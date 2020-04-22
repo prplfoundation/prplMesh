@@ -1505,8 +1505,51 @@ void son_management::handle_bml_message(Socket *sd,
     }
     case beerocks_message::ACTION_BML_WIFI_CREDENTIALS_SET_REQUEST: {
         LOG(TRACE) << "ACTION_BML_WIFI_CREDENTIALS_SET_REQUEST";
-        // TODO: trigger auto-config, probaly it will be a good idea to change the message to
-        // "ACTION_BML_UPDATE_CONFIGURATION_REQUEST"
+        son::wireless_utils::sBssInfoConf wifi_credentials;
+        uint32_t ret = 0;
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST failed";
+            return;
+        }
+
+        wifi_credentials.ssid                = request->ssid();
+        wifi_credentials.network_key         = request->network_key();
+        wifi_credentials.authentication_type = WSC::eWscAuth(request->authentication_type());
+        wifi_credentials.encryption_type     = WSC::eWscEncr(request->encryption_type());
+        wifi_credentials.bss_type = WSC::eWscVendorExtSubelementBssType(request->bss_type());
+
+        auto op_ch = request->operating_channels();
+        for (int i; i < request->operating_channel_size(); i++) {
+            wifi_credentials.operating_class.push_back(uint16_t(op_ch[i]));
+        }
+        //debug
+        LOG(DEBUG) << "wifi_credentials.ssid: " << wifi_credentials.ssid;
+        LOG(DEBUG) << "wifi_credentials.network_key: " << wifi_credentials.network_key;
+        LOG(DEBUG) << "wifi_credentials.authentication_type: "
+                   << (int)wifi_credentials.authentication_type;
+        LOG(DEBUG) << "wifi_credentials.encryption_type: " << (int)wifi_credentials.encryption_type;
+        LOG(DEBUG) << "wifi_credentials.bss_type: " << (int)wifi_credentials.bss_type;
+        LOG(DEBUG) << "wifi_credentials.operating_class: ";
+        for (auto var : wifi_credentials.operating_class) {
+            LOG(DEBUG) << (int)var;
+        }
+        //debug
+        LOG(DEBUG) << "database.add_bss_info_configuration";
+        database.add_bss_info_configuration(request->al_mac(), wifi_credentials);
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_WIFI_CREDENTIALS_SET_RESPONSE>(cmdu_tx,
+                                                                         beerocks_header->id());
+        if (!response) {
+            LOG(ERROR) << "Failed building message cACTION_BML_WIFI_CREDENTIALS_SET_RESPONSE ! ";
+        } else {
+            response->error_code() = ret;
+            if (message_com::send_cmdu(sd, cmdu_tx) == false) {
+                LOG(ERROR) << "Error sending cmdu message";
+            }
+        }
         break;
     }
     case beerocks_message::ACTION_BML_WIFI_CREDENTIALS_CLEAR_REQUEST: {

@@ -13,7 +13,6 @@
 
 #include <bcl/beerocks_message_structs.h>
 #include <bcl/beerocks_utils.h>
-#include <bcl/network/network_utils.h>
 #include <easylogging++.h>
 
 #include <beerocks/tlvf/beerocks_message_bml.h>
@@ -1981,127 +1980,82 @@ int bml_internal::register_event_cb(BML_EVENT_CB pCB)
     return (BML_RET_OK);
 }
 
-int bml_internal::set_wifi_credentials(const std::string ssid, const std::string pass, int sec,
-                                       int vap_id, int force)
+int bml_internal::set_wifi_credentials(const sMacAddr &al_mac,
+                                       const son::wireless_utils::sBssInfoConf &wifi_credentials)
 {
     // If the socket is not valid, attempt to re-establish the connection
     if (m_sockPlatform == nullptr && !connect_to_platform()) {
         return (-BML_RET_CONNECT_FAIL);
     }
 
-    // Validate SSID length
-    // Workaround for SSID containing consecutive spaces or start/ end with spaces
-    if (ssid[0] == ' ' || ssid[ssid.length() - 1] == ' ') {
-        LOG(ERROR) << "Invalid SSID. SSID cannot start or end with space";
-        return (-BML_RET_INVALID_ARGS);
-    }
-    if (ssid.find("  ") != std::string::npos) {
-        LOG(ERROR) << "Invalid SSID. SSID cannot contain consecutive spaces";
-        return (-BML_RET_INVALID_ARGS);
-    }
-
-    // Max length should be 31 chars, need last byte for null char to avoid overflow
-    if (ssid.length() == 0 || ssid.length() >= message::WIFI_SSID_MAX_LENGTH) {
-        LOG(ERROR) << "Invalid SSID (Len = " << int(ssid.length()) << "): " << ssid;
-        return (-BML_RET_INVALID_ARGS);
-    }
-
-    // Validate Pass length
-    // Max length should be 63 chars, need last byte for null char to avoid overflow
-    if (pass.length() == 0 || pass.length() >= message::WIFI_PASS_MAX_LENGTH) {
-        LOG(ERROR) << "Invalid PASS (Len = " << int(pass.length()) << "): " << pass;
-        return (-BML_RET_INVALID_ARGS);
-    }
-
-    // Workaround for password containing consecutive spaces or start/ end with spaces
-    if (pass[0] == ' ' || pass[pass.length() - 1] == ' ') {
-        LOG(ERROR) << "Invalid PASS. Password cannot start or end with space";
-        return (-BML_RET_INVALID_ARGS);
-    }
-    if (pass.find("  ") != std::string::npos) {
-        LOG(ERROR) << "Invalid PASS. Password cannot contain consecutive spaces";
-        return (-BML_RET_INVALID_ARGS);
+    if (!is_local_master()) {
+        LOG(ERROR) << "Command supported only on local master!";
+        return (-BML_RET_OP_NOT_SUPPORTED);
     }
 
     // Initialize the promise for receiving the response
-    beerocks::promise<bool> prmWiFiCredentialsUpdate;
-    m_prmWiFiCredentialsUpdate = &prmWiFiCredentialsUpdate;
-    int iOpTimeout             = 60000; // Default timeout
+    beerocks::promise<bool> prmWiFiCredentialsSet;
+    m_prmWiFiCredentialsSet = &prmWiFiCredentialsSet;
+    int iOpTimeout          = 60000; // Default timeout
 
     // Send to master for credential update
     LOG(TRACE) << "BML:: Config update prepareing message to send to master";
-
-    // Increase the operation timeout to 3 minutes (for global update)
-    iOpTimeout = 180000;
-
-    // Command supported only on local master
-    if (!is_local_master()) {
-        LOG(ERROR) << "Command supported only on local master!";
-        // Clear the promise holder
-        m_prmWiFiCredentialsUpdate = nullptr;
-        return (-BML_RET_OP_NOT_SUPPORTED);
-    }
 
     // If the socket is not valid, attempt to re-establish the connection
     if (m_sockMaster == nullptr) {
         int iRet = connect_to_master();
         if (iRet != BML_RET_OK) {
             // Clear the promise holder
-            m_prmWiFiCredentialsUpdate = nullptr;
+            m_prmWiFiCredentialsSet = nullptr;
             return iRet;
         }
     }
 
-    auto config =
+    LOG(DEBUG) << "wifi_credentials.ssid: " << wifi_credentials.ssid;
+    LOG(DEBUG) << "wifi_credentials.network_key: " << wifi_credentials.network_key;
+    LOG(DEBUG) << "wifi_credentials.authentication_type: "
+               << (int)wifi_credentials.authentication_type;
+    LOG(DEBUG) << "wifi_credentials.encryption_type: " << (int)wifi_credentials.encryption_type;
+    LOG(DEBUG) << "wifi_credentials.bss_type: " << (int)wifi_credentials.bss_type;
+    LOG(DEBUG) << "wifi_credentials.operating_class: ";
+    for (auto var : wifi_credentials.operating_class) {
+        LOG(DEBUG) << (int)var;
+    }
+
+    auto set_request =
         message_com::create_vs_message<beerocks_message::cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST>(
             cmdu_tx);
 
-    if (config == nullptr) {
+    if (set_request == nullptr) {
         LOG(ERROR) << "Failed building ACTION_BML_WIFI_CREDENTIALS_SET_REQUEST message!";
         // Clear the promise holder
-        m_prmWiFiCredentialsUpdate = nullptr;
+        m_prmWiFiCredentialsSet = nullptr;
         return (-BML_RET_OP_FAILED);
     }
 
-    mapf::utils::copy_string(config->params().ssid, ssid.c_str(), message::WIFI_SSID_MAX_LENGTH);
-    mapf::utils::copy_string(config->params().pass, pass.c_str(), message::WIFI_PASS_MAX_LENGTH);
+    set_request->al_mac() = al_mac;
+    set_request->set_ssid(wifi_credentials.ssid);
+    set_request->set_network_key(wifi_credentials.network_key);
+    set_request->authentication_type() = uint16_t(wifi_credentials.authentication_type);
+    set_request->encryption_type()     = uint16_t(wifi_credentials.encryption_type);
+    set_request->bss_type()            = uint8_t(wifi_credentials.bss_type);
 
-    switch (sec) {
-    case BML_WLAN_SEC_NONE:
-        config->params().sec = beerocks_message::eWiFiSec_None;
-        break;
+    auto operating_class_size             = wifi_credentials.operating_class.size();
+    set_request->operating_channel_size() = uint8_t(operating_class_size);
 
-    case BML_WLAN_SEC_WEP64:
-        config->params().sec = beerocks_message::eWiFiSec_WEP64;
-        break;
-
-    case BML_WLAN_SEC_WEP128:
-        config->params().sec = beerocks_message::eWiFiSec_WEP128;
-        break;
-
-    case BML_WLAN_SEC_WPA_PSK:
-        config->params().sec = beerocks_message::eWiFiSec_WPA_PSK;
-        break;
-
-    case BML_WLAN_SEC_WPA2_PSK:
-        config->params().sec = beerocks_message::eWiFiSec_WPA2_PSK;
-        break;
-
-    case BML_WLAN_SEC_WPA_WPA2_PSK:
-        config->params().sec = beerocks_message::eWiFiSec_WPA_WPA2_PSK;
-        break;
-
-    default: {
-        LOG(WARNING) << "Unsupported Wi-Fi security: " << sec;
-        // Clear the promise holder
-        m_prmWiFiCredentialsUpdate = nullptr;
-        return (false);
-    }
+    if (!set_request->alloc_operating_channels(operating_class_size)) {
+        LOG(ERROR) << "Failed TLV buffer allocation to size = " << operating_class_size;
+        return (-BML_RET_OP_FAILED);
     }
 
-    // Set the rest of the message values
-    config->params().vap_id = uint8_t(vap_id);
-    config->params().force  = (force) ? 1 : 0;
+    auto op_ch = set_request->operating_channels();
+    int i      = 0;
+
+    for (auto value : wifi_credentials.operating_class) {
+        op_ch[i] = value;
+        LOG(DEBUG) << "op_ch[" << i << "] = " << (int)op_ch[i];
+        ++i;
+    }
 
     // Build and send the message
     LOG(TRACE) << "Sending config update message to master";
@@ -2109,19 +2063,19 @@ int bml_internal::set_wifi_credentials(const std::string ssid, const std::string
     if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
         LOG(ERROR) << "Failed sending configuration update message!";
         // Clear the promise holder
-        m_prmWiFiCredentialsUpdate = nullptr;
+        m_prmWiFiCredentialsSet = nullptr;
         return (-BML_RET_OP_FAILED);
     }
 
     int iRet = BML_RET_OK;
 
-    if (!prmWiFiCredentialsUpdate.wait_for(iOpTimeout)) {
+    if (!prmWiFiCredentialsSet.wait_for(iOpTimeout)) {
         LOG(WARNING) << "Timeout while waiting for configuration update response...";
         iRet = -BML_RET_TIMEOUT;
     }
 
     // Clear the promise holder
-    m_prmWiFiCredentialsUpdate = nullptr;
+    m_prmWiFiCredentialsSet = nullptr;
 
     if (iRet != BML_RET_OK) {
         LOG(ERROR) << "Configuration update failed!";

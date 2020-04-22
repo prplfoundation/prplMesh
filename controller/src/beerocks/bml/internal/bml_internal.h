@@ -12,6 +12,8 @@
 #include <bcl/beerocks_config_file.h>
 #include <bcl/beerocks_promise.h>
 #include <bcl/beerocks_socket_thread.h>
+#include <bcl/network/network_utils.h>
+#include <bcl/son/son_wireless_utils.h>
 
 #include <beerocks/tlvf/beerocks_message_common.h>
 
@@ -51,9 +53,22 @@ public:
     // Register a callback for events
     int register_event_cb(BML_EVENT_CB pCB);
 
-    // Set the wireless lan SSID and password
-    int set_wifi_credentials(const std::string ssid, const std::string pass, int sec, int vap_id,
-                             int force);
+    /**
+    * Updates the Wi-Fi credentials (for WPA2-Personal policy) for the 
+    * beerocks network.
+    *
+    * @param [in] ctx BML Context.
+    * @param [in] al_mac The agent mac adress
+    * @param [in] ssid[BML_NODE_SSID_LEN] The SSID for the network. ssid array length must be equal to BML_NODE_SSID_LEN
+    * @param [in] network_key[BML_NODE_PASS_LEN] The WPA2 passphrase for the network. pass array length must be equal to BML_NODE_PASS_LEN
+    * @param [in] operating_class The list of operating classes for 2.4G or 5G radio.
+    * @param [in] bss_type The type of base station subsystem (fronthaul, backhaul, fronthaul-backhaul)
+    *
+    * @return BML_RET_OK on success.
+    */
+    int set_wifi_credentials(const sMacAddr &al_mac,
+                             const son::wireless_utils::sBssInfoConf &wifi_credentials);
+
     /**
     * @brief Clear wifi credentials for specific AL-MAC
     *
@@ -300,6 +315,7 @@ private:
     beerocks::promise<bool> *m_prmGetVapListCreds       = nullptr;
     beerocks::promise<bool> *m_prmSetVapListCreds       = nullptr;
     beerocks::promise<bool> *m_prmOnboard               = nullptr;
+    beerocks::promise<bool> *m_prmWiFiCredentialsSet    = nullptr;
     beerocks::promise<bool> *m_prmWiFiCredentialsUpdate = nullptr;
     beerocks::promise<bool> *m_prmWiFiCredentialsClear  = nullptr;
     beerocks::promise<bool> *m_prmWiFiCredentialsGet    = nullptr;

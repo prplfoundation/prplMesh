@@ -10,6 +10,7 @@
 #include "internal/bml_internal.h"
 
 #include <bcl/network/network_utils.h>
+#include <bcl/son/son_wireless_utils.h>
 #include <mapf/common/utils.h>
 
 #include <easylogging++.h>
@@ -181,16 +182,44 @@ int bml_event_register_cb(BML_CTX ctx, BML_EVENT_CB cb)
     return pBML->register_event_cb(cb);
 }
 
-int bml_set_wifi_credentials(BML_CTX ctx, const char *ssid, const char *pass, int sec, int vap_id,
-                             int force)
+int bml_set_wifi_credentials(BML_CTX ctx, const char *al_mac, const char *ssid,
+                             const char *network_key, const char *operating_class,
+                             const char *bss_type)
 {
+    sMacAddr al_mac_addr;
+    son::wireless_utils::sBssInfoConf wifi_credentials;
+
     // Validate input parameters
-    if (!ctx || !ssid || !pass || (sec < BML_WLAN_SEC_NONE || sec > BML_WLAN_SEC_WPA_WPA2_PSK))
+    if (!ctx || !al_mac || !ssid)
         return (-BML_RET_INVALID_ARGS);
+
+    al_mac_addr           = network_utils::mac_from_string(al_mac);
+    wifi_credentials.ssid = ssid;
+
+    if (network_key) {
+        wifi_credentials.network_key         = network_key;
+        wifi_credentials.authentication_type = WSC::eWscAuth::WSC_AUTH_WPA2PSK;
+        wifi_credentials.encryption_type     = WSC::eWscEncr::WSC_ENCR_AES;
+    } else {
+        wifi_credentials.authentication_type = WSC::eWscAuth::WSC_AUTH_OPEN;
+        wifi_credentials.encryption_type     = WSC::eWscEncr::WSC_ENCR_NONE;
+    }
+
+    if (operating_class) {
+        wifi_credentials.operating_class =
+            son::wireless_utils::string_to_wsc_oper_class(operating_class);
+    } else {
+        wifi_credentials.operating_class = son::wireless_utils::string_to_wsc_oper_class("24g-5g");
+    }
+    if (bss_type) {
+        wifi_credentials.bss_type = son::wireless_utils::string_to_wsc_bss_type(bss_type);
+    } else {
+        wifi_credentials.bss_type = son::wireless_utils::string_to_wsc_bss_type("fronthaul");
+    }
 
     bml_internal *pBML = (bml_internal *)ctx;
 
-    return (pBML->set_wifi_credentials(ssid, pass, sec, vap_id, force));
+    return (pBML->set_wifi_credentials(al_mac_addr, wifi_credentials));
 }
 
 int bml_clear_wifi_credentials(BML_CTX ctx, const char *al_mac)

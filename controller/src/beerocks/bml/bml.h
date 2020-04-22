@@ -140,16 +140,17 @@ int bml_event_register_cb(BML_CTX ctx, BML_EVENT_CB cb);
  * beerocks network.
  *
  * @param [in] ctx BML Context.
+ * @param [in] al_mac The agent mac adress
  * @param [in] ssid[BML_NODE_SSID_LEN] The SSID for the network. ssid array length must be equal to BML_NODE_SSID_LEN
- * @param [in] pass[BML_NODE_PASS_LEN] The WPA2 passphrase for the network. pass array length must be equal to BML_NODE_PASS_LEN
- * @param [in] sec Wi-Fi security/encryption (BML_WLAN_SEC_*).
- * @param [in] vap_id ID of the requested VAP (0 for main VAP).
- * @param [in] force Force update even if not all registered IREs are online.
+ * @param [in] network_key[BML_NODE_PASS_LEN] The WPA2 passphrase for the network. pass array length must be equal to BML_NODE_PASS_LEN
+ * @param [in] operating_class The list of operating classes for 2.4G or 5G radio.
+ * @param [in] bss_type The type of base station subsystem (fronthaul, backhaul, fronthaul-backhaul)
  *
  * @return BML_RET_OK on success.
  */
-int bml_set_wifi_credentials(BML_CTX ctx, const char *ssid, const char *pass, int sec, int vap_id,
-                             int force);
+int bml_set_wifi_credentials(BML_CTX ctx, const char *al_mac, const char *ssid,
+                             const char *network_key, const char *operating_class,
+                             const char *bss_type);
 /**
  * Removes the Wi-Fi credentials for the client with AL-MAC
  *

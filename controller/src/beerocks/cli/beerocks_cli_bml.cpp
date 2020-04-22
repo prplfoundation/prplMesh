@@ -384,14 +384,16 @@ void cli_bml::setFunctionsMapAndArray()
                        static_cast<pFunction>(&cli_bml::events_register_cb_caller), 0, 1,
                        STRING_ARG);
     insertCommandToMap(
-        "bml_set_wifi_credentials", "<new_ssid> <new_pass> [<security>] [<vap_id>] [<force>]",
-        "Sets new ssid and password for the given VAP."
-        " Security values: 0=No Wi-Fi Security, 1=WEP-64 Encryption, 2=WEP-128 Encryption, "
-        "3=WPA-Personal, 4=WPA2-Personal, 5=WPA-WPA2-Personal Encryption. Default value 4."
-        " Vap default vaule 0."
-        " [<1(True) or 0(False)>] for force. Default value 1",
+        "bml_set_wifi_credentials",
+        "<al_mac> <ssid> [<network_key>] [<operating_class>] [<bss_type>]",
+        "Sets WiFi credentials to the given AL-MAC "
+        "al_mac - agent mac address "
+        "ssid - service set identifier "
+        "network_key - password. Default empty value. "
+        "operating_class - can be 24g,5g or 24g-5g, list of operating classes. Default - 24g-5g. "
+        "bss_type - an be fronthaul, backhaul, fronthaul-backhaul. Default fronthaul.",
         static_cast<pFunction>(&cli_bml::set_wifi_credentials_caller), 2, 5, STRING_ARG, STRING_ARG,
-        INT_ARG, INT_ARG, INT_ARG);
+        STRING_ARG, STRING_ARG, STRING_ARG);
     insertCommandToMap(
         "bml_clear_wifi_credentials", "<al_mac>", "Removes wifi credentials for specific AL-MAC.",
         static_cast<pFunction>(&cli_bml::clear_wifi_credentials_caller), 1, 1, STRING_ARG);
@@ -926,13 +928,13 @@ int cli_bml::set_wifi_credentials_caller(int numOfArgs)
     if (numOfArgs == 2)
         return set_wifi_credentials(args.stringArgs[0], args.stringArgs[1]);
     else if (numOfArgs == 3)
-        return set_wifi_credentials(args.stringArgs[0], args.stringArgs[1], args.intArgs[2]);
+        return set_wifi_credentials(args.stringArgs[0], args.stringArgs[1], args.stringArgs[2]);
     else if (numOfArgs == 4)
-        return set_wifi_credentials(args.stringArgs[0], args.stringArgs[1], args.intArgs[2],
-                                    args.intArgs[3]);
+        return set_wifi_credentials(args.stringArgs[0], args.stringArgs[1], args.stringArgs[2],
+                                    args.stringArgs[3]);
     else if (numOfArgs == 5)
-        return set_wifi_credentials(args.stringArgs[0], args.stringArgs[1], args.intArgs[2],
-                                    args.intArgs[3], args.intArgs[4]);
+        return set_wifi_credentials(args.stringArgs[0], args.stringArgs[1], args.stringArgs[2],
+                                    args.stringArgs[3], args.stringArgs[4]);
     else
         return -1;
 }
@@ -1373,11 +1375,13 @@ int cli_bml::events_register_cb(const std::string &optional)
     return 0;
 }
 
-int cli_bml::set_wifi_credentials(const std::string &ssid, const std::string &pass, int sec,
-                                  int vap_id, int force)
+int cli_bml::set_wifi_credentials(const std::string &al_mac, const std::string &ssid,
+                                  const std::string &network_key,
+                                  const std::string &operating_class, const std::string &bss_type)
 {
 
-    int ret = bml_set_wifi_credentials(ctx, ssid.c_str(), pass.c_str(), sec, vap_id, force);
+    int ret = bml_set_wifi_credentials(ctx, al_mac.c_str(), ssid.c_str(), network_key.c_str(),
+                                       operating_class.c_str(), bss_type.c_str());
 
     printBmlReturnVals("bml_set_wifi_credentials", ret);
     return 0;
