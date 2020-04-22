@@ -12,6 +12,8 @@
 #include <bcl/beerocks_config_file.h>
 #include <bcl/beerocks_promise.h>
 #include <bcl/beerocks_socket_thread.h>
+#include <bcl/network/network_utils.h>
+#include <bcl/son/son_wireless_utils.h>
 
 #include <beerocks/tlvf/beerocks_message_common.h>
 
@@ -51,9 +53,17 @@ public:
     // Register a callback for events
     int register_event_cb(BML_EVENT_CB pCB);
 
-    // Set the wireless lan SSID and password
-    int set_wifi_credentials(const std::string ssid, const std::string pass, int sec, int vap_id,
-                             int force);
+    /**
+    * @brief Add the Wi-Fi credentials for the beerocks network.
+    * 
+    * @param [in] al_mac The agent mac adress
+    * @param [in] wifi_credentials Structure with credentials (ssid, network_key, etc)
+    * 
+    * @return BML_RET_OK on success.
+    */
+    int set_wifi_credentials(const sMacAddr &al_mac,
+                             const son::wireless_utils::sBssInfoConf &wifi_credentials);
+
     /**
     * @brief Clear wifi credentials for specific AL-MAC
     *
@@ -300,6 +310,7 @@ private:
     beerocks::promise<bool> *m_prmGetVapListCreds       = nullptr;
     beerocks::promise<bool> *m_prmSetVapListCreds       = nullptr;
     beerocks::promise<bool> *m_prmOnboard               = nullptr;
+    beerocks::promise<bool> *m_prmWiFiCredentialsSet    = nullptr;
     beerocks::promise<bool> *m_prmWiFiCredentialsUpdate = nullptr;
     beerocks::promise<bool> *m_prmWiFiCredentialsClear  = nullptr;
     beerocks::promise<bool> *m_prmWiFiCredentialsGet    = nullptr;
