@@ -153,7 +153,8 @@ bool agent_ucc_listener::validate_destination_alid(const std::string &dest_alid)
 {
     // On the agent side, the dest_alid is not really needed since the destination socket will
     // always be the controller socket.
-    return m_backhaul_manager_ctx.get_controller_bridge_mac() == dest_alid;
+    return true;
+    // return m_backhaul_manager_ctx.get_controller_bridge_mac() == dest_alid;
 }
 
 /**
