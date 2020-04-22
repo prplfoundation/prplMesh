@@ -1051,20 +1051,34 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
     }
     // Backhaul manager is OPERATIONAL!
     case EState::OPERATIONAL: {
-        auto now = std::chrono::steady_clock::now();
-        int time_elapsed_ms =
-            std::chrono::duration_cast<std::chrono::milliseconds>(now - eth_link_poll_timer)
-                .count();
-        //pooling eth link status every seconed to notice if there been a change.
-        if (time_elapsed_ms > POLL_TIMER_TIMEOUT_MS) {
+        /*
+        * TODO
+        * This code segment is commented out since wireless-backhaul is not yet supported and
+        * the current implementation causes high CPU load on steady-state.
+        * The high CPU load is due to a call to linux_iface_is_up_and_running() performed every
+        * second to check if the wired interface changed its state. The implementation of the above
+        * polls the interface flags using ioctl() which is very costly (~120 milliseconds).
+        * 
+        * An event-driven solution will be implemented as part of the task:
+        * [TASK] Dynamic switching between wired and wireless
+        * https://github.com/prplfoundation/prplMesh/issues/866
+        */
 
-            eth_link_poll_timer = now;
-            bool eth_link_up = network_utils::linux_iface_is_up_and_running(m_sConfig.wire_iface);
-            if (eth_link_up != m_eth_link_up) {
-                m_eth_link_up = network_utils::linux_iface_is_up_and_running(m_sConfig.wire_iface);
-                FSM_MOVE_STATE(RESTART);
-            }
-        } else if (pending_enable && m_sConfig.eType != SBackhaulConfig::EType::Invalid) {
+        // auto now = std::chrono::steady_clock::now();
+        // int time_elapsed_ms =
+        //     std::chrono::duration_cast<std::chrono::milliseconds>(now - eth_link_poll_timer)
+        //         .count();
+        // //pooling eth link status every second to notice if there been a change.
+        // if (time_elapsed_ms > POLL_TIMER_TIMEOUT_MS) {
+
+        //     eth_link_poll_timer = now;
+        //     bool eth_link_up = network_utils::linux_iface_is_up_and_running(m_sConfig.wire_iface);
+        //     if (eth_link_up != m_eth_link_up) {
+        //         m_eth_link_up = network_utils::linux_iface_is_up_and_running(m_sConfig.wire_iface);
+        //         FSM_MOVE_STATE(RESTART);
+        //     }
+        // } else {
+        if (pending_enable && m_sConfig.eType != SBackhaulConfig::EType::Invalid) {
             pending_enable = false;
         }
 
