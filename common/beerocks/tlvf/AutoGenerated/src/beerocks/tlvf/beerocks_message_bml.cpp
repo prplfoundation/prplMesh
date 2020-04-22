@@ -3584,14 +3584,189 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
 }
 cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::~cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST() {
 }
-sWifiCredentials& cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::params() {
-    return (sWifiCredentials&)(*m_params);
+sMacAddr& cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::al_mac() {
+    return (sMacAddr&)(*m_al_mac);
+}
+
+uint16_t& cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::authentication_type() {
+    return (uint16_t&)(*m_authentication_type);
+}
+
+uint16_t& cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::encryption_type() {
+    return (uint16_t&)(*m_encryption_type);
+}
+
+uint8_t& cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::bss_type() {
+    return (uint8_t&)(*m_bss_type);
+}
+
+uint8_t& cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::ssid_size() {
+    return (uint8_t&)(*m_ssid_size);
+}
+
+std::string cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::ssid_str() {
+    char *ssid_ = ssid();
+    if (!ssid_) { return std::string(); }
+    return std::string(ssid_, m_ssid_idx__);
+}
+
+char* cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::ssid(size_t length) {
+    if( (m_ssid_idx__ == 0) || (m_ssid_idx__ < length) ) {
+        TLVF_LOG(ERROR) << "ssid length is smaller than requested length";
+        return nullptr;
+    }
+    return ((char*)m_ssid);
+}
+
+bool cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::set_ssid(const std::string& str) { return set_ssid(str.c_str(), str.size()); }
+bool cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::set_ssid(const char str[], size_t size) {
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_ssid received a null pointer.";
+        return false;
+    }
+    if (!alloc_ssid(size)) { return false; }
+    std::copy(str, str + size, m_ssid);
+    return true;
+}
+bool cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::alloc_ssid(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list ssid, abort!";
+        return false;
+    }
+    size_t len = sizeof(char) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)&m_ssid[*m_ssid_size];
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_network_key_size = (uint8_t *)((uint8_t *)(m_network_key_size) + len);
+    m_network_key = (char *)((uint8_t *)(m_network_key) + len);
+    m_operating_classes_size = (uint8_t *)((uint8_t *)(m_operating_classes_size) + len);
+    m_operating_classes = (uint8_t *)((uint8_t *)(m_operating_classes) + len);
+    m_ssid_idx__ += count;
+    *m_ssid_size += count;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    return true;
+}
+
+uint8_t& cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::network_key_size() {
+    return (uint8_t&)(*m_network_key_size);
+}
+
+std::string cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::network_key_str() {
+    char *network_key_ = network_key();
+    if (!network_key_) { return std::string(); }
+    return std::string(network_key_, m_network_key_idx__);
+}
+
+char* cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::network_key(size_t length) {
+    if( (m_network_key_idx__ == 0) || (m_network_key_idx__ < length) ) {
+        TLVF_LOG(ERROR) << "network_key length is smaller than requested length";
+        return nullptr;
+    }
+    return ((char*)m_network_key);
+}
+
+bool cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::set_network_key(const std::string& str) { return set_network_key(str.c_str(), str.size()); }
+bool cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::set_network_key(const char str[], size_t size) {
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_network_key received a null pointer.";
+        return false;
+    }
+    if (!alloc_network_key(size)) { return false; }
+    std::copy(str, str + size, m_network_key);
+    return true;
+}
+bool cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::alloc_network_key(size_t count) {
+    if (m_lock_order_counter__ > 1) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list network_key, abort!";
+        return false;
+    }
+    size_t len = sizeof(char) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 1;
+    uint8_t *src = (uint8_t *)&m_network_key[*m_network_key_size];
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_operating_classes_size = (uint8_t *)((uint8_t *)(m_operating_classes_size) + len);
+    m_operating_classes = (uint8_t *)((uint8_t *)(m_operating_classes) + len);
+    m_network_key_idx__ += count;
+    *m_network_key_size += count;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    return true;
+}
+
+uint8_t& cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::operating_classes_size() {
+    return (uint8_t&)(*m_operating_classes_size);
+}
+
+uint8_t* cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::operating_classes(size_t idx) {
+    if ( (m_operating_classes_idx__ == 0) || (m_operating_classes_idx__ <= idx) ) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        return nullptr;
+    }
+    return &(m_operating_classes[idx]);
+}
+
+bool cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::set_operating_classes(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_operating_classes received a null pointer.";
+        return false;
+    }
+    if (!alloc_operating_classes(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_operating_classes);
+    return true;
+}
+bool cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::alloc_operating_classes(size_t count) {
+    if (m_lock_order_counter__ > 2) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list operating_classes, abort!";
+        return false;
+    }
+    size_t len = sizeof(uint8_t) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 2;
+    uint8_t *src = (uint8_t *)&m_operating_classes[*m_operating_classes_size];
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_operating_classes_idx__ += count;
+    *m_operating_classes_size += count;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    return true;
 }
 
 void cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
-    m_params->struct_swap();
+    m_al_mac->struct_swap();
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_authentication_type));
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_encryption_type));
 }
 
 bool cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::finalize()
@@ -3624,7 +3799,13 @@ bool cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::finalize()
 size_t cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(sWifiCredentials); // params
+    class_size += sizeof(sMacAddr); // al_mac
+    class_size += sizeof(uint16_t); // authentication_type
+    class_size += sizeof(uint16_t); // encryption_type
+    class_size += sizeof(uint8_t); // bss_type
+    class_size += sizeof(uint8_t); // ssid_size
+    class_size += sizeof(uint8_t); // network_key_size
+    class_size += sizeof(uint8_t); // operating_classes_size
     return class_size;
 }
 
@@ -3634,12 +3815,66 @@ bool cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sWifiCredentials*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sWifiCredentials))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWifiCredentials) << ") Failed!";
+    m_al_mac = (sMacAddr*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
-    if (!m_parse__) { m_params->struct_init(); }
+    if (!m_parse__) { m_al_mac->struct_init(); }
+    m_authentication_type = (uint16_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
+    m_encryption_type = (uint16_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
+    m_bss_type = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_ssid_size = (uint8_t*)m_buff_ptr__;
+    if (!m_parse__) *m_ssid_size = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_ssid = (char*)m_buff_ptr__;
+    uint8_t ssid_size = *m_ssid_size;
+    m_ssid_idx__ = ssid_size;
+    if (!buffPtrIncrementSafe(sizeof(char) * (ssid_size))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (ssid_size) << ") Failed!";
+        return false;
+    }
+    m_network_key_size = (uint8_t*)m_buff_ptr__;
+    if (!m_parse__) *m_network_key_size = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_network_key = (char*)m_buff_ptr__;
+    uint8_t network_key_size = *m_network_key_size;
+    m_network_key_idx__ = network_key_size;
+    if (!buffPtrIncrementSafe(sizeof(char) * (network_key_size))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (network_key_size) << ") Failed!";
+        return false;
+    }
+    m_operating_classes_size = (uint8_t*)m_buff_ptr__;
+    if (!m_parse__) *m_operating_classes_size = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_operating_classes = (uint8_t*)m_buff_ptr__;
+    uint8_t operating_classes_size = *m_operating_classes_size;
+    m_operating_classes_idx__ = operating_classes_size;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t) * (operating_classes_size))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) * (operating_classes_size) << ") Failed!";
+        return false;
+    }
     if (m_parse__) { class_swap(); }
     return true;
 }

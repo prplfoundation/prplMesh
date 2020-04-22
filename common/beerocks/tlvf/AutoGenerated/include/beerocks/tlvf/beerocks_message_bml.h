@@ -1124,7 +1124,26 @@ class cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_WIFI_CREDENTIALS_SET_REQUEST);
         }
-        sWifiCredentials& params();
+        sMacAddr& al_mac();
+        uint16_t& authentication_type();
+        uint16_t& encryption_type();
+        uint8_t& bss_type();
+        uint8_t& ssid_size();
+        std::string ssid_str();
+        char* ssid(size_t length = 0);
+        bool set_ssid(const std::string& str);
+        bool set_ssid(const char buffer[], size_t size);
+        bool alloc_ssid(size_t count = 1);
+        uint8_t& network_key_size();
+        std::string network_key_str();
+        char* network_key(size_t length = 0);
+        bool set_network_key(const std::string& str);
+        bool set_network_key(const char buffer[], size_t size);
+        bool alloc_network_key(size_t count = 1);
+        uint8_t& operating_classes_size();
+        uint8_t* operating_classes(size_t idx = 0);
+        bool set_operating_classes(const void* buffer, size_t size);
+        bool alloc_operating_classes(size_t count = 1);
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -1132,7 +1151,20 @@ class cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST : public BaseClass
     private:
         bool init();
         eActionOp_BML* m_action_op = nullptr;
-        sWifiCredentials* m_params = nullptr;
+        sMacAddr* m_al_mac = nullptr;
+        uint16_t* m_authentication_type = nullptr;
+        uint16_t* m_encryption_type = nullptr;
+        uint8_t* m_bss_type = nullptr;
+        uint8_t* m_ssid_size = nullptr;
+        char* m_ssid = nullptr;
+        size_t m_ssid_idx__ = 0;
+        int m_lock_order_counter__ = 0;
+        uint8_t* m_network_key_size = nullptr;
+        char* m_network_key = nullptr;
+        size_t m_network_key_idx__ = 0;
+        uint8_t* m_operating_classes_size = nullptr;
+        uint8_t* m_operating_classes = nullptr;
+        size_t m_operating_classes_idx__ = 0;
 };
 
 class cACTION_BML_WIFI_CREDENTIALS_SET_RESPONSE : public BaseClass

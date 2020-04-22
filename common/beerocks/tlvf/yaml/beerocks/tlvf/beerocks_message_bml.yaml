@@ -217,7 +217,28 @@ cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE:
 
 cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST:
   _type: class
-  params: sWifiCredentials
+  al_mac: sMacAddr
+  authentication_type: uint16_t #  eWscAuth
+  encryption_type: uint16_t #  eWscEncr
+  bss_type: uint8_t  #  eWscVendorExtSubelementBssType
+  ssid_size:
+    _type: uint8_t
+    _length_var: True
+  ssid:
+    _type: char
+    _length: [ ssid_size ]
+  network_key_size:
+    _type: uint8_t
+    _length_var: True
+  network_key:
+    _type: char
+    _length: [ network_key_size ]
+  operating_classes_size:
+    _type: uint8_t
+    _length_var: True
+  operating_classes:
+    _type: uint8_t
+    _length: [ operating_classes_size ]
 
 cACTION_BML_WIFI_CREDENTIALS_SET_RESPONSE:
   _type: class
