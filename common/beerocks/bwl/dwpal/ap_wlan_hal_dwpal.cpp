@@ -1675,6 +1675,34 @@ bool ap_wlan_hal_dwpal::generate_connected_clients_events()
     return ret;
 }
 
+bool ap_wlan_hal_dwpal::start_wps_pbc()
+{
+    refresh_vaps_info(beerocks::IFACE_RADIO_ID);
+    // start wps on the first fronthaul vap
+    auto it = std::find_if(m_radio_info.available_vaps.begin(), m_radio_info.available_vaps.end(),
+                           [&](const std::pair<int, VAPElement> &vap) -> bool {
+                               if (vap.second.ssid.empty() ||
+                                   vap.second.type != eVapType::VAP_TYPE_FRONTHAUL) {
+                                   return false;
+                               }
+                               return true;
+                           });
+    if (it == m_radio_info.available_vaps.end()) {
+        LOG(ERROR) << "Failed to find fronthaul VAP for WPS";
+        return false;
+    }
+    int vap_id = (*it).first;
+    std::string ifname =
+        beerocks::utils::get_iface_string_from_iface_vap_ids(m_radio_info.iface_name, vap_id);
+    LOG(DEBUG) << "Start WPS PBC on interface " << ifname;
+    std::string cmd = "WPS_PBC " + ifname;
+    if (!dwpal_send_cmd(cmd)) {
+        LOG(ERROR) << "start_wps_pbc() failed!";
+        return false;
+    }
+    return true;
+}
+
 std::string ap_wlan_hal_dwpal::get_radio_driver_version() { return std::string("NA"); }
 
 static bool is_acs_completed_scan(char *buffer, int bufLen)

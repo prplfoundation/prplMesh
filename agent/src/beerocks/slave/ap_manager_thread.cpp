@@ -875,7 +875,13 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
     case beerocks_message::ACTION_APMANAGER_START_WPS_PBC_REQUEST: {
         LOG(DEBUG) << "Got ACTION_APMANAGER_START_WPS_PBC_REQUEST";
-        //TODO
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_START_WPS_PBC_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_APMANAGER_START_WPS_PBC_REQUEST failed";
+            return false;
+        }
+        ap_wlan_hal->start_wps_pbc();
         break;
     }
     case beerocks_message::ACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION: {
