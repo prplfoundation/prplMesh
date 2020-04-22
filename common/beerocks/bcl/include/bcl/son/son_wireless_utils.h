@@ -92,7 +92,8 @@ public:
         WSC::eWscAuth authentication_type;
         WSC::eWscEncr encryption_type;
         std::string network_key;
-        WSC::eWscVendorExtSubelementBssType bss_type;
+        bool fronthaul;
+        bool backhaul;
     } sBssInfoConf;
 
     typedef struct {
