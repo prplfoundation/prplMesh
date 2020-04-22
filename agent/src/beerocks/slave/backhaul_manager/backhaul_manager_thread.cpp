@@ -3463,10 +3463,11 @@ bool backhaul_manager::get_neighbor_links(
     std::map<sLinkInterface, std::vector<sLinkNeighbor>> &neighbor_links_map)
 {
     // TODO: Topology Database is required to implement this method.
-    // Since we don't have it yet, method will return a single neighbor, the controller (which is
-    // BTW incorrect for the second repeater if we have a chain topology, because then the
-    // controller is not a neighbor) connected through the wired backhaul interface
 
+    // TODO: this is not accurate as we have made the assumption that there is a single interface.
+    // Note that when processing Topology Discovery message we must store the IEEE 1905.1 AL MAC
+    // address of the transmitting device together with the interface that such message is
+    // received through.
     sLinkInterface wired_interface;
     wired_interface.iface_name = m_sConfig.wire_iface;
 
@@ -3480,12 +3481,14 @@ bool backhaul_manager::get_neighbor_links(
         return false;
     }
 
-    sLinkNeighbor neighbor;
-    neighbor.iface_mac = network_utils::mac_from_string(controller_bridge_mac);
-    neighbor.al_mac    = neighbor.iface_mac;
-    if ((neighbor_mac_filter == network_utils::ZERO_MAC) ||
-        (neighbor_mac_filter == neighbor.al_mac)) {
-        neighbor_links_map[wired_interface].push_back(neighbor);
+    for (const auto &entry : m_1905_neighbor_devices) {
+        sLinkNeighbor neighbor;
+        neighbor.al_mac    = entry.first;
+        neighbor.iface_mac = neighbor.al_mac;
+        if ((neighbor_mac_filter == network_utils::ZERO_MAC) ||
+            (neighbor_mac_filter == neighbor.al_mac)) {
+            neighbor_links_map[wired_interface].push_back(neighbor);
+        }
     }
 
     // Also include a link for each associated client
@@ -3516,6 +3519,7 @@ bool backhaul_manager::get_neighbor_links(
             for (const auto &associated_client : associated_clients) {
                 // TODO: This is not correct... We actually have to get this from the topology
                 // discovery message, which will give us the neighbor interface and AL MAC addresses.
+                sLinkNeighbor neighbor;
                 neighbor.iface_mac = associated_client.first;
                 neighbor.al_mac    = neighbor.iface_mac;
 
