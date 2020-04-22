@@ -217,7 +217,22 @@ cACTION_BML_CHANGE_MODULE_LOGGING_LEVEL_RESPONSE:
 
 cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST:
   _type: class
-  params: sWifiCredentials
+  al_mac: sMacAddr
+  ssid:
+   _type: char 
+   _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+  network_key:
+    _type: char 
+    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+  authentication_type: uint16_t #  eWscAuth
+  encryption_type: uint16_t #  eWscEncr
+  bss_type: uint8_t  #  eWscVendorExtSubelementBssType
+  operating_channel_size:
+    _type: uint8_t
+    _length_var: True
+  operating_channels:
+    _type: uint8_t
+    _length: [ operating_channel_size ]
 
 cACTION_BML_WIFI_CREDENTIALS_SET_RESPONSE:
   _type: class
