@@ -825,6 +825,49 @@ bool base_wlan_hal_dwpal::refresh_radio_info()
     return true;
 }
 
+eVapType base_wlan_hal_dwpal::get_vap_type(const std::string &ifname)
+{
+    char *reply              = nullptr;
+    size_t numOfValidArgs[1] = {0}, replyLen = 0;
+    char mode[16]                 = {0};
+    FieldsToParse fieldsToParse[] = {
+        {(void *)mode, &numOfValidArgs[0], DWPAL_STR_PARAM, "mesh_mode=", sizeof(mode)},
+        /* Must be at the end */
+        {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
+    std::string cmd = "GET_MESH_MODE " + ifname;
+
+    if (!dwpal_send_cmd(cmd, &reply) || reply[0] == '\0') {
+        return eVapType::VAP_TYPE_FRONTHAUL; // if mesh_mode not defined at all, assume fronthaul
+    }
+
+    replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
+
+    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse, sizeof(mode)) ==
+        DWPAL_FAILURE) {
+        LOG(ERROR) << "DWPAL parse error on " << ifname;
+        return eVapType::VAP_TYPE_INVALID;
+    }
+
+    for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
+        if (numOfValidArgs[i] == 0) {
+            LOG(ERROR) << "Failed reading parsed parameter " << (int)i << " ==> Abort";
+            return eVapType::VAP_TYPE_INVALID;
+        }
+    }
+
+    std::string mesh_mode = std::string(mode);
+    if (mesh_mode.find("bAP") != std::string::npos) {
+        return eVapType::VAP_TYPE_BACKHAUL;
+    } else if (mesh_mode.find("fAP") != std::string::npos) {
+        return eVapType::VAP_TYPE_FRONTHAUL;
+    } else if (mesh_mode.find("hybrid") != std::string::npos) {
+        return eVapType::VAP_TYPE_HYBRID;
+    }
+
+    LOG(ERROR) << "Invalid mesh_mode=" << mesh_mode;
+    return eVapType::VAP_TYPE_INVALID;
+}
+
 bool base_wlan_hal_dwpal::refresh_vap_info(int vap_id)
 {
     const std::string ifname =
@@ -880,6 +923,7 @@ bool base_wlan_hal_dwpal::refresh_vap_info(int vap_id)
 
     vapElement.mac  = std::string(bssid);
     vapElement.ssid = std::string(ssid);
+    vapElement.type = get_vap_type(ifname);
 
     // Store the VAP element
     LOG(DEBUG) << "Detected VAP ID (" << vap_id << ") - MAC: " << vapElement.mac

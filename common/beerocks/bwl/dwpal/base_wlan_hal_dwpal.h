@@ -93,6 +93,8 @@ protected:
 
     // Private data-members:
 private:
+    eVapType get_vap_type(const std::string &ifname);
+
     const uint32_t AP_ENABLED_TIMEOUT_SEC           = 15;
     const uint32_t AP_ENABLED_FIXED_DFS_TIMEOUT_SEC = 660;
 
