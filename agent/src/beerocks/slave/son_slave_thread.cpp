@@ -3550,11 +3550,10 @@ bool slave_thread::ap_manager_start()
     ap_manager = new ap_manager_thread(slave_uds);
 
     ap_manager_thread::ap_manager_conf_t ap_manager_conf;
-    ap_manager_conf.hostap_iface        = config.hostap_iface;
-    ap_manager_conf.hostap_iface_type   = config.hostap_iface_type;
-    ap_manager_conf.channel             = wlan_settings.channel;
-    ap_manager_conf.iface_filter_low    = config.backhaul_wireless_iface_filter_low;
-    ap_manager_conf.backhaul_vaps_bssid = platform_settings.backhaul_vaps_bssid;
+    ap_manager_conf.hostap_iface      = config.hostap_iface;
+    ap_manager_conf.hostap_iface_type = config.hostap_iface_type;
+    ap_manager_conf.channel           = wlan_settings.channel;
+    ap_manager_conf.iface_filter_low  = config.backhaul_wireless_iface_filter_low;
 
     ap_manager->ap_manager_config(ap_manager_conf);
 
