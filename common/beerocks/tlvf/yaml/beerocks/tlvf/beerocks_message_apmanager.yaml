@@ -201,6 +201,9 @@ cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST:
     _type: WSC::cConfigData
     _length: [ wifi_credentials_size ]
 
+cACTION_APMANAGER_START_WPS_PBC_REQUEST:
+  _type: class
+
 cACTION_APMANAGER_HEARTBEAT_NOTIFICATION:
   _type: class
 

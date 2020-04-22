@@ -135,3 +135,6 @@ cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION:
   _type: class
   client_mac: sMacAddr
   bssid: sMacAddr
+
+cACTION_BACKHAUL_START_WPS_PBC_REQUEST:
+  _type: class
