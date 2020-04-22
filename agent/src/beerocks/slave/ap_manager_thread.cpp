@@ -832,6 +832,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         std::list<son::wireless_utils::sBssInfoConf> bss_info_conf_list;
         auto wifi_credentials_size = request->wifi_credentials_size();
 
+        std::string backhaul_wps_ssid, backhaul_wps_passphrase;
         for (auto i = 0; i < wifi_credentials_size; i++) {
             son::wireless_utils::sBssInfoConf bss_info_conf;
             auto config_data_tuple = request->wifi_credentials(i);
@@ -853,6 +854,10 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                 bss_info_conf_list.clear();
                 break;
             }
+            if ((bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS) != 0) {
+                backhaul_wps_ssid       = config_data.ssid_str();
+                backhaul_wps_passphrase = config_data.network_key_str();
+            }
 
             bss_info_conf.ssid                = config_data.ssid_str();
             bss_info_conf.authentication_type = config_data.authentication_type_attr().data;
@@ -863,7 +868,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             bss_info_conf_list.push_back(bss_info_conf);
         }
 
-        ap_wlan_hal->update_vap_credentials(bss_info_conf_list);
+        ap_wlan_hal->update_vap_credentials(bss_info_conf_list, backhaul_wps_ssid,
+                                            backhaul_wps_passphrase);
 
         break;
     }
@@ -1560,6 +1566,7 @@ bool ap_manager_thread::handle_ap_enabled(int vap_id)
     }
 
     const auto vap_info = vap_iter->second;
+    sMacAddr vap_bssid  = network_utils::mac_from_string(vap_info.mac);
 
     LOG(INFO) << "vap_id = " << int(vap_id) << ", bssid = " << vap_info.mac
               << ", ssid = " << vap_info.ssid << ", type = " << vap_info.type;
@@ -1574,7 +1581,7 @@ bool ap_manager_thread::handle_ap_enabled(int vap_id)
     notification->vap_id() = vap_id;
 
     // Copy the VAP MAC and SSID
-    notification->vap_info().mac = network_utils::mac_from_string(vap_info.mac);
+    notification->vap_info().mac = vap_bssid;
     mapf::utils::copy_string(notification->vap_info().ssid, vap_info.ssid.c_str(),
                              beerocks::message::WIFI_SSID_MAX_LENGTH);
     notification->vap_info().backhaul_vap = (vap_info.type == bwl::eVapType::VAP_TYPE_BACKHAUL);

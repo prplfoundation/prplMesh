@@ -934,8 +934,53 @@ bool ap_wlan_hal_dwpal::sta_bss_steer(const std::string &mac, const std::string 
     return true;
 }
 
+static bool set_vap_multiap_mode(std::vector<std::string> &vap_hostapd_config,
+                                 WSC::eWscVendorExtSubelementBssType bss_type,
+                                 const std::string &backhaul_wps_ssid,
+                                 const std::string &backhaul_wps_passphrase)
+{
+    std::string bssid, ifname;
+    if (!hostapd_config_get_value(vap_hostapd_config, "bssid", bssid)) {
+        LOG(ERROR) << "Failed to get VAP BSSID";
+        return false;
+    }
+    if (!hostapd_config_get_value(vap_hostapd_config, "bss", ifname)) {
+        LOG(ERROR) << "Failed to get VAP ifname (bss)";
+        return false;
+    }
+
+    bool backhaul  = !!(bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS);
+    bool fronthaul = !!(bss_type & WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS);
+    bool teardown  = (bss_type == WSC::eWscVendorExtSubelementBssType::TEARDOWN);
+    LOG(DEBUG) << "Configuring VAP " << ifname << ": bssid=" << bssid
+               << ", backhaul=" << beerocks::string_utils::bool_str(backhaul)
+               << ", teardown=" << beerocks::string_utils::bool_str(teardown);
+    // BSS type (backhaul, fronthaul or both)
+    // Use Intel Mesh-Mode (upstream Multi-AP functionality not supported by Intel):
+    // Not supporting hybrid mode for in mesh mode (TODO - move to hybrid mode after
+    // https://github.com/prplfoundation/prplMesh/issues/889)
+    if (fronthaul && backhaul) {
+        LOG(ERROR) << "Not supporting hybrid VAP";
+        return false;
+    }
+    hostapd_config_set_value(vap_hostapd_config, "mesh_mode", backhaul ? "bAP" : "fAP");
+    hostapd_config_set_value(vap_hostapd_config, "sFourAddrMode", backhaul ? "1" : "");
+    hostapd_config_set_value(vap_hostapd_config, "max_num_sta", backhaul ? "1" : "");
+    hostapd_config_set_value(vap_hostapd_config, "start_disabled", teardown ? "1" : "0");
+    if (fronthaul) {
+        // Oddly enough, multi_ap_backhaul_wpa_passphrase has to be quoted, while wpa_passphrase does not...
+        hostapd_config_set_value(vap_hostapd_config, "multi_ap_backhaul_ssid",
+                                 "\"" + backhaul_wps_ssid + "\"");
+        hostapd_config_set_value(vap_hostapd_config, "multi_ap_backhaul_wpa_passphrase",
+                                 backhaul_wps_passphrase);
+    }
+
+    return true;
+}
+
 bool ap_wlan_hal_dwpal::update_vap_credentials(
-    std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list)
+    std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list,
+    const std::string &backhaul_wps_ssid, const std::string &backhaul_wps_passphrase)
 {
     // The bss_info_conf_list contains list of all VAPs and STAs that have to be created
     // on the radio. If the list is empty, there should be no VAPs left.
@@ -1029,24 +1074,12 @@ bool ap_wlan_hal_dwpal::update_vap_credentials(
             return false;
         }
 
-        // BSS type (backhaul, fronthaul or both)
-        // From hostap 2.8
-        // Enable Multi-AP functionality
-        // 0 = disabled (default)
-        // 1 = AP support backhaul BSS
-        // 2 = AP support fronthaul BSS
-        // 3 = AP supports both backhaul BSS and fronthaul BSS
-        int multi_ap = 0;
-        if ((bss_info_conf.bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS) != 0) {
-            multi_ap |= 0x01;
+        // Set multi_ap mode
+        if (!set_vap_multiap_mode(vap_hostapd_config, bss_info_conf.bss_type, backhaul_wps_ssid,
+                             backhaul_wps_passphrase) {
+            // The function prints the error messages itself
+            return false;
         }
-        if ((bss_info_conf.bss_type & WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS) != 0) {
-            multi_ap |= 0x02;
-        }
-        hostapd_config_set_value(vap_hostapd_config, "multi_ap", multi_ap);
-
-        // Finally enable the VAP
-        hostapd_config_set_value(vap_hostapd_config, "start_disabled", "0");
 
         // Successfully updated the VAP, move on to the the next
         ++hostapd_vap_iterator;
