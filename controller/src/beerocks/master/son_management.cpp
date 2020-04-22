@@ -1505,8 +1505,40 @@ void son_management::handle_bml_message(Socket *sd,
     }
     case beerocks_message::ACTION_BML_WIFI_CREDENTIALS_SET_REQUEST: {
         LOG(TRACE) << "ACTION_BML_WIFI_CREDENTIALS_SET_REQUEST";
-        // TODO: trigger auto-config, probaly it will be a good idea to change the message to
-        // "ACTION_BML_UPDATE_CONFIGURATION_REQUEST"
+        son::wireless_utils::sBssInfoConf wifi_credentials;
+
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST failed";
+            return;
+        }
+        wifi_credentials.ssid                = request->ssid_str();
+        wifi_credentials.network_key         = request->network_key_str();
+        wifi_credentials.authentication_type = WSC::eWscAuth(request->authentication_type());
+        wifi_credentials.encryption_type     = WSC::eWscEncr(request->encryption_type());
+        wifi_credentials.bss_type = WSC::eWscVendorExtSubelementBssType(request->bss_type());
+
+        auto operating_classes = request->operating_classes();
+        for (int i = 0; i < request->operating_classes_size(); i++) {
+            wifi_credentials.operating_class.push_back(operating_classes[i]);
+        }
+
+        LOG(DEBUG) << "Add wifi credentials to the database for AL-MAC: "
+                   << network_utils::mac_to_string(request->al_mac());
+        database.add_bss_info_configuration(request->al_mac(), wifi_credentials);
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_WIFI_CREDENTIALS_SET_RESPONSE>(cmdu_tx,
+                                                                         beerocks_header->id());
+        if (!response) {
+            LOG(ERROR) << "Failed building message cACTION_BML_WIFI_CREDENTIALS_SET_RESPONSE ! ";
+        } else {
+            response->error_code() = 1;
+            if (message_com::send_cmdu(sd, cmdu_tx) == false) {
+                LOG(ERROR) << "Error sending cmdu message";
+            }
+        }
         break;
     }
     case beerocks_message::ACTION_BML_WIFI_CREDENTIALS_CLEAR_REQUEST: {

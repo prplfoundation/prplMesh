@@ -156,8 +156,10 @@ private:
     int connection_map();
     int stat_register_cb(const std::string &optional = std::string());
     int events_register_cb(const std::string &optional = std::string());
-    int set_wifi_credentials(const std::string &ssid, const std::string &pass, int sec = 4,
-                             int vap_id = 0, int force = 1);
+    int set_wifi_credentials(const std::string &al_mac, const std::string &ssid,
+                             const std::string &network_key = "",
+                             const std::string &bands       = "24g-5g",
+                             const std::string &bss_type    = "fronthaul");
     int clear_wifi_credentials(const std::string &al_mac);
     int update_wifi_credentials(const std::string &al_mac);
     int get_wifi_credentials(int vap_id = 0);
