@@ -27,6 +27,7 @@ This file lists all contributors.
 - Mario Maz
 - MaxLinear
 - Moran Shoeg
+- Oleksii Ponomarenko
 - Ostap Slyusar
 - Pavel Levitsky
 - Ram Marzin

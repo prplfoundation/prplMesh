@@ -1,0 +1,9 @@
+{
+    "prplmesh_docker": {
+        "name": "dockerized_device",
+        "board_type": "prplmesh_docker",
+        "role": "controller",
+        "conn_cmd": "",
+        "devices": []
+    }
+}
