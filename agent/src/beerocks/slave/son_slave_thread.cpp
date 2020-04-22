@@ -4465,9 +4465,9 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     // using vs message
 
     // get the correct type of the message
-    auto beaconMetricsQuery = cmdu_rx.getClass<wfa_map::tlvBeaconMetricsQuery>();
+    auto beacon_metrics_query = cmdu_rx.getClass<wfa_map::tlvBeaconMetricsQuery>();
 
-    if (!beaconMetricsQuery) {
+    if (!beacon_metrics_query) {
         LOG(ERROR) << "tlvBeaconMetricsQuery missing - ignoring beacon metrics query message";
         return false;
     }
@@ -4515,8 +4515,8 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
 
     auto &measurement_request_out = request_out->params();
 
-    measurement_request_out.bssid   = beaconMetricsQuery->bssid();
-    measurement_request_out.channel = beaconMetricsQuery->channel_number();
+    measurement_request_out.bssid   = beacon_metrics_query->bssid();
+    measurement_request_out.channel = beacon_metrics_query->channel_number();
 
     measurement_request_out.measurement_mode = beerocks::MEASURE_MODE_ACTIVE;
     measurement_request_out.duration         = beerocks::BEACON_MEASURE_DEFAULT_ACTIVE_DURATION;
@@ -4524,12 +4524,12 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     measurement_request_out.expected_reports_count = 1;
 
     measurement_request_out.rand_ival = beerocks::BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL;
-    measurement_request_out.sta_mac   = beaconMetricsQuery->associated_sta_mac();
+    measurement_request_out.sta_mac   = beacon_metrics_query->associated_sta_mac();
 
-    measurement_request_out.op_class = beaconMetricsQuery->operating_class();
+    measurement_request_out.op_class = beacon_metrics_query->operating_class();
 
     // FixMe: not sure about this
-    measurement_request_out.report = beaconMetricsQuery->reporting_detail_value();
+    measurement_request_out.report = beacon_metrics_query->reporting_detail_value();
 
     // values based on https://github.com/prplfoundation/prplMesh/pull/1114#discussion_r406326546
     measurement_request_out.repeats            = 0;
@@ -4539,21 +4539,47 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     measurement_request_out.mandatory_duration = 0;
     measurement_request_out.use_optional_ssid  = 0;
 
-    mapf::utils::copy_string(measurement_request_out.ssid, beaconMetricsQuery->ssid_str().c_str(),
+    mapf::utils::copy_string(measurement_request_out.ssid, beacon_metrics_query->ssid_str().c_str(),
                              message::WIFI_SSID_MAX_LENGTH);
 
-    measurement_request_out.use_optional_ap_ch_report =
-        beaconMetricsQuery->ap_channel_reports_list_length();
+    auto ap_ch_report_length = beacon_metrics_query->ap_channel_reports_list_length();
 
-    // FixMe:
-    // here (I think) we need to copy m_ap_channel_reports_list from the 1905 beaconMetricsQuery
+    measurement_request_out.use_optional_ap_ch_report = ap_ch_report_length;
+
+    // copy m_ap_channel_reports_list from the 1905 beacon_metrics_query
     // into ap_ch_report char array of the vs message (measurement_request_out)
+    if (ap_ch_report_length > 1) {
+        // the reason we support only 1 channel list is that the hostapd does not support more
+        // there is no way to tell it for which operating class which channels to use
+        LOG(ERROR)
+            << "too many channles requested (the maximum is 237, current support is only for 1): "
+            << ap_ch_report_length;
+        return false;
+    }
 
-    // currently not supported
-    // if (0 != measurement_request_out.use_optional_ap_ch_report) {
-    //    LOG(ERROR) << "unsupported optional channel report in the request";
-    // }
-    // end FixMe
+    // it might be zero as well
+    if (1 == ap_ch_report_length) {
+        // get the first (and currently only) structure from the list
+        auto channel = beacon_metrics_query->ap_channel_reports_list(0);
+        if (!std::get<0>(channel)) {
+            LOG(ERROR) << "there should be a structure at index 0, but it wasn't found";
+            return false;
+        }
+
+        // the first index in the tlv's channel-report-list is the operating class,
+        // we skip it. using pointer arithmethics and copying one element less from the source (we skip the operation class)
+        std::copy_n(measurement_request_out.ap_ch_report,
+                    std::get<1>(channel).ap_channel_report_list_length() - 1,
+                    std::get<1>(channel).ap_channel_report_list() + 1 );
+                    
+
+        // DEBUG
+        LOG(DEBUG) << "beacon request for the following channels:";
+        for(int idx = 0; idx < std::get<1>(channel).ap_channel_report_list_length() - 1; ++idx)
+        {
+            LOG(DEBUG) << "channel: " << measurement_request_out.ap_ch_report[idx];
+        }
+    }
 
     // FixMe:
     // the same is true for use_optional_req_elements and req_elements
