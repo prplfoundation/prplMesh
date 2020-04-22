@@ -24,9 +24,11 @@
 #include "tlvf/common/sMacAddr.h"
 #include <tuple>
 #include <tlvf/tlvfutils.h>
+#include <vector>
 
 namespace wfa_map {
 
+class cApChannelReports;
 
 class tlvBeaconMetricsQuery : public BaseClass
 {
@@ -35,16 +37,6 @@ class tlvBeaconMetricsQuery : public BaseClass
         explicit tlvBeaconMetricsQuery(std::shared_ptr<BaseClass> base, bool parse = false);
         ~tlvBeaconMetricsQuery();
 
-        typedef struct sApChannelReports {
-            uint8_t ap_channel_report_list_length;
-            uint8_t operating_class_in_ap_channel_report;
-            uint8_t* ap_channel_report_list; //TLVF_TODO: not supported yet
-            void struct_swap(){
-            }
-            void struct_init(){
-            }
-        } __attribute__((packed)) sApChannelReports;
-        
         const eTlvTypeMap& type();
         const uint16_t& length();
         sMacAddr& associated_sta_mac();
@@ -59,8 +51,9 @@ class tlvBeaconMetricsQuery : public BaseClass
         bool set_ssid(const char buffer[], size_t size);
         bool alloc_ssid(size_t count = 1);
         uint8_t& ap_channel_reports_list_length();
-        std::tuple<bool, sApChannelReports&> ap_channel_reports_list(size_t idx);
-        bool alloc_ap_channel_reports_list(size_t count = 1);
+        std::tuple<bool, cApChannelReports&> ap_channel_reports_list(size_t idx);
+        std::shared_ptr<cApChannelReports> create_ap_channel_reports_list();
+        bool add_ap_channel_reports_list(std::shared_ptr<cApChannelReports> ptr);
         uint8_t& elemnt_id_list_length();
         uint8_t* elemnt_id_list(size_t idx = 0);
         bool set_elemnt_id_list(const void* buffer, size_t size);
@@ -83,11 +76,37 @@ class tlvBeaconMetricsQuery : public BaseClass
         size_t m_ssid_idx__ = 0;
         int m_lock_order_counter__ = 0;
         uint8_t* m_ap_channel_reports_list_length = nullptr;
-        sApChannelReports* m_ap_channel_reports_list = nullptr;
+        cApChannelReports* m_ap_channel_reports_list = nullptr;
         size_t m_ap_channel_reports_list_idx__ = 0;
+        std::vector<std::shared_ptr<cApChannelReports>> m_ap_channel_reports_list_vector;
+        bool m_lock_allocation__ = false;
         uint8_t* m_elemnt_id_list_length = nullptr;
         uint8_t* m_elemnt_id_list = nullptr;
         size_t m_elemnt_id_list_idx__ = 0;
+};
+
+class cApChannelReports : public BaseClass
+{
+    public:
+        cApChannelReports(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cApChannelReports(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cApChannelReports();
+
+        uint8_t& ap_channel_report_list_length();
+        //The first element of this list is the operating class.
+        uint8_t* ap_channel_report_list(size_t idx = 0);
+        bool set_ap_channel_report_list(const void* buffer, size_t size);
+        bool alloc_ap_channel_report_list(size_t count = 1);
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        uint8_t* m_ap_channel_report_list_length = nullptr;
+        uint8_t* m_ap_channel_report_list = nullptr;
+        size_t m_ap_channel_report_list_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 }; // close namespace: wfa_map
