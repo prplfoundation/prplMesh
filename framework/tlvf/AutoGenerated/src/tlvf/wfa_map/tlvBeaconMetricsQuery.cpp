@@ -99,7 +99,7 @@ bool tlvBeaconMetricsQuery::alloc_ssid(size_t count) {
         std::copy_n(src, move_length, dst);
     }
     m_ap_channel_reports_list_length = (uint8_t *)((uint8_t *)(m_ap_channel_reports_list_length) + len);
-    m_ap_channel_reports_list = (sApChannelReports *)((uint8_t *)(m_ap_channel_reports_list) + len);
+    m_ap_channel_reports_list = (cApChannelReports *)((uint8_t *)(m_ap_channel_reports_list) + len);
     m_elemnt_id_list_length = (uint8_t *)((uint8_t *)(m_elemnt_id_list_length) + len);
     m_elemnt_id_list = (uint8_t *)((uint8_t *)(m_elemnt_id_list) + len);
     m_ssid_idx__ += count;
@@ -116,44 +116,74 @@ uint8_t& tlvBeaconMetricsQuery::ap_channel_reports_list_length() {
     return (uint8_t&)(*m_ap_channel_reports_list_length);
 }
 
-std::tuple<bool, tlvBeaconMetricsQuery::sApChannelReports&> tlvBeaconMetricsQuery::ap_channel_reports_list(size_t idx) {
+std::tuple<bool, cApChannelReports&> tlvBeaconMetricsQuery::ap_channel_reports_list(size_t idx) {
     bool ret_success = ( (m_ap_channel_reports_list_idx__ > 0) && (m_ap_channel_reports_list_idx__ > idx) );
     size_t ret_idx = ret_success ? idx : 0;
     if (!ret_success) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
     }
-    return std::forward_as_tuple(ret_success, m_ap_channel_reports_list[ret_idx]);
+    return std::forward_as_tuple(ret_success, *(m_ap_channel_reports_list_vector[ret_idx]));
 }
 
-bool tlvBeaconMetricsQuery::alloc_ap_channel_reports_list(size_t count) {
-    if (m_lock_order_counter__ > 1) {;
+std::shared_ptr<cApChannelReports> tlvBeaconMetricsQuery::create_ap_channel_reports_list() {
+    if (m_lock_order_counter__ > 1) {
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list ap_channel_reports_list, abort!";
-        return false;
+        return nullptr;
     }
-    size_t len = sizeof(sApChannelReports) * count;
-    if(getBuffRemainingBytes() < len )  {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
-        return false;
+    size_t len = cApChannelReports::get_initial_size();
+    if (m_lock_allocation__ || getBuffRemainingBytes() < len) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return nullptr;
     }
     m_lock_order_counter__ = 1;
-    uint8_t *src = (uint8_t *)&m_ap_channel_reports_list[*m_ap_channel_reports_list_length];
-    uint8_t *dst = src + len;
+    m_lock_allocation__ = true;
+    uint8_t *src = (uint8_t *)m_ap_channel_reports_list;
+    if (m_ap_channel_reports_list_idx__ > 0) {
+        src = (uint8_t *)m_ap_channel_reports_list_vector[m_ap_channel_reports_list_idx__ - 1]->getBuffPtr();
+    }
     if (!m_parse__) {
+        uint8_t *dst = src + len;
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
     m_elemnt_id_list_length = (uint8_t *)((uint8_t *)(m_elemnt_id_list_length) + len);
     m_elemnt_id_list = (uint8_t *)((uint8_t *)(m_elemnt_id_list) + len);
-    m_ap_channel_reports_list_idx__ += count;
-    *m_ap_channel_reports_list_length += count;
+    return std::make_shared<cApChannelReports>(src, getBuffRemainingBytes(src), m_parse__);
+}
+
+bool tlvBeaconMetricsQuery::add_ap_channel_reports_list(std::shared_ptr<cApChannelReports> ptr) {
+    if (ptr == nullptr) {
+        TLVF_LOG(ERROR) << "Received entry is nullptr";
+        return false;
+    }
+    if (m_lock_allocation__ == false) {
+        TLVF_LOG(ERROR) << "No call to create_ap_channel_reports_list was called before add_ap_channel_reports_list";
+        return false;
+    }
+    uint8_t *src = (uint8_t *)m_ap_channel_reports_list;
+    if (m_ap_channel_reports_list_idx__ > 0) {
+        src = (uint8_t *)m_ap_channel_reports_list_vector[m_ap_channel_reports_list_idx__ - 1]->getBuffPtr();
+    }
+    if (ptr->getStartBuffPtr() != src) {
+        TLVF_LOG(ERROR) << "Received entry pointer is different than expected (expecting the same pointer returned from add method)";
+        return false;
+    }
+    if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return false;
+    }
+    m_ap_channel_reports_list_idx__++;
+    if (!m_parse__) { (*m_ap_channel_reports_list_length)++; }
+    size_t len = ptr->getLen();
+    m_elemnt_id_list_length = (uint8_t *)((uint8_t *)(m_elemnt_id_list_length) + len - ptr->get_initial_size());
+    m_elemnt_id_list = (uint8_t *)((uint8_t *)(m_elemnt_id_list) + len - ptr->get_initial_size());
+    m_ap_channel_reports_list_vector.push_back(ptr);
     if (!buffPtrIncrementSafe(len)) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
         return false;
     }
-    if(m_length){ (*m_length) += len; }
-    if (!m_parse__) { 
-        for (size_t i = m_ap_channel_reports_list_idx__ - count; i < m_ap_channel_reports_list_idx__; i++) { m_ap_channel_reports_list[i].struct_init(); }
-    }
+    if(!m_parse__ && m_length){ (*m_length) += len; }
+    m_lock_allocation__ = false;
     return true;
 }
 
@@ -211,7 +241,7 @@ void tlvBeaconMetricsQuery::class_swap()
     m_associated_sta_mac->struct_swap();
     m_bssid->struct_swap();
     for (size_t i = 0; i < (size_t)*m_ap_channel_reports_list_length; i++){
-        m_ap_channel_reports_list[i].struct_swap();
+        std::get<1>(ap_channel_reports_list(i)).class_swap();
     }
 }
 
@@ -330,12 +360,21 @@ bool tlvBeaconMetricsQuery::init()
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
-    m_ap_channel_reports_list = (sApChannelReports*)m_buff_ptr__;
+    m_ap_channel_reports_list = (cApChannelReports*)m_buff_ptr__;
     uint8_t ap_channel_reports_list_length = *m_ap_channel_reports_list_length;
-    m_ap_channel_reports_list_idx__ = ap_channel_reports_list_length;
-    if (!buffPtrIncrementSafe(sizeof(sApChannelReports) * (ap_channel_reports_list_length))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApChannelReports) * (ap_channel_reports_list_length) << ") Failed!";
-        return false;
+    m_ap_channel_reports_list_idx__ = 0;
+    for (size_t i = 0; i < ap_channel_reports_list_length; i++) {
+        auto ap_channel_reports_list = create_ap_channel_reports_list();
+        if (!ap_channel_reports_list) {
+            TLVF_LOG(ERROR) << "create_ap_channel_reports_list() failed";
+            return false;
+        }
+        if (!add_ap_channel_reports_list(ap_channel_reports_list)) {
+            TLVF_LOG(ERROR) << "add_ap_channel_reports_list() failed";
+            return false;
+        }
+        // swap back since ap_channel_reports_list will be swapped as part of the whole class swap
+        ap_channel_reports_list->class_swap();
     }
     m_elemnt_id_list_length = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_elemnt_id_list_length = 0;
@@ -358,6 +397,124 @@ bool tlvBeaconMetricsQuery::init()
             return false;
         }
     }
+    return true;
+}
+
+cApChannelReports::cApChannelReports(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cApChannelReports::cApChannelReports(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cApChannelReports::~cApChannelReports() {
+}
+uint8_t& cApChannelReports::ap_channel_report_list_length() {
+    return (uint8_t&)(*m_ap_channel_report_list_length);
+}
+
+uint8_t* cApChannelReports::ap_channel_report_list(size_t idx) {
+    if ( (m_ap_channel_report_list_idx__ == 0) || (m_ap_channel_report_list_idx__ <= idx) ) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        return nullptr;
+    }
+    return &(m_ap_channel_report_list[idx]);
+}
+
+bool cApChannelReports::set_ap_channel_report_list(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_ap_channel_report_list received a null pointer.";
+        return false;
+    }
+    if (!alloc_ap_channel_report_list(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_ap_channel_report_list);
+    return true;
+}
+bool cApChannelReports::alloc_ap_channel_report_list(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list ap_channel_report_list, abort!";
+        return false;
+    }
+    size_t len = sizeof(uint8_t) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)&m_ap_channel_report_list[*m_ap_channel_report_list_length];
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_ap_channel_report_list_idx__ += count;
+    *m_ap_channel_report_list_length += count;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    return true;
+}
+
+void cApChannelReports::class_swap()
+{
+}
+
+bool cApChannelReports::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cApChannelReports::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // ap_channel_report_list_length
+    return class_size;
+}
+
+bool cApChannelReports::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_ap_channel_report_list_length = (uint8_t*)m_buff_ptr__;
+    if (!m_parse__) *m_ap_channel_report_list_length = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_ap_channel_report_list = (uint8_t*)m_buff_ptr__;
+    uint8_t ap_channel_report_list_length = *m_ap_channel_report_list_length;
+    m_ap_channel_report_list_idx__ = ap_channel_report_list_length;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t) * (ap_channel_report_list_length))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) * (ap_channel_report_list_length) << ") Failed!";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
     return true;
 }
 
