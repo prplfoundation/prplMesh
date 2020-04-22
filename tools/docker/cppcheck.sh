@@ -11,3 +11,6 @@ scriptdir="$(cd "${0%/*}" && pwd)"
 rootdir="$(realpath "$scriptdir/../..")"
 
 docker run --rm -it -w "$rootdir" -v "$rootdir:$rootdir" --user="${SUDO_UID:-$UID}"  prplfoundationinc/prplmesh-builder:alpine-3.11.3 "$rootdir"/tools/docker/static-analysis/cppcheck.sh -j"$(nproc)" .
+
+# Also check for new issues:
+docker run --rm -it -w "$rootdir" -v "$rootdir:$rootdir" --user="${SUDO_UID:-$UID}" prplfoundationinc/prplmesh-builder:alpine-3.11.3 "$rootdir"/ci/cppcheck/cppcheck-new-issues.sh .
