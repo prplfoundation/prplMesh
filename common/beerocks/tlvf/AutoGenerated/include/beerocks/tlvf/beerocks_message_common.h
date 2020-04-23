@@ -98,16 +98,9 @@ typedef struct sPlatformSettings {
     uint8_t backhaul_max_vaps;
     uint8_t backhaul_network_enabled;
     uint8_t backhaul_preferred_radio_band;
-    sMacAddr backhaul_vaps_bssid[12];
     void struct_swap(){
-        for (size_t i = 0; i < 12; i++){
-            (backhaul_vaps_bssid[i]).struct_swap();
-        }
     }
     void struct_init(){
-            for (size_t i = 0; i < 12; i++) {
-                (backhaul_vaps_bssid[i]).struct_init();
-            }
     }
 } __attribute__((packed)) sPlatformSettings;
 
