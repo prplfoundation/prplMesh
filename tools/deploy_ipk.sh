@@ -25,6 +25,14 @@ deploy() {
     IPK_FILENAME="$(basename "$2")"
     DEST_FOLDER=/tmp/prplmesh_ipks
 
+    echo "Stopping prplmesh and restarting netifd on remote"
+    eval ssh "$SSH_OPTIONS" "$TARGET" <<EOF
+# during prplmesh run, it might change hostapd conf files, which may
+# result with a currpot configuration. To avoid this, stop prplmesh
+# and restart netifd so it will re-create the conf files.
+/etc/init.d/prplmesh stop
+/etc/init.d/network restart
+EOF
     echo "Removing previous ipks"
     eval ssh "$SSH_OPTIONS" "$TARGET" \""rm -rf \"$DEST_FOLDER\" ; mkdir -p \"$DEST_FOLDER\"\""
     echo "Copying $IPK to $TARGET:$DEST_FOLDER/$IPK_FILENAME"
