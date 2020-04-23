@@ -12,6 +12,8 @@
 #include <tlvf/CmduMessage.h>
 #include <tlvf/ieee_1905_1/tlvVendorSpecific.h>
 
+#define MTU_SIZE (size_t)1500
+
 namespace ieee1905_1 {
 
 class CmduMessageTx : public CmduMessage {
@@ -27,6 +29,7 @@ public:
     template <class T> std::shared_ptr<T> addClass() { return msg.addClass<T>(); }
     void reset() { msg.reset(false); }
     bool finalize();
+    size_t elements_in_message(size_t size);
 };
 
 }; // namespace ieee1905_1

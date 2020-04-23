@@ -78,4 +78,40 @@ bool CmduMessageTx::finalize()
     if (!addClass<tlvEndOfMessage>())
         return false;
     return msg.finalize();
-};
+}
+
+/**
+ * @brief Return how much elements of the given size can be allocated within MTU sized buffer.
+ * 
+ * @param[in] size size of one element in bytes.
+ * @return size_t number of elements of 'size' that can be inserted.
+ */
+size_t CmduMessageTx::elements_in_message(size_t size)
+{
+    if (!size) {
+        return 0;
+    }
+
+    size_t current_msg_length = 0;
+    auto ptr                  = msg.prevClass();
+    auto valid_ptr            = ptr;
+    while (ptr) {
+        valid_ptr       = ptr;
+        auto class_list = ptr->getInnerClassList();
+        if (!class_list) {
+            break;
+        }
+        ptr = class_list->prevClass();
+    }
+
+    if (!valid_ptr) {
+        return 0;
+    }
+
+    current_msg_length = valid_ptr->getBuffPtr() - getMessageBuff();
+    ssize_t size_left  = MTU_SIZE - current_msg_length - tlvEndOfMessage::get_initial_size();
+    if (size_left < 0) {
+        return 0;
+    }
+    return size_left / size;
+}
