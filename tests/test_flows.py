@@ -545,6 +545,18 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
         self.check_log(env.agents[0].radios[0],
                        r"Got client disallow request for {}".format(sta.mac))
 
+    def test_client_association_link_metrics(self):
+        ''' This test verifies that a MAUT with an associated STA responds to
+        an Associated STA Link Metrics Query message with an Associated STA Link Metrics
+        Response message containing an Associated STA Link Metrics TLV for the associated STA.'''
+
+        sta_mac = "11:11:33:44:55:66"
+        debug("Send link metrics query for unconnected STA")
+        env.controller.dev_send_1905(env.agents[0].mac, 0x800D,
+                                     tlv(0x95, 0x0006, '{sta_mac}'.format(sta_mac=sta_mac)))
+        self.check_log(env.agents[0],
+                       "client with mac address {sta_mac} not found".format(sta_mac=sta_mac))
+
     def test_client_steering_mandate(self):
         debug("Send topology request to agent 1")
         env.controller.dev_send_1905(env.agents[0].mac, 0x0002)
