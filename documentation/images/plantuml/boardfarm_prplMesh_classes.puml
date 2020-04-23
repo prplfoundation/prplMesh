@@ -32,124 +32,100 @@ package prplMesh_devices <<Frame>> {
         check_status()
     }
 
-    class prplMesh_docker {
-        string model
-        string wan_iface
-        string lan_iface
-        IPv4Network lan_network
-        IPv4Address lan_gateway
-        IPv4Network wan_network
-        IPv4Address wan_gateway
+    class PrplMeshBase {
+    }
 
+    class PrplMeshDocker {
         check_status()
+        isalive()
     }
 
     class sniffer {
-        int listening_ports
-        string listening_proto
-        string iface
+        string interface
 
-        catch_message()
-        set_port()
-        set_proto()
-        start_monitor()
-        stop_monitor()
-    }
-
-    class wired_sniffer {
-        string model
-
-        __init__()
-    }
-
-    class wireless_sniffer {
-        string model
-        uint channel
-
-        __init__()
-        set_ssid()
-        set_bsid()
-        get_channel()
-        get_bandwith()
+        start()
+        stop()
+        get_packets()
     }
 }
 
 package prplMesh_entities <<Frame>> {
 
-    class prplMesh_agent {
-        int port
-        IPv4Address ip
-
-        __init__()
-        get_radio()
-        get_status()
-        check_log()
-    }
-
-    class prplMesh_radio {
+    class ALEntity {
         string mac
-        int status
 
-        get_mac()
         get_status()
-        get_txpower()
-        get_rxpower()
+        {abstract} command()
+        prplmesh_command()
+        {abstract} wait_for_log()
+        cmd_reply()
+        dev_get_parameter()
+        dev_send_1905()
     }
 
-    class prplMesh_radio_dummy {
-
-        check_log()
-        get_mac()
-        get_status()
-        get_txpower()
-        get_rxpower()
+    class ALEntityDocker {
+        command()
+        wait_for_log()
     }
 
-    class prplMesh_radio_hw {
-
-        get_mac()
-        get_status()
-        get_txpower()
-        get_rxpower()
+    class ALEntityPrplWrt {
+        command()
+        wait_for_log()
     }
 
-    class prplMesh_controller {
-        int port
-        IPv4Address ip
+    class Radio {
+        string mac
 
-        __init__()
-        get_alid()
+        {abstract} get_status()
+        {abstract} get_txpower()
+        {abstract} wait_for_log()
+    }
+
+    class RadioDocker {
         get_status()
-        check_log()
+        get_txpower()
+        wait_for_log()
+    }
+
+    class RadioHostapd {
+        get_status()
+        get_txpower()
+        wait_for_log()
+    }
+
+    class VirtualAP {
+        string bssid
+        {abstract} associate(sta)
+        {abstract} disassociate(sta)
+    }
+
+    class VirtualAPDocker {
+        associate(sta)
+        disassociate(sta)
+    }
+
+    class VirtualAPHostapd {
+        associate(sta)
+        disassociate(sta)
     }
 }
 
-package tests {
-
-    class CAPI {
-        string dest_alid
-        string payload
-
-        send()
-        set_alid()
-        get_alid()
-        set_payload()
-        get_payload()
-    }
-}
-
-prplMesh_docker --* prplMesh_controller
-prplMesh_docker --* prplMesh_agent
-prplMesh_docker --|> LinuxDevice
+LinuxDevice <|-right- OpenWrtRouter
 OpenWrtRouter <|-- prplWRT
-prplMesh_controller *-- prplWRT
-prplMesh_agent *-- prplWRT
-prplMesh_radio *-- prplMesh_agent
-LinuxDevice <|-- OpenWrtRouter
-LinuxDevice <|-- sniffer
-sniffer <|-- wired_sniffer
-sniffer <|-- wireless_sniffer
-prplMesh_radio <|-- prplMesh_radio_hw
-prplMesh_radio <|-- prplMesh_radio_dummy
+PrplMeshBase *-- ALEntity : > controller_entity
+PrplMeshBase *-- ALEntity : > agent_entity
+PrplMeshDocker --|> PrplMeshBase
+PrplMeshDocker --|> LinuxDevice
+prplWRT --|> PrplMeshBase
+PrplMeshBase o-left- sniffer : > wired_sniffer
+PrplMeshBase o-left- sniffer : > wireless_sniffer
+ALEntity --|> ALEntityDocker
+ALEntity --|> ALEntityPrplWrt
+ALEntity *-left- Radio : > radios
+Radio <|-- RadioHostapd
+Radio <|-- RadioDocker
+Radio *-left- VirtualAP : > vaps
+VirtualAP <|-- VirtualAPDocker
+VirtualAP <|-- VirtualAPHostapd
 
 @enduml
