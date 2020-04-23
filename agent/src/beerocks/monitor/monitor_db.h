@@ -312,6 +312,8 @@ public:
         return sta_nodes.end();
     }
 
+    size_t get_sta_count() const { return sta_nodes.size(); }
+
     // Monitor parameters //
     void set_arp_burst_delay(int arp_burst_delay_) { arp_burst_delay = arp_burst_delay_; }
     uint8_t get_arp_burst_delay() { return arp_burst_delay; }
