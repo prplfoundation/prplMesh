@@ -47,6 +47,21 @@ public:
 
     // For agent_ucc_listener
     const std::string &get_controller_bridge_mac() { return controller_bridge_mac; }
+    /**
+     * @brief get radio mac (ruid) of registered slave based on frequency type
+     * 
+     * @param freq radio frequency to search
+     * @return radio mac of the found slave if found, otherwise empty string
+     */
+    const std::string freq_to_radio_mac(eFreqType freq) const;
+
+    /**
+     * @brief start WPS PBC
+     * 
+     * @param radio_mac radio mac of the radio on which to start WPS
+     * @return true on success, false on failure
+     */
+    bool start_wps_pbc(const sMacAddr &radio_mac);
 
 private:
     // Forward declaration
