@@ -48,6 +48,8 @@ enum class WiFiChanBW { Invalid = 0, BW_20 = 20, BW_40 = 40, BW_80 = 80 };
 struct VAPElement {
     std::string ssid;
     std::string mac;
+    bool fronthaul;
+    bool backhaul;
 
     virtual bool operator==(const VAPElement &other) const
     {
