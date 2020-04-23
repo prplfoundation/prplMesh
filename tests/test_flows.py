@@ -167,6 +167,49 @@ class TestFlows:
             if vap.ssid != b'N/A':
                 self.fail('Wrong SSID: {vap.ssid} instead torn down'.format(vap=vap))
 
+    def test_ap_config_bss_tear_down_cli(self):
+        # Same test as the previous one but using CLI instead of dev_send_1905
+
+        env.beerocks_cli_command('bml_clear_wifi_credentials {}'.format(env.agents[0].mac))
+        # TODO replace with bml_set_wifi_credentials
+        env.controller.cmd_reply(
+            "DEV_SET_CONFIG,bss_info1,"
+            "{} 8x Multi-AP-24G-3 0x0020 0x0008 maprocks1 0 1".format(env.agents[0].mac))
+        env.beerocks_cli_command('bml_update_wifi_credentials {}'.format(env.agents[0].mac))
+
+        # Wait a bit for the renew to complete
+        time.sleep(3)
+
+        self.check_log(env.agents[0].radios[0],
+                       r"Received credentials for ssid: Multi-AP-24G-3 .* bss_type: 2")
+        self.check_log(env.agents[0].radios[1], r".* tear down radio")
+        conn_map = connmap.get_conn_map()
+        repeater1 = conn_map[env.agents[0].mac]
+        repeater1_wlan0 = repeater1.radios[env.agents[0].radios[0].mac]
+        for vap in repeater1_wlan0.vaps.values():
+            if vap.ssid not in (b'Multi-AP-24G-3', b'N/A'):
+                self.fail('Wrong SSID: {vap.ssid} instead of Multi-AP-24G-3'.format(vap=vap))
+        repeater1_wlan2 = repeater1.radios[env.agents[0].radios[1].mac]
+        for vap in repeater1_wlan2.vaps.values():
+            if vap.ssid != b'N/A':
+                self.fail('Wrong SSID: {vap.ssid} instead torn down'.format(vap=vap))
+
+        env.beerocks_cli_command('bml_clear_wifi_credentials {}'.format(env.agents[0].mac))
+        env.beerocks_cli_command('bml_update_wifi_credentials {}'.format(env.agents[0].mac))
+
+        time.sleep(3)
+        self.check_log(env.agents[0].radios[0], r".* tear down radio")
+        conn_map = connmap.get_conn_map()
+        repeater1 = conn_map[env.agents[0].mac]
+        repeater1_wlan0 = repeater1.radios[env.agents[0].radios[0].mac]
+        for vap in repeater1_wlan0.vaps.values():
+            if vap.ssid != b'N/A':
+                self.fail('Wrong SSID: {vap.ssid} instead torn down'.format(vap=vap))
+        repeater1_wlan2 = repeater1.radios[env.agents[0].radios[1].mac]
+        for vap in repeater1_wlan2.vaps.values():
+            if vap.ssid != b'N/A':
+                self.fail('Wrong SSID: {vap.ssid} instead torn down'.format(vap=vap))
+
     def test_channel_selection(self):
         debug("Send channel preference query")
         env.controller.dev_send_1905(env.agents[0].mac, 0x8004)
