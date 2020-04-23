@@ -159,3 +159,5 @@ cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_RESPONSE:
     _type: sBssidInfo
     _length: [ bssid_info_list_length ]
 
+cACTION_BACKHAUL_START_WPS_PBC_REQUEST:
+  _type: class
