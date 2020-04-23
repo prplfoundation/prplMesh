@@ -181,6 +181,8 @@ void monitor_stats::process()
 
         allocate_sta_stats_elements();
 
+        std::unordered_map<sMacAddr, std::vector<beerocks_message::sBssidInfo>> bss_infos;
+
         for (auto it = mon_db->sta_begin(); it != mon_db->sta_end(); ++it) {
             auto sta_mac  = it->first;
             auto sta_node = it->second;
@@ -220,11 +222,65 @@ void monitor_stats::process()
             sta_stats_msg.rx_rssi           = sta_stats.rx_rssi_curr;
 
             sta_count++;
+
+            beerocks_message::sBssidInfo bss_info;
+            bss_info.earliest_measurement_delta = sta_stats.delta_ms;
+            // TODO: MAC data rate and Phy rate are not necessarily the same
+            // https://github.com/prplfoundation/prplMesh/issues/1195
+            bss_info.downlink_estimated_mac_data_rate_mbps = sta_stats.rx_phy_rate_100kb_avg / 10;
+            bss_info.uplink_estimated_mac_data_rate_mbps   = sta_stats.tx_phy_rate_100kb_avg / 10;
+            bss_info.sta_measured_uplink_rssi_dbm_enc      = sta_stats.rx_rssi_curr;
+
+            bss_infos[network_utils::mac_from_string(sta_mac)].push_back(bss_info);
         }
 
-        beerocks_header->actionhdr()->id() = requests_list.front();
+        auto message_id = requests_list.front();
+
+        beerocks_header->actionhdr()->id() = message_id;
         requests_list.pop_front();
         message_com::send_cmdu(slave_socket, cmdu_tx);
+
+        LOG(DEBUG) << "Preparing ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE. "
+                   << "Number of entries: " << bss_infos.size();
+
+        std::for_each(
+            bss_infos.begin(), bss_infos.end(),
+            [&](std::pair<sMacAddr, std::vector<beerocks_message::sBssidInfo>> bss_info) {
+                auto sta_metrics = message_com::create_vs_message<
+                    beerocks_message::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE>(
+                    cmdu_tx, message_id);
+                if (sta_metrics == nullptr) {
+                    LOG(ERROR)
+                        << "Failed building "
+                           "cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE message!";
+                    return;
+                }
+
+                if (!sta_metrics->alloc_bssid_info_list(bss_info.second.size())) {
+                    LOG(ERROR) << "Failed allocate_bssid_info_list";
+                }
+
+                sta_metrics->sta_mac() = bss_info.first;
+
+                for (size_t i = 0; i < sta_metrics->bssid_info_list_length(); ++i) {
+                    auto &bss_reply = std::get<1>(sta_metrics->bssid_info_list(i));
+                    auto &info      = bss_info.second[i];
+
+                    bss_reply.bssid                      = info.bssid;
+                    bss_reply.earliest_measurement_delta = info.earliest_measurement_delta;
+                    bss_reply.downlink_estimated_mac_data_rate_mbps =
+                        info.downlink_estimated_mac_data_rate_mbps;
+                    bss_reply.uplink_estimated_mac_data_rate_mbps =
+                        info.uplink_estimated_mac_data_rate_mbps;
+                    bss_reply.sta_measured_uplink_rssi_dbm_enc =
+                        info.sta_measured_uplink_rssi_dbm_enc;
+
+                    LOG(DEBUG) << "Send ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE "
+                               << "for mac " << sta_metrics->sta_mac()
+                               << ", message_id = " << message_id;
+                    message_com::send_cmdu(slave_socket, cmdu_tx);
+                }
+            });
     }
 
     int delta_val;
