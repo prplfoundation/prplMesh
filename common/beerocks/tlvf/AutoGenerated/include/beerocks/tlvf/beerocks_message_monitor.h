@@ -423,6 +423,36 @@ class cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION : public BaseClass
         sApActivityNotificationParams* m_params = nullptr;
 };
 
+class cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE();
+
+        static eActionOp_MONITOR get_action_op(){
+            return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE);
+        }
+        const uint16_t& length();
+        sMacAddr& sta_mac();
+        uint8_t& bssid_info_list_length();
+        std::tuple<bool, sBssidInfo&> bssid_info_list(size_t idx);
+        bool alloc_bssid_info_list(size_t count = 1);
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_MONITOR* m_action_op = nullptr;
+        uint16_t* m_length = nullptr;
+        sMacAddr* m_sta_mac = nullptr;
+        uint8_t* m_bssid_info_list_length = nullptr;
+        sBssidInfo* m_bssid_info_list = nullptr;
+        size_t m_bssid_info_list_idx__ = 0;
+        int m_lock_order_counter__ = 0;
+};
+
 class cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST : public BaseClass
 {
     public:
