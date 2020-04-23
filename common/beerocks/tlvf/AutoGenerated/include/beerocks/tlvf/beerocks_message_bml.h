@@ -1127,7 +1127,8 @@ class cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST : public BaseClass
         sMacAddr& al_mac();
         uint16_t& authentication_type();
         uint16_t& encryption_type();
-        uint8_t& bss_type();
+        uint8_t& fronthaul();
+        uint8_t& backhaul();
         uint8_t& ssid_size();
         std::string ssid_str();
         char* ssid(size_t length = 0);
@@ -1154,7 +1155,8 @@ class cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST : public BaseClass
         sMacAddr* m_al_mac = nullptr;
         uint16_t* m_authentication_type = nullptr;
         uint16_t* m_encryption_type = nullptr;
-        uint8_t* m_bss_type = nullptr;
+        uint8_t* m_fronthaul = nullptr;
+        uint8_t* m_backhaul = nullptr;
         uint8_t* m_ssid_size = nullptr;
         char* m_ssid = nullptr;
         size_t m_ssid_idx__ = 0;

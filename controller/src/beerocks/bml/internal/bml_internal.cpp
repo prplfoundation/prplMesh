@@ -2031,7 +2031,8 @@ int bml_internal::set_wifi_credentials(const sMacAddr &al_mac,
     set_request->al_mac()              = al_mac;
     set_request->authentication_type() = uint16_t(wifi_credentials.authentication_type);
     set_request->encryption_type()     = uint16_t(wifi_credentials.encryption_type);
-    set_request->bss_type()            = uint8_t(wifi_credentials.bss_type);
+    set_request->fronthaul()           = uint8_t(wifi_credentials.fronthaul);
+    set_request->backhaul()            = uint8_t(wifi_credentials.backhaul);
 
     auto ssid_size = wifi_credentials.ssid.size();
     if (!set_request->alloc_ssid(ssid_size)) {
