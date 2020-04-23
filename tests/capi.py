@@ -159,6 +159,18 @@ class UCCSocket:
             self.send_cmd(command)
             return self.get_reply(verbose)
 
+    def start_wps_registration(self, band: str) -> None:
+        """Call start_wps_registration on a given band.
+
+        Parameters
+        ----------
+        band : str
+            The band on which to start wps
+
+        """
+        command = "start_wps_registration,band,{},WpsConfigMethod,PBC".format(band)
+        self.cmd_reply(command)
+
     def dev_get_parameter(self, parameter: str, **additional_parameters: str) -> str:
         """Call dev_get_parameter and return the parameter, or raise KeyError if it is missing.
 
