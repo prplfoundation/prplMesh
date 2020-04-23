@@ -45,6 +45,8 @@
 #include <tlvf/wfa_map/tlvSteeringRequest.h>
 #include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
 
+#include "1905_beacon_query_to_vs.h"
+
 // BPL Error Codes
 #include <bpl/bpl_cfg.h>
 #include <bpl/bpl_err.h>
@@ -4571,31 +4573,6 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received BEACON_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid);
 
-    /*
-    // Note: No need to send ack - the backhaul already sent the ACK
-    // 1. send ACK to the controller
-    if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE)) {
-        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
-        return false;
-    }
-
-    if (!send_cmdu_to_controller(cmdu_tx)) {
-        LOG(ERROR) << "failed sending ACK to the controller";
-        return false;
-    }
-    */
-
-    // 2. forward the request to the monitor
-    // using vs message
-
-    // get the correct type of the message
-    auto beacon_metrics_query = cmdu_rx.getClass<wfa_map::tlvBeaconMetricsQuery>();
-
-    if (!beacon_metrics_query) {
-        LOG(ERROR) << "tlvBeaconMetricsQuery missing - ignoring beacon metrics query message";
-        return false;
-    }
-
     // create vs message
     auto request_out =
         message_com::create_vs_message<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST>(
@@ -4605,116 +4582,10 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
         return false;
     }
 
-    // fill the parameters
-    /*
-    Legend: 
-        V - fine, we have value
-        ? - don't know where to take the value from
-        U - uncertain, set but not sure it is the correct value
-    V uint8_t measurement_mode;
-    V uint8_t channel;
-    V int16_t op_class;
-    V uint16_t repeats;
-    V uint16_t rand_ival;
-    V uint16_t duration;
-    V sMacAddr sta_mac;
-    V sMacAddr bssid;
-    V uint8_t parallel;
-    V uint8_t enable;
-    V uint8_t request;
-    U uint8_t report;
-    V uint8_t mandatory_duration;
-    V uint8_t expected_reports_count;
-    V uint8_t use_optional_ssid;
-    V char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
-    ? uint8_t use_optional_ap_ch_report;
-    ? uint8_t ap_ch_report[237];
-    ? uint8_t use_optional_req_elements;
-    ? uint8_t req_elements[13];
-    ? uint8_t use_optional_wide_band_ch_switch;
-    ? uint32_t new_ch_width;
-    ? uint32_t new_ch_center_freq_seg_0;
-    ? uint32_t new_ch_center_freq_seg_1;
-    */
-
-    auto &measurement_request_out = request_out->params();
-
-    measurement_request_out.bssid   = beacon_metrics_query->bssid();
-    measurement_request_out.channel = beacon_metrics_query->channel_number();
-
-    measurement_request_out.measurement_mode = beerocks::MEASURE_MODE_ACTIVE;
-    measurement_request_out.duration         = beerocks::BEACON_MEASURE_DEFAULT_ACTIVE_DURATION;
-
-    measurement_request_out.expected_reports_count = 1;
-
-    measurement_request_out.rand_ival = beerocks::BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL;
-    measurement_request_out.sta_mac   = beacon_metrics_query->associated_sta_mac();
-
-    measurement_request_out.op_class = beacon_metrics_query->operating_class();
-
-    // FixMe: not sure about this
-    measurement_request_out.report = beacon_metrics_query->reporting_detail_value();
-
-    // values based on https://github.com/prplfoundation/prplMesh/pull/1114#discussion_r406326546
-    measurement_request_out.repeats            = 0;
-    measurement_request_out.parallel           = 0;
-    measurement_request_out.enable             = 0;
-    measurement_request_out.request            = 1;
-    measurement_request_out.mandatory_duration = 0;
-    measurement_request_out.use_optional_ssid  = 0;
-
-    mapf::utils::copy_string(measurement_request_out.ssid, beacon_metrics_query->ssid_str().c_str(),
-                             message::WIFI_SSID_MAX_LENGTH);
-
-    auto ap_ch_report_length = beacon_metrics_query->ap_channel_reports_list_length();
-
-    measurement_request_out.use_optional_ap_ch_report = ap_ch_report_length;
-
-    // copy m_ap_channel_reports_list from the 1905 beacon_metrics_query
-    // into ap_ch_report char array of the vs message (measurement_request_out)
-    if (ap_ch_report_length > 1) {
-        // the reason we support only 1 channel list is that the hostapd does not support more
-        // there is no way to tell it for which operating class which channels to use
-        LOG(ERROR)
-            << "too many channles requested (the maximum is 237, current support is only for 1): "
-            << ap_ch_report_length;
+    if (!gate::load(request_out, cmdu_rx)) {
+        LOG(ERROR) << "faild translating 1905 message to vs message";
         return false;
-    }
-
-    // it might be zero as well
-    if (1 == ap_ch_report_length) {
-        // get the first (and currently only) structure from the list
-        auto channel = beacon_metrics_query->ap_channel_reports_list(0);
-        if (!std::get<0>(channel)) {
-            LOG(ERROR) << "there should be a structure at index 0, but it wasn't found";
-            return false;
-        }
-
-        // the first index in the tlv's channel-report-list is the operating class,
-        // we skip it. using pointer arithmethics and copying one element less from the source (we skip the operation class)
-        std::copy_n(measurement_request_out.ap_ch_report,
-                    std::get<1>(channel).ap_channel_report_list_length() - 1,
-                    std::get<1>(channel).ap_channel_report_list() + 1 );
-                    
-
-        // DEBUG
-        LOG(DEBUG) << "beacon request for the following channels:";
-        for(int idx = 0; idx < std::get<1>(channel).ap_channel_report_list_length() - 1; ++idx)
-        {
-            LOG(DEBUG) << "channel: " << measurement_request_out.ap_ch_report[idx];
-        }
-    }
-
-    // FixMe:
-    // the same is true for use_optional_req_elements and req_elements
-    // end FixMe
-
-    // FixMe:
-    // measurement_request_out.use_optional_wide_band_ch_switch = ??
-    // measurement_request_out.new_ch_width = ??
-    // measurement_request_out.new_ch_center_freq_seg_0 = ??
-    // measurement_request_out.new_ch_center_freq_seg_1 = ??
-    // end FixMe
+    } 
 
     message_com::send_cmdu(monitor_socket, cmdu_tx);
 
