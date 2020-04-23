@@ -181,7 +181,12 @@ cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST:
 
 cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE:
   _type: class
-  ap_stats: sApStatsParams
+  ap_stats_size:
+    _type: uint8_t
+    _length_var: True
+  ap_stats: 
+    _type: sApStatsParams
+    _length: [ ap_stats_size ]
   sta_stats_size:
     _type: uint8_t
     _length_var: True
