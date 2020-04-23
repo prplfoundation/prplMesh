@@ -92,9 +92,21 @@ bool socket_thread::init()
 
 void socket_thread::set_select_timeout(unsigned msec)
 {
+    m_select_timeout_msec = msec;
+
     struct timeval tv;
     tv.tv_sec  = (msec / 1000);
     tv.tv_usec = (1000 * (msec % 1000));
+    select.setTimeout(&tv);
+}
+
+void socket_thread::skip_next_select_timeout()
+{
+    m_skip_next_select_timeout = true;
+
+    struct timeval tv;
+    tv.tv_sec  = 0;
+    tv.tv_usec = 0;
     select.setTimeout(&tv);
 }
 
@@ -259,6 +271,12 @@ bool socket_thread::work()
 
         THREAD_LOG(ERROR) << "select error: " << strerror(errno);
         return false;
+    }
+
+    // If select was skipped, rest the select timeout to default value
+    if (m_skip_next_select_timeout) {
+        m_skip_next_select_timeout = false;
+        set_select_timeout(m_select_timeout_msec);
     }
 
     after_select(bool(sel_ret == 0));
