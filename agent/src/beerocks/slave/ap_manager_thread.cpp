@@ -22,7 +22,7 @@ using namespace beerocks::net;
 ////////////////////////// Local Module Definitions //////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-#define SELECT_TIMEOUT_MSC 200
+#define SELECT_TIMEOUT_MSC 1000
 #define ACS_READ_SLEEP_USC 1000
 #define READ_ACS_ATTEMPT_MAX 5
 #define DISABLE_BACKHAUL_VAP_TIMEOUT_SEC 30
@@ -341,7 +341,9 @@ void ap_manager_thread::after_select(bool timeout)
             return;
         } else {
             LOG(INFO) << "waiting to attach to " << ap_wlan_hal->get_radio_info().iface_name;
-            UTILS_SLEEP_MSEC(200);
+            // Set the sleep to little less than the select timeout so we won't get awake timeout
+            // print to the log on the socket thread.
+            UTILS_SLEEP_MSEC(SELECT_TIMEOUT_MSC * 0.9);
         }
 
         // AP is attached
