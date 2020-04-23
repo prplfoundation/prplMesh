@@ -55,6 +55,8 @@ protected:
     inline void clear_ready(Socket *s) { select.clearReady(s); }
     virtual bool read_ready(Socket *s) { return select.readReady(s); }
 
+    void skip_next_select_timeout();
+
     ieee1905_1::CmduMessageTx cmdu_tx;
     ieee1905_1::CmduMessageTx cert_cmdu_tx;
     const std::string unix_socket_path;
@@ -80,6 +82,9 @@ private:
 
     int server_max_connections;
     SocketSelect select;
+
+    uint32_t m_select_timeout_msec  = 0;
+    bool m_skip_next_select_timeout = false;
 };
 
 } // namespace beerocks
