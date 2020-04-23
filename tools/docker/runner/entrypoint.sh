@@ -13,7 +13,7 @@ run() {
 
 # Use the ip address that was allocated by the daemon to this
 # container (from eth0)
-bridge_ip="$(ip addr show dev eth0 | grep inet | awk '{print $2}')"
+bridge_ip="$(ip addr show dev eth0 | awk '/^ *inet / {print $2}')"
 
 run ip link add          br-lan   type bridge
 run ip link add          wlan0    type dummy
