@@ -2503,8 +2503,19 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
             return false;
         }
 
-        response_out->ap_stats() = response_in->ap_stats();
-        auto sta_stats_size      = response_in->sta_stats_size();
+        auto ap_stats_size = response_in->ap_stats_size();
+        if (ap_stats_size > 0) {
+            if (!response_out->alloc_ap_stats(ap_stats_size)) {
+                LOG(ERROR) << "Failed buffer allocation to size=" << int(ap_stats_size);
+                break;
+            }
+            auto ap_stats_tuple_in  = response_in->ap_stats(0);
+            auto ap_stats_tuple_out = response_out->ap_stats(0);
+            std::copy_n(&std::get<1>(ap_stats_tuple_in), ap_stats_size,
+                        &std::get<1>(ap_stats_tuple_out));
+        }
+
+        auto sta_stats_size = response_in->sta_stats_size();
         if (sta_stats_size > 0) {
             if (!response_out->alloc_sta_stats(sta_stats_size)) {
                 LOG(ERROR) << "Failed buffer allocation to size=" << int(sta_stats_size);

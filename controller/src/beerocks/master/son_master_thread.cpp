@@ -3147,7 +3147,17 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             database.set_node_stats_info(client_mac, &sta_stats);
         }
 
-        database.set_hostap_stats_info(hostap_mac, &response->ap_stats());
+        if (response->ap_stats_size() == 0) {
+            break;
+        }
+
+        auto ap_stats_tuple = response->ap_stats(response->ap_stats_size() - 1);
+        if (!std::get<0>(ap_stats_tuple)) {
+            LOG(ERROR) << "Couldn't access ap element";
+            return false;
+        }
+        auto &ap_stats = std::get<1>(ap_stats_tuple);
+        database.set_hostap_stats_info(hostap_mac, &ap_stats);
         break;
     }
     case beerocks_message::ACTION_CONTROL_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION: {

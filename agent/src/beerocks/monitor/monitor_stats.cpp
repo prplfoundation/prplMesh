@@ -134,7 +134,17 @@ void monitor_stats::process()
             return;
         }
 
-        auto &ap_stats_msg                  = response->ap_stats();
+        if (!response->alloc_ap_stats()) {
+            LOG(ERROR) << "tx_buffer overflow!";
+        }
+
+        auto ap_stats_tuple = response->ap_stats(0);
+        if (!std::get<0>(ap_stats_tuple)) {
+            LOG(ERROR) << "Failed to get element";
+            return;
+        }
+        auto &ap_stats_msg = std::get<1>(ap_stats_tuple);
+
         ap_stats_msg.stats_delta_ms         = radio_stats.delta_ms;
         ap_stats_msg.rx_packets             = radio_stats.hal_stats.rx_packets;
         ap_stats_msg.tx_packets             = radio_stats.hal_stats.tx_packets;
@@ -150,6 +160,27 @@ void monitor_stats::process()
         ap_stats_msg.client_tx_load_percent = radio_stats.client_tx_load_tot_curr;
         ap_stats_msg.client_rx_load_percent = radio_stats.client_rx_load_tot_curr;
 
+        auto total_sta_count = mon_db->get_sta_count();
+        size_t elements_to_allocate;
+        uint32_t sta_count;
+
+        auto allocate_sta_stats_elements = [&]() {
+            elements_to_allocate =
+                cmdu_tx.elements_in_message(sizeof(beerocks_message::sStaStatsParams));
+
+            elements_to_allocate = std::min(total_sta_count, elements_to_allocate);
+
+            if (!response->alloc_sta_stats(elements_to_allocate)) {
+                LOG(ERROR) << "tx_buffer overflow! elements_to_allocate="
+                           << int(elements_to_allocate);
+                return;
+            }
+
+            sta_count = 0;
+        };
+
+        allocate_sta_stats_elements();
+
         for (auto it = mon_db->sta_begin(); it != mon_db->sta_end(); ++it) {
             auto sta_mac  = it->first;
             auto sta_node = it->second;
@@ -159,13 +190,21 @@ void monitor_stats::process()
 
             auto &sta_stats = sta_node->get_stats();
 
-            if (!response->alloc_sta_stats()) {
-                LOG(ERROR) << "tx_buffer overflow!";
-                return;
+            if (elements_to_allocate == sta_count) {
+                message_com::send_cmdu(slave_socket, cmdu_tx);
+                response = message_com::create_vs_message<
+                    beerocks_message::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE>(cmdu_tx);
+                if (!response) {
+                    LOG(ERROR) << "Failed building "
+                                  "cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE message!";
+                    return;
+                }
+
+                total_sta_count -= sta_count;
+                allocate_sta_stats_elements();
             }
 
-            uint8_t num_of_stas = response->sta_stats_size();
-            auto &sta_stats_msg = std::get<1>(response->sta_stats(num_of_stas - 1));
+            auto &sta_stats_msg = std::get<1>(response->sta_stats(sta_count));
 
             sta_stats_msg.mac               = network_utils::mac_from_string(sta_mac);
             sta_stats_msg.rx_packets        = sta_stats.hal_stats.rx_packets;
@@ -179,6 +218,8 @@ void monitor_stats::process()
             sta_stats_msg.rx_load_percent   = sta_stats.rx_load_percent_curr;
             sta_stats_msg.stats_delta_ms    = sta_stats.delta_ms;
             sta_stats_msg.rx_rssi           = sta_stats.rx_rssi_curr;
+
+            sta_count++;
         }
 
         beerocks_header->actionhdr()->id() = requests_list.front();
