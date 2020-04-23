@@ -935,7 +935,8 @@ bool ap_wlan_hal_dwpal::sta_bss_steer(const std::string &mac, const std::string 
 }
 
 bool ap_wlan_hal_dwpal::update_vap_credentials(
-    std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list)
+    std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list,
+    const std::string &backhaul_wps_ssid, const std::string &backhaul_wps_passphrase)
 {
     // The bss_info_conf_list contains list of all VAPs and STAs that have to be created
     // on the radio. If the list is empty, there should be no VAPs left.
