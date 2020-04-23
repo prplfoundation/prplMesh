@@ -23,8 +23,6 @@
     (MSG *)(TX_B + SIZE_VAR);                                                                      \
     SIZE_VAR += sizeof(MSG);
 
-#define MTU_SIZE (size_t)1500
-
 namespace beerocks {
 
 class message_com {

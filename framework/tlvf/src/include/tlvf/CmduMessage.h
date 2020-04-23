@@ -51,7 +51,6 @@ public:
     bool is_finalized() const { return msg.is_finalized(); };
     bool is_swapped() const { return msg.is_swapped(); };
 
-    static const size_t kMaxCmduLength      = 1500;
     static const uint16_t kCmduHeaderLength = 8;
     static const uint16_t kTlvHeaderLength  = 3;
 
