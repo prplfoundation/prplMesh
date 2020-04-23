@@ -118,52 +118,52 @@ bool cACTION_HEADER::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_magic = (uint32_t*)m_buff_ptr__;
+    m_magic = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!m_parse__) *m_magic = beerocks::message::MESSAGE_MAGIC;
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
     }
-    m_version = (uint8_t*)m_buff_ptr__;
+    m_version = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_version = beerocks::message::MESSAGE_VERSION;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_action = (eAction*)m_buff_ptr__;
+    m_action = reinterpret_cast<eAction*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(eAction))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eAction) << ") Failed!";
         return false;
     }
-    m_action_op = (uint8_t*)m_buff_ptr__;
+    m_action_op = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_direction = (uint8_t*)m_buff_ptr__;
+    m_direction = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_direction = 0x1;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_radio_mac = (sMacAddr*)m_buff_ptr__;
+    m_radio_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_radio_mac->struct_init(); }
-    m_last = (uint8_t*)m_buff_ptr__;
+    m_last = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_last = 0x0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_id = (uint16_t*)m_buff_ptr__;
+    m_id = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0x0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";

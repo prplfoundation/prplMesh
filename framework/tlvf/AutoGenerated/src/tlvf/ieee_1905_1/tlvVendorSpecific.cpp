@@ -129,19 +129,19 @@ bool tlvVendorSpecific::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eTlvType*)m_buff_ptr__;
+    m_type = reinterpret_cast<eTlvType*>(m_buff_ptr__);
     if (!m_parse__) *m_type = eTlvType::TLV_VENDOR_SPECIFIC;
     if (!buffPtrIncrementSafe(sizeof(eTlvType))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvType) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_vendor_oui = (sVendorOUI*)m_buff_ptr__;
+    m_vendor_oui = reinterpret_cast<sVendorOUI*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sVendorOUI))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sVendorOUI) << ") Failed!";
         return false;

@@ -107,40 +107,40 @@ bool tlvVsClientAssociationEvent::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    m_bssid = (sMacAddr*)m_buff_ptr__;
+    m_bssid = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_bssid->struct_init(); }
-    m_vap_id = (int8_t*)m_buff_ptr__;
+    m_vap_id = reinterpret_cast<int8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(int8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
     }
-    m_capabilities = (beerocks::message::sRadioCapabilities*)m_buff_ptr__;
+    m_capabilities = reinterpret_cast<beerocks::message::sRadioCapabilities*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(beerocks::message::sRadioCapabilities))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sRadioCapabilities) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_capabilities->struct_init(); }
-    m_disconnect_reason = (uint8_t*)m_buff_ptr__;
+    m_disconnect_reason = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_disconnect_source = (uint8_t*)m_buff_ptr__;
+    m_disconnect_source = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_disconnect_type = (uint8_t*)m_buff_ptr__;
+    m_disconnect_type = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;

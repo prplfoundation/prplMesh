@@ -498,25 +498,25 @@ bool tlvTestVarList::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (uint8_t*)m_buff_ptr__;
+    m_type = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_type = 0xff;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_var0 = (uint16_t*)m_buff_ptr__;
+    m_var0 = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
-    m_simple_list_length = (uint8_t*)m_buff_ptr__;
+    m_simple_list_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -529,7 +529,7 @@ bool tlvTestVarList::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) * (simple_list_length) << ") Failed!";
         return false;
     }
-    m_test_string_length = (uint8_t*)m_buff_ptr__;
+    m_test_string_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -542,7 +542,7 @@ bool tlvTestVarList::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (test_string_length) << ") Failed!";
         return false;
     }
-    m_complex_list_length = (uint8_t*)m_buff_ptr__;
+    m_complex_list_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -592,7 +592,7 @@ bool tlvTestVarList::init()
         // swap back since var3 will be swapped as part of the whole class swap
         var3->class_swap();
     }
-    m_var2 = (uint32_t*)m_buff_ptr__;
+    m_var2 = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
@@ -805,19 +805,19 @@ bool cInner::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (uint16_t*)m_buff_ptr__;
+    m_type = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_type = 0x1;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_list_length = (uint8_t*)m_buff_ptr__;
+    m_list_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -830,7 +830,7 @@ bool cInner::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) * (list_length) << ") Failed!";
         return false;
     }
-    m_var1 = (uint32_t*)m_buff_ptr__;
+    m_var1 = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;

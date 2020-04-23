@@ -166,32 +166,32 @@ bool tlvApRadioBasicCapabilities::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eTlvTypeMap*)m_buff_ptr__;
+    m_type = reinterpret_cast<eTlvTypeMap*>(m_buff_ptr__);
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_AP_RADIO_BASIC_CAPABILITIES;
     if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvTypeMap) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_radio_uid = (sMacAddr*)m_buff_ptr__;
+    m_radio_uid = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_radio_uid->struct_init(); }
-    m_maximum_number_of_bsss_supported = (uint8_t*)m_buff_ptr__;
+    m_maximum_number_of_bsss_supported = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
-    m_operating_classes_info_list_length = (uint8_t*)m_buff_ptr__;
+    m_operating_classes_info_list_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_operating_classes_info_list_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
@@ -335,17 +335,17 @@ bool cOperatingClassesInfo::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_operating_class = (uint8_t*)m_buff_ptr__;
+    m_operating_class = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_maximum_transmit_power_dbm = (uint8_t*)m_buff_ptr__;
+    m_maximum_transmit_power_dbm = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_statically_non_operable_channels_list_length = (uint8_t*)m_buff_ptr__;
+    m_statically_non_operable_channels_list_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_statically_non_operable_channels_list_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";

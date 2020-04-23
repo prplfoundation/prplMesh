@@ -145,39 +145,39 @@ bool tlvClientAssociationControlRequest::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eTlvTypeMap*)m_buff_ptr__;
+    m_type = reinterpret_cast<eTlvTypeMap*>(m_buff_ptr__);
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_CLIENT_ASSOCIATION_CONTROL_REQUEST;
     if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvTypeMap) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_bssid_to_block_client = (sMacAddr*)m_buff_ptr__;
+    m_bssid_to_block_client = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_bssid_to_block_client->struct_init(); }
-    m_association_control = (eAssociationControl*)m_buff_ptr__;
+    m_association_control = reinterpret_cast<eAssociationControl*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(eAssociationControl))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eAssociationControl) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(eAssociationControl); }
-    m_validity_period_sec = (uint16_t*)m_buff_ptr__;
+    m_validity_period_sec = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_validity_period_sec = 0x0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
-    m_sta_list_length = (uint8_t*)m_buff_ptr__;
+    m_sta_list_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_sta_list_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";

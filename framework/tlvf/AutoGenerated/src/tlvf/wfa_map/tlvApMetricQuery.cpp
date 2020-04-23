@@ -127,19 +127,19 @@ bool tlvApMetricQuery::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eTlvTypeMap*)m_buff_ptr__;
+    m_type = reinterpret_cast<eTlvTypeMap*>(m_buff_ptr__);
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_AP_METRIC_QUERY;
     if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvTypeMap) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_bssid_list_length = (uint8_t*)m_buff_ptr__;
+    m_bssid_list_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_bssid_list_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
