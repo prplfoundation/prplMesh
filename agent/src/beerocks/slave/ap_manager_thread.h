@@ -30,22 +30,9 @@ public:
         beerocks::eIfaceType hostap_iface_type;
         int channel;
         bool iface_filter_low;
-        sMacAddr *backhaul_vaps_bssid; // array
     };
 
     void ap_manager_config(ap_manager_conf_t &conf);
-
-    enum eBackhaulVapType : uint8_t {
-        BH_VAP_TYPE_2G           = 0,
-        BH_VAP_TYPE_5G           = 1,
-        BH_VAP_TYPE_5G_SECONDARY = 2,
-    };
-
-    struct backhaul_vap_list_element_t {
-        std::string bssid;
-        bool enabled;
-        eBackhaulVapType type;
-    };
 
     /**
      * disallowed client parameters
@@ -97,8 +84,6 @@ private:
     int bss_steer_valid_int;
     int bss_steer_imminent_valid_int;
     std::vector<disallowed_client_t> m_disallowed_clients;
-
-    std::list<backhaul_vap_list_element_t> backhaul_vaps_list;
 
     struct pending_disable_vap_t {
         int8_t vap_id;

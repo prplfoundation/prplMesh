@@ -95,10 +95,6 @@ sPlatformSettings:
   backhaul_max_vaps: uint8_t 
   backhaul_network_enabled: uint8_t 
   backhaul_preferred_radio_band: uint8_t 
-  backhaul_vaps_bssid:
-    _type: sMacAddr 
-    _length: [ 12 ]
-    _comment: # 4 groups of 3 bssid in each group
 
 sWlanSettings:
   _type: struct
