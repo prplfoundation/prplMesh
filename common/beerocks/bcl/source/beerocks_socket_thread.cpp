@@ -261,6 +261,15 @@ bool socket_thread::work()
 {
     before_select();
 
+    auto awake_time_msec = std::chrono::duration_cast<std::chrono::milliseconds>(
+                               std::chrono::steady_clock::now() - m_select_wake_up_time)
+                               .count();
+
+    if (m_select_timeout_msec > 0 && awake_time_msec > m_select_timeout_msec) {
+        THREAD_LOG(WARNING) << "Thread awake time is exceptionally long: " << int(awake_time_msec)
+                            << " [ms]";
+    }
+
     int sel_ret = select.selectSocket();
     if (sel_ret < 0) {
         // Do not fail for the following "errors"
