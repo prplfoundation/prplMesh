@@ -58,6 +58,8 @@ struct WiFiChannel {
 struct VAPElement {
     std::string ssid;
     std::string mac;
+    bool fronthaul;
+    bool backhaul;
 
     virtual bool operator==(const VAPElement &other) const
     {
