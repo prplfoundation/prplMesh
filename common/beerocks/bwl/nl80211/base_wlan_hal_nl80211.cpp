@@ -764,6 +764,9 @@ bool base_wlan_hal_nl80211::refresh_vaps_info(int id)
             // Try reading the BSSID and SSID of the requested VAP
             vap_element.mac  = reply["bssid[" + std::to_string(vap_id) + "]"];
             vap_element.ssid = reply["ssid[" + std::to_string(vap_id) + "]"];
+            // TODO https://github.com/prplfoundation/prplMesh/issues/1175
+            vap_element.fronthaul = true;
+            vap_element.backhaul  = false;
 
             // VAP does not exists
             if (vap_element.mac.empty()) {
@@ -786,6 +789,9 @@ bool base_wlan_hal_nl80211::refresh_vaps_info(int id)
         // Try reading the BSSID and SSID of the requested VAP
         vap_element.mac  = reply["bssid[" + std::to_string(id) + "]"];
         vap_element.ssid = reply["ssid[" + std::to_string(id) + "]"];
+        // TODO https://github.com/prplfoundation/prplMesh/issues/1175
+        vap_element.fronthaul = true;
+        vap_element.backhaul  = false;
 
         // VAP does not exists
         if (vap_element.mac.empty()) {

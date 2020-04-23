@@ -825,6 +825,56 @@ bool base_wlan_hal_dwpal::refresh_radio_info()
     return true;
 }
 
+bool base_wlan_hal_dwpal::get_vap_type(const std::string &ifname, bool &fronthaul, bool &backhaul)
+{
+    char *reply              = nullptr;
+    size_t numOfValidArgs[1] = {0}, replyLen = 0;
+    char mode[16]                 = {0};
+    FieldsToParse fieldsToParse[] = {
+        {(void *)mode, &numOfValidArgs[0], DWPAL_STR_PARAM, "mesh_mode=", sizeof(mode)},
+        /* Must be at the end */
+        {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
+    std::string cmd = "GET_MESH_MODE " + ifname;
+
+    fronthaul = false;
+    backhaul  = false;
+    if (!dwpal_send_cmd(cmd, &reply) || reply[0] == '\0') {
+        fronthaul = true; // if mesh_mode not defined at all, assume fronthaul
+        return true;
+    }
+
+    replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
+
+    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse, sizeof(mode)) ==
+        DWPAL_FAILURE) {
+        LOG(ERROR) << "DWPAL parse error on " << ifname;
+        return false;
+    }
+
+    for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
+        if (numOfValidArgs[i] == 0) {
+            LOG(ERROR) << "Failed reading parsed parameter " << (int)i << " ==> Abort";
+            return false;
+        }
+    }
+
+    std::string mesh_mode = std::string(mode);
+    if (mesh_mode.find("bAP") != std::string::npos) {
+        backhaul = true;
+        return true;
+    } else if (mesh_mode.find("fAP") != std::string::npos) {
+        fronthaul = true;
+        return true;
+    } else if (mesh_mode.find("hybrid") != std::string::npos) {
+        fronthaul = true;
+        backhaul  = true;
+        return true;
+    }
+
+    LOG(ERROR) << "Invalid mesh_mode=" << mesh_mode;
+    return false;
+}
+
 bool base_wlan_hal_dwpal::refresh_vap_info(int vap_id)
 {
     const std::string ifname =
@@ -880,10 +930,16 @@ bool base_wlan_hal_dwpal::refresh_vap_info(int vap_id)
 
     vapElement.mac  = std::string(bssid);
     vapElement.ssid = std::string(ssid);
+    if (!get_vap_type(ifname, vapElement.fronthaul, vapElement.backhaul)) {
+        LOG(ERROR) << "Failed to get VAP type";
+        return false;
+    }
 
     // Store the VAP element
     LOG(DEBUG) << "Detected VAP ID (" << vap_id << ") - MAC: " << vapElement.mac
-               << ", SSID: " << vapElement.ssid;
+               << ", SSID: " << vapElement.ssid
+               << ", fronthaul: " << beerocks::string_utils::bool_str(vapElement.fronthaul)
+               << ", backhaul: " << beerocks::string_utils::bool_str(vapElement.backhaul);
 
     m_radio_info.available_vaps[vap_id] = vapElement;
 
