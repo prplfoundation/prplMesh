@@ -489,6 +489,11 @@ bool monitor_thread::update_sta_stats()
     auto poll_cnt  = mon_db.get_poll_cnt();
     auto poll_last = mon_db.is_last_poll();
 
+    if (m_sta_stats_polling_completed) {
+        m_sta_stats_polling_start_timestamp = std::chrono::steady_clock::now();
+        m_sta_stats_polling_completed       = false;
+    }
+
     for (auto it = mon_db.sta_begin(); it != mon_db.sta_end(); ++it) {
 
         auto sta_mac  = it->first;
@@ -501,6 +506,19 @@ bool monitor_thread::update_sta_stats()
 
         auto vap_node   = mon_db.vap_get_by_id(sta_node->get_vap_id());
         auto &sta_stats = sta_node->get_stats();
+
+        // Skip stations that were already updated in the current cycle
+        if (sta_stats.last_update_time > m_sta_stats_polling_start_timestamp) {
+            continue;
+        }
+
+        if (std::chrono::steady_clock::now() > awake_timeout()) {
+            // If we haven't finish to iterate on all stations, skip one time on the select timeout
+            // so the select will not be stuck on full select timeout and the thread will be able to
+            // finish this operation quickly.
+            skip_next_select_timeout();
+            return true;
+        }
 
         // Update the stats
         if (!mon_wlan_hal->update_stations_stats(vap_node->get_iface(), sta_mac,
@@ -576,6 +594,8 @@ bool monitor_thread::update_sta_stats()
         sta_stats.delta_ms         = float(time_span.count());
         sta_stats.last_update_time = now;
     }
+
+    m_sta_stats_polling_completed = true;
 
     return true;
 }

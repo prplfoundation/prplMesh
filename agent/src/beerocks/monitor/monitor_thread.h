@@ -108,6 +108,9 @@ private:
     std::shared_ptr<bwl::mon_wlan_hal> mon_wlan_hal;
     bool mon_hal_attached           = false;
     bwl::HALState last_attach_state = bwl::HALState::Uninitialized;
+
+    std::chrono::steady_clock::time_point m_sta_stats_polling_start_timestamp;
+    bool m_sta_stats_polling_completed = true;
 };
 } // namespace son
 
