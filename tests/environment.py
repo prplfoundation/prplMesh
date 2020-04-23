@@ -45,6 +45,7 @@ class ALEntity:
         self.cmd_reply = self.ucc_socket.cmd_reply
         self.dev_get_parameter = self.ucc_socket.dev_get_parameter
         self.dev_send_1905 = self.ucc_socket.dev_send_1905
+        self.start_wps_registration = self.ucc_socket.start_wps_registration
 
     def command(self, *command: str) -> bytes:
         '''Run `command` on the device and return its output as bytes.

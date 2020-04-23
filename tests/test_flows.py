@@ -119,6 +119,10 @@ class TestFlows:
         if not bssid1:
             self.fail("repeater1 didn't configure Multi-AP-24G-1")
 
+        # simulate wps onboarding to the backhaul vap
+        env.agents[0].start_wps_registration("24G")
+        self.check_log(env.agents[0].radios[0], r"Start WPS PBC")
+
     def test_ap_config_bss_tear_down(self):
         # Configure the controller and send renew
         env.controller.cmd_reply("DEV_RESET_DEFAULT")
