@@ -923,6 +923,25 @@ class cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST : public BaseClass
         int m_lock_order_counter__ = 0;
 };
 
+class cACTION_APMANAGER_START_WPS_PBC_REQUEST : public BaseClass
+{
+    public:
+        cACTION_APMANAGER_START_WPS_PBC_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_APMANAGER_START_WPS_PBC_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_APMANAGER_START_WPS_PBC_REQUEST();
+
+        static eActionOp_APMANAGER get_action_op(){
+            return (eActionOp_APMANAGER)(ACTION_APMANAGER_START_WPS_PBC_REQUEST);
+        }
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_APMANAGER* m_action_op = nullptr;
+};
+
 class cACTION_APMANAGER_HEARTBEAT_NOTIFICATION : public BaseClass
 {
     public:
