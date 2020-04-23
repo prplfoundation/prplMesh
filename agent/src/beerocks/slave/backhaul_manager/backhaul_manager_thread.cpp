@@ -2039,6 +2039,19 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     }
 }
 
+sMacAddr backhaul_manager::get_sta_bssid(
+    const std::unordered_map<sMacAddr, associated_clients_t> &clients_map, const sMacAddr &sta_mac)
+{
+    sMacAddr bssid = network_utils::ZERO_MAC;
+    std::for_each(clients_map.begin(), clients_map.end(),
+                  [&sta_mac, &bssid](std::pair<sMacAddr, associated_clients_t> vap) {
+                      if (vap.second.find(sta_mac) != vap.second.end()) {
+                          bssid = vap.first;
+                      }
+                  });
+    return bssid;
+}
+
 bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                       const std::string &src_mac)
 {

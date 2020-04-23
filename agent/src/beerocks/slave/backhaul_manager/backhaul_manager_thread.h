@@ -257,6 +257,17 @@ private:
     typedef std::unordered_map<sMacAddr, sClientInfo> associated_clients_t;
 
     /**
+     * @brief Gets BSSID to which STA with given MAC is connected
+     *
+     * @param[in] clients_map Associated client map to seach
+     * @param[in] sta_mac MAC address of the STA
+     * @return BSSID in case of success or network_utils::ZERO_MAC otherwise
+     */
+    static sMacAddr
+    get_sta_bssid(const std::unordered_map<sMacAddr, associated_clients_t> &clients_map,
+                  const sMacAddr &sta_mac);
+
+    /**
      * @brief Information gathered about a radio (= slave).
      *
      * Radio information is obtained from messages sent by slave threads and is used to build
