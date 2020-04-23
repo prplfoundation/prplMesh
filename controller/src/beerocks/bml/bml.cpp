@@ -218,12 +218,11 @@ int bml_set_wifi_credentials(BML_CTX ctx, const char *al_mac, const char *ssid,
         bss_type = "fronthaul";
     }
 
-    wifi_credentials.bss_type =
-        WSC::eWscVendorExtSubelementBssType(son::wireless_utils::string_to_wsc_bss_type(bss_type));
-    if (!wifi_credentials.bss_type) {
-        LOG(ERROR) << "Wrong bss type value.";
-        return (-BML_RET_INVALID_ARGS);
-    }
+    std::string bss_type_str = std::string(bss_type);
+    wifi_credentials.fronthaul =
+        (bss_type_str == "fronthaul" || bss_type_str == "fronthaul-backhaul");
+    wifi_credentials.backhaul =
+        (bss_type_str == "backhaul" || bss_type_str == "fronthaul-backhaul");
 
     bml_internal *pBML = (bml_internal *)ctx;
 

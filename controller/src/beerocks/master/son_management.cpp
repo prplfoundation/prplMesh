@@ -1517,7 +1517,8 @@ void son_management::handle_bml_message(Socket *sd,
         wifi_credentials.network_key         = request->network_key_str();
         wifi_credentials.authentication_type = WSC::eWscAuth(request->authentication_type());
         wifi_credentials.encryption_type     = WSC::eWscEncr(request->encryption_type());
-        wifi_credentials.bss_type = WSC::eWscVendorExtSubelementBssType(request->bss_type());
+        wifi_credentials.fronthaul           = request->fronthaul();
+        wifi_credentials.backhaul            = request->backhaul();
 
         auto operating_classes = request->operating_classes();
         for (int i = 0; i < request->operating_classes_size(); i++) {

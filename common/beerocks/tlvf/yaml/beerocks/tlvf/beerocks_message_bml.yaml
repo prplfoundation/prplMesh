@@ -220,7 +220,8 @@ cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST:
   al_mac: sMacAddr
   authentication_type: uint16_t #  eWscAuth
   encryption_type: uint16_t #  eWscEncr
-  bss_type: uint8_t  #  eWscVendorExtSubelementBssType
+  fronthaul: uint8_t
+  backhaul: uint8_t
   ssid_size:
     _type: uint8_t
     _length_var: True

@@ -868,17 +868,3 @@ std::list<uint8_t> wireless_utils::string_to_wsc_oper_class(const std::string &o
         return {};
     }
 }
-
-uint8_t wireless_utils::string_to_wsc_bss_type(const std::string &bss_type)
-{
-    if (bss_type == "backhaul") {
-        return WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS;
-    } else if (bss_type == "fronthaul") {
-        return WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS;
-    } else if (bss_type == "fronthaul-backhaul") {
-        return (WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS |
-                WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS);
-    } else {
-        return 0;
-    }
-}

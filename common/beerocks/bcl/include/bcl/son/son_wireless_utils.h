@@ -92,7 +92,8 @@ public:
         WSC::eWscAuth authentication_type;
         WSC::eWscEncr encryption_type;
         std::string network_key;
-        WSC::eWscVendorExtSubelementBssType bss_type;
+        bool fronthaul = false;
+        bool backhaul  = false;
     } sBssInfoConf;
 
     typedef struct {
@@ -156,7 +157,6 @@ public:
     static std::string wsc_to_bwl_encryption(WSC::eWscEncr enctype);
     static beerocks::eBssType wsc_to_bwl_bss_type(WSC::eWscVendorExtSubelementBssType bss_type);
     static std::list<uint8_t> string_to_wsc_oper_class(const std::string &operating_class);
-    static uint8_t string_to_wsc_bss_type(const std::string &bss_type);
     static std::vector<uint8_t>
     get_supported_operating_classes(const beerocks::message::sWifiChannel supported_channels[]);
     static uint8_t

@@ -3596,8 +3596,12 @@ uint16_t& cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::encryption_type() {
     return (uint16_t&)(*m_encryption_type);
 }
 
-uint8_t& cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::bss_type() {
-    return (uint8_t&)(*m_bss_type);
+uint8_t& cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::fronthaul() {
+    return (uint8_t&)(*m_fronthaul);
+}
+
+uint8_t& cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::backhaul() {
+    return (uint8_t&)(*m_backhaul);
 }
 
 uint8_t& cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::ssid_size() {
@@ -3802,7 +3806,8 @@ size_t cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::get_initial_size()
     class_size += sizeof(sMacAddr); // al_mac
     class_size += sizeof(uint16_t); // authentication_type
     class_size += sizeof(uint16_t); // encryption_type
-    class_size += sizeof(uint8_t); // bss_type
+    class_size += sizeof(uint8_t); // fronthaul
+    class_size += sizeof(uint8_t); // backhaul
     class_size += sizeof(uint8_t); // ssid_size
     class_size += sizeof(uint8_t); // network_key_size
     class_size += sizeof(uint8_t); // operating_classes_size
@@ -3831,7 +3836,12 @@ bool cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_bss_type = (uint8_t*)m_buff_ptr__;
+    m_fronthaul = (uint8_t*)m_buff_ptr__;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_backhaul = (uint8_t*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;

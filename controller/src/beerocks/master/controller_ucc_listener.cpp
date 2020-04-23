@@ -266,7 +266,9 @@ controller_ucc_listener::parse_bss_info(const std::string &bss_info_str,
         err_string = "invalid bit 6 of Multi-AP IE's extention attribute";
         return std::string();
     }
-    uint8_t bss_type = (bit_6_str == "1" ? WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS : 0);
+    if (bit_6_str == "1") {
+        bss_info_conf.backhaul = true;
+    }
 
     // Bit 5 of Multi-AP IE's extention attribute, aka "Fronthaul BSS"
     auto &bit_5_str = confs[7];
@@ -274,10 +276,9 @@ controller_ucc_listener::parse_bss_info(const std::string &bss_info_str,
         err_string = "invalid bit 5 of Multi-AP IE's extention attribute";
         return std::string();
     }
-    bss_type |= (bit_5_str == "1" ? WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS : 0);
-
-    // Update Bits 6 and 5
-    bss_info_conf.bss_type = static_cast<WSC::eWscVendorExtSubelementBssType>(bss_type);
+    if (bit_5_str == "1") {
+        bss_info_conf.fronthaul = true;
+    }
 
     return al_mac;
 }

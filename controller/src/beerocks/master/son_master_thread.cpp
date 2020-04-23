@@ -659,12 +659,19 @@ bool master_thread::autoconfig_wsc_add_m2(WSC::m1 &m1,
         cfg.auth_type   = bss_info_conf->authentication_type;
         cfg.encr_type   = bss_info_conf->encryption_type;
         cfg.network_key = bss_info_conf->network_key;
-        cfg.bss_type    = bss_info_conf->bss_type;
+        cfg.bss_type    = 0;
+        if (bss_info_conf->fronthaul) {
+            cfg.bss_type |= WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS;
+        }
+        if (bss_info_conf->backhaul) {
+            cfg.bss_type |= WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS;
+        }
 
         LOG(DEBUG) << "WSC config_data:" << std::hex << std::endl
                    << "     ssid: " << cfg.ssid << std::endl
                    << "     authentication_type: " << int(cfg.auth_type) << std::endl
-                   << "     encryption_type: " << int(cfg.encr_type) << std::dec << std::endl;
+                   << "     encryption_type: " << int(cfg.encr_type) << std::dec << std::endl
+                   << "     bss_type: " << std::hex << int(cfg.bss_type);
     } else {
         // Tear down. No need to set any parameter except the teardown bit and the MAC address.
         cfg.bss_type = WSC::eWscVendorExtSubelementBssType::TEARDOWN;
