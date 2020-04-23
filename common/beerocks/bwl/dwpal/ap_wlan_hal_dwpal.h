@@ -43,8 +43,10 @@ public:
     virtual bool sta_deauth(int8_t vap_id, const std::string &mac, uint32_t reason = 0) override;
     virtual bool sta_bss_steer(const std::string &mac, const std::string &bssid, int chan,
                                int disassoc_timer, int valid_int) override;
-    virtual bool update_vap_credentials(
-        std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list) override;
+    virtual bool
+    update_vap_credentials(std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list,
+                           const std::string &backhaul_wps_ssid,
+                           const std::string &backhaul_wps_passphrase) override;
     virtual bool sta_unassoc_rssi_measurement(const std::string &mac, int chan, int bw,
                                               int vht_center_frequency, int delay,
                                               int window_size) override;
@@ -86,6 +88,7 @@ protected:
     }
 
 private:
+    bool set_multiap_wps(std::map<std::string, std::vector<std::string>> &hostapd_config_vaps);
     // Unassociated measurement state variables
     std::chrono::steady_clock::time_point m_unassoc_measure_start;
     int m_unassoc_measure_window_size = 0;

@@ -163,13 +163,16 @@ public:
     /*!
      * Update wifi credentials.
      *
-     * @param [in] List of wifi credentials.
-     *
+     * @param [in] bss_info_conf_list List of wifi credentials.
+     * @param [in] backhaul_wps_ssid backhaul ssid used for wps onboarding
+     * @param [in] backhaul_wps_passphrase backhaul passphrase used for wps onboarding
      * @return true on success or false on error.
      */
 
     virtual bool
-    update_vap_credentials(std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list) = 0;
+    update_vap_credentials(std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list,
+                           const std::string &backhaul_wps_ssid,
+                           const std::string &backhaul_wps_passphrase) = 0;
 
     /*!
      * TODO: Move to the base class?
