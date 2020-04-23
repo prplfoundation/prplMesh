@@ -1436,6 +1436,18 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
         message_com::send_cmdu(monitor_socket, cmdu_tx);
         break;
     }
+    case beerocks_message::ACTION_BACKHAUL_START_WPS_PBC_REQUEST: {
+        LOG(DEBUG) << "ACTION_BACKHAUL_START_WPS_PBC_REQUEST";
+        auto notification_out = message_com::create_vs_message<
+            beerocks_message::cACTION_APMANAGER_START_WPS_PBC_REQUEST>(cmdu_tx);
+
+        if (!notification_out) {
+            LOG(ERROR) << "Failed building message cACTION_APMANAGER_START_WPS_PBC_REQUEST!";
+            return false;
+        }
+        message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+        break;
+    }
     default: {
         LOG(ERROR) << "Unknown BACKHAUL_MANAGER message, action_op: "
                    << int(beerocks_header->action_op());

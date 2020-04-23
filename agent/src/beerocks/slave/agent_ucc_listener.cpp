@@ -169,6 +169,41 @@ bool agent_ucc_listener::send_cmdu_to_destination(ieee1905_1::CmduMessageTx &cmd
     return m_backhaul_manager_ctx.send_cmdu_to_bus(cmdu_tx, dest_mac, m_bridge_mac);
 }
 
+static enum eFreqType band_to_freq(const std::string &band)
+{
+    if (band == "24G") {
+        return eFreqType::FREQ_24G;
+    } else if (band == "5GL") {
+        return eFreqType::FREQ_5G;
+    } else if (band == "5GH") {
+        return eFreqType::FREQ_5G;
+    } else {
+        return eFreqType::FREQ_UNKNOWN;
+    }
+}
+
+bool agent_ucc_listener::handle_start_wps_registration(const std::string &band,
+                                                       std::string &err_string)
+{
+    auto freq      = band_to_freq(band);
+    auto radio_mac = m_backhaul_manager_ctx.freq_to_radio_mac(freq);
+    if (radio_mac.empty()) {
+        err_string = "Failed to get radio for " + band;
+        return false;
+    }
+
+    auto it = vaps_map.find(radio_mac);
+    if (it == vaps_map.end()) {
+        LOG(ERROR) << "radio_mac " + radio_mac + " not found";
+        err_string = "Failed to get radio for " + band;
+        return false;
+    }
+
+    LOG(DEBUG) << "Trigger WPS PBC on radio mac " << radio_mac;
+    err_string = "Failed to start wps pbc";
+    return m_backhaul_manager_ctx.start_wps_pbc(network_utils::mac_from_string(radio_mac));
+}
+
 /**
  * @brief Handle DEV_SET_CONFIG command. Parse the command and save the parameters on the agent.
  * 
