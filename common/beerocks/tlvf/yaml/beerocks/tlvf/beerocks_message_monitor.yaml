@@ -90,6 +90,18 @@ cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION:
   _type: class
   params: sApActivityNotificationParams 
 
+cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE:
+  _type: class
+  _is_tlv_class : True
+  length: uint16_t
+  sta_mac: sMacAddr
+  bssid_info_list_length:
+    _type: uint8_t
+    _length_var: True
+  bssid_info_list:
+    _type: sBssidInfo
+    _length: [ bssid_info_list_length ]
+
 #################################################
 # HOSTAP
 #################################################
