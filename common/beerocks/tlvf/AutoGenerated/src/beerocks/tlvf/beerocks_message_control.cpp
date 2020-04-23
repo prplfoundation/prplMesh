@@ -2580,8 +2580,48 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
 }
 cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::~cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE() {
 }
-sApStatsParams& cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::ap_stats() {
-    return (sApStatsParams&)(*m_ap_stats);
+uint8_t& cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::ap_stats_size() {
+    return (uint8_t&)(*m_ap_stats_size);
+}
+
+std::tuple<bool, sApStatsParams&> cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::ap_stats(size_t idx) {
+    bool ret_success = ( (m_ap_stats_idx__ > 0) && (m_ap_stats_idx__ > idx) );
+    size_t ret_idx = ret_success ? idx : 0;
+    if (!ret_success) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+    }
+    return std::forward_as_tuple(ret_success, m_ap_stats[ret_idx]);
+}
+
+bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_ap_stats(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list ap_stats, abort!";
+        return false;
+    }
+    size_t len = sizeof(sApStatsParams) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)&m_ap_stats[*m_ap_stats_size];
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_sta_stats_size = (uint8_t *)((uint8_t *)(m_sta_stats_size) + len);
+    m_sta_stats = (sStaStatsParams *)((uint8_t *)(m_sta_stats) + len);
+    m_ap_stats_idx__ += count;
+    *m_ap_stats_size += count;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { 
+        for (size_t i = m_ap_stats_idx__ - count; i < m_ap_stats_idx__; i++) { m_ap_stats[i].struct_init(); }
+    }
+    return true;
 }
 
 uint8_t& cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::sta_stats_size() {
@@ -2598,7 +2638,7 @@ std::tuple<bool, sStaStatsParams&> cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESP
 }
 
 bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t count) {
-    if (m_lock_order_counter__ > 0) {;
+    if (m_lock_order_counter__ > 1) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list sta_stats, abort!";
         return false;
     }
@@ -2607,7 +2647,7 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t c
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
     }
-    m_lock_order_counter__ = 0;
+    m_lock_order_counter__ = 1;
     uint8_t *src = (uint8_t *)&m_sta_stats[*m_sta_stats_size];
     uint8_t *dst = src + len;
     if (!m_parse__) {
@@ -2629,7 +2669,9 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t c
 void cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
-    m_ap_stats->struct_swap();
+    for (size_t i = 0; i < (size_t)*m_ap_stats_size; i++){
+        m_ap_stats[i].struct_swap();
+    }
     for (size_t i = 0; i < (size_t)*m_sta_stats_size; i++){
         m_sta_stats[i].struct_swap();
     }
@@ -2665,7 +2707,7 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::finalize()
 size_t cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(sApStatsParams); // ap_stats
+    class_size += sizeof(uint8_t); // ap_stats_size
     class_size += sizeof(uint8_t); // sta_stats_size
     return class_size;
 }
@@ -2676,12 +2718,19 @@ bool cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_ap_stats = (sApStatsParams*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(sApStatsParams))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApStatsParams) << ") Failed!";
+    m_ap_stats_size = (uint8_t*)m_buff_ptr__;
+    if (!m_parse__) *m_ap_stats_size = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    if (!m_parse__) { m_ap_stats->struct_init(); }
+    m_ap_stats = (sApStatsParams*)m_buff_ptr__;
+    uint8_t ap_stats_size = *m_ap_stats_size;
+    m_ap_stats_idx__ = ap_stats_size;
+    if (!buffPtrIncrementSafe(sizeof(sApStatsParams) * (ap_stats_size))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApStatsParams) * (ap_stats_size) << ") Failed!";
+        return false;
+    }
     m_sta_stats_size = (uint8_t*)m_buff_ptr__;
     if (!m_parse__) *m_sta_stats_size = 0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {

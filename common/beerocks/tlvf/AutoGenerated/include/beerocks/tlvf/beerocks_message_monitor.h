@@ -477,7 +477,9 @@ class cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE : public BaseClass
         static eActionOp_MONITOR get_action_op(){
             return (eActionOp_MONITOR)(ACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE);
         }
-        sApStatsParams& ap_stats();
+        uint8_t& ap_stats_size();
+        std::tuple<bool, sApStatsParams&> ap_stats(size_t idx);
+        bool alloc_ap_stats(size_t count = 1);
         uint8_t& sta_stats_size();
         std::tuple<bool, sStaStatsParams&> sta_stats(size_t idx);
         bool alloc_sta_stats(size_t count = 1);
@@ -488,11 +490,13 @@ class cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE : public BaseClass
     private:
         bool init();
         eActionOp_MONITOR* m_action_op = nullptr;
+        uint8_t* m_ap_stats_size = nullptr;
         sApStatsParams* m_ap_stats = nullptr;
+        size_t m_ap_stats_idx__ = 0;
+        int m_lock_order_counter__ = 0;
         uint8_t* m_sta_stats_size = nullptr;
         sStaStatsParams* m_sta_stats = nullptr;
         size_t m_sta_stats_idx__ = 0;
-        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION : public BaseClass
