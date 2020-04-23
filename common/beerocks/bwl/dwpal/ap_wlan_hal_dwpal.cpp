@@ -934,9 +934,8 @@ bool ap_wlan_hal_dwpal::sta_bss_steer(const std::string &mac, const std::string 
     return true;
 }
 
-static bool set_vap_multiap_mode(std::vector<std::string> &vap_hostapd_config,
-                                 WSC::eWscVendorExtSubelementBssType bss_type,
-                                 const std::string &backhaul_wps_ssid,
+static bool set_vap_multiap_mode(std::vector<std::string> &vap_hostapd_config, bool fronthaul,
+                                 bool backhaul, const std::string &backhaul_wps_ssid,
                                  const std::string &backhaul_wps_passphrase)
 {
     std::string bssid, ifname;
@@ -949,12 +948,9 @@ static bool set_vap_multiap_mode(std::vector<std::string> &vap_hostapd_config,
         return false;
     }
 
-    bool backhaul  = !!(bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS);
-    bool fronthaul = !!(bss_type & WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS);
-    bool teardown  = (bss_type == WSC::eWscVendorExtSubelementBssType::TEARDOWN);
     LOG(DEBUG) << "Configuring VAP " << ifname << ": bssid=" << bssid
-               << ", backhaul=" << beerocks::string_utils::bool_str(backhaul)
-               << ", teardown=" << beerocks::string_utils::bool_str(teardown);
+               << ", fronthaul=" << beerocks::string_utils::bool_str(fronthaul)
+               << ", backhaul=" << beerocks::string_utils::bool_str(backhaul);
     // BSS type (backhaul, fronthaul or both)
     // Use Intel Mesh-Mode (upstream Multi-AP functionality not supported by Intel):
     // Not supporting hybrid mode for in mesh mode (TODO - move to hybrid mode after
@@ -966,8 +962,8 @@ static bool set_vap_multiap_mode(std::vector<std::string> &vap_hostapd_config,
     hostapd_config_set_value(vap_hostapd_config, "wps_state", fronthaul ? "2" : "");
     hostapd_config_set_value(vap_hostapd_config, "mesh_mode", backhaul ? "bAP" : "fAP");
     hostapd_config_set_value(vap_hostapd_config, "sFourAddrMode", backhaul ? "1" : "");
-    hostapd_config_set_value(vap_hostapd_config, "max_num_sta", backhaul ? "1" : "");
-    hostapd_config_set_value(vap_hostapd_config, "start_disabled", teardown ? "1" : "0");
+    hostapd_config_set_value(vap_hostapd_config, "max_num_sta", backhaul ? "4" : "");
+
     if (fronthaul) {
         // Oddly enough, multi_ap_backhaul_wpa_passphrase has to be quoted, while wpa_passphrase does not...
         hostapd_config_set_value(vap_hostapd_config, "multi_ap_backhaul_ssid",
@@ -1032,20 +1028,12 @@ bool ap_wlan_hal_dwpal::update_vap_credentials(
                        << int(bss_info_conf.encryption_type);
             return false;
         }
-        auto bss_type = son::wireless_utils::wsc_to_bwl_bss_type(bss_info_conf.bss_type);
-        if (bss_type == beerocks::BSS_TYPE_INVALID) {
-            LOG(ERROR) << "Autoconfiguration: invalid bss_type";
-            return false;
-        }
+
         LOG(DEBUG) << "Autoconfiguration for ssid: " << bss_info_conf.ssid
                    << " auth_type: " << auth_type << " encr_type: " << enc_type
-                   << " network_key: " << bss_info_conf.network_key << " bss_type: " << bss_type;
-
-        // We cannot configure STAs here
-        if ((bss_info_conf.bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_STA) != 0) {
-            LOG(ERROR) << "Autoconfiguration: STA cannot be configured here";
-            return false;
-        }
+                   << " network_key: " << bss_info_conf.network_key
+                   << " fronthaul: " << bss_info_conf.fronthaul
+                   << " backhaul: " << bss_info_conf.backhaul;
 
         // We only can use AP entries, skip STAs if ended up on one
         std::string entry_mode;
@@ -1076,7 +1064,8 @@ bool ap_wlan_hal_dwpal::update_vap_credentials(
         }
 
         // Set multi_ap mode
-        if (!set_vap_multiap_mode(vap_hostapd_config, bss_info_conf.bss_type, backhaul_wps_ssid,
+        if (!set_vap_multiap_mode(vap_hostapd_config, bss_info_conf.fronthaul,
+                                  bss_info_conf.backhaul, backhaul_wps_ssid,
                                   backhaul_wps_passphrase)) {
             // The function prints the error messages itself
             return false;

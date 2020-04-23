@@ -194,14 +194,21 @@ bool ap_wlan_hal_dummy::update_vap_credentials(
             LOG(ERROR) << "Invalid enc_type " << int(bss_info_conf.encryption_type);
             return false;
         }
-        auto bss_type = son::wireless_utils::wsc_to_bwl_bss_type(bss_info_conf.bss_type);
-        if (bss_type == beerocks::BSS_TYPE_INVALID) {
-            LOG(ERROR) << "Invalid bss_type";
-            return false;
-        }
+
         LOG(DEBUG) << "Received credentials for ssid: " << bss_info_conf.ssid
                    << " auth_type: " << auth_type << " encr_type: " << enc_type
-                   << " network_key: " << bss_info_conf.network_key << " bss_type: " << bss_type;
+                   << " network_key: " << bss_info_conf.network_key
+                   << " fronthaul: " << beerocks::string_utils::bool_str(bss_info_conf.fronthaul)
+                   << " backhaul: " << beerocks::string_utils::bool_str(bss_info_conf.backhaul);
+        if (bss_info_conf.fronthaul && bss_info_conf.backhaul) {
+            LOG(ERROR) << "Not supporting hybrid VAP";
+            return false;
+        }
+        if (bss_info_conf.backhaul) {
+            m_radio_info.available_vaps[vap_id].type = eVapType::VAP_TYPE_BACKHAUL;
+        } else if (bss_info_conf.fronthaul) {
+            m_radio_info.available_vaps[vap_id].type = eVapType::VAP_TYPE_FRONTHAUL;
+        }
         m_radio_info.available_vaps[vap_id++].ssid = bss_info_conf.ssid;
     }
 

@@ -105,9 +105,11 @@ class TestFlows:
         time.sleep(3)
 
         self.check_log(env.agents[0].radios[0],
-                       r"Received credentials for ssid: Multi-AP-24G-1 .* bss_type: 2")
+                       r"Received credentials for ssid: Multi-AP-24G-1 .* "
+                       r"fronthaul: true backhaul: false")
         self.check_log(env.agents[0].radios[0],
-                       r"Received credentials for ssid: Multi-AP-24G-2 .* bss_type: 1")
+                       r"Received credentials for ssid: Multi-AP-24G-2 .*"
+                       r"fronthaul: false backhaul: true")
         self.check_log(env.agents[0].radios[1], r".* tear down radio")
 
         bssid1 = env.agents[0].dev_get_parameter('macaddr',
@@ -132,7 +134,8 @@ class TestFlows:
         time.sleep(3)
 
         self.check_log(env.agents[0].radios[0],
-                       r"Received credentials for ssid: Multi-AP-24G-3 .* bss_type: 2")
+                       r"Received credentials for ssid: Multi-AP-24G-3 .*"
+                       r"fronthaul: true backhaul: false")
         self.check_log(env.agents[0].radios[1], r".* tear down radio")
         conn_map = connmap.get_conn_map()
         repeater1 = conn_map[env.agents[0].mac]

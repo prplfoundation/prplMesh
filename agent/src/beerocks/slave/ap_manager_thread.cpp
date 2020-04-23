@@ -856,7 +856,11 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                 bss_info_conf_list.clear();
                 break;
             }
+            if ((bss_type & WSC::eWscVendorExtSubelementBssType::FRONTHAUL_BSS) != 0) {
+                bss_info_conf.fronthaul = true;
+            }
             if ((bss_type & WSC::eWscVendorExtSubelementBssType::BACKHAUL_BSS) != 0) {
+                bss_info_conf.backhaul  = true;
                 backhaul_wps_ssid       = config_data.ssid_str();
                 backhaul_wps_passphrase = config_data.network_key_str();
             }
@@ -865,7 +869,6 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             bss_info_conf.authentication_type = config_data.authentication_type_attr().data;
             bss_info_conf.encryption_type     = config_data.encryption_type_attr().data;
             bss_info_conf.network_key         = config_data.network_key_str();
-            bss_info_conf.bss_type            = bss_type;
 
             bss_info_conf_list.push_back(bss_info_conf);
         }
