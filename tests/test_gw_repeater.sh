@@ -38,7 +38,7 @@ check_wsl() {
     if ! grep -q Microsoft /proc/version; then return; fi
 
     status "Running in WSL"
-    
+
     # Read GW & Repeater UCC ports
     local GW_UCC_PORT
     GW_UCC_PORT=$(grep ucc_listener_port \
@@ -56,7 +56,7 @@ check_wsl() {
 
 main() {
     if ! OPTS=$(getopt -o 'hvd:fg:r:u:' --long help,verbose,rm,gateway-only,repeater-only,delay:,force,gateway:,repeater:,unique-id: -n 'parse-options' -- "$@"); then
-        err "Failed parsing options." >&2 ; usage; exit 1 ; 
+        err "Failed parsing options." >&2 ; usage; exit 1 ;
     fi
 
     eval set -- "$OPTS"
@@ -96,7 +96,7 @@ main() {
 
     [ "$START_GATEWAY" = "true" ] && {
         status "Start GW (Controller + local Agent)"
-        "${rootdir}"/tools/docker/run.sh -u "${UNIQUE_ID}" ${VERBOSE_OPT} ${FORCE_OPT} ${GW_EXTRA_OPT} \
+        "${rootdir}"/tools/docker/run.sh -u "${UNIQUE_ID}" ${VERBOSE_OPT} ${FORCE_OPT} "${GW_EXTRA_OPT[@]}" \
             start-controller-agent -d -n "${GW_NAME}" -- "$@"
     }
 
@@ -108,7 +108,7 @@ main() {
     [ "$START_REPEATER" = "true" ] && {
         for repeater in $REPEATER_NAMES; do
             status "Start Repeater (Remote Agent): $repeater"
-            "${rootdir}"/tools/docker/run.sh -u "${UNIQUE_ID}" ${VERBOSE_OPT} ${FORCE_OPT} ${RP_EXTRA_OPT} \
+            "${rootdir}"/tools/docker/run.sh -u "${UNIQUE_ID}" ${VERBOSE_OPT} ${FORCE_OPT} "${RP_EXTRA_OPT[@]}" \
                 start-agent -d -n "${repeater}" -- "$@"
         done
     }
@@ -118,14 +118,14 @@ main() {
 
     error=0
     [ "$START_GATEWAY" = "true" ] && report "GW operational" \
-        "${rootdir}"/tools/docker/test.sh "${VERBOSE_OPT}" -n "${GW_NAME}"
+        "${rootdir}"/tools/docker/test.sh ${VERBOSE_OPT} -n "${GW_NAME}"
 
 
     [ "$START_REPEATER" = "true" ] && {
         for repeater in $REPEATER_NAMES
         do
             report "Repeater $repeater operational" \
-            "${rootdir}"/tools/docker/test.sh "${VERBOSE_OPT}" -n "${repeater}"
+            "${rootdir}"/tools/docker/test.sh ${VERBOSE_OPT} -n "${repeater}"
         done
     }
 
