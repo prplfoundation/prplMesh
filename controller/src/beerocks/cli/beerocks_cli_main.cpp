@@ -267,10 +267,8 @@ static void cli_interactive(std::string path, std::string tmp_path, std::string 
               << BEEROCKS_BUILD_DATE << std::endl;
     std::cout << "Enter 'help' for help, 'exit' to exit" << std::endl;
 
-    beerocks::cli_socket cli_soc(tmp_path, ip);
     beerocks::cli_bml cli_bml(path);
-    beerocks::cli *cli_ptr = &cli_soc;
-    int is_onboarding      = -1;
+    int is_onboarding = -1;
 
     if (!cli_bml.connect()) {
         std::cout << "cli_bml: Can't connect to BML, exit..." << std::endl;
@@ -279,6 +277,8 @@ static void cli_interactive(std::string path, std::string tmp_path, std::string 
         is_onboarding = cli_bml.get_onboarding_status();
     }
 
+    beerocks::cli_socket cli_soc(tmp_path, ip);
+    beerocks::cli *cli_ptr = &cli_soc;
     if (is_onboarding == 0) {
         if (!cli_soc.connect()) {
             std::cout << "cli_socket: Can't connect to master." << std::endl;
