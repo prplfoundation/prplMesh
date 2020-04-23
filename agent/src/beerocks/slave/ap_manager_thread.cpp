@@ -867,6 +867,11 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
 
         break;
     }
+    case beerocks_message::ACTION_APMANAGER_START_WPS_PBC_REQUEST: {
+        LOG(DEBUG) << "Got ACTION_APMANAGER_START_WPS_PBC_REQUEST";
+        //TODO
+        break;
+    }
     case beerocks_message::ACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION: {
         auto update =
             beerocks_header
