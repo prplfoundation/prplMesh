@@ -22,7 +22,7 @@ public:
         eWscEncr encr_type;
         std::string network_key = "";
         sMacAddr bssid          = {};
-        eWscVendorExtSubelementBssType bss_type;
+        uint8_t bss_type;
     };
 
     configData(uint8_t *buff, size_t buff_len, bool parse) : AttrList(buff, buff_len, parse) {}
