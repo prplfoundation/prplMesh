@@ -141,3 +141,7 @@ cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION:
   _type: class
   client_mac: sMacAddr
   bssid: sMacAddr
+
+cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST:
+  _type: class
+  sync: uint8_t
