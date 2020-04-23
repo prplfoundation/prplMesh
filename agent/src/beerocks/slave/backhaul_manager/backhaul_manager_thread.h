@@ -306,6 +306,14 @@ private:
     };
 
     /**
+     * @brief Gets radio info for the STA with given MAC address
+     *
+     * @param[in] sta_mac MAC address of the STA
+     * @return shared pointer to radio info in case of success or nullptr otherwise
+     */
+    std::shared_ptr<sRadioInfo> get_sta_radio(const sMacAddr &sta_mac);
+
+    /**
      * @brief Interface in this device which connects to an interface in one or more neighbors.
      *
      * An interface is defined by its name, its MAC address and its MediaType as

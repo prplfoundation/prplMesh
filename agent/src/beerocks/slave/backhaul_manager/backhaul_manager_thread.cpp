@@ -2052,6 +2052,16 @@ sMacAddr backhaul_manager::get_sta_bssid(
     return bssid;
 }
 
+std::shared_ptr<backhaul_manager::sRadioInfo>
+backhaul_manager::get_sta_radio(const sMacAddr &sta_mac)
+{
+    auto radio = std::find_if(
+        slaves_sockets.begin(), slaves_sockets.end(), [&sta_mac](std::shared_ptr<sRadioInfo> r) {
+            return get_sta_bssid(r->associated_clients_map, sta_mac) != network_utils::ZERO_MAC;
+        });
+    return radio != slaves_sockets.end() ? *radio : nullptr;
+}
+
 bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                       const std::string &src_mac)
 {
