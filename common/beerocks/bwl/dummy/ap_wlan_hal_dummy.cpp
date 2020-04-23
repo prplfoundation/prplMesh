@@ -342,6 +342,12 @@ bool ap_wlan_hal_dummy::get_vap_enable(const std::string &iface_name, bool &enab
 
 bool ap_wlan_hal_dummy::generate_connected_clients_events() { return true; }
 
+bool ap_wlan_hal_dummy::start_wps_pbc()
+{
+    LOG(DEBUG) << "Start WPS PBC";
+    return true;
+}
+
 std::string ap_wlan_hal_dummy::get_radio_driver_version() { return std::string("dummy"); }
 
 bool ap_wlan_hal_dummy::process_dummy_data(parsed_obj_map_t &parsed_obj) { return true; }
