@@ -1410,6 +1410,32 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
 
         break;
     }
+    case beerocks_message::ACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST: {
+        LOG(DEBUG) << "ACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST";
+        if (!monitor_socket) {
+            LOG(ERROR) << "monitor_socket is null";
+            return false;
+        }
+        auto request_in =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST>();
+        if (!request_in) {
+            LOG(ERROR) << "addClass cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST failed";
+            return false;
+        }
+
+        auto request_out = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST>(
+            cmdu_tx, beerocks_header->id());
+        if (!request_out) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        request_out->sync() = request_in->sync();
+        LOG(DEBUG) << "send ACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST";
+        message_com::send_cmdu(monitor_socket, cmdu_tx);
+        break;
+    }
     default: {
         LOG(ERROR) << "Unknown BACKHAUL_MANAGER message, action_op: "
                    << int(beerocks_header->action_op());

@@ -2119,8 +2119,18 @@ bool backhaul_manager::handle_associated_sta_link_metrics_query(ieee1905_1::Cmdu
             return false;
         }
         LOG(DEBUG) << "client with mac address " << mac->sta_mac() << " connected to " << bssid;
-        //TODO: non-error flow for Associated STA Link Metrics Request
-        return false;
+
+        auto request_out = message_com::create_vs_message<
+            beerocks_message::cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST>(cmdu_tx, mid);
+
+        if (!request_out) {
+            LOG(ERROR) << "Failed to build ACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST";
+            return false;
+        }
+
+        request_out->sync() = true;
+
+        return message_com::send_cmdu(radio->slave, cmdu_tx);
     }
 }
 
