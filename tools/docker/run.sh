@@ -28,10 +28,6 @@ usage() {
     echo "      --entrypoint - use a different entrypoint for the container"
 }
 
-gateway_netid_length() {
-    docker network inspect "$1" --format "{{(index .IPAM.Config 0).Subnet}}" | sed -rn 's/^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}(\/[0-9]{2})$/\1/p'
-}
-
 main() {
     if ! OPTS=$(getopt -o 'hvdfn:N:o:t:e:p:u:' --long verbose,help,detach,force,name:,network:,entrypoint:,tag:,expose:,publish:,options:,unique-id: -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2; usage; exit 1
