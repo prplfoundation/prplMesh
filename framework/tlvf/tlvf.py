@@ -622,7 +622,7 @@ class TlvF:
         #if this is the first member of type class override the method 
         if not obj_meta.marker_post_init_method_added:
             #Add decleration in header file
-            line_h = "bool isPostInitSucceeded();" 
+            line_h = "bool isPostInitSucceeded() override;"
             self.insertLineH(obj_meta.name, self.CODE_CLASS_PUBLIC_FUNC_INSERT, line_h)
                     
             #Override isPostInitSucceeded method to verify the class is completly initialized
