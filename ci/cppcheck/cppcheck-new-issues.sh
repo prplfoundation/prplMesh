@@ -13,6 +13,10 @@ rootdir="${scriptdir%/*/*}"
 # Remove the caret lines, we don't need them:
 sed -i '/^\s*\^\s*$/d' "$rootdir/cppcheck_results.txt"
 
+# Sort the list of issues to have a stable list, easier to compare:
+sort "$rootdir/cppcheck_results.txt" > "$rootdir/cppcheck_results_sorted.txt"
+mv "$rootdir/cppcheck_results_sorted.txt" "$rootdir/cppcheck_results.txt"
+
 mapfile -t issues < <(grep -E ".+: .+: .+ \[.+\] .*$"  "$rootdir/cppcheck_results.txt")
 
 status=0
