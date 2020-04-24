@@ -48,7 +48,7 @@ class tlvTestVarList : public BaseClass
         std::tuple<bool, cInner&> complex_list(size_t idx);
         std::shared_ptr<cInner> create_complex_list();
         bool add_complex_list(std::shared_ptr<cInner> ptr);
-        bool isPostInitSucceeded();
+        bool isPostInitSucceeded() override;
         std::shared_ptr<cInner> create_var1();
         bool add_var1(std::shared_ptr<cInner> ptr);
         std::shared_ptr<cInner> var1() { return m_var1_ptr; }
