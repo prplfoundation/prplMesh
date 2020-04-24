@@ -1,5 +1,8 @@
 #!/bin/bash
 
+scriptdir="$(cd "${0%/*}" || exit 1; pwd)"
+rootdir="${scriptdir%/*/*}"
+
 # shellcheck source=../../tools/functions.sh
 . "$(dirname "${BASH_SOURCE[0]}")/../../tools/functions.sh"
 
