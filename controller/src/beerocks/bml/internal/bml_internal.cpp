@@ -202,7 +202,7 @@ bool bml_internal::initialize(const std::string &beerocks_conf_path)
     return (true);
 }
 
-int bml_internal::connect(const std::string beerocks_conf_path)
+int bml_internal::connect(const std::string &beerocks_conf_path)
 {
     // Read the config file
     if (!initialize(beerocks_conf_path)) {
@@ -2846,8 +2846,8 @@ int bml_internal::set_certification_mode(bool enable)
     return (iRet);
 }
 
-int bml_internal::set_log_level(const std::string module_name, const std::string log_level,
-                                uint8_t on, const std::string mac)
+int bml_internal::set_log_level(const std::string &module_name, const std::string &log_level,
+                                uint8_t on, const std::string &mac)
 {
     // Build and send the SET_LOG_LEVEL_REQUEST message
     auto request = message_com::create_vs_message<
@@ -2983,8 +2983,8 @@ int bml_internal::set_log_context(void *log_ctx)
     return (BML_RET_OK);
 }
 
-int bml_internal::set_restricted_channels(const uint8_t *restricted_channels, const std::string mac,
-                                          uint8_t is_global, uint8_t size)
+int bml_internal::set_restricted_channels(const uint8_t *restricted_channels,
+                                          const std::string &mac, uint8_t is_global, uint8_t size)
 {
     // // If the socket is not valid, attempt to re-establish the connection
     // if (m_sockPlatform == nullptr && !connect_to_platform()) {
@@ -3034,7 +3034,7 @@ int bml_internal::set_restricted_channels(const uint8_t *restricted_channels, co
     return (iRet);
 }
 
-int bml_internal::get_restricted_channels(uint8_t *restricted_channels, const std::string mac,
+int bml_internal::get_restricted_channels(uint8_t *restricted_channels, const std::string &mac,
                                           uint8_t is_global)
 {
 

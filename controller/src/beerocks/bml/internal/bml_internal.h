@@ -33,7 +33,7 @@ public:
     ~bml_internal();
 
     // Initialize and connect to platform/master
-    int connect(const std::string beerocks_conf_path);
+    int connect(const std::string &beerocks_conf_path);
 
     // Ping the master
     int ping();
@@ -155,18 +155,18 @@ public:
     int get_certification_mode(int &res);
 
     // Set log level
-    int set_log_level(const std::string module_name, const std::string log_level, uint8_t on,
-                      const std::string mac);
+    int set_log_level(const std::string &module_name, const std::string &log_level, uint8_t on,
+                      const std::string &mac);
 
     // Return master & slave version
     int get_master_slave_versions(char *master_version, char *slave_version);
 
     // set global/slave restricted channel
-    int set_restricted_channels(const uint8_t *restricted_channels, const std::string mac,
+    int set_restricted_channels(const uint8_t *restricted_channels, const std::string &mac,
                                 uint8_t is_global, uint8_t size);
 
     // get global/slave restricted channel
-    int get_restricted_channels(uint8_t *restricted_channels, const std::string mac,
+    int get_restricted_channels(uint8_t *restricted_channels, const std::string &mac,
                                 uint8_t is_global);
 
     // triggers topology discovery
