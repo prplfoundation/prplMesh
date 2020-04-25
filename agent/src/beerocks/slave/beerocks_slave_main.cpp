@@ -139,7 +139,7 @@ static std::string get_sta_iface_from_hostap_iface(const std::string &hostap_ifa
     return sta_iface;
 }
 
-static void fill_son_slave_config(beerocks::config_file::sConfigSlave &beerocks_slave_conf,
+static void fill_son_slave_config(const beerocks::config_file::sConfigSlave &beerocks_slave_conf,
                                   son::slave_thread::sSlaveConfig &son_slave_conf,
                                   const std::string &hostap_iface, int slave_num)
 {
@@ -206,11 +206,10 @@ static void son_slave_watchdog(const std::string &beerocks_slave_temp_path,
     }
 }
 
-static int system_hang_test(beerocks::config_file::sConfigSlave &beerocks_slave_conf, int argc,
-                            char *argv[])
+static int system_hang_test(const beerocks::config_file::sConfigSlave &beerocks_slave_conf,
+                            int argc, char *argv[])
 {
     std::string name = std::string("system_hang_test");
-    std::ofstream versionfile;
 
     //init logger
     beerocks::logging logger(beerocks_slave_conf.sLog, name);
