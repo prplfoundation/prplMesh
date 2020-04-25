@@ -1,7 +1,3 @@
-'/builds/prpl-foundation/prplMesh/common/beerocks/bcl/source/beerocks_string_utils.cpp: performance: Function parameter 'additional_chars' should be passed by const reference. [passedByValue]void string_utils::ltrim(std::string &str, std::string additional_chars)
-'/builds/prpl-foundation/prplMesh/common/beerocks/bcl/source/beerocks_string_utils.cpp: performance: Function parameter 'additional_chars' should be passed by const reference. [passedByValue]void string_utils::rtrim(std::string &str, std::string additional_chars)
-'/builds/prpl-foundation/prplMesh/common/beerocks/bcl/source/beerocks_string_utils.cpp: performance: Function parameter 'additional_chars' should be passed by const reference. [passedByValue]void string_utils::trim(std::string &str, std::string additional_chars)
-'/builds/prpl-foundation/prplMesh/common/beerocks/bcl/source/beerocks_string_utils.cpp: style: Unused variable: return_string [unusedVariable]    std::string return_string;
 '/builds/prpl-foundation/prplMesh/common/beerocks/bcl/source/beerocks_os_utils.cpp: style: The scope of the variable 'buffer' can be reduced. [variableScope]    char buffer[512];
 '/builds/prpl-foundation/prplMesh/common/beerocks/bcl/source/beerocks_os_utils.cpp: style: The scope of the variable 'pid' can be reduced. [variableScope]    int pid;
 '/builds/prpl-foundation/prplMesh/common/beerocks/bcl/source/beerocks_os_utils.cpp: style: The scope of the variable 'buffer' can be reduced. [variableScope]            char buffer[1024]          = {0};
