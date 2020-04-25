@@ -22,17 +22,17 @@ public:
     ///
     /// @brief trim whitespace in place from the head of a string.
     ///
-    static void ltrim(std::string &, std::string additional_chars = std::string());
+    static void ltrim(std::string &, const std::string &additional_chars = std::string());
 
     ///
     /// @brief trim whitespace in place from the tail of a string.
     ///
-    static void rtrim(std::string &, std::string additional_chars = std::string());
+    static void rtrim(std::string &, const std::string &additional_chars = std::string());
 
     ///
     /// @brief trim whitespace in place from the head and tail of a string.
     ///
-    static void trim(std::string &, std::string additional_chars = std::string());
+    static void trim(std::string &, const std::string &additional_chars = std::string());
 
     ///
     /// @brief get a head trimmed substring from provided string
