@@ -55,7 +55,7 @@ public:
         return std::extent<A>::value;
     }
 
-    static int write_to_file(std::string full_path, std::string val);
+    static int write_to_file(std::string full_path, const std::string &val);
 
     static beerocks::eIfaceType get_iface_type_from_string(std::string iface_type_name);
     static std::string get_iface_type_string(beerocks::eIfaceType iface_type);
