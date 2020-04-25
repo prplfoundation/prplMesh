@@ -79,11 +79,12 @@ public:
 
     static std::string system_call(std::string cmd, int log_lvl = 0, bool detached = false);
 
-    static void kill_pid(std::string path, std::string file_name);
+    static void kill_pid(const std::string &path, const std::string &file_name);
 
-    static bool is_pid_running(std::string path, std::string file_name, int *pid_out = nullptr);
+    static bool is_pid_running(const std::string &path, std::string file_name,
+                               int *pid_out = nullptr);
 
-    static bool write_pid_file(std::string path, std::string file_name);
+    static bool write_pid_file(const std::string &path, const std::string &file_name);
 
     static bool touch_pid_file(std::string file_path);
 

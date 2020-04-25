@@ -48,9 +48,9 @@ std::string os_utils::system_call(std::string cmd, int log_lvl, bool detached)
     std::string ret_str;
 
 #ifdef IS_WINDOWS
-    char buffer[512];
     FILE *popen_fd = _popen(cmd.c_str(), "r");
     if (popen_fd) {
+        char buffer[512];
         while (fgets(buffer, sizeof(buffer) - 1, popen_fd)) {
             ret_str.append(buffer);
         }
@@ -89,7 +89,7 @@ std::string os_utils::system_call(std::string cmd, int log_lvl, bool detached)
     return ret_str;
 }
 
-void os_utils::kill_pid(std::string path, std::string file_name)
+void os_utils::kill_pid(const std::string &path, const std::string &file_name)
 {
     int pid_out;
     if (is_pid_running(path, file_name, &pid_out)) {
@@ -107,26 +107,25 @@ void os_utils::kill_pid(std::string path, std::string file_name)
     }
 }
 
-bool os_utils::is_pid_running(std::string path, std::string file_name, int *pid_out)
+bool os_utils::is_pid_running(const std::string &path, std::string file_name, int *pid_out)
 {
     std::string pid_file_name = path + "pid/" + file_name;
     std::string pid_str;
     std::string cmdline;
-    int pid;
 
     // get pid from file
     std::ifstream pid_file(pid_file_name);
     if (pid_file.is_open()) {
         std::getline(pid_file, pid_str);
         pid_file.close();
-        pid = beerocks::string_utils::stoi(pid_str);
+        int pid = beerocks::string_utils::stoi(pid_str);
 
         //check pid program name
         {
             std::string proc_file_path = "/proc/" + pid_str + "/cmdline";
-            char buffer[1024]          = {0};
             std::ifstream proc_file(proc_file_path);
             if (proc_file.is_open()) {
+                char buffer[1024] = {0};
                 proc_file.read(buffer, sizeof(buffer));
                 buffer[sizeof(buffer) - 1] = 0; // putting null terminator
                 cmdline.assign(buffer);
@@ -152,7 +151,7 @@ bool os_utils::is_pid_running(std::string path, std::string file_name, int *pid_
     return false; //pid is not running
 }
 
-bool os_utils::write_pid_file(std::string path, std::string file_name)
+bool os_utils::write_pid_file(const std::string &path, const std::string &file_name)
 {
     std::string pid_file_path = path + "pid";
     mkdir(pid_file_path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
