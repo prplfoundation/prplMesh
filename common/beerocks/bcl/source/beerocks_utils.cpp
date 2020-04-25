@@ -13,7 +13,7 @@
 
 using namespace beerocks;
 
-int utils::write_to_file(std::string full_path, std::string val)
+int utils::write_to_file(std::string full_path, const std::string &val)
 {
     std::ofstream out_file(full_path);
     if (out_file.is_open()) {
@@ -215,7 +215,7 @@ std::string utils::convert_channel_ext_above_to_string(bool channel_ext_above_se
 void utils::merge_list(std::vector<uint8_t> &ret, std::vector<uint8_t> &list)
 {
     std::vector<uint8_t>::iterator it;
-    for (it = list.begin(); it != list.end(); it++) {
+    for (it = list.begin(); it != list.end(); ++it) {
         if ((*it != 0) && (std::find(ret.begin(), ret.end(), *it) == ret.end())) {
             ret.push_back(*it);
         }
