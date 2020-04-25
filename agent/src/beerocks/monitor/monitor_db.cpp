@@ -248,7 +248,7 @@ void monitor_db::clear()
     vap_erase_all();
 }
 
-std::shared_ptr<monitor_vap_node> monitor_db::vap_add(const std::string iface, int8_t vap_id)
+std::shared_ptr<monitor_vap_node> monitor_db::vap_add(const std::string &iface, int8_t vap_id)
 {
     auto node         = std::make_shared<monitor_vap_node>(iface, vap_id);
     vap_nodes[vap_id] = node;
@@ -298,7 +298,7 @@ int monitor_db::get_vap_id(const std::string &bssid)
     return beerocks::IFACE_ID_INVALID;
 }
 
-monitor_sta_node *monitor_db::sta_find(const std::string sta_mac)
+monitor_sta_node *monitor_db::sta_find(const std::string &sta_mac)
 {
     auto it = sta_nodes.find(sta_mac);
     if (it != sta_nodes.end()) {
@@ -307,7 +307,7 @@ monitor_sta_node *monitor_db::sta_find(const std::string sta_mac)
     return nullptr;
 }
 
-monitor_sta_node *monitor_db::sta_find_by_ipv4(const std::string ipv4)
+monitor_sta_node *monitor_db::sta_find_by_ipv4(const std::string &ipv4)
 {
     for (auto kv : sta_nodes) {
         if (kv.second->get_ipv4() == ipv4) {
@@ -317,7 +317,7 @@ monitor_sta_node *monitor_db::sta_find_by_ipv4(const std::string ipv4)
     return nullptr;
 }
 
-monitor_sta_node *monitor_db::sta_add(const std::string sta_mac, const int8_t vap_id)
+monitor_sta_node *monitor_db::sta_add(const std::string &sta_mac, const int8_t vap_id)
 {
     auto node = new monitor_sta_node(vap_id, sta_mac);
     sta_nodes.insert(std::make_pair(sta_mac, node));
@@ -328,7 +328,7 @@ monitor_sta_node *monitor_db::sta_add(const std::string sta_mac, const int8_t va
     return node;
 }
 
-void monitor_db::sta_erase(const std::string sta_mac)
+void monitor_db::sta_erase(const std::string &sta_mac)
 {
     auto it = sta_nodes.find(sta_mac);
     if (it != sta_nodes.end()) {
@@ -395,12 +395,12 @@ bool monitor_db::is_last_poll()
 
 uint32_t monitor_sta_node::get_tx_packets()
 {
-    auto &sta_stats = get_stats();
+    const auto &sta_stats = get_stats();
     return sta_stats.hal_stats.tx_packets;
 }
 
 uint32_t monitor_sta_node::get_rx_packets()
 {
-    auto &sta_stats = get_stats();
+    const auto &sta_stats = get_stats();
     return sta_stats.hal_stats.rx_packets;
 }
