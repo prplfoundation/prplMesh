@@ -23,7 +23,10 @@ namespace son {
 ////////////////////////////////////////////
 class monitor_sta_node {
 public:
-    monitor_sta_node(const int8_t vap_id_, const std::string mac_) { vap_id = vap_id_, mac = mac_; }
+    monitor_sta_node(const int8_t vap_id_, const std::string &mac_)
+        : vap_id(vap_id_), mac(mac_), m_sta_stats()
+    {
+    }
 
     enum eArpState {
         IDLE = 0,
@@ -38,10 +41,10 @@ public:
 
     int8_t get_vap_id() { return vap_id; }
 
-    void set_ipv4(std::string ip) { ipv4 = ip; }
+    void set_ipv4(const std::string &ip) { ipv4 = ip; }
     std::string get_ipv4() { return ipv4; }
 
-    void set_bridge_4addr_mac(const std::string bridge_mac_4addr_)
+    void set_bridge_4addr_mac(const std::string &bridge_mac_4addr_)
     {
         bridge_mac_4addr = bridge_mac_4addr_;
     }
@@ -145,10 +148,9 @@ private:
 ////////////////////////////////////////////
 class monitor_vap_node {
 public:
-    monitor_vap_node(const std::string iface_, const int8_t vap_id_)
+    monitor_vap_node(const std::string &iface_, const int8_t vap_id_)
+        : vap_id(vap_id_), iface(iface_), m_vap_stats()
     {
-        iface  = iface_;
-        vap_id = vap_id_;
         // LOG(DEBUG) << "new vap_node=" << uint32_t(this);
         // LOG(DEBUG) << "new vap_stats=" << uint32_t(p_stats);
     }
@@ -157,18 +159,18 @@ public:
     std::string get_iface() { return iface; }
     int8_t get_vap_id() { return vap_id; }
 
-    void set_mac(const std::string ap_mac_) { mac = ap_mac_; }
+    void set_mac(const std::string &ap_mac_) { mac = ap_mac_; }
     std::string get_mac() { return mac; }
 
     std::string get_ipv4();
 
-    void set_bridge_iface(const std::string bridge_iface_) { bridge_iface = bridge_iface_; }
+    void set_bridge_iface(const std::string &bridge_iface_) { bridge_iface = bridge_iface_; }
     std::string get_bridge_iface() { return bridge_iface; }
 
-    void set_bridge_mac(const std::string bridge_mac_) { bridge_mac = bridge_mac_; }
+    void set_bridge_mac(const std::string &bridge_mac_) { bridge_mac = bridge_mac_; }
     std::string get_bridge_mac() { return bridge_mac; }
 
-    void set_bridge_ipv4(const std::string bridge_ipv4_) { bridge_ipv4 = bridge_ipv4_; }
+    void set_bridge_ipv4(const std::string &bridge_ipv4_) { bridge_ipv4 = bridge_ipv4_; }
     std::string get_bridge_ipv4() { return bridge_ipv4; }
 
     void sta_count_inc() { sta_count += 1; }
@@ -222,10 +224,10 @@ private:
 ////////////////////////////////////////////
 class monitor_radio_node {
 public:
-    monitor_radio_node() {}
+    monitor_radio_node() : m_radio_stats() {}
     ~monitor_radio_node() {}
 
-    void set_iface(const std::string iface_) { iface = iface_; }
+    void set_iface(const std::string &iface_) { iface = iface_; }
     std::string get_iface() { return iface; }
 
     void set_channel(const uint8_t channel_) { channel = channel_; }
@@ -289,7 +291,7 @@ public:
     void set_ap_tx_enabled(int8_t enabled) { ap_tx_enabled = enabled; }
 
     // VAP //
-    std::shared_ptr<monitor_vap_node> vap_add(const std::string iface, int8_t vap_id);
+    std::shared_ptr<monitor_vap_node> vap_add(const std::string &iface, int8_t vap_id);
     std::shared_ptr<monitor_vap_node> vap_get_by_id(int vap_id);
     int get_vap_id(const std::string &bssid);
     std::shared_ptr<monitor_vap_node> get_vap_node(const std::string &bssid);
@@ -298,11 +300,11 @@ public:
     void vap_erase_all();
 
     // STA's //
-    monitor_sta_node *sta_add(const std::string sta_mac, const int8_t vap_id);
-    void sta_erase(const std::string sta_mac);
+    monitor_sta_node *sta_add(const std::string &sta_mac, const int8_t vap_id);
+    void sta_erase(const std::string &sta_mac);
     void sta_erase_all();
-    monitor_sta_node *sta_find(const std::string mac);
-    monitor_sta_node *sta_find_by_ipv4(const std::string ipv4);
+    monitor_sta_node *sta_find(const std::string &mac);
+    monitor_sta_node *sta_find_by_ipv4(const std::string &ipv4);
     std::unordered_map<std::string, monitor_sta_node *>::iterator sta_begin()
     {
         return sta_nodes.begin();
