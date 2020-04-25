@@ -169,73 +169,74 @@ public:
                   const sMacAddr &radio_identifier = beerocks::net::network_utils::ZERO_MAC);
     bool remove_node(const sMacAddr &mac);
 
-    bool set_node_type(std::string mac, beerocks::eType type);
-    beerocks::eType get_node_type(std::string mac);
+    bool set_node_type(const std::string &mac, beerocks::eType type);
+    beerocks::eType get_node_type(const std::string &mac);
 
-    bool set_local_slave_mac(std::string mac);
+    bool set_local_slave_mac(const std::string &mac);
     std::string get_local_slave_mac();
 
     bool set_node_ipv4(const std::string &mac, const std::string &ipv4 = std::string());
     std::string get_node_ipv4(const std::string &mac);
 
-    bool set_node_manufacturer(std::string mac, std::string manufacturer);
-    std::string get_node_manufacturer(std::string mac);
+    bool set_node_manufacturer(const std::string &mac, const std::string &manufacturer);
+    std::string get_node_manufacturer(const std::string &mac);
 
-    int get_node_channel(std::string mac);
+    int get_node_channel(const std::string &mac);
 
     int get_hostap_operating_class(const sMacAddr &mac);
 
-    bool set_node_vap_id(std::string mac, int8_t vap_id);
-    int8_t get_node_vap_id(std::string mac);
+    bool set_node_vap_id(const std::string &mac, int8_t vap_id);
+    int8_t get_node_vap_id(const std::string &mac);
 
     bool set_node_beacon_measurement_support_level(
-        std::string mac, beerocks::eBeaconMeasurementSupportLevel support_beacon_measurement);
+        const std::string &mac,
+        beerocks::eBeaconMeasurementSupportLevel support_beacon_measurement);
     beerocks::eBeaconMeasurementSupportLevel
-    get_node_beacon_measurement_support_level(std::string mac);
+    get_node_beacon_measurement_support_level(const std::string &mac);
 
-    bool set_node_name(std::string mac, std::string name);
-    std::string get_node_name(std::string mac);
+    bool set_node_name(const std::string &mac, std::string name);
+    std::string get_node_name(const std::string &mac);
 
-    bool set_node_state(std::string mac, beerocks::eNodeState state);
-    beerocks::eNodeState get_node_state(std::string mac);
+    bool set_node_state(const std::string &mac, beerocks::eNodeState state);
+    beerocks::eNodeState get_node_state(const std::string &mac);
 
-    bool set_node_operational_state(std::string bridge_mac, bool operational);
-    int8_t get_node_operational_state(std::string bridge_mac);
+    bool set_node_operational_state(const std::string &bridge_mac, bool operational);
+    int8_t get_node_operational_state(const std::string &bridge_mac);
 
-    std::chrono::steady_clock::time_point get_last_state_change(std::string mac);
+    std::chrono::steady_clock::time_point get_last_state_change(const std::string &mac);
 
-    bool set_node_handoff_flag(std::string mac, bool handoff);
-    bool get_node_handoff_flag(std::string mac);
+    bool set_node_handoff_flag(const std::string &mac, bool handoff);
+    bool get_node_handoff_flag(const std::string &mac);
 
-    bool set_node_confined_flag(std::string mac, bool flag);
-    bool get_node_confined_flag(std::string mac);
+    bool set_node_confined_flag(const std::string &mac, bool flag);
+    bool get_node_confined_flag(const std::string &mac);
 
-    bool update_node_last_seen(std::string mac);
+    bool update_node_last_seen(const std::string &mac);
 
-    bool update_node_last_ping_sent(std::string mac);
-    std::chrono::steady_clock::time_point get_node_last_seen(std::string mac);
-    std::chrono::steady_clock::time_point get_node_last_ping_sent(std::string mac);
+    bool update_node_last_ping_sent(const std::string &mac);
+    std::chrono::steady_clock::time_point get_node_last_seen(const std::string &mac);
+    std::chrono::steady_clock::time_point get_node_last_ping_sent(const std::string &mac);
 
-    bool update_node_last_ping_received(std::string mac, int seq);
-    bool update_node_last_ping_received_avg(std::string mac, int total_seq);
-    std::chrono::steady_clock::time_point get_node_last_ping_received(std::string mac);
-    int get_node_last_ping_delta_ms(std::string mac);
-    int get_node_last_ping_min_ms(std::string mac);
-    int get_node_last_ping_max_ms(std::string mac);
-    int get_node_last_ping_avg_ms(std::string mac);
+    bool update_node_last_ping_received(const std::string &mac, int seq);
+    bool update_node_last_ping_received_avg(const std::string &mac, int total_seq);
+    std::chrono::steady_clock::time_point get_node_last_ping_received(const std::string &mac);
+    int get_node_last_ping_delta_ms(const std::string &mac);
+    int get_node_last_ping_min_ms(const std::string &mac);
+    int get_node_last_ping_max_ms(const std::string &mac);
+    int get_node_last_ping_avg_ms(const std::string &mac);
 
-    bool set_hostap_active(std::string mac, bool active);
-    bool is_hostap_active(std::string mac);
+    bool set_hostap_active(const std::string &mac, bool active);
+    bool is_hostap_active(const std::string &mac);
 
-    bool set_hostap_backhaul_manager(std::string mac, bool is_backhaul_manager);
-    bool is_hostap_backhaul_manager(std::string mac);
+    bool set_hostap_backhaul_manager(const std::string &mac, bool is_backhaul_manager);
+    bool is_hostap_backhaul_manager(const std::string &mac);
     std::string get_hostap_backhaul_manager(std::string ire);
 
-    bool is_ap_out_of_band(std::string mac, std::string sta_mac);
+    bool is_ap_out_of_band(const std::string &mac, const std::string &sta_mac);
 
-    bool is_node_wireless(std::string mac);
+    bool is_node_wireless(const std::string &mac);
 
-    std::string node_to_string(std::string mac);
+    std::string node_to_string(const std::string &mac);
 
     /**
      * @brief Get the link metric database
@@ -253,7 +254,7 @@ public:
     //
     // DB node functions (get only)
     //
-    int get_node_hierarchy(std::string mac);
+    int get_node_hierarchy(const std::string &mac);
     std::set<std::string> get_nodes(int type = -1);
     std::set<std::string> get_device_nodes();
     std::set<std::string> get_active_hostaps();
@@ -261,15 +262,15 @@ public:
     std::set<std::string> get_all_backhaul_manager_slaves();
     std::set<std::string> get_nodes_from_hierarchy(int hierarchy, int type = -1);
     std::string get_gw_mac();
-    std::set<std::string> get_node_subtree(std::string mac);
-    std::string get_node_parent(std::string mac);
+    std::set<std::string> get_node_subtree(const std::string &mac);
+    std::string get_node_parent(const std::string &mac);
 
-    std::string get_node_parent_hostap(std::string mac);
-    std::string get_node_previous_parent(std::string mac);
-    std::string get_node_parent_ire(std::string mac);
-    std::string get_node_parent_backhaul(std::string mac);
-    std::set<std::string> get_node_siblings(std::string mac, int type = beerocks::TYPE_ANY);
-    std::set<std::string> get_node_children(std::string mac, int type = beerocks::TYPE_ANY,
+    std::string get_node_parent_hostap(const std::string &mac);
+    std::string get_node_previous_parent(const std::string &mac);
+    std::string get_node_parent_ire(const std::string &mac);
+    std::string get_node_parent_backhaul(const std::string &mac);
+    std::set<std::string> get_node_siblings(const std::string &mac, int type = beerocks::TYPE_ANY);
+    std::set<std::string> get_node_children(const std::string &mac, int type = beerocks::TYPE_ANY,
                                             int state = beerocks::STATE_ANY);
     std::list<sMacAddr> get_1905_1_neighbors(const sMacAddr &al_mac);
     std::string get_node_key(const std::string &al_mac, const std::string &ruid);
@@ -278,60 +279,62 @@ public:
     // Capabilities
     //
 
-    const beerocks::message::sRadioCapabilities *get_station_current_capabilities(std::string mac);
+    const beerocks::message::sRadioCapabilities *
+    get_station_current_capabilities(const std::string &mac);
 
     const beerocks::message::sRadioCapabilities *
     get_station_capabilities(const std::string &client_mac, bool is_bandtype_5ghz);
     bool set_station_capabilities(const std::string &client_mac,
                                   const beerocks::message::sRadioCapabilities &sta_cap);
 
-    bool set_hostap_ant_num(std::string mac, beerocks::eWiFiAntNum ant_num);
-    beerocks::eWiFiAntNum get_hostap_ant_num(std::string mac);
+    bool set_hostap_ant_num(const std::string &mac, beerocks::eWiFiAntNum ant_num);
+    beerocks::eWiFiAntNum get_hostap_ant_num(const std::string &mac);
 
-    bool set_hostap_ant_gain(std::string mac, int ant_gain);
-    int get_hostap_ant_gain(std::string mac);
+    bool set_hostap_ant_gain(const std::string &mac, int ant_gain);
+    int get_hostap_ant_gain(const std::string &mac);
 
-    bool set_hostap_tx_power(std::string mac, int tx_power);
-    int get_hostap_tx_power(std::string mac);
+    bool set_hostap_tx_power(const std::string &mac, int tx_power);
+    int get_hostap_tx_power(const std::string &mac);
 
-    bool set_hostap_supported_channels(std::string mac,
+    bool set_hostap_supported_channels(const std::string &mac,
                                        beerocks::message::sWifiChannel *supported_channels,
                                        int length);
     const std::vector<beerocks::message::sWifiChannel>
-    get_hostap_supported_channels(std::string mac);
+    get_hostap_supported_channels(const std::string &mac);
     std::string get_hostap_supported_channels_string(const std::string &radio_mac);
 
     bool add_hostap_supported_operating_class(const std::string &radio_mac, uint8_t operating_class,
                                               uint8_t tx_power,
                                               const std::vector<uint8_t> &non_operable_channels);
 
-    bool set_hostap_band_capability(std::string mac, beerocks::eRadioBandCapability capability);
-    beerocks::eRadioBandCapability get_hostap_band_capability(std::string mac);
+    bool set_hostap_band_capability(const std::string &mac,
+                                    beerocks::eRadioBandCapability capability);
+    beerocks::eRadioBandCapability get_hostap_band_capability(const std::string &mac);
 
-    bool capability_check(std::string mac, int channel);
+    bool capability_check(const std::string &mac, int channel);
 
     bool get_node_5ghz_support(
-        std::string mac); // TODO: add a real learning algorithm for per-channel support
-    bool get_node_24ghz_support(std::string mac);
-    bool is_node_5ghz(std::string mac);
-    bool is_node_24ghz(std::string mac);
-    bool update_node_failed_5ghz_steer_attempt(std::string mac);
-    bool update_node_failed_24ghz_steer_attempt(std::string mac);
+        const std::string &mac); // TODO: add a real learning algorithm for per-channel support
+    bool get_node_24ghz_support(const std::string &mac);
+    bool is_node_5ghz(const std::string &mac);
+    bool is_node_24ghz(const std::string &mac);
+    bool update_node_failed_5ghz_steer_attempt(const std::string &mac);
+    bool update_node_failed_24ghz_steer_attempt(const std::string &mac);
 
-    bool update_node_11v_responsiveness(std::string mac, bool success);
-    bool get_node_11v_capability(std::string mac);
+    bool update_node_11v_responsiveness(const std::string &mac, bool success);
+    bool get_node_11v_capability(const std::string &mac);
 
-    bool set_hostap_iface_name(std::string mac, std::string iface_name);
-    std::string get_hostap_iface_name(std::string mac);
+    bool set_hostap_iface_name(const std::string &mac, std::string iface_name);
+    std::string get_hostap_iface_name(const std::string &mac);
 
-    bool set_hostap_iface_type(std::string mac, beerocks::eIfaceType iface_type);
-    beerocks::eIfaceType get_hostap_iface_type(std::string mac);
+    bool set_hostap_iface_type(const std::string &mac, beerocks::eIfaceType iface_type);
+    beerocks::eIfaceType get_hostap_iface_type(const std::string &mac);
 
-    bool set_hostap_driver_version(std::string mac, std::string version);
-    std::string get_hostap_driver_version(std::string mac);
+    bool set_hostap_driver_version(const std::string &mac, std::string version);
+    std::string get_hostap_driver_version(const std::string &mac);
 
-    bool set_hostap_iface_id(std::string mac, int8_t iface_id);
-    int8_t get_hostap_iface_id(std::string mac);
+    bool set_hostap_iface_id(const std::string &mac, int8_t iface_id);
+    int8_t get_hostap_iface_id(const std::string &mac);
 
     bool set_hostap_vap_list(const std::string &mac,
                              const std::unordered_map<int8_t, sVapElement> &vap_list);
@@ -347,55 +350,58 @@ public:
     std::string get_node_parent_radio(const std::string &mac);
     int8_t get_hostap_vap_id(const std::string &mac);
 
-    bool set_hostap_repeater_mode_flag(std::string mac, bool flag);
-    bool get_hostap_repeater_mode_flag(std::string mac);
+    bool set_hostap_repeater_mode_flag(const std::string &mac, bool flag);
+    bool get_hostap_repeater_mode_flag(const std::string &mac);
 
-    bool set_node_backhaul_iface_type(std::string mac, beerocks::eIfaceType iface_type);
-    beerocks::eIfaceType get_node_backhaul_iface_type(std::string mac);
+    bool set_node_backhaul_iface_type(const std::string &mac, beerocks::eIfaceType iface_type);
+    beerocks::eIfaceType get_node_backhaul_iface_type(const std::string &mac);
 
-    std::string get_5ghz_sibling_hostap(std::string mac);
+    std::string get_5ghz_sibling_hostap(const std::string &mac);
 
-    bool set_cs_op_flag(std::string mac, bool flag);
-    bool get_cs_op_flag(std::string mac);
-    bool set_cs_lb_flag(std::string mac, bool flag);
-    bool get_cs_lb_flag(std::string mac);
+    bool set_cs_op_flag(const std::string &mac, bool flag);
+    bool get_cs_op_flag(const std::string &mac);
+    bool set_cs_lb_flag(const std::string &mac, bool flag);
+    bool get_cs_lb_flag(const std::string &mac);
 
     bool set_global_restricted_channels(uint8_t *restricted_channels);
     std::vector<uint8_t> get_global_restricted_channels();
-    bool set_hostap_conf_restricted_channels(std::string hostap_mac, uint8_t *restricted_channels);
-    std::vector<uint8_t> get_hostap_conf_restricted_channels(std::string hostap_mac);
+    bool set_hostap_conf_restricted_channels(const std::string &hostap_mac,
+                                             uint8_t *restricted_channels);
+    std::vector<uint8_t> get_hostap_conf_restricted_channels(const std::string &hostap_mac);
 
     //
     // CS - DFS
     //
-    bool set_hostap_activity_mode(std::string mac, beerocks::eApActiveMode ap_activity_mode);
-    beerocks::eApActiveMode get_hostap_activity_mode(std::string mac);
-    bool set_radar_hit_stats(std::string mac, uint8_t channel, uint8_t bw, bool is_csa_entry);
-    bool set_supported_channel_radar_affected(std::string mac, std::vector<uint8_t> channels,
+    bool set_hostap_activity_mode(const std::string &mac, beerocks::eApActiveMode ap_activity_mode);
+    beerocks::eApActiveMode get_hostap_activity_mode(const std::string &mac);
+    bool set_radar_hit_stats(const std::string &mac, uint8_t channel, uint8_t bw,
+                             bool is_csa_entry);
+    bool set_supported_channel_radar_affected(const std::string &mac, std::vector<uint8_t> channels,
                                               bool affected);
-    //bool get_supported_channel_all_availble(std::string mac );
+    //bool get_supported_channel_all_availble(const std::string &mac );
 
-    bool set_hostap_is_dfs(std::string mac, bool enable);
-    bool get_hostap_is_dfs(std::string mac);
+    bool set_hostap_is_dfs(const std::string &mac, bool enable);
+    bool get_hostap_is_dfs(const std::string &mac);
 
-    bool set_hostap_cac_completed(std::string mac, bool enable);
-    bool get_hostap_cac_completed(std::string mac);
+    bool set_hostap_cac_completed(const std::string &mac, bool enable);
+    bool get_hostap_cac_completed(const std::string &mac);
 
-    bool set_hostap_is_on_fail_safe(std::string mac, bool enable);
-    bool get_hostap_is_on_fail_safe(std::string mac);
+    bool set_hostap_is_on_fail_safe(const std::string &mac, bool enable);
+    bool get_hostap_is_on_fail_safe(const std::string &mac);
 
-    bool set_hostap_is_on_sub_band(std::string mac, bool enable);
-    bool get_hostap_is_on_sub_band(std::string mac);
+    bool set_hostap_is_on_sub_band(const std::string &mac, bool enable);
+    bool get_hostap_is_on_sub_band(const std::string &mac);
 
-    bool set_hostap_on_dfs_reentry(std::string mac, bool enable);
-    bool get_hostap_on_dfs_reentry(std::string mac);
+    bool set_hostap_on_dfs_reentry(const std::string &mac, bool enable);
+    bool get_hostap_on_dfs_reentry(const std::string &mac);
 
-    bool set_hostap_dfs_reentry_clients(std::string mac, std::set<std::string> dfs_reentry_clients);
-    std::set<std::string> get_hostap_dfs_reentry_clients(std::string mac);
-    bool clear_hostap_dfs_reentry_clients(std::string mac);
+    bool set_hostap_dfs_reentry_clients(const std::string &mac,
+                                        const std::set<std::string> &dfs_reentry_clients);
+    std::set<std::string> get_hostap_dfs_reentry_clients(const std::string &mac);
+    bool clear_hostap_dfs_reentry_clients(const std::string &mac);
 
-    bool set_hostap_is_acs_enabled(std::string mac, bool enable);
-    bool get_hostap_is_acs_enabled(std::string mac);
+    bool set_hostap_is_acs_enabled(const std::string &mac, bool enable);
+    bool get_hostap_is_acs_enabled(const std::string &mac);
 
     //
     // Channel Scan
@@ -606,86 +612,86 @@ public:
     //
     // Measurements
     //
-    bool set_node_beacon_measurement(std::string sta_mac, std::string ap_mac, int8_t rcpi,
+    bool set_node_beacon_measurement(const std::string &sta_mac, std::string ap_mac, int8_t rcpi,
                                      uint8_t rsni);
-    bool get_node_beacon_measurement(std::string sta_mac, std::string ap_mac, int8_t &rcpi,
+    bool get_node_beacon_measurement(const std::string &sta_mac, std::string ap_mac, int8_t &rcpi,
                                      uint8_t &rsni);
 
-    bool set_node_cross_rx_rssi(std::string sta_mac, std::string ap_mac, int8_t rssi,
+    bool set_node_cross_rx_rssi(const std::string &sta_mac, std::string ap_mac, int8_t rssi,
                                 int8_t rx_packets);
-    bool get_node_cross_rx_rssi(std::string sta_mac, std::string ap_mac, int8_t &rssi,
+    bool get_node_cross_rx_rssi(const std::string &sta_mac, std::string ap_mac, int8_t &rssi,
                                 int8_t &rx_packets);
 
-    bool set_node_cross_rx_phy_rate_100kb(std::string mac, uint16_t rx_phy_rate_100kb);
-    bool set_node_cross_tx_phy_rate_100kb(std::string mac, uint16_t tx_phy_rate_100kb);
+    bool set_node_cross_rx_phy_rate_100kb(const std::string &mac, uint16_t rx_phy_rate_100kb);
+    bool set_node_cross_tx_phy_rate_100kb(const std::string &mac, uint16_t tx_phy_rate_100kb);
 
-    uint16_t get_node_cross_rx_phy_rate_100kb(std::string mac);
-    uint16_t get_node_cross_tx_phy_rate_100kb(std::string mac);
+    uint16_t get_node_cross_rx_phy_rate_100kb(const std::string &mac);
+    uint16_t get_node_cross_tx_phy_rate_100kb(const std::string &mac);
 
-    bool clear_node_cross_rssi(std::string sta_mac);
+    bool clear_node_cross_rssi(const std::string &sta_mac);
 
-    bool set_node_cross_estimated_tx_phy_rate(std::string mac, double phy_rate);
-    double get_node_cross_estimated_tx_phy_rate(std::string mac);
+    bool set_node_cross_estimated_tx_phy_rate(const std::string &mac, double phy_rate);
+    double get_node_cross_estimated_tx_phy_rate(const std::string &mac);
 
-    bool set_hostap_stats_info(std::string mac, beerocks_message::sApStatsParams *params);
-    void clear_hostap_stats_info(std::string mac);
-    bool set_node_stats_info(std::string mac, beerocks_message::sStaStatsParams *params);
-    void clear_node_stats_info(std::string mac);
+    bool set_hostap_stats_info(const std::string &mac, beerocks_message::sApStatsParams *params);
+    void clear_hostap_stats_info(const std::string &mac);
+    bool set_node_stats_info(const std::string &mac, beerocks_message::sStaStatsParams *params);
+    void clear_node_stats_info(const std::string &mac);
 
-    int get_hostap_stats_measurement_duration(std::string mac);
-    std::chrono::steady_clock::time_point get_node_stats_info_timestamp(std::string mac);
-    std::chrono::steady_clock::time_point get_hostap_stats_info_timestamp(std::string mac);
+    int get_hostap_stats_measurement_duration(const std::string &mac);
+    std::chrono::steady_clock::time_point get_node_stats_info_timestamp(const std::string &mac);
+    std::chrono::steady_clock::time_point get_hostap_stats_info_timestamp(const std::string &mac);
 
-    uint32_t get_node_rx_bytes(std::string mac);
-    uint32_t get_node_tx_bytes(std::string mac);
+    uint32_t get_node_rx_bytes(const std::string &mac);
+    uint32_t get_node_tx_bytes(const std::string &mac);
 
-    double get_node_rx_bitrate(std::string mac);
-    double get_node_tx_bitrate(std::string mac);
+    double get_node_rx_bitrate(const std::string &mac);
+    double get_node_tx_bitrate(const std::string &mac);
 
-    bool set_node_rx_phy_rate_100kb(std::string mac, uint16_t rx_phy_rate_100kb);
-    bool set_node_tx_phy_rate_100kb(std::string mac, uint16_t tx_phy_rate_100kb);
+    bool set_node_rx_phy_rate_100kb(const std::string &mac, uint16_t rx_phy_rate_100kb);
+    bool set_node_tx_phy_rate_100kb(const std::string &mac, uint16_t tx_phy_rate_100kb);
 
-    uint16_t get_node_rx_phy_rate_100kb(std::string mac);
-    uint16_t get_node_tx_phy_rate_100kb(std::string mac);
+    uint16_t get_node_rx_phy_rate_100kb(const std::string &mac);
+    uint16_t get_node_tx_phy_rate_100kb(const std::string &mac);
 
-    int get_hostap_channel_load_percent(std::string mac);
+    int get_hostap_channel_load_percent(const std::string &mac);
 
-    uint32_t get_hostap_total_sta_rx_bytes(std::string mac);
-    uint32_t get_hostap_total_sta_tx_bytes(std::string mac);
+    uint32_t get_hostap_total_sta_rx_bytes(const std::string &mac);
+    uint32_t get_hostap_total_sta_tx_bytes(const std::string &mac);
 
-    int get_hostap_total_client_tx_load_percent(std::string mac);
-    int get_hostap_total_client_rx_load_percent(std::string mac);
+    int get_hostap_total_client_tx_load_percent(const std::string &mac);
+    int get_hostap_total_client_rx_load_percent(const std::string &mac);
 
-    int get_node_rx_load_percent(std::string mac);
-    int get_node_tx_load_percent(std::string mac);
+    int get_node_rx_load_percent(const std::string &mac);
+    int get_node_tx_load_percent(const std::string &mac);
 
-    int8_t get_load_rx_rssi(std::string sta_mac);
-    uint16_t get_load_rx_phy_rate_100kb(std::string sta_mac);
-    uint16_t get_load_tx_phy_rate_100kb(std::string sta_mac);
+    int8_t get_load_rx_rssi(const std::string &sta_mac);
+    uint16_t get_load_rx_phy_rate_100kb(const std::string &sta_mac);
+    uint16_t get_load_tx_phy_rate_100kb(const std::string &sta_mac);
 
-    bool set_measurement_delay(std::string mac, int measurement_delay);
-    int get_measurement_delay(std::string mac);
+    bool set_measurement_delay(const std::string &mac, int measurement_delay);
+    int get_measurement_delay(const std::string &mac);
 
-    std::chrono::steady_clock::time_point get_measurement_sent_timestamp(std::string mac);
-    bool set_measurement_sent_timestamp(std::string mac);
+    std::chrono::steady_clock::time_point get_measurement_sent_timestamp(const std::string &mac);
+    bool set_measurement_sent_timestamp(const std::string &mac);
 
-    int get_measurement_recv_delta(std::string mac);
-    bool set_measurement_recv_delta(std::string mac);
+    int get_measurement_recv_delta(const std::string &mac);
+    bool set_measurement_recv_delta(const std::string &mac);
 
-    int get_measurement_window_size(std::string mac);
-    bool set_measurement_window_size(std::string mac, int window_size);
+    int get_measurement_window_size(const std::string &mac);
+    bool set_measurement_window_size(const std::string &mac, int window_size);
 
-    bool get_hostap_exclude_from_steering_flag(std::string mac);
-    bool set_hostap_exclude_from_steering_flag(std::string mac, bool flag);
+    bool get_hostap_exclude_from_steering_flag(const std::string &mac);
+    bool set_hostap_exclude_from_steering_flag(const std::string &mac, bool flag);
 
     bool set_node_channel_bw(const std::string &mac, int channel, beerocks::eWiFiBandwidth bw,
                              bool channel_ext_above_secondary, int8_t channel_ext_above_primary,
                              uint16_t vht_center_frequency);
-    beerocks::eWiFiBandwidth get_node_bw(std::string mac);
-    int get_node_bw_int(std::string mac);
-    bool get_hostap_channel_ext_above_primary(std::string hostap_mac);
-    bool get_node_channel_ext_above_secondary(std::string mac);
-    uint16_t get_hostap_vht_center_frequency(std::string mac);
+    beerocks::eWiFiBandwidth get_node_bw(const std::string &mac);
+    int get_node_bw_int(const std::string &mac);
+    bool get_hostap_channel_ext_above_primary(const std::string &hostap_mac);
+    bool get_node_channel_ext_above_secondary(const std::string &mac);
+    uint16_t get_hostap_vht_center_frequency(const std::string &mac);
 
     void add_bss_info_configuration(const sMacAddr &al_mac,
                                     const wireless_utils::sBssInfoConf &bss_info);
@@ -696,20 +702,21 @@ public:
     //
     // tasks
     //
-    bool assign_association_handling_task_id(std::string mac, int new_task_id);
-    int get_association_handling_task_id(std::string mac);
+    bool assign_association_handling_task_id(const std::string &mac, int new_task_id);
+    int get_association_handling_task_id(const std::string &mac);
 
-    bool assign_steering_task_id(std::string mac, int new_task_id);
-    int get_steering_task_id(std::string mac);
+    bool assign_steering_task_id(const std::string &mac, int new_task_id);
+    int get_steering_task_id(const std::string &mac);
 
-    bool assign_roaming_task_id(std::string mac, int new_task_id);
-    int get_roaming_task_id(std::string mac);
+    bool assign_roaming_task_id(const std::string &mac, int new_task_id);
+    int get_roaming_task_id(const std::string &mac);
 
-    bool assign_load_balancer_task_id(std::string mac, int new_task_id);
-    int get_load_balancer_task_id(std::string mac);
+    bool assign_load_balancer_task_id(const std::string &mac, int new_task_id);
+    int get_load_balancer_task_id(const std::string &mac);
 
-    bool assign_client_locating_task_id(std::string mac, int new_task_id, bool new_connection);
-    int get_client_locating_task_id(std::string mac, bool new_connection);
+    bool assign_client_locating_task_id(const std::string &mac, int new_task_id,
+                                        bool new_connection);
+    int get_client_locating_task_id(const std::string &mac, bool new_connection);
 
     bool assign_network_optimization_task_id(int new_task_id);
     int get_network_optimization_task_id();
@@ -720,8 +727,8 @@ public:
     bool assign_rdkb_wlan_task_id(int new_task_id);
     int get_rdkb_wlan_task_id();
 
-    bool assign_ire_4addr_mode_transition_task_id(std::string mac, int new_task_id);
-    int get_ire_4addr_mode_transition_task_id(std::string mac);
+    bool assign_ire_4addr_mode_transition_task_id(const std::string &mac, int new_task_id);
+    int get_ire_4addr_mode_transition_task_id(const std::string &mac);
 
     bool assign_channel_selection_task_id(int new_task_id);
     int get_channel_selection_task_id();
