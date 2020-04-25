@@ -154,7 +154,7 @@ bool db::remove_node(const sMacAddr &mac)
     return false;
 }
 
-bool db::set_node_type(std::string mac, beerocks::eType type)
+bool db::set_node_type(const std::string &mac, beerocks::eType type)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -164,7 +164,7 @@ bool db::set_node_type(std::string mac, beerocks::eType type)
     return true;
 }
 
-beerocks::eType db::get_node_type(std::string mac)
+beerocks::eType db::get_node_type(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -173,7 +173,7 @@ beerocks::eType db::get_node_type(std::string mac)
     return n->get_type();
 }
 
-bool db::set_local_slave_mac(std::string mac)
+bool db::set_local_slave_mac(const std::string &mac)
 {
     if (!local_slave_mac.empty()) {
         LOG(WARNING) << "local_slave_mac != empty";
@@ -203,7 +203,7 @@ std::string db::get_node_ipv4(const std::string &mac)
     return n->ipv4;
 }
 
-bool db::set_node_manufacturer(std::string mac, std::string manufacturer)
+bool db::set_node_manufacturer(const std::string &mac, const std::string &manufacturer)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -213,7 +213,7 @@ bool db::set_node_manufacturer(std::string mac, std::string manufacturer)
     return true;
 }
 
-std::string db::get_node_manufacturer(std::string mac)
+std::string db::get_node_manufacturer(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -222,7 +222,7 @@ std::string db::get_node_manufacturer(std::string mac)
     return n->manufacturer;
 }
 
-int db::get_node_channel(std::string mac)
+int db::get_node_channel(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -245,7 +245,7 @@ int db::get_hostap_operating_class(const sMacAddr &mac)
     return n->hostap->operating_class;
 }
 
-bool db::set_node_vap_id(std::string mac, int8_t vap_id)
+bool db::set_node_vap_id(const std::string &mac, int8_t vap_id)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -255,7 +255,7 @@ bool db::set_node_vap_id(std::string mac, int8_t vap_id)
     return true;
 }
 
-int8_t db::get_node_vap_id(std::string mac)
+int8_t db::get_node_vap_id(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -264,7 +264,7 @@ int8_t db::get_node_vap_id(std::string mac)
     return n->vap_id;
 }
 
-bool db::get_cs_op_flag(std::string mac)
+bool db::get_cs_op_flag(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -273,7 +273,7 @@ bool db::get_cs_op_flag(std::string mac)
     return n->cs_op;
 }
 
-bool db::set_cs_op_flag(std::string mac, bool flag)
+bool db::set_cs_op_flag(const std::string &mac, bool flag)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -283,7 +283,7 @@ bool db::set_cs_op_flag(std::string mac, bool flag)
     return true;
 }
 
-bool db::get_cs_lb_flag(std::string mac)
+bool db::get_cs_lb_flag(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -292,7 +292,7 @@ bool db::get_cs_lb_flag(std::string mac)
     return n->cs_lb;
 }
 
-bool db::set_cs_lb_flag(std::string mac, bool flag)
+bool db::set_cs_lb_flag(const std::string &mac, bool flag)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -315,7 +315,8 @@ bool db::set_global_restricted_channels(uint8_t *restricted_channels)
 
 std::vector<uint8_t> db::get_global_restricted_channels() { return global_restricted_channels; }
 
-bool db::set_hostap_conf_restricted_channels(std::string hostap_mac, uint8_t *restricted_channels)
+bool db::set_hostap_conf_restricted_channels(const std::string &hostap_mac,
+                                             uint8_t *restricted_channels)
 {
     auto n = get_node(hostap_mac);
     if (!n) {
@@ -337,7 +338,7 @@ bool db::set_hostap_conf_restricted_channels(std::string hostap_mac, uint8_t *re
     return true;
 }
 
-std::vector<uint8_t> db::get_hostap_conf_restricted_channels(std::string hostap_mac)
+std::vector<uint8_t> db::get_hostap_conf_restricted_channels(const std::string &hostap_mac)
 {
     auto n = get_node(hostap_mac);
     if (!n) {
@@ -351,7 +352,7 @@ std::vector<uint8_t> db::get_hostap_conf_restricted_channels(std::string hostap_
 }
 
 bool db::set_node_beacon_measurement_support_level(
-    std::string mac, beerocks::eBeaconMeasurementSupportLevel support_beacon_measurement)
+    const std::string &mac, beerocks::eBeaconMeasurementSupportLevel support_beacon_measurement)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -364,7 +365,7 @@ bool db::set_node_beacon_measurement_support_level(
 }
 
 beerocks::eBeaconMeasurementSupportLevel
-db::get_node_beacon_measurement_support_level(std::string mac)
+db::get_node_beacon_measurement_support_level(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -373,7 +374,7 @@ db::get_node_beacon_measurement_support_level(std::string mac)
     return n->supports_beacon_measurement;
 }
 
-bool db::set_node_name(std::string mac, std::string name)
+bool db::set_node_name(const std::string &mac, std::string name)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -383,7 +384,7 @@ bool db::set_node_name(std::string mac, std::string name)
     return true;
 }
 
-std::string db::get_node_name(std::string mac)
+std::string db::get_node_name(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -392,7 +393,7 @@ std::string db::get_node_name(std::string mac)
     return n->name;
 }
 
-bool db::set_node_state(std::string mac, beerocks::eNodeState state)
+bool db::set_node_state(const std::string &mac, beerocks::eNodeState state)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -403,7 +404,7 @@ bool db::set_node_state(std::string mac, beerocks::eNodeState state)
     return true;
 }
 
-beerocks::eNodeState db::get_node_state(std::string mac)
+beerocks::eNodeState db::get_node_state(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -413,7 +414,7 @@ beerocks::eNodeState db::get_node_state(std::string mac)
     return n->state;
 }
 
-bool db::set_node_operational_state(std::string bridge_mac, bool operational)
+bool db::set_node_operational_state(const std::string &bridge_mac, bool operational)
 {
     auto n = get_node(bridge_mac);
     if (!n) {
@@ -430,7 +431,7 @@ bool db::set_node_operational_state(std::string bridge_mac, bool operational)
     return true;
 }
 
-int8_t db::get_node_operational_state(std::string bridge_mac)
+int8_t db::get_node_operational_state(const std::string &bridge_mac)
 {
     auto n = get_node(bridge_mac);
     if (!n) {
@@ -446,7 +447,7 @@ int8_t db::get_node_operational_state(std::string bridge_mac)
     return n->operational_state;
 }
 
-std::chrono::steady_clock::time_point db::get_last_state_change(std::string mac)
+std::chrono::steady_clock::time_point db::get_last_state_change(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -455,7 +456,7 @@ std::chrono::steady_clock::time_point db::get_last_state_change(std::string mac)
     return n->last_state_change;
 }
 
-bool db::set_node_handoff_flag(std::string mac, bool handoff)
+bool db::set_node_handoff_flag(const std::string &mac, bool handoff)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -469,7 +470,7 @@ bool db::set_node_handoff_flag(std::string mac, bool handoff)
     return true;
 }
 
-bool db::get_node_handoff_flag(std::string mac)
+bool db::get_node_handoff_flag(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -484,7 +485,7 @@ bool db::get_node_handoff_flag(std::string mac)
     }
 }
 
-bool db::set_node_confined_flag(std::string mac, bool flag)
+bool db::set_node_confined_flag(const std::string &mac, bool flag)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -495,7 +496,7 @@ bool db::set_node_confined_flag(std::string mac, bool flag)
     return true;
 }
 
-bool db::get_node_confined_flag(std::string mac)
+bool db::get_node_confined_flag(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -505,7 +506,7 @@ bool db::get_node_confined_flag(std::string mac)
     return n->confined;
 }
 
-bool db::update_node_last_seen(std::string mac)
+bool db::update_node_last_seen(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -516,7 +517,7 @@ bool db::update_node_last_seen(std::string mac)
     return true;
 }
 
-bool db::update_node_last_ping_sent(std::string mac)
+bool db::update_node_last_ping_sent(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -527,7 +528,7 @@ bool db::update_node_last_ping_sent(std::string mac)
     return true;
 }
 
-std::chrono::steady_clock::time_point db::get_node_last_seen(std::string mac)
+std::chrono::steady_clock::time_point db::get_node_last_seen(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -538,7 +539,7 @@ std::chrono::steady_clock::time_point db::get_node_last_seen(std::string mac)
     return n->last_seen;
 }
 
-std::chrono::steady_clock::time_point db::get_node_last_ping_sent(std::string mac)
+std::chrono::steady_clock::time_point db::get_node_last_ping_sent(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -548,7 +549,7 @@ std::chrono::steady_clock::time_point db::get_node_last_ping_sent(std::string ma
     return n->last_ping_sent;
 }
 
-bool db::update_node_last_ping_received(std::string mac, int seq)
+bool db::update_node_last_ping_received(const std::string &mac, int seq)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -578,7 +579,7 @@ bool db::update_node_last_ping_received(std::string mac, int seq)
     return true;
 }
 
-bool db::update_node_last_ping_received_avg(std::string mac, int total_seq)
+bool db::update_node_last_ping_received_avg(const std::string &mac, int total_seq)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -589,7 +590,7 @@ bool db::update_node_last_ping_received_avg(std::string mac, int total_seq)
     return true;
 }
 
-std::chrono::steady_clock::time_point db::get_node_last_ping_received(std::string mac)
+std::chrono::steady_clock::time_point db::get_node_last_ping_received(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -599,7 +600,7 @@ std::chrono::steady_clock::time_point db::get_node_last_ping_received(std::strin
     return n->last_ping_received;
 }
 
-int db::get_node_last_ping_delta_ms(std::string mac)
+int db::get_node_last_ping_delta_ms(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -609,7 +610,7 @@ int db::get_node_last_ping_delta_ms(std::string mac)
     return n->last_ping_delta_ms;
 }
 
-int db::get_node_last_ping_min_ms(std::string mac)
+int db::get_node_last_ping_min_ms(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -619,7 +620,7 @@ int db::get_node_last_ping_min_ms(std::string mac)
     return n->last_ping_min_ms;
 }
 
-int db::get_node_last_ping_max_ms(std::string mac)
+int db::get_node_last_ping_max_ms(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -629,7 +630,7 @@ int db::get_node_last_ping_max_ms(std::string mac)
     return n->last_ping_max_ms;
 }
 
-int db::get_node_last_ping_avg_ms(std::string mac)
+int db::get_node_last_ping_avg_ms(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -650,7 +651,7 @@ std::unordered_map<sMacAddr, son::node::ap_metrics_data> &db::get_ap_metric_data
     return m_ap_metric_data;
 }
 
-bool db::set_hostap_active(std::string mac, bool active)
+bool db::set_hostap_active(const std::string &mac, bool active)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -663,7 +664,7 @@ bool db::set_hostap_active(std::string mac, bool active)
     return true;
 }
 
-bool db::is_hostap_active(std::string mac)
+bool db::is_hostap_active(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -676,7 +677,7 @@ bool db::is_hostap_active(std::string mac)
     return n->hostap->active;
 }
 
-bool db::set_hostap_backhaul_manager(std::string mac, bool is_backhaul_manager)
+bool db::set_hostap_backhaul_manager(const std::string &mac, bool is_backhaul_manager)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -689,7 +690,7 @@ bool db::set_hostap_backhaul_manager(std::string mac, bool is_backhaul_manager)
     return true;
 }
 
-bool db::is_hostap_backhaul_manager(std::string mac)
+bool db::is_hostap_backhaul_manager(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -723,7 +724,7 @@ std::string db::get_hostap_backhaul_manager(std::string ire)
     return std::string();
 }
 
-bool db::is_ap_out_of_band(std::string mac, std::string sta_mac)
+bool db::is_ap_out_of_band(const std::string &mac, const std::string &sta_mac)
 {
     bool client_on_5ghz =
         (wireless_utils::which_freq(get_node_channel(sta_mac)) == eFreqType::FREQ_5G);
@@ -737,7 +738,7 @@ bool db::is_ap_out_of_band(std::string mac, std::string sta_mac)
     return false;
 }
 
-bool db::is_node_wireless(std::string mac)
+bool db::is_node_wireless(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -747,7 +748,7 @@ bool db::is_node_wireless(std::string mac)
     return utils::is_node_wireless(n->iface_type);
 }
 
-std::string db::node_to_string(std::string mac)
+std::string db::node_to_string(const std::string &mac)
 {
     auto n = get_node(mac);
     std::ostringstream os;
@@ -761,7 +762,7 @@ std::string db::node_to_string(std::string mac)
 //
 // DB node functions (get only)
 //
-int db::get_node_hierarchy(std::string mac)
+int db::get_node_hierarchy(const std::string &mac)
 {
     auto n = get_node(mac);
     return get_node_hierarchy(n);
@@ -867,7 +868,7 @@ std::string db::get_gw_mac()
     return gw_mac;
 }
 
-std::set<std::string> db::get_node_subtree(std::string mac)
+std::set<std::string> db::get_node_subtree(const std::string &mac)
 {
     std::set<std::string> subtree;
 
@@ -882,7 +883,7 @@ std::set<std::string> db::get_node_subtree(std::string mac)
     return subtree;
 }
 
-std::string db::get_node_parent(std::string mac)
+std::string db::get_node_parent(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -892,7 +893,7 @@ std::string db::get_node_parent(std::string mac)
     return n->parent_mac;
 }
 
-std::string db::get_node_parent_hostap(std::string mac)
+std::string db::get_node_parent_hostap(const std::string &mac)
 {
     std::string parent_backhaul = get_node_parent_backhaul(mac);
     if (is_node_wireless(parent_backhaul)) {
@@ -903,7 +904,7 @@ std::string db::get_node_parent_hostap(std::string mac)
     }
 }
 
-std::string db::get_node_parent_backhaul(std::string mac)
+std::string db::get_node_parent_backhaul(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -921,7 +922,7 @@ std::string db::get_node_parent_backhaul(std::string mac)
     return get_node_parent(ire);
 }
 
-std::string db::get_node_parent_ire(std::string mac)
+std::string db::get_node_parent_ire(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n || n->get_type() == beerocks::TYPE_GW) {
@@ -941,7 +942,7 @@ std::string db::get_node_parent_ire(std::string mac)
     return p->mac;
 }
 
-std::string db::get_node_previous_parent(std::string mac)
+std::string db::get_node_previous_parent(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -951,7 +952,7 @@ std::string db::get_node_previous_parent(std::string mac)
     return n->previous_parent_mac;
 }
 
-std::set<std::string> db::get_node_siblings(std::string mac, int type)
+std::set<std::string> db::get_node_siblings(const std::string &mac, int type)
 {
     std::set<std::string> siblings;
     auto n = get_node(mac);
@@ -982,7 +983,7 @@ std::set<std::string> db::get_node_siblings(std::string mac, int type)
     return siblings;
 }
 
-std::set<std::string> db::get_node_children(std::string mac, int type, int state)
+std::set<std::string> db::get_node_children(const std::string &mac, int type, int state)
 {
     std::set<std::string> children_macs;
     auto n = get_node(mac);
@@ -1037,7 +1038,8 @@ std::list<sMacAddr> db::get_1905_1_neighbors(const sMacAddr &al_mac)
 // Capabilities
 //
 
-const beerocks::message::sRadioCapabilities *db::get_station_current_capabilities(std::string mac)
+const beerocks::message::sRadioCapabilities *
+db::get_station_current_capabilities(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1112,7 +1114,7 @@ db::get_station_capabilities(const std::string &client_mac, bool is_bandtype_5gh
     }
 }
 
-bool db::set_hostap_ant_num(std::string mac, beerocks::eWiFiAntNum ant_num)
+bool db::set_hostap_ant_num(const std::string &mac, beerocks::eWiFiAntNum ant_num)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1126,7 +1128,7 @@ bool db::set_hostap_ant_num(std::string mac, beerocks::eWiFiAntNum ant_num)
     return true;
 }
 
-beerocks::eWiFiAntNum db::get_hostap_ant_num(std::string mac)
+beerocks::eWiFiAntNum db::get_hostap_ant_num(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1139,7 +1141,7 @@ beerocks::eWiFiAntNum db::get_hostap_ant_num(std::string mac)
     return beerocks::eWiFiAntNum(n->capabilities.ant_num);
 }
 
-bool db::set_hostap_ant_gain(std::string mac, int ant_gain)
+bool db::set_hostap_ant_gain(const std::string &mac, int ant_gain)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1153,7 +1155,7 @@ bool db::set_hostap_ant_gain(std::string mac, int ant_gain)
     return true;
 }
 
-int db::get_hostap_ant_gain(std::string mac)
+int db::get_hostap_ant_gain(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1166,7 +1168,7 @@ int db::get_hostap_ant_gain(std::string mac)
     return n->hostap->ant_gain;
 }
 
-bool db::set_hostap_tx_power(std::string mac, int tx_power)
+bool db::set_hostap_tx_power(const std::string &mac, int tx_power)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1180,7 +1182,7 @@ bool db::set_hostap_tx_power(std::string mac, int tx_power)
     return true;
 }
 
-int db::get_hostap_tx_power(std::string mac)
+int db::get_hostap_tx_power(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1193,8 +1195,8 @@ int db::get_hostap_tx_power(std::string mac)
     return n->hostap->tx_power;
 }
 
-bool db::set_hostap_supported_channels(std::string mac, beerocks::message::sWifiChannel *channels,
-                                       int length)
+bool db::set_hostap_supported_channels(const std::string &mac,
+                                       beerocks::message::sWifiChannel *channels, int length)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1228,7 +1230,7 @@ bool db::set_hostap_supported_channels(std::string mac, beerocks::message::sWifi
 }
 
 const std::vector<beerocks::message::sWifiChannel>
-db::get_hostap_supported_channels(std::string mac)
+db::get_hostap_supported_channels(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1312,7 +1314,8 @@ bool db::add_hostap_supported_operating_class(const std::string &radio_mac, uint
     return true;
 }
 
-bool db::set_hostap_band_capability(std::string mac, beerocks::eRadioBandCapability capability)
+bool db::set_hostap_band_capability(const std::string &mac,
+                                    beerocks::eRadioBandCapability capability)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1326,7 +1329,7 @@ bool db::set_hostap_band_capability(std::string mac, beerocks::eRadioBandCapabil
     return true;
 }
 
-beerocks::eRadioBandCapability db::get_hostap_band_capability(std::string mac)
+beerocks::eRadioBandCapability db::get_hostap_band_capability(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1339,7 +1342,7 @@ beerocks::eRadioBandCapability db::get_hostap_band_capability(std::string mac)
     return n->hostap->capability;
 }
 
-bool db::capability_check(std::string mac, int channel)
+bool db::capability_check(const std::string &mac, int channel)
 {
     auto band       = wireless_utils::which_subband(channel);
     auto capability = get_hostap_band_capability(mac);
@@ -1352,7 +1355,7 @@ bool db::capability_check(std::string mac, int channel)
     return false;
 }
 
-bool db::get_node_5ghz_support(std::string mac)
+bool db::get_node_5ghz_support(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1361,7 +1364,7 @@ bool db::get_node_5ghz_support(std::string mac)
     return n->supports_5ghz;
 }
 
-bool db::get_node_24ghz_support(std::string mac)
+bool db::get_node_24ghz_support(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1370,7 +1373,7 @@ bool db::get_node_24ghz_support(std::string mac)
     return n->supports_24ghz;
 }
 
-bool db::is_node_24ghz(std::string mac)
+bool db::is_node_24ghz(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1383,7 +1386,7 @@ bool db::is_node_24ghz(std::string mac)
     return false;
 }
 
-bool db::is_node_5ghz(std::string mac)
+bool db::is_node_5ghz(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1396,7 +1399,7 @@ bool db::is_node_5ghz(std::string mac)
     return false;
 }
 
-bool db::update_node_failed_5ghz_steer_attempt(std::string mac)
+bool db::update_node_failed_5ghz_steer_attempt(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1409,7 +1412,7 @@ bool db::update_node_failed_5ghz_steer_attempt(std::string mac)
     return true;
 }
 
-bool db::update_node_failed_24ghz_steer_attempt(std::string mac)
+bool db::update_node_failed_24ghz_steer_attempt(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1422,7 +1425,7 @@ bool db::update_node_failed_24ghz_steer_attempt(std::string mac)
     return true;
 }
 
-bool db::update_node_11v_responsiveness(std::string mac, bool success)
+bool db::update_node_11v_responsiveness(const std::string &mac, bool success)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1444,7 +1447,7 @@ bool db::update_node_11v_responsiveness(std::string mac, bool success)
     return true;
 }
 
-bool db::get_node_11v_capability(std::string mac)
+bool db::get_node_11v_capability(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1453,7 +1456,7 @@ bool db::get_node_11v_capability(std::string mac)
     return n->supports_11v;
 }
 
-bool db::set_hostap_iface_id(std::string mac, int8_t iface_id)
+bool db::set_hostap_iface_id(const std::string &mac, int8_t iface_id)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1467,7 +1470,7 @@ bool db::set_hostap_iface_id(std::string mac, int8_t iface_id)
     return true;
 }
 
-int8_t db::get_hostap_iface_id(std::string mac)
+int8_t db::get_hostap_iface_id(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1648,7 +1651,7 @@ int8_t db::get_hostap_vap_id(const std::string &mac)
     return IFACE_ID_INVALID;
 }
 
-bool db::get_hostap_repeater_mode_flag(std::string mac)
+bool db::get_hostap_repeater_mode_flag(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1661,7 +1664,7 @@ bool db::get_hostap_repeater_mode_flag(std::string mac)
     return n->hostap->enable_repeater_mode;
 }
 
-bool db::set_hostap_repeater_mode_flag(std::string mac, bool flag)
+bool db::set_hostap_repeater_mode_flag(const std::string &mac, bool flag)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1675,7 +1678,7 @@ bool db::set_hostap_repeater_mode_flag(std::string mac, bool flag)
     return true;
 }
 
-bool db::set_hostap_iface_name(std::string mac, std::string iface_name)
+bool db::set_hostap_iface_name(const std::string &mac, std::string iface_name)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1690,7 +1693,7 @@ bool db::set_hostap_iface_name(std::string mac, std::string iface_name)
     return true;
 }
 
-std::string db::get_hostap_iface_name(std::string mac)
+std::string db::get_hostap_iface_name(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1704,7 +1707,7 @@ std::string db::get_hostap_iface_name(std::string mac)
     return n->hostap->iface_name;
 }
 
-bool db::set_hostap_iface_type(std::string mac, beerocks::eIfaceType iface_type)
+bool db::set_hostap_iface_type(const std::string &mac, beerocks::eIfaceType iface_type)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1718,7 +1721,7 @@ bool db::set_hostap_iface_type(std::string mac, beerocks::eIfaceType iface_type)
     return true;
 }
 
-beerocks::eIfaceType db::get_hostap_iface_type(std::string mac)
+beerocks::eIfaceType db::get_hostap_iface_type(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1731,7 +1734,7 @@ beerocks::eIfaceType db::get_hostap_iface_type(std::string mac)
     return n->hostap->iface_type;
 }
 
-bool db::set_node_backhaul_iface_type(std::string mac, beerocks::eIfaceType iface_type)
+bool db::set_node_backhaul_iface_type(const std::string &mac, beerocks::eIfaceType iface_type)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1747,7 +1750,7 @@ bool db::set_node_backhaul_iface_type(std::string mac, beerocks::eIfaceType ifac
     return true;
 }
 
-bool db::set_hostap_driver_version(std::string mac, std::string version)
+bool db::set_hostap_driver_version(const std::string &mac, std::string version)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1762,7 +1765,7 @@ bool db::set_hostap_driver_version(std::string mac, std::string version)
     return true;
 }
 
-std::string db::get_hostap_driver_version(std::string mac)
+std::string db::get_hostap_driver_version(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1776,7 +1779,7 @@ std::string db::get_hostap_driver_version(std::string mac)
     return n->hostap->driver_version;
 }
 
-beerocks::eIfaceType db::get_node_backhaul_iface_type(std::string mac)
+beerocks::eIfaceType db::get_node_backhaul_iface_type(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1786,7 +1789,7 @@ beerocks::eIfaceType db::get_node_backhaul_iface_type(std::string mac)
     return n->iface_type;
 }
 
-std::string db::get_5ghz_sibling_hostap(std::string mac)
+std::string db::get_5ghz_sibling_hostap(const std::string &mac)
 {
     auto siblings = get_node_siblings(mac, beerocks::TYPE_SLAVE);
     for (auto &hostap : siblings) {
@@ -1802,7 +1805,7 @@ std::string db::get_5ghz_sibling_hostap(std::string mac)
     return std::string();
 }
 
-bool db::set_hostap_activity_mode(std::string mac, eApActiveMode ap_activity_mode)
+bool db::set_hostap_activity_mode(const std::string &mac, eApActiveMode ap_activity_mode)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1815,7 +1818,7 @@ bool db::set_hostap_activity_mode(std::string mac, eApActiveMode ap_activity_mod
     return true;
 }
 
-beerocks::eApActiveMode db::get_hostap_activity_mode(std::string mac)
+beerocks::eApActiveMode db::get_hostap_activity_mode(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -1827,7 +1830,7 @@ beerocks::eApActiveMode db::get_hostap_activity_mode(std::string mac)
     return n->hostap->ap_activity_mode;
 }
 
-bool db::set_radar_hit_stats(std::string mac, uint8_t channel, uint8_t bw, bool is_csa_entry)
+bool db::set_radar_hit_stats(const std::string &mac, uint8_t channel, uint8_t bw, bool is_csa_entry)
 {
     std::shared_ptr<node> n = get_node(mac);
 
@@ -1869,7 +1872,7 @@ bool db::set_radar_hit_stats(std::string mac, uint8_t channel, uint8_t bw, bool 
     return true;
 }
 
-bool db::set_supported_channel_radar_affected(std::string mac, std::vector<uint8_t> channels,
+bool db::set_supported_channel_radar_affected(const std::string &mac, std::vector<uint8_t> channels,
                                               bool affected)
 {
     std::shared_ptr<node> n = get_node(mac);
@@ -1909,7 +1912,7 @@ bool db::set_supported_channel_radar_affected(std::string mac, std::vector<uint8
     return true;
 }
 
-bool db::set_hostap_is_dfs(std::string mac, bool enable)
+bool db::set_hostap_is_dfs(const std::string &mac, bool enable)
 {
     std::shared_ptr<node> n = get_node(mac);
 
@@ -1924,7 +1927,7 @@ bool db::set_hostap_is_dfs(std::string mac, bool enable)
     return true;
 }
 
-bool db::get_hostap_is_dfs(std::string mac)
+bool db::get_hostap_is_dfs(const std::string &mac)
 {
     auto n = get_node(mac);
 
@@ -1939,7 +1942,7 @@ bool db::get_hostap_is_dfs(std::string mac)
     return n->hostap->is_dfs;
 }
 
-bool db::set_hostap_cac_completed(std::string mac, bool enable)
+bool db::set_hostap_cac_completed(const std::string &mac, bool enable)
 {
     std::shared_ptr<node> n = get_node(mac);
 
@@ -1954,7 +1957,7 @@ bool db::set_hostap_cac_completed(std::string mac, bool enable)
     return true;
 }
 
-bool db::get_hostap_cac_completed(std::string mac)
+bool db::get_hostap_cac_completed(const std::string &mac)
 {
     std::shared_ptr<node> n = get_node(mac);
 
@@ -1968,7 +1971,7 @@ bool db::get_hostap_cac_completed(std::string mac)
 
     return n->hostap->cac_completed;
 }
-bool db::set_hostap_is_on_fail_safe(std::string mac, bool enable)
+bool db::set_hostap_is_on_fail_safe(const std::string &mac, bool enable)
 {
     std::shared_ptr<node> n = get_node(mac);
 
@@ -1984,7 +1987,7 @@ bool db::set_hostap_is_on_fail_safe(std::string mac, bool enable)
     return true;
 }
 
-bool db::get_hostap_is_on_fail_safe(std::string mac)
+bool db::get_hostap_is_on_fail_safe(const std::string &mac)
 {
     std::shared_ptr<node> n = get_node(mac);
 
@@ -1999,7 +2002,7 @@ bool db::get_hostap_is_on_fail_safe(std::string mac)
     return n->hostap->on_fail_safe_channel;
 }
 
-bool db::set_hostap_is_on_sub_band(std::string mac, bool enable)
+bool db::set_hostap_is_on_sub_band(const std::string &mac, bool enable)
 {
     std::shared_ptr<node> n = get_node(mac);
 
@@ -2015,7 +2018,7 @@ bool db::set_hostap_is_on_sub_band(std::string mac, bool enable)
     return true;
 }
 
-bool db::get_hostap_is_on_sub_band(std::string mac)
+bool db::get_hostap_is_on_sub_band(const std::string &mac)
 {
     std::shared_ptr<node> n = get_node(mac);
 
@@ -2030,7 +2033,7 @@ bool db::get_hostap_is_on_sub_band(std::string mac)
     return n->hostap->on_sub_band_channel;
 }
 
-bool db::set_hostap_on_dfs_reentry(std::string mac, bool enable)
+bool db::set_hostap_on_dfs_reentry(const std::string &mac, bool enable)
 {
     auto n = get_node(mac);
 
@@ -2046,7 +2049,7 @@ bool db::set_hostap_on_dfs_reentry(std::string mac, bool enable)
     return true;
 }
 
-bool db::get_hostap_on_dfs_reentry(std::string mac)
+bool db::get_hostap_on_dfs_reentry(const std::string &mac)
 {
     auto n = get_node(mac);
 
@@ -2061,7 +2064,8 @@ bool db::get_hostap_on_dfs_reentry(std::string mac)
     return n->hostap->on_dfs_reentry;
 }
 
-bool db::set_hostap_dfs_reentry_clients(std::string mac, std::set<std::string> dfs_reentry_clients)
+bool db::set_hostap_dfs_reentry_clients(const std::string &mac,
+                                        const std::set<std::string> &dfs_reentry_clients)
 {
     auto n = get_node(mac);
 
@@ -2075,13 +2079,13 @@ bool db::set_hostap_dfs_reentry_clients(std::string mac, std::set<std::string> d
 
     n->hostap->dfs_reentry_clients = dfs_reentry_clients;
     for_each(begin(n->hostap->dfs_reentry_clients), end(n->hostap->dfs_reentry_clients),
-             [&](std::string dfs_reentry_client) {
+             [&](const std::string &dfs_reentry_client) {
                  LOG(DEBUG) << "dfs_reentry_client = " << dfs_reentry_client;
              });
     return true;
 }
 
-std::set<std::string> db::get_hostap_dfs_reentry_clients(std::string mac)
+std::set<std::string> db::get_hostap_dfs_reentry_clients(const std::string &mac)
 {
     auto n = get_node(mac);
 
@@ -2094,13 +2098,13 @@ std::set<std::string> db::get_hostap_dfs_reentry_clients(std::string mac)
         return ret;
     }
     for_each(begin(n->hostap->dfs_reentry_clients), end(n->hostap->dfs_reentry_clients),
-             [&](std::string dfs_reentry_client) {
+             [&](const std::string &dfs_reentry_client) {
                  LOG(DEBUG) << "dfs_reentry_client = " << dfs_reentry_client;
              });
     return n->hostap->dfs_reentry_clients;
 }
 
-bool db::clear_hostap_dfs_reentry_clients(std::string mac)
+bool db::clear_hostap_dfs_reentry_clients(const std::string &mac)
 {
     auto n = get_node(mac);
 
@@ -2116,7 +2120,7 @@ bool db::clear_hostap_dfs_reentry_clients(std::string mac)
     return true;
 }
 
-bool db::set_hostap_is_acs_enabled(std::string mac, bool enable)
+bool db::set_hostap_is_acs_enabled(const std::string &mac, bool enable)
 {
     auto n = get_node(mac);
 
@@ -2132,7 +2136,7 @@ bool db::set_hostap_is_acs_enabled(std::string mac, bool enable)
     return true;
 }
 
-bool db::get_hostap_is_acs_enabled(std::string mac)
+bool db::get_hostap_is_acs_enabled(const std::string &mac)
 {
     auto n = get_node(mac);
 
@@ -2576,7 +2580,7 @@ bool db::is_bml_listener_exist()
 //
 // Measurements
 //
-bool db::set_node_beacon_measurement(std::string sta_mac, std::string ap_mac, int8_t rcpi,
+bool db::set_node_beacon_measurement(const std::string &sta_mac, std::string ap_mac, int8_t rcpi,
                                      uint8_t rsni)
 {
     auto sta = get_node(sta_mac);
@@ -2588,7 +2592,7 @@ bool db::set_node_beacon_measurement(std::string sta_mac, std::string ap_mac, in
     return true;
 }
 
-bool db::get_node_beacon_measurement(std::string sta_mac, std::string ap_mac, int8_t &rcpi,
+bool db::get_node_beacon_measurement(const std::string &sta_mac, std::string ap_mac, int8_t &rcpi,
                                      uint8_t &rsni)
 {
     auto sta = get_node(sta_mac);
@@ -2601,7 +2605,7 @@ bool db::get_node_beacon_measurement(std::string sta_mac, std::string ap_mac, in
     return sta->get_beacon_measurement(ap_mac, rcpi, rsni);
 }
 
-bool db::set_node_cross_rx_rssi(std::string sta_mac, std::string ap_mac, int8_t rssi,
+bool db::set_node_cross_rx_rssi(const std::string &sta_mac, std::string ap_mac, int8_t rssi,
                                 int8_t rx_packets)
 {
     auto sta = get_node(sta_mac);
@@ -2612,7 +2616,7 @@ bool db::set_node_cross_rx_rssi(std::string sta_mac, std::string ap_mac, int8_t 
     return true;
 }
 
-bool db::get_node_cross_rx_rssi(std::string sta_mac, std::string ap_mac, int8_t &rssi,
+bool db::get_node_cross_rx_rssi(const std::string &sta_mac, std::string ap_mac, int8_t &rssi,
                                 int8_t &rx_packets)
 {
     auto sta = get_node(sta_mac);
@@ -2624,7 +2628,7 @@ bool db::get_node_cross_rx_rssi(std::string sta_mac, std::string ap_mac, int8_t 
     return sta->get_cross_rx_rssi(ap_mac, rssi, rx_packets);
 }
 
-bool db::set_node_cross_rx_phy_rate_100kb(std::string mac, uint16_t rx_phy_rate_100kb)
+bool db::set_node_cross_rx_phy_rate_100kb(const std::string &mac, uint16_t rx_phy_rate_100kb)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2634,7 +2638,7 @@ bool db::set_node_cross_rx_phy_rate_100kb(std::string mac, uint16_t rx_phy_rate_
     return true;
 }
 
-bool db::set_node_cross_tx_phy_rate_100kb(std::string mac, uint16_t tx_phy_rate_100kb)
+bool db::set_node_cross_tx_phy_rate_100kb(const std::string &mac, uint16_t tx_phy_rate_100kb)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2644,7 +2648,7 @@ bool db::set_node_cross_tx_phy_rate_100kb(std::string mac, uint16_t tx_phy_rate_
     return true;
 }
 
-uint16_t db::get_node_cross_rx_phy_rate_100kb(std::string mac)
+uint16_t db::get_node_cross_rx_phy_rate_100kb(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2653,7 +2657,7 @@ uint16_t db::get_node_cross_rx_phy_rate_100kb(std::string mac)
     return n->cross_rx_phy_rate_100kb;
 }
 
-uint16_t db::get_node_cross_tx_phy_rate_100kb(std::string mac)
+uint16_t db::get_node_cross_tx_phy_rate_100kb(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2662,7 +2666,7 @@ uint16_t db::get_node_cross_tx_phy_rate_100kb(std::string mac)
     return n->cross_tx_phy_rate_100kb;
 }
 
-bool db::clear_node_cross_rssi(std::string sta_mac)
+bool db::clear_node_cross_rssi(const std::string &sta_mac)
 {
     auto sta = get_node(sta_mac);
     if (sta == nullptr) {
@@ -2672,7 +2676,7 @@ bool db::clear_node_cross_rssi(std::string sta_mac)
     return true;
 }
 
-bool db::set_node_cross_estimated_tx_phy_rate(std::string mac, double phy_rate)
+bool db::set_node_cross_estimated_tx_phy_rate(const std::string &mac, double phy_rate)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2682,7 +2686,7 @@ bool db::set_node_cross_estimated_tx_phy_rate(std::string mac, double phy_rate)
     return true;
 }
 
-double db::get_node_cross_estimated_tx_phy_rate(std::string mac)
+double db::get_node_cross_estimated_tx_phy_rate(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2691,7 +2695,7 @@ double db::get_node_cross_estimated_tx_phy_rate(std::string mac)
     return n->cross_estimated_tx_phy_rate;
 }
 
-bool db::set_hostap_stats_info(std::string mac, beerocks_message::sApStatsParams *params)
+bool db::set_hostap_stats_info(const std::string &mac, beerocks_message::sApStatsParams *params)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2723,9 +2727,9 @@ bool db::set_hostap_stats_info(std::string mac, beerocks_message::sApStatsParams
     return true;
 }
 
-void db::clear_hostap_stats_info(std::string mac) { set_hostap_stats_info(mac, nullptr); }
+void db::clear_hostap_stats_info(const std::string &mac) { set_hostap_stats_info(mac, nullptr); }
 
-bool db::set_node_stats_info(std::string mac, beerocks_message::sStaStatsParams *params)
+bool db::set_node_stats_info(const std::string &mac, beerocks_message::sStaStatsParams *params)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2751,9 +2755,9 @@ bool db::set_node_stats_info(std::string mac, beerocks_message::sStaStatsParams 
     return true;
 }
 
-void db::clear_node_stats_info(std::string mac) { set_node_stats_info(mac, nullptr); }
+void db::clear_node_stats_info(const std::string &mac) { set_node_stats_info(mac, nullptr); }
 
-int db::get_hostap_stats_measurement_duration(std::string mac)
+int db::get_hostap_stats_measurement_duration(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2766,7 +2770,7 @@ int db::get_hostap_stats_measurement_duration(std::string mac)
     return n->hostap->stats_info->stats_delta_ms;
 }
 
-std::chrono::steady_clock::time_point db::get_node_stats_info_timestamp(std::string mac)
+std::chrono::steady_clock::time_point db::get_node_stats_info_timestamp(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2775,7 +2779,7 @@ std::chrono::steady_clock::time_point db::get_node_stats_info_timestamp(std::str
     return n->stats_info->timestamp;
 }
 
-std::chrono::steady_clock::time_point db::get_hostap_stats_info_timestamp(std::string mac)
+std::chrono::steady_clock::time_point db::get_hostap_stats_info_timestamp(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2788,7 +2792,7 @@ std::chrono::steady_clock::time_point db::get_hostap_stats_info_timestamp(std::s
     return n->hostap->stats_info->timestamp;
 }
 
-uint32_t db::get_node_rx_bytes(std::string mac)
+uint32_t db::get_node_rx_bytes(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2797,7 +2801,7 @@ uint32_t db::get_node_rx_bytes(std::string mac)
     return n->stats_info->rx_bytes;
 }
 
-uint32_t db::get_node_tx_bytes(std::string mac)
+uint32_t db::get_node_tx_bytes(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2806,7 +2810,7 @@ uint32_t db::get_node_tx_bytes(std::string mac)
     return n->stats_info->tx_bytes;
 }
 
-uint32_t db::get_hostap_total_sta_rx_bytes(std::string mac)
+uint32_t db::get_hostap_total_sta_rx_bytes(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2819,7 +2823,7 @@ uint32_t db::get_hostap_total_sta_rx_bytes(std::string mac)
     return n->hostap->stats_info->rx_bytes;
 }
 
-uint32_t db::get_hostap_total_sta_tx_bytes(std::string mac)
+uint32_t db::get_hostap_total_sta_tx_bytes(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2832,7 +2836,7 @@ uint32_t db::get_hostap_total_sta_tx_bytes(std::string mac)
     return n->hostap->stats_info->tx_bytes;
 }
 
-double db::get_node_rx_bitrate(std::string mac)
+double db::get_node_rx_bitrate(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2842,7 +2846,7 @@ double db::get_node_rx_bitrate(std::string mac)
     return (1000 * 8 * double(n->stats_info->rx_bytes) / n->stats_info->stats_delta_ms) / 1e+6;
 }
 
-double db::get_node_tx_bitrate(std::string mac)
+double db::get_node_tx_bitrate(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2852,7 +2856,7 @@ double db::get_node_tx_bitrate(std::string mac)
     return (1000 * 8 * double(n->stats_info->tx_bytes) / n->stats_info->stats_delta_ms) / 1e+6;
 }
 
-uint16_t db::get_node_rx_phy_rate_100kb(std::string mac)
+uint16_t db::get_node_rx_phy_rate_100kb(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2861,7 +2865,7 @@ uint16_t db::get_node_rx_phy_rate_100kb(std::string mac)
     return n->stats_info->rx_phy_rate_100kb;
 }
 
-uint16_t db::get_node_tx_phy_rate_100kb(std::string mac)
+uint16_t db::get_node_tx_phy_rate_100kb(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2870,7 +2874,7 @@ uint16_t db::get_node_tx_phy_rate_100kb(std::string mac)
     return n->stats_info->tx_phy_rate_100kb;
 }
 
-int db::get_hostap_channel_load_percent(std::string mac)
+int db::get_hostap_channel_load_percent(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2883,7 +2887,7 @@ int db::get_hostap_channel_load_percent(std::string mac)
     return n->hostap->stats_info->channel_load_percent;
 }
 
-int db::get_hostap_total_client_tx_load_percent(std::string mac)
+int db::get_hostap_total_client_tx_load_percent(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2896,7 +2900,7 @@ int db::get_hostap_total_client_tx_load_percent(std::string mac)
     return n->hostap->stats_info->total_client_tx_load_percent;
 }
 
-int db::get_hostap_total_client_rx_load_percent(std::string mac)
+int db::get_hostap_total_client_rx_load_percent(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2909,7 +2913,7 @@ int db::get_hostap_total_client_rx_load_percent(std::string mac)
     return n->hostap->stats_info->total_client_rx_load_percent;
 }
 
-int db::get_node_rx_load_percent(std::string mac)
+int db::get_node_rx_load_percent(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2918,7 +2922,7 @@ int db::get_node_rx_load_percent(std::string mac)
     return n->stats_info->rx_load_percent;
 }
 
-int db::get_node_tx_load_percent(std::string mac)
+int db::get_node_tx_load_percent(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -2927,7 +2931,7 @@ int db::get_node_tx_load_percent(std::string mac)
     return n->stats_info->tx_load_percent;
 }
 
-int8_t db::get_load_rx_rssi(std::string sta_mac)
+int8_t db::get_load_rx_rssi(const std::string &sta_mac)
 {
     auto n = get_node(sta_mac);
     if (!n) {
@@ -2936,7 +2940,7 @@ int8_t db::get_load_rx_rssi(std::string sta_mac)
     return n->stats_info->rx_rssi;
 }
 
-uint16_t db::get_load_rx_phy_rate_100kb(std::string sta_mac)
+uint16_t db::get_load_rx_phy_rate_100kb(const std::string &sta_mac)
 {
     auto n = get_node(sta_mac);
     if (!n) {
@@ -2945,7 +2949,7 @@ uint16_t db::get_load_rx_phy_rate_100kb(std::string sta_mac)
     return n->stats_info->rx_phy_rate_100kb;
 }
 
-uint16_t db::get_load_tx_phy_rate_100kb(std::string sta_mac)
+uint16_t db::get_load_tx_phy_rate_100kb(const std::string &sta_mac)
 {
     auto n = get_node(sta_mac);
     if (!n) {
@@ -2954,7 +2958,7 @@ uint16_t db::get_load_tx_phy_rate_100kb(std::string sta_mac)
     return n->stats_info->tx_phy_rate_100kb;
 }
 
-bool db::set_measurement_delay(std::string mac, int measurement_delay)
+bool db::set_measurement_delay(const std::string &mac, int measurement_delay)
 {
     std::shared_ptr<node> n = get_node(mac);
     if (!n) {
@@ -2966,7 +2970,7 @@ bool db::set_measurement_delay(std::string mac, int measurement_delay)
     return true;
 }
 
-int db::get_measurement_delay(std::string mac)
+int db::get_measurement_delay(const std::string &mac)
 {
     std::shared_ptr<node> n = get_node(mac);
     if (!n) {
@@ -2976,7 +2980,7 @@ int db::get_measurement_delay(std::string mac)
     return n->measurement_delay;
 }
 
-std::chrono::steady_clock::time_point db::get_measurement_sent_timestamp(std::string mac)
+std::chrono::steady_clock::time_point db::get_measurement_sent_timestamp(const std::string &mac)
 {
     std::shared_ptr<node> n = get_node(mac);
     if (!n) {
@@ -2986,7 +2990,7 @@ std::chrono::steady_clock::time_point db::get_measurement_sent_timestamp(std::st
     return n->measurement_sent_timestamp;
 }
 
-bool db::set_measurement_sent_timestamp(std::string mac)
+bool db::set_measurement_sent_timestamp(const std::string &mac)
 {
     std::shared_ptr<node> n = get_node(mac);
     if (!n) {
@@ -2997,7 +3001,7 @@ bool db::set_measurement_sent_timestamp(std::string mac)
     return true;
 }
 
-int db::get_measurement_recv_delta(std::string mac)
+int db::get_measurement_recv_delta(const std::string &mac)
 {
     std::shared_ptr<node> n = get_node(mac);
     if (!n) {
@@ -3009,7 +3013,7 @@ int db::get_measurement_recv_delta(std::string mac)
     return n->measurement_recv_delta;
 }
 
-bool db::set_measurement_recv_delta(std::string mac)
+bool db::set_measurement_recv_delta(const std::string &mac)
 {
     std::shared_ptr<node> n = get_node(mac);
     if (!n) {
@@ -3023,7 +3027,7 @@ bool db::set_measurement_recv_delta(std::string mac)
     return true;
 }
 
-int db::get_measurement_window_size(std::string mac)
+int db::get_measurement_window_size(const std::string &mac)
 {
     std::shared_ptr<node> n = get_node(mac);
     if (!n) {
@@ -3032,7 +3036,7 @@ int db::get_measurement_window_size(std::string mac)
     return n->measurement_window_size;
 }
 
-bool db::set_measurement_window_size(std::string mac, int window_size)
+bool db::set_measurement_window_size(const std::string &mac, int window_size)
 {
     std::shared_ptr<node> n = get_node(mac);
     if (!n) {
@@ -3042,7 +3046,7 @@ bool db::set_measurement_window_size(std::string mac, int window_size)
     return true;
 }
 
-bool db::get_hostap_exclude_from_steering_flag(std::string mac)
+bool db::get_hostap_exclude_from_steering_flag(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3054,7 +3058,7 @@ bool db::get_hostap_exclude_from_steering_flag(std::string mac)
     return n->hostap->exclude_from_steering;
 }
 
-bool db::set_hostap_exclude_from_steering_flag(std::string mac, bool flag)
+bool db::set_hostap_exclude_from_steering_flag(const std::string &mac, bool flag)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3122,7 +3126,7 @@ bool db::set_node_channel_bw(const std::string &mac, int channel, beerocks::eWiF
     return true;
 }
 
-beerocks::eWiFiBandwidth db::get_node_bw(std::string mac)
+beerocks::eWiFiBandwidth db::get_node_bw(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3132,7 +3136,7 @@ beerocks::eWiFiBandwidth db::get_node_bw(std::string mac)
     return n->bandwidth;
 }
 
-bool db::get_node_channel_ext_above_secondary(std::string mac)
+bool db::get_node_channel_ext_above_secondary(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3142,7 +3146,7 @@ bool db::get_node_channel_ext_above_secondary(std::string mac)
     return n->channel_ext_above_secondary;
 }
 
-bool db::get_hostap_channel_ext_above_primary(std::string hostap_mac)
+bool db::get_hostap_channel_ext_above_primary(const std::string &hostap_mac)
 {
     auto n = get_node(hostap_mac);
     if (!n) {
@@ -3155,7 +3159,7 @@ bool db::get_hostap_channel_ext_above_primary(std::string hostap_mac)
     return n->hostap->channel_ext_above_primary;
 }
 
-int db::get_node_bw_int(std::string mac)
+int db::get_node_bw_int(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3175,7 +3179,7 @@ std::string db::get_node_key(const std::string &al_mac, const std::string &ruid)
     return al_mac + "_" + ruid;
 }
 
-uint16_t db::get_hostap_vht_center_frequency(std::string mac)
+uint16_t db::get_hostap_vht_center_frequency(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3191,7 +3195,7 @@ uint16_t db::get_hostap_vht_center_frequency(std::string mac)
 // tasks
 //
 
-bool db::assign_association_handling_task_id(std::string mac, int new_task_id)
+bool db::assign_association_handling_task_id(const std::string &mac, int new_task_id)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3202,7 +3206,7 @@ bool db::assign_association_handling_task_id(std::string mac, int new_task_id)
     return true;
 }
 
-int db::get_association_handling_task_id(std::string mac)
+int db::get_association_handling_task_id(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3212,7 +3216,7 @@ int db::get_association_handling_task_id(std::string mac)
     return n->association_handling_task_id;
 }
 
-bool db::assign_steering_task_id(std::string mac, int new_task_id)
+bool db::assign_steering_task_id(const std::string &mac, int new_task_id)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3223,7 +3227,7 @@ bool db::assign_steering_task_id(std::string mac, int new_task_id)
     return true;
 }
 
-int db::get_steering_task_id(std::string mac)
+int db::get_steering_task_id(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3233,7 +3237,7 @@ int db::get_steering_task_id(std::string mac)
     return n->steering_task_id;
 }
 
-bool db::assign_roaming_task_id(std::string mac, int new_task_id)
+bool db::assign_roaming_task_id(const std::string &mac, int new_task_id)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3244,7 +3248,7 @@ bool db::assign_roaming_task_id(std::string mac, int new_task_id)
     return true;
 }
 
-int db::get_roaming_task_id(std::string mac)
+int db::get_roaming_task_id(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3254,7 +3258,7 @@ int db::get_roaming_task_id(std::string mac)
     return n->roaming_task_id;
 }
 
-bool db::assign_load_balancer_task_id(std::string mac, int new_task_id)
+bool db::assign_load_balancer_task_id(const std::string &mac, int new_task_id)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3265,7 +3269,7 @@ bool db::assign_load_balancer_task_id(std::string mac, int new_task_id)
     return true;
 }
 
-int db::get_load_balancer_task_id(std::string mac)
+int db::get_load_balancer_task_id(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3275,7 +3279,8 @@ int db::get_load_balancer_task_id(std::string mac)
     return n->load_balancer_task_id;
 }
 
-bool db::assign_client_locating_task_id(std::string mac, int new_task_id, bool new_connection)
+bool db::assign_client_locating_task_id(const std::string &mac, int new_task_id,
+                                        bool new_connection)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3290,7 +3295,7 @@ bool db::assign_client_locating_task_id(std::string mac, int new_task_id, bool n
     return true;
 }
 
-int db::get_client_locating_task_id(std::string mac, bool new_connection)
+int db::get_client_locating_task_id(const std::string &mac, bool new_connection)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3303,7 +3308,7 @@ int db::get_client_locating_task_id(std::string mac, bool new_connection)
     return n->client_locating_task_id_exist_connection;
 }
 
-bool db::assign_ire_4addr_mode_transition_task_id(std::string mac, int new_task_id)
+bool db::assign_ire_4addr_mode_transition_task_id(const std::string &mac, int new_task_id)
 {
     auto n = get_node(mac);
     if (!n) {
@@ -3314,7 +3319,7 @@ bool db::assign_ire_4addr_mode_transition_task_id(std::string mac, int new_task_
     return true;
 }
 
-int db::get_ire_4addr_mode_transition_task_id(std::string mac)
+int db::get_ire_4addr_mode_transition_task_id(const std::string &mac)
 {
     auto n = get_node(mac);
     if (!n) {
