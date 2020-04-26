@@ -1787,10 +1787,10 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return false;
         }
         notification_out->cs_params()     = notification_in->cs_params();
-        auto tuple_in_supported_channels  = notification_in->supported_channels_list(0);
-        auto tuple_out_supported_channels = notification_out->supported_channels(0);
-        std::copy_n(&std::get<1>(tuple_in_supported_channels), message::SUPPORTED_CHANNELS_LENGTH,
-                    &std::get<1>(tuple_out_supported_channels));
+        auto tuple_in_preferred_channels  = notification_in->preferred_channels_list(0);
+        auto tuple_out_preferred_channels = notification_out->preferred_channels(0);
+        std::copy_n(&std::get<1>(tuple_in_preferred_channels), message::SUPPORTED_CHANNELS_LENGTH,
+                    &std::get<1>(tuple_out_preferred_channels));
         send_cmdu_to_controller(cmdu_tx);
         send_operating_channel_report();
         break;
@@ -2244,9 +2244,9 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return false;
         }
 
-        auto tuple_supported_channels = response->supported_channels_list(0);
-        std::copy_n(&std::get<1>(tuple_supported_channels), message::SUPPORTED_CHANNELS_LENGTH,
-                    hostap_params.supported_channels);
+        auto tuple_preferred_channels = response->preferred_channels_list(0);
+        std::copy_n(&std::get<1>(tuple_preferred_channels), message::SUPPORTED_CHANNELS_LENGTH,
+                    hostap_params.preferred_channels);
 
         // build channel preference report
         auto cmdu_tx_header = cmdu_tx.create(
@@ -2258,7 +2258,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         }
 
         auto preferences =
-            wireless_utils::get_channel_preferences(hostap_params.supported_channels);
+            wireless_utils::get_channel_preferences(hostap_params.preferred_channels);
 
         auto channel_preference_tlv = cmdu_tx.addClass<wfa_map::tlvChannelPreference>();
         if (!channel_preference_tlv) {
@@ -3269,14 +3269,14 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         std::copy_n(hostap_params.vht_mcs_set, beerocks::message::VHT_MCS_SET_SIZE,
                     bh_enable->vht_mcs_set());
 
-        auto tuple_supported_channels = bh_enable->supported_channels_list(0);
-        if (!std::get<0>(tuple_supported_channels)) {
+        auto tuple_preferred_channels = bh_enable->preferred_channels_list(0);
+        if (!std::get<0>(tuple_preferred_channels)) {
             LOG(ERROR) << "getting supported channels has failed!";
             break;
         }
 
-        std::copy_n(hostap_params.supported_channels, message::SUPPORTED_CHANNELS_LENGTH,
-                    &std::get<1>(tuple_supported_channels));
+        std::copy_n(hostap_params.preferred_channels, message::SUPPORTED_CHANNELS_LENGTH,
+                    &std::get<1>(tuple_preferred_channels));
 
         // Send the message
         LOG(DEBUG) << "send ACTION_BACKHAUL_ENABLE for mac " << bh_enable->iface_mac();
@@ -3401,12 +3401,12 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         }
 
         std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
-            supported_channels;
-        std::copy_n(std::begin(hostap_params.supported_channels), supported_channels.size(),
-                    supported_channels.begin());
+            preferred_channels;
+        std::copy_n(std::begin(hostap_params.preferred_channels), preferred_channels.size(),
+                    preferred_channels.begin());
 
         if (!tlvf_utils::add_ap_radio_basic_capabilities(cmdu_tx, hostap_params.iface_mac,
-                                                         supported_channels)) {
+                                                         preferred_channels)) {
             LOG(ERROR) << "Failed adding AP Radio Basic Capabilities TLV";
             return false;
         }
@@ -4518,7 +4518,7 @@ beerocks::message::sWifiChannel slave_thread::channel_selection_select_channel()
             continue;
         }
         for (uint8_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) {
-            const auto &channel  = hostap_params.supported_channels[i];
+            const auto &channel  = hostap_params.preferred_channels[i];
             auto operating_class = wireless_utils::get_operating_class_by_channel(channel);
 
             // Skip DFS channels

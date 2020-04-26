@@ -439,11 +439,11 @@ bool ap_wlan_hal_nl80211::read_acs_report()
 {
     LOG(TRACE) << __func__ << " for interface: " << get_radio_info().iface_name;
 
-    return read_supported_channels();
+    return read_preferred_channels();
 }
 
 // based on print_channels_handler() iw/phy.c
-bool ap_wlan_hal_nl80211::read_supported_channels()
+bool ap_wlan_hal_nl80211::read_preferred_channels()
 {
     auto ifname = get_radio_info().iface_name;
     LOG(TRACE) << "for interface: " << ifname;
@@ -454,7 +454,7 @@ bool ap_wlan_hal_nl80211::read_supported_channels()
         LOG(TRACE) << "Failed to get channels info from nl80211";
         return false;
     }
-    std::vector<bwl::WiFiChannel> supported_channels;
+    std::vector<bwl::WiFiChannel> preferred_channels;
     for (auto const &band : radio_info.bands) {
         for (auto const &pair : band.supported_channels) {
             auto &channel_info = pair.second;
@@ -464,16 +464,16 @@ bool ap_wlan_hal_nl80211::read_supported_channels()
                 channel.bandwidth = beerocks::utils::convert_bandwidth_to_int(bw);
                 channel.tx_pow    = channel_info.tx_power;
                 channel.is_dfs    = channel_info.is_dfs;
-                supported_channels.push_back(channel);
+                preferred_channels.push_back(channel);
             }
         }
     }
 
     // Clear the supported channels vector
-    m_radio_info.supported_channels.clear();
+    m_radio_info.preferred_channels.clear();
     // Resize the supported channels vector
-    m_radio_info.supported_channels.insert(m_radio_info.supported_channels.begin(),
-                                           supported_channels.begin(), supported_channels.end());
+    m_radio_info.preferred_channels.insert(m_radio_info.preferred_channels.begin(),
+                                           preferred_channels.begin(), preferred_channels.end());
     return true;
 }
 

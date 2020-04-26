@@ -1701,16 +1701,16 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             return false;
         }
 
-        auto tuple_supported_channels = request->supported_channels_list(0);
-        if (!std::get<0>(tuple_supported_channels)) {
+        auto tuple_preferred_channels = request->preferred_channels_list(0);
+        if (!std::get<0>(tuple_preferred_channels)) {
             LOG(ERROR) << "access to supported channels list failed!";
             return false;
         }
 
-        auto channels = &std::get<1>(tuple_supported_channels);
+        auto channels = &std::get<1>(tuple_preferred_channels);
 
         std::copy_n(channels, beerocks::message::SUPPORTED_CHANNELS_LENGTH,
-                    soc->supported_channels.begin());
+                    soc->preferred_channels.begin());
 
         soc->radio_mac             = request->iface_mac();
         soc->freq_type             = request->frequency_band();
@@ -2141,9 +2141,9 @@ bool backhaul_manager::handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmd
     for (const auto &slave : slaves_sockets) {
         // TODO skip slaves that are not operational
         auto radio_mac          = slave->radio_mac;
-        auto supported_channels = slave->supported_channels;
+        auto preferred_channels = slave->preferred_channels;
 
-        if (!tlvf_utils::add_ap_radio_basic_capabilities(cmdu_tx, radio_mac, supported_channels)) {
+        if (!tlvf_utils::add_ap_radio_basic_capabilities(cmdu_tx, radio_mac, preferred_channels)) {
             return false;
         }
 
