@@ -289,7 +289,7 @@ private:
         bool he_supported = false;             /**< Is HE supported flag */
         beerocks_message::sVapsList vaps_list; /**< List of VAPs in radio. */
         std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
-            supported_channels; /**< Array of supported channels in radio. */
+            preferred_channels; /**< Array of supported channels in radio. */
         std::unordered_map<sMacAddr, associated_clients_t>
             associated_clients_map; /**< Associated clients grouped by BSSID. */
     };

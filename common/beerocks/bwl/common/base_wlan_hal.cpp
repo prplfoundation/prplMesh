@@ -31,7 +31,7 @@ base_wlan_hal::base_wlan_hal(HALType type, std::string iface_name, IfaceType ifa
     }
 
     // Initialize complex containers of the radio_info structure
-    m_radio_info.supported_channels.resize(128 /* TODO: Get real value */);
+    m_radio_info.preferred_channels.resize(128 /* TODO: Get real value */);
 }
 
 base_wlan_hal::~base_wlan_hal()

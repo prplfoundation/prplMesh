@@ -317,7 +317,7 @@ public:
      *
      * @return true on success or false on error.
      */
-    virtual bool read_supported_channels() = 0;
+    virtual bool read_preferred_channels() = 0;
 
     /*!
      * Set Transmit Power Limit 
