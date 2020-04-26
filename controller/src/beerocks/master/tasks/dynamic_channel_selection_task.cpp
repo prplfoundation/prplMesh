@@ -262,7 +262,7 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
         TASK_LOG(DEBUG) << "TRIGGER_SINGLE_SCAN received";
         auto single_scan_event = reinterpret_cast<sScanEvent *>(obj);
         event_handled          = true;
-        TASK_LOG(DEBUG) << "TRIGGER_SINGLE_SCAN handled on:" << single_scan_event->radio_mac.oct;
+        TASK_LOG(DEBUG) << "TRIGGER_SINGLE_SCAN handled on: " << single_scan_event->radio_mac;
         m_single_scan_request_pending = true;
         break;
     }
@@ -271,8 +271,8 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
         if (fsm_in_state(eState::WAIT_FOR_SCAN_TRIGGERED)) {
             auto scan_trigger_failed_event = reinterpret_cast<sScanEvent *>(obj);
             event_handled                  = true;
-            TASK_LOG(WARNING) << "failed to trigger a scan on:"
-                              << scan_trigger_failed_event->radio_mac.oct << ", aborting scan";
+            TASK_LOG(WARNING) << "failed to trigger a scan on: "
+                              << scan_trigger_failed_event->radio_mac << ", aborting scan";
             m_last_scan_error_code = beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
             clear_pending_events();
             fsm_move_state(eState::ABORT_SCAN);
@@ -284,7 +284,7 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
         if (fsm_in_state(eState::WAIT_FOR_SCAN_TRIGGERED)) {
             auto scan_triggered_event = reinterpret_cast<sScanEvent *>(obj);
             event_handled             = true;
-            TASK_LOG(DEBUG) << "SCAN_TRIGGERED handled on:" << scan_triggered_event->radio_mac.oct;
+            TASK_LOG(DEBUG) << "SCAN_TRIGGERED handled on: " << scan_triggered_event->radio_mac;
 
             set_events_timeout(SCAN_RESULTS_DUMP_WAIT_TIME_MSEC);
             dcs_wait_for_event(eEvent::SCAN_RESULTS_DUMP);
@@ -301,8 +301,8 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
         if (fsm_in_state(eState::WAIT_FOR_RESULTS_READY)) {
             auto scan_results_ready_event = reinterpret_cast<sScanEvent *>(obj);
             event_handled                 = true;
-            TASK_LOG(DEBUG) << "SCAN_RESULTS_READY handled on:"
-                            << scan_results_ready_event->radio_mac.oct;
+            TASK_LOG(DEBUG) << "SCAN_RESULTS_READY handled on: "
+                            << scan_results_ready_event->radio_mac;
 
             if (!database.clear_channel_scan_results(m_radio_mac, m_single_scan)) {
                 TASK_LOG(ERROR) << "failed to clear scan results";
@@ -327,8 +327,8 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
         if (fsm_in_state(eState::WAIT_FOR_RESULTS_DUMP)) {
             auto scan_results_dump_event = reinterpret_cast<sScanEvent *>(obj);
             event_handled                = true;
-            TASK_LOG(DEBUG) << "SCAN_RESULTS_DUMP handled on:"
-                            << scan_results_dump_event->radio_mac.oct;
+            TASK_LOG(DEBUG) << "SCAN_RESULTS_DUMP handled on: "
+                            << scan_results_dump_event->radio_mac;
             auto channel = scan_results_dump_event->udata.scan_results.channel;
 
             if (!database.is_channel_in_pool(m_radio_mac, channel, m_single_scan)) {
@@ -359,7 +359,7 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
         if (fsm_in_state(eState::WAIT_FOR_RESULTS_DUMP)) {
             auto scan_finished_event = reinterpret_cast<sScanEvent *>(obj);
             event_handled            = true;
-            TASK_LOG(DEBUG) << "SCAN_FINISHED handled on:" << scan_finished_event->radio_mac.oct;
+            TASK_LOG(DEBUG) << "SCAN_FINISHED handled on: " << scan_finished_event->radio_mac;
 
             //clear any pending events. for example SCAN_RESULTS_DUMP
             clear_pending_events();
@@ -375,7 +375,7 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
         TASK_LOG(DEBUG) << "SCAN_ABORTED received";
         auto scan_abort_event = reinterpret_cast<sScanEvent *>(obj);
         event_handled         = true;
-        TASK_LOG(DEBUG) << "SCAN_FINISHED handled on:" << scan_abort_event->radio_mac.oct;
+        TASK_LOG(DEBUG) << "SCAN_FINISHED handled on: " << scan_abort_event->radio_mac;
 
         m_last_scan_error_code = beerocks::eChannelScanErrCode::CHANNEL_SCAN_ABORTED_BY_DRIVER;
 
@@ -387,7 +387,7 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
         TASK_LOG(DEBUG) << "SCAN_ENABLE_CHANGE received";
         auto scan_enable_change_event = reinterpret_cast<sScanEvent *>(obj);
         event_handled                 = true;
-        TASK_LOG(DEBUG) << "SCAN_FINISHED handled on:" << scan_enable_change_event->radio_mac.oct;
+        TASK_LOG(DEBUG) << "SCAN_FINISHED handled on: " << scan_enable_change_event->radio_mac;
 
         if (fsm_in_state(eState::IDLE)) {
             TASK_LOG(DEBUG) << "current state:IDLE, resetting interval wait";
