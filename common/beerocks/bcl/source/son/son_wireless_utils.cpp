@@ -782,6 +782,24 @@ const std::set<uint8_t> &wireless_utils::operating_class_to_channel_set(uint8_t 
     return it->second.channels;
 }
 
+/**
+ * @brief convert operating class to bandwidth based on Table 4-E in the ieee 802.11 specification
+ *
+ * @param operating_class operating class
+ * @return beerocks::eWiFiBandwidth enum of supported bandwidth for specific operating class.
+ */
+const beerocks::eWiFiBandwidth &
+wireless_utils::operating_class_to_bandwidth(uint8_t operating_class)
+{
+    static const beerocks::eWiFiBandwidth NA = beerocks::eWiFiBandwidth::BANDWIDTH_UNKNOWN;
+    auto it                                  = operating_classes_list.find(operating_class);
+    if (it == operating_classes_list.end()) {
+        LOG(ERROR) << "reserved operating class " << int(operating_class);
+        return NA;
+    }
+    return it->second.band;
+}
+
 std::string wireless_utils::wsc_to_bwl_authentication(WSC::eWscAuth authtype)
 {
     switch (authtype) {
