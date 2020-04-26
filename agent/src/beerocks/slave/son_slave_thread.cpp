@@ -4585,7 +4585,7 @@ bool slave_thread::handle_beacon_metrics_query_request(Socket *sd,
     if (!gate::load(request_out, cmdu_rx)) {
         LOG(ERROR) << "faild translating 1905 message to vs message";
         return false;
-    } 
+    }
 
     message_com::send_cmdu(monitor_socket, cmdu_tx);
 
