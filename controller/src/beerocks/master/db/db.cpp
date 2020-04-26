@@ -1275,19 +1275,20 @@ bool db::add_hostap_supported_operating_class(const std::string &radio_mac, uint
 {
     auto supported_channels = get_hostap_supported_channels(radio_mac);
     auto channel_set        = wireless_utils::operating_class_to_channel_set(operating_class);
-
+    auto class_bw           = wireless_utils::operating_class_to_bandwidth(operating_class);
     // Update current channels
     for (auto c : channel_set) {
         auto channel = std::find_if(
             supported_channels.begin(), supported_channels.end(),
             [&c](const beerocks::message::sWifiChannel &ch) { return ch.channel == c; });
         if (channel != supported_channels.end()) {
-            channel->tx_pow = tx_power;
-            //TODO fill other channel parameters
+            channel->tx_pow            = tx_power;
+            channel->channel_bandwidth = class_bw;
         } else {
             beerocks::message::sWifiChannel ch;
-            ch.channel = c;
-            ch.tx_pow  = tx_power;
+            ch.channel           = c;
+            ch.tx_pow            = tx_power;
+            ch.channel_bandwidth = class_bw;
             supported_channels.push_back(ch);
         }
     }
