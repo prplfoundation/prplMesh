@@ -101,8 +101,10 @@ void fillTxValues(ieee1905_1::CmduMessageTx &tx)
     tlv->add_ap_channel_reports_list(ap_channel_list);
 
     // verify
-    for (int idx=0; idx<3; ++idx) {
-        std::cout << "DEBUG: " << idx << ":" << std::hex << +*(std::get<1>(tlv->ap_channel_reports_list(0)).ap_channel_report_list(idx)) << "\n";
+    for (int idx = 0; idx < 3; ++idx) {
+        std::cout << "DEBUG: " << idx << ":" << std::hex
+                  << +*(std::get<1>(tlv->ap_channel_reports_list(0)).ap_channel_report_list(idx))
+                  << "\n";
     }
 }
 

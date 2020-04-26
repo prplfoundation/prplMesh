@@ -1,11 +1,12 @@
 
 #include "1905_beacon_query_to_vs.h"
-#include <mapf/common/utils.h>
 #include <bcl/beerocks_defines.h>
+#include <mapf/common/utils.h>
 
-namespace gate{
+namespace gate {
 
-bool load( std::shared_ptr<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST> lhs, const ieee1905_1::CmduMessageRx &rhs )
+bool load(std::shared_ptr<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST> lhs,
+          const ieee1905_1::CmduMessageRx &rhs)
 {
     // escape I
     if (!lhs) {
@@ -16,9 +17,8 @@ bool load( std::shared_ptr<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_R
     // escape II
     // get the correct type of the message
     auto beacon_metrics_query = rhs.getClass<wfa_map::tlvBeaconMetricsQuery>();
-
     if (!beacon_metrics_query) {
-        LOG(ERROR) << "tlvBeaconMetricsQuery missing - can't load invalid input";
+        LOG(ERROR) << "tlvBeaconMetricsQuery is missing - can't load invalid input";
         return false;
     }
 
@@ -83,9 +83,17 @@ bool load( std::shared_ptr<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_R
     mapf::utils::copy_string(lhs_params.ssid, beacon_metrics_query->ssid_str().c_str(),
                              beerocks::message::WIFI_SSID_MAX_LENGTH);
 
+    // how many elements in the list of channels, we support only 1 at the moment
     auto ap_ch_report_length = beacon_metrics_query->ap_channel_reports_list_length();
 
-    lhs_params.use_optional_ap_ch_report = ap_ch_report_length;
+    // escape III - data validation
+    // ap_ch_report_length != 0 ==> channel_number == 255
+    // we verify with the already extracted values (we could do it withthe original as well)
+    if (ap_ch_report_length != 0 && lhs_params.channel != 255) {
+        LOG(ERROR) << "inconsistency between channel report length and channel number. please take "
+                      "look at the specification. v1 17.2.27";
+        return false;
+    }
 
     // copy m_ap_channel_reports_list from the 1905 beacon_metrics_query
     // into ap_ch_report char array of the vs message (lhs_params)
@@ -98,8 +106,9 @@ bool load( std::shared_ptr<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_R
         return false;
     }
 
-    // it might be zero as well
+    // we support only one
     if (1 == ap_ch_report_length) {
+
         // get the first (and currently only) structure from the list
         auto channel = beacon_metrics_query->ap_channel_reports_list(0);
         if (!std::get<0>(channel)) {
@@ -107,18 +116,14 @@ bool load( std::shared_ptr<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_R
             return false;
         }
 
+        // the number of channels, excluding the first operating class
+        lhs_params.use_optional_ap_ch_report =
+            std::get<1>(channel).ap_channel_report_list_length() - 1;
+
         // the first index in the tlv's channel-report-list is the operating class,
         // we skip it. using pointer arithmethics and copying one element less from the source (we skip the operation class)
-        std::copy_n(lhs_params.ap_ch_report,
-                    std::get<1>(channel).ap_channel_report_list_length() - 1,
-                    std::get<1>(channel).ap_channel_report_list() + 1 );
-                    
-
-        // DEBUG
-        LOG(DEBUG) << "beacon request for the following channels:";
-        for(int idx = 0; idx < std::get<1>(channel).ap_channel_report_list_length() - 1; ++idx)
-        {
-            LOG(DEBUG) << "channel: " << lhs_params.ap_ch_report[idx];
+        for (int idx = 0; idx < lhs_params.use_optional_ap_ch_report; ++idx) {
+            lhs_params.ap_ch_report[idx] = *std::get<1>(channel).ap_channel_report_list(idx + 1);
         }
     }
 
@@ -132,10 +137,9 @@ bool load( std::shared_ptr<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_R
     // lhs_params.new_ch_center_freq_seg_0 = ??
     // lhs_params.new_ch_center_freq_seg_1 = ??
     // end FixMe
-//
-//
+    //
+    //
     return true;
 }
 
-}
-
+} // namespace gate
