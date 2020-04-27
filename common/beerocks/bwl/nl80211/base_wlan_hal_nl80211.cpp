@@ -634,7 +634,7 @@ bool base_wlan_hal_nl80211::refresh_radio_info()
     parsed_obj_map_t reply;
 
     /**
-     * Obtain frequency band and maximum supported bandwidth using NL80211.
+     * Obtain frequency band, maximum supported bandwidth and supported channels using NL80211.
      * As this information does not change, this is required the first time this method is called
      * only.
      */
@@ -653,6 +653,18 @@ bool base_wlan_hal_nl80211::refresh_radio_info()
                 m_radio_info.vht_capability = band_info.vht_capability;
                 m_radio_info.vht_mcs_set.assign(band_info.vht_mcs_set,
                                                 sizeof(band_info.vht_mcs_set));
+
+                for (auto const &pair : band_info.supported_channels) {
+                    auto &channel_info = pair.second;
+                    for (auto bw : channel_info.supported_bandwidths) {
+                        beerocks::message::sWifiChannel channel;
+                        channel.channel           = channel_info.number;
+                        channel.channel_bandwidth = bw;
+                        channel.tx_pow            = channel_info.tx_power;
+                        channel.is_dfs_channel    = channel_info.is_dfs;
+                        m_radio_info.supported_channels.push_back(channel);
+                    }
+                }
             }
         }
     }
@@ -740,7 +752,7 @@ bool base_wlan_hal_nl80211::refresh_radio_info()
     }
 
     return true;
-}
+} // namespace nl80211
 
 bool base_wlan_hal_nl80211::refresh_vaps_info(int id)
 {
