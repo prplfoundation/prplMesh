@@ -1424,14 +1424,15 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
         }
 
         auto request_out = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST>(
+            beerocks_message::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_REQUEST>(
             cmdu_tx, beerocks_header->id());
         if (!request_out) {
             LOG(ERROR) << "Failed building message!";
             return false;
         }
-        request_out->sync() = request_in->sync();
-        LOG(DEBUG) << "send ACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST";
+        request_out->sync()    = request_in->sync();
+        request_out->sta_mac() = request_in->sta_mac();
+        LOG(DEBUG) << "send ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_REQUEST";
         message_com::send_cmdu(monitor_socket, cmdu_tx);
         break;
     }

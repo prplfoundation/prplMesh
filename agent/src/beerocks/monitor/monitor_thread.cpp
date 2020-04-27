@@ -717,6 +717,21 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
         break;
     }
+    case beerocks_message::ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_REQUEST: {
+        LOG(TRACE) << "received ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_REQUEST";
+        auto request = beerocks_header->addClass<
+            beerocks_message::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_REQUEST>();
+        if (!request) {
+            LOG(ERROR)
+                << "addClass ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_REQUEST failed";
+            return false;
+        }
+        mon_stats.add_request(beerocks_header->id(), request->sync(), request->sta_mac());
+        if (request->sync()) {
+            mon_db.set_poll_next_time(std::chrono::steady_clock::now(), true);
+        }
+        break;
+    }
     case beerocks_message::ACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL: {
         LOG(TRACE) << "received ACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL";
         auto request =
