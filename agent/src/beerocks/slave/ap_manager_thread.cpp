@@ -1573,6 +1573,14 @@ void ap_manager_thread::handle_hostapd_attached()
                 beerocks::message::VHT_MCS_SET_SIZE, notification->params().vht_mcs_set);
 
     // Copy the channels supported by the AP
+    if (!notification->alloc_supported_channels(
+            ap_wlan_hal->get_radio_info().supported_channels.size())) {
+        LOG(ERROR) << "Failed to allocate supported_channels!";
+        return;
+    }
+    auto tuple_supported_channels = notification->supported_channels(0);
+    std::copy_n(ap_wlan_hal->get_radio_info().supported_channels.begin(),
+                notification->supported_channels_size(), &std::get<1>(tuple_supported_channels));
     std::copy_n(ap_wlan_hal->get_radio_info().preferred_channels.begin(),
                 beerocks::message::SUPPORTED_CHANNELS_LENGTH,
                 notification->params().preferred_channels);
