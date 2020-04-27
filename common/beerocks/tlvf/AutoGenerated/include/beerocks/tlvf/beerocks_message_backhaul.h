@@ -540,15 +540,15 @@ class cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION : public BaseClass
         sMacAddr* m_bssid = nullptr;
 };
 
-class cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST : public BaseClass
+class cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST : public BaseClass
 {
     public:
-        cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST();
+        cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST();
 
         static eActionOp_BACKHAUL get_action_op(){
-            return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST);
+            return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST);
         }
         uint8_t& sync();
         void class_swap() override;
