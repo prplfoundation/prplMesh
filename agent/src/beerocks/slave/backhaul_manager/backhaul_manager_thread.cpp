@@ -2182,7 +2182,8 @@ bool backhaul_manager::handle_associated_sta_link_metrics_query(ieee1905_1::Cmdu
             return false;
         }
 
-        request_out->sync() = true;
+        request_out->sync()    = true;
+        request_out->sta_mac() = mac->sta_mac();
 
         return message_com::send_cmdu(radio->slave, cmdu_tx);
     }
