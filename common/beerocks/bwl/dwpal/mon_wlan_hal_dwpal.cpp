@@ -739,8 +739,17 @@ bool mon_wlan_hal_dwpal::sta_beacon_11k_request(const SBeaconRequest11k &req, in
         cmd += " ssid=" + req_ssid;
     }
 
-    // ToDo:
     // use ap_ch_report in the request.
+    if (req.use_optional_ap_ch_report) {
+        std::stringstream ch_report_ss;
+        uint8_t current_channel = 0;
+        for (; current_channel < req.use_optional_ap_ch_report - 1; ++current_channel) {
+            ch_report_ss << req.ap_ch_report[current_channel] << ",";
+        }
+        ch_report_ss << req.ap_ch_report[current_channel];
+
+        cmd += " ap_ch_report=" + ch_report_ss.str();
+    }
 
     // send command
     if (!dwpal_send_cmd(cmd, &reply)) {

@@ -71,7 +71,8 @@ void fillTxValues(ieee1905_1::CmduMessageTx &tx)
         return;
     }
     ap_channel_list->alloc_ap_channel_report_list(3);
-    *ap_channel_list->ap_channel_report_list(0) = 0x73; // operating class (currently ignored system wide)
+    *ap_channel_list->ap_channel_report_list(0) =
+        0x73; // operating class (currently ignored system wide)
     *ap_channel_list->ap_channel_report_list(1) = 46;
     *ap_channel_list->ap_channel_report_list(2) = 31;
 
@@ -123,7 +124,7 @@ int main()
     gate::load(/*dst*/ beerocks, /*src*/ rx);
 
     // verification (hunman readable output_
-    beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST &msg = *beerocks; 
+    beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST &msg = *beerocks;
     std::cout << msg;
 
     return RET_OK;
