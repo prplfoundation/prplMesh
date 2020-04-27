@@ -2109,9 +2109,6 @@ bool master_thread::handle_intel_slave_join(
     database.set_node_ipv4(radio_mac, bridge_ipv4);
     database.set_node_manufacturer(radio_mac, "Intel");
 
-    database.set_hostap_supported_channels(radio_mac, notification->hostap().preferred_channels,
-                                           message::SUPPORTED_CHANNELS_LENGTH);
-
     if (database.get_node_5ghz_support(radio_mac)) {
         if (notification->low_pass_filter_on()) {
             database.set_hostap_band_capability(radio_mac, beerocks::LOW_SUBBAND_ONLY);
