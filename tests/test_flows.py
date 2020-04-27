@@ -565,10 +565,11 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
 
         time.sleep(1)
 
-        env.controller.dev_send_1905(env.agents[0].mac, 0x800D,
-                                     tlv(0x95, 0x0006, '{sta_mac}'.format(sta_mac=sta.mac)))
+        mid = env.controller.dev_send_1905(env.agents[0].mac, 0x800D,
+                                           tlv(0x95, 0x0006, '{sta_mac}'.format(sta_mac=sta.mac)))
         time.sleep(1)
-        self.check_log(env.agents[0], "Send AssociatedStaLinkMetrics to controller")
+        self.check_log(env.agents[0],
+                       "Send AssociatedStaLinkMetrics to controller, mid = {}".format(mid))
 
     def test_client_steering_mandate(self):
         debug("Send topology request to agent 1")
