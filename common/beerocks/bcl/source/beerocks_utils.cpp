@@ -212,16 +212,6 @@ std::string utils::convert_channel_ext_above_to_string(bool channel_ext_above_se
     }
 }
 
-void utils::merge_list(std::vector<uint8_t> &ret, std::vector<uint8_t> &list)
-{
-    std::vector<uint8_t>::iterator it;
-    for (it = list.begin(); it != list.end(); ++it) {
-        if ((*it != 0) && (std::find(ret.begin(), ret.end(), *it) == ret.end())) {
-            ret.push_back(*it);
-        }
-    }
-}
-
 std::string utils::dump_buffer(const uint8_t *buffer, size_t len)
 {
     std::ostringstream hexdump;
