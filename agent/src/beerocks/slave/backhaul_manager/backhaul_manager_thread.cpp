@@ -1981,6 +1981,60 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
         }
         break;
     }
+    case beerocks_message::ACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_RESPONSE: {
+        auto response_in = beerocks_header->addClass<
+            beerocks_message::cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_RESPONSE>();
+        if (!response_in) {
+            LOG(ERROR) << "addClass ACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_RESPONSE failed";
+            return false;
+        }
+
+        auto mid = beerocks_header->id();
+
+        if (!cmdu_tx.create(
+                mid, ieee1905_1::eMessageType::ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE)) {
+            LOG(ERROR)
+                << "cmdu creation of type ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE has failed";
+            return false;
+        }
+
+        auto response_out = cmdu_tx.addClass<wfa_map::tlvAssociatedStaLinkMetrics>();
+
+        if (!response_out->alloc_bssid_info_list(response_in->bssid_info_list_length())) {
+            LOG(ERROR) << "alloc_per_bss_sta_link_metrics failed";
+            return false;
+        }
+
+        response_out->sta_mac() = response_in->sta_mac();
+
+        for (size_t i = 0; i < response_out->bssid_info_list_length(); ++i) {
+            auto &bss_in  = std::get<1>(response_in->bssid_info_list(i));
+            auto &bss_out = std::get<1>(response_out->bssid_info_list(i));
+
+            auto mac   = response_out->sta_mac();
+            auto radio = get_sta_radio(mac);
+            if (!radio) {
+                LOG(ERROR) << "radio for mac " << mac << " is null";
+                return false;
+            }
+
+            bss_out.bssid = get_sta_bssid(radio->associated_clients_map, mac);
+            if (bss_out.bssid == network_utils::ZERO_MAC) {
+                LOG(ERROR) << "bssid is ZERO_MAC";
+                return false;
+            }
+
+            bss_out.earliest_measurement_delta = bss_in.earliest_measurement_delta;
+            bss_out.downlink_estimated_mac_data_rate_mbps =
+                bss_in.downlink_estimated_mac_data_rate_mbps;
+            bss_out.uplink_estimated_mac_data_rate_mbps =
+                bss_in.uplink_estimated_mac_data_rate_mbps;
+            bss_out.sta_measured_uplink_rssi_dbm_enc = bss_in.sta_measured_uplink_rssi_dbm_enc;
+        }
+        LOG(DEBUG) << "Send AssociatedStaLinkMetrics to controller, mid = " << mid;
+        send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+        break;
+    }
     default: {
         LOG(ERROR) << "Unhandled message received from master: "
                    << int(beerocks_header->action_op());
