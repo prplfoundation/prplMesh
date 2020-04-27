@@ -22,38 +22,6 @@ bool load(std::shared_ptr<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RE
         return false;
     }
 
-    // fill the parameters
-    /*
-    Legend: 
-        V - fine, we have value
-        ? - don't know where to take the value from
-        U - uncertain, set but not sure it is the correct value
-    V uint8_t measurement_mode;
-    V uint8_t channel;
-    V int16_t op_class;
-    V uint16_t repeats;
-    V uint16_t rand_ival;
-    V uint16_t duration;
-    V sMacAddr sta_mac;
-    V sMacAddr bssid;
-    V uint8_t parallel;
-    V uint8_t enable;
-    V uint8_t request;
-    U uint8_t report;
-    V uint8_t mandatory_duration;
-    V uint8_t expected_reports_count;
-    V uint8_t use_optional_ssid;
-    V char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
-    ? uint8_t use_optional_ap_ch_report;
-    ? uint8_t ap_ch_report[237];
-    ? uint8_t use_optional_req_elements;
-    ? uint8_t req_elements[13];
-    ? uint8_t use_optional_wide_band_ch_switch;
-    ? uint32_t new_ch_width;
-    ? uint32_t new_ch_center_freq_seg_0;
-    ? uint32_t new_ch_center_freq_seg_1;
-    */
-
     auto &lhs_params = lhs->params();
 
     lhs_params.bssid   = beacon_metrics_query->bssid();

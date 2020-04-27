@@ -15,8 +15,8 @@
 
 namespace gate {
 
-// loads lhs with rhs. as if it was written: lhs = rhs;
-// however load() was chosen over operator=() or operator<<() as it permits returning success/fail with the bool return value
+// loads lhs with rhs. as if it was written: lhs = rhs; or lhs << rhs;
+// however load() was chosen over operator=() or operator<<() as it permits returning success/fail with the bool return value,
 // and also it opens the possibilites for adding additional parameters in the future if needed
 bool load(std::shared_ptr<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST> lhs,
           const ieee1905_1::CmduMessageRx &rhs);
