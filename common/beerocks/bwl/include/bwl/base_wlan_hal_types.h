@@ -45,16 +45,6 @@ enum class AntMode { Invalid = 0, ANT_1X1, ANT_2X2, ANT_3X3, ANT_4X4 };
 
 enum class WiFiChanBW { Invalid = 0, BW_20 = 20, BW_40 = 40, BW_80 = 80 };
 
-struct WiFiChannel {
-    int channel;
-    int bandwidth;
-    int noise;
-    int tx_pow;
-    int bss_overlap;
-    bool is_dfs;
-    bool radar_affected;
-};
-
 struct VAPElement {
     std::string ssid;
     std::string mac;
@@ -101,7 +91,7 @@ struct RadioInfo {
     std::basic_string<uint8_t>
         vht_mcs_set; /**< 32-byte attribute containing the MCS set as defined in 802.11ac */
     ChanSwReason last_csa_sw_reason = ChanSwReason::Unknown;
-    std::vector<WiFiChannel> preferred_channels;
+    std::vector<beerocks::message::sWifiChannel> preferred_channels;
     std::unordered_map<int, VAPElement> available_vaps; // key = vap_id
 };
 

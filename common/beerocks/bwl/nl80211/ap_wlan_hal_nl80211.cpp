@@ -454,17 +454,16 @@ bool ap_wlan_hal_nl80211::read_preferred_channels()
         LOG(TRACE) << "Failed to get channels info from nl80211";
         return false;
     }
-    std::vector<bwl::WiFiChannel> preferred_channels;
+    std::vector<beerocks::message::sWifiChannel> preferred_channels;
     for (auto const &band : radio_info.bands) {
         for (auto const &pair : band.supported_channels) {
             auto &channel_info = pair.second;
             for (auto bw : channel_info.supported_bandwidths) {
-                bwl::WiFiChannel channel;
-                channel.channel   = channel_info.number;
-                channel.bandwidth = beerocks::utils::convert_bandwidth_to_int(bw);
-                channel.tx_pow    = channel_info.tx_power;
-                channel.is_dfs    = channel_info.is_dfs;
-                preferred_channels.push_back(channel);
+                beerocks::message::sWifiChannel channel;
+                channel.channel           = channel_info.number;
+                channel.channel_bandwidth = bw;
+                channel.tx_pow            = channel_info.tx_power;
+                channel.is_dfs_channel    = channel_info.is_dfs;
             }
         }
     }

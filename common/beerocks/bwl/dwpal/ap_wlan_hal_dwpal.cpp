@@ -1458,17 +1458,6 @@ bool ap_wlan_hal_dwpal::read_acs_report()
     // Initialize default values
     m_radio_info.is_5ghz = false;
 
-    // Resize the supported channels vector
-    if (MAX_SUPPORTED_20M_CHANNELS >= m_radio_info.preferred_channels.size()) {
-        LOG(DEBUG) << "Increasing supported channels vector to: " << MAX_SUPPORTED_20M_CHANNELS;
-        m_radio_info.preferred_channels.resize(MAX_SUPPORTED_20M_CHANNELS);
-    }
-
-    // Clear the supported channels vector
-    for (auto &chan : m_radio_info.preferred_channels) {
-        memset(&chan, 0, sizeof(chan));
-    }
-
     size_t numOfValidArgs[4] = {0};
     std::vector<DWPAL_acs_report_get> acs_report(MAX_SUPPORTED_CHANNELS);
 
@@ -1496,29 +1485,26 @@ bool ap_wlan_hal_dwpal::read_acs_report()
         }
     }
 
-    uint8_t channel_idx = 0;
+    m_radio_info.preferred_channels.clear();
     LOG(DEBUG) << "Parsed ACS report:";
     for (uint16_t i = 0; (i < numOfValidArgs[0]) && (i < MAX_SUPPORTED_CHANNELS); i++) {
         LOG(DEBUG) << "Ch=" << (int)acs_report[i].Ch << " BW=" << (int)acs_report[i].BW
                    << " DFS=" << acs_report[i].DFS << " bss=" << acs_report[i].bss;
 
+        beerocks::message::sWifiChannel preferred_channel;
         if (acs_report[i].BW == 20) {
-            m_radio_info.preferred_channels[channel_idx].bandwidth = acs_report[i].BW;
-            m_radio_info.preferred_channels[channel_idx].channel   = acs_report[i].Ch;
+            preferred_channel.channel_bandwidth =
+                beerocks::utils::convert_bandwidth_to_enum(acs_report[i].BW);
+            preferred_channel.channel = acs_report[i].Ch;
             // Check if channel is 5GHz
-            if (son::wireless_utils::which_freq(
-                    m_radio_info.preferred_channels[channel_idx].channel) ==
+            if (son::wireless_utils::which_freq(preferred_channel.channel) ==
                 beerocks::eFreqType::FREQ_5G) {
                 m_radio_info.is_5ghz = true;
             }
-            m_radio_info.preferred_channels[channel_idx].bss_overlap = acs_report[i].bss;
-            m_radio_info.preferred_channels[channel_idx].is_dfs      = acs_report[i].DFS;
+            preferred_channel.bss_overlap    = acs_report[i].bss;
+            preferred_channel.is_dfs_channel = acs_report[i].DFS;
 
-            channel_idx++;
-            if (channel_idx == MAX_SUPPORTED_20M_CHANNELS) {
-                LOG(DEBUG) << "Max supported channels reached ==> break!";
-                break;
-            }
+            m_radio_info.preferred_channels.push_back(preferred_channel);
         }
     }
 
@@ -1536,16 +1522,16 @@ bool ap_wlan_hal_dwpal::read_preferred_channels()
         LOG(TRACE) << "Failed to get channels info from nl80211";
         return false;
     }
-    std::vector<bwl::WiFiChannel> preferred_channels;
+    std::vector<beerocks::message::sWifiChannel> preferred_channels;
     for (auto const &band : radio_info.bands) {
         for (auto const &pair : band.supported_channels) {
             auto &channel_info = pair.second;
             for (auto bw : channel_info.supported_bandwidths) {
-                bwl::WiFiChannel channel;
-                channel.channel   = channel_info.number;
-                channel.bandwidth = beerocks::utils::convert_bandwidth_to_int(bw);
-                channel.tx_pow    = channel_info.tx_power;
-                channel.is_dfs    = channel_info.is_dfs;
+                beerocks::message::sWifiChannel channel;
+                channel.channel           = channel_info.number;
+                channel.channel_bandwidth = bw;
+                channel.tx_pow            = channel_info.tx_power;
+                channel.is_dfs_channel    = channel_info.is_dfs;
                 preferred_channels.push_back(channel);
             }
         }

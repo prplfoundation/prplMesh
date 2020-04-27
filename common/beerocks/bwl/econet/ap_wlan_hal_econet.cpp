@@ -279,10 +279,11 @@ bool ap_wlan_hal_dummy::read_acs_report()
         m_radio_info.channel = 1;
         // 2.4G simulated report
         for (uint16_t ch = 1; ch <= 11; ch++) {
-            m_radio_info.preferred_channels[idx].channel     = ch;
-            m_radio_info.preferred_channels[idx].bandwidth   = 20;
-            m_radio_info.preferred_channels[idx].bss_overlap = 10;
-            m_radio_info.preferred_channels[idx].is_dfs      = 0;
+            m_radio_info.preferred_channels[idx].channel = ch;
+            m_radio_info.preferred_channels[idx].channel_bandwidth =
+                beerocks::utils::convert_bandwidth_to_enum(20);
+            m_radio_info.preferred_channels[idx].bss_overlap    = 10;
+            m_radio_info.preferred_channels[idx].is_dfs_channel = 0;
             idx++;
         }
     } else {
@@ -290,28 +291,31 @@ bool ap_wlan_hal_dummy::read_acs_report()
         m_radio_info.channel = 149;
         for (uint16_t ch = 36; ch <= 64; ch += 4) {
             for (uint16_t step = 0; step < 3; step++) {
-                m_radio_info.preferred_channels[idx].channel     = ch;
-                m_radio_info.preferred_channels[idx].bandwidth   = 20 + step * 20;
-                m_radio_info.preferred_channels[idx].bss_overlap = 10 + step * 10;
-                m_radio_info.preferred_channels[idx].is_dfs      = (ch > 48) ? 1 : 0;
+                m_radio_info.preferred_channels[idx].channel = ch;
+                m_radio_info.preferred_channels[idx].channel_bandwidth =
+                    beerocks::utils::convert_bandwidth_to_enum(20 + step * 20);
+                m_radio_info.preferred_channels[idx].bss_overlap    = 10 + step * 10;
+                m_radio_info.preferred_channels[idx].is_dfs_channel = (ch > 48) ? 1 : 0;
                 idx++;
             }
         }
         for (uint16_t ch = 100; ch <= 144; ch += 4) {
             for (uint16_t step = 0; step < 3; step++) {
-                m_radio_info.preferred_channels[idx].channel     = ch;
-                m_radio_info.preferred_channels[idx].bandwidth   = 20 + step * 20;
-                m_radio_info.preferred_channels[idx].bss_overlap = 10 + step * 10;
-                m_radio_info.preferred_channels[idx].is_dfs      = 1;
+                m_radio_info.preferred_channels[idx].channel = ch;
+                m_radio_info.preferred_channels[idx].channel_bandwidth =
+                    beerocks::utils::convert_bandwidth_to_enum(20 + step * 20);
+                m_radio_info.preferred_channels[idx].bss_overlap    = 10 + step * 10;
+                m_radio_info.preferred_channels[idx].is_dfs_channel = 1;
                 idx++;
             }
         }
         for (uint16_t ch = 149; ch <= 165; ch += 4) {
             for (uint16_t step = 0; step < 3; step++) {
-                m_radio_info.preferred_channels[idx].channel     = ch;
-                m_radio_info.preferred_channels[idx].bandwidth   = 20 + step * 20;
-                m_radio_info.preferred_channels[idx].bss_overlap = 10 + step * 10;
-                m_radio_info.preferred_channels[idx].is_dfs      = 0;
+                m_radio_info.preferred_channels[idx].channel = ch;
+                m_radio_info.preferred_channels[idx].channel_bandwidth =
+                    beerocks::utils::convert_bandwidth_to_enum(20 + step * 20);
+                m_radio_info.preferred_channels[idx].bss_overlap    = 10 + step * 10;
+                m_radio_info.preferred_channels[idx].is_dfs_channel = 0;
                 idx++;
             }
         }
