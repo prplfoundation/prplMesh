@@ -89,9 +89,12 @@ cACTION_APMANAGER_HOSTAP_ACS_ERROR_NOTIFICATION:
 cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION:
   _type: class
   cs_params: sApChannelSwitch
-  preferred_channels_list:
+  preferred_channels_size:
+    _type: uint8_t
+    _length_var: True
+  preferred_channels:
     _type: beerocks::message::sWifiChannel
-    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
+    _length: [ preferred_channels_size ]
 
 cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION:
   _type: class
@@ -215,7 +218,10 @@ cACTION_APMANAGER_READ_ACS_REPORT_REQUEST:
 
 cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE:
   _type: class
-  preferred_channels_list:
+  preferred_channels_size:
+    _type: uint8_t
+    _length_var: True
+  preferred_channels:
     _type: beerocks::message::sWifiChannel
-    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
+    _length: [ preferred_channels_size ]
 

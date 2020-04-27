@@ -66,9 +66,12 @@ cACTION_BACKHAUL_ENABLE:
   vht_mcs_set:
     _type: uint8_t
     _length: [ "beerocks::message::VHT_MCS_SET_SIZE" ]
-  preferred_channels_list:
-    _type: beerocks::message::sWifiChannel 
-    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
+  preferred_channels_size:
+    _type: uint8_t
+    _length_var: True
+  preferred_channels:
+    _type: beerocks::message::sWifiChannel
+    _length: [ preferred_channels_size ]
 
 cACTION_BACKHAUL_CONNECTED_NOTIFICATION:
   _type: class

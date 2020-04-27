@@ -2568,7 +2568,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         new_event->hostap_mac         = network_utils::mac_from_string(hostap_mac);
         new_event->cs_params          = notification->cs_params();
         auto tuple_preferred_channels = notification->preferred_channels(0);
-        std::copy_n(&std::get<1>(tuple_preferred_channels), message::SUPPORTED_CHANNELS_LENGTH,
+        std::copy_n(&std::get<1>(tuple_preferred_channels), notification->preferred_channels_size(),
                     new_event->supported_channels);
         tasks.push_event(database.get_channel_selection_task_id(),
                          (int)channel_selection_task::eEvent::ACS_RESPONSE_EVENT,
