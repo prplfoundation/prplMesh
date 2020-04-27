@@ -40,7 +40,6 @@ protected:
     virtual void unlock()                                                              = 0;
     virtual std::string fill_version_reply_string()                                    = 0;
     virtual void clear_configuration()                                                 = 0;
-    virtual bool validate_destination_alid(const std::string &dest_alid)               = 0;
     virtual bool send_cmdu_to_destination(ieee1905_1::CmduMessageTx &cmdu_tx,
                                           const std::string &dest_mac = std::string()) = 0;
     virtual bool handle_dev_set_config(std::unordered_map<std::string, std::string> &params,

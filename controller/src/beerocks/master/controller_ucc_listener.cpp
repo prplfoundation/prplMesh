@@ -84,18 +84,6 @@ bool controller_ucc_listener::handle_dev_get_param(
 }
 
 /**
- * @brief Validate if the 'dest_alid` MAC address matches one of known Agents MAC addresses.
- * 
- * @param[in] dest_alid Agent bridge MAC address.
- * @return true if successful, false if not.
- */
-bool controller_ucc_listener::validate_destination_alid(const std::string &dest_alid)
-{
-    auto agents = m_database.get_all_connected_ires();
-    return agents.find(dest_alid) != agents.end();
-}
-
-/**
  * @brief Send CMDU to destined Agent.
  * 
  * @param[in] dest_mac Agents mac address.

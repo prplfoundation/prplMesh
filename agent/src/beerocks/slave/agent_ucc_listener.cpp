@@ -143,18 +143,6 @@ bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, st
     value = "parameter " + parameter + " not supported";
     return false;
 }
-/**
- * @brief Validate if the 'dest_alid` MAC address matches the controllers MAC address.
- * 
- * @param[in] dest_alid Agent bridge MAC address.
- * @return true if successful, false if not.
- */
-bool agent_ucc_listener::validate_destination_alid(const std::string &dest_alid)
-{
-    // On the agent side, the dest_alid is not really needed since the destination socket will
-    // always be the controller socket.
-    return m_backhaul_manager_ctx.get_controller_bridge_mac() == dest_alid;
-}
 
 /**
  * @brief Send CMDU to destined Agent.
