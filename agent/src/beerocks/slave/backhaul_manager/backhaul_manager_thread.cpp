@@ -3154,19 +3154,19 @@ bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageR
 
     auto radio = findRadioInfo(slaves_sockets, requiredMac);
 
+    // build ACK message CMDU
+    const auto mid = cmdu_rx.getMessageId();
+
+    auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
+
     if (!radio) {
         LOG(WARNING) << "couldn't find any agent for the requested mac: " << requiredMac;
 
         // send ack with error to the controller
-
-        // build ACK message CMDU
-        const auto mid = cmdu_rx.getMessageId();
-
-        auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
-        if (!cmdu_tx_header) {
-            LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
-            return false;
-        }
 
         // add an Error Code TLV
         auto error_code_tlv = cmdu_tx.addClass<wfa_map::tlvErrorCode>();
@@ -3197,8 +3197,7 @@ bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageR
                << "; station: " << requiredMac;
     forward_to = radio->slave;
 
-    // more work to do at the caller
-    return false;
+    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
 }
 
 bool backhaul_manager::send_slaves_enable()
