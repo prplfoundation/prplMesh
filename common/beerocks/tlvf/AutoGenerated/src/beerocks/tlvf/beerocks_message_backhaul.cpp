@@ -1941,26 +1941,26 @@ bool cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::init()
     return true;
 }
 
-cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST::cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST::cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
     BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST::cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST::cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
 BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
-cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST::~cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST() {
+cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST::~cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST() {
 }
-uint8_t& cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST::sync() {
+uint8_t& cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST::sync() {
     return (uint8_t&)(*m_sync);
 }
 
-void cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST::class_swap()
+void cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
 }
 
-bool cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST::finalize()
+bool cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST::finalize()
 {
     if (m_parse__) {
         TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
@@ -1987,14 +1987,14 @@ bool cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST::finalize()
     return true;
 }
 
-size_t cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST::get_initial_size()
+size_t cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(uint8_t); // sync
     return class_size;
 }
 
-bool cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST::init()
+bool cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST::init()
 {
     if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";

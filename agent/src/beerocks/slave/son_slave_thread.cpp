@@ -1410,17 +1410,16 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
 
         break;
     }
-    case beerocks_message::ACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST: {
-        LOG(DEBUG) << "ACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST";
+    case beerocks_message::ACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST: {
+        LOG(DEBUG) << "ACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST";
         if (!monitor_socket) {
             LOG(ERROR) << "monitor_socket is null";
             return false;
         }
-        auto request_in =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST>();
+        auto request_in = beerocks_header->addClass<
+            beerocks_message::cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST>();
         if (!request_in) {
-            LOG(ERROR) << "addClass cACTION_BACKHAUL_HOSTAP_STATS_MEASUREMENT_REQUEST failed";
+            LOG(ERROR) << "addClass cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST failed";
             return false;
         }
 
