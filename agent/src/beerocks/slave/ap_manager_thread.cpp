@@ -34,10 +34,10 @@ using namespace beerocks::net;
 //////////////////////////////////////////////////////////////////////////////
 
 static std::string
-get_radio_preferred_channels_string(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal)
+get_radio_channels_string(const std::vector<beerocks::message::sWifiChannel> &channels)
 {
     std::ostringstream os;
-    for (auto val : ap_wlan_hal->get_radio_info().preferred_channels) {
+    for (auto val : channels) {
         if (val.channel > 0) {
             os << " ch = " << int(val.channel) << " | dfs = " << int(val.tx_pow) << " | bw = "
                << int(beerocks::utils::convert_bandwidth_to_int(
@@ -1600,7 +1600,9 @@ void ap_manager_thread::handle_hostapd_attached()
     LOG(INFO) << " vht_supported = " << ap_wlan_hal->get_radio_info().vht_supported;
     LOG(INFO) << " vht_capability = " << std::hex << ap_wlan_hal->get_radio_info().vht_capability;
     LOG(INFO) << " preferred_channels = " << std::endl
-              << get_radio_preferred_channels_string(ap_wlan_hal);
+              << get_radio_channels_string(ap_wlan_hal->get_radio_info().preferred_channels);
+    LOG(INFO) << " supported_channels = " << std::endl
+              << get_radio_channels_string(ap_wlan_hal->get_radio_info().supported_channels);
 
     // Send CMDU
     message_com::send_cmdu(slave_socket, cmdu_tx);
