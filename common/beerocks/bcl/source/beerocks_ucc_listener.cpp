@@ -670,14 +670,6 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
         auto &dest_alid = params["destalid"];
         std::transform(dest_alid.begin(), dest_alid.end(), dest_alid.begin(), ::tolower);
 
-        if (!validate_destination_alid(dest_alid)) {
-            err_string = "invalid param value '" + params["destalid"] +
-                         "' for param name 'DestALID', destination not found";
-            LOG(ERROR) << err_string;
-            reply_ucc(eWfaCaStatus::INVALID, err_string);
-            break;
-        }
-
         auto &message_type_str = params["messagetypevalue"];
         auto message_type      = (uint16_t)(std::stoul(message_type_str, nullptr, 16));
         if (!ieee1905_1::eMessageTypeValidate::check(message_type)) {
