@@ -551,6 +551,7 @@ class cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST : public BaseClass
             return (eActionOp_BACKHAUL)(ACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST);
         }
         uint8_t& sync();
+        sMacAddr& sta_mac();
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -559,6 +560,7 @@ class cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST : public BaseClass
         bool init();
         eActionOp_BACKHAUL* m_action_op = nullptr;
         uint8_t* m_sync = nullptr;
+        sMacAddr* m_sta_mac = nullptr;
 };
 
 class cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_RESPONSE : public BaseClass
