@@ -294,6 +294,48 @@ bool base_wlan_hal_dummy::refresh_radio_info()
 {
     if (get_iface_name() == "wlan2") {
         m_radio_info.is_5ghz = true;
+        for (uint16_t ch = 36; ch <= 64; ch += 4) {
+            for (uint16_t step = 0; step < 3; step++) {
+                beerocks::message::sWifiChannel supported_channel;
+                supported_channel.channel = ch;
+                supported_channel.channel_bandwidth =
+                    beerocks::utils::convert_bandwidth_to_enum(20 + step * 20);
+                supported_channel.bss_overlap    = 10 + step * 10;
+                supported_channel.is_dfs_channel = (ch > 48) ? 1 : 0;
+                m_radio_info.supported_channels.push_back(supported_channel);
+            }
+        }
+        for (uint16_t ch = 100; ch <= 144; ch += 4) {
+            for (uint16_t step = 0; step < 3; step++) {
+                beerocks::message::sWifiChannel supported_channel;
+                supported_channel.channel = ch;
+                supported_channel.channel_bandwidth =
+                    beerocks::utils::convert_bandwidth_to_enum(20 + step * 20);
+                supported_channel.bss_overlap    = 10 + step * 10;
+                supported_channel.is_dfs_channel = 1;
+                m_radio_info.supported_channels.push_back(supported_channel);
+            }
+        }
+        for (uint16_t ch = 149; ch <= 165; ch += 4) {
+            for (uint16_t step = 0; step < 3; step++) {
+                beerocks::message::sWifiChannel supported_channel;
+                supported_channel.channel = ch;
+                supported_channel.channel_bandwidth =
+                    beerocks::utils::convert_bandwidth_to_enum(20 + step * 20);
+                supported_channel.bss_overlap    = 10 + step * 10;
+                supported_channel.is_dfs_channel = 0;
+                m_radio_info.supported_channels.push_back(supported_channel);
+            }
+        }
+    } else {
+        for (uint16_t ch = 1; ch <= 11; ch++) {
+            beerocks::message::sWifiChannel supported_channel;
+            supported_channel.channel           = ch;
+            supported_channel.channel_bandwidth = beerocks::utils::convert_bandwidth_to_enum(20);
+            supported_channel.bss_overlap       = 10;
+            supported_channel.is_dfs_channel    = 0;
+            m_radio_info.supported_channels.push_back(supported_channel);
+        }
     }
     std::string radio_mac;
     beerocks::net::network_utils::linux_iface_get_mac(m_radio_info.iface_name, radio_mac);
