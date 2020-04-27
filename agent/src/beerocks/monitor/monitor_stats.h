@@ -64,6 +64,9 @@ private:
         sMacAddr mac;
     };
     std::list<sMeasurementsRequest> requests_list;
+    void send_hostap_measurements(const sMeasurementsRequest &request,
+                                  const monitor_radio_node::SRadioStats &radio_stats);
+    void send_associated_sta_link_metrics(const sMeasurementsRequest &request);
 
     ieee1905_1::CmduMessageTx &cmdu_tx;
 };

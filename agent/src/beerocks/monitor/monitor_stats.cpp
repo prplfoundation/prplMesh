@@ -54,6 +54,159 @@ void monitor_stats::add_request(uint16_t id, uint8_t sync, const sMacAddr &sta_m
     requests_list.push_back(sMeasurementsRequest(id, sta_mac));
 }
 
+void monitor_stats::send_hostap_measurements(const sMeasurementsRequest &request,
+                                             const monitor_radio_node::SRadioStats &radio_stats)
+{
+    auto response = message_com::create_vs_message<
+        beerocks_message::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE>(cmdu_tx);
+    if (!response) {
+        LOG(ERROR) << "Failed building cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE message!";
+        return;
+    }
+
+    auto beerocks_header = message_com::get_beerocks_header(cmdu_tx);
+    if (!beerocks_header) {
+        LOG(ERROR) << "Failed getting beerocks_header!";
+        return;
+    }
+
+    if (!response->alloc_ap_stats()) {
+        LOG(ERROR) << "tx_buffer overflow!";
+    }
+
+    auto ap_stats_tuple = response->ap_stats(0);
+    if (!std::get<0>(ap_stats_tuple)) {
+        LOG(ERROR) << "Failed to get element";
+        return;
+    }
+    auto &ap_stats_msg = std::get<1>(ap_stats_tuple);
+
+    ap_stats_msg.stats_delta_ms         = radio_stats.delta_ms;
+    ap_stats_msg.rx_packets             = radio_stats.hal_stats.rx_packets;
+    ap_stats_msg.tx_packets             = radio_stats.hal_stats.tx_packets;
+    ap_stats_msg.rx_bytes               = radio_stats.hal_stats.rx_bytes;
+    ap_stats_msg.tx_bytes               = radio_stats.hal_stats.tx_bytes;
+    ap_stats_msg.errors_sent            = radio_stats.hal_stats.errors_sent;
+    ap_stats_msg.errors_received        = radio_stats.hal_stats.errors_received;
+    ap_stats_msg.retrans_count          = radio_stats.total_retrans_count;
+    ap_stats_msg.noise                  = radio_stats.hal_stats.noise;
+    ap_stats_msg.channel_load_percent   = radio_stats.channel_load_tot_curr;
+    ap_stats_msg.client_count           = radio_stats.sta_count;
+    ap_stats_msg.active_client_count    = radio_stats.active_client_count_curr;
+    ap_stats_msg.client_tx_load_percent = radio_stats.client_tx_load_tot_curr;
+    ap_stats_msg.client_rx_load_percent = radio_stats.client_rx_load_tot_curr;
+
+    auto total_sta_count = mon_db->get_sta_count();
+    size_t elements_to_allocate;
+    uint32_t sta_count;
+
+    auto allocate_sta_stats_elements = [&]() {
+        elements_to_allocate =
+            cmdu_tx.elements_in_message(sizeof(beerocks_message::sStaStatsParams));
+
+        elements_to_allocate = std::min(total_sta_count, elements_to_allocate);
+
+        if (!response->alloc_sta_stats(elements_to_allocate)) {
+            LOG(ERROR) << "tx_buffer overflow! elements_to_allocate=" << int(elements_to_allocate);
+            return;
+        }
+
+        sta_count = 0;
+    };
+
+    allocate_sta_stats_elements();
+
+    for (auto it = mon_db->sta_begin(); it != mon_db->sta_end(); ++it) {
+        auto sta_mac  = it->first;
+        auto sta_node = it->second;
+        if (sta_node == nullptr) {
+            continue;
+        }
+
+        const auto &sta_stats = sta_node->get_stats();
+
+        if (elements_to_allocate == sta_count) {
+            message_com::send_cmdu(slave_socket, cmdu_tx);
+            response = message_com::create_vs_message<
+                beerocks_message::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE>(cmdu_tx);
+            if (!response) {
+                LOG(ERROR) << "Failed building "
+                              "cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE message!";
+                return;
+            }
+
+            total_sta_count -= sta_count;
+            allocate_sta_stats_elements();
+        }
+
+        auto &sta_stats_msg = std::get<1>(response->sta_stats(sta_count));
+
+        sta_stats_msg.mac               = network_utils::mac_from_string(sta_mac);
+        sta_stats_msg.rx_packets        = sta_stats.hal_stats.rx_packets;
+        sta_stats_msg.tx_packets        = sta_stats.hal_stats.tx_packets;
+        sta_stats_msg.tx_bytes          = sta_stats.hal_stats.tx_bytes;
+        sta_stats_msg.rx_bytes          = sta_stats.hal_stats.rx_bytes;
+        sta_stats_msg.retrans_count     = sta_stats.hal_stats.retrans_count;
+        sta_stats_msg.tx_phy_rate_100kb = sta_stats.tx_phy_rate_100kb_avg;
+        sta_stats_msg.rx_phy_rate_100kb = sta_stats.rx_phy_rate_100kb_avg;
+        sta_stats_msg.tx_load_percent   = sta_stats.tx_load_percent_curr;
+        sta_stats_msg.rx_load_percent   = sta_stats.rx_load_percent_curr;
+        sta_stats_msg.stats_delta_ms    = sta_stats.delta_ms;
+        sta_stats_msg.rx_rssi           = sta_stats.rx_rssi_curr;
+
+        sta_count++;
+    }
+
+    beerocks_header->actionhdr()->id() = request.message_id;
+    message_com::send_cmdu(slave_socket, cmdu_tx);
+}
+
+void monitor_stats::send_associated_sta_link_metrics(const sMeasurementsRequest &request)
+{
+    for (auto it = mon_db->sta_begin(); it != mon_db->sta_end(); ++it) {
+        auto sta_mac  = it->first;
+        auto sta_node = it->second;
+        if (sta_node == nullptr) {
+            continue;
+        }
+
+        if (network_utils::mac_from_string(sta_mac) != request.mac) {
+            continue;
+        }
+
+        auto sta_metrics = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE>(
+            cmdu_tx, request.message_id);
+        if (!sta_metrics) {
+            LOG(ERROR) << "Failed building "
+                          "cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE message!";
+            return;
+        }
+
+        // there is exactly 1 BSSID per STA
+        if (!sta_metrics->alloc_bssid_info_list(1)) {
+            LOG(ERROR) << "Failed allocate_bssid_info_list";
+            return;
+        }
+        const auto &sta_stats = sta_node->get_stats();
+
+        sta_metrics->sta_mac() = request.mac;
+
+        beerocks_message::sBssidInfo &bss_info = std::get<1>(sta_metrics->bssid_info_list(0));
+
+        bss_info.earliest_measurement_delta = sta_stats.delta_ms;
+        // TODO: MAC data rate and Phy rate are not necessarily the same
+        // https://github.com/prplfoundation/prplMesh/issues/1195
+        bss_info.downlink_estimated_mac_data_rate_mbps = sta_stats.rx_phy_rate_100kb_avg / 10;
+        bss_info.uplink_estimated_mac_data_rate_mbps   = sta_stats.tx_phy_rate_100kb_avg / 10;
+        bss_info.sta_measured_uplink_rssi_dbm_enc      = sta_stats.rx_rssi_curr;
+
+        LOG(DEBUG) << "Send ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE "
+                   << "for mac " << sta_metrics->sta_mac() << ", message_id = " << request.message_id;
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+    }
+}
+
 void monitor_stats::process()
 {
 
@@ -120,167 +273,14 @@ void monitor_stats::process()
 
     //send response
     if (!requests_list.empty()) {
-        auto response = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE>(cmdu_tx);
-        if (response == nullptr) {
-            LOG(ERROR)
-                << "Failed building cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE message!";
-            return;
+        auto request = requests_list.front();
+        if (request.mac == beerocks::net::network_utils::ZERO_MAC) {
+            send_hostap_measurements(request, radio_stats);
+        } else {
+            send_associated_sta_link_metrics(request);
         }
 
-        auto beerocks_header = message_com::get_beerocks_header(cmdu_tx);
-        if (!beerocks_header) {
-            LOG(ERROR) << "Failed getting beerocks_header!";
-            return;
-        }
-
-        if (!response->alloc_ap_stats()) {
-            LOG(ERROR) << "tx_buffer overflow!";
-        }
-
-        auto ap_stats_tuple = response->ap_stats(0);
-        if (!std::get<0>(ap_stats_tuple)) {
-            LOG(ERROR) << "Failed to get element";
-            return;
-        }
-        auto &ap_stats_msg = std::get<1>(ap_stats_tuple);
-
-        ap_stats_msg.stats_delta_ms         = radio_stats.delta_ms;
-        ap_stats_msg.rx_packets             = radio_stats.hal_stats.rx_packets;
-        ap_stats_msg.tx_packets             = radio_stats.hal_stats.tx_packets;
-        ap_stats_msg.rx_bytes               = radio_stats.hal_stats.rx_bytes;
-        ap_stats_msg.tx_bytes               = radio_stats.hal_stats.tx_bytes;
-        ap_stats_msg.errors_sent            = radio_stats.hal_stats.errors_sent;
-        ap_stats_msg.errors_received        = radio_stats.hal_stats.errors_received;
-        ap_stats_msg.retrans_count          = radio_stats.total_retrans_count;
-        ap_stats_msg.noise                  = radio_stats.hal_stats.noise;
-        ap_stats_msg.channel_load_percent   = radio_stats.channel_load_tot_curr;
-        ap_stats_msg.client_count           = radio_stats.sta_count;
-        ap_stats_msg.active_client_count    = radio_stats.active_client_count_curr;
-        ap_stats_msg.client_tx_load_percent = radio_stats.client_tx_load_tot_curr;
-        ap_stats_msg.client_rx_load_percent = radio_stats.client_rx_load_tot_curr;
-
-        auto total_sta_count = mon_db->get_sta_count();
-        size_t elements_to_allocate;
-        uint32_t sta_count;
-
-        auto allocate_sta_stats_elements = [&]() {
-            elements_to_allocate =
-                cmdu_tx.elements_in_message(sizeof(beerocks_message::sStaStatsParams));
-
-            elements_to_allocate = std::min(total_sta_count, elements_to_allocate);
-
-            if (!response->alloc_sta_stats(elements_to_allocate)) {
-                LOG(ERROR) << "tx_buffer overflow! elements_to_allocate="
-                           << int(elements_to_allocate);
-                return;
-            }
-
-            sta_count = 0;
-        };
-
-        allocate_sta_stats_elements();
-
-        std::unordered_map<sMacAddr, std::vector<beerocks_message::sBssidInfo>> bss_infos;
-
-        for (auto it = mon_db->sta_begin(); it != mon_db->sta_end(); ++it) {
-            auto sta_mac  = it->first;
-            auto sta_node = it->second;
-            if (sta_node == nullptr) {
-                continue;
-            }
-
-            auto &sta_stats = sta_node->get_stats();
-
-            if (elements_to_allocate == sta_count) {
-                message_com::send_cmdu(slave_socket, cmdu_tx);
-                response = message_com::create_vs_message<
-                    beerocks_message::cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE>(cmdu_tx);
-                if (!response) {
-                    LOG(ERROR) << "Failed building "
-                                  "cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE message!";
-                    return;
-                }
-
-                total_sta_count -= sta_count;
-                allocate_sta_stats_elements();
-            }
-
-            auto &sta_stats_msg = std::get<1>(response->sta_stats(sta_count));
-
-            sta_stats_msg.mac               = network_utils::mac_from_string(sta_mac);
-            sta_stats_msg.rx_packets        = sta_stats.hal_stats.rx_packets;
-            sta_stats_msg.tx_packets        = sta_stats.hal_stats.tx_packets;
-            sta_stats_msg.tx_bytes          = sta_stats.hal_stats.tx_bytes;
-            sta_stats_msg.rx_bytes          = sta_stats.hal_stats.rx_bytes;
-            sta_stats_msg.retrans_count     = sta_stats.hal_stats.retrans_count;
-            sta_stats_msg.tx_phy_rate_100kb = sta_stats.tx_phy_rate_100kb_avg;
-            sta_stats_msg.rx_phy_rate_100kb = sta_stats.rx_phy_rate_100kb_avg;
-            sta_stats_msg.tx_load_percent   = sta_stats.tx_load_percent_curr;
-            sta_stats_msg.rx_load_percent   = sta_stats.rx_load_percent_curr;
-            sta_stats_msg.stats_delta_ms    = sta_stats.delta_ms;
-            sta_stats_msg.rx_rssi           = sta_stats.rx_rssi_curr;
-
-            sta_count++;
-
-            beerocks_message::sBssidInfo bss_info;
-            bss_info.earliest_measurement_delta = sta_stats.delta_ms;
-            // TODO: MAC data rate and Phy rate are not necessarily the same
-            // https://github.com/prplfoundation/prplMesh/issues/1195
-            bss_info.downlink_estimated_mac_data_rate_mbps = sta_stats.rx_phy_rate_100kb_avg / 10;
-            bss_info.uplink_estimated_mac_data_rate_mbps   = sta_stats.tx_phy_rate_100kb_avg / 10;
-            bss_info.sta_measured_uplink_rssi_dbm_enc      = sta_stats.rx_rssi_curr;
-
-            bss_infos[network_utils::mac_from_string(sta_mac)].push_back(bss_info);
-        }
-
-        auto message_id = requests_list.front().message_id;
-
-        beerocks_header->actionhdr()->id() = message_id;
         requests_list.pop_front();
-        message_com::send_cmdu(slave_socket, cmdu_tx);
-
-        LOG(DEBUG) << "Preparing ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE. "
-                   << "Number of entries: " << bss_infos.size();
-
-        std::for_each(
-            bss_infos.begin(), bss_infos.end(),
-            [&](std::pair<sMacAddr, std::vector<beerocks_message::sBssidInfo>> bss_info) {
-                auto sta_metrics = message_com::create_vs_message<
-                    beerocks_message::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE>(
-                    cmdu_tx, message_id);
-                if (sta_metrics == nullptr) {
-                    LOG(ERROR)
-                        << "Failed building "
-                           "cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE message!";
-                    return;
-                }
-
-                if (!sta_metrics->alloc_bssid_info_list(bss_info.second.size())) {
-                    LOG(ERROR) << "Failed allocate_bssid_info_list";
-                }
-
-                sta_metrics->sta_mac() = bss_info.first;
-
-                for (size_t i = 0; i < sta_metrics->bssid_info_list_length(); ++i) {
-                    auto &bss_reply = std::get<1>(sta_metrics->bssid_info_list(i));
-                    auto &info      = bss_info.second[i];
-
-                    bss_reply.bssid                      = info.bssid;
-                    bss_reply.earliest_measurement_delta = info.earliest_measurement_delta;
-                    bss_reply.downlink_estimated_mac_data_rate_mbps =
-                        info.downlink_estimated_mac_data_rate_mbps;
-                    bss_reply.uplink_estimated_mac_data_rate_mbps =
-                        info.uplink_estimated_mac_data_rate_mbps;
-                    bss_reply.sta_measured_uplink_rssi_dbm_enc =
-                        info.sta_measured_uplink_rssi_dbm_enc;
-
-                    LOG(DEBUG) << "Send ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE "
-                               << "for mac " << sta_metrics->sta_mac()
-                               << ", message_id = " << message_id;
-                    message_com::send_cmdu(slave_socket, cmdu_tx);
-                }
-            });
     }
 
     int delta_val;
