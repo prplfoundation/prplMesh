@@ -12,6 +12,7 @@
 #include "monitor_db.h"
 
 #include <bcl/beerocks_message_structs.h>
+#include <bcl/network/network_utils.h>
 #include <bcl/network/socket.h>
 
 #include <tlvf/CmduMessageTx.h>
@@ -25,7 +26,8 @@ public:
     bool start(monitor_db *mon_db_, Socket *slave_socket_);
     void stop();
 
-    void add_request(uint16_t id, uint8_t sync);
+    void add_request(uint16_t id, uint8_t sync,
+                     const sMacAddr &mac = beerocks::net::network_utils::ZERO_MAC);
 
     void process();
 
@@ -55,7 +57,13 @@ private:
     monitor_db *mon_db   = nullptr;
     Socket *slave_socket = nullptr;
     uint32_t next_poll_id;
-    std::list<uint16_t> requests_list;
+
+    struct sMeasurementsRequest {
+        sMeasurementsRequest(uint16_t _mid, const sMacAddr &_mac) : message_id(_mid), mac(_mac) {}
+        uint16_t message_id;
+        sMacAddr mac;
+    };
+    std::list<sMeasurementsRequest> requests_list;
 
     ieee1905_1::CmduMessageTx &cmdu_tx;
 };

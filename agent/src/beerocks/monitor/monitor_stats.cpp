@@ -42,7 +42,7 @@ bool monitor_stats::start(monitor_db *mon_db_, Socket *slave_socket_)
     return true;
 }
 
-void monitor_stats::add_request(uint16_t id, uint8_t sync)
+void monitor_stats::add_request(uint16_t id, uint8_t sync, const sMacAddr &sta_mac)
 {
     if (sync) {
         if (!mon_db) {
@@ -51,7 +51,7 @@ void monitor_stats::add_request(uint16_t id, uint8_t sync)
         }
         next_poll_id = mon_db->get_poll_id() + 1;
     }
-    requests_list.push_back(id);
+    requests_list.push_back(sMeasurementsRequest(id, sta_mac));
 }
 
 void monitor_stats::process()
@@ -234,7 +234,7 @@ void monitor_stats::process()
             bss_infos[network_utils::mac_from_string(sta_mac)].push_back(bss_info);
         }
 
-        auto message_id = requests_list.front();
+        auto message_id = requests_list.front().message_id;
 
         beerocks_header->actionhdr()->id() = message_id;
         requests_list.pop_front();
