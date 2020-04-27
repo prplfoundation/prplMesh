@@ -63,6 +63,9 @@ class cACTION_APMANAGER_JOINED_NOTIFICATION : public BaseClass
         }
         sNodeHostap& params();
         sApChannelSwitch& cs_params();
+        uint8_t& supported_channels_size();
+        std::tuple<bool, beerocks::message::sWifiChannel&> supported_channels(size_t idx);
+        bool alloc_supported_channels(size_t count = 1);
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -72,6 +75,10 @@ class cACTION_APMANAGER_JOINED_NOTIFICATION : public BaseClass
         eActionOp_APMANAGER* m_action_op = nullptr;
         sNodeHostap* m_params = nullptr;
         sApChannelSwitch* m_cs_params = nullptr;
+        uint8_t* m_supported_channels_size = nullptr;
+        beerocks::message::sWifiChannel* m_supported_channels = nullptr;
+        size_t m_supported_channels_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_APMANAGER_ENABLE_APS_REQUEST : public BaseClass
