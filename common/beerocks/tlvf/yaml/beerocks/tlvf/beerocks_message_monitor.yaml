@@ -90,6 +90,11 @@ cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION:
   _type: class
   params: sApActivityNotificationParams 
 
+cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_REQUEST:
+  _type: class
+  sync: uint8_t
+  sta_mac: sMacAddr
+
 cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE:
   _type: class
   _is_tlv_class : True
