@@ -1071,6 +1071,8 @@ bool ap_wlan_hal_dwpal::update_vap_credentials(
             return false;
         }
 
+        // Finally enable the VAP (remove any previously set start_disabled)
+        hostapd_config_set_value(vap_hostapd_config, "start_disabled", "");
         // Successfully updated the VAP, move on to the the next
         ++hostapd_vap_iterator;
     }
