@@ -68,7 +68,6 @@ public:
     static int convert_bandwidth_to_int(beerocks::eWiFiBandwidth bw);
     static std::string convert_channel_ext_above_to_string(bool channel_ext_above_secondary,
                                                            beerocks::eWiFiBandwidth bandwidth);
-    static void merge_list(std::vector<uint8_t> &ret, std::vector<uint8_t> &list);
     static void hex_dump(const std::string &description, uint8_t *addr, int len,
                          const char *calling_file = __builtin_FILE(),
                          int calling_line         = __builtin_LINE());
