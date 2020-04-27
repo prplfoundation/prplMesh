@@ -92,6 +92,7 @@ struct RadioInfo {
         vht_mcs_set; /**< 32-byte attribute containing the MCS set as defined in 802.11ac */
     ChanSwReason last_csa_sw_reason = ChanSwReason::Unknown;
     std::vector<beerocks::message::sWifiChannel> preferred_channels;
+    std::vector<beerocks::message::sWifiChannel> supported_channels;
     std::unordered_map<int, VAPElement> available_vaps; // key = vap_id
 };
 
