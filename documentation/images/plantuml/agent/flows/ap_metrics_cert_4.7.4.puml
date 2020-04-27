@@ -1,0 +1,17 @@
+@startuml
+->controller: Execute 4.1.1 or 4.1.2
+->controller: send 1905, 0x800B,AP Metrics Query\ntlv_type,0x93,tlv_length,0x0006, tlv_value, {WTS_REPLACE_MAUT_BSSID})
+controller->agent: handle_cmdu_control_ieee1905_1_message(AP_METRICS_QUERY_MESSAGE)
+agent->agent: handle_ap_metrics_query()
+agent->controller: handle_cmdu_1905_1_message(AP_METRICS_RESPONSE_MESSAGE)\nwithout Associated STA Traffic Stats\nor Associated STA Link Metrics
+controller->controller: handle_cmdu_1905_ap_metric_response()
+->controller: send 1905, 0x8003,Multi-AP\nPolicy Config Request\nAP Metrics Reporting:0\nSTA MetricsReporting RSSI Threshold:0\nSTA Metrics Reporting RSSI Hysteresis Margin Override:0\nAP Metrics Channel Utilization Reporting Threshold:0\nAssociated STA Traffic Stats Inclusion Policy bit 7: 1\nAssociated STA Link Metrics Inclusion Policy bit 6: 1\nbits 5-0 set to 0\nNo Steering Policy TLV 
+controller->agent: handle_cmdu_control_ieee1905_1_message(MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE)
+agent->agent:handle_multi_ap_policy_config_request()
+agent->controller: send_cmdu_to_controller(ACK_MESSAGE)
+->controller: send 1905, 0x800B,AP Metrics Query\ntlv_type,0x93,tlv_length,0x0006, tlv_value, {WTS_REPLACE_MAUT_BSSID})
+controller->agent: handle_cmdu_control_ieee1905_1_message(AP_METRICS_QUERY_MESSAGE)
+agent->agent: handle_ap_metrics_query()
+agent->controller: handle_cmdu_1905_1_message(AP_METRICS_RESPONSE_MESSAGE)\nwith Associated STA Traffic Stats\nand Associated STA Link Metrics
+controller->controller: handle_cmdu_1905_ap_metric_response()
+@enduml
