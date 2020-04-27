@@ -1,0 +1,19 @@
+@startuml
+controller->backhaul_manager: handle_cmdu_control_ieee1905_1_message\n(AP_METRICS_QUERY_MESSAGE)
+backhaul_manager->backhaul_manager: handle_ap_metrics_query()\nshould find slaves\nfor each bssid\n
+backhaul_manager->backhaul_manager: find_slave_for_bssid\n(sMacAddr bssid)\nShould find in\nsRadioInfo(var slave_sockets)
+backhaul_manager->son_slave_wlan0: handle_cmdu_control_ieee1905_1_message\n(AP_METRICS_QUERY_MESSAGE)
+son_slave_wlan0->monitor_wlan0: handle_cmdu\n(AP_METRICS_QUERY_MESSAGE)
+monitor_wlan0->bwl_wlan0: refresh_radio_info()
+monitor_wlan0->bwl_wlan0: get_radio_info()\n need to get\nchannel_utilization\nestimated_service_parameters
+monitor_wlan0->son_slave_wlan0: handle_cmdu\n(AP_METRICS_RESPONSE_MESSAGE)
+son_slave_wlan0->backhaul_manager: handle_cmdu_control_ieee1905_1_message\n(AP_METRICS_RESPONSE_MESSAGE)\nfill number_of_stas_currently_associated
+backhaul_manager->son_slave_wlan2: \nhandle_cmdu_control_ieee1905_1_message\n(AP_METRICS_QUERY_MESSAGE)
+son_slave_wlan2->monitor_wlan2: handle_cmdu\n(AP_METRICS_QUERY_MESSAGE)
+monitor_wlan2->bwl_wlan2: refresh_radio_info()
+monitor_wlan2->bwl_wlan2: get_radio_info()\n need to get\nchannel_utilization\nestimated_service_parameters
+monitor_wlan2->son_slave_wlan2: handle_cmdu\n(AP_METRICS_RESPONSE_MESSAGE)\n
+son_slave_wlan2->backhaul_manager: handle_cmdu_control_ieee1905_1_message\n(AP_METRICS_RESPONSE_MESSAGE)\nfill number_of_stas_currently_associated
+backhaul_manager->backhaul_manager: collect responses from radios
+backhaul_manager->controller: send_cmdu\n(AP_METRICS_RESPONSE_MESSAGE)\n
+@enduml
