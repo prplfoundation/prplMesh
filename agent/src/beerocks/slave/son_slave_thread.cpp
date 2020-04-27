@@ -2589,15 +2589,14 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
                 << "addClass ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE failed";
             return false;
         }
-
-        if (!cmdu_tx.create(beerocks_header->id(),
-                ieee1905_1::eMessageType::ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE)) {
+        auto response_out = message_com::create_vs_message<
+            beerocks_message::cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_RESPONSE>(
+            cmdu_tx, beerocks_header->id());
+        if (response_out == nullptr) {
             LOG(ERROR)
-                << "cmdu creation of type ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE has failed";
-            return false;
+                << "Failed building ACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_RESPONSE message!";
+            break;
         }
-
-        auto response_out = cmdu_tx.addClass<wfa_map::tlvAssociatedStaLinkMetrics>();
 
         if (!response_out->alloc_bssid_info_list(response_in->bssid_info_list_length())) {
             LOG(ERROR) << "alloc_per_bss_sta_link_metrics failed";
@@ -2610,18 +2609,11 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
             auto &bss_in  = std::get<1>(response_in->bssid_info_list(i));
             auto &bss_out = std::get<1>(response_out->bssid_info_list(i));
 
-            bss_out.bssid                      = bss_in.bssid;
-            bss_out.earliest_measurement_delta = bss_in.earliest_measurement_delta;
-            bss_out.downlink_estimated_mac_data_rate_mbps =
-                bss_in.downlink_estimated_mac_data_rate_mbps;
-            bss_out.uplink_estimated_mac_data_rate_mbps =
-                bss_in.uplink_estimated_mac_data_rate_mbps;
-            bss_out.sta_measured_uplink_rssi_dbm_enc = bss_in.sta_measured_uplink_rssi_dbm_enc;
+            bss_out = bss_in;
         }
 
-        LOG(DEBUG) << "Send AssociatedStaLinkMetrics to controller";
-        send_cmdu_to_controller(cmdu_tx);
-
+        LOG(DEBUG) << "Send ACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_RESPONSE";
+        message_com::send_cmdu(backhaul_manager_socket, cmdu_tx);
         break;
     }
     case beerocks_message::ACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION: {
