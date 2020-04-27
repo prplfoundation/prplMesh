@@ -152,7 +152,9 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         uint32_t& vht_capability();
         uint8_t* vht_mcs_set(size_t idx = 0);
         bool set_vht_mcs_set(const void* buffer, size_t size);
-        std::tuple<bool, beerocks::message::sWifiChannel&> preferred_channels_list(size_t idx);
+        uint8_t& preferred_channels_size();
+        std::tuple<bool, beerocks::message::sWifiChannel&> preferred_channels(size_t idx);
+        bool alloc_preferred_channels(size_t count = 1);
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -186,8 +188,9 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         uint32_t* m_vht_capability = nullptr;
         uint8_t* m_vht_mcs_set = nullptr;
         size_t m_vht_mcs_set_idx__ = 0;
-        beerocks::message::sWifiChannel* m_preferred_channels_list = nullptr;
-        size_t m_preferred_channels_list_idx__ = 0;
+        uint8_t* m_preferred_channels_size = nullptr;
+        beerocks::message::sWifiChannel* m_preferred_channels = nullptr;
+        size_t m_preferred_channels_idx__ = 0;
 };
 
 class cACTION_BACKHAUL_CONNECTED_NOTIFICATION : public BaseClass

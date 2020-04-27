@@ -771,10 +771,15 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             LOG(ERROR) << "Failed building message!";
             return false;
         }
-        auto tuple_preferred_channels = response->preferred_channels_list(0);
+        if (!response->alloc_preferred_channels(
+                ap_wlan_hal->get_radio_info().preferred_channels.size())) {
+            LOG(ERROR) << "Failed to allocate preferred_channels ["
+                       << int(ap_wlan_hal->get_radio_info().preferred_channels.size()) << "]!";
+            return false;
+        }
+        auto tuple_preferred_channels = response->preferred_channels(0);
         std::copy_n(ap_wlan_hal->get_radio_info().preferred_channels.begin(),
-                    beerocks::message::SUPPORTED_CHANNELS_LENGTH,
-                    &std::get<1>(tuple_preferred_channels));
+                    response->preferred_channels_size(), &std::get<1>(tuple_preferred_channels));
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
         break;
@@ -1098,9 +1103,15 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
                 LOG(ERROR) << "Failed building message!";
                 return false;
             }
-            auto tuple_preferred_channels = notification->preferred_channels_list(0);
+            if (!notification->alloc_preferred_channels(
+                    ap_wlan_hal->get_radio_info().preferred_channels.size())) {
+                LOG(ERROR) << "Failed to allocate preferred_channels ["
+                           << int(ap_wlan_hal->get_radio_info().preferred_channels.size()) << "]!";
+                return false;
+            }
+            auto tuple_preferred_channels = notification->preferred_channels(0);
             std::copy_n(ap_wlan_hal->get_radio_info().preferred_channels.begin(),
-                        beerocks::message::SUPPORTED_CHANNELS_LENGTH,
+                        notification->preferred_channels_size(),
                         &std::get<1>(tuple_preferred_channels));
             fill_cs_params(notification->cs_params());
             acs_completed_vap_update = true;

@@ -1786,10 +1786,16 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             LOG(ERROR) << "Failed building message!";
             return false;
         }
-        notification_out->cs_params()     = notification_in->cs_params();
-        auto tuple_in_preferred_channels  = notification_in->preferred_channels_list(0);
+        notification_out->cs_params() = notification_in->cs_params();
+        if (notification_out->alloc_preferred_channels(
+                notification_in->preferred_channels_size())) {
+            LOG(ERROR) << "Failed to allocate preferred_channels!";
+            return false;
+        }
+        auto tuple_in_preferred_channels  = notification_in->preferred_channels(0);
         auto tuple_out_preferred_channels = notification_out->preferred_channels(0);
-        std::copy_n(&std::get<1>(tuple_in_preferred_channels), message::SUPPORTED_CHANNELS_LENGTH,
+        std::copy_n(&std::get<1>(tuple_in_preferred_channels),
+                    notification_out->preferred_channels_size(),
                     &std::get<1>(tuple_out_preferred_channels));
         send_cmdu_to_controller(cmdu_tx);
         send_operating_channel_report();
@@ -2244,7 +2250,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return false;
         }
 
-        auto tuple_preferred_channels = response->preferred_channels_list(0);
+        auto tuple_preferred_channels = response->preferred_channels(0);
         std::copy_n(&std::get<1>(tuple_preferred_channels), message::SUPPORTED_CHANNELS_LENGTH,
                     hostap_params.preferred_channels);
 
@@ -3269,9 +3275,13 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         std::copy_n(hostap_params.vht_mcs_set, beerocks::message::VHT_MCS_SET_SIZE,
                     bh_enable->vht_mcs_set());
 
-        auto tuple_preferred_channels = bh_enable->preferred_channels_list(0);
+        if (!bh_enable->alloc_preferred_channels(message::SUPPORTED_CHANNELS_LENGTH)) {
+            LOG(ERROR) << "Failed to allocate preferred channels!";
+            break;
+        }
+        auto tuple_preferred_channels = bh_enable->preferred_channels(0);
         if (!std::get<0>(tuple_preferred_channels)) {
-            LOG(ERROR) << "getting supported channels has failed!";
+            LOG(ERROR) << "getting preferred channels has failed!";
             break;
         }
 

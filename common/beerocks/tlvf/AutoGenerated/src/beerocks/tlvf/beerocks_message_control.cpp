@@ -1879,6 +1879,10 @@ sApChannelSwitch& cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::cs_params() {
     return (sApChannelSwitch&)(*m_cs_params);
 }
 
+uint8_t& cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::preferred_channels_size() {
+    return (uint8_t&)(*m_preferred_channels_size);
+}
+
 std::tuple<bool, beerocks::message::sWifiChannel&> cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::preferred_channels(size_t idx) {
     bool ret_success = ( (m_preferred_channels_idx__ > 0) && (m_preferred_channels_idx__ > idx) );
     size_t ret_idx = ret_success ? idx : 0;
@@ -1888,11 +1892,40 @@ std::tuple<bool, beerocks::message::sWifiChannel&> cACTION_CONTROL_HOSTAP_ACS_NO
     return std::forward_as_tuple(ret_success, m_preferred_channels[ret_idx]);
 }
 
+bool cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::alloc_preferred_channels(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list preferred_channels, abort!";
+        return false;
+    }
+    size_t len = sizeof(beerocks::message::sWifiChannel) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)&m_preferred_channels[*m_preferred_channels_size];
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_preferred_channels_idx__ += count;
+    *m_preferred_channels_size += count;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { 
+        for (size_t i = m_preferred_channels_idx__ - count; i < m_preferred_channels_idx__; i++) { m_preferred_channels[i].struct_init(); }
+    }
+    return true;
+}
+
 void cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
-    for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
+    for (size_t i = 0; i < (size_t)*m_preferred_channels_size; i++){
         m_preferred_channels[i].struct_swap();
     }
 }
@@ -1928,7 +1961,7 @@ size_t cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(sApChannelSwitch); // cs_params
-    class_size += beerocks::message::SUPPORTED_CHANNELS_LENGTH * sizeof(beerocks::message::sWifiChannel); // preferred_channels
+    class_size += sizeof(uint8_t); // preferred_channels_size
     return class_size;
 }
 
@@ -1944,14 +1977,18 @@ bool cACTION_CONTROL_HOSTAP_ACS_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_cs_params->struct_init(); }
-    m_preferred_channels = (beerocks::message::sWifiChannel*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
+    m_preferred_channels_size = (uint8_t*)m_buff_ptr__;
+    if (!m_parse__) *m_preferred_channels_size = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_preferred_channels_idx__  = beerocks::message::SUPPORTED_CHANNELS_LENGTH;
-    if (!m_parse__) {
-        for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++) { m_preferred_channels->struct_init(); }
+    m_preferred_channels = (beerocks::message::sWifiChannel*)m_buff_ptr__;
+    uint8_t preferred_channels_size = *m_preferred_channels_size;
+    m_preferred_channels_idx__ = preferred_channels_size;
+    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (preferred_channels_size))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (preferred_channels_size) << ") Failed!";
+        return false;
     }
     if (m_parse__) { class_swap(); }
     return true;

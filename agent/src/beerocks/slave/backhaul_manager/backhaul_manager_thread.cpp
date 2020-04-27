@@ -1701,7 +1701,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             return false;
         }
 
-        auto tuple_preferred_channels = request->preferred_channels_list(0);
+        auto tuple_preferred_channels = request->preferred_channels(0);
         if (!std::get<0>(tuple_preferred_channels)) {
             LOG(ERROR) << "access to supported channels list failed!";
             return false;
@@ -1709,8 +1709,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
 
         auto channels = &std::get<1>(tuple_preferred_channels);
 
-        std::copy_n(channels, beerocks::message::SUPPORTED_CHANNELS_LENGTH,
-                    soc->preferred_channels.begin());
+        std::copy_n(channels, request->preferred_channels_size(), soc->preferred_channels.begin());
 
         soc->radio_mac             = request->iface_mac();
         soc->freq_type             = request->frequency_band();
