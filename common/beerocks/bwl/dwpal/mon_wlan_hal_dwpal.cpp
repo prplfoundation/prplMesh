@@ -464,7 +464,7 @@ bool mon_wlan_hal_dwpal::update_radio_stats(SRadioStats &radio_stats)
     char *reply = nullptr;
 
     if (!dwpal_send_cmd("GET_RADIO_INFO", &reply)) {
-        LOG(ERROR) << __func__ << " failed";
+        LOG(ERROR) << " failed";
         return false;
     }
 
