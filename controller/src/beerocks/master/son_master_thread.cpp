@@ -1568,7 +1568,7 @@ bool master_thread::handle_cmdu_1905_topology_notification(const std::string &sr
 #ifdef BEEROCKS_RDKB
         //push event to rdkb_wlan_hal task
         if (vs_tlv && database.settings_rdkb_extensions()) {
-            beerocks_message::sClientAssociationParams new_event = {};
+            bwl::sClientAssociationParams new_event = {};
 
             new_event.mac          = client_mac;
             new_event.bssid        = bssid;

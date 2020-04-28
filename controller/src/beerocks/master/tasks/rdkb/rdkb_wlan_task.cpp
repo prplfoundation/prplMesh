@@ -678,7 +678,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
     case STEERING_EVENT_CLIENT_CONNECT_AVAILABLE: {
 
         if (obj) {
-            auto event_obj   = (beerocks_message::sClientAssociationParams *)obj;
+            auto event_obj   = (bwl::sClientAssociationParams *)obj;
             auto client_mac  = net::network_utils::mac_to_string(event_obj->mac);
             auto bssid       = net::network_utils::mac_to_string(event_obj->bssid);
             auto group_index = rdkb_db.get_group_index(client_mac, bssid);
