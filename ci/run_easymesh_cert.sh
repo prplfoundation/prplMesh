@@ -9,13 +9,16 @@
 # See LICENSE file for more details.
 ###############################################################
 
+
 scriptdir="$(cd "${0%/*}" && pwd)"
+
+# shellcheck source=./owncloud/owncloud_definitions.sh
+. "$scriptdir/owncloud/owncloud_definitions.sh"
+
 rootdir=$(realpath "$scriptdir/../")
 
 # shellcheck source=../tools/functions.sh
 . "$rootdir/tools/functions.sh"
-# shellcheck source=ci/owncloud/owncloud_definitions.sh
-. "$rootdir/ci/owncloud/owncloud_definitions.sh"
 
 usage() {
     echo "usage: $(basename "$0") [-hboev] <test> [test]"
