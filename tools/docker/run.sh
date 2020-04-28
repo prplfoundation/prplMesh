@@ -56,7 +56,7 @@ main() {
     docker image inspect "prplmesh-runner$TAG" >/dev/null 2>&1 || {
         [ -n "$TAG" ] && { err "image prplmesh-runner$TAG doesn't exist, aborting"; exit 1; }
         dbg "Image prplmesh-runner$TAG does not exist, creating..."
-        run "${scriptdir}/image-build.sh"
+        run "${scriptdir}/image-build.sh" --image runner
     }
 
     NETWORK="${NETWORK:-prplMesh-net-${UNIQUE_ID}}"

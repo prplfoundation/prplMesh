@@ -15,7 +15,7 @@ rootdir="${scriptdir%/*/*}"
 main() {
     docker image inspect prplmesh-builder >/dev/null 2>&1 || {
         echo "Image prplmesh-build does not exist, creating..."
-        run "${scriptdir}"/image-build.sh
+        run "${scriptdir}"/image-build.sh --image builder
     }
 
     # Default docker arguments
