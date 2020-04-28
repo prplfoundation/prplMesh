@@ -277,6 +277,7 @@ void monitor_stats::process()
     //send response
     if (!requests_list.empty()) {
         auto request = requests_list.front();
+        LOG(TRACE) << "Serving reqeust: mid = " << request.message_id << " MAC = " << request.mac;
         if (request.mac == beerocks::net::network_utils::ZERO_MAC) {
             send_hostap_measurements(request, radio_stats);
         } else {
