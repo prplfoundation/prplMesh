@@ -83,6 +83,10 @@ class cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION : public BaseClass
         sWlanSettings& wlan_settings();
         sBackhaulParams& backhaul_params();
         sNodeHostap& hostap();
+        bool isPostInitSucceeded();
+        std::shared_ptr<cChannelsList> create_supported_channels();
+        bool add_supported_channels(std::shared_ptr<cChannelsList> ptr);
+        std::shared_ptr<cChannelsList> supported_channels() { return m_supported_channels_ptr; }
         sApChannelSwitch& cs_params();
         uint8_t& low_pass_filter_on();
         uint8_t& enable_repeater_mode();
@@ -102,6 +106,10 @@ class cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION : public BaseClass
         sWlanSettings* m_wlan_settings = nullptr;
         sBackhaulParams* m_backhaul_params = nullptr;
         sNodeHostap* m_hostap = nullptr;
+        cChannelsList *m_supported_channels = nullptr;
+        std::shared_ptr<cChannelsList> m_supported_channels_ptr = nullptr;
+        bool m_supported_channels_init = false;
+        bool m_lock_allocation__ = false;
         sApChannelSwitch* m_cs_params = nullptr;
         uint8_t* m_low_pass_filter_on = nullptr;
         uint8_t* m_enable_repeater_mode = nullptr;
@@ -154,6 +162,10 @@ class cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION : public BaseClass
         sMacAddr& bridge_iface_mac();
         beerocks::net::sIpv4Addr& bridge_ipv4();
         sNodeHostap& hostap();
+        bool isPostInitSucceeded();
+        std::shared_ptr<cChannelsList> create_supported_channels();
+        bool add_supported_channels(std::shared_ptr<cChannelsList> ptr);
+        std::shared_ptr<cChannelsList> supported_channels() { return m_supported_channels_ptr; }
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -166,6 +178,11 @@ class cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION : public BaseClass
         sMacAddr* m_bridge_iface_mac = nullptr;
         beerocks::net::sIpv4Addr* m_bridge_ipv4 = nullptr;
         sNodeHostap* m_hostap = nullptr;
+        cChannelsList *m_supported_channels = nullptr;
+        std::shared_ptr<cChannelsList> m_supported_channels_ptr = nullptr;
+        bool m_supported_channels_init = false;
+        bool m_lock_allocation__ = false;
+        int m_lock_order_counter__ = 0;
 };
 
 class cACTION_CONTROL_SON_CONFIG_UPDATE : public BaseClass

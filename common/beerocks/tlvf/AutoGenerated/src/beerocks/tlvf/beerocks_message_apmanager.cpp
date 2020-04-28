@@ -111,6 +111,66 @@ sNodeHostap& cACTION_APMANAGER_JOINED_NOTIFICATION::params() {
     return (sNodeHostap&)(*m_params);
 }
 
+bool cACTION_APMANAGER_JOINED_NOTIFICATION::isPostInitSucceeded() {
+    if (!m_supported_channels_init) {
+        TLVF_LOG(ERROR) << "supported_channels is not initialized";
+        return false;
+    }
+    return true; 
+}
+
+std::shared_ptr<cChannelsList> cACTION_APMANAGER_JOINED_NOTIFICATION::create_supported_channels() {
+    if (m_lock_order_counter__ > 0) {
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list supported_channels, abort!";
+        return nullptr;
+    }
+    size_t len = cChannelsList::get_initial_size();
+    if (m_lock_allocation__ || getBuffRemainingBytes() < len) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return nullptr;
+    }
+    m_lock_order_counter__ = 0;
+    m_lock_allocation__ = true;
+    uint8_t *src = (uint8_t *)m_supported_channels;
+    if (!m_parse__) {
+        uint8_t *dst = src + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_cs_params = (sApChannelSwitch *)((uint8_t *)(m_cs_params) + len);
+    return std::make_shared<cChannelsList>(src, getBuffRemainingBytes(src), m_parse__);
+}
+
+bool cACTION_APMANAGER_JOINED_NOTIFICATION::add_supported_channels(std::shared_ptr<cChannelsList> ptr) {
+    if (ptr == nullptr) {
+        TLVF_LOG(ERROR) << "Received entry is nullptr";
+        return false;
+    }
+    if (m_lock_allocation__ == false) {
+        TLVF_LOG(ERROR) << "No call to create_supported_channels was called before add_supported_channels";
+        return false;
+    }
+    uint8_t *src = (uint8_t *)m_supported_channels;
+    if (ptr->getStartBuffPtr() != src) {
+        TLVF_LOG(ERROR) << "Received entry pointer is different than expected (expecting the same pointer returned from add method)";
+        return false;
+    }
+    if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return false;
+    }
+    m_supported_channels_init = true;
+    size_t len = ptr->getLen();
+    m_cs_params = (sApChannelSwitch *)((uint8_t *)(m_cs_params) + len - ptr->get_initial_size());
+    m_supported_channels_ptr = ptr;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    m_lock_allocation__ = false;
+    return true;
+}
+
 sApChannelSwitch& cACTION_APMANAGER_JOINED_NOTIFICATION::cs_params() {
     return (sApChannelSwitch&)(*m_cs_params);
 }
@@ -119,6 +179,7 @@ void cACTION_APMANAGER_JOINED_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
+    if (m_supported_channels_ptr) { m_supported_channels_ptr->class_swap(); }
     m_cs_params->struct_swap();
 }
 
@@ -169,6 +230,20 @@ bool cACTION_APMANAGER_JOINED_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
+    m_supported_channels = (cChannelsList*)m_buff_ptr__;
+    if (m_parse__) {
+        auto supported_channels = create_supported_channels();
+        if (!supported_channels) {
+            TLVF_LOG(ERROR) << "create_supported_channels() failed";
+            return false;
+        }
+        if (!add_supported_channels(supported_channels)) {
+            TLVF_LOG(ERROR) << "add_supported_channels() failed";
+            return false;
+        }
+        // swap back since supported_channels will be swapped as part of the whole class swap
+        supported_channels->class_swap();
+    }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApChannelSwitch) << ") Failed!";
@@ -1180,6 +1255,66 @@ sApChannelSwitch& cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::cs_params() {
     return (sApChannelSwitch&)(*m_cs_params);
 }
 
+bool cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::isPostInitSucceeded() {
+    if (!m_supported_channels_init) {
+        TLVF_LOG(ERROR) << "supported_channels is not initialized";
+        return false;
+    }
+    return true; 
+}
+
+std::shared_ptr<cChannelsList> cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::create_supported_channels() {
+    if (m_lock_order_counter__ > 0) {
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list supported_channels, abort!";
+        return nullptr;
+    }
+    size_t len = cChannelsList::get_initial_size();
+    if (m_lock_allocation__ || getBuffRemainingBytes() < len) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return nullptr;
+    }
+    m_lock_order_counter__ = 0;
+    m_lock_allocation__ = true;
+    uint8_t *src = (uint8_t *)m_supported_channels;
+    if (!m_parse__) {
+        uint8_t *dst = src + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_supported_channels_list = (beerocks::message::sWifiChannel *)((uint8_t *)(m_supported_channels_list) + len);
+    return std::make_shared<cChannelsList>(src, getBuffRemainingBytes(src), m_parse__);
+}
+
+bool cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::add_supported_channels(std::shared_ptr<cChannelsList> ptr) {
+    if (ptr == nullptr) {
+        TLVF_LOG(ERROR) << "Received entry is nullptr";
+        return false;
+    }
+    if (m_lock_allocation__ == false) {
+        TLVF_LOG(ERROR) << "No call to create_supported_channels was called before add_supported_channels";
+        return false;
+    }
+    uint8_t *src = (uint8_t *)m_supported_channels;
+    if (ptr->getStartBuffPtr() != src) {
+        TLVF_LOG(ERROR) << "Received entry pointer is different than expected (expecting the same pointer returned from add method)";
+        return false;
+    }
+    if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return false;
+    }
+    m_supported_channels_init = true;
+    size_t len = ptr->getLen();
+    m_supported_channels_list = (beerocks::message::sWifiChannel *)((uint8_t *)(m_supported_channels_list) + len - ptr->get_initial_size());
+    m_supported_channels_ptr = ptr;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    m_lock_allocation__ = false;
+    return true;
+}
+
 std::tuple<bool, beerocks::message::sWifiChannel&> cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::supported_channels_list(size_t idx) {
     bool ret_success = ( (m_supported_channels_list_idx__ > 0) && (m_supported_channels_list_idx__ > idx) );
     size_t ret_idx = ret_success ? idx : 0;
@@ -1193,6 +1328,7 @@ void cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
+    if (m_supported_channels_ptr) { m_supported_channels_ptr->class_swap(); }
     for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
         m_supported_channels_list[i].struct_swap();
     }
@@ -1245,6 +1381,20 @@ bool cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_cs_params->struct_init(); }
+    m_supported_channels = (cChannelsList*)m_buff_ptr__;
+    if (m_parse__) {
+        auto supported_channels = create_supported_channels();
+        if (!supported_channels) {
+            TLVF_LOG(ERROR) << "create_supported_channels() failed";
+            return false;
+        }
+        if (!add_supported_channels(supported_channels)) {
+            TLVF_LOG(ERROR) << "add_supported_channels() failed";
+            return false;
+        }
+        // swap back since supported_channels will be swapped as part of the whole class swap
+        supported_channels->class_swap();
+    }
     m_supported_channels_list = (beerocks::message::sWifiChannel*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH) << ") Failed!";
@@ -3225,6 +3375,66 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
 }
 cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE::~cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE() {
 }
+bool cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE::isPostInitSucceeded() {
+    if (!m_supported_channels_init) {
+        TLVF_LOG(ERROR) << "supported_channels is not initialized";
+        return false;
+    }
+    return true; 
+}
+
+std::shared_ptr<cChannelsList> cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE::create_supported_channels() {
+    if (m_lock_order_counter__ > 0) {
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list supported_channels, abort!";
+        return nullptr;
+    }
+    size_t len = cChannelsList::get_initial_size();
+    if (m_lock_allocation__ || getBuffRemainingBytes() < len) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return nullptr;
+    }
+    m_lock_order_counter__ = 0;
+    m_lock_allocation__ = true;
+    uint8_t *src = (uint8_t *)m_supported_channels;
+    if (!m_parse__) {
+        uint8_t *dst = src + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_supported_channels_list = (beerocks::message::sWifiChannel *)((uint8_t *)(m_supported_channels_list) + len);
+    return std::make_shared<cChannelsList>(src, getBuffRemainingBytes(src), m_parse__);
+}
+
+bool cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE::add_supported_channels(std::shared_ptr<cChannelsList> ptr) {
+    if (ptr == nullptr) {
+        TLVF_LOG(ERROR) << "Received entry is nullptr";
+        return false;
+    }
+    if (m_lock_allocation__ == false) {
+        TLVF_LOG(ERROR) << "No call to create_supported_channels was called before add_supported_channels";
+        return false;
+    }
+    uint8_t *src = (uint8_t *)m_supported_channels;
+    if (ptr->getStartBuffPtr() != src) {
+        TLVF_LOG(ERROR) << "Received entry pointer is different than expected (expecting the same pointer returned from add method)";
+        return false;
+    }
+    if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return false;
+    }
+    m_supported_channels_init = true;
+    size_t len = ptr->getLen();
+    m_supported_channels_list = (beerocks::message::sWifiChannel *)((uint8_t *)(m_supported_channels_list) + len - ptr->get_initial_size());
+    m_supported_channels_ptr = ptr;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    m_lock_allocation__ = false;
+    return true;
+}
+
 std::tuple<bool, beerocks::message::sWifiChannel&> cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE::supported_channels_list(size_t idx) {
     bool ret_success = ( (m_supported_channels_list_idx__ > 0) && (m_supported_channels_list_idx__ > idx) );
     size_t ret_idx = ret_success ? idx : 0;
@@ -3237,6 +3447,7 @@ std::tuple<bool, beerocks::message::sWifiChannel&> cACTION_APMANAGER_READ_ACS_RE
 void cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
+    if (m_supported_channels_ptr) { m_supported_channels_ptr->class_swap(); }
     for (size_t i = 0; i < beerocks::message::SUPPORTED_CHANNELS_LENGTH; i++){
         m_supported_channels_list[i].struct_swap();
     }
@@ -3281,6 +3492,20 @@ bool cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE::init()
     if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
+    }
+    m_supported_channels = (cChannelsList*)m_buff_ptr__;
+    if (m_parse__) {
+        auto supported_channels = create_supported_channels();
+        if (!supported_channels) {
+            TLVF_LOG(ERROR) << "create_supported_channels() failed";
+            return false;
+        }
+        if (!add_supported_channels(supported_channels)) {
+            TLVF_LOG(ERROR) << "add_supported_channels() failed";
+            return false;
+        }
+        // swap back since supported_channels will be swapped as part of the whole class swap
+        supported_channels->class_swap();
     }
     m_supported_channels_list = (beerocks::message::sWifiChannel*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(beerocks::message::sWifiChannel) * (beerocks::message::SUPPORTED_CHANNELS_LENGTH))) {

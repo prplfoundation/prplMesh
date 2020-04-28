@@ -184,6 +184,74 @@ sNodeHostap& cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::hostap() {
     return (sNodeHostap&)(*m_hostap);
 }
 
+bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::isPostInitSucceeded() {
+    if (!m_supported_channels_init) {
+        TLVF_LOG(ERROR) << "supported_channels is not initialized";
+        return false;
+    }
+    return true; 
+}
+
+std::shared_ptr<cChannelsList> cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::create_supported_channels() {
+    if (m_lock_order_counter__ > 0) {
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list supported_channels, abort!";
+        return nullptr;
+    }
+    size_t len = cChannelsList::get_initial_size();
+    if (m_lock_allocation__ || getBuffRemainingBytes() < len) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return nullptr;
+    }
+    m_lock_order_counter__ = 0;
+    m_lock_allocation__ = true;
+    uint8_t *src = (uint8_t *)m_supported_channels;
+    if (!m_parse__) {
+        uint8_t *dst = src + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_cs_params = (sApChannelSwitch *)((uint8_t *)(m_cs_params) + len);
+    m_low_pass_filter_on = (uint8_t *)((uint8_t *)(m_low_pass_filter_on) + len);
+    m_enable_repeater_mode = (uint8_t *)((uint8_t *)(m_enable_repeater_mode) + len);
+    m_radio_identifier = (sMacAddr *)((uint8_t *)(m_radio_identifier) + len);
+    m_is_slave_reconf = (uint8_t *)((uint8_t *)(m_is_slave_reconf) + len);
+    return std::make_shared<cChannelsList>(src, getBuffRemainingBytes(src), m_parse__);
+}
+
+bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::add_supported_channels(std::shared_ptr<cChannelsList> ptr) {
+    if (ptr == nullptr) {
+        TLVF_LOG(ERROR) << "Received entry is nullptr";
+        return false;
+    }
+    if (m_lock_allocation__ == false) {
+        TLVF_LOG(ERROR) << "No call to create_supported_channels was called before add_supported_channels";
+        return false;
+    }
+    uint8_t *src = (uint8_t *)m_supported_channels;
+    if (ptr->getStartBuffPtr() != src) {
+        TLVF_LOG(ERROR) << "Received entry pointer is different than expected (expecting the same pointer returned from add method)";
+        return false;
+    }
+    if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return false;
+    }
+    m_supported_channels_init = true;
+    size_t len = ptr->getLen();
+    m_cs_params = (sApChannelSwitch *)((uint8_t *)(m_cs_params) + len - ptr->get_initial_size());
+    m_low_pass_filter_on = (uint8_t *)((uint8_t *)(m_low_pass_filter_on) + len - ptr->get_initial_size());
+    m_enable_repeater_mode = (uint8_t *)((uint8_t *)(m_enable_repeater_mode) + len - ptr->get_initial_size());
+    m_radio_identifier = (sMacAddr *)((uint8_t *)(m_radio_identifier) + len - ptr->get_initial_size());
+    m_is_slave_reconf = (uint8_t *)((uint8_t *)(m_is_slave_reconf) + len - ptr->get_initial_size());
+    m_supported_channels_ptr = ptr;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    m_lock_allocation__ = false;
+    return true;
+}
+
 sApChannelSwitch& cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::cs_params() {
     return (sApChannelSwitch&)(*m_cs_params);
 }
@@ -211,6 +279,7 @@ void cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::class_swap()
     m_wlan_settings->struct_swap();
     m_backhaul_params->struct_swap();
     m_hostap->struct_swap();
+    if (m_supported_channels_ptr) { m_supported_channels_ptr->class_swap(); }
     m_cs_params->struct_swap();
     m_radio_identifier->struct_swap();
 }
@@ -294,6 +363,20 @@ bool cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_hostap->struct_init(); }
+    m_supported_channels = (cChannelsList*)m_buff_ptr__;
+    if (m_parse__) {
+        auto supported_channels = create_supported_channels();
+        if (!supported_channels) {
+            TLVF_LOG(ERROR) << "create_supported_channels() failed";
+            return false;
+        }
+        if (!add_supported_channels(supported_channels)) {
+            TLVF_LOG(ERROR) << "add_supported_channels() failed";
+            return false;
+        }
+        // swap back since supported_channels will be swapped as part of the whole class swap
+        supported_channels->class_swap();
+    }
     m_cs_params = (sApChannelSwitch*)m_buff_ptr__;
     if (!buffPtrIncrementSafe(sizeof(sApChannelSwitch))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApChannelSwitch) << ") Failed!";
@@ -469,6 +552,64 @@ sNodeHostap& cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::hostap() {
     return (sNodeHostap&)(*m_hostap);
 }
 
+bool cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::isPostInitSucceeded() {
+    if (!m_supported_channels_init) {
+        TLVF_LOG(ERROR) << "supported_channels is not initialized";
+        return false;
+    }
+    return true; 
+}
+
+std::shared_ptr<cChannelsList> cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::create_supported_channels() {
+    if (m_lock_order_counter__ > 0) {
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list supported_channels, abort!";
+        return nullptr;
+    }
+    size_t len = cChannelsList::get_initial_size();
+    if (m_lock_allocation__ || getBuffRemainingBytes() < len) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return nullptr;
+    }
+    m_lock_order_counter__ = 0;
+    m_lock_allocation__ = true;
+    uint8_t *src = (uint8_t *)m_supported_channels;
+    if (!m_parse__) {
+        uint8_t *dst = src + len;
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    return std::make_shared<cChannelsList>(src, getBuffRemainingBytes(src), m_parse__);
+}
+
+bool cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::add_supported_channels(std::shared_ptr<cChannelsList> ptr) {
+    if (ptr == nullptr) {
+        TLVF_LOG(ERROR) << "Received entry is nullptr";
+        return false;
+    }
+    if (m_lock_allocation__ == false) {
+        TLVF_LOG(ERROR) << "No call to create_supported_channels was called before add_supported_channels";
+        return false;
+    }
+    uint8_t *src = (uint8_t *)m_supported_channels;
+    if (ptr->getStartBuffPtr() != src) {
+        TLVF_LOG(ERROR) << "Received entry pointer is different than expected (expecting the same pointer returned from add method)";
+        return false;
+    }
+    if (ptr->getLen() > getBuffRemainingBytes(ptr->getStartBuffPtr())) {;
+        TLVF_LOG(ERROR) << "Not enough available space on buffer";
+        return false;
+    }
+    m_supported_channels_init = true;
+    size_t len = ptr->getLen();
+    m_supported_channels_ptr = ptr;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    m_lock_allocation__ = false;
+    return true;
+}
+
 void cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
@@ -477,6 +618,7 @@ void cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::class_swap()
     m_bridge_iface_mac->struct_swap();
     m_bridge_ipv4->struct_swap();
     m_hostap->struct_swap();
+    if (m_supported_channels_ptr) { m_supported_channels_ptr->class_swap(); }
 }
 
 bool cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::finalize()
@@ -553,6 +695,20 @@ bool cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_hostap->struct_init(); }
+    m_supported_channels = (cChannelsList*)m_buff_ptr__;
+    if (m_parse__) {
+        auto supported_channels = create_supported_channels();
+        if (!supported_channels) {
+            TLVF_LOG(ERROR) << "create_supported_channels() failed";
+            return false;
+        }
+        if (!add_supported_channels(supported_channels)) {
+            TLVF_LOG(ERROR) << "add_supported_channels() failed";
+            return false;
+        }
+        // swap back since supported_channels will be swapped as part of the whole class swap
+        supported_channels->class_swap();
+    }
     if (m_parse__) { class_swap(); }
     return true;
 }
