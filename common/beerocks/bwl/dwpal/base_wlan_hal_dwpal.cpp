@@ -607,7 +607,7 @@ bool base_wlan_hal_dwpal::process_nl_events()
 bool base_wlan_hal_dwpal::dwpal_nl_cmd_set(const std::string &ifname, unsigned int nl_cmd,
                                            const void *vendor_data, size_t vendor_data_size)
 {
-    if (vendor_data == nullptr) {
+    if (!vendor_data) {
         LOG(ERROR) << "vendor_data is NULL ==> Abort!";
         return false;
     }
@@ -630,7 +630,7 @@ size_t base_wlan_hal_dwpal::dwpal_nl_cmd_get(const std::string &ifname, unsigned
 {
     size_t data_size = 0;
 
-    if (out_buffer == nullptr) {
+    if (!out_buffer) {
         LOG(ERROR) << "out_buffer is invalid ==> Abort!";
         return data_size;
     }
