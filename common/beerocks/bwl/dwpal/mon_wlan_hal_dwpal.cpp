@@ -749,7 +749,11 @@ bool mon_wlan_hal_dwpal::sta_beacon_11k_request(const SBeaconRequest11k &req, in
         ch_report_ss << req.ap_ch_report[current_channel];
 
         cmd += " ap_ch_report=" + ch_report_ss.str();
+    } else {
+        LOG(WARNING) << "optinal channel report was not set (might be also ok)";
     }
+
+    LOG(DEBUG) << __func__ << " the command: " << cmd;
 
     // send command
     if (!dwpal_send_cmd(cmd, &reply)) {
