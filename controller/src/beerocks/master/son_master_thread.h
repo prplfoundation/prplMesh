@@ -14,6 +14,7 @@
 #include "tasks/optimal_path_task.h"
 #include "tasks/task_pool.h"
 
+#include "../../../common/beerocks/bwl/include/bwl/base_wlan_hal.h"
 #include <bcl/beerocks_defines.h>
 #include <bcl/beerocks_logging.h>
 #include <bcl/beerocks_message_structs.h>
