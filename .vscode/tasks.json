@@ -1,0 +1,122 @@
+{
+  // See https://go.microsoft.com/fwlink/?LinkId=733558
+  // for the documentation about the tasks.json format
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Build",
+      "type": "shell",
+      "linux": {
+        "command": "./tools/maptools.py",
+        "args": [
+          "build",
+          "map",
+          "-f",
+          "MSGLIB=zmq",
+          "BUILD_TESTS=ON",
+          "CMAKE_BUILD_TYPE=Debug"
+        ]
+      },
+      "problemMatcher": [
+        "$gcc"
+      ],
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      }
+    },
+    {
+      "label": "Clean",
+      "type": "shell",
+      "linux": {
+        "command": "rm",
+        "args": [
+          "-rf",
+          "build"
+        ]
+      },
+      "problemMatcher": [],
+    },
+    {
+      "label": "Run Containers",
+      "type": "shell",
+      "linux": {
+        "command": "./tests/test_gw_repeater.sh",
+        "args": [
+          "-f",
+          "-g",
+          "gateway-root",
+          "-r",
+          "repeater1-root",
+          "-r",
+          "repeater2-root"
+        ]
+      },
+      "problemMatcher": [],
+    },
+    {
+      "label": "Run test flows",
+      "type": "shell",
+      "linux": {
+        "command": "./tests/test_flows.py",
+        "args": [
+          "-v"
+        ]
+      },
+      "problemMatcher": [],
+    },
+    {
+      "label": "Run beerocks_cli",
+      "type": "shell",
+      "linux": {
+        "command": "/usr/bin/docker",
+        "args": [
+          "exec",
+          "-ti",
+          "gateway-root",
+          "${workspaceFolder}/build/install/bin/beerocks_cli"
+        ]
+      },
+      "problemMatcher": [],
+    },
+    {
+      "label": "SSH Server",
+      "type": "shell",
+      "linux": {
+        "command": "/usr/sbin/service",
+        "args": [
+          "ssh",
+          "${input:serviceOp}"
+        ]
+      },
+      "problemMatcher": [],
+    },
+    {
+      "label": "podman bridge",
+      "type": "shell",
+      "linux": {
+        "command": "/usr/bin/docker",
+        "args": [
+          "network",
+          "inspect",
+          "prplMesh-net-root",
+          "|",
+          "awk",
+          "'/\\\"bridge\\\":/{print substr($2,2,length($2)-3)}'"
+        ]
+      },
+      "problemMatcher": [],
+    },
+  ],
+  "inputs": [
+    {
+      "type": "pickString",
+      "id": "serviceOp",
+      "description": "What would you like to do?",
+      "options": [
+        "start",
+        "stop"
+      ]
+    }
+  ]
+}

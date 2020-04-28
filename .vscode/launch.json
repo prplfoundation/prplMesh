@@ -5,274 +5,196 @@
     "version": "0.2.0",
     "configurations": [
         {
-            // Install "Bash Debug" VSCODE extension by "rogalmic" for that to work
-            "type": "bashdb",
-            "request": "launch",
-            "name": "Bash-Debug (select script from list of sh files)",
-            "cwd": "${workspaceFolder}/../",
-            "program": "${command:SelectScriptName}",
-            "args": []
-        },
-        {
-            "name": "(gdb) Attach to prplMesh Cotroller",
+            "name": "(gdb) GATEWAY - Attach to beerocks_controller",
             "type": "cppdbg",
             "request": "attach",
             "program": "${workspaceFolder}/build/install/bin/beerocks_controller",
-            "processId": "${command:pickProcess}",
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true //TODO: pretty printing doesn't seem to work
-                }
-            ]
+            "processId": "${command:pickRemoteProcess}",
+            "pipeTransport": {
+                "pipeCwd": "${workspaceRoot}",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "gateway-root",
+                    "sh",
+                    "-c"
+                ],
+                "debuggerPath": "/usr/bin/gdb"
+            },
+            "presentation": {
+                "hidden": false,
+                "group": "Gateway",
+                "order": 1
+            }
         },
         {
-            "name": "(gdb) Remote debug prplMesh Controller",
-            "type": "gdb",
-            "request": "attach",
-            "executable": "${workspaceFolder}/build/install/bin/beerocks_controller",
-            "target": "localhost:9999",
-            "remote": true,
-            "cwd": "${workspaceFolder}",
-            "autorun": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true //TODO: pretty printing doesn't seem to work
-                }
-            ]
-        },
-        {
-            "name": "(gdb) Attach to prplMesh Agent",
+            "name": "(gdb) GATEWAY - Attach to beerocks_agent",
             "type": "cppdbg",
             "request": "attach",
             "program": "${workspaceFolder}/build/install/bin/beerocks_agent",
-            "processId": "${command:pickProcess}",
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
+            "processId": "${command:pickRemoteProcess}",
+            "pipeTransport": {
+                "pipeCwd": "${workspaceRoot}",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "gateway-root",
+                    "sh",
+                    "-c"
+                ],
+                "debuggerPath": "/usr/bin/gdb"
+            },
+            "presentation": {
+                "hidden": false,
+                "group": "Gateway",
+                "order": 2
+            }
         },
         {
-            "name": "(gdb) Remote debug prplMesh Agent",
-            "type": "gdb",
-            "request": "attach",
-            "executable": "${workspaceFolder}/build/install/bin/beerocks_agent",
-            "target": "localhost:9999",
-            "remote": true,
-            "cwd": "${workspaceFolder}",
-            "autorun": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true //TODO: pretty printing doesn't seem to work
-                }
-            ]
-        },
-        {
-            "name": "(gdb) Attach to prplMesh Monitor",
+            "name": "(gdb) GATEWAY - Attach to beerocks_monitor",
             "type": "cppdbg",
             "request": "attach",
             "program": "${workspaceFolder}/build/install/bin/beerocks_monitor",
-            "processId": "${command:pickProcess}",
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
+            "processId": "${command:pickRemoteProcess}",
+            "pipeTransport": {
+                "pipeCwd": "${workspaceRoot}",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "gateway-root",
+                    "sh",
+                    "-c"
+                ],
+                "debuggerPath": "/usr/bin/gdb"
+            },
+            "presentation": {
+                "hidden": false,
+                "group": "Gateway",
+                "order": 3
+            }
         },
         {
-            "name": "(gdb) Attach to prplMesh CLI",
+            "name": "(gdb) GATEWAY - Attach to beerocks_cli",
             "type": "cppdbg",
             "request": "attach",
             "program": "${workspaceFolder}/build/install/bin/beerocks_cli",
-            "processId": "${command:pickProcess}",
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
-        },
-        {
-            "name": "(gdb) Remote debug prplMesh CLI",
-            "type": "gdb",
-            "request": "attach",
-            "executable": "${workspaceFolder}/build/install/bin/beerocks_cli",
-            "target": "localhost:9999",
-            "remote": true,
-            "cwd": "${workspaceFolder}",
-            "autorun": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true //TODO: pretty printing doesn't seem to work
-                }
-            ]
-        },
-        {
-            "name": "(gdb) Launch beerocks_controller",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/install/bin/beerocks_controller",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
-        },
-        {
-            "name": "(gdb) Launch beerocks_agent",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/install/bin/beerocks_agent",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
-        },
-        {
-            "name": "(gdb) Launch tlv_test",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/install/bin/tests/tlvf_test",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
-        },
-        {
-            "name": "(gdb) Launch encryption_test",
-            "type": "cppdbg",
-            "request": "launch",
-            "program": "${workspaceFolder}/build/install/bin/tests/common/encryption_test",
-            "args": [],
-            "stopAtEntry": false,
-            "cwd": "${workspaceFolder}",
-            "environment": [],
-            "externalConsole": false,
-            "MIMode": "gdb",
-            "setupCommands": [
-                {
-                    "description": "Enable pretty-printing for gdb",
-                    "text": "-enable-pretty-printing",
-                    "ignoreFailures": true
-                }
-            ]
-        },
-        {
-            "name": "Python: Current File (Integrated Terminal)",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "args": []
-        },
-        {
-            "name": "Python: prplMesh tlvf",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "integratedTerminal",
-            "args": [
-                "${workspaceFolder}/framework/tlvf/src",
-                "${workspaceFolder}/framework/tlvf/yaml",
-                "${workspaceFolder}/framework/tlvf/AutoGenerated",
-                "-c",
-                "${workspaceFolder}/framework/tlvf/tlvf_conf.yaml"
-            ]
-        },
-        {
-            "name": "Python: Remote Attach",
-            "type": "python",
-            "request": "attach",
-            "port": 5678,
-            "host": "localhost",
-            "pathMappings": [
-                {
-                    "localRoot": "${workspaceFolder}",
-                    "remoteRoot": "."
-                }
-            ]
-        },
-        {
-            "name": "Python: Module",
-            "type": "python",
-            "request": "launch",
-            "module": "enter-your-module-name-here",
-            "console": "integratedTerminal"
-        },
-        {
-            "name": "Python: Django",
-            "type": "python",
-            "request": "launch",
-            "program": "${workspaceFolder}/manage.py",
-            "console": "integratedTerminal",
-            "args": [
-                "runserver",
-                "--noreload",
-                "--nothreading"
-            ],
-            "django": true
-        },
-        {
-            "name": "Python: Flask",
-            "type": "python",
-            "request": "launch",
-            "module": "flask",
-            "env": {
-                "FLASK_APP": "app.py"
+            "processId": "${command:pickRemoteProcess}",
+            "pipeTransport": {
+                "pipeCwd": "${workspaceRoot}",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "gateway-root",
+                    "sh",
+                    "-c"
+                ],
+                "debuggerPath": "/usr/bin/gdb"
             },
-            "args": [
-                "run",
-                "--no-debugger",
-                "--no-reload"
-            ],
-            "jinja": true
+            "presentation": {
+                "hidden": false,
+                "group": "Gateway",
+                "order": 4
+            }
         },
         {
-            "name": "Python: Current File (External Terminal)",
-            "type": "python",
-            "request": "launch",
-            "program": "${file}",
-            "console": "externalTerminal"
-        }
+            "name": "(gdb) REPEATER #1 - Attach to beerocks_agent",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceFolder}/build/install/bin/beerocks_agent",
+            "processId": "${command:pickRemoteProcess}",
+            "pipeTransport": {
+                "pipeCwd": "${workspaceRoot}",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "gateway-repeater1",
+                    "sh",
+                    "-c"
+                ],
+                "debuggerPath": "/usr/bin/gdb"
+            },
+            "presentation": {
+                "hidden": false,
+                "group": "Repeater 1",
+                "order": 1
+            }
+        },
+        {
+            "name": "(gdb) REPEATER #1 - Attach to beerocks_monitor",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceFolder}/build/install/bin/beerocks_monitor",
+            "processId": "${command:pickRemoteProcess}",
+            "pipeTransport": {
+                "pipeCwd": "${workspaceRoot}",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "gateway-repeater1",
+                    "sh",
+                    "-c"
+                ],
+                "debuggerPath": "/usr/bin/gdb"
+            },
+            "presentation": {
+                "hidden": false,
+                "group": "Repeater 1",
+                "order": 2
+            }
+        },
+        {
+            "name": "(gdb) REPEATER #2 - Attach to beerocks_agent",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceFolder}/build/install/bin/beerocks_agent",
+            "processId": "${command:pickRemoteProcess}",
+            "pipeTransport": {
+                "pipeCwd": "${workspaceRoot}",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "gateway-repeater2",
+                    "sh",
+                    "-c"
+                ],
+                "debuggerPath": "/usr/bin/gdb"
+            },
+            "presentation": {
+                "hidden": false,
+                "group": "Repeater 2",
+                "order": 1
+            }
+        },
+        {
+            "name": "(gdb) REPEATER #2 - Attach to beerocks_monitor",
+            "type": "cppdbg",
+            "request": "attach",
+            "program": "${workspaceFolder}/build/install/bin/beerocks_monitor",
+            "processId": "${command:pickRemoteProcess}",
+            "pipeTransport": {
+                "pipeCwd": "${workspaceRoot}",
+                "pipeProgram": "docker",
+                "pipeArgs": [
+                    "exec",
+                    "-i",
+                    "gateway-repeater2",
+                    "sh",
+                    "-c"
+                ],
+                "debuggerPath": "/usr/bin/gdb"
+            },
+            "presentation": {
+                "hidden": false,
+                "group": "Repeater 2",
+                "order": 2
+            }
+        },
     ]
 }
