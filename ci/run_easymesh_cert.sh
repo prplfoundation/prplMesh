@@ -54,7 +54,20 @@ is_prplmesh_device() {
     return 1
 }
 
+deploy_dummy_prplmesh() {
+    info "Deploy prplmesh locally to /opt/prplMesh"
+    rm -rf /opt/prplMesh
+    mkdir -p /opt/
+    if ! mv "$rootdir/build/install" /opt/prplMesh ; then
+        err "Failed to deploy prplMesh locally, aborting"
+        exit 1
+    fi
+}
+
 upgrade_prplmesh() {
+    if [ "$TARGET_DEVICE" = prplmesh ] ; then
+        deploy_dummy_prplmesh && return 0 || return 1
+    fi
     if ! is_prplmesh_device "$TARGET_DEVICE"; then
         echo "skip prplmesh upgrade for non prplmesh device $TARGET_DEVICE"
         return 1
