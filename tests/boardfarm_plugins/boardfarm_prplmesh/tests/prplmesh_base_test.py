@@ -5,14 +5,17 @@
 
 from typing import Union
 
+from boardfarm.tests import bft_base_test
 import environment as env
 
 
-class Utils(object):
-    """Collection of common functions used by tests."""
+class PrplMeshBaseTest(bft_base_test.BftBaseTest):
+    """PrplMesh base test case, no actual testing.
 
-    @staticmethod
-    def check_log(entity_or_radio: Union[env.ALEntity, env.Radio], regex: str,
+    Contains common methods used by other(derived) prplmesh test cases.
+    """
+
+    def check_log(self, entity_or_radio: Union[env.ALEntity, env.Radio], regex: str,
                   start_line: int = 0, timeout: float = 0.3) -> bool:
         result, line, match = entity_or_radio.wait_for_log(regex, start_line, timeout)
         if not result:
