@@ -35,7 +35,7 @@ image-build-tests-runner:
     - docker
   needs: ["image-build-builder"]
 
-cppcheck:
+.cppcheck:
   stage: build
   image: $CI_REGISTRY_IMAGE/prplmesh-builder-alpine:$CI_PIPELINE_ID
   script:
@@ -50,7 +50,7 @@ cppcheck:
     - docker
   needs: ["image-build-builder/alpine"]
 
-cppcheck-diff:
+.cppcheck-diff:
   stage: build
   image: $CI_REGISTRY_IMAGE/prplmesh-builder-alpine:$CI_PIPELINE_ID
   script:
@@ -65,7 +65,16 @@ cppcheck-diff:
   needs: ["image-build-builder/alpine"]
 
 
-flake8:
+.flake8:
+  stage: build
+  image: pipelinecomponents/flake8:f087c4c
+  variables:
+    FLAKE8_FILES: "tests/*.py tools/beerocks_analyzer/conf/conf1.py tools/beerocks_analyzer/*.py tools/commands/*.py"
+  script:
+    - apk add --update --no-cache git
+    - git ls-files -z -- $FLAKE8_FILES | xargs -0 -t flake8 --verbose
+
+.flake8-diff:
   stage: build
   image: pipelinecomponents/flake8:f087c4c
   script:
@@ -74,7 +83,7 @@ flake8:
       xargs -0 -t flake8 --verbose
   needs: []
 
-shellcheck:
+.shellcheck:
   stage: build
   image: koalaman/shellcheck-alpine:v0.7.1
   before_script:
@@ -121,14 +130,14 @@ build-in-docker:
     paths:
       - build/install
 
-build-in-docker-alpine:
+.build-in-docker-alpine:
   extends: build-in-docker
   image: $CI_REGISTRY_IMAGE/prplmesh-builder-alpine:$CI_PIPELINE_ID
   only:
     - schedules
   needs: ["image-build-builder/alpine"]
 
-build-in-docker-static:
+.build-in-docker-static:
   extends: build-in-docker
   variables:
     EXTRA_CMAKE_FLAGS: "-DBUILD_SHARED_LIBS=OFF"
@@ -155,8 +164,8 @@ upload-artifacts:
   needs:
     - build-in-docker
     - build-for-netgear-rax40
-    - build-for-glinet-b1300
-    - build-for-turris-omnia
+      #- build-for-glinet-b1300
+      #- build-for-turris-omnia
 
 .run-test-in-docker:
   stage: test
@@ -167,10 +176,10 @@ upload-artifacts:
   needs:
     - job: build-in-docker
 
-tlvf_test:
+.tlvf_test:
   extends: .run-test-in-docker
 
-run-tests:
+.run-tests:
   stage: test
   image: $CI_REGISTRY_IMAGE/prplmesh-tests-runner:$CI_PIPELINE_ID
   script:
@@ -226,12 +235,12 @@ run-tests:
     - targets
   timeout: 5m
 
-build-for-turris-omnia:
+.build-for-turris-omnia:
   extends: .build-for-openwrt
   variables:
     TARGET_DEVICE: "turris-omnia"
 
-build-for-glinet-b1300:
+.build-for-glinet-b1300:
   extends: .build-for-openwrt
   variables:
     TARGET_DEVICE: "glinet-b1300"
@@ -241,14 +250,14 @@ build-for-netgear-rax40:
   variables:
     TARGET_DEVICE: "netgear-rax40"
 
-test-on-turris-omnia:
+.test-on-turris-omnia:
   extends: .test-on-target
   variables:
     TARGET_DEVICE: turris-omnia
     TARGET_DEVICE_NAME: turris-omnia-1
   needs: ["build-for-turris-omnia"]
 
-test-on-glinet-b1300:
+.test-on-glinet-b1300:
   extends: .test-on-target
   variables:
     TARGET_DEVICE: glinet-b1300
