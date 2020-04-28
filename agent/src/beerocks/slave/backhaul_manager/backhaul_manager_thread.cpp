@@ -2813,7 +2813,7 @@ bool backhaul_manager::handle_1905_topology_discovery(const std::string &src_mac
 bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                               const std::string &src_mac)
 {
-    LOG(DEBUG) << "received autoconfig response message";
+    LOG(DEBUG) << "received autoconfiguration response message";
 
     if (!controller_bridge_mac.empty() && src_mac != controller_bridge_mac) {
         LOG(INFO) << "current controller_bridge_mac=" << controller_bridge_mac
@@ -2829,7 +2829,7 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
             return true;
         }
     } else {
-        LOG(ERROR) << "tlvSupportedRole missing - ignoring autconfig search message";
+        LOG(ERROR) << "tlvSupportedRole missing - ignoring autoconfiguration response message";
         return true;
     }
 
@@ -2864,13 +2864,13 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
             freq_type = beerocks::eFreqType::FREQ_5G;
             break;
         case ieee1905_1::tlvSupportedFreqBand::BAND_60G:
-            LOG(DEBUG) << "received auto-config reply for 60GHz band, unsupported";
+            LOG(DEBUG) << "received autoconfiguration response for 60GHz band, unsupported";
             return true;
         default:
             LOG(ERROR) << "invalid tlvSupportedFreqBand value";
             return true;
         }
-        LOG(DEBUG) << "received auto-config reply for " << band_name << " band";
+        LOG(DEBUG) << "received autoconfiguration response for " << band_name << " band";
         for (auto soc : slaves_sockets) {
             if (soc->freq_type == freq_type) {
                 LOG(DEBUG) << band_name << " band socket found, iface=" << soc->hostap_iface;
@@ -2886,7 +2886,7 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
         }
 
     } else {
-        LOG(ERROR) << "tlvSupportedFreqBand missing - ignoring autconfig search message";
+        LOG(ERROR) << "tlvSupportedFreqBand missing - ignoring autoconfiguration response message";
         return true;
     }
 
@@ -2910,7 +2910,7 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
             return true;
         }
     } else {
-        LOG(ERROR) << "tlvSupportedService missing - ignoring autconfig search message";
+        LOG(ERROR) << "tlvSupportedService missing - ignoring autoconfiguration response message";
         return true;
     }
 
