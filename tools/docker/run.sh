@@ -11,7 +11,7 @@ rootdir=$(realpath "$scriptdir/../..")
 # shellcheck disable=SC2034
 installdir="${rootdir:?}/build/install"
 
-# shellcheck source=tools/functions.sh
+# shellcheck source=functions.sh
 . "${rootdir}/tools/functions.sh"
 
 usage() {
