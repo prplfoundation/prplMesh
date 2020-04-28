@@ -240,12 +240,7 @@ run-certification-tests:
     # device to test with: prplmesh for dummy bwl, netgear-rax40 for dwpal on rax40
     DEVICE_UNDER_TEST: prplmesh
   script:
-      - |
-        if [ "$DEVICE_UNDER_TEST" != prplmesh ] ; then
-            echo "Deploying to $DEVICE_UNDER_TEST"
-            tools/deploy_ipk.sh --certification-mode $DEVICE_UNDER_TEST build/$DEVICE_UNDER_TEST/prplmesh.ipk
-        fi
-      - /easymesh_cert/run_test_file.sh -o logs -d $DEVICE_UNDER_TEST $TESTS_TO_RUN
+      - ci/run_easymesh_cert.sh --skip-download -o logs -s $DEVICE_UNDER_TEST -d $DEVICE_UNDER_TEST -e /easymesh_cert $TESTS_TO_RUN
   artifacts:
     paths:
       - logs

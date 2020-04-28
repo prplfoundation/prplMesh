@@ -3,8 +3,7 @@
     # DEVICE_UNDER_TEST need to be set when extending the job
     GIT_CLONE_PATH: "/builds/prpl-foundation/prplMesh/"
   script:
-      - echo $CI_COMMIT_DESCRIPTION
-      - /easymesh_cert/run_test_file.sh -o logs -d $DEVICE_UNDER_TEST "${CI_JOB_NAME%%:*}"
+      - ci/run_easymesh_cert.sh --skip-download -o logs -s $DEVICE_UNDER_TEST -d $DEVICE_UNDER_TEST -e /easymesh_cert "${CI_JOB_NAME%%:*}"
   artifacts:
     paths:
       - logs

@@ -3,8 +3,6 @@
   extends: .certification-generic
   variables:
     DEVICE_UNDER_TEST: "netgear-rax40"
-  before_script:
-    - tools/deploy_ipk.sh --certification-mode $DEVICE_UNDER_TEST build/$DEVICE_UNDER_TEST/prplmesh.ipk
   needs:
     - job: build-for-netgear-rax40
 
