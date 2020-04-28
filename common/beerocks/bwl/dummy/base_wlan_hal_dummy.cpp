@@ -286,7 +286,7 @@ bool base_wlan_hal_dummy::dummy_send_cmd(const std::string &cmd, char **reply) {
 
 bool base_wlan_hal_dummy::process_nl_events()
 {
-    LOG(ERROR) << __func__ << "not implemented";
+    LOG(ERROR) << "not implemented";
     return false;
 }
 
