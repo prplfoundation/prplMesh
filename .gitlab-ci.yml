@@ -190,8 +190,7 @@ run-tests:
     - tests/openwrt/test_status.sh $TARGET_DEVICE_NAME
   artifacts:
     paths:
-      - ${TARGET_DEVICE_NAME}_logs.tar.gz
-      - ${TARGET_DEVICE_NAME}_diags.log
+      - logs
     when: always
   tags:
     - targets

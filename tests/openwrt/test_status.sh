@@ -1,5 +1,8 @@
 #!/bin/sh
 
+scriptdir=$(dirname "$(readlink -f "$0")")
+rootdir=$(realpath "$scriptdir/../..")
+
 usage() {
     echo "usage: $(basename "$0") <target>"
 }
@@ -10,10 +13,13 @@ if [ -z "$1" ] ; then
 fi
 
 TARGET="$1"
+LOG_DIR="$rootdir/logs/${TARGET}"
+
+mkdir -p "$LOG_DIR"
 
 # Collect diagnostic data before the restart
 echo "Collecting pre-test-run diagnostic data..."
-ssh "$TARGET" <<"EOF" > "${TARGET}_diags.log"
+ssh "$TARGET" <<"EOF" > "$LOG_DIR/${TARGET}_diags.log"
 date
 echo "Release:"
 cat /etc/*_release
@@ -51,22 +57,21 @@ TEST_STATUS=$?
 
 # Collect post-run diagnostics
 echo "Collecting post-test-run diagnostic data..."
-ssh "$TARGET" <<"EOF" >> "${TARGET}_diags.log"
+ssh "$TARGET" <<"EOF" > "$LOG_DIR/conn_map.txt"
 date
 echo "Output of bml_conn_map:"
 /opt/prplmesh/bin/beerocks_cli -c bml_conn_map 2>&1
 echo "Output of bml_nw_map_query:"
 /opt/prplmesh/bin/beerocks_cli -c bml_nw_map_query 2>&1
-echo "Kernel messages:"
-dmesg
 EOF
+
+ssh "$TARGET" "dmesg" > "$LOG_DIR/dmesg.txt"
 
 # Capture the logs
 echo "Capturing the prplMesh logs..."
-ssh "$TARGET" "tar -C /tmp/beerocks/logs -czvf - ./" > "${TARGET}_logs.tar.gz"
+scp -r "$TARGET:/tmp/beerocks/logs/*" "$LOG_DIR"
 
-echo "Logs file:"
-ls -l "$PWD/${TARGET}_logs.tar.gz"
+scp "$TARGET:/var/run/hostapd-phy*.conf" "$LOG_DIR"
 
 echo "Stopping prplMesh"
 ssh "$TARGET" /opt/prplmesh/prplmesh_utils.sh stop
