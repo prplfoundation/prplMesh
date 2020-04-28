@@ -163,48 +163,51 @@ void monitor_stats::send_hostap_measurements(const sMeasurementsRequest &request
 
 void monitor_stats::send_associated_sta_link_metrics(const sMeasurementsRequest &request)
 {
-    for (auto it = mon_db->sta_begin(); it != mon_db->sta_end(); ++it) {
-        auto sta_mac  = it->first;
-        auto sta_node = it->second;
-        if (sta_node == nullptr) {
-            continue;
-        }
+    auto sta = std::find_if(mon_db->sta_begin(), mon_db->sta_end(),
+                            [&](std::pair<std::string, monitor_sta_node *> sta) {
+                                auto sta_mac  = sta.first;
+                                auto sta_node = sta.second;
+                                return sta_node &&
+                                       (network_utils::mac_from_string(sta_mac) == request.mac);
+                            });
 
-        if (network_utils::mac_from_string(sta_mac) != request.mac) {
-            continue;
-        }
-
-        auto sta_metrics = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE>(
-            cmdu_tx, request.message_id);
-        if (!sta_metrics) {
-            LOG(ERROR) << "Failed building "
-                          "cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE message!";
-            return;
-        }
-
-        // there is exactly 1 BSSID per STA
-        if (!sta_metrics->alloc_bssid_info_list(1)) {
-            LOG(ERROR) << "Failed allocate_bssid_info_list";
-            return;
-        }
-        const auto &sta_stats = sta_node->get_stats();
-
-        sta_metrics->sta_mac() = request.mac;
-
-        beerocks_message::sBssidInfo &bss_info = std::get<1>(sta_metrics->bssid_info_list(0));
-
-        bss_info.earliest_measurement_delta = sta_stats.delta_ms;
-        // TODO: MAC data rate and Phy rate are not necessarily the same
-        // https://github.com/prplfoundation/prplMesh/issues/1195
-        bss_info.downlink_estimated_mac_data_rate_mbps = sta_stats.rx_phy_rate_100kb_avg / 10;
-        bss_info.uplink_estimated_mac_data_rate_mbps   = sta_stats.tx_phy_rate_100kb_avg / 10;
-        bss_info.sta_measured_uplink_rssi_dbm_enc      = sta_stats.rx_rssi_curr;
-
-        LOG(DEBUG) << "Send ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE "
-                   << "for mac " << sta_metrics->sta_mac() << ", message_id = " << request.message_id;
-        message_com::send_cmdu(slave_socket, cmdu_tx);
+    if (sta == mon_db->sta_end()) {
+        LOG(ERROR) << "Could not find STA for ASSOCIATED_STA_LINK_METRIC_RESPONSE";
+        return;
     }
+
+    auto sta_node = sta->second;
+
+    auto sta_metrics = message_com::create_vs_message<
+        beerocks_message::cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE>(
+        cmdu_tx, request.message_id);
+    if (!sta_metrics) {
+        LOG(ERROR) << "Failed building "
+                      "cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE message!";
+        return;
+    }
+
+    // there is exactly 1 BSSID per STA
+    if (!sta_metrics->alloc_bssid_info_list(1)) {
+        LOG(ERROR) << "Failed allocate_bssid_info_list";
+        return;
+    }
+    const auto &sta_stats = sta_node->get_stats();
+
+    sta_metrics->sta_mac() = request.mac;
+
+    beerocks_message::sBssidInfo &bss_info = std::get<1>(sta_metrics->bssid_info_list(0));
+
+    bss_info.earliest_measurement_delta = sta_stats.delta_ms;
+    // TODO: MAC data rate and Phy rate are not necessarily the same
+    // https://github.com/prplfoundation/prplMesh/issues/1195
+    bss_info.downlink_estimated_mac_data_rate_mbps = sta_stats.rx_phy_rate_100kb_avg / 10;
+    bss_info.uplink_estimated_mac_data_rate_mbps   = sta_stats.tx_phy_rate_100kb_avg / 10;
+    bss_info.sta_measured_uplink_rssi_dbm_enc      = sta_stats.rx_rssi_curr;
+
+    LOG(DEBUG) << "Send ACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE "
+               << "for mac " << sta_metrics->sta_mac() << ", message_id = " << request.message_id;
+    message_com::send_cmdu(slave_socket, cmdu_tx);
 }
 
 void monitor_stats::process()
