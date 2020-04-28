@@ -196,6 +196,7 @@ typedef struct {
 
 typedef struct {
     sMacAddr mac;
+    sMacAddr bssid;
     beerocks::message::sRadioCapabilities capabilities;
     int8_t vap_id;
     uint8_t reserved1;
