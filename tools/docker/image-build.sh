@@ -9,8 +9,7 @@
 scriptdir="$(cd "${0%/*}" || exit 1; pwd)"
 rootdir="${scriptdir%/*/*}"
 
-# Suppress shellcheck's "Can't follow non-constant source" warning
-# shellcheck disable=SC1090
+# shellcheck source=functions.sh
 . "${rootdir}/tools/functions.sh"
 
 usage() {

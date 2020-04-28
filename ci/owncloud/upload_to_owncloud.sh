@@ -9,9 +9,9 @@
 scriptdir=$(cd "${0%/*}" || exit 1; pwd)
 rootdir="${scriptdir%/*/*}"
 
-# shellcheck source=tools/functions.sh
+# shellcheck source=functions.sh
 . "${rootdir}/tools/functions.sh"
-# shellcheck source=ci/owncloud/owncloud_definitions.sh
+# shellcheck source=owncloud_definitions.sh
 . "${rootdir}/ci/owncloud/owncloud_definitions.sh"
 
 usage() {

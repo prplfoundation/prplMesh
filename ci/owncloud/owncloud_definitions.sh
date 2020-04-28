@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# shellcheck source=../../tools/functions.sh
+# shellcheck source=functions.sh
 . "$(dirname "${BASH_SOURCE[0]}")/../../tools/functions.sh"
 
 create_dir() {

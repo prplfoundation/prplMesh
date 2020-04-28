@@ -9,7 +9,7 @@
 scriptdir=$(cd "${0%/*}" || exit 1; pwd)
 rootdir="${scriptdir%/*}"
 
-# shellcheck source=../tools/functions.sh
+# shellcheck source=functions.sh
 . "${rootdir}/tools/functions.sh"
 
 usage() {
