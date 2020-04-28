@@ -191,9 +191,11 @@ run-tests:
   artifacts:
     paths:
       - logs
+    expire_in: 4 weeks
     when: always
   tags:
     - targets
+  timeout: 5m
 
 build-for-turris-omnia:
   extends: .build-for-openwrt
