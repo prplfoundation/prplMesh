@@ -1,0 +1,16 @@
+#
+---
+_include: {
+  beerocks/tlvf/beerocks_message_action.h,
+  bcl/beerocks_message_structs.h,
+}
+
+cChannelsList:
+  _type: class
+  supported_channels_length:
+    _type: uint8_t
+    _length_var: True
+  supported_channels_length: uint8_t
+  supported_channels:
+    _type: beerocks::message::sWifiChannel 
+    _length: [ supported_channels_length ]

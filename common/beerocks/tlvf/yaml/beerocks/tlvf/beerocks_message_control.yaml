@@ -30,7 +30,8 @@ cACTION_CONTROL_SLAVE_JOINED_NOTIFICATION:
   platform_settings: sPlatformSettings
   wlan_settings: sWlanSettings 
   backhaul_params: sBackhaulParams 
-  hostap: sNodeHostap 
+  hostap: sNodeHostap
+  supported_channels: cChannelsList
   cs_params: sApChannelSwitch 
   low_pass_filter_on: uint8_t  # configuration
   enable_repeater_mode: uint8_t 
@@ -52,6 +53,7 @@ cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION:
   bridge_iface_mac: sMacAddr 
   bridge_ipv4: beerocks::net::sIpv4Addr 
   hostap: sNodeHostap 
+  supported_channels: cChannelsList
 
 cACTION_CONTROL_SON_CONFIG_UPDATE:
   _type: class

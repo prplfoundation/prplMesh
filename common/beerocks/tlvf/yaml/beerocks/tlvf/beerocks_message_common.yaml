@@ -2,6 +2,7 @@
 ---
 _include: {
   beerocks/tlvf/beerocks_message_action.h,
+  beerocks/tlvf/channels_list.h,
   bcl/beerocks_message_structs.h,
 }
 
@@ -282,7 +283,7 @@ sNodeHostap:
     _length: [ "beerocks::message::WIFI_DRIVER_VER_LENGTH" ]
   supported_channels:
     _type: beerocks::message::sWifiChannel 
-    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]          
+    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
 
 sVapsList:
   _type: struct
