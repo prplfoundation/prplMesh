@@ -146,7 +146,7 @@ for REPO in "${REPOS[@]}"; do
 
       # finalize reports
       # remove local prefixes from source controlled reports
-      declare -a KW_REPORTS=(${REPORT_PATH}/kwreport_all.log ${REPORT_PATH}/kwreport_critical.log ${REPORT_PATH}/kwreport_error.log ${REPORT_PATH}/kwreport_warning.log ${REPORT_PATH}/kwreport_review.log ${REPORT_PATH}/kwreport_ignore.log)
+      declare -a KW_REPORTS=("${REPORT_PATH}/kwreport_all.log" "${REPORT_PATH}/kwreport_critical.log" "${REPORT_PATH}/kwreport_error.log" "${REPORT_PATH}/kwreport_warning.log" "${REPORT_PATH}/kwreport_review.log" "${REPORT_PATH}/kwreport_ignore.log")
       for r in "${KW_REPORTS[@]}"; do
             cp "$r" "${r}".tmp
             # TODO: fix path joining problem (capitalization, splitting with slashes)
