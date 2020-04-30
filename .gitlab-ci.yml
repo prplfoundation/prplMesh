@@ -115,14 +115,13 @@ upload-artifacts:
     # on the command line.
     - ln -s "$CI_OWNCLOUD_PASSWORD" ~/.netrc
     - sed --follow-symlinks -i 's/^/machine ftp.essensium.com login prplmesh-robot-ci password /' ~/.netrc
-    - ci/owncloud/upload_to_owncloud.sh -v "artifacts/$CI_COMMIT_SHA-$CI_JOB_ID" ./build
     - |
       if [ $CI_COMMIT_BRANCH = "master" ] ; then
           echo "Updating the 'latest' folder"
+          - ci/owncloud/upload_to_owncloud.sh -v "artifacts/$CI_COMMIT_SHA-$CI_JOB_ID" ./build
           # Copying takes a lot of time, and we want the "latest" folder to be updated
           # "as fast as possible", so we make a copy and move it:
-          ci/owncloud/owncloud_definitions.sh copy "artifacts/$CI_COMMIT_SHA-$CI_JOB_ID" "temp_uploads/latest_$CI_COMMIT_SHA-$CI_JOB_ID"
-          ci/owncloud/owncloud_definitions.sh move "temp_uploads/latest_$CI_COMMIT_SHA-$CI_JOB_ID" "artifacts/latest"
+          ci/owncloud/owncloud_definitions.sh move "artifacts/$CI_COMMIT_SHA-$CI_JOB_ID" "artifacts/latest"
       fi
   needs:
     - build-in-docker
