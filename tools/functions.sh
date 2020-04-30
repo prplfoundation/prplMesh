@@ -6,8 +6,8 @@
 # See LICENSE file for more details.
 ###############################################################
 
-# shellcheck disable=SC2034
-installdir="${rootdir:?}/build/install"
+ROOT_DIR="$(realpath "$(dirname "${BASH_SOURCE[0]}")"/..)"
+export ROOT_DIR
 
 dbg() {
     if [ "$VERBOSE" = "true" ]; then echo "$(basename "$0"): $*"; fi

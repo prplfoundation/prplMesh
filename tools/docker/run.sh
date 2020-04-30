@@ -6,11 +6,10 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir=$(dirname "$(readlink -f "$0")")
-rootdir=$(realpath "$scriptdir/../..")
+# shellcheck source=../../tools/functions.sh
+. "$(dirname "${BASH_SOURCE[0]}")/../../tools/functions.sh"
 
-# shellcheck source=tools/functions.sh
-. "${rootdir}/tools/functions.sh"
+installdir="$ROOT_DIR/build/install"
 
 usage() {
     echo "usage: $(basename "$0") [-hvd] [-n name] [-N network]"
@@ -56,14 +55,14 @@ main() {
     docker image inspect "prplmesh-runner$TAG" >/dev/null 2>&1 || {
         [ -n "$TAG" ] && { err "image prplmesh-runner$TAG doesn't exist, aborting"; exit 1; }
         dbg "Image prplmesh-runner$TAG does not exist, creating..."
-        run "${scriptdir}/image-build.sh"
+        run "${ROOT_DIR}/tools/docker/image-build.sh"
     }
 
     NETWORK="${NETWORK:-prplMesh-net-${UNIQUE_ID}}"
     docker network inspect "${NETWORK}" >/dev/null 2>&1 || {
         dbg "Network ${NETWORK} does not exist, creating..."
         run docker network create "${NETWORK}" >/dev/null 2>&1
-        echo "network ${NETWORK}" >> "${scriptdir}/.test_containers"
+        echo "network ${NETWORK}" >> "${ROOT_DIR}/tools/docker/.test_containers"
     }
 
     dbg "VERBOSE=${VERBOSE}"
@@ -84,8 +83,8 @@ main() {
         "${PORT[@]}"
         "${PUBLISH[@]}"
         -v "${installdir}:${installdir}"
-        -v "${rootdir}:${rootdir}"
-        -v "${rootdir}/logs/${NAME}:/tmp/${SUDO_USER:-${USER}}/beerocks/logs"
+        -v "${ROOT_DIR}:${ROOT_DIR}"
+        -v "${ROOT_DIR}/logs/${NAME}:/tmp/${SUDO_USER:-${USER}}/beerocks/logs"
         --name "${NAME}"
     )
 
@@ -104,10 +103,10 @@ main() {
         fi
     fi
 
-    mkdir -p "${rootdir}/logs/${NAME}"
+    mkdir -p "${ROOT_DIR}/logs/${NAME}"
 
     # Save the container name so that it can easily be stopped/removed later
-    echo "$NAME" >> "${scriptdir}/.test_containers"
+    echo "$NAME" >> "${ROOT_DIR}/tools/docker/.test_containers"
     run docker container run "${DOCKEROPTS[@]}" "prplmesh-runner$TAG" "$@"
 }
 
