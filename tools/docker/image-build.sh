@@ -36,7 +36,7 @@ main() {
     while true; do
         case "$1" in
             -h | --help)            usage; exit 0; shift ;;
-            -b | --base-image)      BASE_IMAGE="$2"; shift ; shift ;;
+            -b | --base-image)      BASE_IMAGE="$2"; postfix="-$(echo "${2##*/}" | tr :@ --)"; shift ; shift ;;
             -t | --tag)             TAG=":$2"; shift ; shift ;;
             -i | --image)           BUILD_IMAGES="${BUILD_IMAGES}$2;"; shift ; shift ;;
             -v | --verbose)         export VERBOSE=true; shift ;;
@@ -45,9 +45,9 @@ main() {
         esac
     done
 
-    dbg "BASE_IMAGE=${BASE_IMAGE}:${TAG}"
     dbg "TAG=${TAG}"
     dbg "BUILD_IMAGES=${BUILD_IMAGES}"
+    dbg "postfix=$postfix"
     dbg "rootdir=$rootdir"
 
     # Make sure that a build image was specified
@@ -57,25 +57,26 @@ main() {
     fi
 
     if [[ "${BUILD_IMAGES}" == *";builder;"* ]]; then
-        info "Generating builder docker image (prplmesh-builder$TAG)"
+        info "Generating builder docker image (prplmesh-builder$postfix$TAG)"
         info "Base docker image $BASE_IMAGE"
         run docker image build \
             --build-arg image="$BASE_IMAGE" \
-            --tag "prplmesh-builder$TAG" \
+            --tag "prplmesh-builder$postfix$TAG" \
             "${scriptdir}/builder"
     fi
 
     if [[ "${BUILD_IMAGES}" == *";runner;"* ]]; then
-        info "Generating runner docker image (prplmesh-runner$TAG)"
+        info "Generating runner docker image (prplmesh-runner$postfix$TAG)"
         info "Base docker image $BASE_IMAGE"
         run docker image build \
             --build-arg image="$BASE_IMAGE" \
-            --tag "prplmesh-runner$TAG" \
+            --tag "prplmesh-runner$postfix$TAG" \
             "${scriptdir}/runner"
     fi
 }
 
 BASE_IMAGE="ubuntu:18.04"
 BUILD_IMAGES=";"
+postfix=""
 
 main "$@"
