@@ -95,7 +95,12 @@ void client_steering_task::steer_sta()
     }
 
     std::string radio_mac = database.get_node_parent_radio(target_bssid);
-    original_bssid        = database.get_node_parent(sta_mac);
+    if (radio_mac.empty()) {
+        LOG(ERROR) << "parent radio for target-bssid=" << target_bssid
+                   << " not found, exiting steering task";
+        return;
+    }
+    original_bssid = database.get_node_parent(sta_mac);
 
     // Send 17.1.27	Client Association Control Request
     if (!cmdu_tx.create(0, ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE)) {
@@ -121,6 +126,11 @@ void client_steering_task::steer_sta()
     std::get<1>(sta_list_unblock) = network_utils::mac_from_string(sta_mac);
 
     auto agent_mac = database.get_node_parent_ire(radio_mac);
+    if (agent_mac.empty()) {
+        LOG(ERROR) << "parent ire for radio_mac=" << radio_mac
+                   << " not found, exiting steering task";
+        return;
+    }
     TASK_LOG(DEBUG) << "sending allow request for " << sta_mac << " to bssid " << target_bssid
                     << " id=" << int(id);
     son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
