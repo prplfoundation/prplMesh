@@ -1,4 +1,4 @@
-# shellcheck shell=sh
+#!/bin/bash
 ###############################################################
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 # SPDX-FileCopyrightText: 2019-2020 the prplMesh contributors (see AUTHORS.md)
