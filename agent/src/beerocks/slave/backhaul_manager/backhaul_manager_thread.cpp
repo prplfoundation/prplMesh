@@ -3155,8 +3155,7 @@ bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageR
     auto radio = findRadioInfo(slaves_sockets, requiredMac);
 
     // build ACK message CMDU
-    const auto mid = cmdu_rx.getMessageId();
-
+    const auto mid      = cmdu_rx.getMessageId();
     auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
     if (!cmdu_tx_header) {
         LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
@@ -3166,14 +3165,13 @@ bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageR
     if (!radio) {
         LOG(WARNING) << "couldn't find any agent for the requested mac: " << requiredMac;
 
-        // send ack with error to the controller
-
         // add an Error Code TLV
         auto error_code_tlv = cmdu_tx.addClass<wfa_map::tlvErrorCode>();
         if (!error_code_tlv) {
             LOG(ERROR) << "addClass wfa_map::tlvErrorCode has failed";
             return false;
         }
+
         error_code_tlv->reason_code() =
             wfa_map::tlvErrorCode::STA_NOT_ASSOCIATED_WITH_ANY_BSS_OPERATED_BY_THE_AGENT;
         error_code_tlv->sta_mac() = requiredMac;
@@ -3190,12 +3188,17 @@ bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageR
 
         LOG(DEBUG) << "sending ACK message to the originator with an error, mid: " << std::hex
                    << int(mid) << " tlv error code: " << errorSS.str();
+
         return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
     }
 
+    forward_to = radio->slave;
+
     LOG(DEBUG) << "found the radio that has the sation. radio: " << radio->radio_mac
                << "; station: " << requiredMac;
-    forward_to = radio->slave;
+
+    LOG(DEBUG) << "BEACON METRICS QUERY: sending ACK message to the originator mid: "
+               << int(mid); // USED IN TESTS
 
     return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
 }
