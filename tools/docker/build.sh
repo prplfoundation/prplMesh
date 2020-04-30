@@ -6,24 +6,21 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir="$(cd "${0%/*}" || exit 1; pwd)"
-rootdir="${scriptdir%/*/*}"
-
 # shellcheck source=../../tools/functions.sh
-. "${rootdir}/tools/functions.sh"
+. "$(dirname "${BASH_SOURCE[0]}")/../../tools/functions.sh"
 
 main() {
     docker image inspect prplmesh-builder >/dev/null 2>&1 || {
         echo "Image prplmesh-build does not exist, creating..."
-        run "${scriptdir}"/image-build.sh
+        run "${ROOT_DIR}"/tools/docker/image-build.sh
     }
 
     # Default docker arguments
     docker_args=(
-        --workdir "${rootdir}"
+        --workdir "${ROOT_DIR}"
         --user "${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)}"
         -e "USER=${SUDO_USER:-${USER}}"
-        -v "${rootdir}:${rootdir}"
+        -v "${ROOT_DIR}:${ROOT_DIR}"
         --entrypoint "./tools/maptools.py"
     )
 

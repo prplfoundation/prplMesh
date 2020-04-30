@@ -5,13 +5,12 @@
 # This code is subject to the terms of the BSD+Patent license.
 # See LICENSE file for more details.
 ###############################################################
-scriptdir="$(cd "${0%/*}" && pwd)"
-rootdir=$(realpath "$scriptdir/../")
 
-# shellcheck source=functions.sh
-. "$rootdir/tools/functions.sh"
+# shellcheck source=../tools/functions.sh
+. "$(dirname "${BASH_SOURCE[0]}")/../tools/functions.sh"
+
 # shellcheck source=../ci/owncloud/owncloud_definitions.sh
-. "$rootdir/ci/owncloud/owncloud_definitions.sh"
+. "$ROOT_DIR/ci/owncloud/owncloud_definitions.sh"
 
 usage() {
     echo "usage: $(basename "$0") [-hv]"

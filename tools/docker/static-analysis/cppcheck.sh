@@ -1,14 +1,14 @@
 #!/bin/bash
 
-scriptdir="$(cd "${0%/*}" && pwd)"
-rootdir="${scriptdir%/*/*/*}"
+# shellcheck source=../../../tools/functions.sh
+. "$(dirname "${BASH_SOURCE[0]}")/../../../tools/functions.sh"
 
 # shellcheck source=../../../tools/functions.sh
-. "${rootdir}/tools/functions.sh"
+. "${ROOT_DIR}/tools/functions.sh"
 
-OUTPUT_FILE="$rootdir/cppcheck_results.txt"
+OUTPUT_FILE="$ROOT_DIR/cppcheck_results.txt"
 INCLUDES=()
-while IFS='' read -r line; do INCLUDES+=("-I$line"); done < <(find -L "$rootdir/common" "$rootdir/framework" -type d -name include)
+while IFS='' read -r line; do INCLUDES+=("-I$line"); done < <(find -L "$ROOT_DIR/common" "$ROOT_DIR/framework" -type d -name include)
 
 usage() {
     echo "usage: $(basename "$0") <source> [source]"

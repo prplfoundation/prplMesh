@@ -6,7 +6,8 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir="$(cd "${0%/*}" || exit; pwd)"
+# shellcheck source=../../../../../tools/functions.sh
+. "$(dirname "${BASH_SOURCE[0]}")/../../../../../tools/functions.sh"
 
 err() {
     printf '\033[1;31m%s\033[0m\n' "$*"
@@ -27,7 +28,7 @@ usage() {
 }
 
 build_image() {
-    docker build --tag rdkb-builder "$scriptdir/"
+    docker build --tag rdkb-builder "$ROOT_DIR/tools/docker/builder/rdkb/toolchain"
 }
 
 main() {

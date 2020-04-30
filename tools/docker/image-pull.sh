@@ -6,11 +6,8 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir="$(cd "${0%/*}" || exit 1; pwd)"
-rootdir="${scriptdir%/*/*}"
-
 # shellcheck source=../../tools/functions.sh
-. "${rootdir}/tools/functions.sh"
+. "$(dirname "${BASH_SOURCE[0]}")/../../tools/functions.sh"
 
 usage() {
     echo "usage: $(basename "$0") [-hvbt]"
@@ -53,7 +50,7 @@ main() {
     done
 
     dbg "TAG=$TAG"
-    dbg "rootdir=$rootdir"
+    dbg "ROOT_DIR=$ROOT_DIR"
 
     # The registry used in Gitlab has the base image name appended with : converted to -
     base_image="$(echo "$IMAGE" | tr : -)"

@@ -9,13 +9,10 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir="$(cd "${0%/*}" && pwd)"
-rootdir=$(realpath "$scriptdir/../")
-
 # shellcheck source=../tools/functions.sh
-. "$rootdir/tools/functions.sh"
+. "$(dirname "${BASH_SOURCE[0]}")/../tools/functions.sh"
 # shellcheck source=ci/owncloud/owncloud_definitions.sh
-. "$rootdir/ci/owncloud/owncloud_definitions.sh"
+. "$ROOT_DIR/ci/owncloud/owncloud_definitions.sh"
 
 usage() {
     echo "usage: $(basename "$0") [-hboev] <test> [test]"
@@ -126,7 +123,7 @@ main() {
             REMOTE_PATH="certified/$TARGET_DEVICE"
         fi
         info "Uploading $LOG_FOLDER to $OWNCLOUD_PATH/$REMOTE_PATH"
-        "$scriptdir"/owncloud/upload_to_owncloud.sh --direct "$OWNCLOUD_PATH/$REMOTE_PATH" "$LOG_FOLDER" || {
+        "$ROOT_DIR"/ci/owncloud/upload_to_owncloud.sh --direct "$OWNCLOUD_PATH/$REMOTE_PATH" "$LOG_FOLDER" || {
             err "Failed to upload $LOG_FOLDER"
             exit 1
         }
@@ -137,8 +134,8 @@ main() {
 
 PRPLMESH_IPK=prplmesh.ipk
 PRPLMESH_BUILDINFO=prplmesh.buildinfo
-TOOLS_PATH="$rootdir/tools"
-EASYMESH_CERT_PATH=$(realpath "$rootdir/../easymesh_cert")
+TOOLS_PATH="$ROOT_DIR/tools"
+EASYMESH_CERT_PATH=$(realpath "$ROOT_DIR/../easymesh_cert")
 TARGET_DEVICE="netgear-rax40"
 TARGET_DEVICE_SSH="$TARGET_DEVICE-1"
 OWNCLOUD_PATH=Nightly/agent_certification

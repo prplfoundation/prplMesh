@@ -6,11 +6,8 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir="$(cd "${0%/*}" || exit 1; pwd)"
-rootdir="${scriptdir%/*/*}"
-
 # shellcheck source=../../tools/functions.sh
-. "${rootdir}/tools/functions.sh"
+. "$(dirname "${BASH_SOURCE[0]}")/../../tools/functions.sh"
 
 usage() {
     echo "usage: $(basename "$0") [-hvbt]"
@@ -45,20 +42,20 @@ main() {
 
     dbg "IMAGE=$IMAGE"
     dbg "TAG=$TAG"
-    dbg "rootdir=$rootdir"
+    dbg "ROOT_DIR=$ROOT_DIR"
 
     info "Base docker image $IMAGE"
     info "Generating builder docker image (prplmesh-builder$TAG)"
     run docker image build \
         --build-arg image="$IMAGE" \
         --tag "prplmesh-builder$TAG" \
-        "${scriptdir}/builder"
+        "${ROOT_DIR}/tools/docker/builder"
 
     info "Generating runner docker image (prplmesh-runner$TAG)"
     run docker image build \
         --build-arg image="$IMAGE" \
         --tag "prplmesh-runner$TAG" \
-        "${scriptdir}/runner"
+        "${ROOT_DIR}/tools/docker/runner"
 }
 
 VERBOSE=false

@@ -6,11 +6,8 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir="$(cd "${0%/*}" && pwd)"
-rootdir="${scriptdir%/*/*}"
-
 # shellcheck source=../../tools/functions.sh
-. "${rootdir}/tools/functions.sh"
+. "$(dirname "${BASH_SOURCE[0]}")/../../tools/functions.sh"
 
 usage() {
     echo "usage: $(basename "$0") [-hv] [-n name]"
@@ -39,7 +36,7 @@ main() {
         esac
     done
 
-    run docker container exec "${NAME}" "${rootdir}/build/install/scripts/prplmesh_utils.sh" status $OPT
+    run docker container exec "${NAME}" "${ROOT_DIR}/build/install/scripts/prplmesh_utils.sh" status $OPT
 }
 
 VERBOSE=false

@@ -6,11 +6,8 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir=$(cd "${0%/*}" || exit 1; pwd)
-rootdir="${scriptdir%/*}"
-
 # shellcheck source=../tools/functions.sh
-. "${rootdir}/tools/functions.sh"
+. "$(dirname "${BASH_SOURCE[0]}")/../tools/functions.sh"
 
 usage() {
     echo "usage: $(basename "${0}") [-hv] [-d delay]"
@@ -42,12 +39,12 @@ check_wsl() {
     # Read GW & Repeater UCC ports
     local GW_UCC_PORT
     GW_UCC_PORT=$(grep ucc_listener_port \
-    "${rootdir}"/build/install/config/beerocks_controller.conf | \
+    "${ROOT_DIR}"/build/install/config/beerocks_controller.conf | \
     awk -F'[= ]' '{ print $2 }')
 
     local RP_UCC_PORT
     RP_UCC_PORT=$(grep ucc_listener_port \
-    "${rootdir}"/build/install/config/beerocks_agent.conf | \
+    "${ROOT_DIR}"/build/install/config/beerocks_agent.conf | \
     awk -F'[= ]' '{ print $2 }')
 
     GW_EXTRA_OPT="--expose ${GW_UCC_PORT} --publish 127.0.0.1::${GW_UCC_PORT}"
@@ -96,7 +93,7 @@ main() {
 
     [ "$START_GATEWAY" = "true" ] && {
         status "Start GW (Controller + local Agent)"
-        "${rootdir}"/tools/docker/run.sh -u "${UNIQUE_ID}" ${VERBOSE_OPT} ${FORCE_OPT} "${GW_EXTRA_OPT[@]}" \
+        "${ROOT_DIR}"/tools/docker/run.sh -u "${UNIQUE_ID}" ${VERBOSE_OPT} ${FORCE_OPT} "${GW_EXTRA_OPT[@]}" \
             start-controller-agent -d -n "${GW_NAME}" -- "$@"
     }
 
@@ -108,7 +105,7 @@ main() {
     [ "$START_REPEATER" = "true" ] && {
         for repeater in $REPEATER_NAMES; do
             status "Start Repeater (Remote Agent): $repeater"
-            "${rootdir}"/tools/docker/run.sh -u "${UNIQUE_ID}" ${VERBOSE_OPT} ${FORCE_OPT} "${RP_EXTRA_OPT[@]}" \
+            "${ROOT_DIR}"/tools/docker/run.sh -u "${UNIQUE_ID}" ${VERBOSE_OPT} ${FORCE_OPT} "${RP_EXTRA_OPT[@]}" \
                 start-agent -d -n "${repeater}" -- "$@"
         done
     }
@@ -118,14 +115,14 @@ main() {
 
     error=0
     [ "$START_GATEWAY" = "true" ] && report "GW operational" \
-        "${rootdir}"/tools/docker/test.sh ${VERBOSE_OPT} -n "${GW_NAME}"
+        "${ROOT_DIR}"/tools/docker/test.sh ${VERBOSE_OPT} -n "${GW_NAME}"
 
 
     [ "$START_REPEATER" = "true" ] && {
         for repeater in $REPEATER_NAMES
         do
             report "Repeater $repeater operational" \
-            "${rootdir}"/tools/docker/test.sh ${VERBOSE_OPT} -n "${repeater}"
+            "${ROOT_DIR}"/tools/docker/test.sh ${VERBOSE_OPT} -n "${repeater}"
         done
     }
 

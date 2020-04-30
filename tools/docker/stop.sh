@@ -11,7 +11,8 @@
 # test scripts.
 #
 
-scriptdir="$(cd "${0%/*}" && pwd)"
+# shellcheck source=../../tools/functions.sh
+. "$(dirname "${BASH_SOURCE[0]}")/../../tools/functions.sh"
 
 usage() {
     echo "usage: $(basename "$0") [-hkr]"
@@ -23,7 +24,7 @@ usage() {
 
 main() {
     local stop_cmd remove containers_file
-    containers_file="${scriptdir}/.test_containers"
+    containers_file="${ROOT_DIR}/tools/docker/.test_containers"
     stop_cmd=stop
     if ! OPTS=$(getopt -o 'hkr' --long help,kill,remove -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2

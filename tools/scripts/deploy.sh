@@ -6,8 +6,8 @@
 # See LICENSE file for more details.
 ###############################################################
 
-scriptdir="$(cd "${0%/*}" && pwd)"
-rootdir="${scriptdir%/*/*}"
+# shellcheck source=../../tools/functions.sh
+. "$(dirname "${BASH_SOURCE[0]}")/../../tools/functions.sh"
 
 dbg() {
     [ "$VERBOSE" = "true" ] && echo "$@"
@@ -97,7 +97,7 @@ main() {
 }
 
 VERBOSE=false
-BUILD_DIR=${rootdir}/build
+BUILD_DIR=${ROOT_DIR}/build
 DEPLOY=false
 KEEP_CONF=false
 TARGET=

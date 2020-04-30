@@ -1,10 +1,7 @@
-#!/bin/sh -e
+#!/bin/bash
 
-scriptdir="$(cd "${0%/*}"; pwd)"
-rootdir="${scriptdir%/*/*/*/*}"
-
-# shellcheck source=tools/functions.sh
-. "${rootdir}/tools/functions.sh"
+# shellcheck source=../../../../tools/functions.sh
+. "$(dirname "${BASH_SOURCE[0]}")/../../../../tools/functions.sh"
 
 usage() {
     echo "usage: $(basename "$0") -d <target_device> [-hfiortv]"
@@ -40,7 +37,7 @@ build_image() {
            --build-arg INTEL_FEED \
            --build-arg IWLWAV_FEED \
            --build-arg BASE_CONFIG \
-           "$scriptdir/"
+           "$ROOT_DIR/tools/docker/builder/openwrt"
 }
 
 build_prplmesh() {
@@ -55,8 +52,8 @@ build_prplmesh() {
            -e TARGET_PROFILE \
            -e OPENWRT_VERSION \
            -e PRPLMESH_VERSION \
-           -v "$scriptdir/scripts:/home/openwrt/openwrt/build_scripts/:ro" \
-           -v "${rootdir}:/home/openwrt/prplMesh_source:ro" \
+           -v "$ROOT_DIR/tools/docker/builder/openwrt/scripts:/home/openwrt/openwrt/build_scripts/:ro" \
+           -v "${ROOT_DIR}:/home/openwrt/prplMesh_source:ro" \
            "$image_tag" \
            ./build_scripts/build.sh
     mkdir -p "$build_dir"
@@ -170,7 +167,7 @@ main() {
     fi
 
     build_image
-    build_prplmesh "$rootdir/build/$TARGET_DEVICE"
+    build_prplmesh "$ROOT_DIR/build/$TARGET_DEVICE"
 
 }
 

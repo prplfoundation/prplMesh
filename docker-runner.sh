@@ -1,4 +1,6 @@
 #!/bin/bash
 
-scriptdir="$(cd "${0%/*}" || exit 1; pwd)"
-"${scriptdir}/tools/docker/run.sh" "$@"
+# shellcheck source=tools/functions.sh
+. "$(dirname "${BASH_SOURCE[0]}")/tools/functions.sh"
+
+"${ROOT_DIR}/tools/docker/run.sh" "$@"
