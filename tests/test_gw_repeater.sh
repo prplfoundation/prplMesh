@@ -50,8 +50,8 @@ check_wsl() {
     "${rootdir}"/build/install/config/beerocks_agent.conf | \
     awk -F'[= ]' '{ print $2 }')
 
-    GW_EXTRA_OPT="--expose ${GW_UCC_PORT} --publish 127.0.0.1::${GW_UCC_PORT}"
-    RP_EXTRA_OPT="--expose ${RP_UCC_PORT} --publish 127.0.0.1::${RP_UCC_PORT}"
+    GW_EXTRA_OPT=(--expose "${GW_UCC_PORT}" --publish "127.0.0.1::${GW_UCC_PORT}")
+    RP_EXTRA_OPT=(--expose "${RP_UCC_PORT}" --publish "127.0.0.1::${RP_UCC_PORT}")
 }
 
 main() {
