@@ -72,8 +72,8 @@ main() {
 
     if [ "$REMOTE" = "owncloud" ]; then
         info "Download from owncloud"
-        download_artifact latest/build/"$DEVICE"/prplmesh.ipk
-        download_artifact latest/build/"$DEVICE"/prplmesh.buildinfo
+        download_artifact latest/build/"$DEVICE"/prplmesh.ipk "$DOWNLOAD_PATH"/prplmesh.ipk
+        download_artifact latest/build/"$DEVICE"/prplmesh.buildinfo "$DOWNLOAD_PATH"/prplmesh.buildinfo
     elif [ "$REMOTE" = "gitlab" ]; then
         GITLAB_BASE_URL="https://gitlab.com/prpl-foundation/prplmesh/-/jobs/artifacts/"
         # URL for downloading the prplmesh.ipk according to
