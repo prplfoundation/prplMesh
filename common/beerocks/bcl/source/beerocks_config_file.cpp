@@ -15,7 +15,7 @@
 
 using namespace beerocks;
 
-static bool read_log_section(std::string config_file_path, config_file::SConfigLog &sLogConf)
+static bool read_log_section(const std::string &config_file_path, config_file::SConfigLog &sLogConf)
 {
     int mandatory = 1;
     int optional  = 0;
@@ -40,7 +40,7 @@ static bool read_log_section(std::string config_file_path, config_file::SConfigL
     return ret_val;
 }
 
-bool config_file::read_master_config_file(std::string config_file_path, sConfigMaster &conf)
+bool config_file::read_master_config_file(const std::string &config_file_path, sConfigMaster &conf)
 {
     int mandatory_master    = 1;
     std::string config_type = "controller";
@@ -140,7 +140,7 @@ bool config_file::read_master_config_file(std::string config_file_path, sConfigM
     return ret_val;
 }
 
-bool config_file::read_slave_config_file(std::string config_file_path, sConfigSlave &conf)
+bool config_file::read_slave_config_file(const std::string &config_file_path, sConfigSlave &conf)
 {
     int mandatory_slave = 1;
 
@@ -218,7 +218,7 @@ static std::string getFileName(const std::string &s)
 }
 
 bool config_file::read_config_file(std::string config_file_path, tConfig &conf_args,
-                                   std::string config_type)
+                                   const std::string &config_type)
 {
     std::ifstream in_conf_file;
     std::string line;

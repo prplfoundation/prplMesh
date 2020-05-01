@@ -20,7 +20,8 @@ constexpr char version::INVALID_TIMESTAMP_STRING[];
 
 const beerocks::version *beerocks::version::s_version = nullptr;
 
-beerocks::version::version(std::string ver, std::string build_date, std::string build_rev)
+beerocks::version::version(const std::string &ver, const std::string &build_date,
+                           const std::string &build_rev)
     : m_ver(ver), m_build_date(build_date), m_build_rev(build_rev)
 {
     s_version = this;

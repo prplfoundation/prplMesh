@@ -98,7 +98,7 @@ private:
 
 class NetLogger : public el::LogDispatchCallback {
 public:
-    void enable(const std::string &server, uint16_t port, std::string module_name)
+    void enable(const std::string &server, uint16_t port, const std::string &module_name)
     {
         m_server      = server;
         m_port        = port;
@@ -287,7 +287,7 @@ bool log_levels::trace_enabled() { return (m_level_set.end() != m_level_set.find
 const std::string logging::format("%level %datetime{%H:%m:%s:%g} <%thread> %fbase[%line] --> %msg");
 const std::string logging::syslogFormat("<%thread> %fbase[%line] --> %msg");
 
-logging::logging(const std::string config_path, std::string module_name)
+logging::logging(const std::string &config_path, const std::string &module_name)
     : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
       m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT)
 {
@@ -307,7 +307,7 @@ logging::logging(const std::string config_path, std::string module_name)
     }
 }
 
-logging::logging(const settings_t &settings, bool cache_settings, std::string module_name)
+logging::logging(const settings_t &settings, bool cache_settings, const std::string &module_name)
     : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
       m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT)
 
@@ -325,7 +325,7 @@ logging::logging(const settings_t &settings, bool cache_settings, std::string mo
     eval_settings();
 }
 
-logging::logging(const beerocks::config_file::SConfigLog &settings, std::string module_name,
+logging::logging(const beerocks::config_file::SConfigLog &settings, const std::string &module_name,
                  bool cache_settings)
     : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
       m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT)

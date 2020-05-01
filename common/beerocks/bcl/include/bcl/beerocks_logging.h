@@ -73,11 +73,11 @@ class logging {
 public:
     typedef std::map<std::string, std::string> settings_t;
 
-    logging(const std::string config_path = std::string(),
-            std::string module_name       = BEEROCKS_LOGGING_MODULE_NAME);
+    logging(const std::string &config_path = std::string(),
+            const std::string &module_name = BEEROCKS_LOGGING_MODULE_NAME);
     explicit logging(const settings_t &settings, bool cache_settings = false,
-                     std::string module_name = BEEROCKS_LOGGING_MODULE_NAME);
-    logging(const beerocks::config_file::SConfigLog &settings, std::string module_name,
+                     const std::string &module_name = BEEROCKS_LOGGING_MODULE_NAME);
+    logging(const beerocks::config_file::SConfigLog &settings, const std::string &module_name,
             bool cache_settings = false);
     ~logging() = default;
 
