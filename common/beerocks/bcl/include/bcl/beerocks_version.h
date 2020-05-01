@@ -50,7 +50,7 @@ public:
     static constexpr char INVALID_TIMESTAMP_STRING[] = "00/00/00--00:00";
 
     // Constructor
-    version(std::string ver, std::string build_date, std::string build_rev);
+    version(const std::string &ver, const std::string &build_date, const std::string &build_rev);
 
     static void print_version(bool verbose, const std::string &name,
                               const std::string &description = std::string());

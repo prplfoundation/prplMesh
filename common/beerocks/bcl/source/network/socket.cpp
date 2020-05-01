@@ -81,7 +81,7 @@ Socket::Socket(SOCKET s, long readTimeout)
         setReadTimeout(readTimeout);
 }
 
-Socket::Socket(SOCKET s, std::string peer_ip, int port_port, long readTimeout)
+Socket::Socket(SOCKET s, const std::string &peer_ip, int port_port, long readTimeout)
 {
     m_socket    = s;
     m_peer_ip   = peer_ip;

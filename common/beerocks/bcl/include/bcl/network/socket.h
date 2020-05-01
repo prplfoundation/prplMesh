@@ -44,7 +44,7 @@ typedef unsigned __int64 ssize_t;
 class Socket {
 public:
     explicit Socket(SOCKET s, long readTimeout = 1000);
-    Socket(SOCKET s, std::string peer_ip, int port_port, long readTimeout = 1000);
+    Socket(SOCKET s, const std::string &peer_ip, int port_port, long readTimeout = 1000);
     Socket(const std::string &uds_path = std::string(), long readTimeout = 1000);
     virtual ~Socket();
 
@@ -68,7 +68,7 @@ public:
     std::string getPeerIP() { return m_peer_ip; }
     int getPeerPort() { return m_peer_port; }
     std::string getUdsPath() { return m_uds_path; }
-    void setPeerMac(std::string mac) { m_peer_mac = mac; }
+    void setPeerMac(const std::string &mac) { m_peer_mac = mac; }
     std::string getPeerMac() { return m_peer_mac; }
 
     bool isAcceptedSocket() { return m_accepted_socket; }

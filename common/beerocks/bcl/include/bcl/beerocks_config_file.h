@@ -115,9 +115,9 @@ public:
     } sConfigSlave;
 
     static bool read_config_file(std::string config_file_path, tConfig &conf,
-                                 std::string config_type);
-    static bool read_master_config_file(std::string config_file_path, sConfigMaster &conf);
-    static bool read_slave_config_file(std::string config_file_path, sConfigSlave &conf);
+                                 const std::string &config_type);
+    static bool read_master_config_file(const std::string &config_file_path, sConfigMaster &conf);
+    static bool read_slave_config_file(const std::string &config_file_path, sConfigSlave &conf);
 };
 
 } //  namespace beerocks
