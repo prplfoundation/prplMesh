@@ -56,8 +56,8 @@ protected:
     virtual std::string print_cmdu_types(const beerocks::message::sUdsHeader *cmdu_header) override;
 
 private:
-    bool start_monitoring_sta(const std::string &sta_mac, const std::string &sta_ipv4,
-                              const int vap_id);
+    bool start_monitoring_sta(const std::string &sta_mac, const int vap_id);
+    bool monitored_sta_set_ipv4(const std::string &sta_mac, const std::string &sta_ipv4);
 
     void stop_monitor_thread();
     bool hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr);

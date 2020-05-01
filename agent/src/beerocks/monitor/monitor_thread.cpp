@@ -670,8 +670,7 @@ bool monitor_thread::update_ap_stats()
     return true;
 }
 
-bool monitor_thread::start_monitoring_sta(const std::string &sta_mac, const std::string &sta_ipv4,
-                                          const int vap_id)
+bool monitor_thread::start_monitoring_sta(const std::string &sta_mac, const int vap_id)
 {
     auto sta_node = mon_db.sta_find(sta_mac);
     if (sta_node) {
@@ -685,7 +684,6 @@ bool monitor_thread::start_monitoring_sta(const std::string &sta_mac, const std:
     }
 
     sta_node = mon_db.sta_add(sta_mac, vap_id);
-    sta_node->set_ipv4(sta_ipv4);
     sta_node->set_bridge_4addr_mac(al_mac);
 
 #ifdef BEEROCKS_RDKB
@@ -698,6 +696,18 @@ bool monitor_thread::start_monitoring_sta(const std::string &sta_mac, const std:
         client->clearData();
     }
 #endif
+    return true;
+}
+
+bool monitor_thread::monitored_sta_set_ipv4(const std::string &sta_mac, const std::string &sta_ipv4)
+{
+    auto sta_node = mon_db.sta_find(sta_mac);
+    if (!sta_node) {
+        LOG(ERROR) << "Cannot find STA with MAC " << sta_mac;
+        return false;
+    }
+
+    sta_node->set_ipv4(sta_ipv4);
     return true;
 }
 
@@ -832,13 +842,21 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
             return false;
         }
 
-        bool success = start_monitoring_sta(sta_mac, sta_ipv4, set_bridge_4addr_mac, vap_id);
+        bool success = start_monitoring_sta(sta_mac, vap_id);
+        if (success) {
+            success = monitored_sta_set_ipv4(sta_mac, sta_ipv4);
+            if (!success) {
+                LOG(ERROR) << "monitored_sta_set_ipv4 failed!";
+            }
+        }
+        else {
+            LOG(ERROR) << "start_monitoring_sta failed";
+        }
 
         response->success() = success;
         message_com::send_cmdu(slave_socket, cmdu_tx);
 
         if (!success) {
-            LOG(ERROR) << "start_monitoring_sta failed!";
             return false;
         }
         break;
