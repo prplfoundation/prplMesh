@@ -451,7 +451,7 @@ static bool get_scan_results_from_nl_msg(sChannelScanResults &results, struct nl
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-mon_wlan_hal_dwpal::mon_wlan_hal_dwpal(std::string iface_name, hal_event_cb_t callback)
+mon_wlan_hal_dwpal::mon_wlan_hal_dwpal(const std::string &iface_name, hal_event_cb_t callback)
     : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, callback),
       base_wlan_hal_dwpal(bwl::HALType::Monitor, iface_name, callback)
 {

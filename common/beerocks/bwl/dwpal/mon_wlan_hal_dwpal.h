@@ -29,7 +29,7 @@ public:
      * @param [in] iface_name Monitor interface name.
      * @param [in] callback Callback for handling internal events.
      */
-    mon_wlan_hal_dwpal(std::string iface_name, hal_event_cb_t callback);
+    mon_wlan_hal_dwpal(const std::string &iface_name, hal_event_cb_t callback);
     virtual ~mon_wlan_hal_dwpal();
 
     virtual bool update_radio_stats(SRadioStats &radio_stats) override;
