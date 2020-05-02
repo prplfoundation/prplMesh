@@ -76,7 +76,7 @@ bool mon_wlan_hal_dummy::update_radio_stats(SRadioStats &radio_stats)
     return true;
 }
 
-bool mon_wlan_hal_dummy::update_vap_stats(const std::string vap_iface_name, SVapStats &vap_stats)
+bool mon_wlan_hal_dummy::update_vap_stats(const std::string &vap_iface_name, SVapStats &vap_stats)
 {
     vap_stats = {};
     return true;

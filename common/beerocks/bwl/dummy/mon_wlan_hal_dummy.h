@@ -36,7 +36,7 @@ public:
     virtual ~mon_wlan_hal_dummy();
 
     virtual bool update_radio_stats(SRadioStats &radio_stats) override;
-    virtual bool update_vap_stats(const std::string vap_iface_name, SVapStats &vap_stats) override;
+    virtual bool update_vap_stats(const std::string &vap_iface_name, SVapStats &vap_stats) override;
     virtual bool update_stations_stats(const std::string vap_iface_name, const std::string sta_mac,
                                        SStaStats &sta_stats) override;
     virtual bool sta_channel_load_11k_request(const SStaChannelLoadRequest11k &req) override;
