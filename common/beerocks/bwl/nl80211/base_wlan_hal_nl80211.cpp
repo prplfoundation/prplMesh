@@ -200,7 +200,7 @@ static void parsed_obj_debug(base_wlan_hal_nl80211::parsed_obj_listed_map_t &obj
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-base_wlan_hal_nl80211::base_wlan_hal_nl80211(HALType type, std::string iface_name,
+base_wlan_hal_nl80211::base_wlan_hal_nl80211(HALType type, const std::string &iface_name,
                                              hal_event_cb_t callback, int wpa_ctrl_buffer_size,
                                              hal_conf_t hal_conf)
     : base_wlan_hal(type, iface_name, IfaceType::Intel, callback, hal_conf),

@@ -50,7 +50,7 @@ public:
 
     // Protected methods
 protected:
-    base_wlan_hal_dwpal(HALType type, std::string iface_name, hal_event_cb_t callback,
+    base_wlan_hal_dwpal(HALType type, const std::string &iface_name, hal_event_cb_t callback,
                         hal_conf_t hal_conf = {});
 
     // Process dwpal event
