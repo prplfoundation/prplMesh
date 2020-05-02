@@ -831,7 +831,7 @@ bool sta_wlan_hal_dwpal::parse_fapi_event(const std::string& opcode, std::shared
 
 } // namespace dwpal
 
-std::shared_ptr<sta_wlan_hal> sta_wlan_hal_create(std::string iface_name,
+std::shared_ptr<sta_wlan_hal> sta_wlan_hal_create(const std::string &iface_name,
                                                   base_wlan_hal::hal_event_cb_t callback)
 {
     return std::make_shared<dwpal::sta_wlan_hal_dwpal>(iface_name, callback);
