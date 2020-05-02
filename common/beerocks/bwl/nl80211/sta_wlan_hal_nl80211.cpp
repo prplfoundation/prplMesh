@@ -16,7 +16,7 @@
 namespace bwl {
 namespace nl80211 {
 
-sta_wlan_hal_nl80211::sta_wlan_hal_nl80211(std::string iface_name, hal_event_cb_t callback)
+sta_wlan_hal_nl80211::sta_wlan_hal_nl80211(const std::string &iface_name, hal_event_cb_t callback)
     : base_wlan_hal(), base_wlan_hal_nl80211(bwl::HALType::Station, iface_name, callback, {})
 {
 }

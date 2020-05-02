@@ -28,7 +28,7 @@ public:
      * @param [in] iface_name STA/Client interface name.
      * @param [in] callback Callback for handling internal events.
      */
-    sta_wlan_hal_nl80211(std::string iface_name, hal_event_cb_t callback);
+    sta_wlan_hal_nl80211(const std::string &iface_name, hal_event_cb_t callback);
     virtual ~sta_wlan_hal_nl80211();
 
     virtual bool detach() override;
