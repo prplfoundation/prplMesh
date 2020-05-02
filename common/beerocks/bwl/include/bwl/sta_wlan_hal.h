@@ -67,7 +67,7 @@ public:
 };
 
 // STA HAL factory types
-std::shared_ptr<sta_wlan_hal> sta_wlan_hal_create(std::string iface_name,
+std::shared_ptr<sta_wlan_hal> sta_wlan_hal_create(const std::string &iface_name,
                                                   base_wlan_hal::hal_event_cb_t cb);
 
 } // namespace bwl

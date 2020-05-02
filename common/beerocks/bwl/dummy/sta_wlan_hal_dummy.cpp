@@ -71,7 +71,7 @@ bool sta_wlan_hal_dummy::update_status() { return false; }
 
 } // namespace dummy
 
-std::shared_ptr<sta_wlan_hal> sta_wlan_hal_create(std::string iface_name,
+std::shared_ptr<sta_wlan_hal> sta_wlan_hal_create(const std::string &iface_name,
                                                   base_wlan_hal::hal_event_cb_t callback)
 {
     return std::make_shared<dummy::sta_wlan_hal_dummy>(iface_name, callback);
