@@ -75,7 +75,7 @@ std::ostream &operator<<(std::ostream &out, const dwpal_fsm_event &value)
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-base_wlan_hal_dwpal::base_wlan_hal_dwpal(HALType type, std::string iface_name,
+base_wlan_hal_dwpal::base_wlan_hal_dwpal(HALType type, const std::string &iface_name,
                                          hal_event_cb_t callback, hal_conf_t hal_conf)
     : base_wlan_hal(type, iface_name, IfaceType::Intel, callback, hal_conf),
       beerocks::beerocks_fsm<dwpal_fsm_state, dwpal_fsm_event>(dwpal_fsm_state::Delay),

@@ -229,7 +229,7 @@ void base_wlan_hal_dummy::parsed_obj_debug(parsed_obj_listed_map_t &obj)
     LOG(DEBUG) << ss_obj.str();
 }
 
-base_wlan_hal_dummy::base_wlan_hal_dummy(HALType type, std::string iface_name,
+base_wlan_hal_dummy::base_wlan_hal_dummy(HALType type, const std::string &iface_name,
                                          hal_event_cb_t callback, hal_conf_t hal_conf)
     : base_wlan_hal(type, iface_name, IfaceType::Intel, callback, hal_conf),
       beerocks::beerocks_fsm<dummy_fsm_state, dummy_fsm_event>(dummy_fsm_state::Delay)
