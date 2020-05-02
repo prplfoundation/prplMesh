@@ -141,8 +141,8 @@ bool mon_wlan_hal_nl80211::update_vap_stats(const std::string &vap_iface_name, S
     return true;
 }
 
-bool mon_wlan_hal_nl80211::update_stations_stats(const std::string vap_iface_name,
-                                                 const std::string sta_mac, SStaStats &sta_stats)
+bool mon_wlan_hal_nl80211::update_stations_stats(const std::string &vap_iface_name,
+                                                 const std::string &sta_mac, SStaStats &sta_stats)
 {
     static struct nla_policy stats_policy[NL80211_STA_INFO_MAX + 1];
     stats_policy[NL80211_STA_INFO_INACTIVE_TIME] = {NLA_U32, 0, 0};
