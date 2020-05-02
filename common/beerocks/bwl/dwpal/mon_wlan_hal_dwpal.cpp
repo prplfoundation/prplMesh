@@ -584,8 +584,8 @@ bool mon_wlan_hal_dwpal::update_vap_stats(const std::string &vap_iface_name, SVa
     return true;
 }
 
-bool mon_wlan_hal_dwpal::update_stations_stats(const std::string vap_iface_name,
-                                               const std::string sta_mac, SStaStats &sta_stats)
+bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name,
+                                               const std::string &sta_mac, SStaStats &sta_stats)
 {
     char *reply = nullptr;
 
