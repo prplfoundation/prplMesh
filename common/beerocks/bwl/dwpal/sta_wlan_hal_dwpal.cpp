@@ -91,7 +91,7 @@ static std::string dwpal_security_val(WiFiSec sec)
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-sta_wlan_hal_dwpal::sta_wlan_hal_dwpal(std::string iface_name, hal_event_cb_t callback)
+sta_wlan_hal_dwpal::sta_wlan_hal_dwpal(const std::string &iface_name, hal_event_cb_t callback)
     : base_wlan_hal(bwl::HALType::Station, iface_name, IfaceType::Intel, callback),
       base_wlan_hal_dwpal(bwl::HALType::Station, iface_name, callback)
 {
