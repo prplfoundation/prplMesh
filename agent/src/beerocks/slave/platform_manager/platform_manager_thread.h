@@ -25,12 +25,12 @@
 namespace beerocks {
 namespace platform_manager {
 
-extern std::string extern_query_db(std::string parameter);
+extern std::string extern_query_db(const std::string &parameter);
 
 class main_thread : public socket_thread {
 
 public:
-    main_thread(config_file::sConfigSlave config_,
+    main_thread(const config_file::sConfigSlave &config_,
                 const std::unordered_map<int, std::string> &interfaces_map, logging &logger_);
     ~main_thread();
 
@@ -75,8 +75,8 @@ private:
     Socket *get_backhaul_socket();
     void load_iface_params(const std::string &strIface, beerocks::eArpSource eType);
     std::string bridge_iface_from_mac(const sMacAddr &sMac);
-    void send_dhcp_notification(std::string op, std::string mac, std::string ip,
-                                std::string hostname);
+    void send_dhcp_notification(const std::string &op, const std::string &mac,
+                                const std::string &ip, const std::string &hostname);
     void arp_entries_cleanup();
     bool init_dhcp_monitor();
     bool init_arp_monitor();

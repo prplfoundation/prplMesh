@@ -233,7 +233,7 @@ static bool fill_platform_settings(
     return true;
 }
 
-std::string extern_query_db(std::string parameter)
+std::string extern_query_db(const std::string &parameter)
 {
     std::string ret;
     if (bpl::bpl_init() < 0) {
@@ -279,7 +279,7 @@ static std::string get_sta_iface(const std::string &hostap_iface)
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-main_thread::main_thread(config_file::sConfigSlave config_,
+main_thread::main_thread(const config_file::sConfigSlave &config_,
                          const std::unordered_map<int, std::string> &interfaces_map_,
                          logging &logger_)
     : socket_thread(config_.temp_path + std::string(BEEROCKS_PLAT_MGR_UDS)), config(config_),
@@ -407,8 +407,8 @@ std::string main_thread::bridge_iface_from_mac(const sMacAddr &sMac)
     return std::string(iface_name);
 }
 
-void main_thread::send_dhcp_notification(std::string op, std::string mac, std::string ip,
-                                         std::string hostname)
+void main_thread::send_dhcp_notification(const std::string &op, const std::string &mac,
+                                         const std::string &ip, const std::string &hostname)
 {
     LOG(DEBUG) << "DHCP Event: " << op << ", mac: " << mac << ", ip: " << ip
                << ", hostname: " << hostname;
@@ -1455,8 +1455,8 @@ bool main_thread::restart_arp_monitor()
 
 bool main_thread::init_dhcp_monitor()
 {
-    static auto dhcp_monitor_cb_wrapper = [&](std::string op, std::string mac, std::string ip,
-                                              std::string hostname) {
+    static auto dhcp_monitor_cb_wrapper = [&](const std::string &op, const std::string &mac,
+                                              const std::string &ip, const std::string &hostname) {
         send_dhcp_notification(op, mac, ip, hostname);
     };
 
