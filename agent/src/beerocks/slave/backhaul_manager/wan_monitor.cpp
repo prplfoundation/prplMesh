@@ -67,7 +67,7 @@ wan_monitor::~wan_monitor()
         close(m_iNetlinkFD);
 }
 
-wan_monitor::ELinkState wan_monitor::initialize(std::string strWanIfaceName)
+wan_monitor::ELinkState wan_monitor::initialize(const std::string &strWanIfaceName)
 {
     // Close the previous FD
     if (m_iNetlinkFD != -1) {

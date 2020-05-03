@@ -32,7 +32,7 @@ public:
     ~wan_monitor();
 
     // Initialize the WAN monitor
-    ELinkState initialize(std::string strWanIfaceName);
+    ELinkState initialize(const std::string &strWanIfaceName);
 
     // Process incoming netlink message
     ELinkState process();
