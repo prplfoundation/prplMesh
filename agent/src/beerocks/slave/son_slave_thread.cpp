@@ -33,7 +33,6 @@
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
-#include <tlvf/wfa_map/tlvBeaconMetricsQuery.h>
 #include <tlvf/wfa_map/tlvBeaconMetricsResponse.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
@@ -917,6 +916,7 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
             return false;
         }
         request_out->params() = request_in->params();
+
         message_com::send_cmdu(monitor_socket, cmdu_tx);
         break;
     }
