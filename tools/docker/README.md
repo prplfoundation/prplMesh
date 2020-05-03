@@ -7,11 +7,7 @@ The `image-build.sh` supports building 2 images:
 - **builder image** for building prplMesh using docker
 - **runner image** for running prplMesh using docker
 
-Building the images should be done first prior to attempting to run the builder and runner helper scripts, as it fetches the base (FROM) image from the docker hub and generates local images - `prplmesh-builder` and `prplmesh-runner`.
-
----
-
-If `build.sh` or `run.sh` are called without first calling `image-build.sh`, then the docker image will be built automatically.
+If you don't build the images first, they will be pulled from the prplmesh registry on gitlab.com.
 
 ---
 
