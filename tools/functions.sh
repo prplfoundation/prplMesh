@@ -6,9 +6,6 @@
 # See LICENSE file for more details.
 ###############################################################
 
-# shellcheck disable=SC2034
-installdir="${rootdir:?}/build/install"
-
 dbg() {
     if [ "$VERBOSE" = "true" ]; then echo "$(basename "$0"): $*"; fi
 }

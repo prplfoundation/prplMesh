@@ -8,6 +8,8 @@
 
 scriptdir=$(dirname "$(readlink -f "$0")")
 rootdir=$(realpath "$scriptdir/../..")
+# shellcheck disable=SC2034
+installdir="${rootdir:?}/build/install"
 
 # shellcheck source=tools/functions.sh
 . "${rootdir}/tools/functions.sh"
