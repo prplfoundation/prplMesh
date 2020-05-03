@@ -855,7 +855,7 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
         # associated STA
         sta = env.Station.create()
 
-        # for testing non existing STA, the error flow
+        # for testing non existing STA, testing the error flow
         # sta1 = env.Station.create()
 
         debug("Connect dummy STA (" + sta.mac + ") to wlan0")
