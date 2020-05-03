@@ -55,9 +55,20 @@ main() {
         esac
     done
 
-    docker image inspect "prplmesh-runner$TAG" >/dev/null 2>&1 || {
-        [ -n "$TAG" ] && { err "image prplmesh-runner$TAG doesn't exist, aborting"; exit 1; }
-        dbg "Image prplmesh-runner$TAG does not exist, creating..."
+    image="prplmesh-runner$TAG"
+    dbg "VERBOSE=${VERBOSE}"
+    dbg "DETACH=${DETACH}"
+    dbg "NETWORK=${NETWORK}"
+    dbg "IMAGE=${image}"
+    dbg "PORT=${PORT[*]}"
+    dbg "PUBLISH=${PUBLISH[*]}"
+    dbg "NAME=${NAME}"
+    dbg "FORCE=${FORCE}"
+    dbg "UNIQUE_ID=${UNIQUE_ID}"
+
+    docker image inspect "$image" >/dev/null 2>&1 || {
+        [ -n "$TAG" ] && { err "image $image doesn't exist, aborting"; exit 1; }
+        dbg "Image $image does not exist, creating..."
         run "${scriptdir}/image-build.sh" --image runner
     }
 
@@ -67,16 +78,6 @@ main() {
         run docker network create "${NETWORK}" >/dev/null 2>&1
         echo "network ${NETWORK}" >> "${scriptdir}/.test_containers"
     }
-
-    dbg "VERBOSE=${VERBOSE}"
-    dbg "DETACH=${DETACH}"
-    dbg "NETWORK=${NETWORK}"
-    dbg "IMAGE=prplmesh-runner$TAG"
-    dbg "PORT=${PORT[*]}"
-    dbg "PUBLISH=${PUBLISH[*]}"
-    dbg "NAME=${NAME}"
-    dbg "FORCE=${FORCE}"
-    dbg "UNIQUE_ID=${UNIQUE_ID}"
 
     DOCKEROPTS=(
         -e "USER=${SUDO_USER:-${USER}}"
@@ -110,7 +111,7 @@ main() {
 
     # Save the container name so that it can easily be stopped/removed later
     echo "$NAME" >> "${scriptdir}/.test_containers"
-    run docker container run "${DOCKEROPTS[@]}" "prplmesh-runner$TAG" "$@"
+    run docker container run "${DOCKEROPTS[@]}" "${image}" "$@"
 }
 
 VERBOSE=false
