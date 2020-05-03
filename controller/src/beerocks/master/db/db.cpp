@@ -2338,12 +2338,12 @@ bool db::set_channel_scan_pool(const sMacAddr &mac, const std::unordered_set<uin
 
 const std::unordered_set<uint8_t> &db::get_channel_scan_pool(const sMacAddr &mac, bool single_scan)
 {
-    static std::unordered_set<uint8_t> dummy_return;
+    static std::unordered_set<uint8_t> empty;
 
     auto hostap = get_hostap_by_mac(mac);
     if (!hostap) {
         LOG(ERROR) << "unable to get hostap";
-        return dummy_return;
+        return empty;
     }
 
     return (single_scan ? hostap->single_scan_config : hostap->continuous_scan_config).channel_pool;
@@ -2393,12 +2393,12 @@ bool db::add_channel_scan_results(const sMacAddr &mac, const sChannelScanResults
 const std::list<sChannelScanResults> &db::get_channel_scan_results(const sMacAddr &mac,
                                                                    bool single_scan)
 {
-    static std::list<sChannelScanResults> dummy_return;
+    static std::list<sChannelScanResults> empty;
 
     auto hostap = get_hostap_by_mac(mac);
     if (!hostap) {
         LOG(ERROR) << "unable to get hostap";
-        return dummy_return;
+        return empty;
     }
 
     return (single_scan ? hostap->single_scan_results : hostap->continuous_scan_results);
