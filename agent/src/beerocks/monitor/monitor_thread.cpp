@@ -1080,9 +1080,20 @@ bool monitor_thread::handle_cmdu_vs_message(Socket *sd, ieee1905_1::CmduMessageR
         bwl_request.expected_reports_count = request->params().expected_reports_count;
         bwl_request.use_optional_ssid      = request->params().use_optional_ssid;
         std::copy_n(request->params().ssid, sizeof(bwl_request.ssid), bwl_request.ssid);
+
         bwl_request.use_optional_ap_ch_report = request->params().use_optional_ap_ch_report;
         std::copy_n(request->params().ap_ch_report, sizeof(bwl_request.ap_ch_report),
                     bwl_request.ap_ch_report);
+
+        /*
+        // HACK - DEBUG ONLY
+        bwl_request.channel = 255;
+        bwl_request.use_optional_ap_ch_report = 2;
+        bwl_request.ap_ch_report[0]=81; // operating class, ignored by hostapd
+        bwl_request.ap_ch_report[1]=112;
+        // end HACK - DEBUG ONLY
+        */
+
         bwl_request.use_optional_req_elements = request->params().use_optional_req_elements;
         std::copy_n(request->params().req_elements, sizeof(bwl_request.req_elements),
                     bwl_request.req_elements);
