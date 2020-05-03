@@ -77,8 +77,8 @@ private:
     bool start_scan();
     bool finish_scan();
 
-    beerocks::eChannelScanErrCode dcs_request_scan_trigger();
-    beerocks::eChannelScanErrCode dcs_request_scan_dump();
+    beerocks::eChannelScanStatusCode dcs_request_scan_trigger();
+    beerocks::eChannelScanStatusCode dcs_request_scan_dump();
 
     eState m_fsm_state;
 
@@ -89,8 +89,8 @@ private:
     std::chrono::steady_clock::time_point m_next_scan_timestamp_interval;
     std::chrono::steady_clock::time_point m_last_scan_try_timestamp;
 
-    beerocks::eChannelScanErrCode m_last_scan_error_code =
-        beerocks::eChannelScanErrCode::CHANNEL_SCAN_INVALID_PARAMS;
+    beerocks::eChannelScanStatusCode m_last_scan_error_code =
+        beerocks::eChannelScanStatusCode::INVALID_PARAMS;
     eEvent m_dcs_waiting_for_event = eEvent::INVALID_EVENT;
 
     // The single scan request scan-parameters and scan-results are stored separately from the

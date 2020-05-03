@@ -29,7 +29,7 @@ dynamic_channel_selection_task::dynamic_channel_selection_task(db &database_,
 {
     m_fsm_state = eState::INIT;
 }
-beerocks::eChannelScanErrCode dynamic_channel_selection_task::dcs_request_scan_dump()
+beerocks::eChannelScanStatusCode dynamic_channel_selection_task::dcs_request_scan_dump()
 {
     // When a dump is requested, do not set the scan_in_progress flag
     // simply send the request as is, and wait for the results ready event
@@ -38,7 +38,7 @@ beerocks::eChannelScanErrCode dynamic_channel_selection_task::dcs_request_scan_d
         beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_DUMP_RESULTS_REQUEST>(cmdu_tx);
     if (!request) {
         LOG(ERROR) << "Failed building message cACTION_CONTROL_CHANNEL_SCAN_DUMP_RESULTS_REQUEST";
-        return beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
+        return beerocks::eChannelScanStatusCode::INTERNAL_FAILURE;
     }
 
     // get the parent node to send the CMDU to the agent
@@ -46,9 +46,9 @@ beerocks::eChannelScanErrCode dynamic_channel_selection_task::dcs_request_scan_d
     auto ire           = database.get_node_parent_ire(radio_mac_str);
     son_actions::send_cmdu_to_agent(ire, cmdu_tx, database, radio_mac_str);
 
-    return beerocks::eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
+    return beerocks::eChannelScanStatusCode::SUCCESS;
 }
-beerocks::eChannelScanErrCode dynamic_channel_selection_task::dcs_request_scan_trigger()
+beerocks::eChannelScanStatusCode dynamic_channel_selection_task::dcs_request_scan_trigger()
 {
     // When a scan is requested send the scan parameters Channel pool & Dwell time
 
@@ -58,7 +58,7 @@ beerocks::eChannelScanErrCode dynamic_channel_selection_task::dcs_request_scan_t
         beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST>(cmdu_tx);
     if (!request) {
         LOG(ERROR) << "Failed building message cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST";
-        return beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
+        return beerocks::eChannelScanStatusCode::INTERNAL_FAILURE;
     }
     request->scan_params().radio_mac = m_radio_mac;
 
@@ -66,7 +66,7 @@ beerocks::eChannelScanErrCode dynamic_channel_selection_task::dcs_request_scan_t
     int32_t dwell_time_msec = database.get_channel_scan_dwell_time_msec(m_radio_mac, m_single_scan);
     if (dwell_time_msec <= 0) {
         LOG(ERROR) << "invalid dwell_time=" << int(dwell_time_msec);
-        return beerocks::eChannelScanErrCode::CHANNEL_SCAN_INVALID_PARAMS;
+        return beerocks::eChannelScanStatusCode::INVALID_PARAMS;
     }
     request->scan_params().dwell_time_ms = dwell_time_msec;
 
@@ -86,12 +86,12 @@ beerocks::eChannelScanErrCode dynamic_channel_selection_task::dcs_request_scan_t
         if (curr_channel_pool.empty()) {
             LOG(ERROR) << "empty channel pool is not supported. please set channel pool for mac="
                        << m_radio_mac;
-            return beerocks::eChannelScanErrCode::CHANNEL_SCAN_INVALID_PARAMS;
+            return beerocks::eChannelScanStatusCode::INVALID_PARAMS;
         }
         if (curr_channel_pool.size() > beerocks::message::SUPPORTED_CHANNELS_LENGTH) {
             LOG(ERROR) << "channel_pool is too big [" << int(curr_channel_pool.size())
                        << "] on mac=" << m_radio_mac;
-            return beerocks::eChannelScanErrCode::CHANNEL_SCAN_POOL_TOO_BIG;
+            return beerocks::eChannelScanStatusCode::POOL_TOO_BIG;
         }
         request->scan_params().channel_pool_size = curr_channel_pool.size();
         std::copy(curr_channel_pool.begin(), curr_channel_pool.end(),
@@ -102,7 +102,7 @@ beerocks::eChannelScanErrCode dynamic_channel_selection_task::dcs_request_scan_t
     auto ire = database.get_node_parent_ire(radio_mac_str);
     son_actions::send_cmdu_to_agent(ire, cmdu_tx, database, radio_mac_str);
 
-    return beerocks::eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
+    return beerocks::eChannelScanStatusCode::SUCCESS;
 }
 void dynamic_channel_selection_task::work()
 {
@@ -151,11 +151,10 @@ void dynamic_channel_selection_task::work()
         // When a scan is requested, check the Dwell time parameter,
         // Normally send a "trigger scan" request.
         // but on a dwell time = 0 scenario, sent a "scan dump" request
-        auto ret = beerocks::eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
+        auto ret = beerocks::eChannelScanStatusCode::SUCCESS;
         if (database.get_channel_scan_dwell_time_msec(m_radio_mac, m_single_scan) != 0) {
             // Send the "trigger scan" request and continue on to WAIT_FOR_SCAN_TRIGGERED
-            if ((ret = dcs_request_scan_trigger()) !=
-                beerocks::eChannelScanErrCode::CHANNEL_SCAN_SUCCESS) {
+            if ((ret = dcs_request_scan_trigger()) != beerocks::eChannelScanStatusCode::SUCCESS) {
                 m_last_scan_error_code = ret;
                 fsm_move_state(eState::ABORT_SCAN);
             } else {
@@ -167,8 +166,7 @@ void dynamic_channel_selection_task::work()
         } else {
             // Send the "scan dump" request but skip the WAIT_FOR_SCAN_TRIGGERED
             // and continue to WAIT_FOR_RESULTS_READY since no scan is triggered
-            if ((ret = dcs_request_scan_dump()) !=
-                beerocks::eChannelScanErrCode::CHANNEL_SCAN_SUCCESS) {
+            if ((ret = dcs_request_scan_dump()) != beerocks::eChannelScanStatusCode::SUCCESS) {
                 m_last_scan_error_code = ret;
                 fsm_move_state(eState::ABORT_SCAN);
             } else {
@@ -183,8 +181,7 @@ void dynamic_channel_selection_task::work()
     case eState::WAIT_FOR_SCAN_TRIGGERED: {
         TASK_LOG(ERROR) << "This should not happen!";
 
-        m_last_scan_error_code =
-            beerocks::eChannelScanErrCode::CHANNEL_SCAN_TRIGGERED_EVENT_TIMEOUT;
+        m_last_scan_error_code = beerocks::eChannelScanStatusCode::TRIGGERED_EVENT_TIMEOUT;
 
         fsm_move_state(eState::ABORT_SCAN);
         break;
@@ -192,8 +189,7 @@ void dynamic_channel_selection_task::work()
     case eState::WAIT_FOR_RESULTS_READY: {
         TASK_LOG(ERROR) << "This should not happen!";
 
-        m_last_scan_error_code =
-            beerocks::eChannelScanErrCode::CHANNEL_SCAN_RESULTS_READY_EVENT_TIMEOUT;
+        m_last_scan_error_code = beerocks::eChannelScanStatusCode::RESULTS_READY_EVENT_TIMEOUT;
 
         fsm_move_state(eState::ABORT_SCAN);
         break;
@@ -201,8 +197,7 @@ void dynamic_channel_selection_task::work()
     case eState::WAIT_FOR_RESULTS_DUMP: {
         TASK_LOG(ERROR) << "This should not happen!";
 
-        m_last_scan_error_code =
-            beerocks::eChannelScanErrCode::CHANNEL_SCAN_RESULTS_DUMP_EVENT_TIMEOUT;
+        m_last_scan_error_code = beerocks::eChannelScanStatusCode::RESULTS_DUMP_EVENT_TIMEOUT;
 
         fsm_move_state(eState::ABORT_SCAN);
         break;
@@ -217,7 +212,7 @@ void dynamic_channel_selection_task::work()
             m_next_scan_timestamp_interval = m_last_scan_try_timestamp + interval;
         }
 
-        m_last_scan_error_code = beerocks::eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
+        m_last_scan_error_code = beerocks::eChannelScanStatusCode::SUCCESS;
         fsm_move_state(eState::FINISH);
         break;
     }
@@ -286,7 +281,7 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
             event_handled                  = true;
             TASK_LOG(WARNING) << "failed to trigger a scan on: "
                               << scan_trigger_failed_event->radio_mac << ", aborting scan";
-            m_last_scan_error_code = beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
+            m_last_scan_error_code = beerocks::eChannelScanStatusCode::INTERNAL_FAILURE;
             clear_pending_events();
             fsm_move_state(eState::ABORT_SCAN);
         }
@@ -319,8 +314,7 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
 
             if (!database.clear_channel_scan_results(m_radio_mac, m_single_scan)) {
                 TASK_LOG(ERROR) << "failed to clear scan results";
-                m_last_scan_error_code =
-                    beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
+                m_last_scan_error_code = beerocks::eChannelScanStatusCode::INTERNAL_FAILURE;
                 fsm_move_state(eState::ABORT_SCAN);
                 break;
             }
@@ -350,8 +344,7 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
                            m_radio_mac, scan_results_dump_event->udata.scan_results,
                            m_single_scan)) {
                 TASK_LOG(ERROR) << "failed to save scan results";
-                m_last_scan_error_code =
-                    beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
+                m_last_scan_error_code = beerocks::eChannelScanStatusCode::INTERNAL_FAILURE;
                 fsm_move_state(eState::ABORT_SCAN);
                 break;
             } else {
@@ -390,7 +383,7 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
         event_handled         = true;
         TASK_LOG(DEBUG) << "SCAN_FINISHED handled on: " << scan_abort_event->radio_mac;
 
-        m_last_scan_error_code = beerocks::eChannelScanErrCode::CHANNEL_SCAN_ABORTED_BY_DRIVER;
+        m_last_scan_error_code = beerocks::eChannelScanStatusCode::ABORTED_BY_DRIVER;
 
         clear_pending_events();
         fsm_move_state(eState::ABORT_SCAN);
@@ -431,20 +424,17 @@ void dynamic_channel_selection_task::handle_events_timeout(std::multiset<int> pe
 
         switch (m_fsm_state) {
         case eState::WAIT_FOR_SCAN_TRIGGERED: {
-            m_last_scan_error_code =
-                beerocks::eChannelScanErrCode::CHANNEL_SCAN_TRIGGERED_EVENT_TIMEOUT;
+            m_last_scan_error_code = beerocks::eChannelScanStatusCode::TRIGGERED_EVENT_TIMEOUT;
             fsm_move_state(eState::ABORT_SCAN);
             break;
         }
         case eState::WAIT_FOR_RESULTS_READY: {
-            m_last_scan_error_code =
-                beerocks::eChannelScanErrCode::CHANNEL_SCAN_RESULTS_READY_EVENT_TIMEOUT;
+            m_last_scan_error_code = beerocks::eChannelScanStatusCode::RESULTS_READY_EVENT_TIMEOUT;
             fsm_move_state(eState::ABORT_SCAN);
             break;
         }
         case eState::WAIT_FOR_RESULTS_DUMP: {
-            m_last_scan_error_code =
-                beerocks::eChannelScanErrCode::CHANNEL_SCAN_RESULTS_DUMP_EVENT_TIMEOUT;
+            m_last_scan_error_code = beerocks::eChannelScanStatusCode::RESULTS_DUMP_EVENT_TIMEOUT;
             fsm_move_state(eState::ABORT_SCAN);
             break;
         }

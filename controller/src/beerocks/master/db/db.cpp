@@ -2229,7 +2229,8 @@ bool db::get_channel_scan_in_progress(const sMacAddr &mac, bool single_scan)
 }
 
 bool db::set_channel_scan_results_status(const sMacAddr &mac,
-                                         beerocks::eChannelScanErrCode error_code, bool single_scan)
+                                         beerocks::eChannelScanStatusCode error_code,
+                                         bool single_scan)
 {
     auto hostap = get_hostap_by_mac(mac);
     if (!hostap) {
@@ -2246,13 +2247,13 @@ bool db::set_channel_scan_results_status(const sMacAddr &mac,
     return true;
 }
 
-beerocks::eChannelScanErrCode db::get_channel_scan_results_status(const sMacAddr &mac,
-                                                                  bool single_scan)
+beerocks::eChannelScanStatusCode db::get_channel_scan_results_status(const sMacAddr &mac,
+                                                                     bool single_scan)
 {
     auto hostap = get_hostap_by_mac(mac);
     if (!hostap) {
         LOG(ERROR) << "unable to get hostap";
-        return beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
+        return beerocks::eChannelScanStatusCode::INTERNAL_FAILURE;
     }
 
     return (single_scan ? hostap->single_scan_status : hostap->continuous_scan_status)
