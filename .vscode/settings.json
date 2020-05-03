@@ -60,6 +60,9 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp"
     },
+    "files.exclude": {
+        "build": true
+    },
     "editor.formatOnSave": true,
     "C_Cpp.default.defines": [
         "BEEROCKS_LINUX",
@@ -69,6 +72,14 @@
         "BEEROCKS_REVISION=\"\"",
         "BEEROCKS_BUILD_DATE=\"\"",
         "HAVE_READLINE"
+    ],
+    "C_Cpp.default.includePath": [
+        "/usr/include",
+        "/usr/include/libnl3",
+        "${workspaceFolder}/agent/**",
+        "${workspaceFolder}/common/**",
+        "${workspaceFolder}/framework/**",
+        "${workspaceFolder}/controller/**"
     ],
     "python.linting.flake8Enabled": true,
     "cSpell.words": [
