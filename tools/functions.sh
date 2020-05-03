@@ -6,6 +6,9 @@
 # See LICENSE file for more details.
 ###############################################################
 
+# Docker registry which is used in all docker-related scripts
+export DOCKER_REGISTRY=registry.gitlab.com/prpl-foundation/prplmesh/
+
 dbg() {
     if [ "$VERBOSE" = "true" ]; then echo "$(basename "$0"): $*"; fi
 }
