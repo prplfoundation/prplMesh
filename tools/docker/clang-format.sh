@@ -35,14 +35,15 @@ main() {
         esac
     done
 
-    docker image inspect prplmesh-builder"$TAG" >/dev/null 2>&1 || {
-        [ -n "$TAG" ] && { err "image prplmesh-builder$TAG doesn't exist, aborting"; exit 1; }
-        dbg "Image prplmesh-builder$TAG does not exist, creating..."
+    image="prplmesh-builder$TAG"
+    dbg "VERBOSE=${VERBOSE}"
+    dbg "IMAGE=${image}"
+
+    docker image inspect "$image" >/dev/null 2>&1 || {
+        [ -n "$TAG" ] && { err "image $image doesn't exist, aborting"; exit 1; }
+        dbg "Image $image does not exist, creating..."
         run "${scriptdir}"/image-build.sh --image builder
     }
-
-    dbg "VERBOSE=${VERBOSE}"
-    dbg "IMAGE=prplmesh-builder$TAG"
 
     DOCKEROPTS="-e USER=${SUDO_USER:-${USER}}
                 -e SOURCES_DIR=${rootdir}
@@ -55,7 +56,7 @@ main() {
     # TODO: replace DOCKEROPTS with a bash array (and require bash)
     # We disable SC2086 because of the DOCKEROPTS variable
     # shellcheck disable=SC2086
-    run docker container run --entrypoint "${rootdir}/clang-format.sh" ${DOCKEROPTS} prplmesh-builder"$TAG" "$@"
+    run docker container run --entrypoint "${rootdir}/clang-format.sh" ${DOCKEROPTS} "${image}" "$@"
 }
 
 VERBOSE=false
