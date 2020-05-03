@@ -14,7 +14,7 @@
 using namespace beerocks;
 using namespace son;
 
-node::node(beerocks::eType type_, const std::string mac_)
+node::node(beerocks::eType type_, const std::string &mac_)
     : mac(mac_), capabilities(m_sta_24ghz_capabilities) // deafult value
 {
     type = type_;
@@ -212,7 +212,7 @@ std::ostream &operator<<(std::ostream &os, const node *n) { return (os << (const
 
 } // namespace son
 
-bool node::get_beacon_measurement(std::string ap_mac_, int8_t &rcpi, uint8_t &rsni)
+bool node::get_beacon_measurement(const std::string &ap_mac_, int8_t &rcpi, uint8_t &rsni)
 {
     auto it = beacon_measurements.find(ap_mac_);
     if (it == beacon_measurements.end()) {
@@ -226,7 +226,7 @@ bool node::get_beacon_measurement(std::string ap_mac_, int8_t &rcpi, uint8_t &rs
     return true;
 }
 
-void node::set_beacon_measurement(std::string ap_mac_, int8_t rcpi, uint8_t rsni)
+void node::set_beacon_measurement(const std::string &ap_mac_, int8_t rcpi, uint8_t rsni)
 {
     auto it = beacon_measurements.find(ap_mac_);
     if (it == beacon_measurements.end()) {
@@ -240,7 +240,7 @@ void node::set_beacon_measurement(std::string ap_mac_, int8_t rcpi, uint8_t rsni
     }
 }
 
-bool node::get_cross_rx_rssi(std::string ap_mac_, int8_t &rssi, int8_t &packets)
+bool node::get_cross_rx_rssi(const std::string &ap_mac_, int8_t &rssi, int8_t &packets)
 {
     auto it = cross_rx_rssi.find(ap_mac_);
     if (it == cross_rx_rssi.end()) {
@@ -253,7 +253,7 @@ bool node::get_cross_rx_rssi(std::string ap_mac_, int8_t &rssi, int8_t &packets)
     return true;
 }
 
-void node::set_cross_rx_rssi(std::string ap_mac_, int8_t rssi, int8_t packets)
+void node::set_cross_rx_rssi(const std::string &ap_mac_, int8_t rssi, int8_t packets)
 {
     auto it = cross_rx_rssi.find(ap_mac_);
     if (it == cross_rx_rssi.end()) {

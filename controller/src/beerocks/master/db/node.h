@@ -37,11 +37,11 @@ typedef struct {
 
 class node {
 public:
-    node(beerocks::eType type_, const std::string mac_);
-    bool get_beacon_measurement(std::string ap_mac_, int8_t &rcpi, uint8_t &rsni);
-    void set_beacon_measurement(std::string ap_mac_, int8_t rcpi, uint8_t rsni);
-    bool get_cross_rx_rssi(std::string ap_mac_, int8_t &rssi, int8_t &rx_packets);
-    void set_cross_rx_rssi(std::string ap_mac_, int8_t rssi, int8_t rx_packets);
+    node(beerocks::eType type_, const std::string &mac_);
+    bool get_beacon_measurement(const std::string &ap_mac_, int8_t &rcpi, uint8_t &rsni);
+    void set_beacon_measurement(const std::string &ap_mac_, int8_t rcpi, uint8_t rsni);
+    bool get_cross_rx_rssi(const std::string &ap_mac_, int8_t &rssi, int8_t &rx_packets);
+    void set_cross_rx_rssi(const std::string &ap_mac_, int8_t rssi, int8_t rx_packets);
 
     void clear_cross_rssi();
     void clear_node_stats_info();
@@ -270,7 +270,8 @@ public:
 private:
     class rssi_measurement {
     public:
-        rssi_measurement(std::string ap_mac_, int8_t rssi_, int8_t packets_) : ap_mac(ap_mac_)
+        rssi_measurement(const std::string &ap_mac_, int8_t rssi_, int8_t packets_)
+            : ap_mac(ap_mac_)
         {
             rssi      = rssi_;
             packets   = packets_;
@@ -284,7 +285,8 @@ private:
 
     class beacon_measurement {
     public:
-        beacon_measurement(std::string ap_mac_, int8_t rcpi_, uint8_t rsni_) : ap_mac(ap_mac_)
+        beacon_measurement(const std::string &ap_mac_, int8_t rcpi_, uint8_t rsni_)
+            : ap_mac(ap_mac_)
         {
             rcpi      = rcpi_; // received channel power indication (like rssi)
             rsni      = rsni_; // received signal noise indication (SNR)
