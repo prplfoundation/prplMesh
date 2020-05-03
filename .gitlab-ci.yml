@@ -154,8 +154,6 @@ run-tests:
   stage: test
   image: $CI_REGISTRY_IMAGE/tests-runner:18.09.7-dind
   script:
-    # Try to pull from dockerhub, if it fails, the run should fail
-    - tools/docker/image-pull.sh
     - tests/test_flows.py -v -u $RANDOM --tcpdump
 
   artifacts:
