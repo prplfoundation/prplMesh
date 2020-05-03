@@ -66,12 +66,6 @@ main() {
     dbg "FORCE=${FORCE}"
     dbg "UNIQUE_ID=${UNIQUE_ID}"
 
-    docker image inspect "$image" >/dev/null 2>&1 || {
-        [ -n "$TAG" ] && { err "image $image doesn't exist, aborting"; exit 1; }
-        dbg "Image $image does not exist, creating..."
-        run "${scriptdir}/image-build.sh" --image runner
-    }
-
     NETWORK="${NETWORK:-prplMesh-net-${UNIQUE_ID}}"
     docker network inspect "${NETWORK}" >/dev/null 2>&1 || {
         dbg "Network ${NETWORK} does not exist, creating..."

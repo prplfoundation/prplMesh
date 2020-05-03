@@ -13,11 +13,6 @@ rootdir="${scriptdir%/*/*}"
 . "${rootdir}/tools/functions.sh"
 
 main() {
-    docker image inspect "${DOCKER_REGISTRY}prplmesh-builder" >/dev/null 2>&1 || {
-        echo "Image prplmesh-build does not exist, creating..."
-        run "${scriptdir}"/image-build.sh --image builder
-    }
-
     # Default docker arguments
     docker_args=(
         --workdir "${rootdir}"
