@@ -188,13 +188,15 @@ static void get_ht_oper(const uint8_t *data, sChannelScanResults &results)
     }
 
     if (!(data[1] & 0x3)) {
-        results.operating_channel_bandwidth = eChannel_Bandwidth_20MHz;
+        results.operating_channel_bandwidth =
+            eChannelScanResultChannelBandwidth::eChannel_Bandwidth_20MHz;
     } else if ((data[1] & 0x3) != 2) {
-        results.operating_channel_bandwidth = eChannel_Bandwidth_40MHz;
+        results.operating_channel_bandwidth =
+            eChannelScanResultChannelBandwidth::eChannel_Bandwidth_40MHz;
     }
 
-    results.supported_standards.push_back(eStandard_802_11n);
-    results.operating_standards = eStandard_802_11n;
+    results.supported_standards.push_back(eChannelScanResultStandards::eStandard_802_11n);
+    results.operating_standards = eChannelScanResultStandards::eStandard_802_11n;
 }
 
 static void get_vht_oper(const uint8_t *data, sChannelScanResults &results)
@@ -206,27 +208,32 @@ static void get_vht_oper(const uint8_t *data, sChannelScanResults &results)
 
     if (data[0] == 0x01) {
         if (data[2]) {
-            results.operating_channel_bandwidth = eChannel_Bandwidth_160MHz;
+            results.operating_channel_bandwidth =
+                eChannelScanResultChannelBandwidth::eChannel_Bandwidth_160MHz;
         } else {
-            results.operating_channel_bandwidth = eChannel_Bandwidth_80MHz;
+            results.operating_channel_bandwidth =
+                eChannelScanResultChannelBandwidth::eChannel_Bandwidth_80MHz;
         }
     }
 
     if (data[0] == 0x02) {
-        results.operating_channel_bandwidth = eChannel_Bandwidth_80MHz;
+        results.operating_channel_bandwidth =
+            eChannelScanResultChannelBandwidth::eChannel_Bandwidth_80MHz;
     }
 
     if (data[0] == 0x03) {
-        results.operating_channel_bandwidth = eChannel_Bandwidth_80_80;
+        results.operating_channel_bandwidth =
+            eChannelScanResultChannelBandwidth::eChannel_Bandwidth_80_80;
     }
 
     if (data[0] > 0x03) {
         LOG(ERROR) << "illegal TYPE_VHT_OPERATION value=" << data[0];
     }
 
-    if (results.operating_frequency_band == eOperating_Freq_Band_5GHz) {
-        results.supported_standards.push_back(eStandard_802_11ac);
-        results.operating_standards = eStandard_802_11ac;
+    if (results.operating_frequency_band ==
+        eChannelScanResultOperatingFrequencyBand::eOperating_Freq_Band_5GHz) {
+        results.supported_standards.push_back(eChannelScanResultStandards::eStandard_802_11ac);
+        results.operating_standards = eChannelScanResultStandards::eStandard_802_11ac;
     }
 }
 
@@ -244,14 +251,18 @@ static void get_supprates(const uint8_t *data, uint8_t len, sChannelScanResults 
         rate_mbs_fp_8_1 = data[i] & 0x7f;
 
         if (rate_mbs_fp_8_1 / 2 == 11) {
-            if (results.operating_frequency_band == eOperating_Freq_Band_2_4GHz) {
-                results.supported_standards.push_back(eStandard_802_11b);
-                results.operating_standards = eStandard_802_11b;
+            if (results.operating_frequency_band ==
+                eChannelScanResultOperatingFrequencyBand::eOperating_Freq_Band_2_4GHz) {
+                results.supported_standards.push_back(
+                    eChannelScanResultStandards::eStandard_802_11b);
+                results.operating_standards = eChannelScanResultStandards::eStandard_802_11b;
             }
         } else if (rate_mbs_fp_8_1 / 2 == 54) {
-            if (results.operating_frequency_band == eOperating_Freq_Band_5GHz) {
-                results.supported_standards.push_back(eStandard_802_11a);
-                results.operating_standards = eStandard_802_11a;
+            if (results.operating_frequency_band ==
+                eChannelScanResultOperatingFrequencyBand::eOperating_Freq_Band_5GHz) {
+                results.supported_standards.push_back(
+                    eChannelScanResultStandards::eStandard_802_11a);
+                results.operating_standards = eChannelScanResultStandards::eStandard_802_11a;
             }
         }
 
@@ -316,15 +327,19 @@ static void parse_info_elements(unsigned char *ie, int ielen, sChannelScanResult
                 LOG(ERROR) << "TYPE_RSN doesn't match min and max length criteria";
                 break;
             }
-            results.encryption_mode.push_back(eEncryption_Mode_AES);
-            results.security_mode_enabled.push_back(eSecurity_Mode_WPA2);
+            results.encryption_mode.push_back(
+                eChannelScanResultEncryptionMode::eEncryption_Mode_AES);
+            results.security_mode_enabled.push_back(
+                eChannelScanResultSecurityMode::eSecurity_Mode_WPA2);
         } break;
 
         case ie_type::TYPE_EXTENDED_SUPPORTED_RATES: {
 
-            if (results.operating_frequency_band == eOperating_Freq_Band_2_4GHz) {
-                results.supported_standards.push_back(eStandard_802_11g);
-                results.operating_standards = eStandard_802_11g;
+            if (results.operating_frequency_band ==
+                eChannelScanResultOperatingFrequencyBand::eOperating_Freq_Band_2_4GHz) {
+                results.supported_standards.push_back(
+                    eChannelScanResultStandards::eStandard_802_11g);
+                results.operating_standards = eChannelScanResultStandards::eStandard_802_11g;
             }
 
             get_supprates(data, length, results);
@@ -372,9 +387,11 @@ static bool translate_nl_data_to_bwl_results(sChannelScanResults &results,
     if (bss[NL80211_BSS_FREQUENCY]) {
         int freq = nla_get_u32(bss[NL80211_BSS_FREQUENCY]);
         if (freq >= 5180) {
-            results.operating_frequency_band = eOperating_Freq_Band_5GHz;
+            results.operating_frequency_band =
+                eChannelScanResultOperatingFrequencyBand::eOperating_Freq_Band_5GHz;
         } else {
-            results.operating_frequency_band = eOperating_Freq_Band_2_4GHz;
+            results.operating_frequency_band =
+                eChannelScanResultOperatingFrequencyBand::eOperating_Freq_Band_2_4GHz;
         }
         results.channel = son::wireless_utils::freq_to_channel(freq);
     }
@@ -407,16 +424,18 @@ static bool translate_nl_data_to_bwl_results(sChannelScanResults &results,
         uint16_t capa = nla_get_u16(bss[NL80211_BSS_CAPABILITY]);
 
         if (capa & WLAN_CAPABILITY_IBSS) {
-            results.mode = eMode_AdHoc;
+            results.mode = eChannelScanResultMode::eMode_AdHoc;
         } else if (capa & WLAN_CAPABILITY_ESS) {
-            results.mode = eMode_Infrastructure;
+            results.mode = eChannelScanResultMode::eMode_Infrastructure;
         }
 
         if (results.security_mode_enabled.size() == 0) {
             if (capa & WLAN_CAPABILITY_PRIVACY) {
-                results.security_mode_enabled.push_back(eSecurity_Mode_WEP);
+                results.security_mode_enabled.push_back(
+                    eChannelScanResultSecurityMode::eSecurity_Mode_WEP);
             } else {
-                results.security_mode_enabled.push_back(eSecurity_Mode_None);
+                results.security_mode_enabled.push_back(
+                    eChannelScanResultSecurityMode::eSecurity_Mode_None);
             }
         }
     }

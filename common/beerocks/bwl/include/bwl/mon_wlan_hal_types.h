@@ -348,32 +348,32 @@ struct SLinkMeasurementsResponse11k {
     uint32_t dmg_link_adapt_ack_reference_timestamp;
 };
 
-enum eChannelScanResultMode : uint8_t {
+enum class eChannelScanResultMode : uint8_t {
     eMode_NA             = 0x0,
     eMode_AdHoc          = 0x1,
     eMode_Infrastructure = 0x2,
 };
 
-enum eChannelScanResultEncryptionMode : uint8_t {
+enum class eChannelScanResultEncryptionMode : uint8_t {
     eEncryption_Mode_NA   = 0x0,
     eEncryption_Mode_AES  = 0x1,
     eEncryption_Mode_TKIP = 0x2,
 };
 
-enum eChannelScanResultSecurityMode : uint8_t {
+enum class eChannelScanResultSecurityMode : uint8_t {
     eSecurity_Mode_None = 0x0,
     eSecurity_Mode_WEP  = 0x1,
     eSecurity_Mode_WPA  = 0x2,
     eSecurity_Mode_WPA2 = 0x3,
 };
 
-enum eChannelScanResultOperatingFrequencyBand : uint8_t {
+enum class eChannelScanResultOperatingFrequencyBand : uint8_t {
     eOperating_Freq_Band_NA     = 0x0,
     eOperating_Freq_Band_2_4GHz = 0x1,
     eOperating_Freq_Band_5GHz   = 0x2,
 };
 
-enum eChannelScanResultStandards : uint8_t {
+enum class eChannelScanResultStandards : uint8_t {
     eStandard_NA       = 0x0,
     eStandard_802_11a  = 0x1,
     eStandard_802_11b  = 0x2,
@@ -382,7 +382,7 @@ enum eChannelScanResultStandards : uint8_t {
     eStandard_802_11ac = 0x5,
 };
 
-enum eChannelScanResultChannelBandwidth : uint8_t {
+enum class eChannelScanResultChannelBandwidth : uint8_t {
     eChannel_Bandwidth_NA     = 0x0,
     eChannel_Bandwidth_20MHz  = 0x1,
     eChannel_Bandwidth_40MHz  = 0x2,
@@ -399,7 +399,7 @@ typedef struct sChannelScanResults {
     sMacAddr bssid = {.oct = {0}};
 
     //The mode the neighboring WiFi radio is operating in. Enumerate
-    eChannelScanResultMode mode = eMode_NA;
+    eChannelScanResultMode mode = eChannelScanResultMode::eMode_NA;
 
     //The current radio channel used by the neighboring WiFi radio.
     uint32_t channel = 0;
@@ -414,16 +414,18 @@ typedef struct sChannelScanResults {
     std::vector<eChannelScanResultEncryptionMode> encryption_mode;
 
     //Indicates the frequency band at which the radio this SSID instance is operating. Enumerate
-    eChannelScanResultOperatingFrequencyBand operating_frequency_band = eOperating_Freq_Band_NA;
+    eChannelScanResultOperatingFrequencyBand operating_frequency_band =
+        eChannelScanResultOperatingFrequencyBand::eOperating_Freq_Band_NA;
 
     //List items indicate which IEEE 802.11 standards thisResultinstance can support simultaneously, in the frequency band specified byOperatingFrequencyBand. Enumerate List
     std::vector<eChannelScanResultStandards> supported_standards;
 
     //Indicates which IEEE 802.11 standard that is detected for this Result. Enumerate
-    eChannelScanResultStandards operating_standards = eStandard_NA;
+    eChannelScanResultStandards operating_standards = eChannelScanResultStandards::eStandard_NA;
 
     //Indicates the bandwidth at which the channel is operating. Enumerate
-    eChannelScanResultChannelBandwidth operating_channel_bandwidth = eChannel_Bandwidth_NA;
+    eChannelScanResultChannelBandwidth operating_channel_bandwidth =
+        eChannelScanResultChannelBandwidth::eChannel_Bandwidth_NA;
 
     //Time interval (inms) between transmitting beacons.
     uint32_t beacon_period_ms = 0;
