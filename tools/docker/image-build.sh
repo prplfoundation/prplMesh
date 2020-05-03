@@ -57,20 +57,20 @@ main() {
     fi
 
     if [[ "${BUILD_IMAGES}" == *";builder;"* ]]; then
-        info "Generating builder docker image (prplmesh-builder$postfix$TAG)"
+        info "Generating builder docker image (${DOCKER_REGISTRY}prplmesh-builder$postfix$TAG)"
         info "Base docker image $BASE_IMAGE"
         run docker image build \
             --build-arg image="$BASE_IMAGE" \
-            --tag "prplmesh-builder$postfix$TAG" \
+            --tag "${DOCKER_REGISTRY}prplmesh-builder$postfix$TAG" \
             "${scriptdir}/builder"
     fi
 
     if [[ "${BUILD_IMAGES}" == *";runner;"* ]]; then
-        info "Generating runner docker image (prplmesh-runner$postfix$TAG)"
+        info "Generating runner docker image (${DOCKER_REGISTRY}prplmesh-runner$postfix$TAG)"
         info "Base docker image $BASE_IMAGE"
         run docker image build \
             --build-arg image="$BASE_IMAGE" \
-            --tag "prplmesh-runner$postfix$TAG" \
+            --tag "${DOCKER_REGISTRY}prplmesh-runner$postfix$TAG" \
             "${scriptdir}/runner"
     fi
 }
