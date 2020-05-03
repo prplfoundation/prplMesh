@@ -39,12 +39,6 @@ main() {
     dbg "VERBOSE=${VERBOSE}"
     dbg "IMAGE=${image}"
 
-    docker image inspect "$image" >/dev/null 2>&1 || {
-        [ -n "$TAG" ] && { err "image $image doesn't exist, aborting"; exit 1; }
-        dbg "Image $image does not exist, creating..."
-        run "${scriptdir}"/image-build.sh --image builder
-    }
-
     DOCKEROPTS="-e USER=${SUDO_USER:-${USER}}
                 -e SOURCES_DIR=${rootdir}
                 -v ${rootdir}:${rootdir}
