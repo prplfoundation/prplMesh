@@ -35,7 +35,7 @@ main() {
         esac
     done
 
-    image="prplmesh-builder$TAG"
+    image="${DOCKER_REGISTRY}prplmesh-builder$TAG"
     dbg "VERBOSE=${VERBOSE}"
     dbg "IMAGE=${image}"
 

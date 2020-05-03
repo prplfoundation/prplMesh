@@ -13,7 +13,7 @@ rootdir="${scriptdir%/*/*}"
 . "${rootdir}/tools/functions.sh"
 
 main() {
-    docker image inspect prplmesh-builder >/dev/null 2>&1 || {
+    docker image inspect "${DOCKER_REGISTRY}prplmesh-builder" >/dev/null 2>&1 || {
         echo "Image prplmesh-build does not exist, creating..."
         run "${scriptdir}"/image-build.sh --image builder
     }
@@ -32,7 +32,7 @@ main() {
         docker_args+=(-v "${PRPLMESH_PLATFORM_BASE_DIR}:${PRPLMESH_PLATFORM_BASE_DIR}")
     fi
 
-    run docker container run "${docker_args[@]}" --rm prplmesh-builder build "$@"
+    run docker container run "${docker_args[@]}" --rm "${DOCKER_REGISTRY}prplmesh-builder" build "$@"
 }
 
 main "$@"
