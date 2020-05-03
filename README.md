@@ -111,4 +111,4 @@ Its [README file](tools/beerocks_analyzer/README.md) explains how to use it.
 If master branch does not work / does not pass tests on your computer make sure that:
 
 - you loaded ebtables kernel module: `sudo modprobe ebtables`
-- you updated your docker images with `tools/docker/image-pull.sh`
+- you updated your docker images with `tools/docker/image-build.sh`
