@@ -36,7 +36,8 @@ void Ieee1905Transport::handle_packet(Packet &packet)
     }
 
     if (!forward_packet(packet)) {
-        MAPF_WARN("packet forwarding failed.");
+        MAPF_ERR("packet forwarding failed.");
+        remove_packet_from_de_duplication_map(packet);
     }
 }
 
@@ -82,6 +83,23 @@ bool Ieee1905Transport::verify_packet(Packet &packet)
     }
 
     return true;
+}
+
+void Ieee1905Transport::remove_packet_from_de_duplication_map(const Packet &packet)
+{
+    // search for entry matching packet
+    DeDuplicationKey key;
+    std::copy_n(packet.src, ETH_ALEN, key.src);
+    std::copy_n(packet.dst, ETH_ALEN, key.dst);
+    key.messageType = static_cast<Ieee1905CmduHeader *>(packet.payload.iov_base)->messageType;
+    key.messageId   = static_cast<Ieee1905CmduHeader *>(packet.payload.iov_base)->messageId;
+    key.fragmentId  = static_cast<Ieee1905CmduHeader *>(packet.payload.iov_base)->fragmentId;
+
+    auto it = de_duplication_map_.find(key);
+    if (it != de_duplication_map_.end()) {
+        MAPF_DBG("Removing packet from de-duplication map:" << std::endl << packet);
+        de_duplication_map_.erase(it);
+    }
 }
 
 // Check if the specified packet is a duplicate (based on src address and messageId)
@@ -482,7 +500,8 @@ bool Ieee1905Transport::forward_packet(Packet &packet)
                      << (forward_to_bridge ? " bridge," : "")
                      << (forward_to_network_interfaces ? " network interfaces" : ""));
         } else {
-            MAPF_DBG("dropping packet");
+            MAPF_ERR("dropping packet: " << std::endl << packet);
+            return false;
         }
         if (forward_to_local_bus) {
             Packet defragmented_packet =
@@ -490,6 +509,7 @@ bool Ieee1905Transport::forward_packet(Packet &packet)
             if (de_fragment_packet(defragmented_packet)) {
                 if (!send_packet_to_local_bus(defragmented_packet)) {
                     MAPF_ERR("cannot forward packet to Local Bus.");
+                    return false;
                 }
             }
         }
@@ -506,6 +526,7 @@ bool Ieee1905Transport::forward_packet(Packet &packet)
                       packet.src_if_index == if_index)) { /* avoid loop-back */
                     if (!fragment_and_send_packet_to_network_interface(if_index, packet)) {
                         MAPF_ERR("cannot forward packet to network inteface " << ifname << ".");
+                        return false;
                     }
                 }
             }
