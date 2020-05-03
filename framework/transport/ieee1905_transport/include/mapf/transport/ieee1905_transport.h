@@ -280,6 +280,7 @@ private:
     void handle_packet(Packet &packet);
     bool verify_packet(Packet &packet);
     bool de_duplicate_packet(Packet &packet);
+    void remove_packet_from_de_duplication_map(const Packet &packet);
     bool de_fragment_packet(Packet &packet);
     bool fragment_and_send_packet_to_network_interface(unsigned int if_index, Packet &packet);
     bool forward_packet(Packet &packet);
