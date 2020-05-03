@@ -1442,7 +1442,7 @@ int bml_internal::set_dcs_continuous_scan_enable(const sMacAddr &mac, int enable
         return (-BML_RET_OP_FAILED);
     }
 
-    if (result != int(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS)) {
+    if (result != int(eChannelScanOperationCode::SUCCESS)) {
         LOG(ERROR) << "ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST returned error code:"
                    << result;
         return result;
@@ -1518,7 +1518,7 @@ int bml_internal::set_dcs_continuous_scan_params(const sMacAddr &mac, int dwell_
         return (-BML_RET_OP_FAILED);
     }
 
-    if (result != int(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS)) {
+    if (result != int(eChannelScanOperationCode::SUCCESS)) {
         LOG(ERROR) << "ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST returned error code:"
                    << result;
         return result;
@@ -1685,7 +1685,7 @@ int bml_internal::get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP *res
                << "total count: " << scan_results.size() << ", "
                << "results status: " << int(result_status) << ", "
                << "results opt code: " << int(iRet) << "].";
-    if (iRet != int(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS)) {
+    if (iRet != int(eChannelScanOperationCode::SUCCESS)) {
         LOG(ERROR) << "Results returned with error code:" << iRet << ". Aborting!";
         return iRet;
     }
@@ -1731,7 +1731,7 @@ int bml_internal::start_dcs_single_scan(const sMacAddr &mac, int dwell_time_ms,
         return (-BML_RET_OP_FAILED);
     }
 
-    if (result != int(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS)) {
+    if (result != int(eChannelScanOperationCode::SUCCESS)) {
         LOG(ERROR) << "cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST returned error code:" << result;
         return result;
     }

@@ -1794,7 +1794,7 @@ class cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE);
         }
-        //0 - Success, Otherwise error according to beerocks_defines:eChannelScanOpErrCode
+        //0 - Success, Otherwise error according to beerocks_defines:eChannelScanOperationCode
         uint8_t& op_error_code();
         void class_swap() override;
         bool finalize() override;
@@ -1881,7 +1881,7 @@ class cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE);
         }
-        //0 - Success, Otherwise error according to beerocks_defines:eChannelScanOpErrCode
+        //0 - Success, Otherwise error according to beerocks_defines:eChannelScanOperationCode
         uint8_t& op_error_code();
         void class_swap() override;
         bool finalize() override;
@@ -1966,7 +1966,7 @@ class cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE);
         }
-        //0 - Success, Otherwise error according to beerocks_defines:eChannelScanOpErrCode
+        //0 - Success, Otherwise error according to beerocks_defines:eChannelScanOperationCode
         uint8_t& op_error_code();
         void class_swap() override;
         bool finalize() override;
@@ -2014,7 +2014,7 @@ class cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE : public BaseClass
         }
         //0 - Success, Otherwise error according to beerocks_defines:eDcsScanErrCode
         uint8_t& result_status();
-        //0 - Success, Otherwise error according to beerocks_defines:eChannelScanOpErrCode
+        //0 - Success, Otherwise error according to beerocks_defines:eChannelScanOperationCode
         uint8_t& op_error_code();
         //0 - Not reached end of response, 1 - reached end of respons
         uint8_t& last();

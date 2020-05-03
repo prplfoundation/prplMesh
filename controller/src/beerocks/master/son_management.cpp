@@ -1898,28 +1898,28 @@ void son_management::handle_bml_message(Socket *sd,
         auto channel_pool_size = request->params().channel_pool_size;
 
         LOG(DEBUG) << "request radio_mac:" << radio_mac;
-        auto op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS;
+        auto op_error_code = eChannelScanOperationCode::SUCCESS;
 
         if (dwell_time_ms != CHANNEL_SCAN_INVALID_PARAM &&
-            op_error_code == eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS) {
+            op_error_code == eChannelScanOperationCode::SUCCESS) {
             op_error_code =
                 database.set_channel_scan_dwell_time_msec(radio_mac, dwell_time_ms, false)
                     ? op_error_code
-                    : eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_DWELLTIME;
+                    : eChannelScanOperationCode::INVALID_PARAMS_DWELLTIME;
         }
         if (interval_time_sec != CHANNEL_SCAN_INVALID_PARAM &&
-            op_error_code == eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS) {
+            op_error_code == eChannelScanOperationCode::SUCCESS) {
             op_error_code = database.set_channel_scan_interval_sec(radio_mac, interval_time_sec)
                                 ? op_error_code
-                                : eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_SCANTIME;
+                                : eChannelScanOperationCode::INVALID_PARAMS_SCANTIME;
         }
         if (channel_pool != nullptr && channel_pool_size != CHANNEL_SCAN_INVALID_PARAM &&
-            op_error_code == eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS) {
+            op_error_code == eChannelScanOperationCode::SUCCESS) {
             auto channel_pool_set =
                 std::unordered_set<uint8_t>(channel_pool, channel_pool + channel_pool_size);
             op_error_code = database.set_channel_scan_pool(radio_mac, channel_pool_set, false)
                                 ? op_error_code
-                                : eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_CHANNELPOOL;
+                                : eChannelScanOperationCode::INVALID_PARAMS_CHANNELPOOL;
         }
         response->op_error_code() = uint8_t(op_error_code);
         //send response to bml
@@ -1979,8 +1979,8 @@ void son_management::handle_bml_message(Socket *sd,
         LOG(DEBUG) << "request radio_mac:" << radio_mac;
         bool success = database.set_channel_scan_is_enabled(radio_mac, enable);
         response->op_error_code() =
-            uint8_t((success) ? eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS
-                              : eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_ENABLE);
+            uint8_t((success) ? eChannelScanOperationCode::SUCCESS
+                              : eChannelScanOperationCode::INVALID_PARAMS_ENABLE);
 
         // on DCS enable - "reset" the interval wait of the task
         // (will perform scan right after change to enable)
@@ -2041,19 +2041,19 @@ void son_management::handle_bml_message(Socket *sd,
                    << ((is_single_scan) ? "single-scan" : "continuous-scan");
 
         // Clear flags
-        auto result_status = eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
-        auto op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS;
+        auto result_status = eChannelScanStatusCode::SUCCESS;
+        auto op_error_code = eChannelScanOperationCode::SUCCESS;
 
         // Get scan statuses
         auto scan_in_progress = database.get_channel_scan_in_progress(radio_mac, is_single_scan);
         if (scan_in_progress) {
             LOG(ERROR) << "Scan is still running!";
-            op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SCAN_IN_PROGRESS;
+            op_error_code = eChannelScanOperationCode::SCAN_IN_PROGRESS;
         }
 
         auto last_scan_success =
             database.get_channel_scan_results_status(radio_mac, is_single_scan);
-        if (last_scan_success != eChannelScanErrCode::CHANNEL_SCAN_SUCCESS) {
+        if (last_scan_success != eChannelScanStatusCode::SUCCESS) {
             LOG(ERROR) << "Last scan did not finish successfully!";
             result_status = last_scan_success;
         }
@@ -2075,8 +2075,8 @@ void son_management::handle_bml_message(Socket *sd,
             [&sd, &cmdu_tx](
                 std::shared_ptr<beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE>
                     &res_msg,
-                const eChannelScanErrCode result_status, const eChannelScanOpErrCode op_error_code,
-                bool is_last = true) {
+                const eChannelScanStatusCode result_status,
+                const eChannelScanOperationCode op_error_code, bool is_last = true) {
                 res_msg->result_status() = uint8_t(result_status);
                 res_msg->op_error_code() = uint8_t(op_error_code);
                 res_msg->last()          = (is_last) ? 1 : 0;
@@ -2084,8 +2084,8 @@ void son_management::handle_bml_message(Socket *sd,
             };
 
         // If there was an error before, send the results with a failed status
-        if (op_error_code != eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS ||
-            result_status != eChannelScanErrCode::CHANNEL_SCAN_SUCCESS) {
+        if (op_error_code != eChannelScanOperationCode::SUCCESS ||
+            result_status != eChannelScanStatusCode::SUCCESS) {
             LOG(ERROR) << "Something went wrong, sending CMDU with error code: ["
                        << (int)op_error_code << "] & result status [" << (int)result_status << "].";
             auto response = gen_new_results_response();
@@ -2098,8 +2098,7 @@ void son_management::handle_bml_message(Socket *sd,
         if (scan_results_size == 0) {
             LOG(DEBUG) << "no scan results are available";
             auto response = gen_new_results_response();
-            send_results_response(response, eChannelScanErrCode::CHANNEL_SCAN_RESULTS_EMPTY,
-                                  op_error_code);
+            send_results_response(response, eChannelScanStatusCode::RESULTS_EMPTY, op_error_code);
             break;
         }
 
@@ -2120,7 +2119,7 @@ void son_management::handle_bml_message(Socket *sd,
             //LOG(DEBUG) << "Allocating space";
             if (!response->alloc_results()) {
                 LOG(ERROR) << "Failed buffer allocation";
-                op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR;
+                op_error_code = eChannelScanOperationCode::ERROR;
                 break;
             }
             max_size -= sizeof(dump);
@@ -2128,7 +2127,7 @@ void son_management::handle_bml_message(Socket *sd,
             auto num_of_res = response->results_size();
             if (!std::get<0>(response->results(num_of_res - 1))) {
                 LOG(ERROR) << "Failed accessing results buffer";
-                op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR;
+                op_error_code = eChannelScanOperationCode::ERROR;
                 break;
             }
             auto &dump_msg = std::get<1>(response->results(num_of_res - 1));
@@ -2163,8 +2162,7 @@ void son_management::handle_bml_message(Socket *sd,
             database.get_channel_scan_in_progress(request->scan_params().radio_mac, true);
         if (single_scan_in_progress) {
             LOG(ERROR) << "Single scan is still running!";
-            response->op_error_code() =
-                uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SCAN_IN_PROGRESS);
+            response->op_error_code() = uint8_t(eChannelScanOperationCode::SCAN_IN_PROGRESS);
             message_com::send_cmdu(sd, cmdu_tx);
             break;
         }
@@ -2180,7 +2178,7 @@ void son_management::handle_bml_message(Socket *sd,
         if (!database.set_channel_scan_dwell_time_msec(radio_mac, dwell_time_ms, true)) {
             LOG(ERROR) << "set_channel_scan_dwell_time_msec failed";
             response->op_error_code() =
-                uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_DWELLTIME);
+                uint8_t(eChannelScanOperationCode::INVALID_PARAMS_DWELLTIME);
             message_com::send_cmdu(sd, cmdu_tx);
             break;
         }
@@ -2189,7 +2187,7 @@ void son_management::handle_bml_message(Socket *sd,
         if (!database.set_channel_scan_pool(radio_mac, channel_pool_set, true)) {
             LOG(ERROR) << "set_channel_scan_pool failed";
             response->op_error_code() =
-                uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_CHANNELPOOL);
+                uint8_t(eChannelScanOperationCode::INVALID_PARAMS_CHANNELPOOL);
             message_com::send_cmdu(sd, cmdu_tx);
             break;
         }
@@ -2197,7 +2195,7 @@ void son_management::handle_bml_message(Socket *sd,
         LOG(DEBUG) << "Clearing DB results for a single scan";
         if (!database.clear_channel_scan_results(radio_mac, true)) {
             LOG(ERROR) << "failed to clear scan results";
-            response->op_error_code() = uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR);
+            response->op_error_code() = uint8_t(eChannelScanOperationCode::ERROR);
             message_com::send_cmdu(sd, cmdu_tx);
             break;
         }
@@ -2208,7 +2206,7 @@ void son_management::handle_bml_message(Socket *sd,
         tasks.push_event(database.get_dynamic_channel_selection_task_id(radio_mac),
                          (int)dynamic_channel_selection_task::eEvent::TRIGGER_SINGLE_SCAN,
                          (void *)&new_event);
-        response->op_error_code() = uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS);
+        response->op_error_code() = uint8_t(eChannelScanOperationCode::SUCCESS);
         message_com::send_cmdu(sd, cmdu_tx);
         break;
     }

@@ -196,8 +196,8 @@ public:
 
         struct channel_scan_status {
             bool scan_in_progress = false;
-            beerocks::eChannelScanErrCode last_scan_error_code =
-                beerocks::eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
+            beerocks::eChannelScanStatusCode last_scan_error_code =
+                beerocks::eChannelScanStatusCode::SUCCESS;
         };
 
         /**
