@@ -20,8 +20,8 @@ namespace son {
 class optimal_path_task : public task {
 public:
     optimal_path_task(db &database_, ieee1905_1::CmduMessageTx &cmdu_tx_, task_pool &tasks_,
-                      std::string sta_mac_, int starting_delay_ms_ = 0,
-                      std::string task_name_ = std::string("optimal_path"));
+                      const std::string &sta_mac_, int starting_delay_ms_ = 0,
+                      const std::string &task_name_ = std::string("optimal_path"));
     virtual ~optimal_path_task() {}
 
     /////////////// FOR DEBUG ONLY ////////////////
@@ -40,26 +40,28 @@ protected:
         override;
 
 private:
-    bool check_if_sta_can_steer_to_ap(std::string ap);
-    void send_rssi_measurement_request(const std::string &agent_mac, std::string client_mac,
-                                       int channel, std::string hostap, int id);
+    bool check_if_sta_can_steer_to_ap(const std::string &ap);
+    void send_rssi_measurement_request(const std::string &agent_mac, const std::string &client_mac,
+                                       int channel, const std::string &hostap, int id);
     bool assert_original_parent();
-    bool calculate_measurement_delay(std::set<std::string> temp_cross_hostaps, std::string sta_ap,
-                                     std::string sta_mac);
-    bool ready_to_pick_optimal_path(std::set<std::string> temp_cross_hostaps, std::string sta_ap,
-                                    std::string sta_mac);
-    bool is_measurement_valid(std::set<std::string> temp_cross_hostaps, std::string sta_ap,
-                              std::string sta_mac);
-    bool all_measurement_succeed(std::set<std::string> temp_cross_hostaps, std::string sta_ap,
-                                 std::string sta_mac);
-    bool is_delay_match_window(std::set<std::string> temp_cross_hostaps, std::string sta_ap);
-    void change_measurement_window_size(std::string sta_ap, bool inc);
+    bool calculate_measurement_delay(const std::set<std::string> &temp_cross_hostaps,
+                                     const std::string &sta_ap, const std::string &sta_mac);
+    bool ready_to_pick_optimal_path(const std::set<std::string> &temp_cross_hostaps,
+                                    const std::string &sta_ap, const std::string &sta_mac);
+    bool is_measurement_valid(const std::set<std::string> &temp_cross_hostaps,
+                              const std::string &sta_ap, const std::string &sta_mac);
+    bool all_measurement_succeed(const std::set<std::string> &temp_cross_hostaps,
+                                 const std::string &sta_ap, const std::string &sta_mac);
+    bool is_delay_match_window(const std::set<std::string> &temp_cross_hostaps,
+                               const std::string &sta_ap);
+    void change_measurement_window_size(const std::string &sta_ap, bool inc);
     bool get_station_default_capabilities(bool is_bandtype_5ghz,
                                           beerocks::message::sRadioCapabilities &default_sta_cap);
 
-    double calculate_weighted_phy_rate(std::string client_mac, std::string hostap_mac);
-    double calculate_weighted_phy_rate(std::string hostap_mac, int &hops);
-    bool is_hostap_on_cs_process(std::string hostap_mac);
+    double calculate_weighted_phy_rate(const std::string &client_mac,
+                                       const std::string &hostap_mac);
+    double calculate_weighted_phy_rate(const std::string &hostap_mac, int &hops);
+    bool is_hostap_on_cs_process(const std::string &hostap_mac);
 
     db &database;
     ieee1905_1::CmduMessageTx &cmdu_tx;

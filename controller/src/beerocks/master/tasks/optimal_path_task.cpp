@@ -39,8 +39,8 @@ beerocks::eMeasurementMode11K optimal_path_task::cli_beacon_request_mode =
 ///////////////////////////////////////////////
 
 optimal_path_task::optimal_path_task(db &database_, ieee1905_1::CmduMessageTx &cmdu_tx_,
-                                     task_pool &tasks_, std::string sta_mac_,
-                                     int starting_delay_ms_, std::string task_name_)
+                                     task_pool &tasks_, const std::string &sta_mac_,
+                                     int starting_delay_ms_, const std::string &task_name_)
     : task(task_name_), database(database_), cmdu_tx(cmdu_tx_), tasks(tasks_), sta_mac(sta_mac_),
       starting_delay_ms(starting_delay_ms_)
 {
@@ -1214,7 +1214,7 @@ void optimal_path_task::work()
     }
 }
 
-bool optimal_path_task::check_if_sta_can_steer_to_ap(std::string ap_mac)
+bool optimal_path_task::check_if_sta_can_steer_to_ap(const std::string &ap_mac)
 {
     bool hostap_is_5ghz = database.is_node_5ghz(ap_mac);
     bool sta_is_5ghz    = database.is_node_5ghz(sta_mac);
@@ -1239,8 +1239,8 @@ bool optimal_path_task::check_if_sta_can_steer_to_ap(std::string ap_mac)
 }
 
 void optimal_path_task::send_rssi_measurement_request(const std::string &agent_mac,
-                                                      std::string client_mac, int channel,
-                                                      std::string hostap, int id)
+                                                      const std::string &client_mac, int channel,
+                                                      const std::string &hostap, int id)
 {
     auto hostap_mac = database.get_node_parent(client_mac);
     auto request    = message_com::create_vs_message<
@@ -1372,8 +1372,9 @@ bool optimal_path_task::assert_original_parent()
 
 //TO DO - calculate if the delay are in the burst window. if not set appropriate delays and return false
 //else return true, and the measure will proceed.
-bool optimal_path_task::calculate_measurement_delay(std::set<std::string> temp_cross_hostaps,
-                                                    std::string current_hostap, std::string sta_mac)
+bool optimal_path_task::calculate_measurement_delay(const std::set<std::string> &temp_cross_hostaps,
+                                                    const std::string &current_hostap,
+                                                    const std::string &sta_mac)
 {
     calculate_measurement_delay_count++;
     TASK_LOG(DEBUG) << "calculate_measurement_delay_count = "
@@ -1386,8 +1387,9 @@ bool optimal_path_task::calculate_measurement_delay(std::set<std::string> temp_c
     return (ready_to_pick_optimal_path(temp_cross_hostaps, current_hostap, sta_mac));
 }
 
-bool optimal_path_task::ready_to_pick_optimal_path(std::set<std::string> temp_cross_hostaps,
-                                                   std::string current_hostap, std::string sta_mac)
+bool optimal_path_task::ready_to_pick_optimal_path(const std::set<std::string> &temp_cross_hostaps,
+                                                   const std::string &current_hostap,
+                                                   const std::string &sta_mac)
 {
     if (!is_measurement_valid(temp_cross_hostaps, current_hostap, sta_mac)) {
         return false;
@@ -1399,8 +1401,9 @@ bool optimal_path_task::ready_to_pick_optimal_path(std::set<std::string> temp_cr
     return false;
 }
 
-bool optimal_path_task::is_measurement_valid(std::set<std::string> temp_cross_hostaps,
-                                             std::string current_hostap, std::string sta_mac)
+bool optimal_path_task::is_measurement_valid(const std::set<std::string> &temp_cross_hostaps,
+                                             const std::string &current_hostap,
+                                             const std::string &sta_mac)
 {
     int delta_burst = 0;
     //sanity check if delta_burst delay bigger then delta_burst_limit (20 sec)
@@ -1433,8 +1436,9 @@ bool optimal_path_task::is_measurement_valid(std::set<std::string> temp_cross_ho
     return true;
 }
 
-bool optimal_path_task::all_measurement_succeed(std::set<std::string> temp_cross_hostaps,
-                                                std::string current_hostap, std::string sta_mac)
+bool optimal_path_task::all_measurement_succeed(const std::set<std::string> &temp_cross_hostaps,
+                                                const std::string &current_hostap,
+                                                const std::string &sta_mac)
 {
     //iterating on cross hostap to check if all measurement succeed (all IRE captured at list 1)
     int8_t rx_rssi, rx_packets;
@@ -1473,8 +1477,8 @@ bool optimal_path_task::all_measurement_succeed(std::set<std::string> temp_cross
     return all_hostapd_got_packets;
 }
 
-bool optimal_path_task::is_delay_match_window(std::set<std::string> temp_cross_hostaps,
-                                              std::string current_hostap)
+bool optimal_path_task::is_delay_match_window(const std::set<std::string> &temp_cross_hostaps,
+                                              const std::string &current_hostap)
 {
     bool res        = false;
     int delta_burst = 0;
@@ -1578,7 +1582,7 @@ bool optimal_path_task::is_delay_match_window(std::set<std::string> temp_cross_h
     return res;
 }
 
-void optimal_path_task::change_measurement_window_size(std::string current_hostap, bool inc)
+void optimal_path_task::change_measurement_window_size(const std::string &current_hostap, bool inc)
 {
     auto window_size = database.get_measurement_window_size(current_hostap);
     if (inc) {
@@ -1637,8 +1641,8 @@ bool optimal_path_task::get_station_default_capabilities(
     }
 }
 
-double optimal_path_task::calculate_weighted_phy_rate(std::string client_mac,
-                                                      std::string hostap_mac)
+double optimal_path_task::calculate_weighted_phy_rate(const std::string &client_mac,
+                                                      const std::string &hostap_mac)
 {
     auto type    = database.get_node_type(client_mac);
     auto if_type = database.get_node_backhaul_iface_type(client_mac);
@@ -1665,7 +1669,7 @@ double optimal_path_task::calculate_weighted_phy_rate(std::string client_mac,
     }
 }
 
-double optimal_path_task::calculate_weighted_phy_rate(std::string node_mac, int &hops)
+double optimal_path_task::calculate_weighted_phy_rate(const std::string &node_mac, int &hops)
 {
     double node_phy_rate;
     bool wireless_link     = false;
@@ -1704,7 +1708,7 @@ double optimal_path_task::calculate_weighted_phy_rate(std::string node_mac, int 
     */
 }
 
-bool optimal_path_task::is_hostap_on_cs_process(std::string hostap_mac)
+bool optimal_path_task::is_hostap_on_cs_process(const std::string &hostap_mac)
 {
     if (database.get_hostap_on_dfs_reentry(hostap_mac) ||
         (database.is_node_5ghz(hostap_mac) && database.get_hostap_is_dfs(hostap_mac) &&
