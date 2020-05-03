@@ -624,15 +624,15 @@ bool base_wlan_hal_dwpal::dwpal_nl_cmd_set(const std::string &ifname, unsigned i
     return true;
 }
 
-size_t base_wlan_hal_dwpal::dwpal_nl_cmd_get(const std::string &ifname, unsigned int nl_cmd,
-                                             unsigned char *out_buffer,
-                                             const size_t max_buffer_size)
+ssize_t base_wlan_hal_dwpal::dwpal_nl_cmd_get(const std::string &ifname, unsigned int nl_cmd,
+                                              unsigned char *out_buffer,
+                                              const size_t max_buffer_size)
 {
     size_t data_size = 0;
 
     if (!out_buffer) {
         LOG(ERROR) << "out_buffer is invalid ==> Abort!";
-        return data_size;
+        return -1;
     }
 
     /* Handle a command which invokes an event with the output data */
@@ -640,7 +640,7 @@ size_t base_wlan_hal_dwpal::dwpal_nl_cmd_get(const std::string &ifname, unsigned
             m_dwpal_nl_ctx, DWPAL_NL_SOLICITED_EVENT, (char *)ifname.c_str(), NL80211_CMD_VENDOR,
             DWPAL_NETDEV_ID, (enum ltq_nl80211_vendor_subcmds)nl_cmd, NULL, 0) == DWPAL_FAILURE) {
         LOG(ERROR) << "ERROR for cmd = " << nl_cmd;
-        return data_size;
+        return -1;
     }
 
     // Passing a lambda with capture is not supported for standard C function
@@ -690,7 +690,7 @@ size_t base_wlan_hal_dwpal::dwpal_nl_cmd_get(const std::string &ifname, unsigned
                                     NULL) == DWPAL_FAILURE) {
             LOG(ERROR) << " dwpal_driver_nl_msg_get failed,"
                        << " ctx=" << m_dwpal_nl_ctx;
-            return data_size;
+            return -1;
         }
     }
 

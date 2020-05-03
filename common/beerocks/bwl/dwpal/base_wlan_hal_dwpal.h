@@ -73,8 +73,8 @@ protected:
      * @param max_buffer_size buffer size
      * @return size of returned data (success if > 0)
      */
-    size_t dwpal_nl_cmd_get(const std::string &ifname, unsigned int nl_cmd,
-                            unsigned char *out_buffer, const size_t max_buffer_size);
+    ssize_t dwpal_nl_cmd_get(const std::string &ifname, unsigned int nl_cmd,
+                             unsigned char *out_buffer, const size_t max_buffer_size);
     /**
      * @brief handle set vendor data cmd to netlink
      * @param ifname radio interface name
