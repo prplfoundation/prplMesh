@@ -92,7 +92,10 @@ RUN cp feeds.conf.default feeds.conf \
     && if [ "$TARGET_PROFILE" = "DEVICE_NETGEAR_RAX40" ] ; then \
         grep -v -E 'CONFIG_SDK|CONFIG_MAKE_TOOLCHAIN' feeds/intel/rax40.profile >> .config ;\
     fi ;\
-    make defconfig \
+    : "Installing intel feed doesn't correctly regenerate kernel .package-info"; \
+    : "force regeneration by removing it"; \
+    rm -rf tmp \
+    && make defconfig \
     && cat .config \
     && make -j$(nproc) \
     && make package/feeds/prpl/prplmesh/clean
