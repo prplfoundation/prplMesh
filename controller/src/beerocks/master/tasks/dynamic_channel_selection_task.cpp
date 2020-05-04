@@ -52,41 +52,54 @@ beerocks::eChannelScanErrCode dynamic_channel_selection_task::dcs_request_scan_t
 {
     // When a scan is requested send the scan parameters Channel pool & Dwell time
 
+    auto radio_mac_str = beerocks::net::network_utils::mac_to_string(m_radio_mac);
+
     auto request = beerocks::message_com::create_vs_message<
         beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST>(cmdu_tx);
     if (!request) {
         LOG(ERROR) << "Failed building message cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST";
         return beerocks::eChannelScanErrCode::CHANNEL_SCAN_INTERNAL_FAILURE;
     }
+    request->scan_params().radio_mac = m_radio_mac;
 
+    //Get dwell time, if dwell time invalid fail scan.
     int32_t dwell_time_msec = database.get_channel_scan_dwell_time_msec(m_radio_mac, m_single_scan);
     if (dwell_time_msec <= 0) {
-        LOG(ERROR) << "invalid dwell_time <= 0";
+        LOG(ERROR) << "invalid dwell_time=" << int(dwell_time_msec);
         return beerocks::eChannelScanErrCode::CHANNEL_SCAN_INVALID_PARAMS;
     }
+    request->scan_params().dwell_time_ms = dwell_time_msec;
 
-    //get current channel pool from DB
+    // Get channel pool;
+    // if pool is set to "all channel": use the supported channels instead.
+    // if the costum channel pool is empty or too big: fail scan and return error accordingly.
     auto &curr_channel_pool = database.get_channel_scan_pool(m_radio_mac, m_single_scan);
-    if (curr_channel_pool.empty()) {
-        LOG(ERROR) << "empty channel pool is not supported. please set channel pool for mac="
-                   << m_radio_mac;
-        return beerocks::eChannelScanErrCode::CHANNEL_SCAN_INVALID_PARAMS;
+    if (curr_channel_pool.size() == 1 && (*curr_channel_pool.begin()) == 0) {
+        LOG(DEBUG) << "Using all supported channels for channel scan on mac=" << m_radio_mac;
+        auto supported_channels = database.get_hostap_supported_channels(radio_mac_str);
+        request->scan_params().channel_pool_size = supported_channels.size();
+        std::transform(supported_channels.begin(), supported_channels.end(),
+                       request->scan_params().channel_pool,
+                       [](beerocks::message::sWifiChannel &c) -> uint8_t { return c.channel; });
+    } else {
+        LOG(DEBUG) << "Using custom set channels for channel scan on mac=" << m_radio_mac;
+        if (curr_channel_pool.empty()) {
+            LOG(ERROR) << "empty channel pool is not supported. please set channel pool for mac="
+                       << m_radio_mac;
+            return beerocks::eChannelScanErrCode::CHANNEL_SCAN_INVALID_PARAMS;
+        }
+        if (curr_channel_pool.size() > beerocks::message::SUPPORTED_CHANNELS_LENGTH) {
+            LOG(ERROR) << "channel_pool is too big [" << int(curr_channel_pool.size())
+                       << "] on mac=" << m_radio_mac;
+            return beerocks::eChannelScanErrCode::CHANNEL_SCAN_POOL_TOO_BIG;
+        }
+        request->scan_params().channel_pool_size = curr_channel_pool.size();
+        std::copy(curr_channel_pool.begin(), curr_channel_pool.end(),
+                  request->scan_params().channel_pool);
     }
-
-    if (curr_channel_pool.size() > beerocks::message::SUPPORTED_CHANNELS_LENGTH) {
-        LOG(ERROR) << "channel_pool is too big";
-        return beerocks::eChannelScanErrCode::CHANNEL_SCAN_POOL_TOO_BIG;
-    }
-
-    request->scan_params().radio_mac         = m_radio_mac;
-    request->scan_params().dwell_time_ms     = dwell_time_msec;
-    request->scan_params().channel_pool_size = curr_channel_pool.size();
-    std::copy(curr_channel_pool.begin(), curr_channel_pool.end(),
-              request->scan_params().channel_pool);
 
     // get the parent node to send the CMDU to the agent
-    auto radio_mac_str = beerocks::net::network_utils::mac_to_string(m_radio_mac);
-    auto ire           = database.get_node_parent_ire(radio_mac_str);
+    auto ire = database.get_node_parent_ire(radio_mac_str);
     son_actions::send_cmdu_to_agent(ire, cmdu_tx, database, radio_mac_str);
 
     return beerocks::eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
