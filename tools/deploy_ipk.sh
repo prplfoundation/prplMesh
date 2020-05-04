@@ -14,8 +14,16 @@ usage() {
     echo "      --proxy - use ssh proxy <user>@<proxy>"
 }
 
+_ssh() {
+    ssh "${SSH_OPTIONS[@]}" "$@"
+}
+
+_scp() {
+    scp "${SSH_OPTIONS[@]}" "$@"
+}
+
 deploy() {
-    if ! ssh "${SSH_OPTIONS[@]}" "$1" /bin/true ; then
+    if ! _ssh "$1" /bin/true ; then
         echo "Error: $1 unreachable via ssh"
         exit 1
     fi
@@ -26,11 +34,11 @@ deploy() {
     DEST_FOLDER=/tmp/prplmesh_ipks
 
     echo "Removing previous ipks"
-    ssh "${SSH_OPTIONS[@]}" "$TARGET" "rm -rf \"$DEST_FOLDER\" ; mkdir -p \"$DEST_FOLDER\""
+    _ssh "$TARGET" "rm -rf \"$DEST_FOLDER\" ; mkdir -p \"$DEST_FOLDER\""
     echo "Copying $IPK to $TARGET:$DEST_FOLDER/$IPK_FILENAME"
-    scp "${SSH_OPTIONS[@]}" "$IPK" "$TARGET:$DEST_FOLDER/$IPK_FILENAME"
+    _scp "$IPK" "$TARGET:$DEST_FOLDER/$IPK_FILENAME"
 
-    ssh "${SSH_OPTIONS[@]}" "$TARGET" <<EOF
+    _ssh "$TARGET" <<EOF
 # we don't want opkg to stay locked with a previous failed invocation.
 # when using this, make sure no one is using opkg in the meantime!
 pgrep opkg | xargs kill -SIGINT
@@ -45,7 +53,7 @@ EOF
 
     if [ "$CERTIFICATION_MODE" = true ] ; then
         echo "Certification mode will be enabled on the target"
-        ssh "${SSH_OPTIONS[@]}" "$TARGET" '"uci set prplmesh.config.certification_mode=1 && uci commit"'
+        _ssh "$TARGET" '"uci set prplmesh.config.certification_mode=1 && uci commit"'
         echo "Certification mode enabled on the target."
     fi
     echo "Done"
