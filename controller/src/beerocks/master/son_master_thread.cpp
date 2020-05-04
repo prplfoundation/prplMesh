@@ -3026,46 +3026,49 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             database.update_node_last_seen(client_mac);
         }
 
-        if (database.get_node_type(client_mac) == beerocks::TYPE_CLIENT) {
-            auto db_ipv4 = database.get_node_ipv4(client_mac);
-            if (!database.set_node_ipv4(client_mac, ipv4)) {
-                LOG(ERROR) << "set node ipv4 failed";
+        if (database.get_node_type(client_mac) != beerocks::TYPE_CLIENT) {
+            LOG(INFO) << "Ignoring DHCP notification for mac " << client_mac
+                      << ", as it's not a client";
+            return true;
+        }
+
+        database.set_node_ipv4(client_mac, ipv4);
+        database.set_node_name(client_mac,
+                               std::string(notification_in->name(message::NODE_NAME_LENGTH)));
+
+        if (database.is_node_wireless(client_mac)) {
+            auto notification_out = message_com::create_vs_message<
+                beerocks_message::cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION>(cmdu_tx);
+
+            if (!notification_out) {
+                LOG(ERROR) << "Failed building message!";
+                return false;
             }
+            notification_out->mac()  = notification_in->mac();
+            notification_out->ipv4() = notification_in->ipv4();
 
-            if (!database.set_node_name(
-                    client_mac, std::string(notification_in->name(message::NODE_NAME_LENGTH)))) {
-                LOG(ERROR) << "set node name failed";
+            auto client_bssid = database.get_node_parent(client_mac);
+            if (client_bssid.empty()) {
+                LOG(WARNING) << "Client does not have a valid parent hostap on the database";
+                return true;
             }
+            auto client_radio = database.get_node_parent_radio(client_bssid);
+            LOG(WARNING) << "Client " << client_mac
+                         << " is connected wirelessly, Sending IP addr notification to radio="
+                         << client_radio;
 
-            if (database.is_node_wireless(client_mac)) {
-                auto notification_out = message_com::create_vs_message<
-                    beerocks_message::cACTION_CONTROL_CLIENT_NEW_IP_ADDRESS_NOTIFICATION>(cmdu_tx);
+            auto agent_mac = database.get_node_parent(client_radio);
+            son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, client_radio);
 
-                if (!notification_out) {
-                    LOG(ERROR) << "Failed building message!";
-                    return false;
-                }
-                notification_out->mac()  = notification_in->mac();
-                notification_out->ipv4() = notification_in->ipv4();
-
-                auto clients_bssid_radio_mac = database.get_node_parent(client_mac);
-                if (clients_bssid_radio_mac.empty()) {
-                    LOG(WARNING) << "Client does not have a valid parent hostap on the database";
-                    return true;
-                }
-                son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database,
-                                                clients_bssid_radio_mac);
-
+        } else {
+            LOG(DEBUG) << "run_client_locating_task client_mac = " << client_mac;
+            int prev_task_id = database.get_client_locating_task_id(client_mac, true);
+            if (tasks.is_task_running(prev_task_id)) {
+                LOG(DEBUG) << "client locating task already running for " << client_mac;
             } else {
-                LOG(DEBUG) << "run_client_locating_task client_mac = " << client_mac;
-                int prev_task_id = database.get_client_locating_task_id(client_mac, true);
-                if (tasks.is_task_running(prev_task_id)) {
-                    LOG(DEBUG) << "client locating task already running for " << client_mac;
-                } else {
-                    auto new_task = std::make_shared<client_locating_task>(database, cmdu_tx, tasks,
-                                                                           client_mac, true, 2000);
-                    tasks.add_task(new_task);
-                }
+                auto new_task = std::make_shared<client_locating_task>(database, cmdu_tx, tasks,
+                                                                       client_mac, true, 2000);
+                tasks.add_task(new_task);
             }
         }
         break;
