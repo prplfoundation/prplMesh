@@ -1,4 +1,4 @@
-#!/bin/sh -e
+#!/bin/bash -e
 ###############################################################
 # SPDX-License-Identifier: BSD-2-Clause-Patent
 # SPDX-FileCopyrightText: 2019-2020 the prplMesh contributors (see AUTHORS.md)
@@ -15,7 +15,7 @@ usage() {
 }
 
 deploy() {
-    if ! eval ssh "$SSH_OPTIONS" "$1" /bin/true ; then
+    if ! ssh "${SSH_OPTIONS[@]}" "$1" /bin/true ; then
         echo "Error: $1 unreachable via ssh"
         exit 1
     fi
@@ -26,11 +26,11 @@ deploy() {
     DEST_FOLDER=/tmp/prplmesh_ipks
 
     echo "Removing previous ipks"
-    eval ssh "$SSH_OPTIONS" "$TARGET" \""rm -rf \"$DEST_FOLDER\" ; mkdir -p \"$DEST_FOLDER\"\""
+    ssh "${SSH_OPTIONS[@]}" "$TARGET" "rm -rf \"$DEST_FOLDER\" ; mkdir -p \"$DEST_FOLDER\""
     echo "Copying $IPK to $TARGET:$DEST_FOLDER/$IPK_FILENAME"
-    eval scp "$SSH_OPTIONS" "$IPK" "$TARGET:$DEST_FOLDER/$IPK_FILENAME"
+    scp "${SSH_OPTIONS[@]}" "$IPK" "$TARGET:$DEST_FOLDER/$IPK_FILENAME"
 
-    eval ssh "$SSH_OPTIONS" "$TARGET" <<EOF
+    ssh "${SSH_OPTIONS[@]}" "$TARGET" <<EOF
 # we don't want opkg to stay locked with a previous failed invocation.
 # when using this, make sure no one is using opkg in the meantime!
 pgrep opkg | xargs kill -SIGINT
@@ -45,7 +45,7 @@ EOF
 
     if [ "$CERTIFICATION_MODE" = true ] ; then
         echo "Certification mode will be enabled on the target"
-        eval ssh "$SSH_OPTIONS" "$TARGET" \""uci set prplmesh.config.certification_mode=1 && uci commit"\"
+        ssh "${SSH_OPTIONS[@]}" "$TARGET" '"uci set prplmesh.config.certification_mode=1 && uci commit"'
         echo "Certification mode enabled on the target."
     fi
     echo "Done"
@@ -68,7 +68,7 @@ main() {
                 shift
                 ;;
             --proxy)
-                SSH_OPTIONS="$SSH_OPTIONS \"-oProxyJump \"$2\"\""
+                SSH_OPTIONS+=("-o ProxyJump=$2")
                 shift 2
                 ;;
             -- ) shift; break ;;
@@ -79,6 +79,6 @@ main() {
     deploy "$@"
 }
 
-SSH_OPTIONS="\"-oBatchMode yes\" \"-oStrictHostKeyChecking no\""
+SSH_OPTIONS=("-o BatchMode=yes" "-o StrictHostKeyChecking=no")
 
 main "$@"
