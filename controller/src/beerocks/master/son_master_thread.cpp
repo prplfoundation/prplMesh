@@ -312,7 +312,8 @@ bool master_thread::handle_cmdu_1905_1_message(const std::string &src_mac,
         break;
     }
 
-    LOG(WARNING) << "Unknown 1905 message received. Ignoring";
+    LOG(WARNING) << "Unknown 1905 message received message_type=" << std::hex
+                 << int(cmdu_rx.getMessageType()) << " .Ignoring ";
     return true;
 }
 
