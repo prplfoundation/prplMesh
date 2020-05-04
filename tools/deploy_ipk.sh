@@ -42,12 +42,23 @@ deploy() {
 # we don't want opkg to stay locked with a previous failed invocation.
 # when using this, make sure no one is using opkg in the meantime!
 pgrep opkg | xargs kill -SIGINT
+
 # remove any previously installed prplmesh. Use force-depends in case
 # there are packages depending on prplmesh which will cause opkg remove
 # to fail without this:
 opkg remove --force-depends prplmesh prplmesh-dwpal prplmesh-nl80211
+
 # currently opkg remove does not remove everything from /opt/prplmesh:
 rm -rf /opt/prplmesh
+
+# reset the wireless configuration
+if grep -q GRX /tmp/sysinfo/board_name; then
+    # the rax40 has its configuration stored in /rom:
+    cp /rom/etc/config/wireless /etc/config/wireless 2>/dev/null || true
+    # reload the wifi config (wifi reload might not work on the rax40), so we use down/up)
+    wifi down ; sleep 2 ; wifi
+fi
+
 opkg install -V2 "$DEST_FOLDER/$IPK_FILENAME"
 EOF
 
