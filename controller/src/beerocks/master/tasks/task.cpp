@@ -46,9 +46,7 @@ void task::response_received(std::string mac,
 void task::event_received(int event_type, void *obj)
 {
     auto it = pending_events.find(event_type);
-    if (it == pending_events.end()) {
-        TASK_LOG(DEBUG) << "received non-pending event " << event_type;
-    } else {
+    if (it != pending_events.end()) {
         it = pending_events.erase(it);
     }
 
