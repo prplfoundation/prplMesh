@@ -96,7 +96,6 @@ RUN cp feeds.conf.default feeds.conf \
     : "force regeneration by removing it"; \
     rm -rf tmp \
     && make defconfig \
-    && cat .config \
     && make -j$(nproc) \
     && make package/feeds/prpl/prplmesh/clean
     # note that the result from diffconfig.sh with a minimal
