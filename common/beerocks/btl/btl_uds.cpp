@@ -55,6 +55,7 @@ bool transport_socket_thread::read_ready(Socket *s) { return socket_thread::read
 
 bool transport_socket_thread::bus_subscribe(const std::vector<ieee1905_1::eMessageType> &msg_types)
 {
+    m_subscribed_messages.insert(msg_types.begin(), msg_types.end());
     return true;
 }
 
@@ -123,6 +124,14 @@ bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage &cmdu, const std:
 }
 
 bool transport_socket_thread::from_bus(Socket *sd) { return sd == bus; }
+
+bool transport_socket_thread::skip_filtered_message_type(ieee1905_1::eMessageType msg_type)
+{
+    if (m_subscribed_messages.find(msg_type) == m_subscribed_messages.end()) {
+        return true;
+    }
+    return false;
+}
 
 bool transport_socket_thread::work()
 {

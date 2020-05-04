@@ -184,6 +184,11 @@ bool socket_thread::handle_cmdu_message_uds(Socket *sd)
         return false;
     }
 
+    // On UDS bus, unsubscribed messages needs to be filtered manually.
+    if (skip_filtered_message_type(cmdu_rx.getMessageType())) {
+        return true;
+    }
+
     if (!handle_cmdu(sd, cmdu_rx)) {
         return false;
     }
