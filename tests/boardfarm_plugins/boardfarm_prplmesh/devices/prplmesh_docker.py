@@ -61,7 +61,7 @@ class PrplMeshDocker(PrplMeshBase):
             self.agent_entity = ALEntityDocker(self.name, is_controller=False)
 
         self.wired_sniffer = Sniffer(_get_bridge_interface(self.docker_network),
-                                     True, boardfarm.config.output_dir)
+                                     boardfarm.config.output_dir)
         self.check_status()
 
     def __del__(self):
