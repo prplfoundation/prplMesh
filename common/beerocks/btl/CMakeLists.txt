@@ -21,6 +21,10 @@ set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${prplmesh_VERSION} SOV
 target_link_libraries(${PROJECT_NAME} PUBLIC bcl tlvf elpp btlvf common)
 if (NOT MSGLIB STREQUAL "None")
      target_link_libraries(${PROJECT_NAME} PRIVATE ieee1905_transport_messages)
+else()
+    # Export the UDS_BUS definition publicly to any target that
+    # may include the <btl.h> header
+    target_compile_definitions(${PROJECT_NAME} PUBLIC UDS_BUS)
 endif()
 
 # Include paths

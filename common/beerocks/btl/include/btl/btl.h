@@ -15,6 +15,8 @@
 #include <beerocks/tlvf/beerocks_message.h>
 #include <tlvf/ieee_1905_1/eMessageType.h>
 
+#include <unordered_set>
+
 // Forward Declarations
 namespace mapf {
 class Poller;
@@ -60,8 +62,11 @@ private:
     int poll_timeout_ms = 500;
 
 #ifdef UDS_BUS
+    bool skip_filtered_message_type(ieee1905_1::eMessageType msg_type) override;
+
     Socket *bus = nullptr;
     std::unique_ptr<SocketServer> bus_server_socket;
+    std::unordered_set<ieee1905_1::eMessageType> m_subscribed_messages;
 #else
     std::shared_ptr<mapf::LocalBusInterface> bus = nullptr;
     std::shared_ptr<mapf::Poller> poller         = nullptr;
