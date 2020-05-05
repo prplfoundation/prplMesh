@@ -17,7 +17,7 @@ RUN apt-get update \
     libncurses-dev libreadline-dev libnl-3-dev libnl-genl-3-dev \
     # Install Helper tools
     bash-completion locales ninja-build pkg-config shellcheck \
-    flake8 vim \
+    flake8 clang-format vim \
     # Network capturing
     tcpdump openssh-server
 
