@@ -112,6 +112,8 @@ private:
                                         const std::string &src_mac);
     bool handle_associated_sta_link_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                   const std::string &src_mac);
+    bool handle_multi_ap_policy_config_request(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                               const std::string &src_mac);
     //bool sta_handle_event(const std::string &iface,const std::string& event_name, void* event_obj);
     bool hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr, std::string iface);
 
@@ -246,6 +248,28 @@ private:
 
     std::unique_ptr<beerocks::agent_ucc_listener> m_agent_ucc_listener;
 
+    /**
+     * AP Metrics Reporting configuration and status information type.
+     */
+    struct sApMetricsReportingInfo {
+        /**
+         * AP Metrics Reporting Interval in seconds (0: Do not report AP Metrics periodically).
+         * This value is set by the controller through a Multi-AP Policy Config Request message,
+         * inside the Metric Reporting Policy TLV.
+         */
+        uint8_t reporting_interval_s = 0;
+
+        /**
+         * Time point at which AP metrics were reported for the last time.
+         */
+        std::chrono::steady_clock::time_point last_reporting_time_point;
+    };
+
+    /**
+     * AP Metrics Reporting configuration and status information.
+     */
+    sApMetricsReportingInfo ap_metrics_reporting_info;
+
     struct sClientInfo {
         sMacAddr client_mac;
         sMacAddr bssid; // VAP mac
@@ -321,6 +345,14 @@ private:
         std::unordered_map<sMacAddr, associated_clients_t>
             associated_clients_map; /**< Associated clients grouped by BSSID. */
     };
+
+    /**
+     * @brief Gets radio info for the radio with given MAC address
+     *
+     * @param[in] radio_mac MAC address of the radio
+     * @return shared pointer to radio info in case of success or nullptr otherwise
+     */
+    std::shared_ptr<sRadioInfo> get_radio(const sMacAddr &radio_mac) const;
 
     /**
      * @brief Gets radio info for the STA with given MAC address

@@ -74,8 +74,10 @@
 #include <tlvf/wfa_map/tlvClientInfo.h>
 #include <tlvf/wfa_map/tlvErrorCode.h>
 #include <tlvf/wfa_map/tlvHigherLayerData.h>
+#include <tlvf/wfa_map/tlvMetricReportingPolicy.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
 #include <tlvf/wfa_map/tlvStaMacAddressType.h>
+#include <tlvf/wfa_map/tlvSteeringPolicy.h>
 #include <tlvf/wfa_map/tlvSupportedService.h>
 
 // BPL Error Codes
@@ -965,6 +967,13 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
     }
     // Backhaul manager is OPERATIONAL!
     case EState::OPERATIONAL: {
+
+        /**
+         * Get current time. It is later used to compute elapsed time since some start time and
+         * check if a timeout has expired to perform periodic actions.
+         */
+        auto now = std::chrono::steady_clock::now();
+
         /*
         * TODO
         * This code segment is commented out since wireless-backhaul is not yet supported and
@@ -978,7 +987,6 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
         * https://github.com/prplfoundation/prplMesh/issues/866
         */
 
-        // auto now = std::chrono::steady_clock::now();
         // int time_elapsed_ms =
         //     std::chrono::duration_cast<std::chrono::milliseconds>(now - eth_link_poll_timer)
         //         .count();
@@ -994,6 +1002,22 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
         // } else {
         if (pending_enable && m_sConfig.eType != SBackhaulConfig::EType::Invalid) {
             pending_enable = false;
+        }
+
+        /**
+         * If periodic AP metrics reporting is enabled, check if time interval has elapsed and if
+         * so, then report AP metrics.
+         */
+        if (0 != ap_metrics_reporting_info.reporting_interval_s) {
+            int elapsed_time_s = std::chrono::duration_cast<std::chrono::seconds>(
+                                     now - ap_metrics_reporting_info.last_reporting_time_point)
+                                     .count();
+
+            if (elapsed_time_s >= ap_metrics_reporting_info.reporting_interval_s) {
+                ap_metrics_reporting_info.last_reporting_time_point = now;
+
+                // TODO: report AP metrics
+            }
         }
 
         break;
@@ -2092,6 +2116,9 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     case ieee1905_1::eMessageType::ASSOCIATED_STA_LINK_METRICS_QUERY_MESSAGE: {
         return handle_associated_sta_link_metrics_query(cmdu_rx, src_mac);
     }
+    case ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE: {
+        return handle_multi_ap_policy_config_request(cmdu_rx, src_mac);
+    }
     default: {
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
         // flows, since we won't expect a 1905 message not handled in this function
@@ -2114,6 +2141,16 @@ sMacAddr backhaul_manager::get_sta_bssid(
 }
 
 std::shared_ptr<backhaul_manager::sRadioInfo>
+backhaul_manager::get_radio(const sMacAddr &radio_mac) const
+{
+    auto it = std::find_if(slaves_sockets.begin(), slaves_sockets.end(),
+                           [&radio_mac](const std::shared_ptr<sRadioInfo> &radio_info) {
+                               return radio_info->radio_mac == radio_mac;
+                           });
+    return it != slaves_sockets.end() ? *it : nullptr;
+}
+
+std::shared_ptr<backhaul_manager::sRadioInfo>
 backhaul_manager::get_sta_radio(const sMacAddr &sta_mac)
 {
     auto radio = std::find_if(
@@ -2121,6 +2158,69 @@ backhaul_manager::get_sta_radio(const sMacAddr &sta_mac)
             return get_sta_bssid(r->associated_clients_map, sta_mac) != network_utils::ZERO_MAC;
         });
     return radio != slaves_sockets.end() ? *radio : nullptr;
+}
+
+bool backhaul_manager::handle_multi_ap_policy_config_request(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                             const std::string &src_mac)
+{
+    auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE, mid=" << std::hex << int(mid);
+
+    auto steering_policy_tlv = cmdu_rx.getClass<wfa_map::tlvSteeringPolicy>();
+    if (steering_policy_tlv) {
+        // For the time being, agent doesn't do steering so steering policy is ignored.
+    }
+
+    auto metric_reporting_policy_tlv = cmdu_rx.getClass<wfa_map::tlvMetricReportingPolicy>();
+    if (metric_reporting_policy_tlv) {
+        /**
+         * The Multi-AP Policy Config Request message containing a Metric Reporting Policy TLV is
+         * sent by the controller and received by the backhaul manager.
+         * The backhaul manager forwards the request message "as is" to all the slaves managing the
+         * radios which Radio Unique Identifier has been specified.
+         */
+        for (size_t i = 0; i < metric_reporting_policy_tlv->metrics_reporting_conf_list_length();
+             i++) {
+            auto tuple = metric_reporting_policy_tlv->metrics_reporting_conf_list(i);
+            if (!std::get<0>(tuple)) {
+                LOG(ERROR) << "Failed to get metrics_reporting_conf[" << i
+                           << "] from TLV_METRIC_REPORTING_POLICY";
+                return false;
+            }
+
+            auto metrics_reporting_conf = std::get<1>(tuple);
+
+            std::shared_ptr<sRadioInfo> radio = get_radio(metrics_reporting_conf.radio_uid);
+            if (radio) {
+                uint16_t length = message_com::get_uds_header(cmdu_rx)->length;
+                cmdu_rx.swap(); // swap back before forwarding
+                if (!message_com::forward_cmdu_to_uds(radio->slave, cmdu_rx, length)) {
+                    LOG(ERROR) << "Failed to forward message to slave " << radio->radio_mac;
+                }
+            } else {
+                LOG(INFO) << "Radio Unique Identifier " << metrics_reporting_conf.radio_uid
+                          << " not found";
+            }
+        }
+
+        /**
+         * The AP Metrics Reporting Interval field indicates if periodic AP metrics reporting is
+         * to be enabled, and if so the cadence.
+         *
+         * Store configured interval value and restart the timer.
+         */
+        ap_metrics_reporting_info.reporting_interval_s =
+            metric_reporting_policy_tlv->metrics_reporting_interval_sec();
+        ap_metrics_reporting_info.last_reporting_time_point = std::chrono::steady_clock::now();
+    }
+
+    // send ACK_MESSAGE back to the controller
+    if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE)) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
+
+    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
 }
 
 bool backhaul_manager::handle_associated_sta_link_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
