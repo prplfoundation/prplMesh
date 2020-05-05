@@ -92,7 +92,7 @@ image-build-tests-runner:
       - git ls-files -z '*.sh' '*.sh.in'  | xargs -0 shellcheck -x -P tools:ci/owncloud
   needs: []
 
-clang-format:
+.clang-format:
   extends: .in-prplmesh-builder
   stage: build
   script:
