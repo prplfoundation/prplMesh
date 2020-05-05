@@ -2034,9 +2034,7 @@ void monitor_thread::update_vaps_in_db()
     }
     const auto &radio_vaps = mon_wlan_hal->get_radio_info().available_vaps;
 
-    std::string bridge_iface_mac;
     std::string bridge_iface_ip;
-    network_utils::linux_iface_get_mac(bridge_iface, bridge_iface_mac);
     network_utils::linux_iface_get_ip(bridge_iface, bridge_iface_ip);
 
     for (int vap_id = beerocks::IFACE_VAP_ID_MIN; vap_id < beerocks::IFACE_VAP_ID_MAX; vap_id++) {
@@ -2052,7 +2050,7 @@ void monitor_thread::update_vaps_in_db()
             vap_node->set_mac(curr_vap.mac);
 
             vap_node->set_bridge_iface(bridge_iface);
-            vap_node->set_bridge_mac(bridge_iface_mac);
+            vap_node->set_bridge_mac(al_mac);
             vap_node->set_bridge_ipv4(bridge_iface_ip);
 
         } else if (mon_db.vap_get_by_id(vap_id)) { // vap does not exist in HAL but is in local DB
