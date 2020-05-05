@@ -38,6 +38,19 @@ monitor_thread::monitor_thread(const std::string &slave_uds_, const std::string 
 {
     thread_name = "monitor";
 
+    /**
+     * Get the MAC address of the radio interface that this monitor instance operates on.
+     * This MAC address will later on be used to, for example, extract the information in messages
+     * received from controller that is addressed to this monitor instance.
+     */
+    std::string radio_mac = network_utils::ZERO_MAC_STRING;
+    if (!network_utils::linux_iface_get_mac(monitor_iface, radio_mac)) {
+        LOG(ERROR) << "Failed getting MAC address for interface: " << monitor_iface;
+        m_radio_mac = network_utils::ZERO_MAC;
+    } else {
+        m_radio_mac = network_utils::mac_from_string(radio_mac);
+    }
+
     using namespace std::placeholders; // for `_1`
 
     // Create new Monitor HAL instance
@@ -1323,11 +1336,71 @@ bool monitor_thread::handle_cmdu_ieee1905_1_message(Socket *sd, ieee1905_1::Cmdu
     auto cmdu_message_type = cmdu_rx.getMessageType();
 
     switch (cmdu_message_type) {
+    case ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE:
+        return handle_multi_ap_policy_config_request(sd, cmdu_rx);
     default:
         LOG(ERROR) << "Unknown CMDU message type: " << std::hex << int(cmdu_message_type);
     }
 
     return false;
+}
+
+bool monitor_thread::handle_multi_ap_policy_config_request(Socket *sd,
+                                                           ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    /**
+     * The Multi-AP Policy Config Request message is sent by the controller, received and
+     * acknowledged by the backhaul manager, forwarded "as is" to the slave thread and forwarded
+     * back again to the monitor thread, where it is finally processed.
+     */
+    auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE, mid=" << std::hex << int(mid);
+
+    auto metric_reporting_policy_tlv = cmdu_rx.getClass<wfa_map::tlvMetricReportingPolicy>();
+    if (metric_reporting_policy_tlv) {
+        /**
+         * Metric Reporting Policy TLV contains configuration for several radios
+         */
+        for (size_t i = 0; i < metric_reporting_policy_tlv->metrics_reporting_conf_list_length();
+             i++) {
+            auto tuple = metric_reporting_policy_tlv->metrics_reporting_conf_list(i);
+            if (!std::get<0>(tuple)) {
+                LOG(ERROR) << "Failed to get metrics_reporting_conf[" << i
+                           << "] from TLV_METRIC_REPORTING_POLICY";
+                return false;
+            }
+            auto metrics_reporting_conf = std::get<1>(tuple);
+
+            /**
+             * Skip configurations not addressed to this radio
+             */
+            if (metrics_reporting_conf.radio_uid != m_radio_mac) {
+                continue;
+            }
+
+            /**
+             * Extract and store configuration for this radio
+             */
+            auto &info = mon_db.get_radio_node()->ap_metrics_reporting_info();
+
+            info.sta_metrics_reporting_rcpi_threshold =
+                metrics_reporting_conf.sta_metrics_reporting_rcpi_threshold;
+            info.sta_metrics_reporting_rcpi_hysteresis_margin_override =
+                metrics_reporting_conf.sta_metrics_reporting_rcpi_hysteresis_margin_override;
+            info.ap_channel_utilization_reporting_threshold =
+                metrics_reporting_conf.ap_channel_utilization_reporting_threshold;
+            info.include_associated_sta_link_metrics_tlv_in_ap_metrics_response =
+                metrics_reporting_conf.policy
+                    .include_associated_sta_link_metrics_tlv_in_ap_metrics_response;
+            info.include_associated_sta_traffic_stats_tlv_in_ap_metrics_response =
+                metrics_reporting_conf.policy
+                    .include_associated_sta_traffic_stats_tlv_in_ap_metrics_response;
+
+            break;
+        }
+    }
+
+    return true;
 }
 
 bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr)

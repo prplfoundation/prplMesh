@@ -21,6 +21,8 @@
 
 #include <beerocks/tlvf/beerocks_message_monitor.h>
 
+#include <tlvf/wfa_map/tlvMetricReportingPolicy.h>
+
 // Monitor HAL
 #include <bwl/mon_wlan_hal.h>
 
@@ -76,6 +78,13 @@ private:
 #endif
     beerocks_message::sSonConfig son_config;
 
+    /**
+     * MAC address of the radio interface that this monitor instance operates on.
+     * It is obtained by getting the MAC address of the monitor interface provided as parameter in
+     * constructor.
+     */
+    sMacAddr m_radio_mac;
+
     std::string monitor_iface;
     beerocks::config_file::sConfigSlave &beerocks_slave_conf;
     std::string bridge_iface;
@@ -114,6 +123,8 @@ private:
 
     bool handle_cmdu_vs_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_ieee1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+
+    bool handle_multi_ap_policy_config_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 };
 } // namespace son
 
