@@ -239,6 +239,74 @@ public:
     friend std::ostream &operator<<(std::ostream &os, const monitor_radio_node &radio_node);
     friend std::ostream &operator<<(std::ostream &os, const monitor_radio_node *radio_node);
 
+    /**
+     * AP Metrics Reporting configuration and status type.
+     */
+    struct sApMetricsReportingInfo {
+        /**
+         * STA Metrics Reporting RCPI Threshold.
+         * 0: Do not report STA Metrics based on RCPI threshold.
+         * 1 – 220: RCPI threshold (encoded per Table 9-154 of [1]).
+         * 221 – 255: Reserved
+         * (Value is obtained from Metric Reporting Policy TLV)
+         */
+        uint8_t sta_metrics_reporting_rcpi_threshold = 0;
+
+        /**
+         * STA Metrics Reporting RCPI Hysteresis Margin Override.
+         * 0: Use Agent's implementation-specific default RCPI Hysteresis margin.
+         * >0: RCPI hysteresis margin value
+         * (Value is obtained from Metric Reporting Policy TLV)
+         */
+        uint8_t sta_metrics_reporting_rcpi_hysteresis_margin_override = 0;
+
+        /**
+         * AP Metrics Channel Utilization Reporting Threshold.
+         * 0: Do not report AP Metrics based on Channel utilization threshold.
+         * >0: AP Metrics Channel Utilization Reporting Threshold (similar to channel utilization
+         * measurement in 9.4.2.28 of [1]=[IEEE Std 802.11™-2016.pdf])
+         * (Value is obtained from Metric Reporting Policy TLV)
+         */
+        uint8_t ap_channel_utilization_reporting_threshold = 0;
+
+        /**
+         * Associated STA Traffic Stats Inclusion Policy.
+         * 0: Do not include Associated STA Traffic Stats TLV in AP Metrics Response
+         * 1: Include Associated STA Traffic Stats TLV in AP Metrics Response
+         * (Value is obtained from Metric Reporting Policy TLV)
+         */
+        bool include_associated_sta_link_metrics_tlv_in_ap_metrics_response = false;
+
+        /**
+         * Associated STA Link Metrics Inclusion Policy.
+         * 0: Do not include Associated STA Link Metrics TLV in AP Metrics Response
+         * 1: Include Associated STA Link Metrics TLV in AP Metrics Response
+         * (Value is obtained from Metric Reporting Policy TLV)
+         */
+        bool include_associated_sta_traffic_stats_tlv_in_ap_metrics_response = false;
+
+        /**
+         * Last value reported for STA Metrics Reporting RCPI.
+         * Must be compared with threshold value and hysteresis to decide if current value has to
+         * be reported.
+         */
+        uint8_t sta_metrics_reporting_rcpi_value = 0;
+
+        /**
+         * Last value reported for AP Metrics Channel Utilization Reporting.
+         * Must be compared with threshold value to decide if current value has to be reported.
+         */
+        uint8_t ap_metrics_channel_utilization_reporting_value = 0;
+
+        /**
+         * Time point at which channel utilization was reported for the last time.
+         */
+        std::chrono::steady_clock::time_point
+            ap_metrics_channel_utilization_last_reporting_time_point;
+    };
+
+    sApMetricsReportingInfo &ap_metrics_reporting_info() { return m_ap_metrics_reporting_info; }
+
     // Statistics //
     struct SRadioStats {
         uint16_t delta_ms                                      = 0;
@@ -272,6 +340,17 @@ private:
     std::string iface;
     uint8_t channel = 0;
     SRadioStats m_radio_stats;
+
+    /**
+     * AP Metrics Reporting configuration and status value.
+     * Configuration fields in this struct are initialized to default values during initialization
+     * and from then on overwritten each time a Multi-AP Policy Config Request message is received.
+     * Status fields contain last reported values for different AP metrics reported and the time
+     * point they were reported for the last time. Difference between last reported value and
+     * current value is compared against a threshold value to decide if AP metrics have changed
+     * enough to be reported.
+     */
+    sApMetricsReportingInfo m_ap_metrics_reporting_info;
 };
 
 ////////////////////////////////////////////
