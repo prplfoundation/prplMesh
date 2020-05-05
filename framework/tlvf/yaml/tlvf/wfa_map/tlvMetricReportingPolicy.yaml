@@ -21,14 +21,6 @@ tlvMetricReportingPolicy:
     _type: sMetricsReportingConf
     _length: [ metrics_reporting_conf_list_length ]
 
-sMetricsReportingConf:
-  _type: struct
-  radio_uid: sMacAddr
-  sta_rssi_threshold_dbm_enc: uint8_t
-  sta_rssi_hysteresis: uint8_t
-  ap_channel_utilization_reporting_threshold: uint8_t
-  policy: sPolicy
-
 sPolicy:
   _type: struct
   _bit_field: uint8_t
@@ -38,3 +30,11 @@ sPolicy:
     _bit_range: [6,6]
   reserved:
     _bit_range: [5, 0]
+
+sMetricsReportingConf:
+  _type: struct
+  radio_uid: sMacAddr
+  sta_metrics_reporting_rcpi_threshold: uint8_t
+  sta_metrics_reporting_rcpi_hysteresis_margin_override: uint8_t
+  ap_channel_utilization_reporting_threshold: uint8_t
+  policy: sPolicy
