@@ -10,12 +10,13 @@ import argparse
 import os
 import sys
 import time
-from typing import Union
+from typing import Callable, Union
 
 import connmap
 import environment as env
 from capi import tlv
 from opts import debug, err, message, opts, status
+import sniffer
 
 
 class TestFlows:
@@ -51,6 +52,74 @@ class TestFlows:
         if not result:
             self.__fail_no_message()
         return result, line, match
+
+    def check_cmdu(
+        self, msg: str, match_function: Callable[[sniffer.Packet], bool]
+    ) -> [sniffer.Packet]:
+        """Verify that the wired_sniffer has captured a CMDU that satisfies match_function.
+
+        Mark failure if no satisfying packet is found.
+
+        Parameters
+        ----------
+        msg: str
+            Message to show in case of failure. It is formatted in a context like
+            "No CMDU <msg> found".
+
+        match_function: Callable[[sniffer.Packet], bool]
+            A function that returns True if it is the expected packet. It is called on every
+            packet returned by Sniffer.get_packet_capture until it returns True.
+
+        Returns
+        -------
+        [sniffer.Packet]
+            The matching packets.
+        """
+        debug("Checking for CMDU {}".format(msg))
+        capture = env.wired_sniffer.get_packet_capture()
+        result = [packet for packet in capture if packet.ieee1905 and match_function(packet)]
+        if not result:
+            self.fail("No CMDU {} found".format(msg))
+        return result
+
+    def check_cmdu_type(
+        self, msg: str, msg_type: int, eth_src: str, eth_dst: str = None, mid: int = None
+    ) -> [sniffer.Packet]:
+        """Verify that the wired sniffer has captured a CMDU.
+
+        Mark failure if the CMDU is not found.
+
+        Parameters
+        ----------
+        msg: str
+            Message to show in case of failure. It is formatted in a context like
+            "No CMDU <msg> found".
+
+        msg_type: int
+            CMDU message type that is expected.
+
+        eth_src: str
+            MAC address of the sender that is expected.
+
+        eth_dst: str
+            MAC address of the destination that is expected. If omitted, the IEEE1905.1 multicast
+            MAC address is used.
+
+        mid: int
+            Message Identifier that is expected. If omitted, the MID is not checked.
+
+        Returns
+        -------
+        [sniffer.Packet]
+            The matching packets.
+        """
+        if eth_dst is None:
+            eth_dst = "01:80:c2:00:00:13"
+        return self.check_cmdu(msg, lambda packet:
+                               packet.eth_src == eth_src and
+                               packet.eth_dst == eth_dst and
+                               packet.ieee1905_message_type == msg_type and
+                               (mid is None or packet.ieee1905_mid == mid))
 
     def run_tests(self, tests):
         '''Run all tests as specified on the command line.'''
