@@ -16,7 +16,7 @@
                 "pipeArgs": [
                     "exec",
                     "-i",
-                    "gateway-root",
+                    "gateway-${env:USER}",
                     "sh",
                     "-c"
                 ],
@@ -40,7 +40,7 @@
                 "pipeArgs": [
                     "exec",
                     "-i",
-                    "gateway-root",
+                    "gateway-${env:USER}",
                     "sh",
                     "-c"
                 ],
@@ -64,7 +64,7 @@
                 "pipeArgs": [
                     "exec",
                     "-i",
-                    "gateway-root",
+                    "gateway-${env:USER}",
                     "sh",
                     "-c"
                 ],
@@ -88,7 +88,7 @@
                 "pipeArgs": [
                     "exec",
                     "-i",
-                    "gateway-root",
+                    "gateway-${env:USER}",
                     "sh",
                     "-c"
                 ],
@@ -112,7 +112,7 @@
                 "pipeArgs": [
                     "exec",
                     "-i",
-                    "gateway-repeater1",
+                    "repeater1-${env:USER}",
                     "sh",
                     "-c"
                 ],
@@ -136,7 +136,7 @@
                 "pipeArgs": [
                     "exec",
                     "-i",
-                    "gateway-repeater1",
+                    "repeater1-${env:USER}",
                     "sh",
                     "-c"
                 ],
@@ -160,7 +160,7 @@
                 "pipeArgs": [
                     "exec",
                     "-i",
-                    "gateway-repeater2",
+                    "repeater2-${env:USER}",
                     "sh",
                     "-c"
                 ],
@@ -184,7 +184,7 @@
                 "pipeArgs": [
                     "exec",
                     "-i",
-                    "gateway-repeater2",
+                    "repeater2-${env:USER}",
                     "sh",
                     "-c"
                 ],
