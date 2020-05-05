@@ -655,6 +655,15 @@ bool monitor_thread::update_ap_stats()
 
 bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
+    if (cmdu_rx.getMessageType() == ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE) {
+        return handle_cmdu_vs_message(sd, cmdu_rx);
+    }
+
+    return handle_cmdu_ieee1905_1_message(sd, cmdu_rx);
+}
+
+bool monitor_thread::handle_cmdu_vs_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
     auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
     if (beerocks_header == nullptr) {
         LOG(ERROR) << "Not a vendor specific message";
@@ -1307,6 +1316,18 @@ bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     }
 
     return true;
+}
+
+bool monitor_thread::handle_cmdu_ieee1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto cmdu_message_type = cmdu_rx.getMessageType();
+
+    switch (cmdu_message_type) {
+    default:
+        LOG(ERROR) << "Unknown CMDU message type: " << std::hex << int(cmdu_message_type);
+    }
+
+    return false;
 }
 
 bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr)
