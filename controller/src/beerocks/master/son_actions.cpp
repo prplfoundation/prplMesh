@@ -287,7 +287,7 @@ void son_actions::handle_dead_node(std::string mac, std::string hostap_mac, db &
     if ((mac_type == beerocks::TYPE_IRE_BACKHAUL || mac_type == beerocks::TYPE_CLIENT) &&
         database.is_node_wireless(mac)) {
         auto agent_mac = database.get_node_parent_ire(hostap_mac);
-        LOG(DEBUG) << "STOP_MONITORING mac " << mac << " hostapd " << parent_hostap_mac;
+        LOG(DEBUG) << "STOP_MONITORING mac " << mac << " hostapd " << hostap_mac;
         auto stop_request = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST>(cmdu_tx);
         if (stop_request == nullptr) {
