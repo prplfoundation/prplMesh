@@ -48,7 +48,7 @@ public:
     virtual bool work() override;
 
     // For agent_ucc_listener
-    const std::string &get_controller_bridge_mac() { return controller_bridge_mac; }
+    const std::string &get_controller_bridge_mac() const { return controller_bridge_mac; }
     /**
      * @brief get radio mac (ruid) of registered slave based on frequency type
      * 
@@ -167,8 +167,8 @@ private:
     int unassociated_rssi_measurement_header_id = -1;
 
     //comes from config file
-    const std::set<std::string> &slave_ap_ifaces;
-    const std::set<std::string> &slave_sta_ifaces;
+    const std::set<std::string> slave_ap_ifaces;
+    const std::set<std::string> slave_sta_ifaces;
 
     //used for several states independently
     std::set<std::string> pending_slave_ifaces;
@@ -179,7 +179,7 @@ private:
     net::network_utils::iface_info bridge_info;
 
     int configuration_stop_on_failure_attempts;
-    const std::string &config_const_bh_slave;
+    const std::string config_const_bh_slave;
 
     int stop_on_failure_attempts;
     bool local_master = false;
