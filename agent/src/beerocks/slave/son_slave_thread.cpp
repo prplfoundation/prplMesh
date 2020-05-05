@@ -37,6 +37,7 @@
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
 #include <tlvf/wfa_map/tlvClientAssociationControlRequest.h>
 #include <tlvf/wfa_map/tlvClientAssociationEvent.h>
+#include <tlvf/wfa_map/tlvMetricReportingPolicy.h>
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvSteeringBTMReport.h>
 #include <tlvf/wfa_map/tlvSteeringRequest.h>
@@ -4372,18 +4373,31 @@ bool slave_thread::parse_non_intel_join_response(Socket *sd)
 bool slave_thread::handle_multi_ap_policy_config_request(Socket *sd,
                                                          ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    // TODO: This is a stub handler for the purpose of controller certification testing, will be
-    // implemented later on agent certification.
+    /**
+     * The Multi-AP Policy Config Request message is sent by the controller and received by the
+     * backhaul manager.
+     * The backhaul manager forwards the request message "as is" to all the slaves managing the
+     * radios which Radio Unique Identifier has been specified.
+     */
     auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE, mid=" << std::hex << int(mid);
 
-    // send ACK_MESSAGE back to the controller
-    if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE)) {
-        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+    /**
+     * The slave in turn, forwards the request message again "as is" to the monitor thread.
+     */
+    if (!monitor_socket) {
+        LOG(ERROR) << "monitor_socket is null";
         return false;
     }
 
-    return send_cmdu_to_controller(cmdu_tx);
+    uint16_t length = message_com::get_uds_header(cmdu_rx)->length;
+    cmdu_rx.swap(); // swap back before forwarding
+    if (!message_com::forward_cmdu_to_uds(monitor_socket, cmdu_rx, length)) {
+        LOG(ERROR) << "Failed to forward message to monitor";
+        return false;
+    }
+
+    return true;
 }
 
 bool slave_thread::handle_client_association_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
