@@ -670,6 +670,37 @@ bool monitor_thread::update_ap_stats()
     return true;
 }
 
+bool monitor_thread::start_monitoring_sta(const std::string &sta_mac, const std::string &sta_ipv4,
+                                          const int vap_id)
+{
+    auto sta_node = mon_db.sta_find(sta_mac);
+    if (sta_node) {
+        mon_db.sta_erase(sta_mac);
+    }
+
+    auto vap_node = mon_db.vap_get_by_id(vap_id);
+    if (vap_node == nullptr) {
+        LOG(ERROR) << "vap_id " << vap_id << " doesn't not exists";
+        return false;
+    }
+
+    sta_node = mon_db.sta_add(sta_mac, vap_id);
+    sta_node->set_ipv4(sta_ipv4);
+    sta_node->set_bridge_4addr_mac(al_mac);
+
+#ifdef BEEROCKS_RDKB
+    //clean rdkb monitor data if already in database.
+    auto client = mon_rdkb_hal.conf_get_client(sta_mac);
+    if (client != nullptr) {
+        client->setStartTime(std::chrono::steady_clock::now());
+        client->setLastSampleTime(std::chrono::steady_clock::now());
+        client->setAccumulatedPackets(0);
+        client->clearData();
+    }
+#endif
+    return true;
+}
+
 bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     if (cmdu_rx.getMessageType() == ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE) {
@@ -801,35 +832,15 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
             return false;
         }
 
-        auto sta_node = mon_db.sta_find(sta_mac);
-        if (sta_node) {
-            mon_db.sta_erase(sta_mac);
-        }
+        bool success = start_monitoring_sta(sta_mac, sta_ipv4, set_bridge_4addr_mac, vap_id);
 
-        auto vap_node = mon_db.vap_get_by_id(vap_id);
-        if (vap_node == nullptr) {
-            LOG(ERROR) << "vap_id " << vap_id << " doesn't not exists";
-            response->success() = false;
-            message_com::send_cmdu(slave_socket, cmdu_tx);
+        response->success() = success;
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+
+        if (!success) {
+            LOG(ERROR) << "start_monitoring_sta failed!";
             return false;
         }
-
-        sta_node = mon_db.sta_add(sta_mac, vap_id);
-        sta_node->set_ipv4(sta_ipv4);
-        sta_node->set_bridge_4addr_mac(al_mac);
-
-        response->success() = true;
-        message_com::send_cmdu(slave_socket, cmdu_tx);
-#ifdef BEEROCKS_RDKB
-        //clean rdkb monitor data if already in database.
-        auto client = mon_rdkb_hal.conf_get_client(sta_mac);
-        if (client != nullptr) {
-            client->setStartTime(std::chrono::steady_clock::now());
-            client->setLastSampleTime(std::chrono::steady_clock::now());
-            client->setAccumulatedPackets(0);
-            client->clearData();
-        }
-#endif
         break;
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION: {
