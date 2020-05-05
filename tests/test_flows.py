@@ -681,16 +681,29 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
         debug("Confirming Client Association Control Request message was received (UNBLOCK)")
         self.check_log(env.agents[1].radios[1], r"Got client allow request")
 
-    def test_client_steering_policy(self):
-        debug("Send client steering policy to agent 1")
+    def test_multi_ap_policy_config_w_steering_policy(self):
+        debug("Send multi-ap policy config request with steering policy to agent 1")
         mid = env.controller.dev_send_1905(env.agents[0].mac, 0x8003,
-                                             tlv(0x89, 0x000C, "{0x00 0x00 0x01 {0x112233445566 0x01 0xFF 0x14}}"))  # noqa E501
+                                             tlv(0x89, 0x000C, "{0x00 0x00 0x01 {%s 0x01 0xFF 0x14}}" % env.agents[0].radios[0].mac))  # noqa E501
         time.sleep(1)
-        debug("Confirming client steering policy has been received on agent")
+        debug("Confirming multi-ap policy config request has been received on agent")
 
+        self.check_log(env.agents[0], r"MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE")
+        time.sleep(1)
+        debug("Confirming multi-ap policy config ack message has been received on the controller")
+        self.check_log(env.controller, r"ACK_MESSAGE, mid=0x{:04x}".format(mid))
+
+    def test_multi_ap_policy_config_w_metric_reporting_policy(self):
+        debug("Send multi-ap policy config request with metric reporting policy to agent 1")
+        mid = env.controller.dev_send_1905(env.agents[0].mac, 0x8003,
+                                             tlv(0x8a, 0x000C, "{0x00 0x01 {%s 0x00 0x00 0x01 0xc0}}" % env.agents[0].radios[0].mac))  # noqa E501
+        time.sleep(1)
+        debug("Confirming multi-ap policy config request has been received on agent")
+
+        self.check_log(env.agents[0], r"MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE")
         self.check_log(env.agents[0].radios[0], r"MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE")
         time.sleep(1)
-        debug("Confirming client steering policy ack message has been received on the controller")
+        debug("Confirming multi-ap policy config ack message has been received on the controller")
         self.check_log(env.controller, r"ACK_MESSAGE, mid=0x{:04x}".format(mid))
 
     def test_client_association(self):
