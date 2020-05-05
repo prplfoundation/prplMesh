@@ -99,12 +99,14 @@ class Sniffer:
         self.tcpdump_log_dir = tcpdump_log_dir
         self.tcpdump_proc = None
         self.current_outputfile = None
+        self.checkpoint_frame_number = 0
 
     def start(self, outputfile_basename):
         '''Start tcpdump to outputfile.'''
         debug("Starting tcpdump, output file {}.pcap".format(outputfile_basename))
         os.makedirs(os.path.join(self.tcpdump_log_dir, 'logs'), exist_ok=True)
         self.current_outputfile = os.path.join(self.tcpdump_log_dir, outputfile_basename) + ".pcap"
+        self.checkpoint_frame_number = 0
         command = ["tcpdump", "-i", self.interface, '-U', '-w', self.current_outputfile]
         self.tcpdump_proc = subprocess.Popen(command, stderr=subprocess.PIPE)
         # tcpdump takes a while to start up. Wait for the appropriate output before continuing.
@@ -126,7 +128,8 @@ class Sniffer:
         if not self.current_outputfile:
             err("get_packet_capture but no capture file")
             return []
-        tshark_command = ['tshark', '-r', self.current_outputfile, '-T', 'json']
+        tshark_command = ['tshark', '-r', self.current_outputfile, '-T', 'json',
+                          '-Y', 'frame.number >= {}'.format(self.checkpoint_frame_number)]
         tshark_result = subprocess.run(tshark_command, stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE)
         if tshark_result.returncode != 0:
@@ -139,6 +142,16 @@ class Sniffer:
         except json.JSONDecodeError as error:
             err("capture JSON decoding failed: %s".format(error))
             return []
+
+    def checkpoint(self):
+        '''Checkpoint the capture.
+
+        Any subsequent calls to get_packet_capture will only return packets capture after now.
+        '''
+        capture = self.get_packet_capture()
+        if capture:
+            self.checkpoint_frame_number = capture[-1].frame_number + 1
+        # else keep last checkpoint
 
     def stop(self):
         '''Stop tcpdump if it is running.'''
