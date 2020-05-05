@@ -787,9 +787,7 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
         }
         std::string sta_mac  = network_utils::mac_to_string(request->params().mac);
         std::string sta_ipv4 = network_utils::ipv4_to_string(request->params().ipv4);
-        std::string set_bridge_4addr_mac =
-            network_utils::mac_to_string(request->params().bridge_4addr_mac);
-        int vap_id = int(request->params().vap_id);
+        int vap_id           = int(request->params().vap_id);
         LOG(INFO) << "ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST=" << sta_mac
                   << " ip=" << sta_ipv4 << " vap_id=" << vap_id;
 
@@ -818,7 +816,7 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
 
         sta_node = mon_db.sta_add(sta_mac, vap_id);
         sta_node->set_ipv4(sta_ipv4);
-        sta_node->set_bridge_4addr_mac(set_bridge_4addr_mac);
+        sta_node->set_bridge_4addr_mac(al_mac);
 
         response->success() = true;
         message_com::send_cmdu(slave_socket, cmdu_tx);
