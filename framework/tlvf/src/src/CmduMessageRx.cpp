@@ -39,11 +39,13 @@
 #include <tlvf/wfa_map/tlvClientCapabilityReport.h>
 #include <tlvf/wfa_map/tlvClientInfo.h>
 #include <tlvf/wfa_map/tlvHigherLayerData.h>
+#include <tlvf/wfa_map/tlvMetricReportingPolicy.h>
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvRadioOperationRestriction.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
 #include <tlvf/wfa_map/tlvStaMacAddressType.h>
 #include <tlvf/wfa_map/tlvSteeringBTMReport.h>
+#include <tlvf/wfa_map/tlvSteeringPolicy.h>
 #include <tlvf/wfa_map/tlvSteeringRequest.h>
 #include <tlvf/wfa_map/tlvSupportedService.h>
 #include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
@@ -164,6 +166,12 @@ std::shared_ptr<BaseClass> CmduMessageRx::parseNextTlv()
     }
     case (133): {
         return msg.addClass<wfa_map::tlvApRadioBasicCapabilities>();
+    }
+    case (137): {
+        return msg.addClass<wfa_map::tlvSteeringPolicy>();
+    }
+    case (138): {
+        return msg.addClass<wfa_map::tlvMetricReportingPolicy>();
     }
     case (139): {
         return msg.addClass<wfa_map::tlvChannelPreference>();
