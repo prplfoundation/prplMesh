@@ -95,6 +95,11 @@ private:
     Socket *mon_hal_nl_events  = nullptr;
     beerocks::logging &logger;
 
+    /**
+     * @brief bridge mac address
+     */
+    std::string al_mac;
+
     typedef struct {
         std::string sta_mac;
         int dialog_token;

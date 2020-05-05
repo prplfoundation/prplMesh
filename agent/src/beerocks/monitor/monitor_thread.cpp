@@ -55,6 +55,8 @@ monitor_thread::monitor_thread(const std::string &slave_uds_, const std::string 
 
     using namespace std::placeholders; // for `_1`
 
+    network_utils::linux_iface_get_mac(bridge_iface, al_mac);
+
     // Create new Monitor HAL instance
     mon_wlan_hal = bwl::mon_wlan_hal_create(
         monitor_iface_, std::bind(&monitor_thread::hal_event_handler, this, _1));
