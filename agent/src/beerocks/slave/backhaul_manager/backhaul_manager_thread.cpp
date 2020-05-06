@@ -242,7 +242,7 @@ backhaul_manager::backhaul_manager(const config_file::sConfigSlave &config,
     set_select_timeout(SELECT_TIMEOUT_MSC);
 }
 
-backhaul_manager::~backhaul_manager() { on_thread_stop(); }
+backhaul_manager::~backhaul_manager() { backhaul_manager::on_thread_stop(); }
 
 bool backhaul_manager::init()
 {
