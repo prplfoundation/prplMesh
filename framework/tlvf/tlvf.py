@@ -959,9 +959,10 @@ class TlvF:
                     t_name = ("&" if not param_type_info.swap_is_func else "") + ("std::get<1>(%s(i))" % param_name) + ("." if param_type_info.swap_is_func else "")
                 else:
                     t_name = ("&" if not param_type_info.swap_is_func else "") + ("m_%s[i]" % param_name) + ("." if param_type_info.swap_is_func else "")
-                if is_dynamic_len: t_length = ("m_" + param_name + "_idx__")
-                elif is_var_len: t_length = ("(size_t)*m_" + param_meta.length) 
-                else: t_length = str(param_meta.length)
+                if is_dynamic_len or is_var_len:
+                    t_length = ("m_" + param_name + "_idx__")
+                else:
+                    t_length = str(param_meta.length)
                 swap_func_lines.append( "for (size_t i = 0; i < %s; i++){" % (t_length) )
                 swap_func_lines.append( "%s%s%s%s;" % (self.getIndentation(1), param_type_info.swap_prefix, t_name, param_type_info.swap_suffix))
                 swap_func_lines.append( "}")
