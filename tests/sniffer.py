@@ -107,7 +107,8 @@ class Sniffer:
         os.makedirs(os.path.join(self.tcpdump_log_dir, 'logs'), exist_ok=True)
         self.current_outputfile = os.path.join(self.tcpdump_log_dir, outputfile_basename) + ".pcap"
         self.checkpoint_frame_number = 0
-        command = ["tcpdump", "-i", self.interface, '-U', '-w', self.current_outputfile]
+        command = ["tcpdump", "-i", self.interface, '-U', '-w', self.current_outputfile,
+                   "ether proto 0x88CC or ether proto 0x893A"]
         self.tcpdump_proc = subprocess.Popen(command, stderr=subprocess.PIPE)
         # tcpdump takes a while to start up. Wait for the appropriate output before continuing.
         # poll() so we exit the loop if tcpdump terminates for any reason.
