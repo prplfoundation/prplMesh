@@ -753,6 +753,12 @@ bool mon_wlan_hal_dwpal::sta_beacon_11k_request(const SBeaconRequest11k &req, in
         LOG(WARNING) << "optinal channel report was not set (might be also ok)";
     }
 
+    // report detail: rep_detail=
+    // this value should be set by default to 2 if not stated otherwise.
+    // however hostad does not set it to 2. So we add it hardcoded here
+    // note: currently there is no field in SBeaconRequest11k that holds this optional field
+    cmd += " rep_detail=2";
+
     LOG(DEBUG) << __func__ << " the command: " << cmd;
 
     // send command
