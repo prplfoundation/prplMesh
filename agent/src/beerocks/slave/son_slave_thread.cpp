@@ -1596,6 +1596,19 @@ bool slave_thread::handle_cmdu_platform_manager_message(
                 send_cmdu_to_controller(cmdu_tx);
             }
 
+            // notify monitor
+            auto monitor_notification = message_com::create_vs_message<
+                beerocks_message::cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION>(cmdu_tx);
+            if (!monitor_notification) {
+                LOG(ERROR) << "Failed building message!";
+                return false;
+            }
+
+            monitor_notification->mac()  = notification->mac();
+            monitor_notification->ipv4() = notification->ipv4();
+
+            message_com::send_cmdu(monitor_socket, cmdu_tx);
+
         } else {
             LOG(DEBUG) << "ACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION op " << notification->op()
                        << " mac " << notification->mac()
