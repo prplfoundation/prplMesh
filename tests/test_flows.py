@@ -462,6 +462,18 @@ class TestFlows:
                         self.fail("Unexpected transmit power {} instead of {} for {}".format(
                             ocr.operating_channel_eirp, payload_transmit_power,
                             ocr.operating_channel_radio_id))
+                    debug("Checking switch to correct channel")
+                    if len(ocr.operating_classes) != 1:
+                        self.fail("Operating channel report with multiple channels: {}".format(ocr))
+                    channel = int(ocr.operating_classes[0].chan_num)
+                    if ocr.operating_channel_radio_id == env.agents[0].radios[0].mac:
+                        if channel != 6:
+                            self.fail("Switch to incorrect channel {}: {}".format(channel, ocr))
+                    elif ocr.operating_channel_radio_id == env.agents[0].radios[1].mac:
+                        if channel != 36:
+                            self.fail("Switch to incorrect channel {}: {}".format(channel, ocr))
+                    else:
+                        self.fail("Unexpected radio {}".format(ocr.operating_channel_radio_id))
                 self.check_cmdu_type("ACK", 0x8000, env.controller.mac, env.agents[0].mac,
                                      report.ieee1905_mid)
 
