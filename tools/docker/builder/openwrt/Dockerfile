@@ -95,7 +95,15 @@ RUN cp feeds.conf.default feeds.conf \
     : "Installing intel feed doesn't correctly regenerate kernel .package-info"; \
     : "force regeneration by removing it"; \
     rm -rf tmp \
-    && make defconfig \
+    && make defconfig; \
+    : "We need to keep the hashes in the firmware, to later know whether an upgrade is needed:"; \
+    mkdir -p files/etc \
+    && printf '%s=%s\n' "OPENWRT_REPOSITORY" "$OPENWRT_REPOSITORY" >> files/etc/prplwrt-version \
+    && printf '%s=%s\n' "OPENWRT_VERSION" "$OPENWRT_VERSION" >> files/etc/prplwrt-version \
+    && printf '%s=%s\n' "PRPLMESH_VARIANT" "$PRPLMESH_VARIANT" >> files/etc/prplwrt-version \
+    && printf '%s=%s\n' "PRPL_FEED" "$PRPL_FEED" >> files/etc/prplwrt-version \
+    && printf '%s=%s\n' "INTEL_FEED" "$INTEL_FEED" >> files/etc/prplwrt-version \
+    && printf '%s=%s\n' "IWLWAV_FEED" "$IWLWAV_FEED" >> files/etc/prplwrt-version \
     && make -j$(nproc) \
     && make package/feeds/prpl/prplmesh/clean
     # note that the result from diffconfig.sh with a minimal
