@@ -46,6 +46,8 @@ static mon_wlan_hal::Event dummy_to_bwl_event(const std::string &opcode)
         return mon_wlan_hal::Event::RRM_Beacon_Response;
     else if (opcode == "AP-STA-CONNECTED")
         return mon_wlan_hal_dummy::Event::STA_Connected;
+    else if (opcode == "AP-STA-DISCONNECTED")
+        return mon_wlan_hal_dummy::Event::STA_Disconnected;
 
     return mon_wlan_hal::Event::Invalid;
 }
@@ -374,6 +376,28 @@ bool mon_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
         msg->mac = beerocks::net::network_utils::mac_from_string(tmp_str);
         // Add the message to the queue
         event_queue_push(Event::STA_Connected, msg_buff);
+        break;
+    }
+    case Event::STA_Disconnected: {
+        auto msg_buff =
+            ALLOC_SMART_BUFFER(sizeof(sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION));
+        auto msg =
+            reinterpret_cast<sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION *>(msg_buff.get());
+        LOG_IF(!msg, FATAL) << "Memory allocation failed!";
+
+        // Initialize the message
+        memset(msg_buff.get(), 0, sizeof(sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION));
+
+        if (!dummy_obj_read_str(DUMMY_EVENT_KEYLESS_PARAM_MAC, parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading mac parameter!";
+            return false;
+        }
+
+        // Store the MAC address of the disconnected STA
+        msg->mac = beerocks::net::network_utils::mac_from_string(tmp_str);
+
+        // Add the message to the queue
+        event_queue_push(Event::STA_Disconnected, msg_buff);
         break;
     }
     default:
