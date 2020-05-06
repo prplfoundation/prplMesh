@@ -107,7 +107,7 @@ bool tlvDeviceBridgingCapability::add_bridging_tuples_list(std::shared_ptr<cMacL
 void tlvDeviceBridgingCapability::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
-    for (size_t i = 0; i < (size_t)*m_bridging_tuples_list_length; i++){
+    for (size_t i = 0; i < m_bridging_tuples_list_idx__; i++){
         std::get<1>(bridging_tuples_list(i)).class_swap();
     }
 }
@@ -254,7 +254,7 @@ bool cMacList::alloc_mac_list(size_t count) {
 
 void cMacList::class_swap()
 {
-    for (size_t i = 0; i < (size_t)*m_mac_list_length; i++){
+    for (size_t i = 0; i < m_mac_list_idx__; i++){
         m_mac_list[i].struct_swap();
     }
 }

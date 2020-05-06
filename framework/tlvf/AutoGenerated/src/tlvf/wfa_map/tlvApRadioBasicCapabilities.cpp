@@ -116,7 +116,7 @@ void tlvApRadioBasicCapabilities::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     m_radio_uid->struct_swap();
-    for (size_t i = 0; i < (size_t)*m_operating_classes_info_list_length; i++){
+    for (size_t i = 0; i < m_operating_classes_info_list_idx__; i++){
         std::get<1>(operating_classes_info_list(i)).class_swap();
     }
 }

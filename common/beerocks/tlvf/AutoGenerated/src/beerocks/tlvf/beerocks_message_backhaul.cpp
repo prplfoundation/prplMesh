@@ -579,7 +579,7 @@ void cACTION_BACKHAUL_ENABLE::class_swap()
     tlvf_swap(8*sizeof(beerocks::eWiFiBandwidth), reinterpret_cast<uint8_t*>(m_max_bandwidth));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_ht_capability));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_vht_capability));
-    for (size_t i = 0; i < (size_t)*m_preferred_channels_size; i++){
+    for (size_t i = 0; i < m_preferred_channels_idx__; i++){
         m_preferred_channels[i].struct_swap();
     }
 }
@@ -2087,7 +2087,7 @@ void cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_RESPONSE::class_swap()
     tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     m_sta_mac->struct_swap();
-    for (size_t i = 0; i < (size_t)*m_bssid_info_list_length; i++){
+    for (size_t i = 0; i < m_bssid_info_list_idx__; i++){
         m_bssid_info_list[i].struct_swap();
     }
 }

@@ -107,7 +107,7 @@ bool tlvApOperationalBSS::add_radio_list(std::shared_ptr<cRadioInfo> ptr) {
 void tlvApOperationalBSS::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
-    for (size_t i = 0; i < (size_t)*m_radio_list_length; i++){
+    for (size_t i = 0; i < m_radio_list_idx__; i++){
         std::get<1>(radio_list(i)).class_swap();
     }
 }
@@ -287,7 +287,7 @@ bool cRadioInfo::add_radio_bss_list(std::shared_ptr<cRadioBssInfo> ptr) {
 void cRadioInfo::class_swap()
 {
     m_radio_uid->struct_swap();
-    for (size_t i = 0; i < (size_t)*m_radio_bss_list_length; i++){
+    for (size_t i = 0; i < m_radio_bss_list_idx__; i++){
         std::get<1>(radio_bss_list(i)).class_swap();
     }
 }

@@ -107,7 +107,7 @@ bool tlvAssociatedClients::add_bss_list(std::shared_ptr<cBssInfo> ptr) {
 void tlvAssociatedClients::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
-    for (size_t i = 0; i < (size_t)*m_bss_list_length; i++){
+    for (size_t i = 0; i < m_bss_list_idx__; i++){
         std::get<1>(bss_list(i)).class_swap();
     }
 }
@@ -288,7 +288,7 @@ void cBssInfo::class_swap()
 {
     m_bssid->struct_swap();
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_clients_associated_list_length));
-    for (size_t i = 0; i < (size_t)*m_clients_associated_list_length; i++){
+    for (size_t i = 0; i < m_clients_associated_list_idx__; i++){
         std::get<1>(clients_associated_list(i)).class_swap();
     }
 }

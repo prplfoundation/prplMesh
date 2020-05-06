@@ -171,13 +171,13 @@ bool tlvSteeringPolicy::alloc_radio_ap_control_policy_list(size_t count) {
 void tlvSteeringPolicy::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
-    for (size_t i = 0; i < (size_t)*m_local_steering_disallowed_sta_list_length; i++){
+    for (size_t i = 0; i < m_local_steering_disallowed_sta_list_idx__; i++){
         m_local_steering_disallowed_sta_list[i].struct_swap();
     }
-    for (size_t i = 0; i < (size_t)*m_btm_steering_disallowed_sta_list_length; i++){
+    for (size_t i = 0; i < m_btm_steering_disallowed_sta_list_idx__; i++){
         m_btm_steering_disallowed_sta_list[i].struct_swap();
     }
-    for (size_t i = 0; i < (size_t)*m_radio_ap_control_policy_list_length; i++){
+    for (size_t i = 0; i < m_radio_ap_control_policy_list_idx__; i++){
         m_radio_ap_control_policy_list[i].struct_swap();
     }
 }
