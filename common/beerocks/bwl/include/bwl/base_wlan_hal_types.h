@@ -215,6 +215,23 @@ typedef struct {
     sClientAssociationParams params;
 } sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION;
 
+/**
+ * @brief struct to carry payload of `STA_Connected` BWL monitor event
+ *
+ * When a new STA is connected BWL notifies the monitor with `STA_Connected` event
+ * and attaches this struct for the details.
+ */
+struct sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION {
+    /**
+     * @brief mac MAC address of the newly connected STA
+     */
+    sMacAddr mac;
+    /**
+     * @brief ID of the VAP the STA has connected to
+     */
+    int8_t vap_id;
+};
+
 typedef struct {
     sMacAddr mac;
     sMacAddr source_bssid;
