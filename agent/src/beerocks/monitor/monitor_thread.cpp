@@ -1806,6 +1806,44 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
     } break;
     case Event::STA_Connected: {
         LOG(TRACE) << "Received STA_Connected event";
+        auto msg = static_cast<bwl::sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION *>(data);
+
+        auto sta_mac = tlvf::mac_to_string(msg->mac);
+        auto vap_id  = msg->vap_id;
+
+        LOG(INFO) << "STA_Connected: mac=" << sta_mac << " vap_id=" << vap_id;
+
+        std::string sta_ipv4             = network_utils::ZERO_IP_STRING;
+        std::string set_bridge_4addr_mac = network_utils::ZERO_MAC_STRING;
+
+        auto old_node = mon_db.sta_find(sta_mac);
+        if (old_node) {
+            sta_ipv4             = old_node->get_ipv4();
+            set_bridge_4addr_mac = old_node->get_bridge_4addr_mac();
+        }
+
+        mon_db.sta_erase(sta_mac);
+
+        auto vap_node = mon_db.vap_get_by_id(vap_id);
+        if (!vap_node) {
+            LOG(ERROR) << "vap_id " << vap_id << " does not exist";
+            return false;
+        }
+
+        auto sta_node = mon_db.sta_add(sta_mac, vap_id);
+        sta_node->set_ipv4(sta_ipv4);
+        sta_node->set_bridge_4addr_mac(set_bridge_4addr_mac);
+
+#ifdef BEEROCKS_RDKB
+        //clean rdkb monitor data if already in database.
+        auto client = mon_rdkb_hal.conf_get_client(sta_mac);
+        if (!client) {
+            client->setStartTime(std::chrono::steady_clock::now());
+            client->setLastSampleTime(std::chrono::steady_clock::now());
+            client->setAccumulatedPackets(0);
+            client->clearData();
+        }
+#endif
         break;
     }
     case Event::STA_Disconnected: {
