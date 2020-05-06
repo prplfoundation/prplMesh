@@ -36,6 +36,8 @@ The docker runner image can be used to run prplMesh inside containers using `run
 The runner docker allows running multiple containers, for example one with a controller+agent, the other with an agent only:
 The 2 containers are connected using a docker network (bridge), so can
 communicate + sniffed by running `wireshark` / `tcpdump` on the bridge from the host to see 1905 packets.
+This is what is done by the test scripts in the tests/ directory.
+Therefore they require tcpdump and tshark to be installed in order to work.
 
 ## Docker all
 
