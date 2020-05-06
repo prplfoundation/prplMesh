@@ -817,50 +817,6 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
         received_error_notification_ack_retry = 0;
         break;
     }
-    case beerocks_message::ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST: {
-        LOG(TRACE) << "received ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST";
-        auto request =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST failed";
-            return false;
-        }
-        std::string sta_mac  = network_utils::mac_to_string(request->params().mac);
-        std::string sta_ipv4 = network_utils::ipv4_to_string(request->params().ipv4);
-        int vap_id           = int(request->params().vap_id);
-        LOG(INFO) << "ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST=" << sta_mac
-                  << " ip=" << sta_ipv4 << " vap_id=" << std::dec << static_cast<int>(vap_id);
-
-        auto response = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE>(
-            cmdu_tx, beerocks_header->id());
-
-        if (!response) {
-            LOG(ERROR)
-                << "Failed building ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE message!";
-            return false;
-        }
-
-        bool success = start_monitoring_sta(sta_mac, vap_id);
-        if (success) {
-            success = monitored_sta_set_ipv4(sta_mac, sta_ipv4);
-            if (!success) {
-                LOG(ERROR) << "monitored_sta_set_ipv4 failed!";
-            }
-        }
-        else {
-            LOG(ERROR) << "start_monitoring_sta failed";
-        }
-
-        response->success() = success;
-        message_com::send_cmdu(slave_socket, cmdu_tx);
-
-        if (!success) {
-            return false;
-        }
-        break;
-    }
     case beerocks_message::ACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION: {
         LOG(TRACE) << "received ACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION";
         auto notification =
