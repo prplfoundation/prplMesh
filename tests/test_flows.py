@@ -287,37 +287,33 @@ class TestFlows:
 
     def test_channel_selection(self):
         debug("Send channel preference query")
-        env.controller.dev_send_1905(env.agents[0].mac, 0x8004)
+        ch_pref_query_mid = env.controller.dev_send_1905(env.agents[0].mac, 0x8004)
         time.sleep(1)
         debug("Confirming channel preference query has been received on agent")
         self.check_log(env.agents[0].radios[0], "CHANNEL_PREFERENCE_QUERY_MESSAGE")
         self.check_log(env.agents[0].radios[1], "CHANNEL_PREFERENCE_QUERY_MESSAGE")
+
+        self.check_cmdu_type("channel preferency response", 0x8005, env.agents[0].mac,
+                             env.controller.mac, ch_pref_query_mid)
 
         debug("Send empty channel selection request")
         cs_req_mid = env.controller.dev_send_1905(env.agents[0].mac,
                                                   0x8006, tlv(0x00, 0x0000, "{}"))
         time.sleep(1)
 
-        debug("Confirming channel selection request has been received on controller")
-        self.check_log(env.controller,
-                       r"CHANNEL_SELECTION_RESPONSE_MESSAGE, mid={}".format(cs_req_mid))
-
         debug("Confirming empty channel selection request has been received on agent")
         self.check_log(env.agents[0].radios[0], "CHANNEL_SELECTION_REQUEST_MESSAGE")
         self.check_log(env.agents[0].radios[1], "CHANNEL_SELECTION_REQUEST_MESSAGE")
 
-        debug("Confirming OPERATING_CHANNEL_REPORT_MESSAGE message has been received on \
-            controller with mid")
+        self.check_cmdu_type("channel selection response", 0x8007, env.agents[0].mac,
+                             env.controller.mac, cs_req_mid)
+        oper_channel_reports = self.check_cmdu_type("operating channel report", 0x8008,
+                                                    env.agents[0].mac, env.controller.mac)
+        for report in oper_channel_reports:
+            self.check_cmdu_type("ACK", 0x8000, env.controller.mac, env.agents[0].mac,
+                                 report.ieee1905_mid)
 
-        result, ocrm_line, mid_match = self.check_log(
-            env.controller,
-            r'.+OPERATING_CHANNEL_REPORT_MESSAGE,\smid=(\d+)'
-        )
-        if (mid_match):
-            debug("Confirming ACK_MESSAGE from the controller \
-                with same mid as OPERATING_CHANNEL_REPORT_MESSAGE")
-            self.check_log(env.agents[0].radios[0], "ACK_MESSAGE, mid={}".format(mid_match[0]))
-            self.check_log(env.agents[0].radios[1], "ACK_MESSAGE, mid={}".format(mid_match[0]))
+        env.checkpoint()
 
         tp20dBm = 0x14
         tp21dBm = 0x15
@@ -334,9 +330,6 @@ class TestFlows:
             )
             time.sleep(1)
 
-            self.check_log(env.controller,
-                           r"CHANNEL_SELECTION_RESPONSE_MESSAGE, mid={}".format(cs_req_mid))
-
             self.check_log(env.agents[0].radios[0], "CHANNEL_SELECTION_REQUEST_MESSAGE")
             self.check_log(env.agents[0].radios[1], "CHANNEL_SELECTION_REQUEST_MESSAGE")
 
@@ -345,17 +338,24 @@ class TestFlows:
             self.check_log(env.agents[0].radios[1],
                            "tlvTransmitPowerLimit {}".format(payload_transmit_power))
 
-            self.check_log(env.controller, "tx_power={}".format(payload_transmit_power))
+            self.check_cmdu_type("channel selection response", 0x8007, env.agents[0].mac,
+                                 env.controller.mac, cs_req_mid)
 
-            result, ocrm_line, mid_match = self.check_log(
-                env.controller,
-                r'.+OPERATING_CHANNEL_REPORT_MESSAGE,\smid=(\d+)',
-                ocrm_line
-            )
-            if (result):
-                self.check_log(env.agents[0].radios[0], "ACK_MESSAGE, mid={}".format(mid_match[0]))
+            oper_channel_reports = self.check_cmdu_type("operating channel report", 0x8008,
+                                                        env.agents[0].mac, env.controller.mac)
+            for report in oper_channel_reports:
+                for ocr in report.ieee1905_tlvs:
+                    if ocr.tlv_type != 0x8F:
+                        self.fail("Unexpected TLV in operating channel report: {}".format(ocr))
+                        continue
+                    if int(ocr.operating_channel_eirp) != payload_transmit_power:
+                        self.fail("Unexpected transmit power {} instead of {} for {}".format(
+                            ocr.operating_channel_eirp, payload_transmit_power,
+                            ocr.operating_channel_radio_id))
+                self.check_cmdu_type("ACK", 0x8000, env.controller.mac, env.agents[0].mac,
+                                     report.ieee1905_mid)
 
-                self.check_log(env.agents[0].radios[1], "ACK_MESSAGE, mid={}".format(mid_match[0]))
+            env.checkpoint()
 
         # payload_wlan0 - request for change channel on 6
         payload_wlan0 = (
@@ -418,7 +418,7 @@ class TestFlows:
         """
         for i in range(1, 3):
             debug("Send channel selection request, step {}".format(i))
-            mid = env.controller.dev_send_1905(
+            cs_req_mid = env.controller.dev_send_1905(
                 env.agents[0].mac,
                 0x8006,
                 tlv(0x8B, 0x005F, '{} {}'.format(env.agents[0].radios[0].mac, payload_wlan0)),
@@ -427,12 +427,6 @@ class TestFlows:
                 tlv(0x8D, 0x0007, '{} 0x{:2x}'.format(env.agents[0].radios[1].mac, tp20dBm))
             )
             time.sleep(1)
-
-            debug(
-                "Confirming channel selection request has been received on controller,\
-                    step {}".format(i))
-            self.check_log(env.controller,
-                           r"CHANNEL_SELECTION_RESPONSE_MESSAGE, mid={}".format(mid))
 
             debug(
                 "Confirming channel selection request has been received on agent,step {}".format(i))
@@ -454,29 +448,24 @@ class TestFlows:
             self.check_log(env.agents[0].radios[0],
                            "ACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START")
 
-            debug("Confirming CHANNEL_SELECTION_RESPONSE_MESSAGE has been received, \
-                step {}".format(i))
+            self.check_cmdu_type("channel selection response", 0x8007, env.agents[0].mac,
+                                 env.controller.mac, cs_req_mid)
 
-            self.check_log(env.controller, "CHANNEL_SELECTION_RESPONSE_MESSAGE")
+            oper_channel_reports = self.check_cmdu_type("operating channel report", 0x8008,
+                                                        env.agents[0].mac, env.controller.mac)
+            for report in oper_channel_reports:
+                for ocr in report.ieee1905_tlvs:
+                    if ocr.tlv_type != 0x8F:
+                        self.fail("Unexpected TLV in operating channel report: {}".format(ocr))
+                        continue
+                    if int(ocr.operating_channel_eirp) != tp20dBm:
+                        self.fail("Unexpected transmit power {} instead of {} for {}".format(
+                            ocr.operating_channel_eirp, payload_transmit_power,
+                            ocr.operating_channel_radio_id))
+                self.check_cmdu_type("ACK", 0x8000, env.controller.mac, env.agents[0].mac,
+                                     report.ieee1905_mid)
 
-            debug("Confirming OPERATING_CHANNEL_REPORT_MESSAGE has been received on \
-                controller step {}".format(i))
-
-            result, ocrm_line, mid_match = self.check_log(
-                env.controller,
-                r'.+OPERATING_CHANNEL_REPORT_MESSAGE,\smid=(\d+)',
-                ocrm_line)
-
-            if (mid_match):
-                self.check_log(env.agents[0].radios[0],
-                               "ACK_MESSAGE, mid={}".format(mid_match[0]))
-
-                self.check_log(env.agents[0].radios[1],
-                               "ACK_MESSAGE, mid={}".format(mid_match[0]))
-
-            debug("Confirming tx_power has been received with correct value on controller, \
-                step {}".format(i))
-            self.check_log(env.controller, "tx_power={}".format(tp20dBm))
+            env.checkpoint()
 
     def test_ap_capability_query(self):
         env.controller.dev_send_1905(env.agents[0].mac, 0x8001)
