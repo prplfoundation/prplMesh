@@ -51,6 +51,8 @@ static mon_wlan_hal::Event wav_to_bwl_event(const std::string &opcode)
 {
     if (opcode == "AP-STA-CONNECTED") {
         return mon_wlan_hal::Event::STA_Connected;
+    } else if (opcode == "AP-STA-DISCONNECTED") {
+        return mon_wlan_hal::Event::STA_Disconnected;
     } else if (opcode == "BEACON-REQ-TX-STATUS") {
         return mon_wlan_hal::Event::RRM_Beacon_Request_Status;
     } else if (opcode == "BEACON-RESP-RX") {
@@ -430,6 +432,26 @@ bool mon_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
 
         // Add the message to the queue
         event_queue_push(Event::STA_Connected, msg_buff);
+
+    } break;
+
+    case Event::STA_Disconnected: {
+
+        // TODO: Change to HAL objects
+        auto msg_buff =
+            ALLOC_SMART_BUFFER(sizeof(sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION));
+        auto msg =
+            reinterpret_cast<sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION *>(msg_buff.get());
+        LOG_IF(!msg, FATAL) << "Memory allocation failed!";
+
+        // Initialize the message
+        memset(msg_buff.get(), 0, sizeof(sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION));
+
+        // Store the MAC address of the disconnected STA
+        msg->mac = beerocks::net::network_utils::mac_from_string(parsed_obj["_mac"]);
+
+        // Add the message to the queue
+        event_queue_push(Event::STA_Disconnected, msg_buff);
 
     } break;
 
