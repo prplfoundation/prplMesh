@@ -120,10 +120,11 @@ std::shared_ptr<backhaul_manager::sRadioInfo> findRadioInfo(const SlavesContaine
 
     for (const auto &slave : slave_container) {
         if (slave) {
-            LOG(DEBUG) << "looking into radio info for (hostap_iface): " << slave->hostap_iface;
+            LOG(DEBUG) << "looking into info for hostap iface: " << slave->hostap_iface;
 
             for (const auto &client : slave->associated_clients_map) {
-                LOG(DEBUG) << "client: " << client.first;
+                LOG(DEBUG) << "looking for " << mac
+                           << " within the current associated client map: " << client.first;
 
                 if (client.second.find(mac) != client.second.end()) {
                     return slave;
