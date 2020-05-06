@@ -75,6 +75,10 @@ static mon_wlan_hal::Event dwpal_to_bwl_event(const std::string &opcode)
         return mon_wlan_hal::Event::AP_Enabled;
     } else if (opcode == "AP-DISABLED") {
         return mon_wlan_hal::Event::AP_Disabled;
+    } else if (opcode == "AP-STA-CONNECTED") {
+        return mon_wlan_hal::Event::STA_Connected;
+    } else if (opcode == "AP-STA-DISCONNECTED") {
+        return mon_wlan_hal::Event::STA_Disconnected;
     }
 
     return mon_wlan_hal::Event::Invalid;
@@ -1052,6 +1056,93 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
         msg->vap_id    = iface_ids.vap_id;
 
         event_queue_push(event, msg_buff);
+        break;
+    }
+
+    case Event::STA_Connected: {
+
+        // TODO: Change to HAL objects
+        auto msg_buff = ALLOC_SMART_BUFFER(sizeof(sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION));
+        auto msg =
+            reinterpret_cast<sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION *>(msg_buff.get());
+        LOG_IF(!msg, FATAL) << "Memory allocation failed!";
+
+        // Initialize the message
+        memset(msg_buff.get(), 0, sizeof(sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION));
+
+        char VAP[SSID_MAX_SIZE]        = {0};
+        char MACAddress[MAC_ADDR_SIZE] = {0};
+        size_t numOfValidArgs[3]       = {0};
+
+        FieldsToParse fieldsToParse[] = {
+            {NULL /*opCode*/, &numOfValidArgs[0], DWPAL_STR_PARAM, NULL, 0},
+            {(void *)VAP, &numOfValidArgs[1], DWPAL_STR_PARAM, NULL, sizeof(VAP)},
+            {(void *)MACAddress, &numOfValidArgs[2], DWPAL_STR_PARAM, NULL, sizeof(MACAddress)},
+            /* Must be at the end */
+            {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
+
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(VAP)) ==
+            DWPAL_FAILURE) {
+            LOG(ERROR) << "DWPAL parse error ==> Abort";
+            return false;
+        }
+
+        LOG(DEBUG) << "vap_id           : " << VAP;
+        LOG(DEBUG) << "MACAddress       : " << MACAddress;
+
+        for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
+            if (numOfValidArgs[i] == 0) {
+                LOG(ERROR) << "Failed reading parsed parameter " << static_cast<int>(i);
+                return false;
+            }
+        }
+
+        msg->vap_id = beerocks::utils::get_ids_from_iface_string(VAP).vap_id;
+        msg->mac    = tlvf::mac_from_string(MACAddress);
+
+        event_queue_push(Event::STA_Connected, msg_buff); // send message to the AP manager
+
+        break;
+    }
+
+    case Event::STA_Disconnected: {
+        // TODO: Change to HAL objects
+        auto msg_buff =
+            ALLOC_SMART_BUFFER(sizeof(sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION));
+        auto msg =
+            reinterpret_cast<sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION *>(msg_buff.get());
+        LOG_IF(!msg, FATAL) << "Memory allocation failed!";
+
+        // Initialize the message
+        memset(msg_buff.get(), 0, sizeof(sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION));
+
+        char VAP[SSID_MAX_SIZE]        = {0};
+        char MACAddress[MAC_ADDR_SIZE] = {0};
+        size_t numOfValidArgs[2]       = {0};
+        FieldsToParse fieldsToParse[]  = {
+            {NULL /*opCode*/, &numOfValidArgs[0], DWPAL_STR_PARAM, NULL, 0},
+            {(void *)MACAddress, &numOfValidArgs[1], DWPAL_STR_PARAM, NULL, sizeof(MACAddress)},
+            /* Must be at the end */
+            {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
+
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(VAP)) ==
+            DWPAL_FAILURE) {
+            LOG(ERROR) << "DWPAL parse error ==> Abort";
+            return false;
+        }
+
+        LOG(DEBUG) << "MACAddress : " << MACAddress;
+
+        for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
+            if (numOfValidArgs[i] == 0) {
+                LOG(ERROR) << "Failed reading parsed parameter " << (int)i << " ==> Abort";
+                return false;
+            }
+        }
+
+        msg->mac = tlvf::mac_from_string(MACAddress);
+
+        event_queue_push(Event::STA_Disconnected, msg_buff); // send message to the AP manager
         break;
     }
 
