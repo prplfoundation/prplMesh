@@ -1835,6 +1835,24 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
     } break;
+    case Event::STA_Connected: {
+        LOG(TRACE) << "Received STA_Connected event";
+        const auto msg = static_cast<bwl::sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION *>(data);
+
+        const auto mac    = network_utils::mac_to_string(msg->mac);
+        const auto vap_id = msg->vap_id;
+
+        LOG(TRACE) << "Received STA_Connected event: mac = " << mac
+                   << ", vap_id = " << static_cast<int>(vap_id);
+
+        if (!start_monitoring_sta(mac, vap_id)) {
+            LOG(ERROR) << "Cannot start_monitoring_sta: mac = " << mac
+                       << "< vap_id = " << static_cast<int>(vap_id);
+            return false;
+        }
+
+        break;
+    }
 
     // Unhandled events
     default: {
