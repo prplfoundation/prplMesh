@@ -1804,6 +1804,10 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
     } break;
+    case Event::STA_Connected: {
+        LOG(TRACE) << "Received STA_Connected event";
+        break;
+    }
 
     // Unhandled events
     default: {
