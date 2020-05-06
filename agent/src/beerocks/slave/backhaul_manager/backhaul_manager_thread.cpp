@@ -3201,7 +3201,10 @@ bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageR
     LOG(DEBUG) << "BEACON METRICS QUERY: sending ACK message to the originator mid: "
                << int(mid); // USED IN TESTS
 
-    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+    send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+
+    // continue processing
+    return false;
 }
 
 bool backhaul_manager::send_slaves_enable()
