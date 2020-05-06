@@ -232,6 +232,19 @@ struct sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION {
     int8_t vap_id;
 };
 
+/**
+ * @brief struct to carry payload of `STA_Disconnected` BWL monitor event
+ *
+ * When a STA is disconnected BWL notifies the monitor with `STA_Disconnected` event
+ * add attaches this struct for the details.
+ */
+struct sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION {
+    /**
+     * @brief mac MAC address of the disconnected STA
+     */
+    sMacAddr mac;
+};
+
 typedef struct {
     sMacAddr mac;
     sMacAddr source_bssid;
