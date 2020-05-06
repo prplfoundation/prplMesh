@@ -44,6 +44,8 @@ static mon_wlan_hal::Event dummy_to_bwl_event(const std::string &opcode)
 {
     if (opcode == "RRM-BEACON-REP-RECEIVED")
         return mon_wlan_hal::Event::RRM_Beacon_Response;
+    else if (opcode == "AP-STA-CONNECTED")
+        return mon_wlan_hal_dummy::Event::STA_Connected;
 
     return mon_wlan_hal::Event::Invalid;
 }
@@ -349,6 +351,29 @@ bool mon_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
 
         // Add the message to the queue
         event_queue_push(event, resp_buff);
+        break;
+    }
+    case Event::STA_Connected: {
+        LOG(TRACE) << "STA_Connected";
+        auto msg_buff = ALLOC_SMART_BUFFER(sizeof(sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION));
+        auto msg =
+            reinterpret_cast<sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION *>(msg_buff.get());
+        LOG_IF(!msg, FATAL) << "Memory allocation failed!";
+
+        // Initialize the message
+        memset(msg_buff.get(), 0, sizeof(sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION));
+
+        msg->vap_id = beerocks::IFACE_VAP_ID_MIN;
+        LOG(DEBUG) << "iface name = " << get_iface_name()
+                   << ", vap_id = " << static_cast<int>(msg->vap_id);
+
+        if (!dummy_obj_read_str(DUMMY_EVENT_KEYLESS_PARAM_MAC, parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading mac parameter!";
+            return false;
+        }
+        msg->mac = beerocks::net::network_utils::mac_from_string(tmp_str);
+        // Add the message to the queue
+        event_queue_push(Event::STA_Connected, msg_buff);
         break;
     }
     default:
