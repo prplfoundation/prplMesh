@@ -222,6 +222,10 @@ typedef struct {
 
 typedef struct {
     sMacAddr mac;
+} sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION;
+
+typedef struct {
+    sMacAddr mac;
     sMacAddr source_bssid;
     sMacAddr target_bssid;
     uint8_t status_code;

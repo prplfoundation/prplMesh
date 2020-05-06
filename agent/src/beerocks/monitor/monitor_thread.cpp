@@ -1808,6 +1808,10 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
         LOG(TRACE) << "Received STA_Connected event";
         break;
     }
+    case Event::STA_Disconnected: {
+        LOG(TRACE) << "Received STA_Disconnected event";
+        break;
+    }
 
     // Unhandled events
     default: {
