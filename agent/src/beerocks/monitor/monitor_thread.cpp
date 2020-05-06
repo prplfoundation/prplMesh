@@ -830,7 +830,7 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
         std::string sta_ipv4 = network_utils::ipv4_to_string(request->params().ipv4);
         int vap_id           = int(request->params().vap_id);
         LOG(INFO) << "ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST=" << sta_mac
-                  << " ip=" << sta_ipv4 << " vap_id=" << vap_id;
+                  << " ip=" << sta_ipv4 << " vap_id=" << std::dec << static_cast<int>(vap_id);
 
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE>(
