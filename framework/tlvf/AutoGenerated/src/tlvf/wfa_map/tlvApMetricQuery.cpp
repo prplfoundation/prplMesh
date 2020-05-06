@@ -79,7 +79,7 @@ bool tlvApMetricQuery::alloc_bssid_list(size_t count) {
 void tlvApMetricQuery::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
-    for (size_t i = 0; i < (size_t)*m_bssid_list_length; i++){
+    for (size_t i = 0; i < m_bssid_list_idx__; i++){
         m_bssid_list[i].struct_swap();
     }
 }

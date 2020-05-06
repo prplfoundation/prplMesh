@@ -437,10 +437,10 @@ void tlvTestVarList::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_var0));
-    for (size_t i = 0; i < (size_t)*m_simple_list_length; i++){
+    for (size_t i = 0; i < m_simple_list_idx__; i++){
         tlvf_swap(16, reinterpret_cast<uint8_t*>(&m_simple_list[i]));
     }
-    for (size_t i = 0; i < (size_t)*m_complex_list_length; i++){
+    for (size_t i = 0; i < m_complex_list_idx__; i++){
         std::get<1>(complex_list(i)).class_swap();
     }
     if (m_var1_ptr) { m_var1_ptr->class_swap(); }

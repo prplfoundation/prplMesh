@@ -112,7 +112,7 @@ void tlvDeviceInformation::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     m_mac->struct_swap();
-    for (size_t i = 0; i < (size_t)*m_local_interface_list_length; i++){
+    for (size_t i = 0; i < m_local_interface_list_idx__; i++){
         std::get<1>(local_interface_list(i)).class_swap();
     }
 }

@@ -144,10 +144,10 @@ void tlvSteeringRequest::class_swap()
     m_request_flags->struct_swap();
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_steering_opportunity_window_sec));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_btm_disassociation_timer_ms));
-    for (size_t i = 0; i < (size_t)*m_sta_list_length; i++){
+    for (size_t i = 0; i < m_sta_list_idx__; i++){
         m_sta_list[i].struct_swap();
     }
-    for (size_t i = 0; i < (size_t)*m_target_bssid_list_length; i++){
+    for (size_t i = 0; i < m_target_bssid_list_idx__; i++){
         m_target_bssid_list[i].struct_swap();
     }
 }

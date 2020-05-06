@@ -162,7 +162,7 @@ void cACTION_APMANAGER_JOINED_NOTIFICATION::class_swap()
     tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
     m_cs_params->struct_swap();
-    for (size_t i = 0; i < (size_t)*m_supported_channels_size; i++){
+    for (size_t i = 0; i < m_supported_channels_idx__; i++){
         m_supported_channels[i].struct_swap();
     }
 }
@@ -1285,7 +1285,7 @@ void cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
     m_cs_params->struct_swap();
-    for (size_t i = 0; i < (size_t)*m_preferred_channels_size; i++){
+    for (size_t i = 0; i < m_preferred_channels_idx__; i++){
         m_preferred_channels[i].struct_swap();
     }
 }
@@ -3202,7 +3202,7 @@ bool cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST::add_wifi_credentials(std
 void cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
-    for (size_t i = 0; i < (size_t)*m_wifi_credentials_size; i++){
+    for (size_t i = 0; i < m_wifi_credentials_idx__; i++){
         std::get<1>(wifi_credentials(i)).class_swap();
     }
 }
@@ -3502,7 +3502,7 @@ bool cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE::alloc_preferred_channels(size_t
 void cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
-    for (size_t i = 0; i < (size_t)*m_preferred_channels_size; i++){
+    for (size_t i = 0; i < m_preferred_channels_idx__; i++){
         m_preferred_channels[i].struct_swap();
     }
 }

@@ -4549,7 +4549,7 @@ void cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_result));
-    for (size_t i = 0; i < (size_t)*m_vap_list_size; i++){
+    for (size_t i = 0; i < m_vap_list_idx__; i++){
         m_vap_list[i].struct_swap();
     }
 }
@@ -4746,7 +4746,7 @@ void cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_result));
-    for (size_t i = 0; i < (size_t)*m_vap_list_size; i++){
+    for (size_t i = 0; i < m_vap_list_idx__; i++){
         m_vap_list[i].struct_swap();
     }
 }
@@ -6863,7 +6863,7 @@ bool cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::alloc_results(size_t count) 
 void cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
-    for (size_t i = 0; i < (size_t)*m_results_size; i++){
+    for (size_t i = 0; i < m_results_idx__; i++){
         m_results[i].struct_swap();
     }
 }

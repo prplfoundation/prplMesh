@@ -1472,7 +1472,7 @@ void cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE::class_swap()
     tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     m_sta_mac->struct_swap();
-    for (size_t i = 0; i < (size_t)*m_bssid_info_list_length; i++){
+    for (size_t i = 0; i < m_bssid_info_list_idx__; i++){
         m_bssid_info_list[i].struct_swap();
     }
 }
@@ -1796,10 +1796,10 @@ bool cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE::alloc_sta_stats(size_t c
 void cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_MONITOR), reinterpret_cast<uint8_t*>(m_action_op));
-    for (size_t i = 0; i < (size_t)*m_ap_stats_size; i++){
+    for (size_t i = 0; i < m_ap_stats_idx__; i++){
         m_ap_stats[i].struct_swap();
     }
-    for (size_t i = 0; i < (size_t)*m_sta_stats_size; i++){
+    for (size_t i = 0; i < m_sta_stats_idx__; i++){
         m_sta_stats[i].struct_swap();
     }
 }

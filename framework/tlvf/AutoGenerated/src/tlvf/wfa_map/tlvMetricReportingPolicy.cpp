@@ -83,7 +83,7 @@ bool tlvMetricReportingPolicy::alloc_metrics_reporting_conf_list(size_t count) {
 void tlvMetricReportingPolicy::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
-    for (size_t i = 0; i < (size_t)*m_metrics_reporting_conf_list_length; i++){
+    for (size_t i = 0; i < m_metrics_reporting_conf_list_idx__; i++){
         m_metrics_reporting_conf_list[i].struct_swap();
     }
 }
