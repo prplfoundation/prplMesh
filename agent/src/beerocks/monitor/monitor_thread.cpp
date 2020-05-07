@@ -699,6 +699,8 @@ bool monitor_thread::start_monitoring_sta(const std::string &sta_mac, const int 
     return true;
 }
 
+void monitor_thread::stop_monitoring_sta(const std::string &sta_mac) { mon_db.sta_erase(sta_mac); }
+
 bool monitor_thread::monitored_sta_set_ipv4(const std::string &sta_mac, const std::string &sta_ipv4)
 {
     auto sta_node = mon_db.sta_find(sta_mac);

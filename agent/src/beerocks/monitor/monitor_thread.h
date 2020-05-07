@@ -57,6 +57,7 @@ protected:
 
 private:
     bool start_monitoring_sta(const std::string &sta_mac, const int vap_id);
+    void stop_monitoring_sta(const std::string &sta_mac);
     bool monitored_sta_set_ipv4(const std::string &sta_mac, const std::string &sta_ipv4);
 
     void stop_monitor_thread();
