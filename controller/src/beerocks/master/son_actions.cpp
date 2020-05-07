@@ -56,27 +56,6 @@ void son_actions::handle_completed_connection(db &database, ieee1905_1::CmduMess
     if (database.is_node_wireless(client_mac)) {
         LOG(DEBUG) << "node " << client_mac << " is wireless";
         /*
-         * stop monitoring on all other APs
-         */
-        for (auto &hostap : hostaps) {
-            auto agent_mac = database.get_node_parent_ire(hostap);
-
-            LOG(DEBUG) << "STOP_MONITORING_REQUEST hostap_mac=" << hostap << " sta_mac "
-                       << client_mac;
-
-            auto stop_request = message_com::create_vs_message<
-                beerocks_message::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST>(cmdu_tx);
-            if (stop_request == nullptr) {
-                LOG(ERROR)
-                    << "Failed building ACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST message!";
-                return;
-            }
-
-            stop_request->mac() = tlvf::mac_from_string(client_mac);
-            son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap);
-        }
-
-        /*
          * send disassociate request to previous hostap to clear STA mac from its list
          */
         if (!previous_hostap_mac.empty() && previous_hostap_mac != new_hostap_mac) {
@@ -281,30 +260,15 @@ void son_actions::handle_dead_node(std::string mac, std::string hostap_mac, db &
     LOG(DEBUG) << "NOTICE: handling dead node " << mac << " type enum " << int(mac_type)
                << " hostap_mac " << hostap_mac;
 
-    /*
-     * stop monitoring if dead node is an IRE or client
-     */
     if ((mac_type == beerocks::TYPE_IRE_BACKHAUL || mac_type == beerocks::TYPE_CLIENT) &&
         database.is_node_wireless(mac)) {
-        auto agent_mac = database.get_node_parent_ire(hostap_mac);
-        LOG(DEBUG) << "STOP_MONITORING mac " << mac << " hostapd " << hostap_mac;
-        auto stop_request = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST>(cmdu_tx);
-        if (stop_request == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST message!";
-            return;
-        }
-        stop_request->mac() = tlvf::mac_from_string(mac);
-
-        const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
-
         // If there is running association handleing task already, terminate it.
         int prev_task_id = database.get_association_handling_task_id(mac);
         if (tasks.is_task_running(prev_task_id)) {
             tasks.kill_task(prev_task_id);
         }
     }
+
     if (parent_hostap_mac == hostap_mac) {
         if (mac_type == beerocks::TYPE_IRE_BACKHAUL || mac_type == beerocks::TYPE_CLIENT) {
             database.set_node_state(mac, beerocks::STATE_DISCONNECTED);

@@ -569,33 +569,6 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         break;
     }
 
-    case beerocks_message::ACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST: {
-        LOG(DEBUG) << "received ACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST";
-        auto request_in =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST>();
-        if (request_in == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST failed";
-            return false;
-        }
-        std::string client_mac = tlvf::mac_to_string(request_in->mac());
-
-        LOG(DEBUG) << "STOP_MONITORING_REQUEST: mac=" << client_mac;
-
-        //notify monitor
-        auto request_out = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST>(
-            cmdu_tx, beerocks_header->id());
-        if (request_out == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST message!";
-            return false;
-        }
-
-        request_out->mac() = request_in->mac();
-        message_com::send_cmdu(monitor_socket, cmdu_tx);
-        break;
-    }
-
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST: {
         LOG(DEBUG) << "received ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST";
 
@@ -1967,21 +1940,6 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
 
         std::string client_mac = tlvf::mac_to_string(notification_in->params().mac);
         LOG(INFO) << "client disconnected sta_mac=" << client_mac;
-
-        //notify monitor
-        {
-            auto notification_out = message_com::create_vs_message<
-                beerocks_message::cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST>(
-                cmdu_tx, beerocks_header->id());
-
-            if (notification_out == nullptr) {
-                LOG(ERROR)
-                    << "Failed building cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST message!";
-                break;
-            }
-            notification_out->mac() = notification_in->params().mac;
-            message_com::send_cmdu(monitor_socket, cmdu_tx);
-        }
 
         //notify master
         if (!master_socket) {

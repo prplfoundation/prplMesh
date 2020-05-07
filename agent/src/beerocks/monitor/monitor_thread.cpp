@@ -1047,21 +1047,6 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
         break;
     }
 #endif //BEEROCKS_RDKB
-    case beerocks_message::ACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST: {
-        LOG(TRACE) << "received ACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST";
-        auto request =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST failed";
-            return false;
-        }
-        std::string sta_mac = tlvf::mac_to_string(request->mac());
-        LOG(INFO) << "ACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST=" << sta_mac;
-        mon_db.sta_erase(sta_mac);
-
-        break;
-    }
     case beerocks_message::ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST: {
         LOG(TRACE) << "received ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST";
 
