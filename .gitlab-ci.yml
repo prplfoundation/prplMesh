@@ -59,13 +59,6 @@ flake8:
     - git ls-files -z -- '*.py' ':(exclude)tools/maptools.py' ':(exclude)framework/tlvf/tlvf.py' |
       xargs -0 -t flake8 --verbose
 
-flake8-diff:
-  stage: build
-  image: pipelinecomponents/flake8:f087c4c
-  script:
-    - apk add --update --no-cache git
-    - git diff -U0 origin/master | flake8 --verbose --diff
-
 shellcheck:
   stage: build
   image: koalaman/shellcheck-alpine:v0.7.1
