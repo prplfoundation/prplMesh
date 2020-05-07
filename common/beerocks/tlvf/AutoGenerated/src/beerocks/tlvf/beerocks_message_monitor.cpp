@@ -74,7 +74,7 @@ bool cACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_vap_id = (int8_t*)m_buff_ptr__;
+    m_vap_id = reinterpret_cast<int8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(int8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
@@ -201,7 +201,7 @@ bool cACTION_MONITOR_SON_CONFIG_UPDATE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_config = (sSonConfig*)m_buff_ptr__;
+    m_config = reinterpret_cast<sSonConfig*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sSonConfig))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSonConfig) << ") Failed!";
         return false;
@@ -271,7 +271,7 @@ bool cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sLoggingLevelChange*)m_buff_ptr__;
+    m_params = reinterpret_cast<sLoggingLevelChange*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sLoggingLevelChange))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sLoggingLevelChange) << ") Failed!";
         return false;
@@ -341,7 +341,7 @@ bool cACTION_MONITOR_ERROR_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_error_code = (uint32_t*)m_buff_ptr__;
+    m_error_code = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
@@ -526,7 +526,7 @@ bool cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sClientMonitoringParams*)m_buff_ptr__;
+    m_params = reinterpret_cast<sClientMonitoringParams*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sClientMonitoringParams))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sClientMonitoringParams) << ") Failed!";
         return false;
@@ -595,7 +595,7 @@ bool cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_success = (uint8_t*)m_buff_ptr__;
+    m_success = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -664,7 +664,7 @@ bool cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
@@ -734,7 +734,7 @@ bool cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sNodeRssiMeasurementRequest*)m_buff_ptr__;
+    m_params = reinterpret_cast<sNodeRssiMeasurementRequest*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurementRequest))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sNodeRssiMeasurementRequest) << ") Failed!";
         return false;
@@ -815,19 +815,19 @@ bool cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    m_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
+    m_ipv4 = reinterpret_cast<beerocks::net::sIpv4Addr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::net::sIpv4Addr) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_ipv4->struct_init(); }
-    m_channel = (uint8_t*)m_buff_ptr__;
+    m_channel = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -896,7 +896,7 @@ bool cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sNodeRssiMeasurement*)m_buff_ptr__;
+    m_params = reinterpret_cast<sNodeRssiMeasurement*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurement))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sNodeRssiMeasurement) << ") Failed!";
         return false;
@@ -966,7 +966,7 @@ bool cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sNodeRssiMeasurement*)m_buff_ptr__;
+    m_params = reinterpret_cast<sNodeRssiMeasurement*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurement))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sNodeRssiMeasurement) << ") Failed!";
         return false;
@@ -1036,7 +1036,7 @@ bool cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
@@ -1106,7 +1106,7 @@ bool cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
@@ -1176,7 +1176,7 @@ bool cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
@@ -1246,7 +1246,7 @@ bool cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
@@ -1316,7 +1316,7 @@ bool cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sApActivityNotificationParams*)m_buff_ptr__;
+    m_params = reinterpret_cast<sApActivityNotificationParams*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sApActivityNotificationParams))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApActivityNotificationParams) << ") Failed!";
         return false;
@@ -1391,12 +1391,12 @@ bool cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_sync = (uint8_t*)m_buff_ptr__;
+    m_sync = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_sta_mac = (sMacAddr*)m_buff_ptr__;
+    m_sta_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
@@ -1520,20 +1520,20 @@ bool cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_sta_mac = (sMacAddr*)m_buff_ptr__;
+    m_sta_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_sta_mac->struct_init(); }
-    m_bssid_info_list_length = (uint8_t*)m_buff_ptr__;
+    m_bssid_info_list_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_bssid_info_list_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
@@ -1610,7 +1610,7 @@ bool cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_sync = (uint8_t*)m_buff_ptr__;
+    m_sync = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -1683,12 +1683,12 @@ bool cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_new_tx_state = (int8_t*)m_buff_ptr__;
+    m_new_tx_state = reinterpret_cast<int8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(int8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
     }
-    m_new_hostap_enabled_state = (int8_t*)m_buff_ptr__;
+    m_new_hostap_enabled_state = reinterpret_cast<int8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(int8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
         return false;
@@ -1845,7 +1845,7 @@ bool cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_ap_stats_size = (uint8_t*)m_buff_ptr__;
+    m_ap_stats_size = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_ap_stats_size = 0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
@@ -1858,7 +1858,7 @@ bool cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApStatsParams) * (ap_stats_size) << ") Failed!";
         return false;
     }
-    m_sta_stats_size = (uint8_t*)m_buff_ptr__;
+    m_sta_stats_size = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_sta_stats_size = 0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
@@ -1935,7 +1935,7 @@ bool cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sApLoadNotificationParams*)m_buff_ptr__;
+    m_params = reinterpret_cast<sApLoadNotificationParams*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sApLoadNotificationParams))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sApLoadNotificationParams) << ") Failed!";
         return false;
@@ -2005,7 +2005,7 @@ bool cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sBeaconRequest11k*)m_buff_ptr__;
+    m_params = reinterpret_cast<sBeaconRequest11k*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sBeaconRequest11k))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sBeaconRequest11k) << ") Failed!";
         return false;
@@ -2075,7 +2075,7 @@ bool cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sBeaconResponse11k*)m_buff_ptr__;
+    m_params = reinterpret_cast<sBeaconResponse11k*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sBeaconResponse11k))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sBeaconResponse11k) << ") Failed!";
         return false;
@@ -2145,7 +2145,7 @@ bool cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sStaChannelLoadRequest11k*)m_buff_ptr__;
+    m_params = reinterpret_cast<sStaChannelLoadRequest11k*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sStaChannelLoadRequest11k))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sStaChannelLoadRequest11k) << ") Failed!";
         return false;
@@ -2215,7 +2215,7 @@ bool cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sStaChannelLoadResponse11k*)m_buff_ptr__;
+    m_params = reinterpret_cast<sStaChannelLoadResponse11k*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sStaChannelLoadResponse11k))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sStaChannelLoadResponse11k) << ") Failed!";
         return false;
@@ -2285,7 +2285,7 @@ bool cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sStatisticsRequest11k*)m_buff_ptr__;
+    m_params = reinterpret_cast<sStatisticsRequest11k*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sStatisticsRequest11k))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sStatisticsRequest11k) << ") Failed!";
         return false;
@@ -2355,7 +2355,7 @@ bool cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sStatisticsResponse11k*)m_buff_ptr__;
+    m_params = reinterpret_cast<sStatisticsResponse11k*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sStatisticsResponse11k))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sStatisticsResponse11k) << ") Failed!";
         return false;
@@ -2425,7 +2425,7 @@ bool cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
@@ -2495,7 +2495,7 @@ bool cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sLinkMeasurementsResponse11k*)m_buff_ptr__;
+    m_params = reinterpret_cast<sLinkMeasurementsResponse11k*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sLinkMeasurementsResponse11k))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sLinkMeasurementsResponse11k) << ") Failed!";
         return false;
@@ -2571,13 +2571,13 @@ bool cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    m_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
+    m_ipv4 = reinterpret_cast<beerocks::net::sIpv4Addr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::net::sIpv4Addr) << ") Failed!";
         return false;
@@ -2647,7 +2647,7 @@ bool cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sSteeringSetGroupRequest*)m_buff_ptr__;
+    m_params = reinterpret_cast<sSteeringSetGroupRequest*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sSteeringSetGroupRequest))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSteeringSetGroupRequest) << ") Failed!";
         return false;
@@ -2717,7 +2717,7 @@ bool cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sSteeringSetGroupResponse*)m_buff_ptr__;
+    m_params = reinterpret_cast<sSteeringSetGroupResponse*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sSteeringSetGroupResponse))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSteeringSetGroupResponse) << ") Failed!";
         return false;
@@ -2787,7 +2787,7 @@ bool cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sSteeringClientSetRequest*)m_buff_ptr__;
+    m_params = reinterpret_cast<sSteeringClientSetRequest*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sSteeringClientSetRequest))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSteeringClientSetRequest) << ") Failed!";
         return false;
@@ -2857,7 +2857,7 @@ bool cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sSteeringClientSetResponse*)m_buff_ptr__;
+    m_params = reinterpret_cast<sSteeringClientSetResponse*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sSteeringClientSetResponse))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSteeringClientSetResponse) << ") Failed!";
         return false;
@@ -2927,7 +2927,7 @@ bool cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sSteeringEvActivity*)m_buff_ptr__;
+    m_params = reinterpret_cast<sSteeringEvActivity*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sSteeringEvActivity))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSteeringEvActivity) << ") Failed!";
         return false;
@@ -2997,7 +2997,7 @@ bool cACTION_MONITOR_STEERING_EVENT_SNR_XING_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sSteeringEvSnrXing*)m_buff_ptr__;
+    m_params = reinterpret_cast<sSteeringEvSnrXing*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sSteeringEvSnrXing))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sSteeringEvSnrXing) << ") Failed!";
         return false;
@@ -3067,7 +3067,7 @@ bool cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_scan_params = (sTriggerChannelScanParams*)m_buff_ptr__;
+    m_scan_params = reinterpret_cast<sTriggerChannelScanParams*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sTriggerChannelScanParams))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sTriggerChannelScanParams) << ") Failed!";
         return false;
@@ -3136,7 +3136,7 @@ bool cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_success = (uint8_t*)m_buff_ptr__;
+    m_success = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -3262,7 +3262,7 @@ bool cACTION_MONITOR_CHANNEL_SCAN_DUMP_RESULTS_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_success = (uint8_t*)m_buff_ptr__;
+    m_success = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -3394,13 +3394,13 @@ bool cACTION_MONITOR_CHANNEL_SCAN_RESULTS_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_scan_results = (sChannelScanResults*)m_buff_ptr__;
+    m_scan_results = reinterpret_cast<sChannelScanResults*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sChannelScanResults))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sChannelScanResults) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_scan_results->struct_init(); }
-    m_is_dump = (uint8_t*)m_buff_ptr__;
+    m_is_dump = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_is_dump = 0x0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
@@ -3469,7 +3469,7 @@ bool cACTION_MONITOR_CHANNEL_SCAN_ABORT_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_reason = (uint8_t*)m_buff_ptr__;
+    m_reason = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;

@@ -101,36 +101,36 @@ bool cCmduHeader::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_message_version = (uint8_t*)m_buff_ptr__;
+    m_message_version = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_message_version = 0x0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_reserved = (uint8_t*)m_buff_ptr__;
+    m_reserved = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_reserved = 0x0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_message_type = (eMessageType*)m_buff_ptr__;
+    m_message_type = reinterpret_cast<eMessageType*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(eMessageType))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eMessageType) << ") Failed!";
         return false;
     }
-    m_message_id = (uint16_t*)m_buff_ptr__;
+    m_message_id = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_message_id = 0x0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_fragment_id = (uint8_t*)m_buff_ptr__;
+    m_fragment_id = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_fragment_id = 0x0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_flags = (sFlags*)m_buff_ptr__;
+    m_flags = reinterpret_cast<sFlags*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sFlags))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sFlags) << ") Failed!";
         return false;

@@ -241,13 +241,13 @@ bool cConfigData::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_ssid_type = (eWscAttributes*)m_buff_ptr__;
+    m_ssid_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_ssid_type = ATTR_SSID;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_ssid_length = (uint16_t*)m_buff_ptr__;
+    m_ssid_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_ssid_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -261,25 +261,25 @@ bool cConfigData::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (ssid_length) << ") Failed!";
         return false;
     }
-    m_authentication_type_attr = (sWscAttrAuthenticationType*)m_buff_ptr__;
+    m_authentication_type_attr = reinterpret_cast<sWscAttrAuthenticationType*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sWscAttrAuthenticationType))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWscAttrAuthenticationType) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_authentication_type_attr->struct_init(); }
-    m_encryption_type_attr = (sWscAttrEncryptionType*)m_buff_ptr__;
+    m_encryption_type_attr = reinterpret_cast<sWscAttrEncryptionType*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sWscAttrEncryptionType))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWscAttrEncryptionType) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_encryption_type_attr->struct_init(); }
-    m_network_key_type = (eWscAttributes*)m_buff_ptr__;
+    m_network_key_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_network_key_type = ATTR_NETWORK_KEY;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_network_key_length = (uint16_t*)m_buff_ptr__;
+    m_network_key_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_network_key_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -293,13 +293,13 @@ bool cConfigData::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (network_key_length) << ") Failed!";
         return false;
     }
-    m_bssid_attr = (sWscAttrBssid*)m_buff_ptr__;
+    m_bssid_attr = reinterpret_cast<sWscAttrBssid*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sWscAttrBssid))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWscAttrBssid) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_bssid_attr->struct_init(); }
-    m_multiap_attr = (sWscAttrVendorExtMultiAp*)m_buff_ptr__;
+    m_multiap_attr = reinterpret_cast<sWscAttrVendorExtMultiAp*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sWscAttrVendorExtMultiAp))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWscAttrVendorExtMultiAp) << ") Failed!";
         return false;
@@ -453,13 +453,13 @@ bool cWscAttrEncryptedSettings::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = eWscAttributes::ATTR_ENCR_SETTINGS;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -634,54 +634,54 @@ bool cWscVendorExtWfa::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_VENDOR_EXTENSION;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_vendor_id_0 = (uint8_t*)m_buff_ptr__;
+    m_vendor_id_0 = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_vendor_id_0 = WSC_VENDOR_ID_WFA_1;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
-    m_vendor_id_1 = (uint8_t*)m_buff_ptr__;
+    m_vendor_id_1 = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_vendor_id_1 = WSC_VENDOR_ID_WFA_2;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
-    m_vendor_id_2 = (uint8_t*)m_buff_ptr__;
+    m_vendor_id_2 = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_vendor_id_2 = WSC_VENDOR_ID_WFA_3;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
-    m_subelement_id = (uint8_t*)m_buff_ptr__;
+    m_subelement_id = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_subelement_id = 0x6;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
-    m_subelement_length = (uint8_t*)m_buff_ptr__;
+    m_subelement_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_subelement_length = 0x1;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
-    m_subelement_value = (uint8_t*)m_buff_ptr__;
+    m_subelement_value = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_subelement_value = TEARDOWN;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
@@ -774,19 +774,19 @@ bool cWscAttrVersion::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_VERSION;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_data = (eWscValues8*)m_buff_ptr__;
+    m_data = reinterpret_cast<eWscValues8*>(m_buff_ptr__);
     if (!m_parse__) *m_data = WSC_VERSION;
     if (!buffPtrIncrementSafe(sizeof(eWscValues8))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscValues8) << ") Failed!";
@@ -868,19 +868,19 @@ bool cWscAttrMessageType::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_MSG_TYPE;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_msg_type = (eWscMessageType*)m_buff_ptr__;
+    m_msg_type = reinterpret_cast<eWscMessageType*>(m_buff_ptr__);
     if (!m_parse__) *m_msg_type = WSC_MSG_TYPE_INVALID;
     if (!buffPtrIncrementSafe(sizeof(eWscMessageType))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscMessageType) << ") Failed!";
@@ -978,13 +978,13 @@ bool cWscAttrEnrolleeNonce::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_ENROLLEE_NONCE;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -1090,13 +1090,13 @@ bool cWscAttrPublicKey::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_PUBLIC_KEY;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -1187,19 +1187,19 @@ bool cWscAttrAuthenticationTypeFlags::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_AUTH_TYPE_FLAGS;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_auth_type_flags = (uint16_t*)m_buff_ptr__;
+    m_auth_type_flags = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_auth_type_flags = uint16_t(eWscAuth::WSC_AUTH_OPEN) | uint16_t(eWscAuth::WSC_AUTH_WPA2PSK);
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -1282,19 +1282,19 @@ bool cWscAttrEncryptionTypeFlags::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_ENCR_TYPE_FLAGS;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_encr_type_flags = (uint16_t*)m_buff_ptr__;
+    m_encr_type_flags = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_encr_type_flags = uint16_t(eWscEncr::WSC_ENCR_NONE) | uint16_t(eWscEncr::WSC_ENCR_AES);
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -1376,19 +1376,19 @@ bool cWscAttrConnectionTypeFlags::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_CONN_TYPE_FLAGS;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_conn_type_flags = (eWscConn*)m_buff_ptr__;
+    m_conn_type_flags = reinterpret_cast<eWscConn*>(m_buff_ptr__);
     if (!m_parse__) *m_conn_type_flags = WSC_CONN_ESS;
     if (!buffPtrIncrementSafe(sizeof(eWscConn))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscConn) << ") Failed!";
@@ -1471,19 +1471,19 @@ bool cWscAttrConfigurationMethods::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_CONFIG_METHODS;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_conf_methods = (uint16_t*)m_buff_ptr__;
+    m_conf_methods = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_conf_methods = (WSC_CONFIG_PHY_PUSHBUTTON | WSC_CONFIG_VIRT_PUSHBUTTON);
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -1610,13 +1610,13 @@ bool cWscAttrManufacturer::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_MANUFACTURER;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -1753,13 +1753,13 @@ bool cWscAttrModelName::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_MODEL_NAME;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -1896,13 +1896,13 @@ bool cWscAttrModelNumber::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_MODEL_NUMBER;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -2039,13 +2039,13 @@ bool cWscAttrSerialNumber::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_SERIAL_NUMBER;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -2150,33 +2150,33 @@ bool cWscAttrPrimaryDeviceType::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_PRIMARY_DEV_TYPE;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_category_id = (uint16_t*)m_buff_ptr__;
+    m_category_id = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_category_id = WSC_DEV_NETWORK_INFRA;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint16_t); }
-    m_oui = (uint32_t*)m_buff_ptr__;
+    m_oui = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!m_parse__) *m_oui = 0x50f204;
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint32_t); }
-    m_sub_category_id = (uint16_t*)m_buff_ptr__;
+    m_sub_category_id = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
@@ -2302,13 +2302,13 @@ bool cWscAttrDeviceName::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_DEV_NAME;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -2400,19 +2400,19 @@ bool cWscAttrRfBands::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_RF_BANDS;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_bands = (eWscRfBands*)m_buff_ptr__;
+    m_bands = reinterpret_cast<eWscRfBands*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(eWscRfBands))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscRfBands) << ") Failed!";
         return false;
@@ -2494,19 +2494,19 @@ bool cWscAttrAssociationState::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_ASSOC_STATE;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_assoc_state = (eWscAssoc*)m_buff_ptr__;
+    m_assoc_state = reinterpret_cast<eWscAssoc*>(m_buff_ptr__);
     if (!m_parse__) *m_assoc_state = WSC_ASSOC_NOT_ASSOC;
     if (!buffPtrIncrementSafe(sizeof(eWscAssoc))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAssoc) << ") Failed!";
@@ -2589,19 +2589,19 @@ bool cWscAttrDevicePasswordID::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_DEV_PASSWORD_ID;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_pw = (eWscValues16*)m_buff_ptr__;
+    m_pw = reinterpret_cast<eWscValues16*>(m_buff_ptr__);
     if (!m_parse__) *m_pw = DEV_PW_PUSHBUTTON;
     if (!buffPtrIncrementSafe(sizeof(eWscValues16))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscValues16) << ") Failed!";
@@ -2684,19 +2684,19 @@ bool cWscAttrConfigurationError::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_CONFIG_ERROR;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_cfg_err = (eWscValues16*)m_buff_ptr__;
+    m_cfg_err = reinterpret_cast<eWscValues16*>(m_buff_ptr__);
     if (!m_parse__) *m_cfg_err = WSC_CFG_NO_ERROR;
     if (!buffPtrIncrementSafe(sizeof(eWscValues16))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscValues16) << ") Failed!";
@@ -2779,19 +2779,19 @@ bool cWscAttrOsVersion::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_OS_VERSION;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_os_version = (uint32_t*)m_buff_ptr__;
+    m_os_version = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!m_parse__) *m_os_version = 0x80000001;
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
@@ -2874,19 +2874,19 @@ bool cWscAttrMac::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_MAC_ADDR;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_data = (sMacAddr*)m_buff_ptr__;
+    m_data = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
@@ -2984,13 +2984,13 @@ bool cWscAttrUuidE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_UUID_E;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -3080,19 +3080,19 @@ bool cWscAttrWscState::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_WSC_STATE;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_state = (eWscState*)m_buff_ptr__;
+    m_state = reinterpret_cast<eWscState*>(m_buff_ptr__);
     if (!m_parse__) *m_state = WSC_STATE_NOT_CONFIGURED;
     if (!buffPtrIncrementSafe(sizeof(eWscState))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscState) << ") Failed!";
@@ -3190,13 +3190,13 @@ bool cWscAttrUuidR::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_UUID_R;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -3302,13 +3302,13 @@ bool cWscAttrAuthenticator::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_AUTHENTICATOR;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -3414,13 +3414,13 @@ bool cWscAttrRegistrarNonce::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_REGISTRAR_NONCE;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -3535,54 +3535,54 @@ bool cWscAttrVersion2::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_VENDOR_EXTENSION;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_vendor_id_0 = (uint8_t*)m_buff_ptr__;
+    m_vendor_id_0 = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_vendor_id_0 = WSC_VENDOR_ID_WFA_1;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
-    m_vendor_id_1 = (uint8_t*)m_buff_ptr__;
+    m_vendor_id_1 = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_vendor_id_1 = WSC_VENDOR_ID_WFA_2;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
-    m_vendor_id_2 = (uint8_t*)m_buff_ptr__;
+    m_vendor_id_2 = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_vendor_id_2 = WSC_VENDOR_ID_WFA_3;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
-    m_subelement_id = (uint8_t*)m_buff_ptr__;
+    m_subelement_id = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_subelement_id = 0x0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
-    m_subelement_length = (uint8_t*)m_buff_ptr__;
+    m_subelement_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_subelement_length = 0x1;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
-    m_subelement_value = (uint8_t*)m_buff_ptr__;
+    m_subelement_value = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_subelement_value = WSC_VERSION2;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
@@ -3709,13 +3709,13 @@ bool cWscAttrSsid::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_SSID;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
@@ -3808,19 +3808,19 @@ bool cWscAttrAuthenticationType::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_AUTH_TYPE;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_data = (eWscAuth*)m_buff_ptr__;
+    m_data = reinterpret_cast<eWscAuth*>(m_buff_ptr__);
     if (!m_parse__) *m_data = eWscAuth::WSC_AUTH_WPA2PSK;
     if (!buffPtrIncrementSafe(sizeof(eWscAuth))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAuth) << ") Failed!";
@@ -3903,19 +3903,19 @@ bool cWscAttrEncryptionType::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_ENCR_TYPE;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_data = (eWscEncr*)m_buff_ptr__;
+    m_data = reinterpret_cast<eWscEncr*>(m_buff_ptr__);
     if (!m_parse__) *m_data = eWscEncr::WSC_ENCR_AES;
     if (!buffPtrIncrementSafe(sizeof(eWscEncr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscEncr) << ") Failed!";
@@ -4042,13 +4042,13 @@ bool cWscAttrNetworkKey::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eWscAttributes*)m_buff_ptr__;
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
     if (!m_parse__) *m_type = ATTR_NETWORK_KEY;
     if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";

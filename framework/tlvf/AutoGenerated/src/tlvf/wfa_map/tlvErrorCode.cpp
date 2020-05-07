@@ -92,25 +92,25 @@ bool tlvErrorCode::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eTlvTypeMap*)m_buff_ptr__;
+    m_type = reinterpret_cast<eTlvTypeMap*>(m_buff_ptr__);
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_ERROR_CODE;
     if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvTypeMap) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_reason_code = (eReasonCode*)m_buff_ptr__;
+    m_reason_code = reinterpret_cast<eReasonCode*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(eReasonCode))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eReasonCode) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(eReasonCode); }
-    m_sta_mac = (sMacAddr*)m_buff_ptr__;
+    m_sta_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;

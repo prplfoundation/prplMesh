@@ -129,19 +129,19 @@ bool tlvClientCapabilityReport::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eTlvTypeMap*)m_buff_ptr__;
+    m_type = reinterpret_cast<eTlvTypeMap*>(m_buff_ptr__);
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_CLIENT_CAPABILITY_REPORT;
     if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvTypeMap) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_result_code = (eResultCode*)m_buff_ptr__;
+    m_result_code = reinterpret_cast<eResultCode*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(eResultCode))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eResultCode) << ") Failed!";
         return false;

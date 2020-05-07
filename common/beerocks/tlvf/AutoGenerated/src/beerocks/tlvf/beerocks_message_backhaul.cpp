@@ -162,27 +162,27 @@ bool cACTION_BACKHAUL_REGISTER_REQUEST::init()
         return false;
     }
     m_hostap_iface_idx__  = beerocks::message::IFACE_NAME_LENGTH;
-    m_local_master = (uint8_t*)m_buff_ptr__;
+    m_local_master = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_local_gw = (uint8_t*)m_buff_ptr__;
+    m_local_gw = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_sta_iface_filter_low = (uint8_t*)m_buff_ptr__;
+    m_sta_iface_filter_low = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_onboarding = (uint8_t*)m_buff_ptr__;
+    m_onboarding = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_certification_mode = (uint8_t*)m_buff_ptr__;
+    m_certification_mode = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -250,7 +250,7 @@ bool cACTION_BACKHAUL_REGISTER_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_is_backhaul_manager = (uint8_t*)m_buff_ptr__;
+    m_is_backhaul_manager = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -643,7 +643,7 @@ bool cACTION_BACKHAUL_ENABLE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_iface_mac = (sMacAddr*)m_buff_ptr__;
+    m_iface_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
@@ -673,53 +673,53 @@ bool cACTION_BACKHAUL_ENABLE::init()
         return false;
     }
     m_pass_idx__  = beerocks::message::WIFI_PASS_MAX_LENGTH;
-    m_security_type = (uint32_t*)m_buff_ptr__;
+    m_security_type = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
     }
-    m_preferred_bssid = (sMacAddr*)m_buff_ptr__;
+    m_preferred_bssid = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_preferred_bssid->struct_init(); }
-    m_wire_iface_type = (uint8_t*)m_buff_ptr__;
+    m_wire_iface_type = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_wireless_iface_type = (uint8_t*)m_buff_ptr__;
+    m_wireless_iface_type = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_mem_only_psk = (uint8_t*)m_buff_ptr__;
+    m_mem_only_psk = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_backhaul_preferred_radio_band = (uint8_t*)m_buff_ptr__;
+    m_backhaul_preferred_radio_band = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_frequency_band = (beerocks::eFreqType*)m_buff_ptr__;
+    m_frequency_band = reinterpret_cast<beerocks::eFreqType*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(beerocks::eFreqType))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::eFreqType) << ") Failed!";
         return false;
     }
-    m_max_bandwidth = (beerocks::eWiFiBandwidth*)m_buff_ptr__;
+    m_max_bandwidth = reinterpret_cast<beerocks::eWiFiBandwidth*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(beerocks::eWiFiBandwidth))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::eWiFiBandwidth) << ") Failed!";
         return false;
     }
-    m_ht_supported = (uint8_t*)m_buff_ptr__;
+    m_ht_supported = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_ht_capability = (uint16_t*)m_buff_ptr__;
+    m_ht_capability = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
@@ -730,12 +730,12 @@ bool cACTION_BACKHAUL_ENABLE::init()
         return false;
     }
     m_ht_mcs_set_idx__  = beerocks::message::HT_MCS_SET_SIZE;
-    m_vht_supported = (uint8_t*)m_buff_ptr__;
+    m_vht_supported = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_vht_capability = (uint32_t*)m_buff_ptr__;
+    m_vht_capability = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
@@ -746,7 +746,7 @@ bool cACTION_BACKHAUL_ENABLE::init()
         return false;
     }
     m_vht_mcs_set_idx__  = beerocks::message::VHT_MCS_SET_SIZE;
-    m_preferred_channels_size = (uint8_t*)m_buff_ptr__;
+    m_preferred_channels_size = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_preferred_channels_size = 0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
@@ -823,7 +823,7 @@ bool cACTION_BACKHAUL_CONNECTED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sBackhaulParams*)m_buff_ptr__;
+    m_params = reinterpret_cast<sBackhaulParams*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sBackhaulParams))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sBackhaulParams) << ") Failed!";
         return false;
@@ -892,7 +892,7 @@ bool cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_stopped = (uint8_t*)m_buff_ptr__;
+    m_stopped = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -971,17 +971,17 @@ bool cACTION_BACKHAUL_ENABLE_APS_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_channel = (uint8_t*)m_buff_ptr__;
+    m_channel = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_bandwidth = (uint32_t*)m_buff_ptr__;
+    m_bandwidth = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
     }
-    m_center_channel = (uint8_t*)m_buff_ptr__;
+    m_center_channel = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -1050,7 +1050,7 @@ bool cACTION_BACKHAUL_ROAM_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sBackhaulRoam*)m_buff_ptr__;
+    m_params = reinterpret_cast<sBackhaulRoam*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sBackhaulRoam))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sBackhaulRoam) << ") Failed!";
         return false;
@@ -1119,7 +1119,7 @@ bool cACTION_BACKHAUL_ROAM_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_connected = (uint8_t*)m_buff_ptr__;
+    m_connected = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -1246,7 +1246,7 @@ bool cACTION_BACKHAUL_4ADDR_CONNECTED::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
@@ -1316,7 +1316,7 @@ bool cACTION_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sBackhaulRssi*)m_buff_ptr__;
+    m_params = reinterpret_cast<sBackhaulRssi*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sBackhaulRssi))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sBackhaulRssi) << ") Failed!";
         return false;
@@ -1386,7 +1386,7 @@ bool cACTION_BACKHAUL_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_attempts = (uint32_t*)m_buff_ptr__;
+    m_attempts = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
@@ -1513,7 +1513,7 @@ bool cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sNodeRssiMeasurementRequest*)m_buff_ptr__;
+    m_params = reinterpret_cast<sNodeRssiMeasurementRequest*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurementRequest))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sNodeRssiMeasurementRequest) << ") Failed!";
         return false;
@@ -1583,7 +1583,7 @@ bool cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sNodeRssiMeasurement*)m_buff_ptr__;
+    m_params = reinterpret_cast<sNodeRssiMeasurement*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sNodeRssiMeasurement))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sNodeRssiMeasurement) << ") Failed!";
         return false;
@@ -1653,7 +1653,7 @@ bool cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
@@ -1723,7 +1723,7 @@ bool cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sVapsList*)m_buff_ptr__;
+    m_params = reinterpret_cast<sVapsList*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sVapsList))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sVapsList) << ") Failed!";
         return false;
@@ -1841,13 +1841,13 @@ bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_client_mac = (sMacAddr*)m_buff_ptr__;
+    m_client_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_client_mac->struct_init(); }
-    m_bssid = (sMacAddr*)m_buff_ptr__;
+    m_bssid = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
@@ -1925,13 +1925,13 @@ bool cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_client_mac = (sMacAddr*)m_buff_ptr__;
+    m_client_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_client_mac->struct_init(); }
-    m_bssid = (sMacAddr*)m_buff_ptr__;
+    m_bssid = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
@@ -2006,12 +2006,12 @@ bool cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_sync = (uint8_t*)m_buff_ptr__;
+    m_sync = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    m_sta_mac = (sMacAddr*)m_buff_ptr__;
+    m_sta_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
@@ -2135,20 +2135,20 @@ bool cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_sta_mac = (sMacAddr*)m_buff_ptr__;
+    m_sta_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_sta_mac->struct_init(); }
-    m_bssid_info_list_length = (uint8_t*)m_buff_ptr__;
+    m_bssid_info_list_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_bssid_info_list_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
