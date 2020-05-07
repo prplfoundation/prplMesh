@@ -65,6 +65,8 @@
 #include <tlvf/wfa_map/tlvApCapability.h>
 #include <tlvf/wfa_map/tlvApHeCapabilities.h>
 #include <tlvf/wfa_map/tlvApHtCapabilities.h>
+#include <tlvf/wfa_map/tlvApMetricQuery.h>
+#include <tlvf/wfa_map/tlvApMetrics.h>
 #include <tlvf/wfa_map/tlvApOperationalBSS.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvApVhtCapabilities.h>
@@ -1633,7 +1635,11 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
             }
 
             if (soc && soc->slave == sd) {
-                return handle_slave_backhaul_message(soc, cmdu_rx);
+                if (cmdu_rx.getMessageType() == ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE) {
+                    return handle_slave_backhaul_message(soc, cmdu_rx);
+                } else {
+                    return handle_slave_1905_1_message(cmdu_rx, src_mac);
+                }
             } else {
                 LOG(ERROR) << "ACTION_BACKHAUL from none slave socket!";
                 return false;
@@ -2117,10 +2123,26 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     }
     case ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE: {
         return handle_multi_ap_policy_config_request(cmdu_rx, src_mac);
+    case ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE: {
+        return handle_ap_metrics_query(cmdu_rx, src_mac);
     }
     default: {
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
         // flows, since we won't expect a 1905 message not handled in this function
+        return false;
+    }
+    }
+    }
+}
+bool backhaul_manager::handle_slave_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                   const std::string &src_mac)
+{
+    switch (cmdu_rx.getMessageType()) {
+    case ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE: {
+        return handle_slave_ap_metrics_response(cmdu_rx, src_mac);
+    }
+    default: {
+        LOG(DEBUG) << "Unexpected 1905 message " << int(cmdu_rx.getMessageType());
         return false;
     }
     }
@@ -2410,6 +2432,162 @@ bool backhaul_manager::handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmd
 
     LOG(DEBUG) << "Sending AP_CAPABILITY_REPORT_MESSAGE , mid: " << std::hex << (int)mid;
     return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+}
+
+bool backhaul_manager::handle_ap_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                               const std::string &src_mac)
+{
+    std::vector<sMacAddr> bssid;
+    const auto mid           = cmdu_rx.getMessageId();
+    auto ap_metric_query_tlv = cmdu_rx.getClass<wfa_map::tlvApMetricQuery>();
+    if (!ap_metric_query_tlv) {
+        LOG(ERROR) << "AP Metrics Query CMDU mid=" << mid << " does not have AP Metric Query TLV";
+        return false;
+    }
+    for (size_t bssid_idx = 0; bssid_idx < ap_metric_query_tlv->bssid_list_length(); bssid_idx++) {
+        auto bssid_tuple = ap_metric_query_tlv->bssid_list(bssid_idx);
+        if (!std::get<0>(bssid_tuple)) {
+            LOG(ERROR) << "Failed to get bssid " << bssid_idx << " from AP_METRICS_QUERY";
+            return false;
+        }
+        bssid.push_back(std::get<1>(bssid_tuple));
+        LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
+                   << "  bssid " << std::get<1>(bssid_tuple);
+    }
+
+    auto ret = false;
+    for (auto socket : slaves_sockets) {
+        for (const auto &mac : bssid) {
+            int i = 0;
+            if (mac == socket->vaps_list.vaps[i].mac) {
+                LOG(DEBUG) << "Forwarding AP_METRICS_QUERY_MESSAGE message to son_slave, bssid: "
+                           << std::hex << network_utils::mac_to_string(mac);
+
+                auto forward =
+                    cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE);
+                if (!forward) {
+                    LOG(ERROR) << "Failed to create AP_METRICS_QUERY_MESSAGE";
+                    return false;
+                }
+
+                auto query = cmdu_tx.addClass<wfa_map::tlvApMetricQuery>();
+                if (!query) {
+                    LOG(ERROR) << "Failed addClass<wfa_map::tlvApMetricQuery>";
+                    return false;
+                }
+
+                if (!query->alloc_bssid_list(1)) {
+                    LOG(ERROR) << "Failed allocate memory for bssid_list";
+                    return false;
+                }
+
+                auto list         = query->bssid_list(0);
+                std::get<0>(list) = true;
+                std::get<1>(list) = mac;
+
+                if (!message_com::send_cmdu(socket->slave, cmdu_tx)) {
+                    LOG(ERROR) << "Failed forwarding AP_METRICS_QUERY_MESSAGE message to son_slave";
+                    ret = false;
+                    continue;
+                } else {
+                    ret = true;
+                    // Fill a query vector
+                    m_ap_metric_query.push_back({socket->slave, mac});
+                }
+            }
+            i++;
+        }
+    }
+    return ret;
+}
+
+bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                        const std::string &src_mac)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received AP_METRICS_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
+
+    auto ap_metrics_tlv = cmdu_rx.getClass<wfa_map::tlvApMetrics>();
+    if (!ap_metrics_tlv) {
+        LOG(ERROR) << "Failed cmdu_rx.getClass<wfa_map::tlvApMetrics>(), mid=" << std::hex
+                   << int(mid);
+        return false;
+    }
+
+    auto bssid_tlv = ap_metrics_tlv->bssid();
+    auto mac       = std::find_if(
+        m_ap_metric_query.begin(), m_ap_metric_query.end(),
+        [&bssid_tlv](sApMetricsQuery const &query) { return query.bssid == bssid_tlv; });
+
+    if (mac == m_ap_metric_query.end()) {
+        LOG(ERROR) << "Failed search in ap_metric_query for bssid: " << bssid_tlv
+                   << " from mid=" << std::hex << int(mid);
+        return false;
+    }
+
+    sApMetrics metric;
+    // Copy data to the response vector
+    metric.bssid               = ap_metrics_tlv->bssid();
+    metric.channel_utilization = ap_metrics_tlv->channel_utilization();
+    metric.number_of_stas_currently_associated =
+        ap_metrics_tlv->number_of_stas_currently_associated();
+    metric.estimated_service_parameters = ap_metrics_tlv->estimated_service_parameters();
+    auto info                           = ap_metrics_tlv->estimated_service_info_field();
+    if (ap_metrics_tlv->estimated_service_info_field_length()) {
+        for (size_t i = 0; i < ap_metrics_tlv->estimated_service_info_field_length(); i++) {
+            metric.estimated_service_info_field.push_back(info[i]);
+        }
+    }
+
+    // Fill a response vector
+    m_ap_metric_response.push_back({metric});
+
+    // Remove an entry from the processed query
+    m_ap_metric_query.erase(
+        std::remove_if(m_ap_metric_query.begin(), m_ap_metric_query.end(),
+                       [&](sApMetricsQuery const &query) { return mac->bssid == query.bssid; }),
+        m_ap_metric_query.end());
+
+    if (!m_ap_metric_query.empty()) {
+        return true;
+    }
+
+    // We received all responses - prepare and send response message to the controller
+    auto cmdu_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE);
+
+    if (!cmdu_header) {
+        LOG(ERROR) << "Failed building IEEE1905 AP_METRICS_RESPONSE_MESSAGE";
+        return false;
+    }
+
+    // Prepare tlvApMetrics for each processed query
+    for (const auto &response : m_ap_metric_response) {
+        auto ap_metrics_response_tlv = cmdu_tx.addClass<wfa_map::tlvApMetrics>();
+        if (!ap_metrics_response_tlv) {
+            LOG(ERROR) << "Failed addClass<wfa_map::tlvApMetrics>";
+            return false;
+        }
+
+        ap_metrics_response_tlv->bssid()               = response.metric.bssid;
+        ap_metrics_response_tlv->channel_utilization() = response.metric.channel_utilization;
+        ap_metrics_response_tlv->number_of_stas_currently_associated() =
+            response.metric.number_of_stas_currently_associated;
+        ap_metrics_response_tlv->estimated_service_parameters() =
+            response.metric.estimated_service_parameters;
+        if (!ap_metrics_response_tlv->alloc_estimated_service_info_field(
+                response.metric.estimated_service_info_field.size())) {
+            LOG(ERROR) << "Couldn't allocate "
+                          "ap_metrics_response_tlv->alloc_estimated_service_info_field";
+            return false;
+        }
+        std::copy_n(response.metric.estimated_service_info_field.begin(),
+                    response.metric.estimated_service_info_field.size(),
+                    ap_metrics_response_tlv->estimated_service_info_field());
+    }
+
+    LOG(DEBUG) << "Sending AP_METRICS_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
+
+    return send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
 }
 
 /**

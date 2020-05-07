@@ -14,6 +14,8 @@
 
 #include <beerocks/tlvf/beerocks_message.h>
 
+#include <tlvf/wfa_map/tlvApMetricQuery.h>
+
 #include <cmath>
 #include <vector>
 
@@ -1336,6 +1338,8 @@ bool monitor_thread::handle_cmdu_ieee1905_1_message(Socket &sd, ieee1905_1::Cmdu
     auto cmdu_message_type = cmdu_rx.getMessageType();
 
     switch (cmdu_message_type) {
+    case ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE:
+        return handle_ap_metrics_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE:
         return handle_multi_ap_policy_config_request(sd, cmdu_rx);
     default:
@@ -1401,6 +1405,48 @@ bool monitor_thread::handle_multi_ap_policy_config_request(Socket &sd,
     }
 
     return true;
+}
+
+bool monitor_thread::handle_ap_metrics_query(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    const auto mid           = cmdu_rx.getMessageId();
+    auto ap_metric_query_tlv = cmdu_rx.getClass<wfa_map::tlvApMetricQuery>();
+    if (!ap_metric_query_tlv) {
+        LOG(ERROR) << "AP Metrics Query CMDU mid=" << mid << " does not have AP Metric Query TLV";
+        return false;
+    }
+
+    auto cmdu_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE);
+    if (!cmdu_header) {
+        LOG(ERROR) << "Failed building AP_METRICS_RESPONSE_MESSAGE";
+        return false;
+    }
+
+    for (size_t bssid_idx = 0; bssid_idx < ap_metric_query_tlv->bssid_list_length(); bssid_idx++) {
+        auto bssid_tuple = ap_metric_query_tlv->bssid_list(bssid_idx);
+        if (!std::get<0>(bssid_tuple)) {
+            LOG(ERROR) << "Failed to get bssid " << bssid_idx << " from AP_METRICS_QUERY";
+            return false;
+        }
+        const auto &bssid = std::get<1>(bssid_tuple);
+        LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
+                   << "  bssid " << bssid;
+        if (!mon_stats.add_ap_metrics(cmdu_tx, bssid)) {
+            return false;
+        }
+
+        //TODO: find the way how to check policy config was enabled or not
+        //if (policy config) {
+        //    auto tlv1 = mdu_tx.addClass<wfa_map::tlv>(); //STA tlvAssociatedStaLinkMetrics
+        //
+        //    //TODO add tlvTrafficStats
+        //}
+    }
+
+    LOG(DEBUG) << "Sending AP_METRICS_RESPONSE_MESSAGE to slave_socket, mid=" << std::hex
+               << int(mid);
+
+    return message_com::send_cmdu(slave_socket, cmdu_tx);
 }
 
 bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr)
