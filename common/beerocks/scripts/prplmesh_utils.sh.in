@@ -356,7 +356,7 @@ main() {
     # Give write permissions (linux only)
     # shellcheck disable=SC2050
     if [ "@TARGET_PLATFORM@" = "linux" ]; then
-        chmod -R +o+w "/tmp/${SUDO_USER:-${USER}}"
+        chmod -R +o+w "/tmp/${SUDO_USER:-${USER}}" || true
     fi
 }
 
