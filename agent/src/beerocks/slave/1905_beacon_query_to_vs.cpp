@@ -18,7 +18,7 @@ bool load(std::shared_ptr<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RE
     // get the correct type of the message
     auto beacon_metrics_query = rhs.getClass<wfa_map::tlvBeaconMetricsQuery>();
     if (!beacon_metrics_query) {
-        LOG(ERROR) << "tlvBeaconMetricsQuery is missing - can't load invalid input";
+        LOG(ERROR) << "tlvBeaconMetricsQuery is missing - can't read from invalid input";
         return false;
     }
 
