@@ -549,17 +549,6 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
             request_out->mac() = request_in->params().mac;
             message_com::send_cmdu(ap_manager_socket, cmdu_tx);
         }
-
-        //notify monitor
-        auto request_out = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST>(
-            cmdu_tx, beerocks_header->id());
-        if (request_out == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST message!";
-            return false;
-        }
-        request_out->params() = request_in->params();
-        message_com::send_cmdu(monitor_socket, cmdu_tx);
         break;
     }
 
