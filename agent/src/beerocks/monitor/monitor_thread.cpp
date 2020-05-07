@@ -672,10 +672,7 @@ bool monitor_thread::update_ap_stats()
 
 bool monitor_thread::start_monitoring_sta(const std::string &sta_mac, const int vap_id)
 {
-    auto sta_node = mon_db.sta_find(sta_mac);
-    if (sta_node) {
-        mon_db.sta_erase(sta_mac);
-    }
+    stop_monitoring_sta(sta_mac);
 
     auto vap_node = mon_db.vap_get_by_id(vap_id);
     if (vap_node == nullptr) {
@@ -683,7 +680,7 @@ bool monitor_thread::start_monitoring_sta(const std::string &sta_mac, const int 
         return false;
     }
 
-    sta_node = mon_db.sta_add(sta_mac, vap_id);
+    auto sta_node = mon_db.sta_add(sta_mac, vap_id);
     sta_node->set_bridge_4addr_mac(al_mac);
 
 #ifdef BEEROCKS_RDKB
