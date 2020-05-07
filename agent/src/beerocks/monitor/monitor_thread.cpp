@@ -829,12 +829,10 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
         std::string sta_mac  = network_utils::mac_to_string(notification->mac());
         std::string sta_ipv4 = network_utils::ipv4_to_string(notification->ipv4());
 
-        auto sta_node = mon_db.sta_find(sta_mac);
-        if (!sta_node) {
-            LOG(ERROR) << "sta " << sta_mac << " hasn't been found on mon_db";
+        if (!monitored_sta_set_ipv4(sta_mac, sta_ipv4)) {
+            LOG(ERROR) << "failed to set ipv4 address " << sta_ipv4 << " for STA " << sta_mac;
             return false;
         }
-        sta_node->set_ipv4(sta_ipv4);
         break;
     }
 #ifdef BEEROCKS_RDKB
