@@ -2168,6 +2168,7 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
         // flows, since we won't expect a 1905 message not handled in this function
         return false;
     }
+    }
 }
 
 sMacAddr backhaul_manager::get_sta_bssid(
