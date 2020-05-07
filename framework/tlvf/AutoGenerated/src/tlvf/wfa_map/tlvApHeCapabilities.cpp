@@ -149,26 +149,26 @@ bool tlvApHeCapabilities::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eTlvTypeMap*)m_buff_ptr__;
+    m_type = reinterpret_cast<eTlvTypeMap*>(m_buff_ptr__);
     if (!m_parse__) *m_type = eTlvTypeMap::TLV_AP_HE_CAPABILITIES;
     if (!buffPtrIncrementSafe(sizeof(eTlvTypeMap))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvTypeMap) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_radio_uid = (sMacAddr*)m_buff_ptr__;
+    m_radio_uid = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_radio_uid->struct_init(); }
-    m_supported_he_mcs_length = (uint8_t*)m_buff_ptr__;
+    m_supported_he_mcs_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_supported_he_mcs_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
@@ -182,14 +182,14 @@ bool tlvApHeCapabilities::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) * (supported_he_mcs_length) << ") Failed!";
         return false;
     }
-    m_flags1 = (sFlags1*)m_buff_ptr__;
+    m_flags1 = reinterpret_cast<sFlags1*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sFlags1))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sFlags1) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sFlags1); }
     if (!m_parse__) { m_flags1->struct_init(); }
-    m_flags2 = (sFlags2*)m_buff_ptr__;
+    m_flags2 = reinterpret_cast<sFlags2*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sFlags2))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sFlags2) << ") Failed!";
         return false;

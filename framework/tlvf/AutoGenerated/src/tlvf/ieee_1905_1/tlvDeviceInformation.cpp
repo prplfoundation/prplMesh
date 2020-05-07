@@ -161,26 +161,26 @@ bool tlvDeviceInformation::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eTlvType*)m_buff_ptr__;
+    m_type = reinterpret_cast<eTlvType*>(m_buff_ptr__);
     if (!m_parse__) *m_type = eTlvType::TLV_DEVICE_INFORMATION;
     if (!buffPtrIncrementSafe(sizeof(eTlvType))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvType) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_mac->struct_init(); }
-    m_local_interface_list_length = (uint8_t*)m_buff_ptr__;
+    m_local_interface_list_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_local_interface_list_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
@@ -326,18 +326,18 @@ bool cLocalInterfaceInfo::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    m_media_type = (eMediaType*)m_buff_ptr__;
+    m_media_type = reinterpret_cast<eMediaType*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(eMediaType))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eMediaType) << ") Failed!";
         return false;
     }
-    m_media_info_length = (uint8_t*)m_buff_ptr__;
+    m_media_info_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_media_info_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";

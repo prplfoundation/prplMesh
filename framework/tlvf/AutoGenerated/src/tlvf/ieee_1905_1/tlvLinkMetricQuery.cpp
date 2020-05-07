@@ -91,26 +91,26 @@ bool tlvLinkMetricQueryAllNeighbors::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eTlvType*)m_buff_ptr__;
+    m_type = reinterpret_cast<eTlvType*>(m_buff_ptr__);
     if (!m_parse__) *m_type = eTlvType::TLV_LINK_METRIC_QUERY;
     if (!buffPtrIncrementSafe(sizeof(eTlvType))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvType) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_neighbor_type = (eLinkMetricNeighborType*)m_buff_ptr__;
+    m_neighbor_type = reinterpret_cast<eLinkMetricNeighborType*>(m_buff_ptr__);
     if (!m_parse__) *m_neighbor_type = eLinkMetricNeighborType::ALL_NEIGHBORS;
     if (!buffPtrIncrementSafe(sizeof(eLinkMetricNeighborType))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eLinkMetricNeighborType) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(eLinkMetricNeighborType); }
-    m_link_metrics_type = (eLinkMetricsType*)m_buff_ptr__;
+    m_link_metrics_type = reinterpret_cast<eLinkMetricsType*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(eLinkMetricsType))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eLinkMetricsType) << ") Failed!";
         return false;
@@ -209,32 +209,32 @@ bool tlvLinkMetricQuery::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_type = (eTlvType*)m_buff_ptr__;
+    m_type = reinterpret_cast<eTlvType*>(m_buff_ptr__);
     if (!m_parse__) *m_type = eTlvType::TLV_LINK_METRIC_QUERY;
     if (!buffPtrIncrementSafe(sizeof(eTlvType))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eTlvType) << ") Failed!";
         return false;
     }
-    m_length = (uint16_t*)m_buff_ptr__;
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
     if (!m_parse__) *m_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
         return false;
     }
-    m_neighbor_type = (eLinkMetricNeighborType*)m_buff_ptr__;
+    m_neighbor_type = reinterpret_cast<eLinkMetricNeighborType*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(eLinkMetricNeighborType))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eLinkMetricNeighborType) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(eLinkMetricNeighborType); }
-    m_mac_al_1905_device = (sMacAddr*)m_buff_ptr__;
+    m_mac_al_1905_device = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if(m_length && !m_parse__){ (*m_length) += sizeof(sMacAddr); }
     if (!m_parse__) { m_mac_al_1905_device->struct_init(); }
-    m_link_metrics_type = (eLinkMetricsType*)m_buff_ptr__;
+    m_link_metrics_type = reinterpret_cast<eLinkMetricsType*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(eLinkMetricsType))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eLinkMetricsType) << ") Failed!";
         return false;

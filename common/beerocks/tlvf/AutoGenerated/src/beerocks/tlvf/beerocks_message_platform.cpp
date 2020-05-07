@@ -74,7 +74,7 @@ bool cACTION_PLATFORM_SON_SLAVE_BACKHAUL_CONNECTION_COMPLETE_NOTIFICATION::init(
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_is_backhaul_manager = (uint8_t*)m_buff_ptr__;
+    m_is_backhaul_manager = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -247,19 +247,19 @@ bool cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_platform_settings = (sPlatformSettings*)m_buff_ptr__;
+    m_platform_settings = reinterpret_cast<sPlatformSettings*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sPlatformSettings))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sPlatformSettings) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_platform_settings->struct_init(); }
-    m_wlan_settings = (sWlanSettings*)m_buff_ptr__;
+    m_wlan_settings = reinterpret_cast<sWlanSettings*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sWlanSettings))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWlanSettings) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_wlan_settings->struct_init(); }
-    m_valid = (uint32_t*)m_buff_ptr__;
+    m_valid = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
@@ -328,7 +328,7 @@ bool cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sArpMonitorData*)m_buff_ptr__;
+    m_params = reinterpret_cast<sArpMonitorData*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sArpMonitorData))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sArpMonitorData) << ") Failed!";
         return false;
@@ -398,7 +398,7 @@ bool cACTION_PLATFORM_WLAN_PARAMS_CHANGED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_wlan_settings = (sWlanSettings*)m_buff_ptr__;
+    m_wlan_settings = reinterpret_cast<sWlanSettings*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sWlanSettings))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWlanSettings) << ") Failed!";
         return false;
@@ -514,23 +514,23 @@ bool cACTION_PLATFORM_DHCP_MONITOR_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_dhcp_op = (eDHCPOp*)m_buff_ptr__;
+    m_dhcp_op = reinterpret_cast<eDHCPOp*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(eDHCPOp))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eDHCPOp) << ") Failed!";
         return false;
     }
-    m_op = (uint32_t*)m_buff_ptr__;
+    m_op = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
     }
-    m_mac = (sMacAddr*)m_buff_ptr__;
+    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_mac->struct_init(); }
-    m_ipv4 = (beerocks::net::sIpv4Addr*)m_buff_ptr__;
+    m_ipv4 = reinterpret_cast<beerocks::net::sIpv4Addr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(beerocks::net::sIpv4Addr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::net::sIpv4Addr) << ") Failed!";
         return false;
@@ -606,7 +606,7 @@ bool cACTION_PLATFORM_CHANGE_MODULE_LOGGING_LEVEL::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sLoggingLevelChange*)m_buff_ptr__;
+    m_params = reinterpret_cast<sLoggingLevelChange*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sLoggingLevelChange))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sLoggingLevelChange) << ") Failed!";
         return false;
@@ -676,7 +676,7 @@ bool cACTION_PLATFORM_ARP_QUERY_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sArpQuery*)m_buff_ptr__;
+    m_params = reinterpret_cast<sArpQuery*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sArpQuery))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sArpQuery) << ") Failed!";
         return false;
@@ -746,7 +746,7 @@ bool cACTION_PLATFORM_ARP_QUERY_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sArpMonitorData*)m_buff_ptr__;
+    m_params = reinterpret_cast<sArpMonitorData*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sArpMonitorData))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sArpMonitorData) << ") Failed!";
         return false;
@@ -874,7 +874,7 @@ bool cACTION_PLATFORM_ONBOARD_QUERY_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sOnboarding*)m_buff_ptr__;
+    m_params = reinterpret_cast<sOnboarding*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sOnboarding))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sOnboarding) << ") Failed!";
         return false;
@@ -944,7 +944,7 @@ bool cACTION_PLATFORM_ONBOARD_SET_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sOnboarding*)m_buff_ptr__;
+    m_params = reinterpret_cast<sOnboarding*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sOnboarding))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sOnboarding) << ") Failed!";
         return false;
@@ -1105,7 +1105,7 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_GET_REQUEST::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_vap_id = (uint8_t*)m_buff_ptr__;
+    m_vap_id = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -1186,19 +1186,19 @@ bool cACTION_PLATFORM_WIFI_CREDENTIALS_GET_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_front_params = (sWifiCredentials*)m_buff_ptr__;
+    m_front_params = reinterpret_cast<sWifiCredentials*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sWifiCredentials))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWifiCredentials) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_front_params->struct_init(); }
-    m_back_params = (sWifiCredentials*)m_buff_ptr__;
+    m_back_params = reinterpret_cast<sWifiCredentials*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sWifiCredentials))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWifiCredentials) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_back_params->struct_init(); }
-    m_result = (uint32_t*)m_buff_ptr__;
+    m_result = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
@@ -1331,13 +1331,13 @@ bool cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sAdminCredentials*)m_buff_ptr__;
+    m_params = reinterpret_cast<sAdminCredentials*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sAdminCredentials))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sAdminCredentials) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    m_result = (uint32_t*)m_buff_ptr__;
+    m_result = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
@@ -1470,13 +1470,13 @@ bool cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = (sDeviceInfo*)m_buff_ptr__;
+    m_params = reinterpret_cast<sDeviceInfo*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sDeviceInfo))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sDeviceInfo) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    m_result = (uint32_t*)m_buff_ptr__;
+    m_result = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
@@ -1602,7 +1602,7 @@ bool cACTION_PLATFORM_LOCAL_MASTER_GET_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_local_master = (uint8_t*)m_buff_ptr__;
+    m_local_master = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
@@ -1671,7 +1671,7 @@ bool cACTION_PLATFORM_VERSION_MISMATCH_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_versions = (sVersions*)m_buff_ptr__;
+    m_versions = reinterpret_cast<sVersions*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sVersions))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sVersions) << ") Failed!";
         return false;
@@ -1741,7 +1741,7 @@ bool cACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_versions = (sVersions*)m_buff_ptr__;
+    m_versions = reinterpret_cast<sVersions*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sVersions))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sVersions) << ") Failed!";
         return false;
@@ -1875,13 +1875,13 @@ bool cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_versions = (sVersions*)m_buff_ptr__;
+    m_versions = reinterpret_cast<sVersions*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sVersions))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sVersions) << ") Failed!";
         return false;
     }
     if (!m_parse__) { m_versions->struct_init(); }
-    m_result = (uint32_t*)m_buff_ptr__;
+    m_result = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
@@ -1978,7 +1978,7 @@ bool cACTION_PLATFORM_ERROR_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_code = (uint32_t*)m_buff_ptr__;
+    m_code = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
