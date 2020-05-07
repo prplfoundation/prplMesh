@@ -127,28 +127,27 @@ const char *backhaul_manager::s_arrStates[] = {FOREACH_STATE(GENERATE_STRING)};
  * 8 IEEE 802.11ax (5 GHz)       5 GHz      160 MHz      Not included in Table 6-12—Media type (intfType), WiFi6 is specified to use 0x0108 in R2
  */
 static const std::vector<std::tuple<eFreqType, eWiFiBandwidth, ieee1905_1::eMediaType>>
-    table_6_12_media_type_802_11 //
-    {
-        {eFreqType::FREQ_24G, eWiFiBandwidth::BANDWIDTH_20, //
-         ieee1905_1::eMediaType::IEEE_802_11G_2_4_GHZ},
+    table_6_12_media_type_802_11{
+        std::make_tuple(eFreqType::FREQ_24G, eWiFiBandwidth::BANDWIDTH_20,
+                        ieee1905_1::eMediaType::IEEE_802_11G_2_4_GHZ),
 
-        {eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_20, //
-         ieee1905_1::eMediaType::IEEE_802_11A_5_GHZ},
+        std::make_tuple(eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_20,
+                        ieee1905_1::eMediaType::IEEE_802_11A_5_GHZ),
 
-        {eFreqType::FREQ_24G, eWiFiBandwidth::BANDWIDTH_40, //
-         ieee1905_1::eMediaType::IEEE_802_11N_2_4_GHZ},
+        std::make_tuple(eFreqType::FREQ_24G, eWiFiBandwidth::BANDWIDTH_40,
+                        ieee1905_1::eMediaType::IEEE_802_11N_2_4_GHZ),
 
-        {eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_40, //
-         ieee1905_1::eMediaType::IEEE_802_11N_5_GHZ},
+        std::make_tuple(eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_40,
+                        ieee1905_1::eMediaType::IEEE_802_11N_5_GHZ),
 
-        {eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_80, //
-         ieee1905_1::eMediaType::IEEE_802_11AC_5_GHZ},
+        std::make_tuple(eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_80,
+                        ieee1905_1::eMediaType::IEEE_802_11AC_5_GHZ),
 
-        {eFreqType::FREQ_24G, eWiFiBandwidth::BANDWIDTH_160, //
-         ieee1905_1::eMediaType::IEEE_802_11AX},
+        std::make_tuple(eFreqType::FREQ_24G, eWiFiBandwidth::BANDWIDTH_160,
+                        ieee1905_1::eMediaType::IEEE_802_11AX),
 
-        {eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_160, //
-         ieee1905_1::eMediaType::IEEE_802_11AX},
+        std::make_tuple(eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_160,
+                        ieee1905_1::eMediaType::IEEE_802_11AX),
 
     };
 
