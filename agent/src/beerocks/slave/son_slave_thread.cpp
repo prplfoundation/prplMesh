@@ -1938,21 +1938,6 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         std::string client_mac = network_utils::mac_to_string(notification_in->params().mac);
         LOG(INFO) << "client disconnected sta_mac=" << client_mac;
 
-        //notify monitor
-        {
-            auto notification_out = message_com::create_vs_message<
-                beerocks_message::cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST>(
-                cmdu_tx, beerocks_header->id());
-
-            if (notification_out == nullptr) {
-                LOG(ERROR)
-                    << "Failed building cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST message!";
-                break;
-            }
-            notification_out->mac() = notification_in->params().mac;
-            message_com::send_cmdu(monitor_socket, cmdu_tx);
-        }
-
         //notify master
         if (!master_socket) {
             LOG(DEBUG) << "Controller is not connected";
