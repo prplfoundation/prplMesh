@@ -133,7 +133,7 @@ private:
     bool handle_cmdu_monitor_message(Socket *sd,
                                      std::shared_ptr<beerocks::beerocks_header> beerocks_header);
     bool handle_cmdu_control_ieee1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
-
+    bool handle_cmdu_monitor_ieee1905_1_message(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     void process_keep_alive();
 
     bool slave_fsm(bool &call_slave_select);
@@ -238,7 +238,8 @@ private:
     bool handle_autoconfiguration_renew(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool autoconfig_wsc_add_m1();
     bool send_operating_channel_report();
-    bool handle_ap_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_ap_metrics_query(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_monitor_ap_metrics_response(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_channel_preference_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_channel_selection_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool channel_selection_get_channel_preference(ieee1905_1::CmduMessageRx &cmdu_rx);

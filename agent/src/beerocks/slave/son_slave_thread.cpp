@@ -27,6 +27,7 @@
 #include <tlvf/WSC/AttrList.h>
 #include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
 #include <tlvf/ieee_1905_1/tlvLinkMetricQuery.h>
+#include <tlvf/ieee_1905_1/tlvMacAddress.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
 #include <tlvf/wfa_map/tlvApMetricQuery.h>
@@ -42,7 +43,6 @@
 #include <tlvf/wfa_map/tlvSteeringBTMReport.h>
 #include <tlvf/wfa_map/tlvSteeringRequest.h>
 #include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
-
 // BPL Error Codes
 #include <bpl/bpl_cfg.h>
 #include <bpl/bpl_err.h>
@@ -337,6 +337,8 @@ bool slave_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             LOG(ERROR) << "Unknown message, action: " << int(beerocks_header->action());
         }
         }
+    } else if (sd == monitor_socket) {
+        handle_cmdu_monitor_ieee1905_1_message(*sd, cmdu_rx);
     } else { // IEEE 1905.1 message
         return handle_cmdu_control_ieee1905_1_message(sd, cmdu_rx);
     }
@@ -356,8 +358,7 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         LOG(WARNING) << "master_socket == nullptr";
         return true;
     } else if (master_socket != sd) {
-        LOG(WARNING) << "Unknown socket, cmdu message type: " << int(cmdu_message_type);
-        return true;
+        LOG(DEBUG) << "Unknown socket, cmdu message type: " << int(cmdu_message_type); //TODO:
     }
 
     if (slave_state == STATE_STOPPED) {
@@ -376,7 +377,7 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
     case ieee1905_1::eMessageType::CLIENT_ASSOCIATION_CONTROL_REQUEST_MESSAGE:
         return handle_client_association_request(sd, cmdu_rx);
     case ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE:
-        return handle_ap_metrics_query(sd, cmdu_rx);
+        return handle_ap_metrics_query(*sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_QUERY_MESSAGE:
         return handle_channel_preference_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE:
@@ -393,6 +394,19 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
     }
 
     return true;
+}
+
+bool slave_thread::handle_cmdu_monitor_ieee1905_1_message(Socket &sd,
+                                                          ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto cmdu_message_type = cmdu_rx.getMessageType();
+    switch (cmdu_message_type) {
+    case ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE:
+        return handle_monitor_ap_metrics_response(sd, cmdu_rx);
+    default:
+        LOG(ERROR) << "Unknown CMDU message type: " << std::hex << int(cmdu_message_type);
+        return false;
+    }
 }
 
 bool slave_thread::handle_cmdu_control_message(Socket *sd,
@@ -4536,23 +4550,34 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
     }
 }
 
-bool slave_thread::handle_ap_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+bool slave_thread::handle_ap_metrics_query(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    const auto mid            = cmdu_rx.getMessageId();
-    auto ap_metrics_query_tlv = cmdu_rx.getClass<wfa_map::tlvApMetricQuery>();
-    if (!ap_metrics_query_tlv) {
-        LOG(ERROR) << "AP Metrics Query CMDU mid=" << mid << " does not have AP Metric Query TLV";
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Forwarding AP_METRICS_QUERY_MESSAGE to monitor_socket, mid=" << std::hex
+               << int(mid);
+    uint16_t length = message_com::get_uds_header(cmdu_rx)->length;
+    cmdu_rx.swap(); // swap back before forwarding
+    if (!message_com::forward_cmdu_to_uds(monitor_socket, cmdu_rx, length)) {
+        LOG(ERROR) << "Failed sending AP_METRICS_QUERY_MESSAGE message to monitor_socket";
         return false;
     }
-    for (int bssid_idx = 0; bssid_idx < ap_metrics_query_tlv->bssid_list_length(); bssid_idx++) {
-        auto bssid = ap_metrics_query_tlv->bssid_list(bssid_idx);
-        if (!std::get<0>(bssid)) {
-            LOG(ERROR) << "Failed to get bssid " << bssid_idx << " from AP_METRICS_QUERY";
-            return false;
-        }
-        LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
-                   << "  bssid " << std::get<1>(bssid);
+    return true;
+}
+
+bool slave_thread::handle_monitor_ap_metrics_response(Socket &sd,
+                                                      ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Forwarding AP_METRICS_RESPONSE_MESSAGE to backhaul_manager, mid=" << std::hex
+               << int(mid);
+
+    uint16_t length = message_com::get_uds_header(cmdu_rx)->length;
+    cmdu_rx.swap(); // swap back before forwarding
+    if (!message_com::forward_cmdu_to_uds(backhaul_manager_socket, cmdu_rx, length)) {
+        LOG(ERROR) << "Failed sending AP_METRICS_RESPONSE_MESSAGE message to backhaul_manager";
+        return false;
     }
+
     return true;
 }
 
