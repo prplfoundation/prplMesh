@@ -45,6 +45,7 @@
 #include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
 
 #include "1905_beacon_query_to_vs.h"
+#include "vs_beacon_response_to_1905.h"
 
 // BPL Error Codes
 #include <bpl/bpl_cfg.h>
@@ -2709,9 +2710,10 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
             return false;
         }
 
-        // fill response_out with values from reposne_in
-        // ...
-        // ...
+        if (!gate::load(cmdu_tx, response_in)) {
+            LOG(ERROR) << "unable to load vs beacon response into 1905";
+            return false;
+        }
 
         // send the response
         send_cmdu_to_controller(cmdu_tx);
