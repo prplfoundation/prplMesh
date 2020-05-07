@@ -1831,6 +1831,12 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
     }
     case Event::STA_Disconnected: {
         LOG(TRACE) << "Received STA_Disconnected event";
+        auto msg = static_cast<bwl::sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION *>(data);
+        auto mac = tlvf::mac_to_string(msg->mac);
+
+        LOG(INFO) << "STA_Disconnected event: mac = " << mac;
+
+        mon_db.sta_erase(mac);
         break;
     }
 
