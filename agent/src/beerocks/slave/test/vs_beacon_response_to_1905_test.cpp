@@ -8,7 +8,8 @@ constexpr const int RET_OK          = 0;
 constexpr const int RET_NO_BEEROCKS = -1;
 constexpr const int RET_NO_1905     = -2;
 
-/*
+
+/* for the INPUT
 typedef struct sBeaconResponse11k {
     uint8_t channel;
     uint8_t op_class;
@@ -40,7 +41,7 @@ std::ostream &operator<<(std::ostream &o, const beerocks_message::sBeaconRespons
     o << "\n"
       << "channel:                          "
       << "0x" << std::hex << +response.channel << "\n"
-      << "op_class:                         "   
+      << "op_class:                         "
       << "0x" << std::hex << +response.op_class << "\n"
       << "dialog_token:                     " << +response.dialog_token << "\n"
       << "measurement_token:                " << +response.measurement_token << "\n"
@@ -63,7 +64,6 @@ std::ostream &operator<<(std::ostream &o, const beerocks_message::sBeaconRespons
     return o;
 }
 
-
 std::ostream &operator<<(std::ostream &o,
                          beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE &msg)
 {
@@ -76,8 +76,19 @@ std::ostream &operator<<(std::ostream &o,
     return o;
 }
 
+/* for the OUTPUT
+// yet to be written - print the 1905 message
+*/
+
+
+
 void fillVsValues(std::shared_ptr<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE> vs)
 {
+    if (!vs) {
+        return;
+    }
+
+    vs->params().sta_mac = sMacAddr{0x01, 0x02, 0x03, 0x04, 0x05, 0x06};
 }
 
 int main()
@@ -112,11 +123,10 @@ int main()
     tx.addClass<wfa_map::tlvBeaconMetricsResponse>();
 
     // DUT -
-    gate::load(/*dst*/tx, /*src*/beerocks);
+    gate::load(/*dst*/ tx, /*src*/ beerocks);
 
     // verification (hunman readable output)
-    beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE &msg = *beerocks;
-    std::cout << msg;
+    std::cout << "yet to be written";
 
     return RET_OK;
 }
