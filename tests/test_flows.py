@@ -492,17 +492,19 @@ class TestFlows:
 
     def test_combined_infra_metrics(self):
         debug("Send AP Metrics query message to agent 1")
+        vap1 = env.agents[0].radios[0].vaps[0]
+        vap2 = env.agents[1].radios[1].vaps[0]
         env.controller.dev_send_1905(env.agents[0].mac, 0x800B,
-                                     tlv(0x93, 0x0007, "0x01 {%s}" % (env.agents[0].radios[0].mac)))
+                                     tlv(0x93, 0x0007, "0x01 {%s}" % (vap1.bssid)))
         self.check_log(env.agents[0].radios[0], "Received AP_METRICS_QUERY_MESSAGE")
         # TODO agent should send response autonomously, with same MID.
         # AP metrics TLV
-        tlv1 = tlv(0x94, 0x000d, "{%s} 0x01 0x0002 0x01 0x1f2f3f" % (env.agents[0].radios[0].mac))
+        tlv1 = tlv(0x94, 0x000d, "{%s} 0x01 0x0002 0x01 0x1f2f3f" % (vap1.bssid))
         # STA metrics TLV with no metrics
         tlv2 = tlv(0x96, 0x0007, "{55:44:33:22:11:00} 0x00")
         # STA metrics TLV for STA connected to this BSS
         tlv3 = tlv(0x96, 0x001a,
-                   "{66:44:33:22:11:00} 0x01 {%s} 0x11223344 0x1a2a3a4a 0x1b2b3b4b 0x55" % env.agents[0].radios[0].mac)  # noqa E501
+                   "{66:44:33:22:11:00} 0x01 {%s} 0x11223344 0x1a2a3a4a 0x1b2b3b4b 0x55" % vap1.bssid)  # noqa E501
         # STA traffic stats TLV for same STA
         tlv4 = tlv(0xa2, 0x0022,
                    "{55:44:33:22:11:00} 0x10203040 0x11213141 0x12223242 0x13233343 0x14243444 0x15253545 0x16263646")  # noqa E501
@@ -511,14 +513,14 @@ class TestFlows:
 
         debug("Send AP Metrics query message to agent 2")
         env.controller.dev_send_1905(env.agents[1].mac, 0x800B,
-                                     tlv(0x93, 0x0007, "0x01 {%s}" % env.agents[1].radios[1].mac))
+                                     tlv(0x93, 0x0007, "0x01 {%s}" % vap2.bssid))
         self.check_log(env.agents[1].radios[1], "Received AP_METRICS_QUERY_MESSAGE")
         # TODO agent should send response autonomously
         # Same as above but with different STA MAC addresses, different values and
         # skipping the empty one
-        tlv1 = tlv(0x94, 0x000d, "{%s} 0x01 0x0002 0x01 0x1f2f3f" % (env.agents[1].radios[1].mac))
+        tlv1 = tlv(0x94, 0x000d, "{%s} 0x01 0x0002 0x01 0x1f2f3f" % (vap2.bssid))
         tlv3 = tlv(0x96, 0x001a,
-                   "{77:44:33:22:11:00} 0x01 {%s} 0x19293949 0x10203040 0x11213141 0x99" % env.agents[1].radios[1].mac)  # noqa E501
+                   "{77:44:33:22:11:00} 0x01 {%s} 0x19293949 0x10203040 0x11213141 0x99" % vap2.bssid)  # noqa E501
         tlv4 = tlv(0xa2, 0x0022,
                    "{77:44:33:22:11:00} 0xa0203040 0xa1213141 0xa2223242 0xa3233343 0xa4243444 0xa5253545 0xa6263646")  # noqa E501
         env.agents[1].dev_send_1905(env.controller.mac, 0x800C, tlv1, tlv3, tlv4)
