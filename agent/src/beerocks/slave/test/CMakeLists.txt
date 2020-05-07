@@ -15,4 +15,21 @@ if(BUILD_TESTS)
     target_link_libraries(${TEST_CASE} btlvf tlvf common)
     install(TARGETS ${TEST_CASE} DESTINATION bin/tests)
     add_test(NAME ${TEST_CASE} COMMAND $<TARGET_FILE:${TEST_CASE}>)
+
+
+    set(TEST_CASE vs_beacon_response_to_1905_test)
+
+    add_executable(
+        ${TEST_CASE}
+        vs_beacon_response_to_1905_test.cpp
+        ../vs_beacon_response_to_1905.cpp # this should be in a lib
+    )
+
+    target_include_directories(${TEST_CASE} PRIVATE
+        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../../../../build/install/include/>
+        )
+
+    target_link_libraries(${TEST_CASE} btlvf tlvf common)
+    install(TARGETS ${TEST_CASE} DESTINATION bin/tests)
+    add_test(NAME ${TEST_CASE} COMMAND $<TARGET_FILE:${TEST_CASE}>)
 endif()
