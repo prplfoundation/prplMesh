@@ -611,6 +611,44 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
         self.check_log(env.agents[0].radios[0],
                        r"Got client disallow request for {}".format(sta.mac))
 
+        # TODO client blocking not implemented in dummy bwl
+
+        # Check in connection map
+        conn_map = connmap.get_conn_map()
+        map_radio = conn_map[env.agents[0].mac].radios[env.agents[0].radios[0].mac]
+        map_vap = map_radio.vaps[env.agents[0].radios[0].vaps[0].bssid]
+        if sta.mac not in map_vap.clients:
+            self.fail("client {} not in conn_map, clients: {}".format(sta.mac, map_vap.clients))
+
+        # Associate with other radio, check that conn_map is updated
+        env.agents[0].radios[0].vaps[0].disassociate(sta)
+        env.agents[0].radios[1].vaps[0].associate(sta)
+        time.sleep(1)  # Wait for conn_map to be updated
+        conn_map = connmap.get_conn_map()
+        map_agent = conn_map[env.agents[0].mac]
+        map_radio1 = map_agent.radios[env.agents[0].radios[1].mac]
+        map_vap1 = map_radio1.vaps[env.agents[0].radios[1].vaps[0].bssid]
+        if sta.mac not in map_vap1.clients:
+            self.fail("client {} not in conn_map, clients: {}".format(sta.mac, map_vap1.clients))
+        map_radio0 = map_agent.radios[env.agents[0].radios[0].mac]
+        map_vap0 = map_radio0.vaps[env.agents[0].radios[0].vaps[0].bssid]
+        if sta.mac in map_vap0.clients:
+            self.fail("client {} still in conn_map, clients: {}".format(sta.mac, map_vap0.clients))
+
+        # Associate with other radio implies disassociate from first
+        env.agents[0].radios[0].vaps[0].associate(sta)
+        time.sleep(1)  # Wait for conn_map to be updated
+        conn_map = connmap.get_conn_map()
+        map_agent = conn_map[env.agents[0].mac]
+        map_radio1 = map_agent.radios[env.agents[0].radios[1].mac]
+        map_vap1 = map_radio1.vaps[env.agents[0].radios[1].vaps[0].bssid]
+        if sta.mac in map_vap1.clients:
+            self.fail("client {} still in conn_map, clients: {}".format(sta.mac, map_vap1.clients))
+        map_radio0 = map_agent.radios[env.agents[0].radios[0].mac]
+        map_vap0 = map_radio0.vaps[env.agents[0].radios[0].vaps[0].bssid]
+        if sta.mac not in map_vap0.clients:
+            self.fail("client {} not in conn_map, clients: {}".format(sta.mac, map_vap0.clients))
+
     def test_client_association_link_metrics(self):
         ''' This test verifies that a MAUT with an associated STA responds to
         an Associated STA Link Metrics Query message with an Associated STA Link Metrics
