@@ -1,0 +1,21 @@
+@startuml
+participant controller
+participant agent
+participant STA
+
+->agent: Perform MAUT setup steps (4.1.1 or 4.1.2)
+->STA: Trigger STA to join the specified MAUT BSSID
+
+->controller: send 1905, 0x8003,Multi-AP\nPolicy Config Request\nAP Metrics Reporting Interval:0\nSTA MetricsReporting RSSI Threshold:0\nSTA Metrics Reporting RSSI Hysteresis Margin Override:0\nAP Metrics Channel Utilization Reporting Threshold:1 (0.4%)\nAssociated STA Traffic Stats Inclusion Policy bit 7: 1\nAssociated STA Link Metrics Inclusion Policy bit 6: 1\nbits 5-0 set to 0\nNo Steering Policy TLV 
+controller->agent: send_cmdu(MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE)
+agent->agent:handle_multi_ap_policy_config_request()
+agent->controller: send_cmdu(ACK_MESSAGE)
+
+->STA: Trigger STA to start traffic generation to the controller
+
+...
+agent->agent: on_channel_utilization_measurement_period_elapsed()\nMeasure current channel utilization.\nIf difference with previous value crosses\nconfigured threshold, then send AP metrics.
+
+agent->controller: send_cmdu(AP_METRICS_RESPONSE_MESSAGE)\nwith Associated STA Traffic Stats\nand Associated STA Link Metrics
+controller->controller: handle_cmdu_1905_ap_metric_response()
+@enduml
