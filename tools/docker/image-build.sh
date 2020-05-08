@@ -24,6 +24,7 @@ usage() {
     echo "      -v|--verbose - verbose output"
 }
 
+
 main() {
     if ! OPTS=$(getopt -o 'hb:t:i:v' --long help,base-image:,tag:,image:,verbose -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2
@@ -38,7 +39,7 @@ main() {
             -h | --help)            usage; exit 0; shift ;;
             -b | --base-image)      BASE_IMAGE="$2"; postfix="-$(echo "${2##*/}" | tr :@ --)"; shift ; shift ;;
             -t | --tag)             TAG=":$2"; shift ; shift ;;
-            -i | --image)           BUILD_IMAGES="${BUILD_IMAGES}$2;"; shift ; shift ;;
+            -i | --image)           build_images+=("$2"); shift ; shift ;;
             -v | --verbose)         export VERBOSE=true; shift ;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1 ;;
@@ -46,37 +47,31 @@ main() {
     done
 
     dbg "TAG=${TAG}"
-    dbg "BUILD_IMAGES=${BUILD_IMAGES}"
+    dbg "BUILD_IMAGES=${build_images[*]}"
     dbg "postfix=$postfix"
     dbg "rootdir=$rootdir"
 
     # Make sure that a build image was specified
-    if [[ "${BUILD_IMAGES}" == ";" ]]; then
+    if [ -z "${build_images[*]}" ]; then
         err "build image not specified!"
         usage; exit 1
     fi
 
-    if [[ "${BUILD_IMAGES}" == *";builder;"* ]]; then
-        info "Generating builder docker image (${DOCKER_REGISTRY}prplmesh-builder$postfix$TAG)"
+    for image in "${build_images[@]}"; do
+        image_fixed="$(printf "$image" | tr -cs 'A-Za-z0-9_' '-')"
+        full_image="${DOCKER_REGISTRY}prplmesh-$image_fixed$postfix$TAG"
+        info "Generating $image docker image ($full_image)"
         info "Base docker image $BASE_IMAGE"
         run docker image build \
             --build-arg image="$BASE_IMAGE" \
-            --tag "${DOCKER_REGISTRY}prplmesh-builder$postfix$TAG" \
-            "${scriptdir}/builder"
-    fi
-
-    if [[ "${BUILD_IMAGES}" == *";runner;"* ]]; then
-        info "Generating runner docker image (${DOCKER_REGISTRY}prplmesh-runner$postfix$TAG)"
-        info "Base docker image $BASE_IMAGE"
-        run docker image build \
-            --build-arg image="$BASE_IMAGE" \
-            --tag "${DOCKER_REGISTRY}prplmesh-runner$postfix$TAG" \
-            "${scriptdir}/runner"
-    fi
+            --tag "$full_image" \
+            "${scriptdir}/${image}" || exit $?
+        info "Generated $full_image"
+    done
 }
 
 BASE_IMAGE="ubuntu:18.04"
-BUILD_IMAGES=";"
+build_images=()
 postfix=""
 
 main "$@"
