@@ -305,7 +305,7 @@ def _get_bridge_interface(docker_network):
     return bridge
 
 
-def launch_environment_docker(unique_id: str, skip_init: bool = False):
+def launch_environment_docker(unique_id: str, skip_init: bool = False, tag: str = ""):
     global wired_sniffer
     iface = _get_bridge_interface('prplMesh-net-{}'.format(unique_id))
     wired_sniffer = sniffer.Sniffer(iface, opts.tcpdump_dir)
@@ -315,11 +315,13 @@ def launch_environment_docker(unique_id: str, skip_init: bool = False):
     repeater2 = 'repeater2-' + unique_id
 
     if not skip_init:
+        command = [os.path.join(rootdir, "tests", "test_gw_repeater.sh"), "-f", "-u", unique_id,
+                   "-g", gateway, "-r", repeater1, "-r", repeater2, "-d", "7"]
+        if tag:
+            command += ["-t", tag]
         wired_sniffer.start('init')
         try:
-            subprocess.check_call((os.path.join(rootdir, "tests", "test_gw_repeater.sh"),
-                                   "-f", "-u", unique_id, "-g", gateway,
-                                   "-r", repeater1, "-r", repeater2, "-d", "7"))
+            subprocess.check_call(command)
         finally:
             wired_sniffer.stop()
 

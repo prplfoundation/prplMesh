@@ -826,6 +826,8 @@ if __name__ == '__main__':
     parser.add_argument("--unique-id", "-u", type=str, default=user,
                         help="append UNIQUE_ID to all container names, e.g. gateway-<UNIQUE_ID>; "
                              "defaults to {}".format(user))
+    parser.add_argument("--tag", "-t", type=str,
+                        help="use runner image with tag TAG instead of 'latest'")
     parser.add_argument("--skip-init", action='store_true', default=False,
                         help="don't start up the containers")
     parser.add_argument("tests", nargs='*',
@@ -842,7 +844,7 @@ if __name__ == '__main__':
     opts.stop_on_failure = options.stop_on_failure
 
     t.start_test('init')
-    env.launch_environment_docker(options.unique_id, options.skip_init)
+    env.launch_environment_docker(options.unique_id, options.skip_init, options.tag)
 
     if t.run_tests(options.tests):
         sys.exit(1)
