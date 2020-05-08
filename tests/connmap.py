@@ -14,12 +14,24 @@ import environment as env
 RE_MAC = rb"(?P<mac>([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})"
 
 
+class MapClient:
+    '''Represents a client (STA) in the connection map.'''
+    def __init__(self, mac: str):
+        self.mac = mac
+
+
 class MapVap:
     '''Represents a VAP in the connection map.'''
 
     def __init__(self, bssid: str, ssid: bytes):
         self.bssid = bssid
         self.ssid = ssid
+        self.clients = {}
+
+    def add_client(self, mac: str):
+        client = MapClient(mac)
+        self.clients[mac] = client
+        return client
 
 
 class MapRadio:
@@ -57,11 +69,14 @@ def get_conn_map() -> Dict[str, MapDevice]:
         bridge = re.search(rb' {8}IRE_BRIDGE: .* mac: ' + RE_MAC, line)
         radio = re.match(rb' {16}RADIO: .* mac: ' + RE_MAC, line)
         vap = re.match(rb' {20}fVAP.* bssid: ' + RE_MAC + rb', ssid: (?P<ssid>.*)$', line)
+        client = re.match(rb' {24}CLIENT: mac: ' + RE_MAC, line)
         if bridge:
             cur_agent = MapDevice(bridge.group('mac').decode('utf-8'))
             conn_map[cur_agent.mac] = cur_agent
         elif radio:
             cur_radio = cur_agent.add_radio(radio.group('mac').decode('utf-8'))
         elif vap:
-            cur_radio.add_vap(vap.group('mac').decode('utf-8'), vap.group('ssid'))
+            cur_vap = cur_radio.add_vap(vap.group('mac').decode('utf-8'), vap.group('ssid'))
+        elif client:
+            cur_vap.add_client(client.group('mac').decode('utf-8'))
     return conn_map
