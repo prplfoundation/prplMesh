@@ -549,6 +549,107 @@ bool nl80211_client_impl::get_sta_info(const std::string &interface_name,
         });
 }
 
+bool nl80211_client_impl::get_survey_info(const std::string &interface_name,
+                                          std::vector<sSurveyInfo> &survey_info_list)
+{
+    if (!m_socket) {
+        LOG(ERROR) << "Socket is NULL!";
+        return false;
+    }
+
+    // Get the interface index for given interface name
+    int iface_index = if_nametoindex(interface_name.c_str());
+    if (0 == iface_index) {
+        LOG(ERROR) << "Failed to read the index of interface " << interface_name << ": "
+                   << strerror(errno);
+
+        return false;
+    }
+
+    return m_socket.get()->send_receive_msg(
+        NL80211_CMD_GET_SURVEY, NLM_F_DUMP,
+        [&](struct nl_msg *msg) -> bool {
+            nla_put_u32(msg, NL80211_ATTR_IFINDEX, iface_index);
+
+            return true;
+        },
+        [&](struct nl_msg *msg) {
+            struct nlattr *tb[NL80211_ATTR_MAX + 1];
+            struct genlmsghdr *gnlh = static_cast<genlmsghdr *>(nlmsg_data(nlmsg_hdr(msg)));
+            struct nlattr *sinfo[NL80211_SURVEY_INFO_MAX + 1];
+            sSurveyInfo survey_info;
+
+            // Parse the netlink message
+            if (nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0),
+                          NULL)) {
+                LOG(ERROR) << "Failed to parse netlink message!";
+                return;
+            }
+
+            if (!tb[NL80211_ATTR_SURVEY_INFO]) {
+                LOG(ERROR) << "Survey data missing!";
+                return;
+            }
+
+            // Parse nested survey info
+            static auto survey_policy = []() {
+                static struct nla_policy survey_policy[NL80211_SURVEY_INFO_MAX + 1];
+                survey_policy[NL80211_SURVEY_INFO_FREQUENCY] = {NLA_U32, 0, 0};
+                survey_policy[NL80211_SURVEY_INFO_NOISE]     = {NLA_U8, 0, 0};
+
+                return survey_policy;
+            };
+            if (nla_parse_nested(sinfo, NL80211_SURVEY_INFO_MAX, tb[NL80211_ATTR_SURVEY_INFO],
+                                 survey_policy())) {
+                LOG(ERROR) << "Failed to parse nested survey attributes!";
+                return;
+            }
+
+            survey_info.in_use = sinfo[NL80211_SURVEY_INFO_IN_USE];
+
+            if (sinfo[NL80211_SURVEY_INFO_FREQUENCY]) {
+                survey_info.frequency_mhz = nla_get_u32(sinfo[NL80211_SURVEY_INFO_FREQUENCY]);
+            } else {
+                LOG(ERROR) << "NL80211_SURVEY_INFO_FREQUENCY attribute is missing";
+                return;
+            }
+
+            if (sinfo[NL80211_SURVEY_INFO_NOISE]) {
+                survey_info.noise_dbm = (int8_t)nla_get_u8(sinfo[NL80211_SURVEY_INFO_NOISE]);
+            } else {
+                LOG(TRACE) << "NL80211_SURVEY_INFO_NOISE attribute is missing";
+            }
+
+            if (sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME]) {
+                survey_info.time_on_ms = nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME]);
+            }
+
+            if (sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_BUSY]) {
+                survey_info.time_busy_ms =
+                    nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_BUSY]);
+            }
+
+            if (sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_EXT_BUSY]) {
+                survey_info.time_ext_busy_ms =
+                    nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_EXT_BUSY]);
+            }
+
+            if (sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_RX]) {
+                survey_info.time_rx_ms = nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_RX]);
+            }
+
+            if (sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_TX]) {
+                survey_info.time_tx_ms = nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_TX]);
+            }
+
+            if (sinfo[NL80211_SURVEY_INFO_TIME_SCAN]) {
+                survey_info.time_scan_ms = nla_get_u64(sinfo[NL80211_SURVEY_INFO_TIME_SCAN]);
+            }
+
+            survey_info_list.emplace_back(survey_info);
+        });
+}
+
 bool nl80211_client_impl::set_tx_power_limit(const std::string &interface_name, uint32_t limit)
 {
     if (!m_socket) {

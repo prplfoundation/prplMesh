@@ -61,6 +61,16 @@ public:
                       sta_info &sta_info) override;
 
     /**
+     * @brief Gets dummy survey information.
+     *
+     * @see nl80211_client::get_survey_info
+     *
+     * This implementation returns fixed survey info for the first 8 2.4GHz channels.
+     */
+    bool get_survey_info(const std::string &interface_name,
+                         std::vector<sSurveyInfo> &survey_info_list) override;
+
+    /**
      * @brief Set the tx power limit
      *
      * Set tx power limit for a radio
