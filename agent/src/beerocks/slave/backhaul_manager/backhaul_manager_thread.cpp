@@ -3119,10 +3119,13 @@ bool backhaul_manager::send_slaves_enable()
 void backhaul_manager::remove_client_from_all_radios(sMacAddr &client_mac)
 {
     for (const auto &slave : slaves_sockets) {
-        const auto &associated_clients_map = slave->associated_clients_map;
-        for (const auto &client : associated_clients_map) {
-            if (client.second.find(client_mac) != client.second.end()) {
-                slaves_sockets.remove(slave);
+        auto &associated_clients_map = slave->associated_clients_map;
+        for (auto &clientmap : associated_clients_map) {
+            auto it = clientmap.second.find(client_mac);
+            if (it != clientmap.second.end()) {
+                LOG(DEBUG) << "Removing client " << client_mac << " from radio "
+                           << slave->hostap_iface;
+                clientmap.second.erase(it);
             }
         }
     }
