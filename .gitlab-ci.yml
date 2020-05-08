@@ -16,6 +16,7 @@ images-build:
     - ./tools/docker/image-build.sh --image builder --tag $CI_PIPELINE_ID --push
     - ./tools/docker/image-build.sh --image runner --tag $CI_PIPELINE_ID --push
     - ./tools/docker/image-build.sh --image builder/alpine --tag $CI_PIPELINE_ID --push
+    - ./tools/docker/image-build.sh --image tests-runner --tag $CI_PIPELINE_ID --push
 
 .in-prplmesh-builder:
   image:
@@ -156,7 +157,7 @@ tlvf_test:
 
 run-tests:
   stage: test
-  image: $CI_REGISTRY_IMAGE/tests-runner:18.09.7-dind
+  image: $CI_REGISTRY_IMAGE/prplmesh-tests-runner:$CI_PIPELINE_ID
   script:
     - tests/test_flows.py --verbose --unique-id $CI_JOB_ID --tag $CI_PIPELINE_ID
 
