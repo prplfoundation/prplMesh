@@ -13,20 +13,21 @@ rootdir="${scriptdir%/*/*}"
 . "${rootdir}/tools/functions.sh"
 
 usage() {
-    echo "usage: $(basename "$0") [-hvbt]"
+    echo "usage: $(basename "$0") [-hvbipt]"
     echo "  mandatory:"
     echo "      -i|--image - specify the image(s) to build (can be specified multiple times)"
     echo "                   supported values: builder/runner"
     echo "  options:"
     echo "      -h|--help - show this help menu"
     echo "      -b|--base-image - Base OS image to use (Dockerfile 'FROM')"
+    echo "      -p|--push - push each image to the registry (must be logged in)"
     echo "      -t|--tag - tag to add to the built images"
     echo "      -v|--verbose - verbose output"
 }
 
 
 main() {
-    if ! OPTS=$(getopt -o 'hb:t:i:v' --long help,base-image:,tag:,image:,verbose -n 'parse-options' -- "$@"); then
+    if ! OPTS=$(getopt -o 'hb:i:pt:v' --long help,base-image:,image:,push,tag:,verbose -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2
         usage
         exit 1
@@ -38,6 +39,7 @@ main() {
         case "$1" in
             -h | --help)            usage; exit 0; shift ;;
             -b | --base-image)      BASE_IMAGE="$2"; postfix="-$(echo "${2##*/}" | tr :@ --)"; shift ; shift ;;
+            -p | --push)            push=true; shift ;;
             -t | --tag)             TAG=":$2"; shift ; shift ;;
             -i | --image)           build_images+=("$2"); shift ; shift ;;
             -v | --verbose)         export VERBOSE=true; shift ;;
@@ -58,7 +60,7 @@ main() {
     fi
 
     for image in "${build_images[@]}"; do
-        image_fixed="$(printf "$image" | tr -cs 'A-Za-z0-9_' '-')"
+        image_fixed="$(printf "%s" "$image" | tr -cs 'A-Za-z0-9_' '-')"
         full_image="${DOCKER_REGISTRY}prplmesh-$image_fixed$postfix$TAG"
         info "Generating $image docker image ($full_image)"
         info "Base docker image $BASE_IMAGE"
@@ -67,11 +69,16 @@ main() {
             --tag "$full_image" \
             "${scriptdir}/${image}" || exit $?
         info "Generated $full_image"
+
+        if [ "$push" = true ]; then
+            run docker push "$full_image"
+        fi
     done
 }
 
 BASE_IMAGE="ubuntu:18.04"
 build_images=()
 postfix=""
+push=false
 
 main "$@"
