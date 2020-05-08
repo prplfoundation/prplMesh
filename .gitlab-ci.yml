@@ -15,6 +15,7 @@ images-build:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - ./tools/docker/image-build.sh --image builder --tag $CI_PIPELINE_ID --push
     - ./tools/docker/image-build.sh --image runner --tag $CI_PIPELINE_ID --push
+    - ./tools/docker/image-build.sh --image builder/alpine --tag $CI_PIPELINE_ID --push
 
 .in-prplmesh-builder:
   image:
@@ -25,7 +26,7 @@ images-build:
 
 cppcheck:
   stage: build
-  image: prplfoundationinc/prplmesh-builder:alpine-3.11.3
+  image: $CI_REGISTRY_IMAGE/prplmesh-builder-alpine:$CI_PIPELINE_ID
   script:
     # cppcheck runs in the alpine image because every new release brings useful improvements
     # (the versions from Ubuntu get old too quickly)
@@ -39,7 +40,7 @@ cppcheck:
 
 cppcheck-diff:
   stage: build
-  image: prplfoundationinc/prplmesh-builder:alpine-3.11.3
+  image: $CI_REGISTRY_IMAGE/prplmesh-builder-alpine:$CI_PIPELINE_ID
   script:
     - ci/cppcheck/cppcheck-new-issues.sh
   artifacts:
@@ -107,7 +108,7 @@ build-in-docker:
 
 build-in-docker-alpine:
   extends: build-in-docker
-  image: prplfoundationinc/prplmesh-builder:alpine-3.11.3
+  image: $CI_REGISTRY_IMAGE/prplmesh-builder-alpine:$CI_PIPELINE_ID
   only:
     - schedules
 
