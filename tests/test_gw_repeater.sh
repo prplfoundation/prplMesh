@@ -21,6 +21,7 @@ usage() {
     and testing their status (default %DELAY seconds"
     echo "      -f|--force - kill any running containers before starting"
     echo "      -u|--unique-id - unique id to add as suffix to container and network names"
+    echo "      -t|--tag - use image with this tag (-t option passed to run.sh)"
     echo "      -g|--gateway - gateway container name"
     echo "      -r|--repeater - repeater container name"
     echo "      --rm - remove containers after test completes"
@@ -55,7 +56,7 @@ check_wsl() {
 }
 
 main() {
-    if ! OPTS=$(getopt -o 'hvd:fg:r:u:' --long help,verbose,rm,gateway-only,repeater-only,delay:,force,gateway:,repeater:,unique-id: -n 'parse-options' -- "$@"); then
+    if ! OPTS=$(getopt -o 'hvd:fg:r:t:u:' --long help,verbose,rm,gateway-only,repeater-only,delay:,force,gateway:,repeater:,tag:,unique-id: -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2 ; usage; exit 1 ;
     fi
 
@@ -66,8 +67,9 @@ main() {
             -v | --verbose)       VERBOSE_OPT="-v"; shift ;;
             -h | --help)          usage; exit 0; shift ;;
             -d | --delay)         DELAY="$2"; shift; shift ;;
-            -f | --force)         FORCE_OPT="-f"; shift ;;
+            -f | --force)         docker_opts+=("-f"); shift ;;
             -u | --unique-id)     UNIQUE_ID="$2"; shift; shift ;;
+            -t | --tag)           docker_opts+=("--tag" "$2"); shift; shift ;;
             -g | --gateway)       GW_NAME="$2"; shift; shift ;;
             -r | --repeater)      REPEATER_NAMES="$REPEATER_NAMES $2"; shift; shift ;;
             --rm)                 REMOVE=true; shift ;;
@@ -94,9 +96,11 @@ main() {
     dbg DELAY="${DELAY}"
     dbg UNIQUE_ID="${UNIQUE_ID}"
 
+    docker_opts+=("-u" "${UNIQUE_ID}")
+
     [ "$START_GATEWAY" = "true" ] && {
         status "Start GW (Controller + local Agent)"
-        "${rootdir}"/tools/docker/run.sh -u "${UNIQUE_ID}" ${VERBOSE_OPT} ${FORCE_OPT} "${GW_EXTRA_OPT[@]}" \
+        "${rootdir}"/tools/docker/run.sh ${VERBOSE_OPT} "${docker_opts[@]}" "${GW_EXTRA_OPT[@]}" \
             start-controller-agent -d -n "${GW_NAME}" -- "$@"
     }
 
@@ -108,7 +112,7 @@ main() {
     [ "$START_REPEATER" = "true" ] && {
         for repeater in $REPEATER_NAMES; do
             status "Start Repeater (Remote Agent): $repeater"
-            "${rootdir}"/tools/docker/run.sh -u "${UNIQUE_ID}" ${VERBOSE_OPT} ${FORCE_OPT} "${RP_EXTRA_OPT[@]}" \
+            "${rootdir}"/tools/docker/run.sh ${VERBOSE_OPT} "${docker_opts[@]}" "${RP_EXTRA_OPT[@]}" \
                 start-agent -d -n "${repeater}" -- "$@"
         done
     }
@@ -142,5 +146,6 @@ START_GATEWAY=true
 START_REPEATER=true
 UNIQUE_ID=${SUDO_USER:-${USER}}
 DELAY=5
+docker_opts=()
 
 main "$@"
