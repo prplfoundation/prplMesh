@@ -83,6 +83,20 @@ public:
                               sta_info &sta_info) override;
 
     /**
+     * @brief Gets survey information.
+     *
+     * Survey information includes channel occupation and noise level.
+     *
+     * @param[in] interface_name Interface name, either radio or Virtual AP (VAP).
+     * @param[out] survey_info_list List of survey information structures, one for each channel,
+     * as returned by the NL80211_CMD_GET_SURVEY command.
+     *
+     * @return True on success and false otherwise.
+     */
+    bool get_survey_info(const std::string &interface_name,
+                         std::vector<sSurveyInfo> &survey_info_list) override;
+
+    /**
      * @brief Set the tx power limit
      *
      * Set tx power limit for a radio

@@ -298,6 +298,60 @@ public:
     };
 
     /**
+     * @brief Survey information
+     *
+     * Information obtained with NL80211_CMD_GET_SURVEY command through a NL80211 socket.
+     * See NL80211_SURVEY_INFO* in <linux/nl80211.h> for a description of each field.
+     */
+    struct sSurveyInfo {
+        /**
+         * Center frequency of channel.
+         */
+        uint32_t frequency_mhz = 0;
+
+        /**
+         * Channel is currently being used.
+         */
+        bool in_use = false;
+
+        /**
+         * Noise level of channel (u8, dBm).
+         */
+        int8_t noise_dbm = 0;
+
+        /**
+         * Amount of time (in ms) that the radio was turned on (on channel or globally)
+         */
+        uint64_t time_on_ms = 0;
+
+        /**
+         * Amount of the time (in ms) the primary channel was sensed busy (either due to activity
+         * or energy detect).
+         */
+        uint64_t time_busy_ms = 0;
+
+        /**
+         * Amount of time (in ms) the extension channel was sensed busy.
+         */
+        uint64_t time_ext_busy_ms = 0;
+
+        /**
+         * Amount of time (in ms) the radio spent receiving data (on channel or globally)
+         */
+        uint64_t time_rx_ms = 0;
+
+        /**
+         * Amount of time (in ms) the radio spent transmitting data (on channel or globally).
+         */
+        uint64_t time_tx_ms = 0;
+
+        /**
+         * Time (in ms) the radio spent for scan (on this channel or globally).
+         */
+        uint64_t time_scan_ms = 0;
+    };
+
+    /**
      * @brief Class destructor.
      */
     virtual ~nl80211_client() = default;
@@ -342,6 +396,20 @@ public:
      */
     virtual bool get_sta_info(const std::string &interface_name, const sMacAddr &sta_mac_address,
                               sta_info &sta_info) = 0;
+
+    /**
+     * @brief Gets survey information.
+     *
+     * Survey information includes channel occupation and noise level.
+     *
+     * @param[in] interface_name Interface name, either radio or Virtual AP (VAP).
+     * @param[out] survey_info_list List of survey information structures, one for each channel,
+     * as returned by the NL80211_CMD_GET_SURVEY command.
+     *
+     * @return True on success and false otherwise.
+     */
+    virtual bool get_survey_info(const std::string &interface_name,
+                                 std::vector<sSurveyInfo> &survey_info_list) = 0;
 
     /**
      * @brief Set the tx power limit
