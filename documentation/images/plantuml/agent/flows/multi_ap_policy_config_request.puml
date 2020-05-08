@@ -1,0 +1,14 @@
+@startuml
+controller->backhaul_manager: send_cmdu\n(MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE)
+
+backhaul_manager->backhaul_manager: handle_multi_ap_policy_config_request()\nStore AP Metrics Reporting Interval\nvalue for periodic AP metrics reporting.\nForward CMDU to all slaves whose RUID is\nspecified in Metric Reporting Policy TLV\n
+backhaul_manager->son_slave_wlan0: forward_cmdu\n(MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE)
+backhaul_manager->son_slave_wlan2: forward_cmdu\n(MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE)
+backhaul_manager->controller: send_cmdu\n(ACK_MESSAGE)\n
+
+son_slave_wlan0->monitor_wlan0: forward_cmdu\n(MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE)
+son_slave_wlan2->monitor_wlan2: forward_cmdu\n(MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE)
+
+monitor_wlan0->monitor_wlan0: handle_multi_ap_policy_config_request()\nStore configuration provided in\nMetric Reporting Policy TLV into\nmonitor database\n
+monitor_wlan2->monitor_wlan2: handle_multi_ap_policy_config_request()\nStore configuration provided in\nMetric Reporting Policy TLV into\nmonitor database\n
+@enduml
