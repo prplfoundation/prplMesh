@@ -17,6 +17,7 @@ main() {
     docker_args=(
         --workdir "${rootdir}"
         --user "${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)}"
+        --userns keep-id
         -e "USER=${SUDO_USER:-${USER}}"
         -v "${rootdir}:${rootdir}"
         --entrypoint "./tools/maptools.py"
