@@ -33,6 +33,7 @@ image-build-tests-runner:
     entrypoint: [""]
   tags:
     - docker
+  needs: ["image-build-builder"]
 
 cppcheck:
   stage: build
@@ -47,6 +48,7 @@ cppcheck:
     when: always
   tags:
     - docker
+  needs: ["image-build-builder/alpine"]
 
 cppcheck-diff:
   stage: build
@@ -60,6 +62,7 @@ cppcheck-diff:
     when: always
   tags:
     - docker
+  needs: ["image-build-builder/alpine"]
 
 
 flake8:
@@ -69,6 +72,7 @@ flake8:
     - apk add --update --no-cache git
     - git ls-files -z -- '*.py' ':(exclude)tools/maptools.py' ':(exclude)framework/tlvf/tlvf.py' |
       xargs -0 -t flake8 --verbose
+  needs: []
 
 shellcheck:
   stage: build
@@ -77,6 +81,7 @@ shellcheck:
     - apk add --update --no-cache git
   script:
       - git ls-files -z '*.sh' '*.sh.in'  | xargs -0 shellcheck -x -P tools:ci/owncloud
+  needs: []
 
 clang-format:
   extends: .in-prplmesh-builder
@@ -121,6 +126,7 @@ build-in-docker-alpine:
   image: $CI_REGISTRY_IMAGE/prplmesh-builder-alpine:$CI_PIPELINE_ID
   only:
     - schedules
+  needs: ["image-build-builder/alpine"]
 
 build-in-docker-static:
   extends: build-in-docker
@@ -183,6 +189,8 @@ run-tests:
     - tools/docker/stop.sh -k -r
   needs:
     - job: build-in-docker
+    - job: image-build-tests-runner
+    - job: image-build-runner
 
 .build-for-openwrt:
   stage: build
@@ -197,6 +205,7 @@ run-tests:
   tags:
     - shell
     - docker-build
+  needs: []
 
 .test-on-target:
   stage: test
