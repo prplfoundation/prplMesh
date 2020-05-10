@@ -1829,7 +1829,7 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         int16_t VHT_MCS[16]                    = {0};
         char ht_cap[8]                         = {0};
         char vht_cap[16]                       = {0};
-        size_t numOfValidArgs[20]              = {0};
+        size_t numOfValidArgs[21]              = {0};
         char assoc_req[ASSOCIATION_FRAME_SIZE] = {0};
 
         FieldsToParse fieldsToParse[] = {
@@ -1848,27 +1848,27 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             {(void *)vht_cap, &numOfValidArgs[8], DWPAL_STR_PARAM, "VHT_CAP=", sizeof(vht_cap)},
             {(void *)assoc_req, &numOfValidArgs[9], DWPAL_STR_PARAM,
              "assoc_req=", sizeof(assoc_req)},
-            {(void *)&msg->params.capabilities.btm_supported, &numOfValidArgs[9], DWPAL_CHAR_PARAM,
+            {(void *)&msg->params.capabilities.btm_supported, &numOfValidArgs[10], DWPAL_CHAR_PARAM,
              "btm_supported=", 0},
-            {(void *)&msg->params.capabilities.cell_capa, &numOfValidArgs[10], DWPAL_CHAR_PARAM,
+            {(void *)&msg->params.capabilities.cell_capa, &numOfValidArgs[11], DWPAL_CHAR_PARAM,
              "cell_capa=", 0},
-            {(void *)&msg->params.capabilities.band_2g_capable, &numOfValidArgs[11],
+            {(void *)&msg->params.capabilities.band_2g_capable, &numOfValidArgs[12],
              DWPAL_CHAR_PARAM, "band_2g_capable=", 0},
-            {(void *)&msg->params.capabilities.band_5g_capable, &numOfValidArgs[12],
+            {(void *)&msg->params.capabilities.band_5g_capable, &numOfValidArgs[13],
              DWPAL_CHAR_PARAM, "band_5g_capable=", 0},
-            {(void *)&msg->params.capabilities.rrm_supported, &numOfValidArgs[13], DWPAL_CHAR_PARAM,
+            {(void *)&msg->params.capabilities.rrm_supported, &numOfValidArgs[14], DWPAL_CHAR_PARAM,
              "rrm_supported=", 0},
-            {(void *)&msg->params.capabilities.max_ch_width, &numOfValidArgs[14], DWPAL_CHAR_PARAM,
+            {(void *)&msg->params.capabilities.max_ch_width, &numOfValidArgs[15], DWPAL_CHAR_PARAM,
              "max_ch_width=", 0},
-            {(void *)&msg->params.capabilities.max_streams, &numOfValidArgs[15], DWPAL_CHAR_PARAM,
+            {(void *)&msg->params.capabilities.max_streams, &numOfValidArgs[16], DWPAL_CHAR_PARAM,
              "max_streams=", 0},
-            {(void *)&msg->params.capabilities.phy_mode, &numOfValidArgs[16], DWPAL_CHAR_PARAM,
+            {(void *)&msg->params.capabilities.phy_mode, &numOfValidArgs[17], DWPAL_CHAR_PARAM,
              "phy_mode=", 0},
-            {(void *)&msg->params.capabilities.max_mcs, &numOfValidArgs[17], DWPAL_CHAR_PARAM,
+            {(void *)&msg->params.capabilities.max_mcs, &numOfValidArgs[18], DWPAL_CHAR_PARAM,
              "max_mcs=", 0},
-            {(void *)&msg->params.capabilities.max_tx_power, &numOfValidArgs[18], DWPAL_CHAR_PARAM,
+            {(void *)&msg->params.capabilities.max_tx_power, &numOfValidArgs[19], DWPAL_CHAR_PARAM,
              "max_tx_power=", 0},
-            {(void *)&msg->params.capabilities.mumimo_supported, &numOfValidArgs[19],
+            {(void *)&msg->params.capabilities.mumimo_supported, &numOfValidArgs[20],
              DWPAL_CHAR_PARAM, "mu_mimo=", 0},
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
