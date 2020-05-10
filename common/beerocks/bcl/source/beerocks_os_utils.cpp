@@ -81,7 +81,7 @@ std::string os_utils::system_call(std::string cmd, int log_lvl, bool detached)
     // }
 
     if (system(cmd.c_str()) != 0) {
-        LOG(ERROR) << "System returned non-zero";
+        LOG(ERROR) << "System returned non-zero for the command:" << cmd.c_str();
     }
 
 //if (log_lvl == 2) LOG(INFO) << "system_call ret:\n" << ret_str << "\n";
