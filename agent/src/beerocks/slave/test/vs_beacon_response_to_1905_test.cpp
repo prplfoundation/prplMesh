@@ -8,7 +8,6 @@ constexpr const int RET_OK          = 0;
 constexpr const int RET_NO_BEEROCKS = -1;
 constexpr const int RET_NO_1905     = -2;
 
-
 /* for the INPUT
 typedef struct sBeaconResponse11k {
     uint8_t channel;
@@ -79,8 +78,6 @@ std::ostream &operator<<(std::ostream &o,
 /* for the OUTPUT
 // yet to be written - print the 1905 message
 */
-
-
 
 void fillVsValues(std::shared_ptr<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE> vs)
 {
