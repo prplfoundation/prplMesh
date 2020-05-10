@@ -240,7 +240,7 @@ void tlvBeaconMetricsQuery::class_swap()
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     m_associated_sta_mac->struct_swap();
     m_bssid->struct_swap();
-    for (size_t i = 0; i < (size_t)*m_ap_channel_reports_list_length; i++){
+    for (size_t i = 0; i < m_ap_channel_reports_list_idx__; i++){
         std::get<1>(ap_channel_reports_list(i)).class_swap();
     }
 }
