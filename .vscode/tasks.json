@@ -42,11 +42,11 @@
         "args": [
           "-f",
           "-g",
-          "gateway-root",
+          "gateway-${env:USER}",
           "-r",
-          "repeater1-root",
+          "repeater1-${env:USER}",
           "-r",
-          "repeater2-root"
+          "repeater2-${env:USER}"
         ]
       },
       "problemMatcher": [],
@@ -70,7 +70,7 @@
         "args": [
           "exec",
           "-ti",
-          "gateway-root",
+          "gateway-${env:USER}",
           "${workspaceFolder}/build/install/bin/beerocks_cli"
         ]
       },
@@ -96,7 +96,7 @@
         "args": [
           "network",
           "inspect",
-          "prplMesh-net-root",
+          "prplMesh-net-${env:USER}",
           "|",
           "awk",
           "'/\\\"bridge\\\":/{print substr($2,2,length($2)-3)}'"
