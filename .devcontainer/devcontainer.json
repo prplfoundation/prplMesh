@@ -27,5 +27,7 @@
 		"redhat.vscode-yaml",
 		"streetsidesoftware.code-spell-checker",
 		"yzhang.markdown-all-in-one"
-	]
+	],
+	// Define VSCode as the default git editor
+	"postCreateCommand": "git config --global core.editor 'code --wait'"
 }
