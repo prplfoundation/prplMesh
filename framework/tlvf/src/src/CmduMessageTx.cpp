@@ -15,22 +15,22 @@
 
 using namespace ieee1905_1;
 
-static void set_relay_indicator(std::shared_ptr<ieee1905_1::cCmduHeader> &cmdu_header)
-{
-    // Taken from Table 6-4 on IEEE 1905.1-2013
-    auto message_type                                         = cmdu_header->message_type();
-    const std::set<ieee1905_1::eMessageType> relayed_messages = {
-        ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE,
-        ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE,
-        ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RENEW_MESSAGE,
-        ieee1905_1::eMessageType::PUSH_BUTTON_EVENT_NOTIFICATION_MESSAGE,
-        ieee1905_1::eMessageType::PUSH_BUTTON_JOIN_NOTIFICATION_MESSAGE,
-    };
+// static void set_relay_indicator(std::shared_ptr<ieee1905_1::cCmduHeader> &cmdu_header)
+// {
+//     // Taken from Table 6-4 on IEEE 1905.1-2013
+//     auto message_type                                         = cmdu_header->message_type();
+//     const std::set<ieee1905_1::eMessageType> relayed_messages = {
+//         ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE,
+//         ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE,
+//         ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RENEW_MESSAGE,
+//         ieee1905_1::eMessageType::PUSH_BUTTON_EVENT_NOTIFICATION_MESSAGE,
+//         ieee1905_1::eMessageType::PUSH_BUTTON_JOIN_NOTIFICATION_MESSAGE,
+//     };
 
-    if (relayed_messages.find(message_type) != relayed_messages.end()) {
-        cmdu_header->flags().relay_indicator = true;
-    }
-}
+//     if (relayed_messages.find(message_type) != relayed_messages.end()) {
+//         cmdu_header->flags().relay_indicator = true;
+//     }
+// }
 
 CmduMessageTx::CmduMessageTx(uint8_t *buff, size_t buff_len) : CmduMessage(buff, buff_len) {}
 
@@ -46,8 +46,9 @@ std::shared_ptr<cCmduHeader> CmduMessageTx::create(uint16_t id, eMessageType mes
 
     cmduhdr->message_type() = message_type;
     cmduhdr->message_id()   = id;
+    // cmdu_header->flags().relay_indicator = true;
 
-    set_relay_indicator(cmduhdr);
+    // set_relay_indicator(cmduhdr);
 
     return cmduhdr;
 }

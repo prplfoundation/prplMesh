@@ -70,6 +70,7 @@
 #include <tlvf/wfa_map/tlvApVhtCapabilities.h>
 #include <tlvf/wfa_map/tlvAssociatedClients.h>
 #include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
+#include <tlvf/wfa_map/tlvClientAssociationEvent.h>
 #include <tlvf/wfa_map/tlvClientCapabilityReport.h>
 #include <tlvf/wfa_map/tlvClientInfo.h>
 #include <tlvf/wfa_map/tlvErrorCode.h>
@@ -1982,6 +1983,28 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
         memcpy(client_info.assoc_req, msg->association_frame(), client_info.asso_len);
         associated_clients[msg->client_mac()] = client_info;
 
+        if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE)) {
+            LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
+            return false;
+        }
+
+        auto client_association_event_tlv = cmdu_tx.addClass<wfa_map::tlvClientAssociationEvent>();
+        if (!client_association_event_tlv) {
+            LOG(ERROR) << "addClass tlvClientAssociationEvent failed";
+            return false;
+        }
+        client_association_event_tlv->client_mac() = msg->client_mac();
+        client_association_event_tlv->bssid()      = msg->bssid();
+        client_association_event_tlv->association_event() =
+            wfa_map::tlvClientAssociationEvent::CLIENT_HAS_JOINED_THE_BSS;
+
+        for (const auto &neigh : m_1905_neighbor_devices) {
+            LOG(DEBUG) << "Send connected notification to " << neigh.first;
+            send_cmdu_to_bus(cmdu_tx, network_utils::mac_to_string(neigh.first), bridge_info.mac);
+        }
+        cmdu_tx.getCmduHeader()->flags().relay_indicator = 1;
+        send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
+
         break;
     }
     case beerocks_message::ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION: {
@@ -2000,7 +2023,30 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
         auto &associated_clients = soc->associated_clients_map[msg->bssid()];
         auto it                  = associated_clients.find(msg->client_mac());
         if (it != associated_clients.end()) {
-            it = associated_clients.erase(it);
+            if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE)) {
+                LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
+                return false;
+            }
+
+            auto client_association_event_tlv =
+                cmdu_tx.addClass<wfa_map::tlvClientAssociationEvent>();
+            if (!client_association_event_tlv) {
+                LOG(ERROR) << "addClass tlvClientAssociationEvent failed";
+                return false;
+            }
+            client_association_event_tlv->client_mac() = msg->client_mac();
+            client_association_event_tlv->bssid()      = msg->bssid();
+            client_association_event_tlv->association_event() =
+                wfa_map::tlvClientAssociationEvent::CLIENT_HAS_LEFT_THE_BSS;
+            associated_clients.erase(it);
+
+            for (const auto &neigh : m_1905_neighbor_devices) {
+                LOG(DEBUG) << "Send disconnected notification to " << neigh.first;
+                send_cmdu_to_bus(cmdu_tx, network_utils::mac_to_string(neigh.first),
+                                 bridge_info.mac);
+            }
+            cmdu_tx.getCmduHeader()->flags().relay_indicator = 1;
+            send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
         }
         break;
     }

@@ -36,7 +36,7 @@
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
 #include <tlvf/wfa_map/tlvClientAssociationControlRequest.h>
-#include <tlvf/wfa_map/tlvClientAssociationEvent.h>
+#include <tlvf/wfa_map/tlvClientAssociationEvent.h> //TOMER
 #include <tlvf/wfa_map/tlvMetricReportingPolicy.h>
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvSteeringBTMReport.h>
@@ -1978,7 +1978,8 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             slave_reset();
         }
 
-        // build 1905.1 message CMDU to send to the controller
+// build 1905.1 message CMDU to send to the controller
+#if 0  //TOMER
         if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE)) {
             LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
             return false;
@@ -2015,6 +2016,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         }
 
         send_cmdu_to_controller(cmdu_tx);
+#endif // TOMER
 
         break;
     }
@@ -2169,7 +2171,8 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             slave_reset();
         }
 
-        // build 1905.1 message CMDU to send to the controller
+// build 1905.1 message CMDU to send to the controller
+#if 0  //TOMER
         if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE)) {
             LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
             return false;
@@ -2204,6 +2207,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         }
 
         send_cmdu_to_controller(cmdu_tx);
+#endif //TOMER
 
         break;
     }
