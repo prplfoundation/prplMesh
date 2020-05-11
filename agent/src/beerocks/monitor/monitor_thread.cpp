@@ -1167,6 +1167,9 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
         sEvent11k event_11k = {tlvf::mac_to_string(request->params().sta_mac), dialog_token,
                                std::chrono::steady_clock::now(), beerocks_header->id()};
 
+        // USED IN TESTS
+        LOG(DEBUG) << "inserting " << +request->params().expected_reports_count
+                   << " RRM_EVENT_BEACON_REP_RXED event(s) to the pending list";
         for (int i = 0; i < request->params().expected_reports_count; i++) {
             pending_11k_events.insert(std::make_pair("RRM_EVENT_BEACON_REP_RXED", event_11k));
         }
