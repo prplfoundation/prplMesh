@@ -34,6 +34,7 @@
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
+#include <tlvf/wfa_map/tlvBeaconMetricsResponse.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
 #include <tlvf/wfa_map/tlvClientAssociationControlRequest.h>
@@ -45,6 +46,7 @@
 #include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
 
 #include "gate/1905_beacon_query_to_vs.h"
+#include "gate/vs_beacon_response_to_1905.h"
 
 // BPL Error Codes
 #include <bpl/bpl_cfg.h>
@@ -2657,7 +2659,17 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
         break;
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE: {
-        LOG(TRACE) << "ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE id=" << int(beerocks_header->id());
+        int mid = int(beerocks_header->id());
+        LOG(TRACE) << "ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE id: 0x" << std::hex << mid;
+
+        // flow:
+        // 1. extract data from response_in (vendor specific response) and build
+        // with the extracted data 1905 reponse_out message
+        // 2. send ALSO vs response.
+        // The reason for sending _both_ responses is because the 1905 response
+        // does not contain the data itself, it is being sent just to pass certification tests
+
+        // response in
         auto response_in =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE>();
@@ -2665,15 +2677,40 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
             LOG(ERROR) << "addClass ACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE failed";
             break;
         }
-        auto response_out = message_com::create_vs_message<
+
+        // old vs response:
+        auto response_out_vs = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE>(cmdu_tx,
                                                                           beerocks_header->id());
-        if (response_out == nullptr) {
+        if (response_out_vs == nullptr) {
             LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE message!";
             break;
         }
-        response_out->params() = response_in->params();
+        response_out_vs->params() = response_in->params();
+
         send_cmdu_to_controller(cmdu_tx);
+        // end old response
+
+        // new 1905 response:
+        if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::BEACON_METRICS_RESPONSE_MESSAGE)) {
+            LOG(ERROR) << "cmdu creation of type BEACON_METRICS_RESPONSE_MESSAGE, has failed";
+            return false;
+        }
+
+        auto response_out_1905 = cmdu_tx.addClass<wfa_map::tlvBeaconMetricsResponse>();
+        if (response_out_1905 == nullptr) {
+            LOG(ERROR) << "addClass wfa_map::tlvBeaconMetricsResponse failed";
+            return false;
+        }
+
+        if (!gate::load(cmdu_tx, response_in)) {
+            LOG(ERROR) << "unable to load vs beacon response into 1905";
+            return false;
+        }
+
+        send_cmdu_to_controller(cmdu_tx);
+        // end new 1905 response
+
         break;
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE: {
