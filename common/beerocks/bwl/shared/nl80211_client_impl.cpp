@@ -299,20 +299,27 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
 
                 struct nlattr *nl_freq;
                 int rem_freq;
-                static struct nla_policy freq_policy[NL80211_FREQUENCY_ATTR_MAX + 1];
-                freq_policy[NL80211_FREQUENCY_ATTR_FREQ]         = {NLA_U32, 0, 0};
-                freq_policy[NL80211_FREQUENCY_ATTR_DISABLED]     = {NLA_FLAG, 0, 0};
-                freq_policy[NL80211_FREQUENCY_ATTR_RADAR]        = {NLA_FLAG, 0, 0};
-                freq_policy[NL80211_FREQUENCY_ATTR_MAX_TX_POWER] = {NLA_U32, 0, 0};
 
                 nla_for_each_nested(nl_freq, tb_band[NL80211_BAND_ATTR_FREQS], rem_freq)
                 {
                     struct nlattr *tb_freq[NL80211_FREQUENCY_ATTR_MAX + 1];
-                    channel_info channel{};
+                    static auto freq_policy = []() {
+                        static struct nla_policy freq_policy[NL80211_FREQUENCY_ATTR_MAX + 1];
+                        static bool initialized = false;
+                        if (!initialized) {
+                            initialized = true;
 
+                            freq_policy[NL80211_FREQUENCY_ATTR_FREQ]         = {NLA_U32, 0, 0};
+                            freq_policy[NL80211_FREQUENCY_ATTR_DISABLED]     = {NLA_FLAG, 0, 0};
+                            freq_policy[NL80211_FREQUENCY_ATTR_RADAR]        = {NLA_FLAG, 0, 0};
+                            freq_policy[NL80211_FREQUENCY_ATTR_MAX_TX_POWER] = {NLA_U32, 0, 0};
+                        }
+
+                        return freq_policy;
+                    };
                     if (nla_parse(tb_freq, NL80211_FREQUENCY_ATTR_MAX,
                                   static_cast<nlattr *>(nla_data(nl_freq)), nla_len(nl_freq),
-                                  freq_policy)) {
+                                  freq_policy())) {
                         LOG(ERROR) << "Failed to parse frequency " << nl_freq->nla_type + 1 << "!";
                         return;
                     }
@@ -323,7 +330,9 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
                         continue;
                     }
 
-                    uint32_t freq  = nla_get_u32(tb_freq[NL80211_FREQUENCY_ATTR_FREQ]);
+                    uint32_t freq = nla_get_u32(tb_freq[NL80211_FREQUENCY_ATTR_FREQ]);
+
+                    channel_info channel{};
                     channel.number = son::wireless_utils::freq_to_channel(freq);
 
                     if (tb_freq[NL80211_FREQUENCY_ATTR_MAX_TX_POWER]) {
@@ -396,23 +405,6 @@ bool nl80211_client_impl::get_radio_info(const std::string &interface_name, radi
 bool nl80211_client_impl::get_sta_info(const std::string &interface_name,
                                        const sMacAddr &sta_mac_address, sta_info &sta_info)
 {
-    static struct nla_policy stats_policy[NL80211_STA_INFO_MAX + 1];
-    stats_policy[NL80211_STA_INFO_INACTIVE_TIME] = {NLA_U32, 0, 0};
-    stats_policy[NL80211_STA_INFO_RX_BYTES]      = {NLA_U32, 0, 0};
-    stats_policy[NL80211_STA_INFO_RX_PACKETS]    = {NLA_U32, 0, 0};
-    stats_policy[NL80211_STA_INFO_TX_BYTES]      = {NLA_U32, 0, 0};
-    stats_policy[NL80211_STA_INFO_TX_PACKETS]    = {NLA_U32, 0, 0};
-    stats_policy[NL80211_STA_INFO_TX_RETRIES]    = {NLA_U32, 0, 0};
-    stats_policy[NL80211_STA_INFO_TX_FAILED]     = {NLA_U32, 0, 0};
-    stats_policy[NL80211_STA_INFO_SIGNAL]        = {NLA_U8, 0, 0};
-    stats_policy[NL80211_STA_INFO_SIGNAL_AVG]    = {NLA_U8, 0, 0};
-    stats_policy[NL80211_STA_INFO_TX_BITRATE]    = {NLA_NESTED, 0, 0};
-    stats_policy[NL80211_STA_INFO_RX_BITRATE]    = {NLA_NESTED, 0, 0};
-
-    static struct nla_policy rate_policy[NL80211_RATE_INFO_MAX + 1];
-    rate_policy[NL80211_RATE_INFO_BITRATE]   = {NLA_U16, 0, 0};
-    rate_policy[NL80211_RATE_INFO_BITRATE32] = {NLA_U32, 0, 0};
-
     sta_info = {};
 
     if (!m_socket) {
@@ -440,7 +432,6 @@ bool nl80211_client_impl::get_sta_info(const std::string &interface_name,
         [&](struct nl_msg *msg) {
             struct nlattr *tb[NL80211_ATTR_MAX + 1];
             struct genlmsghdr *gnlh = static_cast<genlmsghdr *>(nlmsg_data(nlmsg_hdr(msg)));
-            struct nlattr *sinfo[NL80211_STA_INFO_MAX + 1];
 
             // Parse the netlink message
             if (nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0),
@@ -455,8 +446,30 @@ bool nl80211_client_impl::get_sta_info(const std::string &interface_name,
             }
 
             // Parse nested station stats
+            struct nlattr *sinfo[NL80211_STA_INFO_MAX + 1];
+            static auto stats_policy = []() {
+                static struct nla_policy stats_policy[NL80211_STA_INFO_MAX + 1];
+                static bool initialized = false;
+                if (!initialized) {
+                    initialized = true;
+
+                    stats_policy[NL80211_STA_INFO_INACTIVE_TIME] = {NLA_U32, 0, 0};
+                    stats_policy[NL80211_STA_INFO_RX_BYTES]      = {NLA_U32, 0, 0};
+                    stats_policy[NL80211_STA_INFO_RX_PACKETS]    = {NLA_U32, 0, 0};
+                    stats_policy[NL80211_STA_INFO_TX_BYTES]      = {NLA_U32, 0, 0};
+                    stats_policy[NL80211_STA_INFO_TX_PACKETS]    = {NLA_U32, 0, 0};
+                    stats_policy[NL80211_STA_INFO_TX_RETRIES]    = {NLA_U32, 0, 0};
+                    stats_policy[NL80211_STA_INFO_TX_FAILED]     = {NLA_U32, 0, 0};
+                    stats_policy[NL80211_STA_INFO_SIGNAL]        = {NLA_U8, 0, 0};
+                    stats_policy[NL80211_STA_INFO_SIGNAL_AVG]    = {NLA_U8, 0, 0};
+                    stats_policy[NL80211_STA_INFO_TX_BITRATE]    = {NLA_NESTED, 0, 0};
+                    stats_policy[NL80211_STA_INFO_RX_BITRATE]    = {NLA_NESTED, 0, 0};
+                }
+
+                return stats_policy;
+            };
             if (nla_parse_nested(sinfo, NL80211_STA_INFO_MAX, tb[NL80211_ATTR_STA_INFO],
-                                 stats_policy)) {
+                                 stats_policy())) {
                 LOG(ERROR) << "Failed to parse nested STA attributes!";
                 return;
             }
@@ -517,10 +530,23 @@ bool nl80211_client_impl::get_sta_info(const std::string &interface_name,
 
             // Bit rate parsing helper function
             auto parse_bitrate_func = [&](struct nlattr *bitrate_attr) -> int {
-                struct nlattr *rinfo[NL80211_RATE_INFO_MAX + 1];
-
                 int rate = 0;
-                if (nla_parse_nested(rinfo, NL80211_RATE_INFO_MAX, bitrate_attr, rate_policy)) {
+
+                struct nlattr *rinfo[NL80211_RATE_INFO_MAX + 1];
+                static auto rate_policy = []() {
+                    static struct nla_policy rate_policy[NL80211_RATE_INFO_MAX + 1];
+                    static bool initialized = false;
+                    if (!initialized) {
+                        initialized = true;
+
+                        rate_policy[NL80211_RATE_INFO_BITRATE]   = {NLA_U16, 0, 0};
+                        rate_policy[NL80211_RATE_INFO_BITRATE32] = {NLA_U32, 0, 0};
+                    }
+
+                    return rate_policy;
+                };
+
+                if (nla_parse_nested(rinfo, NL80211_RATE_INFO_MAX, bitrate_attr, rate_policy())) {
                     LOG(ERROR) << "Failed to parse nested rate attributes!";
                 } else if (rinfo[NL80211_RATE_INFO_BITRATE32]) {
                     rate = nla_get_u32(rinfo[NL80211_RATE_INFO_BITRATE32]);
@@ -576,8 +602,6 @@ bool nl80211_client_impl::get_survey_info(const std::string &interface_name,
         [&](struct nl_msg *msg) {
             struct nlattr *tb[NL80211_ATTR_MAX + 1];
             struct genlmsghdr *gnlh = static_cast<genlmsghdr *>(nlmsg_data(nlmsg_hdr(msg)));
-            struct nlattr *sinfo[NL80211_SURVEY_INFO_MAX + 1];
-            sSurveyInfo survey_info;
 
             // Parse the netlink message
             if (nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0),
@@ -592,10 +616,16 @@ bool nl80211_client_impl::get_survey_info(const std::string &interface_name,
             }
 
             // Parse nested survey info
+            struct nlattr *sinfo[NL80211_SURVEY_INFO_MAX + 1];
             static auto survey_policy = []() {
                 static struct nla_policy survey_policy[NL80211_SURVEY_INFO_MAX + 1];
-                survey_policy[NL80211_SURVEY_INFO_FREQUENCY] = {NLA_U32, 0, 0};
-                survey_policy[NL80211_SURVEY_INFO_NOISE]     = {NLA_U8, 0, 0};
+                static bool initialized = false;
+                if (!initialized) {
+                    initialized = true;
+
+                    survey_policy[NL80211_SURVEY_INFO_FREQUENCY] = {NLA_U32, 0, 0};
+                    survey_policy[NL80211_SURVEY_INFO_NOISE]     = {NLA_U8, 0, 0};
+                }
 
                 return survey_policy;
             };
@@ -605,6 +635,7 @@ bool nl80211_client_impl::get_survey_info(const std::string &interface_name,
                 return;
             }
 
+            sSurveyInfo survey_info;
             survey_info.in_use = sinfo[NL80211_SURVEY_INFO_IN_USE];
 
             if (sinfo[NL80211_SURVEY_INFO_FREQUENCY]) {
