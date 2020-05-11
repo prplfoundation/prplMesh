@@ -99,6 +99,7 @@ bool master_thread::init()
             ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE,
             ieee1905_1::eMessageType::AP_CAPABILITY_REPORT_MESSAGE,
             ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE,
+            ieee1905_1::eMessageType::BEACON_METRICS_RESPONSE_MESSAGE,
             ieee1905_1::eMessageType::CHANNEL_PREFERENCE_REPORT_MESSAGE,
             ieee1905_1::eMessageType::CHANNEL_SELECTION_RESPONSE_MESSAGE,
             ieee1905_1::eMessageType::CLIENT_CAPABILITY_REPORT_MESSAGE,
@@ -289,6 +290,8 @@ bool master_thread::handle_cmdu_1905_1_message(const std::string &src_mac,
         return handle_cmdu_1905_ap_capability_report(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE:
         return handle_cmdu_1905_ap_metric_response(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::BEACON_METRICS_RESPONSE_MESSAGE:
+        return handle_cmdu_1905_beacon_response(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_PREFERENCE_REPORT_MESSAGE:
         return handle_cmdu_1905_channel_preference_report(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_RESPONSE_MESSAGE:
@@ -1788,6 +1791,16 @@ bool master_thread::handle_cmdu_1905_topology_response(const std::string &src_ma
         }
     }
 
+    return true;
+}
+
+bool master_thread::handle_cmdu_1905_beacon_response(const std::string &src_mac,
+                                                     ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    // here we need to extract and keep the data received from the STA
+    // but currently we'll just print that we are here
+    auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "got beacon response from STA. mid: 0x" << std::hex << mid;
     return true;
 }
 
