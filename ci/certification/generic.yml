@@ -11,4 +11,4 @@
     when: always
   tags:
     - certs-tests
-  timeout: 30min
+  timeout: 45min

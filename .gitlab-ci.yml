@@ -223,6 +223,7 @@ run-tests:
     # kill prplmesh on each target to make sure they don't interfere with the test
     - for i in $ALL_TARGETS ; do ssh "$i" 'pgrep -f beerocks | xargs kill -9 2>/dev/null' || true ; done
   script:
+    - tools/deploy_firmware.py --device "$TARGET_DEVICE" --target-name "$TARGET_DEVICE_NAME" --image "$OPENWRT_IMAGE"
     - tools/deploy_ipk.sh $TARGET_DEVICE_NAME "build/$TARGET_DEVICE/"prplmesh.ipk
     - tests/openwrt/test_status.sh $TARGET_DEVICE_NAME
   artifacts:
@@ -232,7 +233,7 @@ run-tests:
     when: always
   tags:
     - targets
-  timeout: 5m
+  timeout: 20m
 
 build-for-turris-omnia:
   extends: .build-for-openwrt
@@ -254,6 +255,7 @@ test-on-turris-omnia:
   variables:
     TARGET_DEVICE: turris-omnia
     TARGET_DEVICE_NAME: turris-omnia-1
+    OPENWRT_IMAGE: openwrt-mvebu-cortexa9-cznic_turris-omnia-sysupgrade.img.gz
   needs: ["build-for-turris-omnia"]
 
 test-on-glinet-b1300:
@@ -261,6 +263,7 @@ test-on-glinet-b1300:
   variables:
     TARGET_DEVICE: glinet-b1300
     TARGET_DEVICE_NAME: glinet-b1300-1
+    OPENWRT_IMAGE: openwrt-ipq40xx-generic-glinet_gl-b1300-squashfs-sysupgrade.bin
   needs: ["build-for-glinet-b1300"]
 
 test-on-netgear-rax40:
@@ -268,6 +271,7 @@ test-on-netgear-rax40:
   variables:
     TARGET_DEVICE: netgear-rax40
     TARGET_DEVICE_NAME: netgear-rax40-1
+    OPENWRT_IMAGE: NETGEAR_RAX40-squashfs-fullimage.img
   needs: ["build-for-netgear-rax40"]
 
 run-certification-tests:
@@ -279,7 +283,8 @@ run-certification-tests:
     DEVICE_UNDER_TEST: prplmesh
   script:
     - |
-      if [ "$DEVICE_UNDER_TEST" != prplmesh ] ; then
+      if [ "$DEVICE_UNDER_TEST" = netgear-rax40 ] ; then
+          tools/deploy_firmware.py --device netgear-rax40 --target-name "$DEVICE_UNDER_TEST" --image NETGEAR_RAX40-squashfs-fullimage.img
           echo "Deploying to $DEVICE_UNDER_TEST"
           tools/deploy_ipk.sh --certification-mode $DEVICE_UNDER_TEST build/$DEVICE_UNDER_TEST/prplmesh.ipk
       fi
