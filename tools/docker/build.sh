@@ -13,11 +13,22 @@ rootdir="${scriptdir%/*/*}"
 . "${rootdir}/tools/functions.sh"
 
 main() {
+
+    # declare the default non WSL value
+    local userns="--userns keep-id"
+
+    # check if running on WSL
+    if grep -q Microsoft /proc/version
+    then 
+        # when running on WSL, remove this parameter
+        userns=""
+    fi
+
     # Default docker arguments
     docker_args=(
         --workdir "${rootdir}"
         --user "${SUDO_UID:-$(id -u)}:${SUDO_GID:-$(id -g)}"
-        --userns keep-id
+        ${userns}
         -e "USER=${SUDO_USER:-${USER}}"
         -v "${rootdir}:${rootdir}"
         --entrypoint "./tools/maptools.py"
