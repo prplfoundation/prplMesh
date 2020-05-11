@@ -6,16 +6,13 @@
     {
       "label": "Build",
       "type": "shell",
+      "options": {
+        "env": {
+          "BUILD_ARGS": "-G Ninja -f MSGLIB=zmq BUILD_TESTS=ON CMAKE_BUILD_TYPE=Debug"
+        }
+      },
       "linux": {
-        "command": "./tools/maptools.py",
-        "args": [
-          "build",
-          "map",
-          "-f",
-          "MSGLIB=zmq",
-          "BUILD_TESTS=ON",
-          "CMAKE_BUILD_TYPE=Debug"
-        ]
+        "command": "[ -f /.dockerenv ] && { ./tools/maptools.py build ${BUILD_ARGS} || exit 1; } || ./tools/docker/build.sh ${BUILD_ARGS}"
       },
       "problemMatcher": [
         "$gcc"
