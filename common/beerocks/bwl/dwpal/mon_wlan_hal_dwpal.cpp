@@ -762,6 +762,35 @@ bool mon_wlan_hal_dwpal::sta_beacon_11k_request(const SBeaconRequest11k &req, in
         cmd += " ssid=" + req_ssid;
     }
 
+    // use ap_ch_report in the request.
+    if (0 != req.use_optional_ap_ch_report) {
+
+        if (255 != req.channel) {
+            LOG(ERROR) << "ap-channel-report was set although channel was not set to 255";
+            return false;
+        }
+        std::stringstream ch_report_ss;
+        uint8_t current_channel = 0;
+        for (; current_channel < req.use_optional_ap_ch_report - 1; ++current_channel) {
+            ch_report_ss << +req.ap_ch_report[current_channel] << ",";
+        }
+        ch_report_ss << +req.ap_ch_report[current_channel];
+
+        cmd += " ap_ch_report=" + ch_report_ss.str();
+    } else {
+        if (255 == req.channel) {
+            LOG(ERROR) << "ap-channel-report was not set although channel was set to 255";
+        }
+    }
+
+    // report detail: rep_detail=
+    // this value should be set by default to 2 if not stated otherwise.
+    // however hostap does not set it to 2. So we add it hardcoded here
+    // note: currently there is no field in SBeaconRequest11k that holds this optional field
+    cmd += " rep_detail=2";
+
+    LOG(DEBUG) << " the command: " << cmd;
+
     // send command
     if (!dwpal_send_cmd(cmd, &reply)) {
         LOG(ERROR) << __func__ << " failed";
