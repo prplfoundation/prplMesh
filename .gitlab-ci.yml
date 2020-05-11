@@ -1,3 +1,6 @@
+variables:
+  PYTHONUNBUFFERED: "1"
+
 stages:
   - containers
   - build
