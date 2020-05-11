@@ -343,7 +343,7 @@ bool node::link_metrics_data::add_receiver_link_metric(
     return true;
 }
 
-bool node::ap_metrics_data::add_ap_metric_data(std::shared_ptr<wfa_map::tlvApMetric> ApMetricData)
+bool node::ap_metrics_data::add_ap_metric_data(std::shared_ptr<wfa_map::tlvApMetrics> ApMetricData)
 {
     bssid                               = ApMetricData->bssid();
     channel_utilization                 = ApMetricData->channel_utilization();
