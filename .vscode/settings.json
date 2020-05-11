@@ -98,5 +98,6 @@
         "stoul",
         "backhual",
         "fronthaul"
-    ]
+    ],
+    "git.alwaysSignOff": true
 }
