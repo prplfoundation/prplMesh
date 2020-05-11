@@ -136,6 +136,10 @@ private:
     };
     std::map<CounterId, unsigned long> counters_;
 
+    struct MacAddr {
+        uint8_t oct[ETH_ALEN];
+    };
+
     // an internal data structure used for manipulating packets (CMDUs, LLDP, etc.)
     class Packet {
     public:
@@ -143,8 +147,8 @@ private:
         unsigned int dst_if_index = 0;
         uint8_t src_if_type       = CmduRxMessage::IF_TYPE_NONE;
         unsigned int src_if_index = 0;
-        uint8_t dst[ETH_ALEN]     = {0}; // destination mac address
-        uint8_t src[ETH_ALEN]     = {0}; // source mac address
+        MacAddr dst               = {0}; // destination mac address
+        MacAddr src               = {0}; // source mac address
         uint16_t ether_type       = 0x0000;
         struct iovec header       = {.iov_base = NULL, .iov_len = 0};
         struct iovec payload      = {.iov_base = NULL, .iov_len = 0};

@@ -48,8 +48,8 @@ void Ieee1905Transport::handle_local_bus_cmdu_tx_message(CmduTxMessage &msg)
     packet.dst_if_index = msg.metadata()->if_index;
     packet.src_if_type  = CmduRxMessage::IF_TYPE_LOCAL_BUS;
     packet.src_if_index = 0;
-    std::copy_n(msg.metadata()->dst, ETH_ALEN, packet.dst);
-    std::copy_n(msg.metadata()->src, ETH_ALEN, packet.src);
+    std::copy_n(msg.metadata()->dst, ETH_ALEN, packet.dst.oct);
+    std::copy_n(msg.metadata()->src, ETH_ALEN, packet.src.oct);
     packet.ether_type       = msg.metadata()->ether_type;
     packet.header.iov_base  = 0;
     packet.header.iov_len   = 0;
@@ -131,8 +131,8 @@ bool Ieee1905Transport::send_packet_to_local_bus(Packet &packet)
     // create and fill an CmduRxMessage to be sent on the local bus
     CmduRxMessage msg;
 
-    std::copy_n(packet.src, ETH_ALEN, msg.metadata()->src);
-    std::copy_n(packet.dst, ETH_ALEN, msg.metadata()->dst);
+    std::copy_n(packet.src.oct, ETH_ALEN, msg.metadata()->src);
+    std::copy_n(packet.dst.oct, ETH_ALEN, msg.metadata()->dst);
 
     msg.metadata()->ether_type = packet.ether_type;
     msg.metadata()->if_type    = packet.src_if_type;
