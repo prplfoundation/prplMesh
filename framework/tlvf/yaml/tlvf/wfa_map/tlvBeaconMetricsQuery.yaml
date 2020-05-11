@@ -13,7 +13,7 @@ tlvBeaconMetricsQuery:
   operating_class: uint8_t
   channel_number: uint8_t
   bssid: sMacAddr
-  reporting_detail_value: uin8_t
+  reporting_detail_value: uint8_t
   ssid_length:
     _type: uint8_t
     _length_var: True
@@ -24,7 +24,7 @@ tlvBeaconMetricsQuery:
     _type: uint8_t
     _length_var: True
   ap_channel_reports_list:
-    _type: sApChannelReports
+    _type: cApChannelReports
     _length: [ ap_channel_reports_list_length ]
   elemnt_id_list_length:
     _type: uint8_t
@@ -33,12 +33,12 @@ tlvBeaconMetricsQuery:
     _type: uint8_t
     _length: [ elemnt_id_list_length ]
 
-sApChannelReports:
-  _type: struct
+cApChannelReports:
+  _type: class
   ap_channel_report_list_length:
     _type: uint8_t
     _length_var: True
-  operating_class_in_ap_channel_report: uint8_t
   ap_channel_report_list:
     _type: uint8_t
     _length: [ ap_channel_report_list_length ]
+    _comment: The first element of this list is the operating class.
