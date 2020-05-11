@@ -29,7 +29,7 @@
         "command": "rm",
         "args": [
           "-rf",
-          "build/*"
+          "build"
         ]
       },
       "problemMatcher": [],
