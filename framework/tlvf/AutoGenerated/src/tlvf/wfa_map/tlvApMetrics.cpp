@@ -10,46 +10,46 @@
  * See LICENSE file for more details.
  */
 
-#include <tlvf/wfa_map/tlvApMetric.h>
+#include <tlvf/wfa_map/tlvApMetrics.h>
 #include <tlvf/tlvflogging.h>
 
 using namespace wfa_map;
 
-tlvApMetric::tlvApMetric(uint8_t* buff, size_t buff_len, bool parse) :
+tlvApMetrics::tlvApMetrics(uint8_t* buff, size_t buff_len, bool parse) :
     BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-tlvApMetric::tlvApMetric(std::shared_ptr<BaseClass> base, bool parse) :
+tlvApMetrics::tlvApMetrics(std::shared_ptr<BaseClass> base, bool parse) :
 BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
-tlvApMetric::~tlvApMetric() {
+tlvApMetrics::~tlvApMetrics() {
 }
-const eTlvTypeMap& tlvApMetric::type() {
+const eTlvTypeMap& tlvApMetrics::type() {
     return (const eTlvTypeMap&)(*m_type);
 }
 
-const uint16_t& tlvApMetric::length() {
+const uint16_t& tlvApMetrics::length() {
     return (const uint16_t&)(*m_length);
 }
 
-sMacAddr& tlvApMetric::bssid() {
+sMacAddr& tlvApMetrics::bssid() {
     return (sMacAddr&)(*m_bssid);
 }
 
-uint8_t& tlvApMetric::channel_utilization() {
+uint8_t& tlvApMetrics::channel_utilization() {
     return (uint8_t&)(*m_channel_utilization);
 }
 
-uint16_t& tlvApMetric::number_of_stas_currently_associated() {
+uint16_t& tlvApMetrics::number_of_stas_currently_associated() {
     return (uint16_t&)(*m_number_of_stas_currently_associated);
 }
 
-tlvApMetric::sEstimatedService& tlvApMetric::estimated_service_parameters() {
+tlvApMetrics::sEstimatedService& tlvApMetrics::estimated_service_parameters() {
     return (sEstimatedService&)(*m_estimated_service_parameters);
 }
 
-uint8_t* tlvApMetric::estimated_service_info_field(size_t idx) {
+uint8_t* tlvApMetrics::estimated_service_info_field(size_t idx) {
     if ( (m_estimated_service_info_field_idx__ == 0) || (m_estimated_service_info_field_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
         return nullptr;
@@ -57,7 +57,7 @@ uint8_t* tlvApMetric::estimated_service_info_field(size_t idx) {
     return &(m_estimated_service_info_field[idx]);
 }
 
-bool tlvApMetric::set_estimated_service_info_field(const void* buffer, size_t size) {
+bool tlvApMetrics::set_estimated_service_info_field(const void* buffer, size_t size) {
     if (buffer == nullptr) {
         TLVF_LOG(WARNING) << "set_estimated_service_info_field received a null pointer.";
         return false;
@@ -66,7 +66,7 @@ bool tlvApMetric::set_estimated_service_info_field(const void* buffer, size_t si
     std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_estimated_service_info_field);
     return true;
 }
-bool tlvApMetric::alloc_estimated_service_info_field(size_t count) {
+bool tlvApMetrics::alloc_estimated_service_info_field(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list estimated_service_info_field, abort!";
         return false;
@@ -92,7 +92,7 @@ bool tlvApMetric::alloc_estimated_service_info_field(size_t count) {
     return true;
 }
 
-void tlvApMetric::class_swap()
+void tlvApMetrics::class_swap()
 {
     tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
     m_bssid->struct_swap();
@@ -100,7 +100,7 @@ void tlvApMetric::class_swap()
     m_estimated_service_parameters->struct_swap();
 }
 
-bool tlvApMetric::finalize()
+bool tlvApMetrics::finalize()
 {
     if (m_parse__) {
         TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
@@ -128,7 +128,7 @@ bool tlvApMetric::finalize()
     return true;
 }
 
-size_t tlvApMetric::get_initial_size()
+size_t tlvApMetrics::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(eTlvTypeMap); // type
@@ -140,7 +140,7 @@ size_t tlvApMetric::get_initial_size()
     return class_size;
 }
 
-bool tlvApMetric::init()
+bool tlvApMetrics::init()
 {
     if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";

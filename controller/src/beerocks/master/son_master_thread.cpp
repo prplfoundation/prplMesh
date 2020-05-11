@@ -47,7 +47,7 @@
 #include <tlvf/ieee_1905_1/tlvSearchedRole.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
-#include <tlvf/wfa_map/tlvApMetric.h>
+#include <tlvf/wfa_map/tlvApMetrics.h>
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
@@ -1357,7 +1357,7 @@ bool master_thread::construct_combined_infra_metric()
     auto &ap_metric_data = database.get_ap_metric_data_map();
     for (auto &it : ap_metric_data) {
         auto metric_data_per_agent            = it.second;
-        auto ap_metrics_tlv                   = cert_cmdu_tx.addClass<wfa_map::tlvApMetric>();
+        auto ap_metrics_tlv                   = cert_cmdu_tx.addClass<wfa_map::tlvApMetrics>();
         ap_metrics_tlv->bssid()               = metric_data_per_agent.bssid;
         ap_metrics_tlv->channel_utilization() = metric_data_per_agent.channel_utilization;
         ap_metrics_tlv->number_of_stas_currently_associated() =
@@ -1395,11 +1395,11 @@ bool master_thread::handle_cmdu_1905_ap_metric_response(const std::string &src_m
     //getting reference for ap metric data storage from db
     auto &ap_metric_data = database.get_ap_metric_data_map();
 
-    for (auto ap_metric_tlv : cmdu_rx.getClassList<wfa_map::tlvApMetric>()) {
+    for (auto ap_metric_tlv : cmdu_rx.getClassList<wfa_map::tlvApMetrics>()) {
         //parse tx_ap_metric_data
         sMacAddr reporting_agent_bssid = ap_metric_tlv->bssid();
 
-        LOG(DEBUG) << "recieved tlvApMetric from BSSID =" << reporting_agent_bssid;
+        LOG(DEBUG) << "recieved tlvApMetrics from BSSID =" << reporting_agent_bssid;
 
         //fill tx data from TLV
         if (!ap_metric_data[reporting_agent_bssid].add_ap_metric_data(ap_metric_tlv)) {

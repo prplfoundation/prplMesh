@@ -14,7 +14,7 @@
 #include <tlvf/common/sMacAddr.h>
 #include <tlvf/ieee_1905_1/tlvReceiverLinkMetric.h>
 #include <tlvf/ieee_1905_1/tlvTransmitterLinkMetric.h>
-#include <tlvf/wfa_map/tlvApMetric.h>
+#include <tlvf/wfa_map/tlvApMetrics.h>
 
 #include <list>
 #include <map>
@@ -248,7 +248,7 @@ public:
         bool include_ac_bk = false;
         bool include_ac_vi = false;
 
-        bool add_ap_metric_data(std::shared_ptr<wfa_map::tlvApMetric> ApMetricData);
+        bool add_ap_metric_data(std::shared_ptr<wfa_map::tlvApMetrics> ApMetricData);
     };
 
     bool is_prplmesh                = false;

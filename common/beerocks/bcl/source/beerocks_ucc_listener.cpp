@@ -21,7 +21,7 @@
 #include <tlvf/ieee_1905_1/tlvReceiverLinkMetric.h>
 #include <tlvf/ieee_1905_1/tlvTransmitterLinkMetric.h>
 #include <tlvf/wfa_map/eTlvTypeMap.h>
-#include <tlvf/wfa_map/tlvApMetric.h>
+#include <tlvf/wfa_map/tlvApMetrics.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
 
