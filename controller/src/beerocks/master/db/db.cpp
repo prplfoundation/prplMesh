@@ -962,7 +962,7 @@ std::set<std::string> db::get_node_siblings(const std::string &mac, int type)
 
     auto parent = get_node(n->parent_mac);
     if (!parent) {
-        LOG(ERROR) << "parent for node " << mac << " does not exist";
+        LOG(WARNING) << "parent for node " << mac << " does not exist";
         return siblings;
     }
 
