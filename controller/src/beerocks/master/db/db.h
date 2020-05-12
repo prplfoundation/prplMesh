@@ -41,6 +41,7 @@ class db {
         bool map_updates;
         bool stats_updates;
         bool events_updates;
+        bool topology_updates;
     } sBmlListener;
 
 public:
