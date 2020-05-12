@@ -669,13 +669,13 @@ bool monitor_thread::update_ap_stats()
 bool monitor_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     if (cmdu_rx.getMessageType() == ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE) {
-        return handle_cmdu_vs_message(sd, cmdu_rx);
+        return handle_cmdu_vs_message(*sd, cmdu_rx);
     }
 
-    return handle_cmdu_ieee1905_1_message(sd, cmdu_rx);
+    return handle_cmdu_ieee1905_1_message(*sd, cmdu_rx);
 }
 
-bool monitor_thread::handle_cmdu_vs_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
     if (beerocks_header == nullptr) {
@@ -686,7 +686,7 @@ bool monitor_thread::handle_cmdu_vs_message(Socket *sd, ieee1905_1::CmduMessageR
     if (beerocks_header->action() != beerocks_message::ACTION_MONITOR) {
         LOG(ERROR) << "Unsupported action: " << int(beerocks_header->action());
         return false;
-    } else if (slave_socket != sd) {
+    } else if (slave_socket != &sd) {
         LOG(ERROR) << "slave_socket != sd";
         return false;
     }
@@ -1331,7 +1331,7 @@ bool monitor_thread::handle_cmdu_vs_message(Socket *sd, ieee1905_1::CmduMessageR
     return true;
 }
 
-bool monitor_thread::handle_cmdu_ieee1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+bool monitor_thread::handle_cmdu_ieee1905_1_message(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto cmdu_message_type = cmdu_rx.getMessageType();
 
@@ -1345,7 +1345,7 @@ bool monitor_thread::handle_cmdu_ieee1905_1_message(Socket *sd, ieee1905_1::Cmdu
     return false;
 }
 
-bool monitor_thread::handle_multi_ap_policy_config_request(Socket *sd,
+bool monitor_thread::handle_multi_ap_policy_config_request(Socket &sd,
                                                            ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     /**
