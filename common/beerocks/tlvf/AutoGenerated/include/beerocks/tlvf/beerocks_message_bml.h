@@ -1737,6 +1737,67 @@ class cACTION_BML_TRIGGER_TOPOLOGY_QUERY : public BaseClass
         sMacAddr* m_al_mac = nullptr;
 };
 
+class cACTION_BML_TOPOLOGY_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_BML_TOPOLOGY_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_BML_TOPOLOGY_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_TOPOLOGY_RESPONSE();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_TOPOLOGY_RESPONSE);
+        }
+        sDeviceData& device_data();
+        uint32_t& result();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+        sDeviceData* m_device_data = nullptr;
+        uint32_t* m_result = nullptr;
+};
+
+class cACTION_BML_REGISTER_TOPOLOGY_QUERY : public BaseClass
+{
+    public:
+        cACTION_BML_REGISTER_TOPOLOGY_QUERY(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_BML_REGISTER_TOPOLOGY_QUERY(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_REGISTER_TOPOLOGY_QUERY();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_REGISTER_TOPOLOGY_QUERY);
+        }
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+};
+
+class cACTION_BML_UNREGISTER_TOPOLOGY_QUERY : public BaseClass
+{
+    public:
+        cACTION_BML_UNREGISTER_TOPOLOGY_QUERY(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_BML_UNREGISTER_TOPOLOGY_QUERY(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_BML_UNREGISTER_TOPOLOGY_QUERY();
+
+        static eActionOp_BML get_action_op(){
+            return (eActionOp_BML)(ACTION_BML_UNREGISTER_TOPOLOGY_QUERY);
+        }
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_BML* m_action_op = nullptr;
+};
+
 class cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST : public BaseClass
 {
     public:

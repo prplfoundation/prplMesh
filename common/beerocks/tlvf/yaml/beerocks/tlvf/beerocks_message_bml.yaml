@@ -380,6 +380,19 @@ cACTION_BML_TRIGGER_TOPOLOGY_QUERY:
   _type: class
   al_mac: sMacAddr
 
+cACTION_BML_TOPOLOGY_RESPONSE:
+  _type: class
+  device_data: sDeviceData
+  result:
+    _type: uint32_t
+    _comment: # 0 - Failure, 1 - Success  
+
+cACTION_BML_REGISTER_TOPOLOGY_QUERY:
+  _type: class
+
+cACTION_BML_UNREGISTER_TOPOLOGY_QUERY:
+  _type: class
+
 cACTION_BML_TRIGGER_CHANNEL_SELECTION_REQUEST:
   _type: class
   al_mac: sMacAddr
