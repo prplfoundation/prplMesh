@@ -72,7 +72,7 @@ class UCCSocket:
     CAPI commands from it.
     """
 
-    def __init__(self, host: str, port: int, timeout: int = 10):
+    def __init__(self, host: str, port: int, timeout: int = 30):
         """Constructor for UCCSocket
 
         Parameters
