@@ -660,6 +660,23 @@ sDeviceInfo:
   wan_ip_address: uint32_t
   wan_network_mask: uint32_t
 
+sIfaceInfo:
+  _type: struct
+  iface_name:
+    _type: char 
+    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+  iface_mac: sMacAddr
+  iface_status: beerocks::eNodeState
+
+sDeviceData:
+  _type: struct
+  al_mac: sMacAddr
+  radios:
+    _type: sIfaceInfo
+    _length: [ "beerocks::message::DEV_MAX_RADIOS" ] 
+  # using const type since LENGTH_TYPE_DYNAMIC is not supported yet in tlvf
+  # github issue  https://github.com/prplfoundation/prplMesh/issues/1266
+
 sRestrictedChannels:
   _type: struct
   hostap_mac: sMacAddr
