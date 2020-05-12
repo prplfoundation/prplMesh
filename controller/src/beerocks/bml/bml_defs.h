@@ -465,13 +465,6 @@ struct BML_EVENT_CAC_STATUS_CHANGED_NOTIFICATION {
     uint8_t reserved;
 };
 
-/*
- * Beerocks beacon measurement (11k) event
- */
-struct BML_EVENT_BEACON_MEASUREMENT {
-    //TBD
-};
-
 /**
  * @brief prplmesh bml radio information structure
  * 
