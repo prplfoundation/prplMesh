@@ -53,7 +53,7 @@ void bml_task::work()
 void bml_task::handle_event(int event_type, void *obj)
 {
     if ((event_type != REGISTER_TO_NW_MAP_UPDATES && event_type != REGISTER_TO_STATS_UPDATES &&
-         event_type != REGISTER_TO_EVENTS_UPDATES) &&
+         event_type != REGISTER_TO_EVENTS_UPDATES && event_type != REGISTER_TO_TOPOLOGY_UPDATES) &&
         !database.is_bml_listener_exist()) {
         return;
     }
@@ -190,6 +190,34 @@ void bml_task::handle_event(int event_type, void *obj)
             }
             auto slave_parent_mac = database.get_node_parent(event_obj->hostap_mac);
             update_bml_nw_map(slave_parent_mac);
+        }
+        break;
+    }
+    case REGISTER_TO_TOPOLOGY_UPDATES: {
+        if (!obj) {
+            break;
+        }
+        auto event_obj = reinterpret_cast<listener_general_register_unregister_event *>(obj);
+        TASK_LOG(DEBUG) << "REGISTER_TO_TOPOLOGY_UPDATES event was received";
+        database.add_bml_socket(event_obj->sd);
+        if (!database.set_bml_topology_update_enable(event_obj->sd, true)) {
+            TASK_LOG(DEBUG) << "fail in topology_updates registration";
+        }
+        state = LISTENING;
+        break;
+    }
+    case UNREGISTER_TO_TOPOLOGY_UPDATES: {
+        if (!obj) {
+            break;
+        }
+        auto event_obj = reinterpret_cast<listener_general_register_unregister_event *>(obj);
+        TASK_LOG(DEBUG) << "UNREGISTER_TO_TOPOLOGY_UPDATES event was received";
+
+        if (!database.set_bml_topology_update_enable(event_obj->sd, false)) {
+            TASK_LOG(DEBUG) << "fail in topology_updates unregistration";
+        }
+        if (!database.is_bml_listener_exist()) {
+            state = IDLE;
         }
         break;
     }
