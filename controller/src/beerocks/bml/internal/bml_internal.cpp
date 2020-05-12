@@ -1852,6 +1852,44 @@ int bml_internal::register_nw_map_update_cb(BML_NW_MAP_QUERY_CB pCB)
     return (BML_RET_OK);
 }
 
+int bml_internal::register_topology_discovery_response()
+{
+    auto request =
+        message_com::create_vs_message<beerocks_message::cACTION_BML_REGISTER_TOPOLOGY_QUERY>(
+            cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR) << "Failed building cACTION_BML_REGISTER_TOPOLOGY_QUERY message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
+        LOG(ERROR) << "Failed sending cACTION_BML_REGISTER_TOPOLOGY_QUERY message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    return (BML_RET_OK);
+}
+
+int bml_internal::unregister_topology_discovery_response()
+{
+    auto request =
+        message_com::create_vs_message<beerocks_message::cACTION_BML_UNREGISTER_TOPOLOGY_QUERY>(
+            cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR) << "Failed building cACTION_BML_UNREGISTER_TOPOLOGY_QUERY message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
+        LOG(ERROR) << "Failed sending cACTION_BML_UNREGISTER_TOPOLOGY_QUERY message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    return (BML_RET_OK);
+}
+
 int bml_internal::nw_map_query()
 {
     // Command supported only on local master

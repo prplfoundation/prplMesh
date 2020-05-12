@@ -47,6 +47,12 @@ public:
     // Query the beerocks master for the network map
     int nw_map_query();
 
+    // Register topology discovery query so bml listener could receive the response event.
+    int register_topology_discovery_response();
+
+    // Unregister topology discovery response events.
+    int unregister_topology_discovery_response();
+
     // Register a callback for the statistcs results
     int register_stats_cb(BML_STATS_UPDATE_CB pCB);
 

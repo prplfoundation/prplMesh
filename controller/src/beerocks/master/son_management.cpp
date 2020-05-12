@@ -925,6 +925,25 @@ void son_management::handle_bml_message(Socket *sd,
 
     } break;
 
+    case beerocks_message::ACTION_BML_REGISTER_TOPOLOGY_QUERY: {
+        LOG(TRACE) << "ACTION_BML_REGISTER_TOPOLOGY_QUERY";
+
+        bml_task::listener_general_register_unregister_event new_event;
+        new_event.sd = sd;
+        tasks.push_event(database.get_bml_task_id(), bml_task::REGISTER_TO_TOPOLOGY_UPDATES,
+                         &new_event);
+
+        message_com::send_cmdu(sd, cmdu_tx);
+    } break;
+
+    case beerocks_message::ACTION_BML_UNREGISTER_TOPOLOGY_QUERY: {
+        LOG(TRACE) << "ACTION_BML_UNREGISTER_TOPOLOGY_QUERY";
+        bml_task::listener_general_register_unregister_event new_event;
+        new_event.sd = sd;
+        tasks.push_event(database.get_bml_task_id(), bml_task::UNREGISTER_TO_TOPOLOGY_UPDATES,
+                         &new_event);
+    } break;
+
     case beerocks_message::ACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST: {
         LOG(TRACE) << "ACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST";
 
