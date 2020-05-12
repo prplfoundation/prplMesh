@@ -1643,6 +1643,10 @@ bool master_thread::handle_cmdu_1905_topology_response(const std::string &src_ma
 
     std::unordered_set<std::string> reported_fronthaul_radios;
 
+    // create topology response update event for bml listeners
+    bml_task::topology_response_update_event new_bml_event;
+    new_bml_event.al_mac = al_mac;
+
     for (uint8_t i = 0; i < tlvDeviceInformation->local_interface_list_length(); i++) {
         const auto iface_info_tuple = tlvDeviceInformation->local_interface_list(i);
         if (!std::get<0>(iface_info_tuple)) {
@@ -1679,12 +1683,18 @@ bool master_thread::handle_cmdu_1905_topology_response(const std::string &src_ma
                 reported_fronthaul_radios.insert(iface_mac_str);
             }
 
+            // update bml event with the new radio interface
+            new_bml_event.radio_interfaces.push_back(iface_info);
+
             LOG(DEBUG) << "New radio interface is reported, mac=" << iface_mac
                        << ", AP=" << (iface_role == ieee1905_1::eRole::AP);
 
             // TODO: Add/Update the node on the database
         }
     }
+
+    tasks.push_event(database.get_bml_task_id(), bml_task::TOPOLOGY_RESPONSE_UPDATE,
+                     &new_bml_event);
 
     // If the database has radio mac that is not reported, remove its node from the db.
     for (const auto &fronthaul_radio_on_db : fronthaul_radios_on_db) {
@@ -1707,7 +1717,7 @@ bool master_thread::handle_cmdu_1905_topology_response(const std::string &src_ma
     if (last_state_change_timestamp +
             std::chrono::seconds(ieee1905_1_consts::DISCOVERY_NOTIFICATION_TIMEOUT_SEC + 5) <
         std::chrono::steady_clock::now()) {
-        LOG(TRACE) << "Checking if one of " << src_mac << "neighbors is no longer connected";
+        LOG(TRACE) << "Checking if one of " << src_mac << " neighbors is no longer connected";
         std::unordered_set<sMacAddr> reported_neighbor_al_macs;
         auto tlv1905NeighborDeviceList = cmdu_rx.getClassList<ieee1905_1::tlv1905NeighborDevice>();
         for (const auto &tlv1905NeighborDevice : tlv1905NeighborDeviceList) {
@@ -1724,7 +1734,7 @@ bool master_thread::handle_cmdu_1905_topology_response(const std::string &src_ma
                 }
 
                 auto &neighbor_al_mac = std::get<1>(neighbor_al_mac_tuple).mac;
-                LOG(DEBUG) << "Inserting reported neighnor " << neighbor_al_mac << " to the list";
+                LOG(DEBUG) << "Inserting reported neighbor " << neighbor_al_mac << " to the list";
                 reported_neighbor_al_macs.insert(neighbor_al_mac);
             }
         }
