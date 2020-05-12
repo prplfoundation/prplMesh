@@ -2566,8 +2566,9 @@ Socket *db::get_bml_socket_at(int idx)
 bool db::is_bml_listener_exist()
 {
     bool listener_exist;
-    for (auto it = bml_listeners_sockets.begin(); it < bml_listeners_sockets.end(); it++) {
-        listener_exist = (*it).map_updates || (*it).stats_updates || (*it).events_updates;
+    for (const auto &listener : bml_listeners_sockets) {
+        listener_exist = listener.map_updates || listener.stats_updates ||
+                         listener.events_updates || listener.topology_updates;
         if (listener_exist) {
             return true;
         }
