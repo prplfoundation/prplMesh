@@ -90,7 +90,8 @@ class UCCSocket:
         self.timeout = timeout
 
     def __enter__(self):
-        self.conn = socket.create_connection((self.host, self.port), self.timeout)
+        self.conn = socket.create_connection((self.host, self.port))
+        self.conn.settimeout(self.timeout)
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
