@@ -784,18 +784,26 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
         debug("Confirming multi-ap policy config ack message has been received on the controller")
         self.check_log(env.controller, r"ACK_MESSAGE, mid=0x{:04x}".format(mid))
 
-    def test_multi_ap_policy_config_w_metric_reporting_policy(self):
-        debug("Send multi-ap policy config request with metric reporting policy to agent 1")
-        mid = env.controller.dev_send_1905(env.agents[0].mac, 0x8003,
-                                             tlv(0x8a, 0x000C, "{0x00 0x01 {%s 0x00 0x00 0x01 0xc0}}" % env.agents[0].radios[0].mac))  # noqa E501
+    def send_and_check_policy_config_metric_reporting(self, agent, include_sta_traffic_stats=True,
+                                                      include_sta_link_metrics=True):
+        debug("Send multi-ap policy config request with metric reporting policy to agent")
+        reporting_value = 0
+        if include_sta_traffic_stats:
+            reporting_value |= 0x80
+        if include_sta_link_metrics:
+            reporting_value |= 0x40
+        radio_policies = ["{%s 0x00 0x00 0x01 0x%02x}" % (radio.mac, reporting_value)
+                          for radio in agent.radios]
+        metric_reporting_tlv = tlv(0x8a, 2 + 10 * len(radio_policies),
+                                   "{0x00 0x%02x %s}" % (len(radio_policies),
+                                                         " ".join(radio_policies)))
+        mid = env.controller.dev_send_1905(agent.mac, 0x8003, metric_reporting_tlv)
         time.sleep(1)
-        debug("Confirming multi-ap policy config request has been received on agent")
+        debug("Confirming multi-ap policy config request was acked by agent")
+        self.check_cmdu_type_single("ACK", 0x8000, agent.mac, env.controller.mac, mid)
 
-        self.check_log(env.agents[0], r"MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE")
-        self.check_log(env.agents[0].radios[0], r"MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE")
-        time.sleep(1)
-        debug("Confirming multi-ap policy config ack message has been received on the controller")
-        self.check_log(env.controller, r"ACK_MESSAGE, mid=0x{:04x}".format(mid))
+    def test_multi_ap_policy_config_w_metric_reporting_policy(self):
+        self.send_and_check_policy_config_metric_reporting(env.agents[0], True, True)
 
     def test_client_association(self):
         debug("Send topology request to agent 1")
