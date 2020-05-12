@@ -12,6 +12,7 @@
 #include "../db/db.h"
 #include "task.h"
 #include "task_pool.h"
+#include <tlvf/ieee_1905_1/tlvDeviceInformation.h>
 
 namespace son {
 class bml_task : public task {
@@ -65,6 +66,19 @@ public:
     struct cac_status_changed_notification_event {
         std::string hostap_mac;
         uint8_t cac_completed;
+    };
+
+    /**
+     * @brief topology response event structure
+     * 
+     * used to update bml_task of a new topology response update from agents
+     * 
+     * @al_mac: mac address of reporting agent 
+     * @radio_interfaces: aganet's local radio interfaces information
+     */
+    struct topology_response_update_event {
+        sMacAddr al_mac;
+        std::vector<ieee1905_1::cLocalInterfaceInfo> radio_interfaces;
     };
 
     enum events {
