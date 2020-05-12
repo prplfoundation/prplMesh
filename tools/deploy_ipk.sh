@@ -40,7 +40,7 @@ pgrep opkg | xargs kill -SIGINT
 opkg remove --force-depends prplmesh prplmesh-dwpal prplmesh-nl80211
 # currently opkg remove does not remove everything from /opt/prplmesh:
 rm -rf /opt/prplmesh
-opkg install -V2 "$DEST_FOLDER/$IPK_FILENAME"
+opkg install -V2 --force-reinstall "$DEST_FOLDER/$IPK_FILENAME"
 EOF
 
     if [ "$CERTIFICATION_MODE" = true ] ; then
