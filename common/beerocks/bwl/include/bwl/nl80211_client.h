@@ -298,12 +298,12 @@ public:
     };
 
     /**
-     * @brief Survey information
+     * @brief Survey information for a channel.
      *
      * Information obtained with NL80211_CMD_GET_SURVEY command through a NL80211 socket.
      * See NL80211_SURVEY_INFO* in <linux/nl80211.h> for a description of each field.
      */
-    struct sSurveyInfo {
+    struct sChannelSurveyInfo {
         /**
          * Center frequency of channel.
          */
@@ -349,6 +349,34 @@ public:
          * Time (in ms) the radio spent for scan (on this channel or globally).
          */
         uint64_t time_scan_ms = 0;
+    };
+
+    class SurveyInfo {
+    public:
+        /**
+         * List of survey information structures, one for each channel, as returned by the
+         * NL80211_CMD_GET_SURVEY command.
+         */
+        std::vector<sChannelSurveyInfo> data;
+
+        /**
+         * @brief Gets channel utilization.
+         *
+         * The channel utilization is defined as the percentage of time, linearly scaled with 255
+         * representing 100%, that the AP sensed the medium was busy. When more than one channel
+         * is in use for the BSS, the channel utilization value is calculated only for the primary
+         * channel.
+         *
+         * This percentage is computed using the formula:
+         * channel_utilization = (channel busy time * 255) / channel on time
+         *
+         * @param[out] channel_utilization Channel utilization value on success and 0 if it cannot
+         * be obtained.
+         *
+         * @return True on success and false if there is no channel in use or time on is zero
+         * (i.e.: no data available) or time busy is greater than time on.
+         */
+        bool get_channel_utilization(uint8_t &channel_utilization) const;
     };
 
     /**
@@ -403,13 +431,12 @@ public:
      * Survey information includes channel occupation and noise level.
      *
      * @param[in] interface_name Interface name, either radio or Virtual AP (VAP).
-     * @param[out] survey_info_list List of survey information structures, one for each channel,
+     * @param[out] survey_info List of survey information structures, one for each channel,
      * as returned by the NL80211_CMD_GET_SURVEY command.
      *
      * @return True on success and false otherwise.
      */
-    virtual bool get_survey_info(const std::string &interface_name,
-                                 std::vector<sSurveyInfo> &survey_info_list) = 0;
+    virtual bool get_survey_info(const std::string &interface_name, SurveyInfo &survey_info) = 0;
 
     /**
      * @brief Set the tx power limit

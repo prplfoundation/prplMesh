@@ -67,8 +67,7 @@ public:
      *
      * This implementation returns fixed survey info for the first 8 2.4GHz channels.
      */
-    bool get_survey_info(const std::string &interface_name,
-                         std::vector<sSurveyInfo> &survey_info_list) override;
+    bool get_survey_info(const std::string &interface_name, SurveyInfo &survey_info) override;
 
     /**
      * @brief Set the tx power limit
