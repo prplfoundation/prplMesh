@@ -369,9 +369,7 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
 
             //LOG(DEBUG) << "sending message, last=0";
             // sending to all listeners
-            for (auto it = bml_listeners.begin(); it != bml_listeners.end(); ++it) {
-                message_com::send_cmdu(*it, cmdu_tx);
-            }
+            send_bml_event_to_listeners(cmdu_tx, bml_listeners);
 
             // prepare for next message
             response =
@@ -453,9 +451,7 @@ void network_map::send_bml_nodes_statistics_message_to_listeners(
 
     //LOG(DEBUG) << "sending message, last=0";
     // sending to all listeners
-    for (auto it = bml_listeners.begin(); it != bml_listeners.end(); ++it) {
-        message_com::send_cmdu(*it, cmdu_tx);
-    }
+    send_bml_event_to_listeners(cmdu_tx, bml_listeners);
     //LOG(DEBUG) << "sending message, last=1";
 }
 
