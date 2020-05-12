@@ -299,6 +299,55 @@ void bml_task::handle_event(int event_type, void *obj)
         }
         break;
     }
+    case TOPOLOGY_RESPONSE_UPDATE: {
+        if (!obj) {
+            break;
+        }
+        auto event_obj = reinterpret_cast<topology_response_update_event *>(obj);
+        TASK_LOG(DEBUG) << "TOPOLOGY_RESPONSE_UPDATE event was received";
+        int sd_idx = 0;
+        std::vector<Socket *> topology_response_updates_listeners;
+        while ((sd = database.get_bml_socket_at(sd_idx)) != nullptr) {
+            if (database.get_bml_topology_update_enable(sd)) {
+                topology_response_updates_listeners.push_back(sd);
+            }
+            sd_idx++;
+        }
+
+        if (topology_response_updates_listeners.empty()) {
+            break;
+        }
+
+        auto response =
+            message_com::create_vs_message<beerocks_message::cACTION_BML_TOPOLOGY_RESPONSE>(
+                cmdu_tx);
+        if (response == nullptr) {
+            LOG(ERROR) << "Failed building ACTION_BML_STATS_UPDATE message!";
+            return;
+        }
+
+        if (event_obj->radio_interfaces.size() > beerocks::message::DEV_MAX_RADIOS) {
+            LOG(ERROR) << "number of reported interfaces is higher than expected, "
+                          "ACTION_BML_TOPOLOGY_RESPONSE will not be sent";
+            return;
+        }
+
+        size_t i = 0;
+        for (auto iface : event_obj->radio_interfaces) {
+            auto iface_mac                                 = iface.mac();
+            auto iface_mac_str                             = tlvf::mac_to_string(iface_mac);
+            response->device_data().radios[i].iface_mac    = iface_mac;
+            response->device_data().radios[i].iface_status = database.get_node_state(iface_mac_str);
+            std::copy_n(database.get_hostap_iface_name(iface_mac_str).c_str(),
+                        beerocks::message::IFACE_NAME_LENGTH,
+                        response->device_data().radios[i].iface_name);
+            i++;
+        }
+        response->device_data().al_mac = event_obj->al_mac;
+        response->result()             = true;
+        network_map::send_bml_event_to_listeners(cmdu_tx, topology_response_updates_listeners);
+        break;
+    }
     default: {
         TASK_LOG(ERROR) << "UNKNOWN event was received";
         break;
