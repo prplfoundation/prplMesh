@@ -603,6 +603,8 @@ public:
     bool set_bml_stats_update_enable(Socket *sd, bool update_enable);
     bool get_bml_events_update_enable(Socket *sd);
     bool set_bml_events_update_enable(Socket *sd, bool update_enable);
+    bool get_bml_topology_update_enable(Socket *sd);
+    bool set_bml_topology_update_enable(Socket *sd, bool update_enable);
     Socket *get_bml_socket_at(int idx);
     bool is_bml_listener_exist();
 

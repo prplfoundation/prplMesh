@@ -2492,6 +2492,35 @@ bool db::get_bml_nw_map_update_enable(Socket *sd)
     return false;
 }
 
+bool db::set_bml_topology_update_enable(Socket *sd, bool update_enable)
+{
+    if (!sd) {
+        return false;
+    }
+    auto it = std::find_if(bml_listeners_sockets.begin(), bml_listeners_sockets.end(),
+                           [&](const sBmlListener &element) { return element.sd == sd; });
+    if (it == bml_listeners_sockets.end()) {
+        LOG(ERROR) << "set_bml_topology_update_enable failed!, cannot find bml listener";
+        return false;
+    }
+    it->topology_updates = update_enable;
+    return true;
+}
+
+bool db::get_bml_topology_update_enable(Socket *sd)
+{
+    if (!sd) {
+        return false;
+    }
+    auto it = std::find_if(bml_listeners_sockets.begin(), bml_listeners_sockets.end(),
+                           [&](const sBmlListener &element) { return element.sd == sd; });
+    if (it == bml_listeners_sockets.end()) {
+        LOG(ERROR) << "set_bml_topology_update_enable failed!, cannot find bml listener";
+        return false;
+    }
+    return it->topology_updates;
+}
+
 bool db::set_bml_nw_map_update_enable(Socket *sd, bool update_enable)
 {
     if (sd) {
