@@ -129,6 +129,10 @@ build-in-docker-alpine:
     - schedules
   needs: ["image-build-builder/alpine"]
 
+build-in-docker-xenial:
+  extends: build-in-docker
+  image: prplfoundationinc/prplmesh-builder:ubuntu-16.04
+
 build-in-docker-static:
   extends: build-in-docker
   variables:
