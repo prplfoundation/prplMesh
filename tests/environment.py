@@ -156,35 +156,44 @@ installdir = os.path.join(rootdir, 'build', 'install')
 on_wsl = "microsoft" in platform.uname()[3].lower()
 
 
-def _docker_wait_for_log(container: str, program: str, regex: str, start_line: int,
+### Temporary workaround
+### Since we have multiple log files that correspond to a radio, multiple programs are passed
+### as argument. In the log messages, we only use the first one.
+### This should be reverted again as part of Unified Agent.
+def _docker_wait_for_log(container: str, programs: [str], regex: str, start_line: int,
                          timeout: float) -> bool:
-    logfilename = os.path.join(rootdir, 'logs', container, 'beerocks_{}.log'.format(program))
-    # WSL doesn't support symlinks on NTFS, so resolve the symlink manually
-    if on_wsl:
-        logfilename = os.path.join(
-            rootdir, 'logs', container,
-            subprocess.check_output(["tail", "-2", logfilename]).decode('utf-8').
-            rstrip(' \t\r\n\0'))
+    def logfilename(program):
+        logfilename = os.path.join(rootdir, 'logs', container, 'beerocks_{}.log'.format(program))
+        # WSL doesn't support symlinks on NTFS, so resolve the symlink manually
+        if on_wsl:
+            logfilename = os.path.join(
+                rootdir, 'logs', container,
+                subprocess.check_output(["tail", "-2", logfilename]).decode('utf-8').
+                rstrip(' \t\r\n\0'))
+        return logfilename
+
+    logfilenames = [logfilename(program) for program in programs]
 
     deadline = time.monotonic() + timeout
     try:
         while True:
-            with open(logfilename) as logfile:
-                for (i, v) in enumerate(logfile.readlines()):
-                    if i <= start_line:
-                        continue
-                    search = re.search(regex, v)
-                    if search:
-                        debug("Found '{}'\n\tin {}".format(regex, logfilename))
-                        return (True, i, search.groups())
+            for logfilename in logfilenames:
+                with open(logfilename) as logfile:
+                    for (i, v) in enumerate(logfile.readlines()):
+                        if i <= start_line:
+                            continue
+                        search = re.search(regex, v)
+                        if search:
+                            debug("Found '{}'\n\tin {}".format(regex, logfilename))
+                            return (True, i, search.groups())
             if time.monotonic() < deadline:
                 time.sleep(.3)
             else:
-                err("'{}'\n\tin log of {} on {} after {}s".format(regex, program, container,
+                err("'{}'\n\tin log of {} on {} after {}s".format(regex, programs[0], container,
                                                                   timeout))
                 return (False, start_line, None)
     except OSError:
-        err("Can't read log of {} on {}".format(program, container))
+        err("Can't read log of {} on {}".format(programs[0], container))
         return (False, start_line, None)
 
 
@@ -235,7 +244,7 @@ class ALEntityDocker(ALEntity):
     def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
         '''Poll the entity's logfile until it contains "regex" or times out.'''
         program = "controller" if self.is_controller else "agent"
-        return _docker_wait_for_log(self.name, program, regex, start_line, timeout)
+        return _docker_wait_for_log(self.name, [program], regex, start_line, timeout)
 
 
 class RadioDocker(Radio):
@@ -253,8 +262,8 @@ class RadioDocker(Radio):
 
     def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
         '''Poll the radio's logfile until it contains "regex" or times out.'''
-        program = "agent_" + self.iface_name
-        return _docker_wait_for_log(self.agent.name, program, regex, start_line, timeout)
+        programs = ("agent_" + self.iface_name, "ap_manager_" + self.iface_name)
+        return _docker_wait_for_log(self.agent.name, programs, regex, start_line, timeout)
 
     def send_bwl_event(self, event: str) -> None:
         # The file is only available within the docker container so we need to use an echo command.
