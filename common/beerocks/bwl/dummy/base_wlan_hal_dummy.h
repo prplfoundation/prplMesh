@@ -51,6 +51,19 @@ public:
     virtual bool process_nl_events() override;
     virtual std::string get_radio_mac() override;
 
+    /**
+     * @brief Gets channel utilization.
+     *
+     * @see base_wlan_hal::get_channel_utilization
+     *
+     * Returns a fake channel utilization value, varying from 0 to UINT8_MAX on each call.
+     *
+     * @param[out] channel_utilization Channel utilization value.
+     *
+     * @return True on success and false otherwise.
+     */
+    bool get_channel_utilization(uint8_t &channel_utilization) override;
+
     // Protected methods
 protected:
     base_wlan_hal_dummy(HALType type, const std::string &iface_name, hal_event_cb_t callback,

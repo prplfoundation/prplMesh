@@ -442,5 +442,22 @@ std::string base_wlan_hal_dummy::get_radio_mac()
     return mac;
 }
 
+bool base_wlan_hal_dummy::get_channel_utilization(uint8_t &channel_utilization)
+{
+    const uint8_t min_value   = 0;
+    const uint8_t max_value   = UINT8_MAX;
+    static uint8_t last_value = max_value;
+
+    if (max_value == last_value) {
+        channel_utilization = min_value;
+    } else {
+        channel_utilization = last_value + 1;
+    }
+
+    last_value = channel_utilization;
+
+    return true;
+}
+
 } // namespace dummy
 } // namespace bwl

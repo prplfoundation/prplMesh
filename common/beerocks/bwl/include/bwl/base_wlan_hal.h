@@ -110,6 +110,20 @@ public:
      */
     virtual bool process_int_events();
 
+    /**
+     * @brief Gets channel utilization.
+     *
+     * The channel utilization is defined as the percentage of time, linearly scaled with 255
+     * representing 100%, that the AP sensed the medium was busy. When more than one channel
+     * is in use for the BSS, the channel utilization value is calculated only for the primary
+     * channel.
+     *
+     * @param[out] channel_utilization Channel utilization value.
+     *
+     * @return True on success and false otherwise.
+     */
+    virtual bool get_channel_utilization(uint8_t &channel_utilization) = 0;
+
     // Public getter methods:
 public:
     /*!

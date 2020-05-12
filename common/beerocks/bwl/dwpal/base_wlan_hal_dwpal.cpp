@@ -1035,5 +1035,22 @@ std::string base_wlan_hal_dwpal::get_radio_mac()
     return mac;
 }
 
+bool base_wlan_hal_dwpal::get_channel_utilization(uint8_t &channel_utilization)
+{
+    nl80211_client::SurveyInfo survey_info;
+    if (!m_nl80211_client->get_survey_info(get_iface_name(), survey_info)) {
+        LOG(ERROR) << "Failed to get survey information for interface " << get_iface_name();
+        return false;
+    }
+
+    if (!survey_info.get_channel_utilization(channel_utilization)) {
+        LOG(ERROR) << "Survey information contains no channel utilization data for interface "
+                   << get_iface_name();
+        return false;
+    }
+
+    return true;
+}
+
 } // namespace dwpal
 } // namespace bwl
