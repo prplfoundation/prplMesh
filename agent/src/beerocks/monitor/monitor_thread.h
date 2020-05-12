@@ -59,6 +59,23 @@ private:
     void stop_monitor_thread();
     bool hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr);
 
+    /**
+     * @brief Executes when channel utilization measurement period has elapsed.
+     *
+     * This method is periodically invoked if AP Metrics Channel Utilization Reporting Threshold
+     * has been set to a non-zero value in last received Metric Reporting Policy TLV.
+     * Measurement period is set to an implementation-specific value.
+     * On invocation, method shall measure current channel utilization on the radio. If difference
+     * with respect to the previous measurement has crossed the reporting threshold, it shall send
+     * an AP Metrics Response message to the controller.
+     */
+    void on_channel_utilization_measurement_period_elapsed();
+
+    /**
+     * @brief Creates AP Metrics Response message
+     */
+    bool create_ap_metrics_response();
+
     bool update_ap_stats();
     bool update_sta_stats();
 
