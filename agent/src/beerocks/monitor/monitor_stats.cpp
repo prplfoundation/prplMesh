@@ -15,6 +15,8 @@
 #include <beerocks/tlvf/beerocks_message.h>
 #include <beerocks/tlvf/beerocks_message_monitor.h>
 #include <tlvf/wfa_map/tlvApMetrics.h>
+#include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
+#include <tlvf/wfa_map/tlvAssociatedStaTrafficStats.h>
 
 using namespace beerocks;
 using namespace net;
@@ -162,6 +164,7 @@ void monitor_stats::send_hostap_measurements(const sMeasurementsRequest &request
     message_com::send_cmdu(slave_socket, cmdu_tx);
 }
 
+// TODO This should use add_ap_assoc_sta_link_metric instead of constructing a VS message
 void monitor_stats::send_associated_sta_link_metrics(const sMeasurementsRequest &request)
 {
     auto sta = std::find_if(mon_db->sta_begin(), mon_db->sta_end(),
@@ -453,6 +456,60 @@ bool monitor_stats::add_ap_metrics(ieee1905_1::CmduMessageTx &cmdu_tx, const sMa
         return false;
     }
     std::fill_n(ap_metrics_response_tlv->estimated_service_info_field(), 3, 0);
+
+    return true;
+}
+
+bool monitor_stats::add_ap_assoc_sta_traffic_stat(ieee1905_1::CmduMessageTx &cmdu_tx,
+                                                  const monitor_sta_node &sta_node)
+{
+    auto ap_assoc_sta_traffic_stat_tlv = cmdu_tx.addClass<wfa_map::tlvAssociatedStaTrafficStats>();
+    if (!ap_assoc_sta_traffic_stat_tlv) {
+        LOG(ERROR) << "Couldn't addClass tlvAssociatedStaTrafficStats";
+        return false;
+    }
+    auto stat                                        = sta_node.get_stats().hal_stats;
+    ap_assoc_sta_traffic_stat_tlv->sta_mac()         = tlvf::mac_from_string(sta_node.get_mac());
+    ap_assoc_sta_traffic_stat_tlv->byte_sent()       = stat.tx_bytes_cnt;
+    ap_assoc_sta_traffic_stat_tlv->byte_recived()    = stat.rx_bytes_cnt;
+    ap_assoc_sta_traffic_stat_tlv->packets_sent()    = stat.tx_packets_cnt;
+    ap_assoc_sta_traffic_stat_tlv->packets_recived() = stat.rx_packets_cnt;
+    //TODO: add tx_packets_error in bwl::SStaStats
+    ap_assoc_sta_traffic_stat_tlv->tx_packets_error() = 0;
+    //TODO: rx_packets_error in bwl::SStaStats
+    ap_assoc_sta_traffic_stat_tlv->rx_packets_error()     = 0;
+    ap_assoc_sta_traffic_stat_tlv->retransmission_count() = stat.retrans_count;
+
+    return true;
+}
+
+bool monitor_stats::add_ap_assoc_sta_link_metric(ieee1905_1::CmduMessageTx &cmdu_tx,
+                                                 const sMacAddr &bssid, monitor_sta_node &sta_node)
+{
+    auto ap_assoc_sta_link_metric_tlv = cmdu_tx.addClass<wfa_map::tlvAssociatedStaLinkMetrics>();
+    if (!ap_assoc_sta_link_metric_tlv) {
+        LOG(ERROR) << "Couldn't addClass tlvAssociatedStaLinkMetrics";
+        return false;
+    }
+
+    ap_assoc_sta_link_metric_tlv->sta_mac() = tlvf::mac_from_string(sta_node.get_mac());
+
+    // Every STA is associated with exactly one BSS in our model, so there is always a single
+    // bssid_info.
+    if (!ap_assoc_sta_link_metric_tlv->alloc_bssid_info_list()) {
+        LOG(ERROR) << "Failed allocate_bssid_info_list";
+        return false;
+    }
+
+    const auto &sta_stats = sta_node.get_stats();
+    auto &bss_info        = std::get<1>(ap_assoc_sta_link_metric_tlv->bssid_info_list(0));
+    bss_info.bssid        = bssid;
+    bss_info.earliest_measurement_delta = sta_stats.delta_ms;
+    // TODO: MAC data rate and Phy rate are not necessarily the same
+    // https://github.com/prplfoundation/prplMesh/issues/1195
+    bss_info.downlink_estimated_mac_data_rate_mbps = sta_stats.rx_phy_rate_100kb_avg / 10;
+    bss_info.uplink_estimated_mac_data_rate_mbps   = sta_stats.tx_phy_rate_100kb_avg / 10;
+    bss_info.sta_measured_uplink_rssi_dbm_enc      = sta_stats.rx_rssi_curr;
 
     return true;
 }
