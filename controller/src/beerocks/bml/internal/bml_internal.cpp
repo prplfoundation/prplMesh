@@ -555,6 +555,33 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             }
 
         } break;
+        // Operation status responce
+        case beerocks_message::ACTION_BML_TOPOLOGY_RESPONSE: {
+
+            auto response =
+                beerocks_header->addClass<beerocks_message::cACTION_BML_TOPOLOGY_RESPONSE>();
+            if (response == nullptr) {
+                LOG(ERROR) << "addClass cACTION_BML_TOPOLOGY_RESPONSE failed";
+                return BML_RET_OP_FAILED;
+            }
+
+            // Signal any waiting threads
+            if (m_prmDeviceDataGet) {
+                if (m_device_data) {
+                    // Exit gracefully in case thread expects diffrent device al_mac
+                    if (m_device_data->al_mac != response->device_data().al_mac) {
+                        return (BML_RET_OK);
+                    }
+                    *m_device_data = response->device_data();
+                    m_prmDeviceDataGet->set_value(response->result());
+                } else {
+                    m_prmDeviceDataGet->set_value(false);
+                }
+                // after signaling the thread m_prmDeviceDataGet is no longer in use
+                m_prmDeviceDataGet = nullptr;
+            }
+            return BML_RET_OK;
+        } break;
         // Network Map Response
         case beerocks_message::ACTION_BML_NW_MAP_RESPONSE: {
             auto response =
