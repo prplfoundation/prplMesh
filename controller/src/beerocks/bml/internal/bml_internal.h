@@ -170,7 +170,7 @@ public:
                                 uint8_t is_global);
 
     // triggers topology discovery
-    int topology_discovery(const char *al_mac);
+    int trigger_topology_discovery_query(const char *al_mac);
 
     // triggers channel selection on specific Agent
     int channel_selection(const char *al_mac, const char *ruid);

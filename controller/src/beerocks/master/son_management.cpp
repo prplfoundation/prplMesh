@@ -1838,8 +1838,25 @@ void son_management::handle_bml_message(Socket *sd,
             return;
         }
 
-        auto agent_mac = database.get_node_parent_ire(al_mac);
-        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database);
+        // In case bridge is not yet connected (bus not active) query will not
+        // be send to a local agent , sending empty bml response instead.
+        if ((database.get_local_bridge_mac() == al_mac) &&
+            (database.get_node_state(al_mac) != beerocks::STATE_CONNECTED)) {
+            LOG(WARNING) << "Bridge is not connected yet, TOPOLOGY_QUERY_MESSAGE will not be sent";
+            auto response =
+                message_com::create_vs_message<beerocks_message::cACTION_BML_TOPOLOGY_RESPONSE>(
+                    cmdu_tx, beerocks_header->id());
+            if (!response) {
+                LOG(ERROR) << "Failed building message "
+                              "cACTION_BML_TOPOLOGY_RESPONSE !";
+            }
+            response->result()             = false;
+            response->device_data().al_mac = bml_request->al_mac();
+            message_com::send_cmdu(sd, cmdu_tx);
+            return;
+        }
+
+        son_actions::send_cmdu_to_agent(al_mac, cmdu_tx, database);
 
     } break;
 
