@@ -471,6 +471,31 @@ struct BML_EVENT_CAC_STATUS_CHANGED_NOTIFICATION {
 struct BML_EVENT_BEACON_MEASUREMENT {
     //TBD
 };
+
+/**
+ * @brief prplmesh bml radio information structure
+ * 
+ * @is_connected: when true indicates that radio is connected
+ * @is_operational: when true indicates that radio has successfully has been attached and in operational state.
+ * @iface_name: name of radio interface.
+ */
+struct BML_RADIO_DATA {
+    bool is_connected;
+    bool is_operational;
+    char iface_name[BML_IFACE_NAME_LEN];
+};
+
+/**
+ * @brief prplmesh device (agent) information structure used for get operational radios bml event.
+ * 
+ * @radios: contains all local radio information on the device
+ * @al_mac: device mac address
+ */
+struct BML_DEVICE_DATA {
+    struct BML_RADIO_DATA radios[BML_NODE_MAX_RADIOS];
+    const char *al_mac;
+};
+
 /**
  * Iterator structure for exploring the network map received in the 
  * Network Map Query callback function.
