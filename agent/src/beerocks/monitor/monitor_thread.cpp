@@ -27,6 +27,13 @@ using namespace son;
 #define OPERATION_SUCCESS 0
 #define OPERATION_FAIL -1
 
+/**
+ * Implementation-specific measurement period of channel utilization.
+ * Currently we use this constant value but a more elaborate solution should read it from
+ * configuration.
+ */
+static constexpr uint8_t ap_metrics_channel_utilization_measurement_period_s = 10;
+
 monitor_thread::monitor_thread(const std::string &slave_uds_, const std::string &monitor_iface_,
                                beerocks::config_file::sConfigSlave &beerocks_slave_conf_,
                                beerocks::logging &logger_)
@@ -496,7 +503,86 @@ void monitor_thread::after_select(bool timeout)
 #ifdef BEEROCKS_RDKB
         mon_rdkb_hal.process();
 #endif
+
+        /**
+         * If a Multi-AP Agent receives a Metric Reporting Policy TLV with AP Metrics Channel
+         * Utilization Reporting Threshold field set to a non-zero value for a given radio, it
+         * shall measure the channel utilization on that radio in each consecutive implementation-
+         * specific measurement period and, if the most recently measured channel utilization has
+         * crossed the reporting threshold in either direction (with respect to the previous
+         * measurement), it shall send an AP Metrics Response message to the Multi-AP Controller
+         * containing one AP Metrics TLV for each of the BSSs on that radio.
+         */
+        auto radio_node = mon_db.get_radio_node();
+        auto &info      = radio_node->ap_metrics_reporting_info();
+        if (0 != info.ap_channel_utilization_reporting_threshold) {
+            int elapsed_time_s =
+                std::chrono::duration_cast<std::chrono::seconds>(
+                    now - info.ap_metrics_channel_utilization_last_reporting_time_point)
+                    .count();
+
+            if (elapsed_time_s >= ap_metrics_channel_utilization_measurement_period_s) {
+                info.ap_metrics_channel_utilization_last_reporting_time_point = now;
+
+                on_channel_utilization_measurement_period_elapsed();
+            }
+        }
     }
+}
+
+void monitor_thread::on_channel_utilization_measurement_period_elapsed()
+{
+    /**
+     * Measure current channel utilization on the radio.
+     */
+    uint8_t channel_utilization;
+    if (!mon_wlan_hal->get_channel_utilization(channel_utilization)) {
+        LOG(ERROR) << "Unable to get channel utilization";
+        return;
+    }
+
+    /**
+     * If previous channel utilization was lower than the threshold and now it is higher than the
+     * threshold, report it.
+     * Or if previous channel utilization was higher than the threshold and now it's lower than
+     * the threshold, report it.
+     */
+    auto radio_node        = mon_db.get_radio_node();
+    auto &info             = radio_node->ap_metrics_reporting_info();
+    bool threshold_crossed = false;
+    if (channel_utilization > info.ap_channel_utilization_reporting_threshold) {
+        if (info.ap_metrics_channel_utilization_reporting_value <=
+            info.ap_channel_utilization_reporting_threshold) {
+            threshold_crossed = true;
+        }
+    } else if (info.ap_metrics_channel_utilization_reporting_value >
+               info.ap_channel_utilization_reporting_threshold) {
+        threshold_crossed = true;
+    }
+
+    if (threshold_crossed) {
+        if (!create_ap_metrics_response()) {
+            LOG(ERROR) << "Unable to create AP Metrics Response message";
+            return;
+        }
+
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+    }
+
+    info.ap_metrics_channel_utilization_reporting_value = channel_utilization;
+}
+
+bool monitor_thread::create_ap_metrics_response()
+{
+    auto cmdu_tx_header = cmdu_tx.create(0, ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE);
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "Failed creating AP_METRICS_RESPONSE_MESSAGE";
+        return false;
+    }
+
+    // TODO: add TLVs to message
+
+    return true;
 }
 
 bool monitor_thread::update_sta_stats()
