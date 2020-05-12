@@ -576,7 +576,7 @@ bool nl80211_client_impl::get_sta_info(const std::string &interface_name,
 }
 
 bool nl80211_client_impl::get_survey_info(const std::string &interface_name,
-                                          std::vector<sSurveyInfo> &survey_info_list)
+                                          SurveyInfo &survey_info)
 {
     if (!m_socket) {
         LOG(ERROR) << "Socket is NULL!";
@@ -635,49 +635,55 @@ bool nl80211_client_impl::get_survey_info(const std::string &interface_name,
                 return;
             }
 
-            sSurveyInfo survey_info;
-            survey_info.in_use = sinfo[NL80211_SURVEY_INFO_IN_USE];
+            sChannelSurveyInfo channel_survey_info;
+            channel_survey_info.in_use = sinfo[NL80211_SURVEY_INFO_IN_USE];
 
             if (sinfo[NL80211_SURVEY_INFO_FREQUENCY]) {
-                survey_info.frequency_mhz = nla_get_u32(sinfo[NL80211_SURVEY_INFO_FREQUENCY]);
+                channel_survey_info.frequency_mhz =
+                    nla_get_u32(sinfo[NL80211_SURVEY_INFO_FREQUENCY]);
             } else {
                 LOG(ERROR) << "NL80211_SURVEY_INFO_FREQUENCY attribute is missing";
                 return;
             }
 
             if (sinfo[NL80211_SURVEY_INFO_NOISE]) {
-                survey_info.noise_dbm = (int8_t)nla_get_u8(sinfo[NL80211_SURVEY_INFO_NOISE]);
+                channel_survey_info.noise_dbm =
+                    (int8_t)nla_get_u8(sinfo[NL80211_SURVEY_INFO_NOISE]);
             } else {
                 LOG(TRACE) << "NL80211_SURVEY_INFO_NOISE attribute is missing";
             }
 
             if (sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME]) {
-                survey_info.time_on_ms = nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME]);
+                channel_survey_info.time_on_ms =
+                    nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME]);
             }
 
             if (sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_BUSY]) {
-                survey_info.time_busy_ms =
+                channel_survey_info.time_busy_ms =
                     nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_BUSY]);
             }
 
             if (sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_EXT_BUSY]) {
-                survey_info.time_ext_busy_ms =
+                channel_survey_info.time_ext_busy_ms =
                     nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_EXT_BUSY]);
             }
 
             if (sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_RX]) {
-                survey_info.time_rx_ms = nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_RX]);
+                channel_survey_info.time_rx_ms =
+                    nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_RX]);
             }
 
             if (sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_TX]) {
-                survey_info.time_tx_ms = nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_TX]);
+                channel_survey_info.time_tx_ms =
+                    nla_get_u64(sinfo[NL80211_SURVEY_INFO_CHANNEL_TIME_TX]);
             }
 
             if (sinfo[NL80211_SURVEY_INFO_TIME_SCAN]) {
-                survey_info.time_scan_ms = nla_get_u64(sinfo[NL80211_SURVEY_INFO_TIME_SCAN]);
+                channel_survey_info.time_scan_ms =
+                    nla_get_u64(sinfo[NL80211_SURVEY_INFO_TIME_SCAN]);
             }
 
-            survey_info_list.emplace_back(survey_info);
+            survey_info.data.emplace_back(channel_survey_info);
         });
 }
 

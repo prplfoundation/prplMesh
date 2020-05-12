@@ -111,18 +111,18 @@ bool nl80211_client_dummy::get_sta_info(const std::string &interface_name,
 }
 
 bool nl80211_client_dummy::get_survey_info(const std::string &interface_name,
-                                           std::vector<sSurveyInfo> &survey_info_list)
+                                           SurveyInfo &survey_info)
 {
     for (size_t i = 0; i < 8; i++) {
-        sSurveyInfo survey_info;
+        sChannelSurveyInfo channel_survey_info;
 
-        survey_info.in_use        = (0 == i);
-        survey_info.frequency_mhz = 2412 + i * 5;
-        survey_info.noise_dbm     = i;
-        survey_info.time_on_ms    = i * 2000;
-        survey_info.time_busy_ms  = i * 1000;
+        channel_survey_info.in_use        = (0 == i);
+        channel_survey_info.frequency_mhz = 2412 + i * 5;
+        channel_survey_info.noise_dbm     = i;
+        channel_survey_info.time_on_ms    = i * 2000;
+        channel_survey_info.time_busy_ms  = i * 1000;
 
-        survey_info_list.push_back(survey_info);
+        survey_info.data.push_back(channel_survey_info);
     }
 
     return true;
