@@ -372,6 +372,10 @@ void cli_bml::setFunctionsMapAndArray()
                        static_cast<pFunction>(&cli_bml::nw_map_query_caller), 0, 0);
     insertCommandToMap("bml_conn_map", "", "dump the latest network map",
                        static_cast<pFunction>(&cli_bml::bml_connection_map_caller), 0, 0);
+    insertCommandToMap("bml_get_device_operational_radios", "",
+                       "returns operational status of all radios on the device",
+                       static_cast<pFunction>(&cli_bml::bml_get_device_operational_radios_caller),
+                       0, 1, STRING_ARG);
     insertCommandToMap("bml_stat_register_cb", "[<x>]",
                        "Registers a callback function to periodic statistics update from the "
                        "beerocks platform, call with 'x' to unregister the callback ",
@@ -904,6 +908,14 @@ int cli_bml::bml_connection_map_caller(int numOfArgs)
         return connection_map();
 }
 
+int cli_bml::bml_get_device_operational_radios_caller(int numOfArgs)
+{
+    if (numOfArgs != 1) {
+        return -1;
+    }
+    return get_device_operational_radios(args.stringArgs[0]);
+}
+
 int cli_bml::stat_register_cb_caller(int numOfArgs)
 {
     if (numOfArgs < 0)
@@ -1347,6 +1359,28 @@ int cli_bml::connection_map()
     pending_response = true;
     int ret          = bml_nw_map_query(ctx);
     printBmlReturnVals("bml_nw_map_query", ret);
+    return 0;
+}
+
+int cli_bml::get_device_operational_radios(const std::string &al_mac)
+{
+    BML_DEVICE_DATA device_data = {};
+    device_data.al_mac          = al_mac.c_str();
+
+    int ret = bml_device_oper_radios_query(ctx, &device_data);
+
+    // Main agent
+    std::cout << ((ret == BML_RET_OK) ? "OK" : "FAIL") << " Main radio agent operational"
+              << std::endl;
+    for (const auto &radio : device_data.radios) {
+        if (radio.is_connected) {
+            // wlan radio agents
+            std::cout << (radio.is_operational ? "OK " : "FAIL ") << radio.iface_name
+                      << " radio agent operational" << std::endl;
+        }
+    }
+
+    printBmlReturnVals("bml_device_oper_radios_query", ret);
     return 0;
 }
 

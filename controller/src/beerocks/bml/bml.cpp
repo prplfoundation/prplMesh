@@ -164,6 +164,15 @@ int bml_nw_map_query(BML_CTX ctx)
     return (pBML->nw_map_query());
 }
 
+int bml_device_oper_radios_query(BML_CTX ctx, BML_DEVICE_DATA *device_data)
+{
+    if (!ctx)
+        return (-BML_RET_INVALID_ARGS);
+    bml_internal *pBML = (bml_internal *)ctx;
+
+    return (pBML->device_oper_radios_query(device_data));
+}
+
 int bml_stat_register_cb(BML_CTX ctx, BML_STATS_UPDATE_CB cb)
 {
     if (!ctx)
