@@ -267,7 +267,7 @@ bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         }
         }
     } else {
-        LOG(DEBUG) << "received 1905.1 cmdu message";
+        LOG(DEBUG) << "received 1905.1 cmdu message LIOR";
         handle_cmdu_1905_1_message(src_mac, cmdu_rx);
     }
 
