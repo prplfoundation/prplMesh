@@ -20,13 +20,6 @@ using namespace beerocks;
 using namespace net;
 using namespace son;
 
-/**
- * Implementation-specific measurement period of channel utilization.
- * Currently we use this constant value but a more elaborate solution should read it from
- * configuration.
- */
-static constexpr uint8_t ap_metrics_channel_utilization_measurement_period_s = 10;
-
 monitor_stats::monitor_stats(ieee1905_1::CmduMessageTx &cmdu_tx_) : cmdu_tx(cmdu_tx_)
 {
     mon_db       = nullptr;
@@ -436,33 +429,6 @@ void monitor_stats::process()
         notification->params().client_rx_load_percent = radio_stats.client_rx_load_tot_curr;
         notification->params().channel_load_percent   = radio_stats.channel_load_tot_curr;
         message_com::send_cmdu(slave_socket, cmdu_tx);
-    }
-
-    /**
-     * If a Multi-AP Agent receives a Metric Reporting Policy TLV with AP Metrics Channel
-     * Utilization Reporting Threshold field set to a non-zero value for a given radio, it
-     * shall measure the channel utilization on that radio in each consecutive implementation-
-     * specific measurement period and, if the most recently measured channel utilization has
-     * crossed the reporting threshold in either direction (with respect to the previous
-     * measurement), it shall send an AP Metrics Response message to the Multi-AP Controller
-     * containing one AP Metrics TLV for each of the BSSs on that radio.
-     */
-    auto &info = radio_node->ap_metrics_reporting_info();
-    if (0 != info.ap_channel_utilization_reporting_threshold) {
-        auto now = std::chrono::steady_clock::now();
-        int elapsed_time_s =
-            std::chrono::duration_cast<std::chrono::seconds>(
-                now - info.ap_metrics_channel_utilization_last_reporting_time_point)
-                .count();
-
-        if (elapsed_time_s >= ap_metrics_channel_utilization_measurement_period_s) {
-            info.ap_metrics_channel_utilization_last_reporting_time_point = now;
-
-            // TODO:
-            // Measure channel utilization and, if difference with previous value is greater than
-            // threshold, then send an AP Metrics Response message to the Multi-AP Controller
-            // containing one AP Metrics TLV for each of the BSSs on this radio.
-        }
     }
 }
 
