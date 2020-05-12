@@ -180,8 +180,8 @@ def _docker_wait_for_log(container: str, program: str, regex: str, start_line: i
             if time.monotonic() < deadline:
                 time.sleep(.3)
             else:
-                err("'{}'\n\tin log of {} on {} after {}s".format(regex, program, container,
-                                                                  timeout))
+                err("Can't find '{}'\n\tin log of {} on {} after {}s".format(regex, program,
+                                                                             container, timeout))
                 return (False, start_line, None)
     except OSError:
         err("Can't read log of {} on {}".format(program, container))
