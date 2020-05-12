@@ -603,7 +603,7 @@ int bml_trigger_topology_discovery(BML_CTX ctx, const char *al_mac)
 
     bml_internal *pBML = (bml_internal *)ctx;
 
-    return (pBML->topology_discovery(al_mac));
+    return (pBML->trigger_topology_discovery_query(al_mac));
 }
 
 int bml_channel_selection(BML_CTX ctx, const char *al_mac, const char *ruid)

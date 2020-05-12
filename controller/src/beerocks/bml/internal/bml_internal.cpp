@@ -3111,7 +3111,7 @@ int bml_internal::get_restricted_channels(uint8_t *restricted_channels, const st
     return (iRet);
 }
 
-int bml_internal::topology_discovery(const char *al_mac)
+int bml_internal::trigger_topology_discovery_query(const char *al_mac)
 {
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_BML_TRIGGER_TOPOLOGY_QUERY>(
