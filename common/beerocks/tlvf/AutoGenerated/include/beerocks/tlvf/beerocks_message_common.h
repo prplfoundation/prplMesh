@@ -893,6 +893,36 @@ typedef struct sDeviceInfo {
     }
 } __attribute__((packed)) sDeviceInfo;
 
+typedef struct sIfaceInfo {
+    char iface_name[beerocks::message::IFACE_NAME_LENGTH];
+    sMacAddr iface_mac;
+    beerocks::eNodeState iface_status;
+    void struct_swap(){
+        iface_mac.struct_swap();
+        tlvf_swap(8*sizeof(beerocks::eNodeState), reinterpret_cast<uint8_t*>(&iface_status));
+    }
+    void struct_init(){
+        iface_mac.struct_init();
+    }
+} __attribute__((packed)) sIfaceInfo;
+
+typedef struct sDeviceData {
+    sMacAddr al_mac;
+    sIfaceInfo radios[beerocks::message::DEV_MAX_RADIOS];
+    void struct_swap(){
+        al_mac.struct_swap();
+        for (size_t i = 0; i < beerocks::message::DEV_MAX_RADIOS; i++){
+            (radios[i]).struct_swap();
+        }
+    }
+    void struct_init(){
+        al_mac.struct_init();
+            for (size_t i = 0; i < beerocks::message::DEV_MAX_RADIOS; i++) {
+                (radios[i]).struct_init();
+            }
+    }
+} __attribute__((packed)) sDeviceData;
+
 typedef struct sRestrictedChannels {
     sMacAddr hostap_mac;
     uint8_t restricted_channels[beerocks::message::RESTRICTED_CHANNEL_LENGTH];
