@@ -1852,6 +1852,62 @@ int bml_internal::register_nw_map_update_cb(BML_NW_MAP_QUERY_CB pCB)
     return (BML_RET_OK);
 }
 
+int bml_internal::device_oper_radios_query(BML_DEVICE_DATA *device_data)
+{
+    if (!device_data) {
+        LOG(ERROR) << "device_data was not supplied";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    // Initialize the promise for receiving the response
+    beerocks::promise<bool> prmDeviceDataGet;
+    m_prmDeviceDataGet = &prmDeviceDataGet;
+    int timeout        = RESPONSE_TIMEOUT; // Default timeout
+
+    beerocks_message::sDeviceData DeviceData;
+    m_device_data         = &DeviceData;
+    m_device_data->al_mac = tlvf::mac_from_string(device_data->al_mac);
+
+    register_topology_discovery_response();
+
+    // device radio status can be retrieved from topology discovery response
+    trigger_topology_discovery_query(device_data->al_mac);
+
+    int iRet = BML_RET_OK;
+
+    if (!prmDeviceDataGet.wait_for(timeout)) {
+        LOG(WARNING) << "Timeout while waiting for topology query response...";
+        iRet = -BML_RET_TIMEOUT;
+    }
+
+    unregister_topology_discovery_response();
+
+    // Clear the device data for next query
+    m_device_data      = nullptr;
+    m_prmDeviceDataGet = nullptr;
+
+    if (iRet != BML_RET_OK) {
+        return iRet;
+    }
+
+    for (auto idx = 0; idx < beerocks::message::DEV_MAX_RADIOS; idx++) {
+        eNodeState iface_status = DeviceData.radios[idx].iface_status;
+        if (iface_status == beerocks::eNodeState::STATE_DISCONNECTED) {
+            device_data->radios[idx].is_connected = false;
+            continue;
+        }
+
+        device_data->radios[idx].is_connected = true;
+        device_data->radios[idx].is_operational =
+            (iface_status == beerocks::eNodeState::STATE_CONNECTED) ? true : false;
+        mapf::utils::copy_string(device_data->radios[idx].iface_name,
+                                 DeviceData.radios[idx].iface_name,
+                                 beerocks::message::IFACE_NAME_LENGTH);
+    }
+
+    return iRet;
+}
+
 int bml_internal::register_topology_discovery_response()
 {
     auto request =

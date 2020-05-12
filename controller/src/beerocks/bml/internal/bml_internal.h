@@ -47,6 +47,9 @@ public:
     // Query the beerocks master for the network map
     int nw_map_query();
 
+    // Query the beerocks master for the network map
+    int device_oper_radios_query(BML_DEVICE_DATA *device_data);
+
     // Register topology discovery query so bml listener could receive the response event.
     int register_topology_discovery_response();
 
@@ -322,6 +325,7 @@ private:
     beerocks::promise<bool> *m_prmWiFiCredentialsGet    = nullptr;
     beerocks::promise<bool> *m_prmAdminCredentialsGet   = nullptr;
     beerocks::promise<bool> *m_prmDeviceInfoGet         = nullptr;
+    beerocks::promise<bool> *m_prmDeviceDataGet         = nullptr;
     beerocks::promise<bool> *m_prmMasterSlaveVersions   = nullptr;
     beerocks::promise<bool> *m_prmLocalMasterGet        = nullptr;
     beerocks::promise<bool> *m_prmRestrictedChannelsGet = nullptr;
@@ -340,6 +344,7 @@ private:
     BML_EVENT_CB m_cbEvent               = nullptr;
 
     beerocks_message::sDeviceInfo *m_device_info                 = nullptr;
+    beerocks_message::sDeviceData *m_device_data                 = nullptr;
     beerocks_message::sWifiCredentials *m_wifi_credentials       = nullptr;
     beerocks_message::sAdminCredentials *m_admin_credentials     = nullptr;
     beerocks_message::sVersions *m_master_slave_versions         = nullptr;
