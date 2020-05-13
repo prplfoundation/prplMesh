@@ -121,6 +121,18 @@ class TestFlows:
                                packet.ieee1905_message_type == msg_type and
                                (mid is None or packet.ieee1905_mid == mid))
 
+    def check_cmdu_type_single(
+        self, msg: str, msg_type: int, eth_src: str, eth_dst: str = None, mid: int = None
+    ) -> Union[sniffer.Packet, None]:
+        '''Like check_cmdu_type, but also check that only a single CMDU is found.'''
+        cmdus = self.check_cmdu_type(msg, msg_type, eth_src, eth_dst, mid)
+        if not cmdus:
+            return None  # Failure already reported by check_cmdu
+        if len(cmdus) > 1:
+            self.fail("Multiple CMDUs {} found".format(msg))
+            return None
+        return cmdus[0]
+
     def run_tests(self, tests):
         '''Run all tests as specified on the command line.'''
         total_errors = 0
@@ -293,6 +305,7 @@ class TestFlows:
         self.check_log(env.agents[0].radios[0], "CHANNEL_PREFERENCE_QUERY_MESSAGE")
         self.check_log(env.agents[0].radios[1], "CHANNEL_PREFERENCE_QUERY_MESSAGE")
 
+        # TODO should be a single response (currently two are sent)
         self.check_cmdu_type("channel preferency response", 0x8005, env.agents[0].mac,
                              env.controller.mac, ch_pref_query_mid)
 
@@ -305,13 +318,14 @@ class TestFlows:
         self.check_log(env.agents[0].radios[0], "CHANNEL_SELECTION_REQUEST_MESSAGE")
         self.check_log(env.agents[0].radios[1], "CHANNEL_SELECTION_REQUEST_MESSAGE")
 
+        # TODO should be a single response (currently two are sent)
         self.check_cmdu_type("channel selection response", 0x8007, env.agents[0].mac,
                              env.controller.mac, cs_req_mid)
         oper_channel_reports = self.check_cmdu_type("operating channel report", 0x8008,
                                                     env.agents[0].mac, env.controller.mac)
         for report in oper_channel_reports:
-            self.check_cmdu_type("ACK", 0x8000, env.controller.mac, env.agents[0].mac,
-                                 report.ieee1905_mid)
+            self.check_cmdu_type_single("ACK", 0x8000, env.controller.mac, env.agents[0].mac,
+                                        report.ieee1905_mid)
 
         env.checkpoint()
 
@@ -338,6 +352,7 @@ class TestFlows:
             self.check_log(env.agents[0].radios[1],
                            "tlvTransmitPowerLimit {}".format(payload_transmit_power))
 
+            # TODO should be a single response (currently two are sent)
             self.check_cmdu_type("channel selection response", 0x8007, env.agents[0].mac,
                                  env.controller.mac, cs_req_mid)
 
@@ -352,8 +367,8 @@ class TestFlows:
                         self.fail("Unexpected transmit power {} instead of {} for {}".format(
                             ocr.operating_channel_eirp, payload_transmit_power,
                             ocr.operating_channel_radio_id))
-                self.check_cmdu_type("ACK", 0x8000, env.controller.mac, env.agents[0].mac,
-                                     report.ieee1905_mid)
+                self.check_cmdu_type_single("ACK", 0x8000, env.controller.mac, env.agents[0].mac,
+                                            report.ieee1905_mid)
 
             env.checkpoint()
 
@@ -448,6 +463,7 @@ class TestFlows:
             self.check_log(env.agents[0].radios[0],
                            "ACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START")
 
+            # TODO should be a single response (currently two are sent)
             self.check_cmdu_type("channel selection response", 0x8007, env.agents[0].mac,
                                  env.controller.mac, cs_req_mid)
 
@@ -462,8 +478,8 @@ class TestFlows:
                         self.fail("Unexpected transmit power {} instead of {} for {}".format(
                             ocr.operating_channel_eirp, payload_transmit_power,
                             ocr.operating_channel_radio_id))
-                self.check_cmdu_type("ACK", 0x8000, env.controller.mac, env.agents[0].mac,
-                                     report.ieee1905_mid)
+                self.check_cmdu_type_single("ACK", 0x8000, env.controller.mac, env.agents[0].mac,
+                                            report.ieee1905_mid)
 
             env.checkpoint()
 
