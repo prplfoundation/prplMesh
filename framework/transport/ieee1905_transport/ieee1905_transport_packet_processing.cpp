@@ -89,8 +89,8 @@ void Ieee1905Transport::remove_packet_from_de_duplication_map(const Packet &pack
 {
     // search for entry matching packet
     DeDuplicationKey key;
-    std::copy_n(packet.src, ETH_ALEN, key.src);
-    std::copy_n(packet.dst, ETH_ALEN, key.dst);
+    key.src         = packet.src;
+    key.dst         = packet.dst;
     key.messageType = static_cast<Ieee1905CmduHeader *>(packet.payload.iov_base)->messageType;
     key.messageId   = static_cast<Ieee1905CmduHeader *>(packet.payload.iov_base)->messageId;
     key.fragmentId  = static_cast<Ieee1905CmduHeader *>(packet.payload.iov_base)->fragmentId;
@@ -138,8 +138,8 @@ bool Ieee1905Transport::de_duplicate_packet(Packet &packet)
 
     // search for entry matching packet
     DeDuplicationKey key;
-    std::copy_n(packet.src, ETH_ALEN, key.src);
-    std::copy_n(packet.dst, ETH_ALEN, key.dst);
+    key.src         = packet.src;
+    key.dst         = packet.dst;
     key.messageType = static_cast<Ieee1905CmduHeader *>(packet.payload.iov_base)->messageType;
     key.messageId   = static_cast<Ieee1905CmduHeader *>(packet.payload.iov_base)->messageId;
     key.fragmentId  = static_cast<Ieee1905CmduHeader *>(packet.payload.iov_base)->fragmentId;
@@ -209,7 +209,7 @@ bool Ieee1905Transport::de_fragment_packet(Packet &packet)
 
     // build the key to the de-fragmentation map
     DeFragmentationKey key;
-    std::copy_n(packet.src, ETH_ALEN, key.src);
+    key.src         = packet.src;
     key.messageType = ch->messageType;
     key.messageId   = ch->messageId;
 
@@ -446,7 +446,7 @@ bool Ieee1905Transport::forward_packet(Packet &packet)
         //
         // Step 1: decide on forwarding sink(s)
         //
-        if (ETHER_IS_MULTICAST(packet.dst)) {
+        if (ETHER_IS_MULTICAST(packet.dst.oct)) {
             forward_to_local_bus = true;
 
             // Note: IEEE1905 multicast packets have special treatment due to the conditional forwarding logic (based on the
@@ -472,13 +472,13 @@ bool Ieee1905Transport::forward_packet(Packet &packet)
             // find if unicast address matches any of the local device's addresses
             // Note to developer: maybe it is possible to just send the packet to the bridge - will it then "come back" on the interfaces?
             bool addressed_to_this_device = false;
-            if (ETHER_IS_SAME(al_mac_addr_, packet.dst)) {
+            if (ETHER_IS_SAME(al_mac_addr_, packet.dst.oct)) {
                 addressed_to_this_device = true;
             } else {
                 for (auto it = network_interfaces_.begin(); it != network_interfaces_.end(); ++it) {
                     auto &network_interface = it->second;
 
-                    if (ETHER_IS_SAME(network_interface.addr, packet.dst)) {
+                    if (ETHER_IS_SAME(network_interface.addr, packet.dst.oct)) {
                         addressed_to_this_device = true;
                         break;
                     }
@@ -541,18 +541,8 @@ std::ostream &Ieee1905Transport::Packet::print(std::ostream &os) const
     std::stringstream ss;
 
     ss << "ethernet header:" << std::endl;
-    ss << "  dst        : " << std::hex << std::setfill('0') << std::setw(2) << (unsigned)dst[0]
-       << ":" << std::hex << std::setfill('0') << std::setw(2) << (unsigned)dst[1] << ":"
-       << std::hex << std::setfill('0') << std::setw(2) << (unsigned)dst[2] << ":" << std::hex
-       << std::setfill('0') << std::setw(2) << (unsigned)dst[3] << ":" << std::hex
-       << std::setfill('0') << std::setw(2) << (unsigned)dst[4] << ":" << std::hex
-       << std::setfill('0') << std::setw(2) << (unsigned)dst[5] << std::endl;
-    ss << "  src        : " << std::hex << std::setfill('0') << std::setw(2) << (unsigned)src[0]
-       << ":" << std::hex << std::setfill('0') << std::setw(2) << (unsigned)src[1] << ":"
-       << std::hex << std::setfill('0') << std::setw(2) << (unsigned)src[2] << ":" << std::hex
-       << std::setfill('0') << std::setw(2) << (unsigned)src[3] << ":" << std::hex
-       << std::setfill('0') << std::setw(2) << (unsigned)src[4] << ":" << std::hex
-       << std::setfill('0') << std::setw(2) << (unsigned)src[5] << std::endl;
+    ss << "  dst        : " << dst << std::endl;
+    ss << "  src        : " << src << std::endl;
     ss << "  ether_type : " << std::hex << std::setfill('0') << std::setw(4) << ether_type
        << std::endl;
 
