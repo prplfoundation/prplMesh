@@ -471,6 +471,7 @@ enum class eChannelScanOperationCode : uint8_t {
 };
 
 #define CHANNEL_SCAN_INVALID_PARAM -1
+#define SCAN_ALL_CHANNELS 0
 
 } // namespace beerocks
 
