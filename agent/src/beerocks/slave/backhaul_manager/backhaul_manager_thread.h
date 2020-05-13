@@ -25,6 +25,7 @@
 #include <tlvf/ieee_1905_1/eMediaType.h>
 
 #include <tlvf/wfa_map/tlvApMetrics.h>
+#include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
 
 #include "../agent_ucc_listener.h"
 #include "../link_metrics/link_metrics.h"
@@ -512,6 +513,22 @@ private:
                           const sLinkNeighbor &link_neighbor, const sLinkMetrics &link_metrics,
                           ieee1905_1::eLinkMetricsType link_metrics_type);
 
+    struct sStaTrafficStats {
+        sMacAddr sta_mac;
+        uint32_t byte_sent;
+        uint32_t byte_recived;
+        uint32_t packets_sent;
+        uint32_t packets_recived;
+        uint32_t tx_packets_error;
+        uint32_t rx_packets_error;
+        uint32_t retransmission_count;
+    };
+
+    struct sStaLinkMetrics {
+        sMacAddr sta_mac;
+        wfa_map::tlvAssociatedStaLinkMetrics::sBssidInfo bssid_info;
+    };
+
     struct sApMetricsQuery {
         Socket *soc;
         sMacAddr bssid;
@@ -527,6 +544,8 @@ private:
 
     struct sApMetricsResponse {
         sApMetrics metric;
+        std::vector<sStaTrafficStats> sta_traffic_stats;
+        std::vector<sStaLinkMetrics> sta_link_metrics;
     };
 
     std::vector<sApMetricsQuery> m_ap_metric_query;

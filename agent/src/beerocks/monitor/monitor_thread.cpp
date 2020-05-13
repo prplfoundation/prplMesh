@@ -1485,21 +1485,57 @@ bool monitor_thread::handle_ap_metrics_query(Socket &sd, ieee1905_1::CmduMessage
         const auto &bssid = std::get<1>(bssid_tuple);
         LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
                    << "  bssid " << bssid;
+
+        auto vap_id = mon_db.get_vap_id(tlvf::mac_to_string(bssid));
+        if (vap_id == IFACE_ID_INVALID) {
+            LOG(WARNING) << "Unknown BSSID " << bssid << " - skipping";
+            continue;
+        }
+
         if (!mon_stats.add_ap_metrics(cmdu_tx, bssid)) {
             return false;
         }
 
-        //TODO: find the way how to check policy config was enabled or not
-        //if (policy config) {
-        //    auto tlv1 = mdu_tx.addClass<wfa_map::tlv>(); //STA tlvAssociatedStaLinkMetrics
-        //
-        //    //TODO add tlvTrafficStats
-        //}
+        auto include_sta_traffic_stats_tlv =
+            mon_db.get_radio_node()
+                ->ap_metrics_reporting_info()
+                .include_associated_sta_traffic_stats_tlv_in_ap_metrics_response;
+        auto include_sta_link_metrics_tlv =
+            mon_db.get_radio_node()
+                ->ap_metrics_reporting_info()
+                .include_associated_sta_link_metrics_tlv_in_ap_metrics_response;
+
+        if (include_sta_traffic_stats_tlv || include_sta_link_metrics_tlv) {
+            for (auto it = mon_db.sta_begin(); it != mon_db.sta_end(); it++) {
+                const auto &sta_mac  = it->first;
+                const auto &sta_node = it->second;
+
+                if (sta_node == nullptr) {
+                    LOG(WARNING) << "Invalid node pointer for STA = " << sta_mac;
+                    continue;
+                }
+                if (sta_node->get_vap_id() != vap_id) {
+                    continue;
+                }
+
+                if (include_sta_traffic_stats_tlv) {
+                    LOG(TRACE) << "Include STA traffic stats for " << sta_node->get_mac();
+                    if (!mon_stats.add_ap_assoc_sta_traffic_stat(cmdu_tx, *sta_node)) {
+                        LOG(ERROR) << "Failed to add sta_traffic_stat tlv";
+                    }
+                }
+                if (include_sta_link_metrics_tlv) {
+                    LOG(TRACE) << "Include STA link metrics for " << sta_node->get_mac();
+                    if (!mon_stats.add_ap_assoc_sta_link_metric(cmdu_tx, bssid, *sta_node)) {
+                        LOG(ERROR) << "Failed to add sta_link_metric tlv";
+                    }
+                }
+            }
+        }
     }
 
     LOG(DEBUG) << "Sending AP_METRICS_RESPONSE_MESSAGE to slave_socket, mid=" << std::hex
                << int(mid);
-
     return message_com::send_cmdu(slave_socket, cmdu_tx);
 }
 
