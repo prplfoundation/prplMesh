@@ -10,6 +10,8 @@
 
 using namespace beerocks;
 
+#pragma GCC error "CI TESTING!"
+
 thread_base::~thread_base()
 {
     should_stop = true;
