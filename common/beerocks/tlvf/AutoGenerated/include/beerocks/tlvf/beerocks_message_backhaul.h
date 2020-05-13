@@ -21,7 +21,6 @@
 #include <tlvf/BaseClass.h>
 #include <tlvf/ClassList.h>
 #include <tuple>
-#include <tlvf/tlvfutils.h>
 #include "beerocks/tlvf/beerocks_message_common.h"
 
 namespace beerocks_message {

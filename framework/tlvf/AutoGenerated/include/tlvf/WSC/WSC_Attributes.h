@@ -24,7 +24,6 @@
 #include <tlvf/BaseClass.h>
 #include <tlvf/ClassList.h>
 #include <tuple>
-#include <tlvf/tlvfutils.h>
 #include "tlvf/WSC/eWscValues8.h"
 #include "tlvf/WSC/eWscMessageType.h"
 #include "tlvf/WSC/eWscConn.h"
