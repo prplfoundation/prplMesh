@@ -154,6 +154,21 @@ private:
     };
     friend std::ostream &operator<<(std::ostream &os, const Packet &m);
 
+    // reliable multicast neighbours map
+    struct ieee1905_neighbor {
+        sMacAddr al_mac;
+        unsigned int if_index;
+        std::chrono::steady_clock::time_point last_seen;
+    };
+
+    std::unordered_map<sMacAddr, ieee1905_neighbor> neighbors_map_;
+
+    // According to the ieee1905.1 specification section 8.2.1.1, a 1905.1 management entity shall
+    // transmit a topology discovery message *at least* once every 60 seconds. Since any message from
+    // the neighbor will update it's last_seen, in practice it should be safe to consider it dead and
+    // delete it if 70 seconds have passed.
+    const std::chrono::seconds kMaximumNeighbourAge = std::chrono::seconds(70);
+
     // de-duplication internal data structures
 
     // two IEE1905 packets received from the same src address and with the same messageId
@@ -279,6 +294,7 @@ private:
     // PACKET PROCESSING STUFF
     //
     void handle_packet(Packet &packet);
+    void update_neighbours(const Packet &packet);
     bool verify_packet(Packet &packet);
     bool de_duplicate_packet(Packet &packet);
     void remove_packet_from_de_duplication_map(const Packet &packet);
