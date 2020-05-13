@@ -13,28 +13,7 @@
 #include <stdint.h>
 #include <string>
 
-#include <tlvf/common/sMacAddr.h>
-
-inline bool operator==(sMacAddr const &lhs, sMacAddr const &rhs)
-{
-    return (0 == std::memcmp(lhs.oct, rhs.oct, sizeof(sMacAddr)));
-}
-
-inline bool operator!=(sMacAddr const &lhs, sMacAddr const &rhs) { return !(rhs == lhs); }
-
-namespace std {
-template <> struct hash<sMacAddr> {
-    size_t operator()(const sMacAddr &m) const
-    {
-        uint64_t value_to_hash = 0;
-        for (size_t byte = 0; byte < sizeof(m.oct); byte++) {
-            value_to_hash <<= 8;
-            value_to_hash += m.oct[byte];
-        }
-        return hash<std::uint64_t>()(value_to_hash);
-    }
-};
-} // namespace std
+#include <tlvf/tlvftypes.h>
 
 namespace beerocks {
 namespace net {
