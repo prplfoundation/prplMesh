@@ -21,6 +21,46 @@ namespace mapf {
 
 static const uint8_t ieee1905_max_message_version = 0x00;
 
+void Ieee1905Transport::update_neighbours(const Packet &packet)
+{
+    if (packet.ether_type != ETH_P_1905_1) {
+        MAPF_DBG("Ignoring non-1905 packet");
+        return;
+    }
+    if (packet.src_if_type != CmduRxMessage::IF_TYPE_NET) {
+        MAPF_DBG("Ignoring packet from src_if_type " << int(packet.src_if_type));
+        return;
+    }
+
+    // Delete aged neighbors
+    for (const auto &neigh : neighbors_map_) {
+        if (neigh.first == packet.src) {
+            continue;
+        }
+        auto age = std::chrono::duration_cast<std::chrono::seconds>(
+            std::chrono::steady_clock::now() - neigh.second.last_seen);
+        if (age > kMaximumNeighbourAge) {
+            MAPF_INFO("Deleting aged out neighbour with almac " << neigh.first);
+            neighbors_map_.erase(neigh.first);
+        }
+    }
+
+    // Add new neighbours
+    auto neighbor_iter = neighbors_map_.find(packet.src);
+    if (neighbor_iter == neighbors_map_.end()) {
+        Ieee1905Transport::ieee1905_neighbor neigh = {0};
+        neigh.al_mac                               = packet.src;
+        neigh.if_index                             = packet.src_if_index;
+        neigh.last_seen                            = std::chrono::steady_clock::now();
+        MAPF_INFO("Adding new neighbour with almac " << packet.src);
+        neighbors_map_[packet.src] = neigh;
+    } else {
+        // Update last seen for new / updated neighbours
+        MAPF_DBG("Updating last seen for neighbour with almac " << packet.src);
+        neighbors_map_[packet.src].last_seen = std::chrono::steady_clock::now();
+    }
+}
+
 void Ieee1905Transport::handle_packet(Packet &packet)
 {
     MAPF_DBG("handling packet:" << std::endl << packet);
@@ -29,6 +69,8 @@ void Ieee1905Transport::handle_packet(Packet &packet)
         MAPF_DBG("packet verification failed.");
         return;
     }
+
+    update_neighbours(packet);
 
     if (!de_duplicate_packet(packet)) {
         MAPF_DBG("packet is duplicate (will not be forwarded)");
