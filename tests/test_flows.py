@@ -133,6 +133,52 @@ class TestFlows:
             return None
         return cmdus[0]
 
+    def check_cmdu_has_tlvs(
+        self, packet: Union[sniffer.Packet, None], tlv_type: int
+    ) -> [sniffer.Tlv]:
+        '''Check that the packet has at least one TLV of the given type.
+
+        Mark failure if no TLV of that type is found.
+
+        Parameters
+        ----------
+        packet: Union[sniffer.Packet, None]
+            The packet to verify. It may also be None, to make it easy to let it follow
+            check_cmdu_type_single. If it is None, no failure is raised. If it is not an IEEE1905
+            packet, a failure *is* raised.
+
+        tlv_type: int
+            The type of TLV to look for.
+
+        Returns
+        -------
+        [sniffer.Tlv]
+            List of TLVs of the requested type. Empty list if the check fails.
+        '''
+        if not packet:
+            return []  # No additional failure, assumed to already have been raised
+        if not packet.ieee1905:
+            self.fail("Packet is not IEEE1905: {}".format(packet))
+            return []
+        tlvs = [tlv for tlv in packet.ieee1905_tlvs if tlv.tlv_type == tlv_type]
+        if not tlvs:
+            self.fail("No TLV of type 0x{:02x} found in packet".format(tlv_type))
+            debug("  {}".format(packet))
+        return tlvs
+
+    def check_cmdu_has_tlv_single(
+        self, packet: Union[sniffer.Packet, None], tlv_type: int
+    ) -> Union[sniffer.Tlv, None]:
+        '''Like check_cmdu_has_tlvs, but also check that only one TLV of that type is found.'''
+        tlvs = self.check_cmdu_has_tlvs(packet, tlv_type)
+        if not tlvs:
+            return None
+        if len(tlvs) > 1:
+            self.fail("More than one ({}) TLVs of type 0x{:02x} found".format(len(tlvs), tlv_type))
+            debug("  {}".format(packet))
+            return None
+        return tlvs[0]
+
     def run_tests(self, tests):
         '''Run all tests as specified on the command line.'''
         total_errors = 0
