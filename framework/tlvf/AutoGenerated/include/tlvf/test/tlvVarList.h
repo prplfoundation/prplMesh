@@ -21,7 +21,6 @@
 #include <tlvf/BaseClass.h>
 #include <tlvf/ClassList.h>
 #include <tuple>
-#include <tlvf/tlvfutils.h>
 #include <vector>
 class cInner;
 

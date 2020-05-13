@@ -1142,7 +1142,6 @@ class TlvF:
 
             if param_type_info.type == TypeInfo.CHAR:
                 self.include_list.append("<string.h>")
-                self.include_list.append('<tlvf/tlvfutils.h>')
 
                 # add function to get std::string
                 lines_h.append("std::string %s_str();" % (param_name))
