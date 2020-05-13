@@ -33,8 +33,13 @@ class TlvStruct:
             setattr(self, name, value)
 
     def __repr__(self):
-        return "{" + ", ".join(["{!r}: {!r}".format(k, v) for k, v in self.__dict__.items()
-                                if not k.startswith('_')]) + "}"
+        return "{" + ", ".join(["{!r}: {!r}".format(k, v) for k, v in self._d().items()]) + "}"
+
+    def _d(self):
+        return {k: v for k, v in self.__dict__.items() if not k.startswith('_')}
+
+    def __eq__(self, other):
+        return self._d() == other._d()
 
 
 class Tlv(TlvStruct):
