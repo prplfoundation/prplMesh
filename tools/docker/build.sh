@@ -13,6 +13,7 @@ rootdir="${scriptdir%/*/*}"
 . "${rootdir}/tools/functions.sh"
 
 main() {
+    image=${PRPLMESH_BUILDER_IMAGE-"${DOCKER_REGISTRY}"prplmesh-builder}
     # Default docker arguments
     docker_args=(
         --workdir "${rootdir}"
@@ -27,7 +28,7 @@ main() {
         docker_args+=(-v "${PRPLMESH_PLATFORM_BASE_DIR}:${PRPLMESH_PLATFORM_BASE_DIR}")
     fi
 
-    run docker container run "${docker_args[@]}" --rm "${DOCKER_REGISTRY}prplmesh-builder" build "$@"
+    run docker container run "${docker_args[@]}" --rm "${image}" build "$@"
 }
 
 main "$@"
