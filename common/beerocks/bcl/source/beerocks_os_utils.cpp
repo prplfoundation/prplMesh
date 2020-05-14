@@ -80,11 +80,9 @@ std::string os_utils::system_call(std::string cmd, int log_lvl, bool detached)
     //     pclose(popen_fd);
     // }
 
-    if (system(cmd.c_str()) != 0) {
-        LOG(ERROR) << "System returned non-zero";
-    }
+    auto ret = system(cmd.c_str());
+    LOG_IF(!ret, ERROR) << cmd << " failed with return code " << ret;
 
-//if (log_lvl == 2) LOG(INFO) << "system_call ret:\n" << ret_str << "\n";
 #endif
     return ret_str;
 }
