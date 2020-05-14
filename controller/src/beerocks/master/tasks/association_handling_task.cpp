@@ -111,9 +111,17 @@ void association_handling_task::work()
         auto agent_mac = database.get_node_parent_ire(radio_mac);
         son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
 
-        add_pending_mac(database.get_node_parent_radio(new_hostap_mac),
-                        beerocks_message::ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE);
-        set_responses_timeout(START_MONITORING_RESPONSE_TIMEOUT_MSEC);
+        if (database.settings_client_11k_roaming() &&
+            (database.get_node_beacon_measurement_support_level(sta_mac) ==
+             beerocks::BEACON_MEAS_UNSUPPORTED) &&
+            (database.get_node_type(sta_mac) == beerocks::TYPE_CLIENT)) {
+
+            state        = CHECK_11K_BEACON_MEASURE_CAP;
+            max_attempts = BEACON_MEASURE_MAX_ATTEMPTS;
+            attempts     = 0;
+        } else {
+            state = REQUEST_RSSI_MEASUREMENT_WAIT;
+        }
         break;
     }
 
@@ -239,48 +247,6 @@ void association_handling_task::handle_response(std::string mac,
                                                 std::shared_ptr<beerocks_header> beerocks_header)
 {
     switch (beerocks_header->action_op()) {
-    case beerocks_message::ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE: {
-
-        auto response =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE>();
-        if (!response) {
-            TASK_LOG(ERROR)
-                << "addClass failed for cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE";
-            return;
-        }
-
-        TASK_LOG(DEBUG) << "received ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE, success="
-                        << string_utils::bool_str(response->success());
-
-        if (!response->success()) {
-            if (++attempts >= max_attempts) {
-                TASK_LOG(ERROR) << "state START_RSSI_MONITORING reached maximum attempts = "
-                                << attempts << " aborting task!";
-
-                TASK_LOG(WARNING) << "client " << sta_mac
-                                  << " is not monitored, and could not be steered!!!";
-                finish();
-            } else {
-                wait_for(START_MONITORING_RESPONSE_TIMEOUT_MSEC); // Wait before next request
-            }
-
-            break;
-        }
-
-        if (database.settings_client_11k_roaming() &&
-            (database.get_node_beacon_measurement_support_level(sta_mac) ==
-             beerocks::BEACON_MEAS_UNSUPPORTED) &&
-            (database.get_node_type(sta_mac) == beerocks::TYPE_CLIENT)) {
-
-            state        = CHECK_11K_BEACON_MEASURE_CAP;
-            max_attempts = BEACON_MEASURE_MAX_ATTEMPTS;
-            attempts     = 0;
-        } else {
-            state = REQUEST_RSSI_MEASUREMENT_WAIT;
-        }
-        break;
-    }
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE: {
         break;
     }
