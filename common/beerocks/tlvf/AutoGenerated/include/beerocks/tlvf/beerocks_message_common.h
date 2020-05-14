@@ -186,7 +186,6 @@ typedef struct sClientDisconnectionParams {
 
 typedef struct sClientMonitoringParams {
     sMacAddr mac;
-    int8_t vap_id;
     uint8_t is_ire;
     void struct_swap(){
         mac.struct_swap();
