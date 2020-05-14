@@ -105,7 +105,6 @@ void association_handling_task::work()
         }
 
         request->params().mac    = network_utils::mac_from_string(sta_mac);
-        request->params().vap_id = database.get_node_vap_id(sta_mac);
         request->params().is_ire = database.get_node_type(sta_mac) == beerocks::TYPE_IRE_BACKHAUL;
 
         auto radio_mac = database.get_node_parent_radio(new_hostap_mac);
