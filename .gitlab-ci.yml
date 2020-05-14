@@ -18,9 +18,6 @@ stages:
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
     - ./tools/docker/image-build.sh --image "${CI_JOB_NAME#image-build-}" --tag $CI_PIPELINE_ID --push
 
-image-build-builder:
-  extends: .image-build
-
 image-build-runner:
   extends: .image-build
 
@@ -30,16 +27,19 @@ image-build-builder/alpine:
 image-build-builder/ubuntu/xenial:
   extends: .image-build
 
+image-build-builder/ubuntu/bionic:
+  extends: .image-build
+
 image-build-tests-runner:
   extends: .image-build
 
 .in-prplmesh-builder:
   image:
-    name: $CI_REGISTRY_IMAGE/prplmesh-builder:$CI_PIPELINE_ID
+    name: $CI_REGISTRY_IMAGE/prplmesh-builder-ubuntu-bionic:$CI_PIPELINE_ID
     entrypoint: [""]
   tags:
     - docker
-  needs: ["image-build-builder"]
+  needs: ["image-build-builder/ubuntu/bionic"]
 
 cppcheck:
   stage: build
