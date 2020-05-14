@@ -146,6 +146,21 @@ elseif (TARGET_PLATFORM STREQUAL "linux")
     set(BEEROCKS_BH_WIRE_IFACE "eth0")
 endif()
 
+# Test support
+option(BUILD_TESTS "build multiap unit tests" OFF)
+if (BUILD_TESTS)
+    enable_testing()
+    message(STATUS "Tests are enabled")
+    # GTest is optional. gtest-based test have to check GTest_FOUND (which implies BUILD_TESTS)
+    # and link with GTest::gtest GTest::gtest_main GTest::gmock GTest::gmock_main as appropriate
+    # CMake-bundled FindGTest doesn't support gmock, so force the one installed by GTest itself.
+    find_package(GTest CONFIG)
+    if (NOT GTest_FOUND)
+        message(STATUS "GTest not found, most tests are disabled")
+    endif()
+endif()
+
+
 ## Components
 
 add_subdirectory(framework)

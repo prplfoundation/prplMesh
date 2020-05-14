@@ -1,9 +1,6 @@
 project(multiap_framework C CXX)
 
-enable_testing()
-
 option(BUILD_EXAMPLES "build examples" OFF)
-option(BUILD_TESTS "build multiap unit tests" OFF)
 
 set(MSGLIB "zmq" CACHE STRING "Which messaging library backend to use")
 set_property(CACHE MSGLIB PROPERTY STRINGS "zmq" "nng" "None")
