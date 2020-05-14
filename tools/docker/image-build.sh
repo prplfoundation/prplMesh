@@ -19,7 +19,6 @@ usage() {
     echo "                   supported values: builder/runner"
     echo "  options:"
     echo "      -h|--help - show this help menu"
-    echo "      -b|--base-image - Base OS image to use (Dockerfile 'FROM')"
     echo "      -p|--push - push each image to the registry (must be logged in)"
     echo "      -t|--tag - tag to add to the built images"
     echo "      -v|--verbose - verbose output"
@@ -38,7 +37,6 @@ main() {
     while true; do
         case "$1" in
             -h | --help)            usage; exit 0; shift ;;
-            -b | --base-image)      BASE_IMAGE="$2"; postfix="-$(echo "${2##*/}" | tr :@ --)"; shift ; shift ;;
             -p | --push)            push=true; shift ;;
             -t | --tag)             TAG=":$2"; shift ; shift ;;
             -i | --image)           build_images+=("$2"); shift ; shift ;;
@@ -63,9 +61,7 @@ main() {
         image_fixed="$(printf "%s" "$image" | tr -cs 'A-Za-z0-9_' '-')"
         full_image="${DOCKER_REGISTRY}prplmesh-$image_fixed$postfix$TAG"
         info "Generating $image docker image ($full_image)"
-        info "Base docker image $BASE_IMAGE"
         run docker image build \
-            --build-arg image="$BASE_IMAGE" \
             --tag "$full_image" \
             "${scriptdir}/${image}" || exit $?
         info "Generated $full_image"
@@ -76,7 +72,6 @@ main() {
     done
 }
 
-BASE_IMAGE="ubuntu:18.04"
 build_images=()
 postfix=""
 push=false
