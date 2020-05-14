@@ -108,9 +108,9 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
                            << int(event_obj->steeringGroupIndex);
 
             if (!event_obj->remove) {
-                auto bssid        = net::network_utils::mac_to_string(event_obj->cfg_2.bssid);
+                auto bssid        = tlvf::mac_to_string(event_obj->cfg_2.bssid);
                 auto radio_mac_2g = database.get_node_parent_radio(bssid);
-                bssid             = net::network_utils::mac_to_string(event_obj->cfg_5.bssid);
+                bssid             = tlvf::mac_to_string(event_obj->cfg_5.bssid);
                 auto radio_mac_5g = database.get_node_parent_radio(bssid);
                 if (radio_mac_2g.empty() || radio_mac_5g.empty() ||
                     !database.is_node_24ghz(radio_mac_2g) || !database.is_node_5ghz(radio_mac_5g)) {
@@ -189,7 +189,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
     case STEERING_CLIENT_SET_REQUEST: {
         if (obj) {
             auto event_obj  = (rdkb_wlan_task::steering_client_set_request_event *)obj;
-            auto client_mac = net::network_utils::mac_to_string(event_obj->client_mac);
+            auto client_mac = tlvf::mac_to_string(event_obj->client_mac);
             TASK_LOG(INFO) << "STEERING_CLIENT_SET_REQUEST event was received for client_mac "
                            << client_mac << " bssid " << event_obj->bssid;
 
@@ -224,9 +224,9 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
 
             update->params().remove             = event_obj->remove;
             update->params().steeringGroupIndex = event_obj->steeringGroupIndex;
-            update->params().bssid      = net::network_utils::mac_from_string(event_obj->bssid);
-            update->params().client_mac = event_obj->client_mac;
-            update->params().config     = event_obj->config;
+            update->params().bssid              = tlvf::mac_from_string(event_obj->bssid);
+            update->params().client_mac         = event_obj->client_mac;
+            update->params().config             = event_obj->config;
 
             LOG(DEBUG) << "Sending ACTION_CONTROL_STEERING_CLIENT_SET_REQUEST to radio "
                        << radio_mac;
@@ -264,7 +264,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
     case STEERING_CLIENT_DISCONNECT_REQUEST: {
         if (obj) {
             auto event_obj         = (steering_client_disconnect_request_event *)obj;
-            std::string client_mac = net::network_utils::mac_to_string(event_obj->client_mac);
+            std::string client_mac = tlvf::mac_to_string(event_obj->client_mac);
             TASK_LOG(INFO) << "STEERING_CLIENT_DISCONNECT_REQUEST received for " << client_mac;
             son_actions::disconnect_client(database, cmdu_tx, client_mac, event_obj->bssid,
                                            event_obj->type, event_obj->reason);
@@ -331,10 +331,9 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
             }
 
             // check that client exists in DB and connected to provided bssid
-            std::string client_mac =
-                beerocks::net::network_utils::mac_to_string(event_obj->params.mac);
-            auto bssid       = std::string(event_obj->bssid);
-            auto group_index = rdkb_db.get_group_index(client_mac, bssid);
+            std::string client_mac = tlvf::mac_to_string(event_obj->params.mac);
+            auto bssid             = std::string(event_obj->bssid);
+            auto group_index       = rdkb_db.get_group_index(client_mac, bssid);
             if (group_index == -1) {
                 TASK_LOG(ERROR) << "event for un-configured client mac - " << client_mac
                                 << " ignored";
@@ -397,8 +396,8 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
     case STEERING_EVENT_CLIENT_ACTIVITY_AVAILABLE: {
         if (obj) {
             auto event_obj   = (beerocks_message::sSteeringEvActivity *)obj;
-            auto client_mac  = net::network_utils::mac_to_string(event_obj->client_mac);
-            auto bssid       = net::network_utils::mac_to_string(event_obj->bssid);
+            auto client_mac  = tlvf::mac_to_string(event_obj->client_mac);
+            auto bssid       = tlvf::mac_to_string(event_obj->bssid);
             auto group_index = rdkb_db.get_group_index(client_mac, bssid);
             TASK_LOG(INFO) << "STEERING_EVENT_CLIENT_ACTIVITY_AVAILABLE client_mac = " << client_mac
                            << " bssid = " << bssid << " group index " << int(group_index);
@@ -452,8 +451,8 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
     case STEERING_EVENT_SNR_XING_AVAILABLE: {
         if (obj) {
             auto event_obj   = (beerocks_message::sSteeringEvSnrXing *)obj;
-            auto client_mac  = net::network_utils::mac_to_string(event_obj->client_mac);
-            auto bssid       = net::network_utils::mac_to_string(event_obj->bssid);
+            auto client_mac  = tlvf::mac_to_string(event_obj->client_mac);
+            auto bssid       = tlvf::mac_to_string(event_obj->bssid);
             auto group_index = rdkb_db.get_group_index(client_mac, bssid);
             TASK_LOG(INFO) << "STEERING_EVENT_SNR_XING_AVAILABLE client_mac = " << client_mac
                            << " bssid = " << bssid << " group index " << int(group_index);
@@ -512,8 +511,8 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
     case STEERING_EVENT_SNR_AVAILABLE: {
         if (obj) {
             auto event_obj   = (beerocks_message::sSteeringEvSnr *)obj;
-            auto client_mac  = net::network_utils::mac_to_string(event_obj->client_mac);
-            auto bssid       = net::network_utils::mac_to_string(event_obj->bssid);
+            auto client_mac  = tlvf::mac_to_string(event_obj->client_mac);
+            auto bssid       = tlvf::mac_to_string(event_obj->bssid);
             auto group_index = rdkb_db.get_group_index(client_mac, bssid);
             TASK_LOG(INFO) << "STEERING_EVENT_SNR_AVAILABLE client_mac = " << client_mac
                            << " bssid = " << bssid << " group index " << int(group_index);
@@ -565,8 +564,8 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
     case STEERING_EVENT_PROBE_REQ_AVAILABLE: {
         if (obj) {
             auto event_obj   = (beerocks_message::sSteeringEvProbeReq *)obj;
-            auto client_mac  = net::network_utils::mac_to_string(event_obj->client_mac);
-            auto bssid       = net::network_utils::mac_to_string(event_obj->bssid);
+            auto client_mac  = tlvf::mac_to_string(event_obj->client_mac);
+            auto bssid       = tlvf::mac_to_string(event_obj->bssid);
             auto group_index = rdkb_db.get_group_index(client_mac, bssid);
             TASK_LOG(INFO) << "STEERING_EVENT_PROBE_REQ_AVAILABLE client_mac = " << client_mac
                            << " bssid = " << bssid << " group index " << int(group_index);
@@ -621,8 +620,8 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
     case STEERING_EVENT_AUTH_FAIL_AVAILABLE: {
         if (obj) {
             auto event_obj   = (beerocks_message::sSteeringEvAuthFail *)obj;
-            auto client_mac  = net::network_utils::mac_to_string(event_obj->client_mac);
-            auto bssid       = net::network_utils::mac_to_string(event_obj->bssid);
+            auto client_mac  = tlvf::mac_to_string(event_obj->client_mac);
+            auto bssid       = tlvf::mac_to_string(event_obj->bssid);
             auto group_index = rdkb_db.get_group_index(client_mac, bssid);
             TASK_LOG(INFO) << "STEERING_EVENT_AUTH_FAIL_AVAILABLE client_mac = " << client_mac
                            << " bssid = " << bssid << " group index " << int(group_index);
@@ -679,8 +678,8 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
 
         if (obj) {
             auto event_obj   = (bwl::sClientAssociationParams *)obj;
-            auto client_mac  = net::network_utils::mac_to_string(event_obj->mac);
-            auto bssid       = net::network_utils::mac_to_string(event_obj->bssid);
+            auto client_mac  = tlvf::mac_to_string(event_obj->mac);
+            auto bssid       = tlvf::mac_to_string(event_obj->bssid);
             auto group_index = rdkb_db.get_group_index(client_mac, bssid);
             TASK_LOG(INFO) << "STEERING_EVENT_CLIENT_CONNECT_AVAILABLE client_mac = " << client_mac
                            << " bssid = " << bssid << " group index " << int(group_index);
@@ -724,7 +723,7 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
                                               std::chrono::steady_clock::now().time_since_epoch())
                                               .count();
 
-            std::copy_n(net::network_utils::mac_from_string(client_mac).oct, BML_MAC_ADDR_LEN,
+            std::copy_n(tlvf::mac_from_string(client_mac).oct, BML_MAC_ADDR_LEN,
                         connect_event->data.connect.client_mac);
             connect_event->data.connect.isBTMSupported = client_caps->btm_supported;
             connect_event->data.connect.isRRMSupported = client_caps->rrm_supported;
@@ -755,8 +754,8 @@ void rdkb_wlan_task::handle_event(int event_type, void *obj)
     case STEERING_EVENT_CLIENT_DISCONNECT_AVAILABLE: {
         if (obj) {
             auto event_obj   = (beerocks_message::sSteeringEvDisconnect *)obj;
-            auto client_mac  = net::network_utils::mac_to_string(event_obj->client_mac);
-            auto bssid       = net::network_utils::mac_to_string(event_obj->bssid);
+            auto client_mac  = tlvf::mac_to_string(event_obj->client_mac);
+            auto bssid       = tlvf::mac_to_string(event_obj->bssid);
             auto group_index = rdkb_db.get_group_index(client_mac, bssid);
             TASK_LOG(INFO) << "STEERING_EVENT_CLIENT_DISCONNECT_AVAILABLE client_mac = "
                            << client_mac << " bssid = " << bssid << " group index "
@@ -970,8 +969,8 @@ bool rdkb_wlan_task::send_steering_conf_to_agent(const std::string &radio_mac)
             }
 
             update->params().steeringGroupIndex = steering_group.first;
-            update->params().bssid              = net::network_utils::mac_from_string(bssid);
-            update->params().client_mac = net::network_utils::mac_from_string(client_entry.first);
+            update->params().bssid              = tlvf::mac_from_string(bssid);
+            update->params().client_mac         = tlvf::mac_from_string(client_entry.first);
             ;
             update->params().config = *(client_entry.second->get_client_config());
             TASK_LOG(DEBUG) << "send cACTION_CONTROL_STEERING_CLIENT_SET to agent " << agent_mac

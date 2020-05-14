@@ -47,8 +47,8 @@ bool rdkb_wlan_task_db::steering_group_config::update_group_config(
     const beerocks_message::sSteeringApConfig &config_2ghz,
     const beerocks_message::sSteeringApConfig &config_5ghz)
 {
-    auto bssid_2ghz = beerocks::net::network_utils::mac_to_string(config_2ghz.bssid);
-    auto bssid_5ghz = beerocks::net::network_utils::mac_to_string(config_5ghz.bssid);
+    auto bssid_2ghz = tlvf::mac_to_string(config_2ghz.bssid);
+    auto bssid_5ghz = tlvf::mac_to_string(config_5ghz.bssid);
     if ((bssid_2ghz != this->config_2ghz.bssid) || (bssid_5ghz != this->config_5ghz.bssid)) {
         LOG(ERROR) << "Can't change bssid in an existing steeringGroup";
         return false;

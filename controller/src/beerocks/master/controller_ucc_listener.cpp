@@ -63,7 +63,7 @@ bool controller_ucc_listener::handle_dev_get_param(
             value = "missing ssid";
             return false;
         }
-        auto ruid = net::network_utils::mac_to_string(std::stoull(params["ruid"], nullptr, 16));
+        auto ruid = tlvf::mac_to_string(std::stoull(params["ruid"], nullptr, 16));
         auto ssid = params["ssid"];
         auto vaps = m_database.get_hostap_vap_list(ruid);
         if (vaps.empty()) {
@@ -138,7 +138,7 @@ bool controller_ucc_listener::handle_dev_set_config(
             return false;
         }
 
-        auto mac = net::network_utils::mac_from_string(al_mac);
+        auto mac = tlvf::mac_from_string(al_mac);
         if (al_mac_cleared_conf.find(mac) == al_mac_cleared_conf.end()) {
             m_database.clear_bss_info_configuration(mac);
             al_mac_cleared_conf.insert(mac);

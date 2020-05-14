@@ -80,13 +80,6 @@ public:
         struct in_addr nmask;
     } raw_iface_info;
 
-    static std::string mac_to_string(const uint64_t mac);
-    static std::string mac_to_string(const sMacAddr &mac);
-    static std::string mac_to_string(const uint8_t *mac_address);
-
-    static sMacAddr mac_from_string(const std::string &mac);
-    static void mac_from_string(uint8_t *buf, const std::string &mac);
-
     static bool is_valid_mac(std::string mac);
 
     static std::string ipv4_to_string(const net::sIpv4Addr &ip);

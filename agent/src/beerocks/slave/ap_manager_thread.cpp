@@ -77,7 +77,7 @@ static void copy_vaps_info(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal,
                        << ", backhaul = " << beerocks::string_utils::bool_str(curr_vap.backhaul);
 
             // Copy the VAP MAC and SSID
-            vaps[i].mac = network_utils::mac_from_string(curr_vap.mac);
+            vaps[i].mac = tlvf::mac_from_string(curr_vap.mac);
             mapf::utils::copy_string(vaps[i].ssid, curr_vap.ssid.c_str(),
                                      beerocks::message::WIFI_SSID_MAX_LENGTH);
         }
@@ -186,7 +186,7 @@ void ap_manager_thread::after_select(bool timeout)
                     LOG(ERROR) << "Failed building message!";
                     return;
                 }
-                notification->params().mac = network_utils::mac_from_string(mac);
+                notification->params().mac = tlvf::mac_from_string(mac);
                 message_com::send_cmdu(slave_socket, cmdu_tx);
             }
             it = pending_4addr_stas.erase(it);
@@ -542,7 +542,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             LOG(ERROR) << "addClass cACTION_APMANAGER_HOSTAP_ADD_4ADDR_STA_UPDATE failed";
             return false;
         }
-        std::string mac = network_utils::mac_to_string(update->mac());
+        std::string mac = tlvf::mac_to_string(update->mac());
         LOG(DEBUG) << "add 4addr sta update for mac=" << mac;
         ap_wlan_hal->wds_add_sta(mac);
         break;
@@ -555,7 +555,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             LOG(ERROR) << "addClass cACTION_APMANAGER_HOSTAP_DEL_4ADDR_STA_UPDATE failed";
             return false;
         }
-        std::string mac = network_utils::mac_to_string(update->mac());
+        std::string mac = tlvf::mac_to_string(update->mac());
         LOG(DEBUG) << "del 4addr sta update for mac=" << mac;
         ap_wlan_hal->wds_del_sta(mac);
         break;
@@ -570,7 +570,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                 beerocks_message::ACTION_APMANAGER_CLIENT_DISCONNECT_RESPONSE, OPERATION_FAIL);
             return false;
         }
-        std::string sta_mac = network_utils::mac_to_string(request->mac());
+        std::string sta_mac = tlvf::mac_to_string(request->mac());
         auto vap_id         = request->vap_id();
         auto type           = request->type();
         auto reason         = request->reason();
@@ -598,8 +598,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             return false;
         }
 
-        std::string sta_mac = network_utils::mac_to_string(request->mac());
-        std::string bssid   = network_utils::mac_to_string(request->bssid());
+        std::string sta_mac = tlvf::mac_to_string(request->mac());
+        std::string bssid   = tlvf::mac_to_string(request->bssid());
 
         const auto &vap_unordered_map = ap_wlan_hal->get_radio_info().available_vaps;
         auto it = std::find_if(vap_unordered_map.begin(), vap_unordered_map.end(),
@@ -656,8 +656,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             return false;
         }
 
-        std::string sta_mac = network_utils::mac_to_string(request->mac());
-        std::string bssid   = network_utils::mac_to_string(request->bssid());
+        std::string sta_mac = tlvf::mac_to_string(request->mac());
+        std::string bssid   = tlvf::mac_to_string(request->bssid());
 
         const auto &vap_unordered_map = ap_wlan_hal->get_radio_info().available_vaps;
         auto it = std::find_if(vap_unordered_map.begin(), vap_unordered_map.end(),
@@ -710,7 +710,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST failed";
             return false;
         }
-        std::string sta_mac = network_utils::mac_to_string(request->params().mac);
+        std::string sta_mac = tlvf::mac_to_string(request->params().mac);
         LOG(DEBUG) << "APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST cross, curr id="
                    << sta_unassociated_rssi_measurement_header_id
                    << " request id=" << int(beerocks_header->id());
@@ -725,7 +725,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                 return false;
             }
 
-            response->mac() = network_utils::mac_from_string(sta_mac);
+            response->mac() = tlvf::mac_from_string(sta_mac);
             message_com::send_cmdu(slave_socket, cmdu_tx);
             LOG(DEBUG)
                 << "send sACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE, sta_mac = "
@@ -780,7 +780,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             return false;
         }
 
-        auto bssid                    = network_utils::mac_to_string(request->params().cur_bssid);
+        auto bssid                    = tlvf::mac_to_string(request->params().cur_bssid);
         const auto &vap_unordered_map = ap_wlan_hal->get_radio_info().available_vaps;
         auto it = std::find_if(vap_unordered_map.begin(), vap_unordered_map.end(),
                                [&](const std::pair<int, bwl::VAPElement> &element) {
@@ -801,8 +801,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         }
         message_com::send_cmdu(slave_socket, cmdu_tx);
 
-        std::string sta_mac       = network_utils::mac_to_string(request->params().mac);
-        std::string target_bssid  = network_utils::mac_to_string(request->params().target.bssid);
+        std::string sta_mac       = tlvf::mac_to_string(request->params().mac);
+        std::string target_bssid  = tlvf::mac_to_string(request->params().target.bssid);
         uint8_t disassoc_imminent = request->params().disassoc_imminent;
 
         LOG(DEBUG) << "CLIENT_BSS_STEER (802.11v) for sta_mac = " << sta_mac
@@ -886,7 +886,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION failed";
             return false;
         }
-        auto ire_mac = network_utils::mac_to_string(update->mac());
+        auto ire_mac = tlvf::mac_to_string(update->mac());
         LOG(DEBUG) << "ire connected in 4addr, mac=" << ire_mac;
         connected_ires.insert(ire_mac);
         break;
@@ -902,7 +902,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             return false;
         }
 
-        auto bssid                    = network_utils::mac_to_string(request->params().bssid);
+        auto bssid                    = tlvf::mac_to_string(request->params().bssid);
         const auto &vap_unordered_map = ap_wlan_hal->get_radio_info().available_vaps;
         auto it = std::find_if(vap_unordered_map.begin(), vap_unordered_map.end(),
                                [&](const std::pair<int, bwl::VAPElement> &element) {
@@ -915,7 +915,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
 
         if (!request->params().remove) {
             if (!ap_wlan_hal->sta_softblock_add(
-                    vap_name, network_utils::mac_to_string(request->params().client_mac),
+                    vap_name, tlvf::mac_to_string(request->params().client_mac),
                     request->params().config.authRejectReason, request->params().config.snrProbeHWM,
                     request->params().config.snrProbeLWM, request->params().config.snrAuthHWM,
                     request->params().config.snrAuthLWM)) {
@@ -926,7 +926,7 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             }
         } else {
             if (!ap_wlan_hal->sta_softblock_remove(
-                    vap_name, network_utils::mac_to_string(request->params().client_mac))) {
+                    vap_name, tlvf::mac_to_string(request->params().client_mac))) {
                 LOG(ERROR) << "sta_softblock_remove failed!";
                 send_steering_return_status(
                     beerocks_message::ACTION_APMANAGER_STEERING_CLIENT_SET_RESPONSE,
@@ -1074,7 +1074,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
         }
 
         auto msg = static_cast<bwl::sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION *>(data);
-        std::string client_mac = network_utils::mac_to_string(msg->params.mac);
+        std::string client_mac = tlvf::mac_to_string(msg->params.mac);
 
         LOG(INFO) << "STA_Connected mac = " << client_mac;
 
@@ -1093,7 +1093,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
 
         notification->mac()          = msg->params.mac;
         notification->vap_id()       = msg->params.vap_id;
-        notification->bssid()        = network_utils::mac_from_string(vap_node->second.mac);
+        notification->bssid()        = tlvf::mac_from_string(vap_node->second.mac);
         notification->capabilities() = msg->params.capabilities;
         if (!msg->params.association_frame) {
             LOG(DEBUG) << "no association frame";
@@ -1120,7 +1120,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
         }
 
         auto msg = static_cast<bwl::sACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION *>(data);
-        std::string mac = network_utils::mac_to_string(msg->params.mac);
+        std::string mac = tlvf::mac_to_string(msg->params.mac);
         LOG(INFO) << "STA_Disconnected client " << mac;
 
         auto it = std::find_if(
@@ -1164,7 +1164,7 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
             }
 
             notification->params().mac    = msg->params.mac;
-            notification->params().bssid  = network_utils::mac_from_string(vap_node->second.mac);
+            notification->params().bssid  = tlvf::mac_from_string(vap_node->second.mac);
             notification->params().vap_id = msg->params.vap_id;
             notification->params().reason = msg->params.reason;
             notification->params().source = msg->params.source;
@@ -1473,8 +1473,8 @@ void ap_manager_thread::handle_hostapd_attached()
                              ap_wlan_hal->get_radio_driver_version().c_str(),
                              message::WIFI_DRIVER_VER_LENGTH);
 
-    notification->params().iface_type = uint8_t(ap_wlan_hal->get_iface_type());
-    notification->params().iface_mac = network_utils::mac_from_string(ap_wlan_hal->get_radio_mac());
+    notification->params().iface_type    = uint8_t(ap_wlan_hal->get_iface_type());
+    notification->params().iface_mac     = tlvf::mac_from_string(ap_wlan_hal->get_radio_mac());
     notification->params().iface_is_5ghz = ap_wlan_hal->get_radio_info().is_5ghz;
     notification->params().ant_num       = ap_wlan_hal->get_radio_info().ant_num;
     notification->params().tx_power      = ap_wlan_hal->get_radio_info().tx_power;
@@ -1613,7 +1613,7 @@ bool ap_manager_thread::handle_ap_enabled(int vap_id)
     notification->vap_id() = vap_id;
 
     // Copy the VAP MAC and SSID
-    notification->vap_info().mac = network_utils::mac_from_string(vap_info.mac);
+    notification->vap_info().mac = tlvf::mac_from_string(vap_info.mac);
     mapf::utils::copy_string(notification->vap_info().ssid, vap_info.ssid.c_str(),
                              beerocks::message::WIFI_SSID_MAX_LENGTH);
     notification->vap_info().backhaul_vap = vap_info.backhaul;
@@ -1677,8 +1677,7 @@ void ap_manager_thread::allow_expired_clients()
     for (auto it = m_disallowed_clients.begin(); it != m_disallowed_clients.end();) {
         if (std::chrono::steady_clock::now() > it->timeout) {
             LOG(DEBUG) << "CLIENT_ALLOW: mac = " << it->mac << ", bssid = " << it->bssid;
-            ap_wlan_hal->sta_allow(network_utils::mac_to_string(it->mac),
-                                   network_utils::mac_to_string(it->bssid));
+            ap_wlan_hal->sta_allow(tlvf::mac_to_string(it->mac), tlvf::mac_to_string(it->bssid));
             it = m_disallowed_clients.erase(it);
         } else {
             it++;

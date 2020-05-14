@@ -78,7 +78,7 @@ void client_locating_task::work()
                 LOG(ERROR) << "Failed building message!";
                 continue;
             }
-            request->params().mac  = network_utils::mac_from_string(client_mac);
+            request->params().mac  = tlvf::mac_from_string(client_mac);
             request->params().ipv4 = network_utils::ipv4_from_string(client_ipv4);
 
             if ((ire == client_mac) || (client_mac == database.get_node_parent_backhaul(ire))) {
@@ -135,15 +135,15 @@ void client_locating_task::work()
                         // update node
                         if (database.get_node_type(client_mac) == beerocks::TYPE_IRE) {
                             auto ire_backhaul = database.get_node_parent_backhaul(client_mac);
-                            database.add_node(network_utils::mac_from_string(ire_backhaul),
-                                              network_utils::mac_from_string(eth_sw_mac),
+                            database.add_node(tlvf::mac_from_string(ire_backhaul),
+                                              tlvf::mac_from_string(eth_sw_mac),
                                               beerocks::TYPE_IRE_BACKHAUL);
-                            database.add_node(network_utils::mac_from_string(client_mac),
-                                              network_utils::mac_from_string(ire_backhaul),
+                            database.add_node(tlvf::mac_from_string(client_mac),
+                                              tlvf::mac_from_string(ire_backhaul),
                                               beerocks::TYPE_IRE);
                         } else {
-                            database.add_node(network_utils::mac_from_string(client_mac),
-                                              network_utils::mac_from_string(eth_sw_mac));
+                            database.add_node(tlvf::mac_from_string(client_mac),
+                                              tlvf::mac_from_string(eth_sw_mac));
                             database.set_node_state(client_mac, beerocks::STATE_CONNECTED);
                         }
 
@@ -192,7 +192,7 @@ void client_locating_task::handle_response(std::string mac,
         pending_ires_num--;
 
         std::string ipv4    = network_utils::ipv4_to_string(response->params().ipv4);
-        std::string arp_mac = network_utils::mac_to_string(response->params().mac);
+        std::string arp_mac = tlvf::mac_to_string(response->params().mac);
 
         TASK_LOG(DEBUG) << "received response from slave " << mac << ":" << std::endl
                         << "   arp_mac=" << arp_mac << std::endl

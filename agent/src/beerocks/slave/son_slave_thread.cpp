@@ -530,9 +530,9 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
             return false;
         }
 
-        std::string client_mac = network_utils::mac_to_string(request_in->params().mac);
+        std::string client_mac = tlvf::mac_to_string(request_in->params().mac);
         std::string client_bridge_4addr_mac =
-            network_utils::mac_to_string(request_in->params().bridge_4addr_mac);
+            tlvf::mac_to_string(request_in->params().bridge_4addr_mac);
         std::string client_ip = network_utils::ipv4_to_string(request_in->params().ipv4);
 
         LOG(DEBUG) << "START_MONITORING_REQUEST: mac=" << client_mac << " ip=" << client_ip
@@ -572,7 +572,7 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST failed";
             return false;
         }
-        std::string client_mac = network_utils::mac_to_string(request_in->mac());
+        std::string client_mac = tlvf::mac_to_string(request_in->mac());
 
         LOG(DEBUG) << "STOP_MONITORING_REQUEST: mac=" << client_mac;
 
@@ -600,7 +600,7 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST failed";
             return false;
         }
-        auto hostap_mac = network_utils::mac_to_string(request_in->params().mac);
+        auto hostap_mac = tlvf::mac_to_string(request_in->params().mac);
         bool forbackhaul =
             (is_backhaul_manager && backhaul_params.backhaul_is_wireless) ? true : false;
 
@@ -808,7 +808,7 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
                 LOG(ERROR) << "addClass cACTION_CONTROL_BACKHAUL_ROAM_REQUEST failed";
                 return false;
             }
-            auto bssid = network_utils::mac_to_string(request_in->params().bssid);
+            auto bssid = tlvf::mac_to_string(request_in->params().bssid);
             LOG(DEBUG) << "reconfigure wpa_supplicant to bssid " << bssid
                        << " channel=" << int(request_in->params().channel);
 
@@ -1257,20 +1257,18 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
 
             backhaul_params.gw_ipv4 = network_utils::ipv4_to_string(notification->params().gw_ipv4);
             backhaul_params.gw_bridge_mac =
-                network_utils::mac_to_string(notification->params().gw_bridge_mac);
+                tlvf::mac_to_string(notification->params().gw_bridge_mac);
             backhaul_params.controller_bridge_mac =
-                network_utils::mac_to_string(notification->params().controller_bridge_mac);
+                tlvf::mac_to_string(notification->params().controller_bridge_mac);
             backhaul_params.is_prplmesh_controller = notification->params().is_prplmesh_controller;
-            backhaul_params.bridge_mac =
-                network_utils::mac_to_string(notification->params().bridge_mac);
+            backhaul_params.bridge_mac = tlvf::mac_to_string(notification->params().bridge_mac);
             backhaul_params.bridge_ipv4 =
                 network_utils::ipv4_to_string(notification->params().bridge_ipv4);
-            backhaul_params.backhaul_mac =
-                network_utils::mac_to_string(notification->params().backhaul_mac);
+            backhaul_params.backhaul_mac = tlvf::mac_to_string(notification->params().backhaul_mac);
             backhaul_params.backhaul_ipv4 =
                 network_utils::ipv4_to_string(notification->params().backhaul_ipv4);
             backhaul_params.backhaul_bssid =
-                network_utils::mac_to_string(notification->params().backhaul_bssid);
+                tlvf::mac_to_string(notification->params().backhaul_bssid);
             // backhaul_params.backhaul_freq        = notification->params.backhaul_freq; // HACK temp disabled because of a bug on endian converter
             backhaul_params.backhaul_channel     = notification->params().backhaul_channel;
             backhaul_params.backhaul_is_wireless = notification->params().backhaul_is_wireless;
@@ -1572,7 +1570,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
 
         if (notification->op() == beerocks_message::eDHCPOp_Add ||
             notification->op() == beerocks_message::eDHCPOp_Old) {
-            std::string client_mac = network_utils::mac_to_string(notification->mac());
+            std::string client_mac = tlvf::mac_to_string(notification->mac());
             std::string client_ip  = network_utils::ipv4_to_string(notification->ipv4());
 
             LOG(DEBUG) << "ACTION_DHCP_LEASE_ADDED_NOTIFICATION mac " << client_mac
@@ -1949,7 +1947,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return false;
         }
 
-        std::string client_mac = network_utils::mac_to_string(notification_in->params().mac);
+        std::string client_mac = tlvf::mac_to_string(notification_in->params().mac);
         LOG(INFO) << "client disconnected sta_mac=" << client_mac;
 
         //notify monitor
@@ -2151,7 +2149,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return false;
         }
         LOG(TRACE) << "received ACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION";
-        std::string client_mac = network_utils::mac_to_string(notification_in->mac());
+        std::string client_mac = tlvf::mac_to_string(notification_in->mac());
         LOG(INFO) << "client associated sta_mac=" << client_mac;
 
         if (!master_socket) {
@@ -2479,7 +2477,7 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
             return false;
         }
         notification_out->operational() = agent_operational;
-        notification_out->bridge_mac() = network_utils::mac_from_string(backhaul_params.bridge_mac);
+        notification_out->bridge_mac()  = tlvf::mac_from_string(backhaul_params.bridge_mac);
         send_cmdu_to_controller(cmdu_tx);
 
         break;
@@ -3355,9 +3353,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             bh_enable->wireless_iface_type() = config.backhaul_wireless_iface_type;
         }
 
-        bh_enable->iface_mac() = hostap_params.iface_mac;
-        bh_enable->preferred_bssid() =
-            network_utils::mac_from_string(config.backhaul_preferred_bssid);
+        bh_enable->iface_mac()       = hostap_params.iface_mac;
+        bh_enable->preferred_bssid() = tlvf::mac_from_string(config.backhaul_preferred_bssid);
 
         mapf::utils::copy_string(bh_enable->sta_iface(message::IFACE_NAME_LENGTH),
                                  config.backhaul_wireless_iface.c_str(),
@@ -3547,27 +3544,27 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             notification->low_pass_filter_on()   = config.backhaul_wireless_iface_filter_low;
             notification->enable_repeater_mode() = config.enable_repeater_mode;
             notification->radio_identifier()     = hostap_params.iface_mac;
-            network_utils::mac_from_string(config.radio_identifier);
+            tlvf::mac_from_string(config.radio_identifier);
 
             // Backhaul Params
             notification->backhaul_params().gw_ipv4 =
                 network_utils::ipv4_from_string(backhaul_params.gw_ipv4);
             notification->backhaul_params().gw_bridge_mac =
-                network_utils::mac_from_string(backhaul_params.gw_bridge_mac);
+                tlvf::mac_from_string(backhaul_params.gw_bridge_mac);
             notification->backhaul_params().is_backhaul_manager = is_backhaul_manager;
             notification->backhaul_params().backhaul_iface_type =
                 backhaul_params.backhaul_iface_type;
             notification->backhaul_params().backhaul_mac =
-                network_utils::mac_from_string(backhaul_params.backhaul_mac);
+                tlvf::mac_from_string(backhaul_params.backhaul_mac);
             notification->backhaul_params().backhaul_channel = backhaul_params.backhaul_channel;
             notification->backhaul_params().backhaul_bssid =
-                network_utils::mac_from_string(backhaul_params.backhaul_bssid);
+                tlvf::mac_from_string(backhaul_params.backhaul_bssid);
             notification->backhaul_params().backhaul_is_wireless =
                 backhaul_params.backhaul_is_wireless;
 
             if (!config.bridge_iface.empty()) {
                 notification->backhaul_params().bridge_mac =
-                    network_utils::mac_from_string(backhaul_params.bridge_mac);
+                    tlvf::mac_from_string(backhaul_params.bridge_mac);
                 notification->backhaul_params().bridge_ipv4 =
                     network_utils::ipv4_from_string(backhaul_params.bridge_ipv4);
                 notification->backhaul_params().backhaul_ipv4 =
@@ -3901,7 +3898,7 @@ bool slave_thread::autoconfig_wsc_calculate_keys(WSC::m2 &m2, uint8_t authkey[32
         LOG(ERROR) << "diffie hellman member not initialized";
         return false;
     }
-    auto mac = network_utils::mac_from_string(backhaul_params.bridge_mac);
+    auto mac = tlvf::mac_from_string(backhaul_params.bridge_mac);
     mapf::encryption::wps_calculate_keys(*dh, m2.public_key(),
                                          WSC::eWscLengths::WSC_PUBLIC_KEY_LENGTH, dh->nonce(),
                                          mac.oct, m2.registrar_nonce(), authkey, keywrapkey);
@@ -4963,7 +4960,7 @@ bool slave_thread::autoconfig_wsc_add_m1()
 
     WSC::m1::config cfg;
     cfg.msg_type = WSC::eWscMessageType::WSC_MSG_TYPE_M1;
-    cfg.mac      = network_utils::mac_from_string(backhaul_params.bridge_mac);
+    cfg.mac      = tlvf::mac_from_string(backhaul_params.bridge_mac);
     dh           = std::make_unique<mapf::encryption::diffie_hellman>();
     std::copy(dh->nonce(), dh->nonce() + dh->nonce_length(), cfg.enrollee_nonce);
     copy_pubkey(*dh, cfg.pub_key);

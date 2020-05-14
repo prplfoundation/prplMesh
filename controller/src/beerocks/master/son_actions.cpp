@@ -72,7 +72,7 @@ void son_actions::handle_completed_connection(db &database, ieee1905_1::CmduMess
                 return;
             }
 
-            stop_request->mac() = network_utils::mac_from_string(client_mac);
+            stop_request->mac() = tlvf::mac_from_string(client_mac);
             son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap);
         }
 
@@ -113,8 +113,8 @@ bool son_actions::add_node_to_default_location(db &database, std::string client_
     }
 
     //LOG(DEBUG) << "adding node " << client_mac << " to db, after getting ARP_MONITOR_NOTIFICATION from source " << int(notification->params.source);
-    if (!database.add_node(network_utils::mac_from_string(client_mac),
-                           network_utils::mac_from_string(gw_lan_switch))) {
+    if (!database.add_node(tlvf::mac_from_string(client_mac),
+                           tlvf::mac_from_string(gw_lan_switch))) {
         LOG(ERROR) << "add_node_to_default_location - add_node failed";
         return false;
     }
@@ -163,12 +163,12 @@ void son_actions::unblock_sta(db &database, ieee1905_1::CmduMessageTx &cmdu_tx, 
                 break;
             }
             association_control_request_tlv->bssid_to_block_client() =
-                network_utils::mac_from_string(hostap_vap.second.mac);
+                tlvf::mac_from_string(hostap_vap.second.mac);
             association_control_request_tlv->association_control() =
                 wfa_map::tlvClientAssociationControlRequest::UNBLOCK;
             association_control_request_tlv->alloc_sta_list();
             auto sta_list         = association_control_request_tlv->sta_list(0);
-            std::get<1>(sta_list) = network_utils::mac_from_string(sta_mac);
+            std::get<1>(sta_list) = tlvf::mac_from_string(sta_mac);
 
             son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap);
             LOG(DEBUG) << "sending allow request for " << sta_mac << " to " << hostap << "bssid"
@@ -220,7 +220,7 @@ void son_actions::disconnect_client(db &database, ieee1905_1::CmduMessageTx &cmd
         LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_DISCONNECT_REQUEST message!";
         return;
     }
-    request->mac()    = network_utils::mac_from_string(client_mac);
+    request->mac()    = tlvf::mac_from_string(client_mac);
     request->vap_id() = database.get_hostap_vap_id(bssid);
     request->type()   = type;
     request->reason() = reason;
@@ -294,7 +294,7 @@ void son_actions::handle_dead_node(std::string mac, std::string hostap_mac, db &
             LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST message!";
             return;
         }
-        stop_request->mac() = network_utils::mac_from_string(mac);
+        stop_request->mac() = tlvf::mac_from_string(mac);
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
         son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
@@ -429,8 +429,8 @@ bool son_actions::validate_beacon_measurement_report(beerocks_message::sBeaconRe
            (report.rcpi < 0) &&
            //      (report.start_time                            >  0          ) &&
            //      (report.duration                              >  0          ) &&
-           (report.channel > 0) && (network_utils::mac_to_string(report.sta_mac) == sta_mac) &&
-           (network_utils::mac_to_string(report.bssid) == bssid);
+           (report.channel > 0) && (tlvf::mac_to_string(report.sta_mac) == sta_mac) &&
+           (tlvf::mac_to_string(report.bssid) == bssid);
 }
 
 /**
@@ -467,7 +467,7 @@ bool son_actions::send_cmdu_to_agent(const std::string &dest_mac,
             return false;
         }
 
-        beerocks_header->actionhdr()->radio_mac() = network_utils::mac_from_string(radio_mac);
+        beerocks_header->actionhdr()->radio_mac() = tlvf::mac_from_string(radio_mac);
         beerocks_header->actionhdr()->direction() = beerocks::BEEROCKS_DIRECTION_AGENT;
     }
 
@@ -485,7 +485,7 @@ bool son_actions::send_ap_config_renew_msg(ieee1905_1::CmduMessageTx &cmdu_tx, d
 {
     bool result = true;
 
-    auto al_mac_addr    = network_utils::mac_to_string(al_mac);
+    auto al_mac_addr    = tlvf::mac_to_string(al_mac);
     auto controller_mac = database.get_local_bridge_mac();
 
     auto ires = database.get_all_connected_ires();
@@ -505,7 +505,7 @@ bool son_actions::send_ap_config_renew_msg(ieee1905_1::CmduMessageTx &cmdu_tx, d
             result = false;
         }
 
-        tlvAlMac->mac() = network_utils::mac_from_string(controller_mac);
+        tlvAlMac->mac() = tlvf::mac_from_string(controller_mac);
 
         auto tlvSupportedRole = cmdu_tx.addClass<ieee1905_1::tlvSupportedRole>();
         if (!tlvSupportedRole) {

@@ -149,7 +149,7 @@ void monitor_stats::send_hostap_measurements(const sMeasurementsRequest &request
 
         auto &sta_stats_msg = std::get<1>(response->sta_stats(sta_count));
 
-        sta_stats_msg.mac               = network_utils::mac_from_string(sta_mac);
+        sta_stats_msg.mac               = tlvf::mac_from_string(sta_mac);
         sta_stats_msg.rx_packets        = sta_stats.hal_stats.rx_packets;
         sta_stats_msg.tx_packets        = sta_stats.hal_stats.tx_packets;
         sta_stats_msg.tx_bytes          = sta_stats.hal_stats.tx_bytes;
@@ -175,8 +175,7 @@ void monitor_stats::send_associated_sta_link_metrics(const sMeasurementsRequest 
                             [&](std::pair<std::string, monitor_sta_node *> sta) {
                                 auto sta_mac  = sta.first;
                                 auto sta_node = sta.second;
-                                return sta_node &&
-                                       (network_utils::mac_from_string(sta_mac) == request.mac);
+                                return sta_node && (tlvf::mac_from_string(sta_mac) == request.mac);
                             });
 
     if (sta == mon_db->sta_end()) {

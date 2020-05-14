@@ -589,7 +589,7 @@ bool arp_monitor::probe(const uint8_t mac[BPL_ARP_MON_MAC_LEN],
 
     // TODO: optimize system to send unicast arp when dst_mac is in arp table
     // network_utils::arp_send(m_strIface, network_utils::ipv4_to_string(sParams.ipv4),
-    //     str_iface_ip, sParams.mac, network_utils::mac_from_string(str_iface_mac),
+    //     str_iface_ip, sParams.mac, tlvf::mac_from_string(str_iface_mac),
     //     1, m_fdArpSocket);
 
     return (true);

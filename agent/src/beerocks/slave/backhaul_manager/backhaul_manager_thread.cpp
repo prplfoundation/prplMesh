@@ -187,7 +187,7 @@ static bool get_iface_mac(const std::string &iface_name, sMacAddr &iface_mac)
 {
     std::string mac;
     if (network_utils::linux_iface_get_mac(iface_name, mac)) {
-        iface_mac = network_utils::mac_from_string(mac);
+        iface_mac = tlvf::mac_from_string(mac);
         return true;
     }
 
@@ -564,8 +564,7 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
         bool backhaul_manager_exist = false;
 
         notification->params().is_prplmesh_controller = is_prplmesh_controller;
-        notification->params().controller_bridge_mac =
-            network_utils::mac_from_string(controller_bridge_mac);
+        notification->params().controller_bridge_mac = tlvf::mac_from_string(controller_bridge_mac);
 
         if (!local_gw) {
 
@@ -581,15 +580,15 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
             }
 
             notification->params().gw_ipv4 = network_utils::ipv4_from_string(bridge_info.ip_gw);
-            notification->params().gw_bridge_mac = network_utils::mac_from_string(bssid_bridge_mac);
-            notification->params().bridge_mac    = network_utils::mac_from_string(bridge_info.mac);
+            notification->params().gw_bridge_mac = tlvf::mac_from_string(bssid_bridge_mac);
+            notification->params().bridge_mac    = tlvf::mac_from_string(bridge_info.mac);
             notification->params().bridge_ipv4   = network_utils::ipv4_from_string(bridge_info.ip);
-            notification->params().backhaul_mac  = network_utils::mac_from_string(iface_info.mac);
+            notification->params().backhaul_mac  = tlvf::mac_from_string(iface_info.mac);
             notification->params().backhaul_ipv4 = network_utils::ipv4_from_string(iface_info.ip);
 
             if (m_sConfig.eType == SBackhaulConfig::EType::Wired) {
                 notification->params().backhaul_bssid =
-                    network_utils::mac_from_string(network_utils::ZERO_MAC_STRING);
+                    tlvf::mac_from_string(network_utils::ZERO_MAC_STRING);
                 notification->params().backhaul_iface_type  = IFACE_TYPE_ETHERNET;
                 notification->params().backhaul_is_wireless = 0;
                 for (auto soc : slaves_sockets) {
@@ -620,7 +619,7 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
                         backhaul_manager_exist         = true;
 
                         notification->params().backhaul_bssid =
-                            network_utils::mac_from_string(soc->sta_wlan_hal->get_bssid());
+                            tlvf::mac_from_string(soc->sta_wlan_hal->get_bssid());
                         // notification->params().backhaul_freq          = son::wireless_utils::channel_to_freq(soc->sta_wlan_hal->get_channel()); // HACK temp disabled because of a bug on endian converter
                         notification->params().backhaul_channel = soc->sta_wlan_hal->get_channel();
                         // TODO - Specify true WiFi model from config (safe to derive from hostap_iface_type?)
@@ -854,7 +853,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
                 auto selected_ruid_it = std::find_if(
                     slaves_sockets.begin(), slaves_sockets.end(),
                     [&selected_backhaul](std::shared_ptr<sRadioInfo> soc) {
-                        return network_utils::mac_from_string(selected_backhaul) == soc->radio_mac;
+                        return tlvf::mac_from_string(selected_backhaul) == soc->radio_mac;
                     });
 
                 if (!selected_backhaul.empty() && selected_ruid_it == slaves_sockets.end()) {
@@ -1105,13 +1104,13 @@ bool backhaul_manager::send_1905_topology_discovery_message()
         LOG(ERROR) << "Failed to create tlvAlMacAddressType tlv";
         return false;
     }
-    tlvAlMac->mac() = network_utils::mac_from_string(bridge_info.mac);
+    tlvAlMac->mac() = tlvf::mac_from_string(bridge_info.mac);
     auto tlvMac     = cmdu_tx.addClass<ieee1905_1::tlvMacAddress>();
     if (!tlvMac) {
         LOG(ERROR) << "Failed to create tlvMacAddress tlv";
         return false;
     }
-    tlvMac->mac() = network_utils::mac_from_string(bridge_info.mac);
+    tlvMac->mac() = tlvf::mac_from_string(bridge_info.mac);
 
     LOG(DEBUG) << "send_1905_topology_discovery_message, bridge_mac=" << bridge_info.mac;
     return send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
@@ -1142,7 +1141,7 @@ bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<sRadioInfo
         LOG(ERROR) << "addClass ieee1905_1::tlvAlMacAddressType failed";
         return false;
     }
-    network_utils::mac_from_string(tlvAlMacAddressType->mac().oct, bridge_info.mac);
+    tlvf::mac_from_string(tlvAlMacAddressType->mac().oct, bridge_info.mac);
 
     auto tlvSearchedRole = cmdu_tx.addClass<ieee1905_1::tlvSearchedRole>();
     if (!tlvSearchedRole) {
@@ -1580,8 +1579,8 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
     }
 
     uint16_t length     = uds_header->length;
-    std::string src_mac = network_utils::mac_to_string(uds_header->src_bridge_mac);
-    std::string dst_mac = network_utils::mac_to_string(uds_header->dst_bridge_mac);
+    std::string src_mac = tlvf::mac_to_string(uds_header->src_bridge_mac);
+    std::string dst_mac = tlvf::mac_to_string(uds_header->dst_bridge_mac);
 
     // LOG(DEBUG) << "handle_cmdu() - received msg from " << std::string(from_bus(sd) ? "bus" : "uds") << ", src=" << src_mac
     //            << ", dst=" << dst_mac << ", " << int(cmdu_rx.getMessageType()); // floods the log
@@ -1797,8 +1796,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
                                << m_sConfig.bridge_iface;
                 } else {
 
-                    m_sConfig.preferred_bssid =
-                        network_utils::mac_to_string(request->preferred_bssid());
+                    m_sConfig.preferred_bssid = tlvf::mac_to_string(request->preferred_bssid());
                     m_sConfig.ssid.assign(request->ssid(message::WIFI_SSID_MAX_LENGTH));
                     m_sConfig.pass.assign(request->pass(message::WIFI_PASS_MAX_LENGTH));
                     m_sConfig.security_type = static_cast<bwl::WiFiSec>(request->security_type());
@@ -1836,7 +1834,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             return false;
         }
         roam_selected_bssid_channel = request->params().channel;
-        roam_selected_bssid         = network_utils::mac_to_string(request->params().bssid);
+        roam_selected_bssid         = tlvf::mac_to_string(request->params().bssid);
         roam_flag                   = true;
         LOG(DEBUG) << "ACTION_BACKHAUL_ROAM_REQUEST to bssid=" << roam_selected_bssid
                    << " on channel=" << int(roam_selected_bssid_channel);
@@ -1881,7 +1879,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             LOG(ERROR) << "addClass cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST failed";
             return false;
         }
-        std::string sta_mac = network_utils::mac_to_string(request->params().mac);
+        std::string sta_mac = tlvf::mac_to_string(request->params().mac);
         bool ap_busy        = false;
         bool bwl_error      = false;
         if (unassociated_rssi_measurement_header_id == -1) {
@@ -1893,7 +1891,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
                               "ACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE message!";
                 break;
             }
-            response->mac() = network_utils::mac_from_string(sta_mac);
+            response->mac() = tlvf::mac_from_string(sta_mac);
             message_com::send_cmdu(soc->slave, cmdu_tx);
             LOG(DEBUG) << "send ACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE, sta_mac = "
                        << sta_mac;
@@ -1958,7 +1956,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
 
         soc->vaps_list = msg->params();
         if (m_agent_ucc_listener) {
-            m_agent_ucc_listener->update_vaps_list(network_utils::mac_to_string(soc->radio_mac),
+            m_agent_ucc_listener->update_vaps_list(tlvf::mac_to_string(soc->radio_mac),
                                                    msg->params());
         }
         break;
@@ -2461,7 +2459,7 @@ bool backhaul_manager::handle_ap_metrics_query(ieee1905_1::CmduMessageRx &cmdu_r
             int i = 0;
             if (mac == socket->vaps_list.vaps[i].mac) {
                 LOG(DEBUG) << "Forwarding AP_METRICS_QUERY_MESSAGE message to son_slave, bssid: "
-                           << std::hex << network_utils::mac_to_string(mac);
+                           << std::hex << tlvf::mac_to_string(mac);
 
                 auto forward =
                     cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE);
@@ -2618,7 +2616,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
     /**
      * 1905.1 AL MAC address of the device.
      */
-    tlvDeviceInformation->mac() = network_utils::mac_from_string(bridge_info.mac);
+    tlvDeviceInformation->mac() = tlvf::mac_from_string(bridge_info.mac);
 
     /**
      * Set the number of local interfaces and fill info of each of the local interfaces, according
@@ -2644,7 +2642,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         // default to zero mac if get_mac fails.
         std::string wire_iface_mac = network_utils::ZERO_MAC_STRING;
         network_utils::linux_iface_get_mac(local_interface_name, wire_iface_mac);
-        localInterfaceInfo->mac()               = network_utils::mac_from_string(wire_iface_mac);
+        localInterfaceInfo->mac()               = tlvf::mac_from_string(wire_iface_mac);
         localInterfaceInfo->media_type()        = media_type;
         localInterfaceInfo->media_info_length() = 0;
 
@@ -2671,7 +2669,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
 
             localInterfaceInfo->mac() =
                 front_iface ? soc->radio_mac
-                            : network_utils::mac_from_string(soc->sta_wlan_hal->get_radio_mac());
+                            : tlvf::mac_from_string(soc->sta_wlan_hal->get_radio_mac());
 
             LOG(DEBUG) << "Added radio interface to tlvDeviceInformation: "
                        << localInterfaceInfo->mac();
@@ -2690,7 +2688,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
                 media_info.network_membership = network_utils::ZERO_MAC;
             } else {
                 media_info.network_membership =
-                    network_utils::mac_from_string(soc->sta_wlan_hal->get_bssid());
+                    tlvf::mac_from_string(soc->sta_wlan_hal->get_bssid());
             }
 
             media_info.role =
@@ -2752,7 +2750,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
                    << (int)mid;
         return false;
     }
-    tlv1905NeighborDevice->mac_local_iface() = network_utils::mac_from_string(bridge_info.mac);
+    tlv1905NeighborDevice->mac_local_iface() = tlvf::mac_from_string(bridge_info.mac);
 
     if (!tlv1905NeighborDevice->alloc_mac_al_1905_device(m_1905_neighbor_devices.size())) {
         LOG(ERROR) << "alloc_mac_al_1905_device() has failed";
@@ -2973,7 +2971,7 @@ bool backhaul_manager::handle_1905_link_metric_query(ieee1905_1::CmduMessageRx &
     /**
      * 1905.1 AL MAC address of the device that transmits the response message.
      */
-    sMacAddr reporter_al_mac = network_utils::mac_from_string(bridge_info.mac);
+    sMacAddr reporter_al_mac = tlvf::mac_from_string(bridge_info.mac);
 
     /**
      * 1905.1 AL MAC address of a neighbor of the receiving device.
@@ -3051,7 +3049,7 @@ bool backhaul_manager::handle_1905_link_metric_query(ieee1905_1::CmduMessageRx &
         }
 
         LOG(INFO) << "Invalid neighbor 1905.1 AL ID specified: "
-                  << network_utils::mac_to_string(neighbor_al_mac);
+                  << tlvf::mac_to_string(neighbor_al_mac);
 
         tlvLinkMetricResultCode->value() = ieee1905_1::tlvLinkMetricResultCode::INVALID_NEIGHBOR;
     } else {
@@ -3127,7 +3125,7 @@ bool backhaul_manager::handle_1905_topology_discovery(const std::string &src_mac
     }
 
     // Filter out the messages we have sent.
-    if (tlvAlMac->mac() == network_utils::mac_from_string(bridge_info.mac)) {
+    if (tlvAlMac->mac() == tlvf::mac_from_string(bridge_info.mac)) {
         return true;
     }
 
@@ -3422,7 +3420,7 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
                 if (msg->disconnect_reason == uint32_t(DEAUTH_REASON_PASSPHRASE_MISMACH)) {
                     //enter bssid to black_list trigger timer
                     auto local_time_stamp = std::chrono::steady_clock::now();
-                    auto local_bssid      = network_utils::mac_to_string(msg->bssid);
+                    auto local_bssid      = tlvf::mac_to_string(msg->bssid);
                     LOG(DEBUG) << "insert bssid = " << local_bssid << " to backhaul blacklist";
                     ap_blacklist_entry entry;
                     entry.timestamp           = local_time_stamp;
@@ -3571,7 +3569,7 @@ bool backhaul_manager::select_bssid()
 
         for (auto &scan_result : scan_results) {
 
-            auto bssid = network_utils::mac_to_string(scan_result.bssid);
+            auto bssid = tlvf::mac_to_string(scan_result.bssid);
             LOG(DEBUG) << "select_bssid: bssid = " << bssid
                        << ", channel = " << int(scan_result.channel) << " iface = " << iface
                        << ", rssi=" << int(scan_result.rssi);
@@ -3774,7 +3772,7 @@ void backhaul_manager::get_scan_measurement()
 
         for (auto &scan_result : scan_results) {
 
-            auto bssid = network_utils::mac_to_string(scan_result.bssid);
+            auto bssid = tlvf::mac_to_string(scan_result.bssid);
             LOG(DEBUG) << "get_scan_measurement: bssid = " << bssid
                        << ", channel = " << int(scan_result.channel) << " iface = " << iface;
 
@@ -4141,7 +4139,7 @@ const std::string backhaul_manager::freq_to_radio_mac(eFreqType freq) const
     }
 
     auto slave = *it;
-    return network_utils::mac_to_string(slave->radio_mac);
+    return tlvf::mac_to_string(slave->radio_mac);
 }
 
 bool backhaul_manager::start_wps_pbc(const sMacAddr &radio_mac)

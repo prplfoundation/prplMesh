@@ -115,8 +115,8 @@ bool mon_wlan_hal_dummy::sta_beacon_11k_request(const SBeaconRequest11k &req, in
 {
     LOG(TRACE) << __func__;
 
-    auto sta_mac = beerocks::net::network_utils::mac_to_string(req.sta_mac.oct);
-    auto bssid   = beerocks::net::network_utils::mac_to_string(req.bssid.oct);
+    auto sta_mac = tlvf::mac_to_string(req.sta_mac.oct);
+    auto bssid   = tlvf::mac_to_string(req.bssid.oct);
 
     LOG(DEBUG) << "Beacon 11k request to sta " << sta_mac << " on bssid " << bssid << " channel "
                << std::to_string(req.channel);
@@ -289,7 +289,7 @@ bool mon_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
             return false;
         }
 
-        beerocks::net::network_utils::mac_from_string(resp->sta_mac.oct, tmp_str);
+        tlvf::mac_from_string(resp->sta_mac.oct, tmp_str);
 
         // Channel
         if (!dummy_obj_read_int("channel", parsed_obj, tmp_int)) {
@@ -345,7 +345,7 @@ bool mon_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
             LOG(ERROR) << "Failed reading mac parameter!";
             return false;
         }
-        beerocks::net::network_utils::mac_from_string(resp->bssid.oct, tmp_str);
+        tlvf::mac_from_string(resp->bssid.oct, tmp_str);
 
         // Add the message to the queue
         event_queue_push(event, resp_buff);

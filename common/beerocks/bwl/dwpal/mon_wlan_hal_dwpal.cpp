@@ -737,7 +737,7 @@ bool mon_wlan_hal_dwpal::sta_beacon_11k_request(const SBeaconRequest11k &req, in
     }
 
     // build command
-    std::string cmd = "REQ_BEACON " + beerocks::net::network_utils::mac_to_string(req.sta_mac.oct) +
+    std::string cmd = "REQ_BEACON " + tlvf::mac_to_string(req.sta_mac.oct) +
                       " " +                                 // Destination MAC Address
                       std::to_string(req.repeats) + " " +   // Number of repitions
                       std::to_string(req_mode) + " " +      // Measurements Request Mode
@@ -746,7 +746,7 @@ bool mon_wlan_hal_dwpal::sta_beacon_11k_request(const SBeaconRequest11k &req, in
                       std::to_string(req.rand_ival) + " " + // Random Interval
                       std::to_string(req.duration) + " " +  // Duration
                       measurement_mode + " " +              // Measurement Mode
-                      beerocks::net::network_utils::mac_to_string(req.bssid.oct); // Target BSSID
+                      tlvf::mac_to_string(req.bssid.oct);   // Target BSSID
 
     /////////////////////////////////////////////////
     //////////////// Optional Fields ////////////////
@@ -967,8 +967,8 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
             }
         }
 
-        beerocks::net::network_utils::mac_from_string(resp->sta_mac.oct, MACAddress);
-        beerocks::net::network_utils::mac_from_string(resp->bssid.oct, bssid);
+        tlvf::mac_from_string(resp->sta_mac.oct, MACAddress);
+        tlvf::mac_from_string(resp->bssid.oct, bssid);
 
         // Add the message to the queue
         event_queue_push(event, resp_buff);

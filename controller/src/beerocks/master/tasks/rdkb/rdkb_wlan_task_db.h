@@ -64,9 +64,9 @@ class rdkb_wlan_task_db {
 
         explicit ap_config(const beerocks_message::sSteeringApConfig &config_)
         {
-            bssid                   = beerocks::net::network_utils::mac_to_string(config_.bssid);
-            util_check_interval_sec = config_.utilCheckIntervalSec;
-            util_avg_count          = config_.utilAvgCount;
+            bssid                          = tlvf::mac_to_string(config_.bssid);
+            util_check_interval_sec        = config_.utilCheckIntervalSec;
+            util_avg_count                 = config_.utilAvgCount;
             inactivity_check_interval_sec  = config_.inactCheckIntervalSec;
             inactivity_check_threshold_sec = config_.inactCheckThresholdSec;
         }
@@ -74,7 +74,7 @@ class rdkb_wlan_task_db {
         beerocks_message::sSteeringApConfig get_ap_config() const
         {
             beerocks_message::sSteeringApConfig config;
-            config.bssid                  = beerocks::net::network_utils::mac_from_string(bssid);
+            config.bssid                  = tlvf::mac_from_string(bssid);
             config.utilCheckIntervalSec   = util_check_interval_sec;
             config.utilAvgCount           = util_avg_count;
             config.inactCheckIntervalSec  = inactivity_check_interval_sec;
@@ -84,7 +84,7 @@ class rdkb_wlan_task_db {
 
         ap_config operator=(const beerocks_message::sSteeringApConfig &config_)
         {
-            this->bssid = beerocks::net::network_utils::mac_to_string(config_.bssid);
+            this->bssid                          = tlvf::mac_to_string(config_.bssid);
             this->util_check_interval_sec        = config_.utilCheckIntervalSec;
             this->util_avg_count                 = config_.utilAvgCount;
             this->inactivity_check_interval_sec  = config_.inactCheckIntervalSec;

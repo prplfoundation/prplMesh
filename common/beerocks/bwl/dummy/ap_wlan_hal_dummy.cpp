@@ -164,11 +164,11 @@ bool ap_wlan_hal_dummy::sta_bss_steer(const std::string &mac, const std::string 
 
     memset(msg_buff.get(), 0, sizeof(sACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE));
 
-    msg->params.mac         = beerocks::net::network_utils::mac_from_string(mac);
+    msg->params.mac         = tlvf::mac_from_string(mac);
     msg->params.status_code = 0;
     // source_bssid should be the vap bssid and not radio_mac, but
     // dummy mode doesn't use vaps yet
-    msg->params.source_bssid = beerocks::net::network_utils::mac_from_string(get_radio_mac());
+    msg->params.source_bssid = tlvf::mac_from_string(get_radio_mac());
 
     // Add the message to the queue
     event_queue_push(Event::BSS_TM_Response, msg_buff);
@@ -398,7 +398,7 @@ bool ap_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
             LOG(ERROR) << "Failed reading mac parameter!";
             return false;
         }
-        msg->params.mac = beerocks::net::network_utils::mac_from_string(tmp_str);
+        msg->params.mac = tlvf::mac_from_string(tmp_str);
         const char assoc_req[] =
             "00003A01029A96FB591100504322565F029A96FB591110E431141400000E4D756C74692D41502D3234472D"
             "31010802040B0C121618242102001430140100000FAC040100000FAC040100000FAC02000032043048606C"
@@ -483,7 +483,7 @@ bool ap_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
         }
 
         // Store the MAC address of the disconnected STA
-        msg->params.mac = beerocks::net::network_utils::mac_from_string(tmp_str);
+        msg->params.mac = tlvf::mac_from_string(tmp_str);
 
         // Add the message to the queue
         event_queue_push(Event::STA_Disconnected, msg_buff);
