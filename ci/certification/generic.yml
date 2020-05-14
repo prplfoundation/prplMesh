@@ -11,5 +11,5 @@
       - logs
     when: always
   tags:
-    - certs-tests
+    - certs-tests-blr
   timeout: 45min

@@ -348,7 +348,7 @@ run-certification-tests:
     - job: build-in-docker
     - job: build-for-netgear-rax40
   tags:
-    - certs-tests
+    - certs-tests-blr
   timeout: 36h
   rules:
     - if: "$TESTS_TO_RUN"
