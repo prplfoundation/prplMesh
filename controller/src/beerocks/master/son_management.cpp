@@ -51,7 +51,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string slave = network_utils::mac_to_string(cli_request->mac());
+        std::string slave = tlvf::mac_to_string(cli_request->mac());
         if (database.is_hostap_active(slave)) {
             auto agent_mac = database.get_node_parent_ire(slave);
 
@@ -154,7 +154,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string hostap_mac = network_utils::mac_to_string(request_in->ap_mac());
+        std::string hostap_mac = tlvf::mac_to_string(request_in->ap_mac());
         auto request_out       = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST>(cmdu_tx);
         if (request_out == nullptr) {
@@ -191,7 +191,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        auto hostap_mac = network_utils::mac_to_string(cli_request->ap_mac());
+        auto hostap_mac = tlvf::mac_to_string(cli_request->ap_mac());
         auto agent_mac  = database.get_node_parent_ire(hostap_mac);
 
         auto request = message_com::create_vs_message<
@@ -219,7 +219,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->ap_mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->ap_mac());
         auto agent_mac         = database.get_node_parent_ire(hostap_mac);
 
         auto request = message_com::create_vs_message<
@@ -284,8 +284,8 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
         LOG(DEBUG) << "CLI client allow request for " << client_mac << " to " << hostap_mac;
 
         auto current_ap_mac = database.get_node_parent(client_mac);
@@ -306,12 +306,12 @@ void son_management::handle_cli_message(Socket *sd,
         }
 
         association_control_request_tlv->bssid_to_block_client() =
-            network_utils::mac_from_string(hostap_mac);
+            tlvf::mac_from_string(hostap_mac);
         association_control_request_tlv->association_control() =
             wfa_map::tlvClientAssociationControlRequest::UNBLOCK;
         association_control_request_tlv->alloc_sta_list();
         auto sta_list         = association_control_request_tlv->sta_list(0);
-        std::get<1>(sta_list) = network_utils::mac_from_string(client_mac);
+        std::get<1>(sta_list) = tlvf::mac_from_string(client_mac);
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
         son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
@@ -327,8 +327,8 @@ void son_management::handle_cli_message(Socket *sd,
             break;
         }
 
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
         std::string sta_parent = database.get_node_parent(client_mac);
         auto agent_mac         = database.get_node_parent_ire(hostap_mac);
 
@@ -341,7 +341,7 @@ void son_management::handle_cli_message(Socket *sd,
             break;
         }
 
-        request->params().mac     = network_utils::mac_from_string(client_mac);
+        request->params().mac     = tlvf::mac_from_string(client_mac);
         request->params().ipv4    = network_utils::ipv4_from_string(network_utils::ZERO_IP_STRING);
         request->params().channel = database.get_node_channel(sta_parent);
         request->params().bandwidth = database.get_node_bw(sta_parent);
@@ -365,8 +365,8 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
         LOG(DEBUG) << "CLI client disallow request for " << client_mac << " to " << hostap_mac;
 
         auto agent_mac      = database.get_node_parent_ire(hostap_mac);
@@ -388,14 +388,14 @@ void son_management::handle_cli_message(Socket *sd,
         }
 
         association_control_request_tlv->bssid_to_block_client() =
-            network_utils::mac_from_string(hostap_mac);
+            tlvf::mac_from_string(hostap_mac);
         association_control_request_tlv->association_control() =
             wfa_map::tlvClientAssociationControlRequest::BLOCK;
         //TODO: Get real validity_period_sec
         association_control_request_tlv->validity_period_sec() = 1;
         association_control_request_tlv->alloc_sta_list();
         auto sta_list         = association_control_request_tlv->sta_list(0);
-        std::get<1>(sta_list) = network_utils::mac_from_string(client_mac);
+        std::get<1>(sta_list) = tlvf::mac_from_string(client_mac);
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
         son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
@@ -409,7 +409,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
         std::string hostap_mac = database.get_node_parent(client_mac);
         LOG(DEBUG) << "CLI client disassociate request, client " << client_mac << " hostap "
                    << hostap_mac;
@@ -427,7 +427,7 @@ void son_management::handle_cli_message(Socket *sd,
             break;
         }
 
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
 
         /////////////// FOR DEBUG ONLY ////////////////
         if (client_mac == network_utils::ZERO_MAC_STRING) {
@@ -502,8 +502,8 @@ void son_management::handle_cli_message(Socket *sd,
             break;
         }
 
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
         auto agent_mac         = database.get_node_parent_ire(hostap_mac);
         LOG(DEBUG) << "CLI channel load request for " << client_mac << " to " << hostap_mac;
 
@@ -553,8 +553,8 @@ void son_management::handle_cli_message(Socket *sd,
             break;
         }
 
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
         auto agent_mac         = database.get_node_parent_ire(hostap_mac);
         LOG(DEBUG) << "CLI statistics request for " << client_mac << " to " << hostap_mac;
 
@@ -642,8 +642,8 @@ void son_management::handle_cli_message(Socket *sd,
             break;
         }
 
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
         auto agent_mac         = database.get_node_parent_ire(hostap_mac);
         LOG(DEBUG) << "CLI link measurement request for " << client_mac << " to " << hostap_mac;
 
@@ -671,7 +671,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->mac());
         auto agent_mac         = database.get_node_parent_ire(hostap_mac);
         LOG(DEBUG) << "CLI ap channel switch request for " << hostap_mac;
 
@@ -733,7 +733,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string mac       = network_utils::mac_to_string(cli_request->mac());
+        std::string mac       = tlvf::mac_to_string(cli_request->mac());
         std::string node_info = database.node_to_string(mac);
         std::size_t length    = node_info.size();
         LOG(TRACE) << "CLI dump node info for " << mac
@@ -779,7 +779,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string client_mac = network_utils::mac_to_string(request->client_mac());
+        std::string client_mac = tlvf::mac_to_string(request->client_mac());
         if (database.get_node_state(client_mac) == beerocks::STATE_CONNECTED) {
 
             int prev_task_id = database.get_roaming_task_id(client_mac);
@@ -813,7 +813,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string hostap_mac = network_utils::mac_to_string(request->ap_mac());
+        std::string hostap_mac = tlvf::mac_to_string(request->ap_mac());
         std::string ire_mac    = database.get_node_parent_ire(hostap_mac);
         LOG(TRACE) << "CLI load notification from hostap " << hostap_mac << " ire mac=" << ire_mac;
 
@@ -855,8 +855,8 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string slave_mac  = network_utils::mac_to_string(request->slave_mac());
-        std::string hostap_mac = network_utils::mac_to_string(request->bssid());
+        std::string slave_mac  = tlvf::mac_to_string(request->slave_mac());
+        std::string hostap_mac = tlvf::mac_to_string(request->bssid());
         //TODO: we are passing true for imminent by default
         //extend ACTION_CLI_BACKHAUL_ROAM_REQUEST to have imminent variable
         uint8_t disassoc_imminent = uint8_t(1);
@@ -872,8 +872,8 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string client_mac = network_utils::mac_to_string(request->client_mac());
-        std::string hostap_mac = network_utils::mac_to_string(request->bssid());
+        std::string client_mac = tlvf::mac_to_string(request->client_mac());
+        std::string hostap_mac = tlvf::mac_to_string(request->bssid());
 
         uint8_t disassoc_imminent = request->disassoc_timer_ms() ? uint8_t(1) : uint8_t(0);
         LOG(DEBUG) << "CLI steer sta request for " << client_mac << " to hostap: " << hostap_mac
@@ -1396,7 +1396,7 @@ void son_management::handle_bml_message(Socket *sd,
             database.set_global_restricted_channels(request->params().restricted_channels);
         } else {
             database.set_hostap_conf_restricted_channels(
-                network_utils::mac_to_string(request->params().hostap_mac),
+                tlvf::mac_to_string(request->params().hostap_mac),
                 request->params().restricted_channels);
         }
 
@@ -1440,11 +1440,10 @@ void son_management::handle_bml_message(Socket *sd,
             break;
         }
 
-        auto vec_restricted_channels =
-            request->params().is_global
-                ? database.get_global_restricted_channels()
-                : database.get_hostap_conf_restricted_channels(
-                      network_utils::mac_to_string(request->params().hostap_mac));
+        auto vec_restricted_channels = request->params().is_global
+                                           ? database.get_global_restricted_channels()
+                                           : database.get_hostap_conf_restricted_channels(
+                                                 tlvf::mac_to_string(request->params().hostap_mac));
         std::copy(vec_restricted_channels.begin(), vec_restricted_channels.end(),
                   response->params().restricted_channels);
 
@@ -1478,7 +1477,7 @@ void son_management::handle_bml_message(Socket *sd,
             request->params().log_level   = bml_request->params().log_level;
             request->params().enable      = bml_request->params().enable;
 
-            std::string dst_mac = network_utils::mac_to_string(bml_request->params().mac);
+            std::string dst_mac = tlvf::mac_to_string(bml_request->params().mac);
             if (dst_mac == network_utils::WILD_MAC_STRING) {
                 auto slaves = database.get_active_hostaps();
                 for (const auto &slave : slaves) {
@@ -1526,7 +1525,7 @@ void son_management::handle_bml_message(Socket *sd,
         }
 
         LOG(DEBUG) << "Add wifi credentials to the database for AL-MAC: "
-                   << network_utils::mac_to_string(request->al_mac());
+                   << tlvf::mac_to_string(request->al_mac());
         database.add_bss_info_configuration(request->al_mac(), wifi_credentials);
 
         auto response = message_com::create_vs_message<
@@ -1740,7 +1739,7 @@ void son_management::handle_bml_message(Socket *sd,
         new_event.sd                 = sd;
         new_event.remove             = request->remove();
         new_event.steeringGroupIndex = request->steeringGroupIndex();
-        new_event.bssid              = network_utils::mac_to_string(request->bssid());
+        new_event.bssid              = tlvf::mac_to_string(request->bssid());
         new_event.client_mac         = request->client_mac();
         new_event.config             = request->config();
 
@@ -1784,7 +1783,7 @@ void son_management::handle_bml_message(Socket *sd,
         new_event.sd                 = sd;
         new_event.client_mac         = request->client_mac();
         new_event.steeringGroupIndex = request->steeringGroupIndex();
-        new_event.bssid              = network_utils::mac_to_string(request->bssid());
+        new_event.bssid              = tlvf::mac_to_string(request->bssid());
         new_event.type               = request->type();
         new_event.reason             = request->reason();
 
@@ -1804,11 +1803,11 @@ void son_management::handle_bml_message(Socket *sd,
 
         rdkb_wlan_task::steering_rssi_measurement_request_event new_event;
         new_event.sd           = sd;
-        std::string client_mac = network_utils::mac_to_string(request->client_mac());
+        std::string client_mac = tlvf::mac_to_string(request->client_mac());
         std::string sta_parent = database.get_node_parent(client_mac);
 
-        new_event.bssid            = network_utils::mac_to_string(request->bssid());
-        new_event.params.mac       = network_utils::mac_from_string(client_mac);
+        new_event.bssid            = tlvf::mac_to_string(request->bssid());
+        new_event.params.mac       = tlvf::mac_from_string(client_mac);
         new_event.params.ipv4      = network_utils::ipv4_from_string(network_utils::ZERO_IP_STRING);
         new_event.params.channel   = database.get_node_channel(sta_parent);
         new_event.params.bandwidth = database.get_node_bw(sta_parent);
@@ -1828,7 +1827,7 @@ void son_management::handle_bml_message(Socket *sd,
         auto bml_request =
             beerocks_header->addClass<beerocks_message::cACTION_BML_TRIGGER_TOPOLOGY_QUERY>();
 
-        auto al_mac = network_utils::mac_to_string(bml_request->al_mac());
+        auto al_mac = tlvf::mac_to_string(bml_request->al_mac());
 
         auto cmdu_header = cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE);
 
@@ -1855,8 +1854,8 @@ void son_management::handle_bml_message(Socket *sd,
             return;
         }
 
-        std::string al_mac   = network_utils::mac_to_string(bml_request->al_mac());
-        std::string ruid_mac = network_utils::mac_to_string(bml_request->ruid());
+        std::string al_mac   = tlvf::mac_to_string(bml_request->al_mac());
+        std::string ruid_mac = tlvf::mac_to_string(bml_request->ruid());
         std::string key      = database.get_node_key(al_mac, ruid_mac);
         auto agent_mac       = database.get_node_parent_ire(key);
 

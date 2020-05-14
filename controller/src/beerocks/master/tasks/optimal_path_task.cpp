@@ -212,11 +212,11 @@ void optimal_path_task::work()
 
         potential_ap_iter = potential_11k_aps.begin();
         //initialize default 11k request params
-        measurement_request.sta_mac          = network_utils::mac_from_string(sta_mac);
+        measurement_request.sta_mac          = tlvf::mac_from_string(sta_mac);
         measurement_request.measurement_mode = beerocks::MEASURE_MODE_ACTIVE;
         measurement_request.rand_ival = beerocks::BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL;
         measurement_request.duration  = beerocks::BEACON_MEASURE_DEFAULT_ACTIVE_DURATION;
-        measurement_request.sta_mac   = network_utils::mac_from_string(sta_mac);
+        measurement_request.sta_mac   = tlvf::mac_from_string(sta_mac);
         current_agent_mac             = database.get_node_parent_ire(current_hostap);
 
         iterator_element_counter = 1; // initialize counter value
@@ -271,7 +271,7 @@ void optimal_path_task::work()
                     }
                     // ap_mac is a radio mac, but we need to request measurment on some vap since radio don't beacon
                     const std::string vap_mac   = *database.get_hostap_vaps_bssids(ap_mac).begin();
-                    measurement_request.bssid   = network_utils::mac_from_string(vap_mac);
+                    measurement_request.bssid   = tlvf::mac_from_string(vap_mac);
                     measurement_request.channel = database.get_node_channel(ap_mac);
                     measurement_request.expected_reports_count = 1;
 
@@ -754,7 +754,7 @@ void optimal_path_task::work()
             return;
         }
 
-        request->params().mac  = network_utils::mac_from_string(sta_mac);
+        request->params().mac  = tlvf::mac_from_string(sta_mac);
         request->params().ipv4 = network_utils::ipv4_from_string(database.get_node_ipv4(sta_mac));
         request->params().channel   = database.get_node_channel(current_hostap);
         request->params().bandwidth = database.get_node_bw(current_hostap);
@@ -1250,7 +1250,7 @@ void optimal_path_task::send_rssi_measurement_request(const std::string &agent_m
         return;
     }
     database.get_node_parent_backhaul(hostap);
-    request->params().mac                    = network_utils::mac_from_string(client_mac);
+    request->params().mac                    = tlvf::mac_from_string(client_mac);
     request->params().ipv4                   = network_utils::ipv4_from_string("0.0.0.0");
     request->params().cross                  = 1;
     request->params().channel                = channel;
@@ -1298,7 +1298,7 @@ void optimal_path_task::handle_response(std::string mac,
             return;
         }
 
-        std::string client_mac = network_utils::mac_to_string(notification->mac());
+        std::string client_mac = tlvf::mac_to_string(notification->mac());
         std::string hostap_mac = mac;
         int channel            = database.get_node_channel(client_mac);
 
@@ -1331,7 +1331,7 @@ void optimal_path_task::handle_response(std::string mac,
             return;
         }
 
-        auto bssid     = network_utils::mac_to_string(response->params().bssid);
+        auto bssid     = tlvf::mac_to_string(response->params().bssid);
         auto radio_mac = database.get_node_parent_radio(bssid);
         TASK_LOG(INFO) << "response for beacon measurement request was received on bssid " << bssid;
         if (potential_11k_aps.find(radio_mac) == potential_11k_aps.end()) {

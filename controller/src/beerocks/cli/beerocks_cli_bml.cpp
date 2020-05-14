@@ -35,13 +35,13 @@ static void fill_conn_map_node(
     n->bw                          = node->bw;
     n->channel_ext_above_secondary = node->channel_ext_above_secondary;
     n->rx_rssi                     = node->rx_rssi;
-    n->mac                         = network_utils::mac_to_string(node->mac);
+    n->mac                         = tlvf::mac_to_string(node->mac);
     n->ip_v4                       = network_utils::ipv4_to_string(node->ip_v4);
     n->name.assign(node->name[0] ? node->name : "N/A");
 
     if (node->type != BML_NODE_TYPE_CLIENT) { // GW or IRE
 
-        n->gw_ire.backhaul_mac = network_utils::mac_to_string(node->data.gw_ire.backhaul_mac);
+        n->gw_ire.backhaul_mac = tlvf::mac_to_string(node->data.gw_ire.backhaul_mac);
 
         // RADIO
         int radio_length = sizeof(node->data.gw_ire.radio) / sizeof(node->data.gw_ire.radio[0]);
@@ -54,16 +54,15 @@ static void fill_conn_map_node(
                 r->channel_ext_above_secondary =
                     node->data.gw_ire.radio[i].channel_ext_above_secondary;
                 r->radio_identifier =
-                    network_utils::mac_to_string(node->data.gw_ire.radio[i].radio_identifier);
-                r->radio_mac = network_utils::mac_to_string(node->data.gw_ire.radio[i].radio_mac);
+                    tlvf::mac_to_string(node->data.gw_ire.radio[i].radio_identifier);
+                r->radio_mac = tlvf::mac_to_string(node->data.gw_ire.radio[i].radio_mac);
                 r->ifname.assign(node->data.gw_ire.radio[i].iface_name);
 
                 // VAP
                 int vap_length = sizeof(node->data.gw_ire.radio[i].vap) /
                                  sizeof(node->data.gw_ire.radio[i].vap[0]);
                 for (int j = 0; j < vap_length; j++) {
-                    auto vap_mac =
-                        network_utils::mac_to_string(node->data.gw_ire.radio[i].vap[j].bssid);
+                    auto vap_mac = tlvf::mac_to_string(node->data.gw_ire.radio[i].vap[j].bssid);
                     if (vap_mac != network_utils::ZERO_MAC_STRING) {
                         auto v =
                             std::make_shared<cli_bml::conn_map_node_t::gw_ire_t::radio_t::vap_t>();
@@ -80,7 +79,7 @@ static void fill_conn_map_node(
         }
     }
 
-    conn_map_nodes.insert({network_utils::mac_to_string(node->parent_bssid), n});
+    conn_map_nodes.insert({tlvf::mac_to_string(node->parent_bssid), n});
 }
 
 static std::string &ind_inc(std::string &ind)
@@ -167,9 +166,9 @@ static void bml_utils_dump_conn_map(
                << ", mac: " << node->mac << ", ipv4: " << node->ip_v4 << std::endl;
 
             // ETHERNET
-            auto eth_sw_mac_binary = network_utils::mac_from_string(node->mac);
+            auto eth_sw_mac_binary = tlvf::mac_from_string(node->mac);
             ++eth_sw_mac_binary.oct[5]; // generate eth address from bridge address
-            auto eth_mac = network_utils::mac_to_string(eth_sw_mac_binary);
+            auto eth_mac = tlvf::mac_to_string(eth_sw_mac_binary);
             ss << ind_inc(ind_str) << "ETHERNET:"
                << " mac: " << eth_mac << std::endl;
             // add clients which are connected to the Ethernet
@@ -230,8 +229,8 @@ static void steering_set_group_string_to_struct(const std::string &str_cfg_2,
     for (const auto &elem : v_str_cfg_5) {
         std::cout << "v_str_cfg_5 : " << elem << std::endl;
     }
-    std::copy_n(network_utils::mac_from_string(v_str_cfg_2[0]).oct, BML_MAC_ADDR_LEN, cfg2.bssid);
-    std::copy_n(network_utils::mac_from_string(v_str_cfg_5[0]).oct, BML_MAC_ADDR_LEN, cfg5.bssid);
+    std::copy_n(tlvf::mac_from_string(v_str_cfg_2[0]).oct, BML_MAC_ADDR_LEN, cfg2.bssid);
+    std::copy_n(tlvf::mac_from_string(v_str_cfg_5[0]).oct, BML_MAC_ADDR_LEN, cfg5.bssid);
     cfg2.utilCheckIntervalSec   = string_utils::stoi(v_str_cfg_2[1]);
     cfg5.utilCheckIntervalSec   = string_utils::stoi(v_str_cfg_5[1]);
     cfg2.utilAvgCount           = string_utils::stoi(v_str_cfg_2[2]);
@@ -1809,9 +1808,9 @@ int cli_bml::steering_client_set(uint32_t steeringGroupIndex, const std::string 
                                  const std::string &str_client_mac, const std::string &str_config)
 {
     BML_MAC_ADDR client_mac;
-    network_utils::mac_from_string(client_mac, str_client_mac);
+    tlvf::mac_from_string(client_mac, str_client_mac);
     BML_MAC_ADDR bssid;
-    network_utils::mac_from_string(bssid, str_bssid);
+    tlvf::mac_from_string(bssid, str_bssid);
     int ret;
     if (str_config.empty()) {
         //client remove
@@ -1843,9 +1842,9 @@ int cli_bml::steering_client_measure(uint32_t steeringGroupIndex, const std::str
                                      const std::string &str_client_mac)
 {
     BML_MAC_ADDR client_mac;
-    network_utils::mac_from_string(client_mac, str_client_mac);
+    tlvf::mac_from_string(client_mac, str_client_mac);
     BML_MAC_ADDR bssid;
-    network_utils::mac_from_string(bssid, str_bssid);
+    tlvf::mac_from_string(bssid, str_bssid);
     int ret = bml_rdkb_steering_client_measure(ctx, steeringGroupIndex, bssid, client_mac);
     printBmlReturnVals("bml_rdkb_steering_client_measure", ret);
     return 0;
@@ -2066,7 +2065,7 @@ int cli_bml::get_dcs_scan_results(const std::string &radio_mac, uint32_t max_res
                 auto res = results[i];
                 std::cout << "result[" << i << "]:" << std::endl
                           << "  ssid=" << res.ap_SSID << std::endl
-                          << "  bssid=" << network_utils::mac_to_string(res.ap_BSSID) << std::endl
+                          << "  bssid=" << tlvf::mac_to_string(res.ap_BSSID) << std::endl
                           << "  mode=" << int(res.ap_Mode) << std::endl
                           << "  channel=" << int(res.ap_Channel) << std::endl
                           << "  signal_strength_dbm=" << res.ap_SignalStrength << std::endl

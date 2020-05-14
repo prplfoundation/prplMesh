@@ -396,7 +396,7 @@ static std::shared_ptr<char> generate_client_assoc_event(const std::string &even
     }
 
     msg->params.vap_id = vap_id;
-    msg->params.mac    = beerocks::net::network_utils::mac_from_string(client_mac);
+    msg->params.mac    = tlvf::mac_from_string(client_mac);
 
     msg->params.capabilities = {};
     std::string ht_cap_str(ht_cap);
@@ -1638,7 +1638,7 @@ bool ap_wlan_hal_dwpal::generate_connected_clients_events()
             // update client mac
             auto msg = reinterpret_cast<sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION *>(
                 msg_buff.get());
-            client_mac = beerocks::net::network_utils::mac_to_string(msg->params.mac);
+            client_mac = tlvf::mac_to_string(msg->params.mac);
 
             event_queue_push(Event::STA_Connected, msg_buff); // send message to the AP manager
 
@@ -1909,7 +1909,7 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         }
 
         msg->params.vap_id       = beerocks::utils::get_ids_from_iface_string(VAP).vap_id;
-        msg->params.mac          = beerocks::net::network_utils::mac_from_string(MACAddress);
+        msg->params.mac          = tlvf::mac_from_string(MACAddress);
         msg->params.capabilities = {};
 
         //convert the hex string to binary
@@ -1981,7 +1981,7 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         }
 
         msg->params.vap_id = beerocks::utils::get_ids_from_iface_string(VAP).vap_id;
-        msg->params.mac    = beerocks::net::network_utils::mac_from_string(MACAddress);
+        msg->params.mac    = tlvf::mac_from_string(MACAddress);
 
         event_queue_push(Event::STA_Disconnected, msg_buff); // send message to the AP manager
         break;
@@ -2031,7 +2031,7 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
 
         msg->params.rx_rssi    = beerocks::RSSI_INVALID;
         msg->params.rx_snr     = beerocks::SNR_INVALID;
-        msg->params.result.mac = beerocks::net::network_utils::mac_from_string(MACAddress);
+        msg->params.result.mac = tlvf::mac_from_string(MACAddress);
 
         // Split the RSSI values
         auto rssiVec = beerocks::string_utils::str_split(rssi, ' ');
@@ -2186,9 +2186,9 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             LOG(DEBUG) << "numOfValidArgs[5]=" << numOfValidArgs[5]
                        << ", broadcast=" << (int)msg->params.broadcast;
 
-            msg->params.client_mac = beerocks::net::network_utils::mac_from_string(client_mac);
+            msg->params.client_mac = tlvf::mac_from_string(client_mac);
             //TODO need to add VAP name parsing to  this WLAN_FC_STYPE_PROBE_REQ event - WLANRTSYS-9170
-            msg->params.bssid = beerocks::net::network_utils::mac_from_string(vap_bssid);
+            msg->params.bssid = tlvf::mac_from_string(vap_bssid);
 
             // Add the message to the queue
             event_queue_push(Event::STA_Steering_Probe_Req, msg_buff);
@@ -2269,9 +2269,9 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             LOG(DEBUG) << "numOfValidArgs[6]=" << numOfValidArgs[6]
                        << ", reason=" << (int)msg->params.reason;
 
-            msg->params.client_mac = beerocks::net::network_utils::mac_from_string(client_mac);
+            msg->params.client_mac = tlvf::mac_from_string(client_mac);
             //TODO need to add VAP name parsing to  this WLAN_FC_STYPE_AUTH event - WLANRTSYS-9170
-            msg->params.bssid = beerocks::net::network_utils::mac_from_string(vap_bssid);
+            msg->params.bssid = tlvf::mac_from_string(vap_bssid);
 
             // Add the message to the queue
             event_queue_push(Event::STA_Steering_Auth_Fail, msg_buff);
@@ -2326,12 +2326,12 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
             }
         }
 
-        msg->params.mac         = beerocks::net::network_utils::mac_from_string(MACAddress);
+        msg->params.mac         = tlvf::mac_from_string(MACAddress);
         msg->params.status_code = status_code;
         std::string bssid;
         beerocks::net::network_utils::linux_iface_get_mac(vap_name, bssid);
         LOG(DEBUG) << "BTM response source BSSID: " << bssid;
-        msg->params.source_bssid = beerocks::net::network_utils::mac_from_string(bssid);
+        msg->params.source_bssid = tlvf::mac_from_string(bssid);
 
         // Add the message to the queue
         event_queue_push(Event::BSS_TM_Response, msg_buff);

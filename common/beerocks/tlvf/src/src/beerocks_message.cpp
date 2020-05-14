@@ -162,8 +162,8 @@ bool message_com::send_cmdu(Socket *sd, ieee1905_1::CmduMessageTx &cmdu_tx,
             return false;
         }
 
-        net::network_utils::mac_from_string(uds_header->src_bridge_mac, src_mac);
-        net::network_utils::mac_from_string(uds_header->dst_bridge_mac, dst_mac);
+        tlvf::mac_from_string(uds_header->src_bridge_mac, src_mac);
+        tlvf::mac_from_string(uds_header->dst_bridge_mac, dst_mac);
     } else {
         memset(uds_header->src_bridge_mac, 0, sizeof(message::sUdsHeader::src_bridge_mac));
         memset(uds_header->dst_bridge_mac, 0, sizeof(message::sUdsHeader::dst_bridge_mac));

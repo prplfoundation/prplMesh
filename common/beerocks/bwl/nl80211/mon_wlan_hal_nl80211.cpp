@@ -178,7 +178,7 @@ bool mon_wlan_hal_nl80211::update_stations_stats(const std::string &vap_iface_na
         NL80211_CMD_GET_STATION, 0,
         // Create the message
         [&](struct nl_msg *msg) -> bool {
-            auto mac = beerocks::net::network_utils::mac_from_string(sta_mac);
+            auto mac = tlvf::mac_from_string(sta_mac);
             nla_put(msg, NL80211_ATTR_MAC, ETH_ALEN, mac.oct);
             return true;
         },
@@ -342,7 +342,7 @@ bool mon_wlan_hal_nl80211::sta_beacon_11k_request(const SBeaconRequest11k &req, 
     // op_class (2), channel (2), randomization_interval (4), measurement duration (4), measurement mode (2), bssid (12)
 
     // build command
-    std::string cmd = "REQ_BEACON " + beerocks::net::network_utils::mac_to_string(req.sta_mac.oct) +
+    std::string cmd = "REQ_BEACON " + tlvf::mac_to_string(req.sta_mac.oct) +
                       " " + // Destination MAC Address
                       "req_mode=" + beerocks::string_utils::int_to_hex_string(req_mode, 2) +
                       " " + // Measurements Request Mode
@@ -423,7 +423,7 @@ bool mon_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
         memset(resp_buff.get(), 0, sizeof(SBeaconRequestStatus11k));
 
         // STA Mac Address
-        beerocks::net::network_utils::mac_from_string(resp->sta_mac.oct, parsed_obj["_mac"]);
+        tlvf::mac_from_string(resp->sta_mac.oct, parsed_obj["_mac"]);
 
         // Dialog token and ACK
         resp->dialog_token = beerocks::string_utils::stoi(parsed_obj["_arg0"]);
@@ -445,7 +445,7 @@ bool mon_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
         memset(resp_buff.get(), 0, sizeof(SBeaconResponse11k));
 
         // STA Mac Address
-        beerocks::net::network_utils::mac_from_string(resp->sta_mac.oct, parsed_obj["_mac"]);
+        tlvf::mac_from_string(resp->sta_mac.oct, parsed_obj["_mac"]);
 
         // Dialog token and rep_mode
         resp->dialog_token = beerocks::string_utils::stoi(parsed_obj["_arg0"]);

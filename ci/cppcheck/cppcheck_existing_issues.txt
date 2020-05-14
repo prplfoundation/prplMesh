@@ -1,4 +1,6 @@
 agent/src/beerocks/monitor/monitor_rssi.cpp: style: Local variable 'sta_vap_id' shadows outer variable [shadowVariable]            auto sta_vap_id = sta_node->get_vap_id();
+agent/src/beerocks/monitor/monitor_rssi.cpp: style: Parameter 'sta_mac' can be declared with const [constParameter]void monitor_rssi::monitor_idle_station(std::string &sta_mac, monitor_sta_node *sta_node)
+agent/src/beerocks/monitor/monitor_rssi.cpp: style: Parameter 'sta_mac' can be declared with const [constParameter]void monitor_rssi::send_rssi_measurement_response(std::string &sta_mac, monitor_sta_node *sta_node)
 agent/src/beerocks/monitor/monitor_thread.cpp: style: Local variable 'time_span' shadows outer variable [shadowVariable]        auto time_span =
 agent/src/beerocks/monitor/monitor_thread.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]        if (poll_last) {
 agent/src/beerocks/monitor/monitor_thread.cpp: style: Variable 'id' is assigned a value that is never used. [unreadVariable]        int id        = 0;
@@ -125,7 +127,7 @@ controller/src/beerocks/master/db/db.cpp: performance: Function parameter 'ssid'
 controller/src/beerocks/master/db/db.cpp: performance: Function parameter 'version' should be passed by const reference. [passedByValue]bool db::set_hostap_driver_version(const std::string &mac, std::string version)
 controller/src/beerocks/master/db/db.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]            get_node_state(hostap) == beerocks::STATE_CONNECTED) {
 controller/src/beerocks/master/db/db.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]        if (it.second.mac == mac) {
-controller/src/beerocks/master/db/db.cpp: style: Consider using std::transform algorithm instead of a raw loop. [useStlAlgorithm]        neighbors_al_macs.push_back(network_utils::mac_from_string(sibling));
+controller/src/beerocks/master/db/db.cpp: style: Consider using std::transform algorithm instead of a raw loop. [useStlAlgorithm]        neighbors_al_macs.push_back(tlvf::mac_from_string(sibling));
 controller/src/beerocks/master/db/db.cpp: style: Non-boolean value returned from function returning bool [returnNonBoolInBooleanFunction]        return -1;
 controller/src/beerocks/master/db/db.cpp: style: Parameter 'n' can be declared with const [constParameter]int db::get_node_bw_int(std::shared_ptr<node> &n)
 controller/src/beerocks/master/db/db.cpp: style: The scope of the variable 'listener_exist' can be reduced. [variableScope]    bool listener_exist;
@@ -213,7 +215,7 @@ controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: Local varia
 controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: The scope of the variable 'listener_exist' can be reduced. [variableScope]    bool listener_exist;
 controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task.cpp: style: Variable '(*it).events_updates' is assigned a value that is never used. [unreadVariable]                (*it).events_updates = update_enable;
 controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task_db.cpp: style: Parameter 'bssid' can be declared with const [constParameter]int32_t rdkb_wlan_task_db::get_group_index(const std::string &client_mac, std::string &bssid)
-controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task_db.h: performance: Variable 'bssid' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]            bssid                   = beerocks::net::network_utils::mac_to_string(config_.bssid);
+controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task_db.h: performance: Variable 'bssid' is assigned in constructor body. Consider performing initialization in initialization list. [useInitializationList]            bssid                          = tlvf::mac_to_string(config_.bssid);
 controller/src/beerocks/master/tasks/task.cpp: performance: Function parameter 'mac' should be passed by const reference. [passedByValue]void task::add_pending_mac(std::string mac, beerocks_message::eActionOp_CONTROL action_op)
 controller/src/beerocks/master/tasks/task.cpp: performance: Function parameter 'node_mac' should be passed by const reference. [passedByValue]task::task(std::string task_name_, std::string node_mac)
 controller/src/beerocks/master/tasks/task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]task::task(std::string task_name_, std::string node_mac)

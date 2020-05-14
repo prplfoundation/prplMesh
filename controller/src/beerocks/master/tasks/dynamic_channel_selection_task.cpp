@@ -42,7 +42,7 @@ beerocks::eChannelScanStatusCode dynamic_channel_selection_task::dcs_request_sca
     }
 
     // get the parent node to send the CMDU to the agent
-    auto radio_mac_str = beerocks::net::network_utils::mac_to_string(m_radio_mac);
+    auto radio_mac_str = tlvf::mac_to_string(m_radio_mac);
     auto ire           = database.get_node_parent_ire(radio_mac_str);
     son_actions::send_cmdu_to_agent(ire, cmdu_tx, database, radio_mac_str);
 
@@ -52,7 +52,7 @@ beerocks::eChannelScanStatusCode dynamic_channel_selection_task::dcs_request_sca
 {
     // When a scan is requested send the scan parameters Channel pool & Dwell time
 
-    auto radio_mac_str = beerocks::net::network_utils::mac_to_string(m_radio_mac);
+    auto radio_mac_str = tlvf::mac_to_string(m_radio_mac);
 
     auto request = beerocks::message_com::create_vs_message<
         beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST>(cmdu_tx);

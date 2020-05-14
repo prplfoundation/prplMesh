@@ -123,7 +123,7 @@ void network_health_check_task::handle_response(std::string mac,
         }
 
         std::string ipv4    = network_utils::ipv4_to_string(response->params().ipv4);
-        std::string arp_mac = network_utils::mac_to_string(response->params().mac);
+        std::string arp_mac = tlvf::mac_to_string(response->params().mac);
 
         TASK_LOG(DEBUG) << "received response from slave " << mac << ":" << std::endl
                         << "   arp_mac=" << arp_mac << std::endl
@@ -162,7 +162,7 @@ bool network_health_check_task::send_arp_query(std::string mac)
         return false;
     }
 
-    request->params().mac  = network_utils::mac_from_string(mac);
+    request->params().mac  = tlvf::mac_from_string(mac);
     auto ipv4              = database.get_node_ipv4(mac);
     request->params().ipv4 = network_utils::ipv4_from_string(ipv4);
 

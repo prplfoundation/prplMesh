@@ -104,7 +104,7 @@ void association_handling_task::work()
             return;
         }
 
-        request->params().mac  = network_utils::mac_from_string(sta_mac);
+        request->params().mac  = tlvf::mac_from_string(sta_mac);
         request->params().ipv4 = network_utils::ipv4_from_string(database.get_node_ipv4(sta_mac));
         request->params().channel = database.get_node_channel(sta_mac);
         request->params().vap_id  = database.get_node_vap_id(sta_mac);
@@ -115,9 +115,8 @@ void association_handling_task::work()
             request->params().is_ire = true;
             auto bridge_container    = database.get_node_children(sta_mac, beerocks::TYPE_IRE);
             if (!bridge_container.empty()) {
-                std::string bridge_4addr_mac = *bridge_container.begin();
-                request->params().bridge_4addr_mac =
-                    network_utils::mac_from_string(bridge_4addr_mac);
+                std::string bridge_4addr_mac       = *bridge_container.begin();
+                request->params().bridge_4addr_mac = tlvf::mac_from_string(bridge_4addr_mac);
                 LOG(DEBUG) << "IRE " << sta_mac << " is on a bridge with mac " << bridge_4addr_mac;
             }
         }
@@ -154,8 +153,8 @@ void association_handling_task::work()
             BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL; // random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
         measurement_request->params().duration = beerocks::
             BEACON_MEASURE_DEFAULT_ACTIVE_DURATION; // measurement duration, expressed in units of TUs [=1024usec]
-        measurement_request->params().sta_mac = network_utils::mac_from_string(sta_mac);
-        measurement_request->params().bssid   = network_utils::mac_from_string(
+        measurement_request->params().sta_mac = tlvf::mac_from_string(sta_mac);
+        measurement_request->params().bssid   = tlvf::mac_from_string(
             parent_mac); // the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
         //measurement_request.params.use_optional_ssid = true;
         measurement_request->params().expected_reports_count = 1;
@@ -217,7 +216,7 @@ void association_handling_task::work()
                 << "Failed building ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST message!";
             return;
         }
-        measurement_request->params().mac       = network_utils::mac_from_string(sta_mac);
+        measurement_request->params().mac       = tlvf::mac_from_string(sta_mac);
         measurement_request->params().ipv4      = network_utils::ipv4_from_string(ipv4);
         measurement_request->params().channel   = database.get_node_channel(hostap_mac);
         measurement_request->params().bandwidth = database.get_node_bw(hostap_mac);

@@ -50,7 +50,7 @@ monitor_thread::monitor_thread(const std::string &slave_uds_, const std::string 
         LOG(ERROR) << "Failed getting MAC address for interface: " << monitor_iface;
         m_radio_mac = network_utils::ZERO_MAC;
     } else {
-        m_radio_mac = network_utils::mac_from_string(radio_mac);
+        m_radio_mac = tlvf::mac_from_string(radio_mac);
     }
 
     using namespace std::placeholders; // for `_1`
@@ -783,11 +783,10 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST failed";
             return false;
         }
-        std::string sta_mac  = network_utils::mac_to_string(request->params().mac);
-        std::string sta_ipv4 = network_utils::ipv4_to_string(request->params().ipv4);
-        std::string set_bridge_4addr_mac =
-            network_utils::mac_to_string(request->params().bridge_4addr_mac);
-        int vap_id = int(request->params().vap_id);
+        std::string sta_mac              = tlvf::mac_to_string(request->params().mac);
+        std::string sta_ipv4             = network_utils::ipv4_to_string(request->params().ipv4);
+        std::string set_bridge_4addr_mac = tlvf::mac_to_string(request->params().bridge_4addr_mac);
+        int vap_id                       = int(request->params().vap_id);
         LOG(INFO) << "ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST=" << sta_mac
                   << " ip=" << sta_ipv4 << " vap_id=" << vap_id;
 
@@ -841,7 +840,7 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION failed";
             return false;
         }
-        std::string sta_mac  = network_utils::mac_to_string(notification->mac());
+        std::string sta_mac  = tlvf::mac_to_string(notification->mac());
         std::string sta_ipv4 = network_utils::ipv4_to_string(notification->ipv4());
 
         auto sta_node = mon_db.sta_find(sta_mac);
@@ -866,7 +865,7 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
             return false;
         }
 
-        const auto bssid = network_utils::mac_to_string(request->params().cfg.bssid);
+        const auto bssid = tlvf::mac_to_string(request->params().cfg.bssid);
         int vap_id       = mon_db.get_vap_id(bssid);
 
         LOG(TRACE) << "ACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST" << std::endl
@@ -932,7 +931,7 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
             return false;
         }
 
-        std::string sta_mac = network_utils::mac_to_string(request->params().client_mac);
+        std::string sta_mac = tlvf::mac_to_string(request->params().client_mac);
         if (request->params().remove) {
             if (mon_rdkb_hal.conf_erase_client(sta_mac) == false) {
                 LOG(ERROR) << "failed removing client:" << sta_mac << " configuration";
@@ -946,7 +945,7 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
             break;
         }
 
-        const auto bssid = network_utils::mac_to_string(request->params().bssid);
+        const auto bssid = tlvf::mac_to_string(request->params().bssid);
         int vap_id       = mon_db.get_vap_id(bssid);
 
         LOG(DEBUG) << "snrInactXing " << request->params().config.snrInactXing << std::endl
@@ -988,7 +987,7 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST failed";
             return false;
         }
-        std::string sta_mac = network_utils::mac_to_string(request->mac());
+        std::string sta_mac = tlvf::mac_to_string(request->mac());
         LOG(INFO) << "ACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST=" << sta_mac;
         mon_db.sta_erase(sta_mac);
 
@@ -1004,7 +1003,7 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST failed";
             return false;
         }
-        std::string sta_mac = network_utils::mac_to_string(request->params().mac);
+        std::string sta_mac = tlvf::mac_to_string(request->params().mac);
         auto sta_node       = mon_db.sta_find(sta_mac);
         if (sta_node == nullptr) {
             LOG(ERROR) << "RX_RSSI_MEASUREMENT REQUEST sta_mac=" << sta_mac
@@ -1028,7 +1027,7 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
                 LOG(ERROR) << "Failed building message!";
                 break;
             }
-            response->mac() = network_utils::mac_from_string(sta_mac);
+            response->mac() = tlvf::mac_from_string(sta_mac);
             message_com::send_cmdu(slave_socket, cmdu_tx);
             LOG(DEBUG) << "send ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE, sta_mac = "
                        << sta_mac << " id=" << beerocks_header->id();
@@ -1096,9 +1095,8 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
 
         mon_wlan_hal->sta_beacon_11k_request(bwl_request, dialog_token);
 
-        sEvent11k event_11k = {network_utils::mac_to_string(request->params().sta_mac),
-                               dialog_token, std::chrono::steady_clock::now(),
-                               beerocks_header->id()};
+        sEvent11k event_11k = {tlvf::mac_to_string(request->params().sta_mac), dialog_token,
+                               std::chrono::steady_clock::now(), beerocks_header->id()};
 
         for (int i = 0; i < request->params().expected_reports_count; i++) {
             pending_11k_events.insert(std::make_pair("RRM_EVENT_BEACON_REP_RXED", event_11k));
@@ -1234,7 +1232,7 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
             LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST failed";
             return false;
         }
-        std::string mac_str = network_utils::mac_to_string(request->mac());
+        std::string mac_str = tlvf::mac_to_string(request->mac());
 
         LOG(DEBUG) << "ACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST:" << std::endl
                    << "mac=" << mac_str;
@@ -1506,7 +1504,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
     case Event::RRM_Beacon_Request_Status: {
 
         auto hal_data = static_cast<bwl::SBeaconRequestStatus11k *>(data);
-        auto sta_mac  = network_utils::mac_to_string((sMacAddr &)hal_data->sta_mac);
+        auto sta_mac  = tlvf::mac_to_string((sMacAddr &)hal_data->sta_mac);
 
         LOG(INFO) << "Received beacon measurement request status for STA: " << sta_mac
                   << ", dialog_token: " << int(hal_data->dialog_token)

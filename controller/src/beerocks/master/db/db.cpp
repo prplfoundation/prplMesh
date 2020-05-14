@@ -54,8 +54,7 @@ bool db::add_virtual_node(sMacAddr mac, sMacAddr real_node_mac)
      * it should be able to find its virtual nodes and move them to the appropriate hierarchy as well
      */
 
-    nodes[real_node->hierarchy].insert(
-        std::make_pair(network_utils::mac_to_string(mac), real_node));
+    nodes[real_node->hierarchy].insert(std::make_pair(tlvf::mac_to_string(mac), real_node));
     return true;
 }
 
@@ -79,13 +78,13 @@ bool db::add_node(const sMacAddr &mac, const sMacAddr &parent_mac, beerocks::eTy
     if (n) { // n is not nullptr
         LOG(DEBUG) << "node with mac " << mac << " already exists, updating";
         n->set_type(type);
-        if (n->parent_mac != network_utils::mac_to_string(parent_mac)) {
+        if (n->parent_mac != tlvf::mac_to_string(parent_mac)) {
             n->previous_parent_mac = n->parent_mac;
-            n->parent_mac          = network_utils::mac_to_string(parent_mac);
+            n->parent_mac          = tlvf::mac_to_string(parent_mac);
         }
         int old_hierarchy = get_node_hierarchy(n);
         if (old_hierarchy >= 0 && old_hierarchy < HIERARCHY_MAX) {
-            nodes[old_hierarchy].erase(network_utils::mac_to_string(mac));
+            nodes[old_hierarchy].erase(tlvf::mac_to_string(mac));
         } else {
             LOG(ERROR) << "old hierarchy " << old_hierarchy << " for node " << mac
                        << " is invalid!!!";
@@ -95,16 +94,15 @@ bool db::add_node(const sMacAddr &mac, const sMacAddr &parent_mac, beerocks::eTy
         adjust_subtree_hierarchy(subtree, offset);
     } else {
         LOG(DEBUG) << "node with mac " << mac << " being created, the type is " << type;
-        n             = std::make_shared<node>(type, network_utils::mac_to_string(mac));
-        n->parent_mac = network_utils::mac_to_string(parent_mac);
+        n             = std::make_shared<node>(type, tlvf::mac_to_string(mac));
+        n->parent_mac = tlvf::mac_to_string(parent_mac);
     }
-    n->radio_identifier = network_utils::mac_to_string(radio_identifier);
+    n->radio_identifier = tlvf::mac_to_string(radio_identifier);
     n->hierarchy        = new_hierarchy;
-    nodes[new_hierarchy].insert(std::make_pair(network_utils::mac_to_string(mac), n));
+    nodes[new_hierarchy].insert(std::make_pair(tlvf::mac_to_string(mac), n));
 
     if (radio_identifier != network_utils::ZERO_MAC) {
-        std::string ruid_key =
-            get_node_key(network_utils::mac_to_string(parent_mac), n->radio_identifier);
+        std::string ruid_key = get_node_key(tlvf::mac_to_string(parent_mac), n->radio_identifier);
         if (ruid_key.empty()) {
             LOG(ERROR) << "can't insert node with empty RUID";
             return false;
@@ -123,27 +121,27 @@ bool db::remove_node(const sMacAddr &mac)
 {
     int i;
     for (i = 0; i < HIERARCHY_MAX; i++) {
-        auto it = nodes[i].find(network_utils::mac_to_string(mac));
+        auto it = nodes[i].find(tlvf::mac_to_string(mac));
         if (it != nodes[i].end()) {
             std::string ruid_key =
                 get_node_key(it->second->parent_mac, it->second->radio_identifier);
             std::string node_mac = it->second->mac;
 
-            if (last_accessed_node_mac == network_utils::mac_to_string(mac)) {
+            if (last_accessed_node_mac == tlvf::mac_to_string(mac)) {
                 last_accessed_node_mac = std::string();
                 last_accessed_node     = nullptr;
             }
 
             // map may include 2 keys to same node - if so remove other key-node pair from map
             // if removed by mac
-            if (network_utils::mac_to_string(mac) == node_mac) {
+            if (tlvf::mac_to_string(mac) == node_mac) {
                 it = nodes[i].erase(it);
                 // if ruid_key exists for this node
                 if (!ruid_key.empty()) {
                     nodes[i].erase(ruid_key);
                 }
                 // if removed by ruid_key
-            } else if (network_utils::mac_to_string(mac) == ruid_key) {
+            } else if (tlvf::mac_to_string(mac) == ruid_key) {
                 nodes[i].erase(node_mac);
             }
 
@@ -233,7 +231,7 @@ int db::get_node_channel(const std::string &mac)
 
 int db::get_hostap_operating_class(const sMacAddr &mac)
 {
-    auto mac_str = network_utils::mac_to_string(mac);
+    auto mac_str = tlvf::mac_to_string(mac);
     auto n       = get_node(mac_str);
     if (!n) {
         LOG(WARNING) << "node " << mac_str << " does not exist!";
@@ -1007,7 +1005,7 @@ std::set<std::string> db::get_node_children(const std::string &mac, int type, in
 
 std::list<sMacAddr> db::get_1905_1_neighbors(const sMacAddr &al_mac)
 {
-    auto al_mac_str = network_utils::mac_to_string(al_mac);
+    auto al_mac_str = tlvf::mac_to_string(al_mac);
     std::list<sMacAddr> neighbors_al_macs;
     auto all_al_macs = get_nodes(beerocks::TYPE_IRE);
 
@@ -1015,20 +1013,20 @@ std::list<sMacAddr> db::get_1905_1_neighbors(const sMacAddr &al_mac)
     // out the childrens from second circle and above.
     for (const auto &al_mac_iter : all_al_macs) {
         if (get_node_parent_ire(al_mac_iter) == al_mac_str) {
-            neighbors_al_macs.push_back(network_utils::mac_from_string(al_mac_iter));
+            neighbors_al_macs.push_back(tlvf::mac_from_string(al_mac_iter));
         }
     }
 
     // Add the parent bridge as well to the neighbors list
-    auto parent_bridge = get_node_parent_ire(network_utils::mac_to_string(al_mac));
+    auto parent_bridge = get_node_parent_ire(tlvf::mac_to_string(al_mac));
     if (!parent_bridge.empty()) {
-        neighbors_al_macs.push_back(network_utils::mac_from_string(parent_bridge));
+        neighbors_al_macs.push_back(tlvf::mac_from_string(parent_bridge));
     }
 
     // Add siblings Nodes
     auto siblings = get_node_siblings(al_mac_str, beerocks::TYPE_IRE);
     for (const auto &sibling : siblings) {
-        neighbors_al_macs.push_back(network_utils::mac_from_string(sibling));
+        neighbors_al_macs.push_back(tlvf::mac_from_string(sibling));
     }
 
     return neighbors_al_macs;
@@ -1520,9 +1518,8 @@ bool db::remove_vap(const std::string &radio_mac, int vap_id)
 bool db::add_vap(const std::string &radio_mac, int vap_id, std::string bssid, std::string ssid,
                  bool backhual)
 {
-    if (!has_node(network_utils::mac_from_string(bssid)) &&
-        !add_virtual_node(network_utils::mac_from_string(bssid),
-                          network_utils::mac_from_string(radio_mac))) {
+    if (!has_node(tlvf::mac_from_string(bssid)) &&
+        !add_virtual_node(tlvf::mac_from_string(bssid), tlvf::mac_from_string(radio_mac))) {
         return false;
     }
 
@@ -2299,7 +2296,7 @@ int db::get_channel_scan_dwell_time_msec(const sMacAddr &mac, bool single_scan)
 bool db::is_channel_scan_pool_supported(const sMacAddr &mac,
                                         const std::unordered_set<uint8_t> &channel_pool)
 {
-    auto supported_channels = get_hostap_supported_channels(network_utils::mac_to_string(mac));
+    auto supported_channels = get_hostap_supported_channels(tlvf::mac_to_string(mac));
     for (const auto &channel : channel_pool) {
         auto found_channel =
             std::find_if(supported_channels.begin(), supported_channels.end(),
@@ -3366,7 +3363,7 @@ bool db::assign_dynamic_channel_selection_task_id(const sMacAddr &mac, int new_t
 {
     auto n = get_node(mac);
     if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << network_utils::mac_to_string(mac)
+        LOG(WARNING) << __FUNCTION__ << " - node " << tlvf::mac_to_string(mac)
                      << " does not exist!";
         return false;
     }
@@ -3378,7 +3375,7 @@ int db::get_dynamic_channel_selection_task_id(const sMacAddr &mac)
 {
     auto n = get_node(mac);
     if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << network_utils::mac_to_string(mac)
+        LOG(WARNING) << __FUNCTION__ << " - node " << tlvf::mac_to_string(mac)
                      << " does not exist!";
         return -1;
     }
@@ -3437,8 +3434,7 @@ std::shared_ptr<node> db::get_node(std::string key)
 
 std::shared_ptr<node> db::get_node(sMacAddr mac)
 {
-    std::string key =
-        mac == network_utils::ZERO_MAC ? std::string() : network_utils::mac_to_string(mac);
+    std::string key = mac == network_utils::ZERO_MAC ? std::string() : tlvf::mac_to_string(mac);
     return get_node(key);
 }
 
@@ -3446,7 +3442,7 @@ std::shared_ptr<node> db::get_node(sMacAddr al_mac, sMacAddr ruid)
 {
     std::string key = std::string();
     if (al_mac != network_utils::ZERO_MAC && ruid != network_utils::ZERO_MAC)
-        key = network_utils::mac_to_string(al_mac) + network_utils::mac_to_string(ruid);
+        key = tlvf::mac_to_string(al_mac) + tlvf::mac_to_string(ruid);
 
     return get_node(key);
 }
@@ -3459,8 +3455,8 @@ std::shared_ptr<node::radio> db::get_hostap_by_mac(const sMacAddr &mac)
         LOG(ERROR) << "node not found.... ";
         return nullptr;
     } else if ((t = n->get_type()) != beerocks::TYPE_SLAVE || n->hostap == nullptr) {
-        LOG(ERROR) << "node " << network_utils::mac_to_string(mac) << " type is #" << (int)t;
-        LOG(ERROR) << "node " << network_utils::mac_to_string(mac) << " is not a valid hostap!";
+        LOG(ERROR) << "node " << tlvf::mac_to_string(mac) << " type is #" << (int)t;
+        LOG(ERROR) << "node " << tlvf::mac_to_string(mac) << " is not a valid hostap!";
         return nullptr;
     }
 

@@ -123,7 +123,7 @@ bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, st
             value = "missing ssid";
             return false;
         }
-        auto ruid = network_utils::mac_to_string(std::stoull(params["ruid"], nullptr, 16));
+        auto ruid = tlvf::mac_to_string(std::stoull(params["ruid"], nullptr, 16));
         auto ssid = params["ssid"];
 
         auto it = vaps_map.find(ruid);
@@ -133,7 +133,7 @@ bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, st
         }
         for (const auto &vap : it->second.vaps) {
             if (std::string(vap.ssid) == ssid) {
-                value = network_utils::mac_to_string(vap.mac);
+                value = tlvf::mac_to_string(vap.mac);
                 return true;
             }
         }
@@ -189,7 +189,7 @@ bool agent_ucc_listener::handle_start_wps_registration(const std::string &band,
 
     LOG(DEBUG) << "Trigger WPS PBC on radio mac " << radio_mac;
     err_string = "Failed to start wps pbc";
-    return m_backhaul_manager_ctx.start_wps_pbc(network_utils::mac_from_string(radio_mac));
+    return m_backhaul_manager_ctx.start_wps_pbc(tlvf::mac_from_string(radio_mac));
 }
 
 /**

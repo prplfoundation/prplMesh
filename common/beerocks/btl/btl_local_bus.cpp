@@ -229,8 +229,8 @@ bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage &cmdu, const std:
 {
     mapf::CmduTxMessage msg;
 
-    net::network_utils::mac_from_string(msg.metadata()->src, src_mac);
-    net::network_utils::mac_from_string(msg.metadata()->dst, dst_mac);
+    tlvf::mac_from_string(msg.metadata()->src, src_mac);
+    tlvf::mac_from_string(msg.metadata()->dst, dst_mac);
 
     msg.metadata()->ether_type        = ETH_P_1905_1;
     msg.metadata()->length            = length;

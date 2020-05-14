@@ -228,18 +228,18 @@ std::ptrdiff_t network_map::fill_bml_node_data(db &database, std::shared_ptr<nod
         node->channel_ext_above_secondary = n->channel_ext_above_secondary;
     }
 
-    network_utils::mac_from_string(node->mac, n->mac); // if IRE->bridge, else if STA->sta mac
-    network_utils::mac_from_string(node->parent_bridge,
-                                   database.get_node_parent_ire(n->mac)); // remote bridge
+    tlvf::mac_from_string(node->mac, n->mac); // if IRE->bridge, else if STA->sta mac
+    tlvf::mac_from_string(node->parent_bridge,
+                          database.get_node_parent_ire(n->mac)); // remote bridge
     if (n_type == beerocks::TYPE_CLIENT) {
-        network_utils::mac_from_string(node->parent_bssid, n->parent_mac); // remote radio(ap)
+        tlvf::mac_from_string(node->parent_bssid, n->parent_mac); // remote radio(ap)
         node->rx_rssi = database.get_load_rx_rssi(n->mac);
     } else {
         if (n->parent_mac != std::string()) {
             auto n_parent = database.get_node(n->parent_mac);
             if (n_parent) {
-                network_utils::mac_from_string(node->parent_bssid,
-                                               n_parent->parent_mac); // remote radio(ap)
+                tlvf::mac_from_string(node->parent_bssid,
+                                      n_parent->parent_mac); // remote radio(ap)
             }
         }
     }
@@ -249,9 +249,8 @@ std::ptrdiff_t network_map::fill_bml_node_data(db &database, std::shared_ptr<nod
 
     // GW/IRE specific parameters
     if (n_type != beerocks::TYPE_CLIENT) {
-        network_utils::mac_from_string(
-            node->data.gw_ire.backhaul_mac,
-            database.get_node_parent_backhaul(n->mac)); // local parent backhaul
+        tlvf::mac_from_string(node->data.gw_ire.backhaul_mac,
+                              database.get_node_parent_backhaul(n->mac)); // local parent backhaul
         auto children = database.get_node_children(n, beerocks::TYPE_SLAVE);
         int i         = 0;
         for (auto c : children) {
@@ -261,8 +260,8 @@ std::ptrdiff_t network_map::fill_bml_node_data(db &database, std::shared_ptr<nod
                     break;
                 }
 
-                network_utils::mac_from_string(node->data.gw_ire.radio[i].radio_mac,
-                                               c->mac); // local parent backhaul
+                tlvf::mac_from_string(node->data.gw_ire.radio[i].radio_mac,
+                                      c->mac); // local parent backhaul
 
                 // Copy the interface name
                 mapf::utils::copy_string(node->data.gw_ire.radio[i].iface_name,
@@ -291,14 +290,13 @@ std::ptrdiff_t network_map::fill_bml_node_data(db &database, std::shared_ptr<nod
                 node->data.gw_ire.radio[i].ap_active = c->hostap->active;
 
                 // Copy the radio identifier string
-                network_utils::mac_from_string(node->data.gw_ire.radio[i].radio_identifier,
-                                               c->radio_identifier);
+                tlvf::mac_from_string(node->data.gw_ire.radio[i].radio_identifier,
+                                      c->radio_identifier);
 
                 for (int8_t vap_id = beerocks::IFACE_VAP_ID_MIN;
                      vap_id < int8_t(c->hostap->vaps_info.size()); vap_id++) {
                     const auto &vap = (c->hostap->vaps_info[vap_id]);
-                    network_utils::mac_from_string(node->data.gw_ire.radio[i].vap[vap_id].bssid,
-                                                   vap.mac);
+                    tlvf::mac_from_string(node->data.gw_ire.radio[i].vap[vap_id].bssid, vap.mac);
                     mapf::utils::copy_string(node->data.gw_ire.radio[i].vap[vap_id].ssid,
                                              vap.ssid.c_str(),
                                              sizeof(node->data.gw_ire.radio[i].vap[0].ssid));
@@ -498,7 +496,7 @@ void network_map::send_bml_bss_tm_req_message_to_listeners(db &database,
     event->data = GET_MESSAGE_POINTER(BML_EVENT_BSS_TM_REQ, response->buffer(0), size);
 
     auto event_bss_tm_req = (BML_EVENT_BSS_TM_REQ *)event->data;
-    network_utils::mac_from_string(event_bss_tm_req->target_bssid, target_bssid);
+    tlvf::mac_from_string(event_bss_tm_req->target_bssid, target_bssid);
     event_bss_tm_req->disassoc_imminent = disassoc_imminent;
 
     send_bml_event_to_listeners(cmdu_tx, bml_listeners);
@@ -532,7 +530,7 @@ void network_map::send_bml_bh_roam_req_message_to_listeners(db &database,
     event->data = GET_MESSAGE_POINTER(BML_EVENT_BH_ROAM_REQ, response->buffer(0), size);
 
     auto event_bh_roam_req = (BML_EVENT_BH_ROAM_REQ *)event->data;
-    network_utils::mac_from_string(event_bh_roam_req->bssid, bssid);
+    tlvf::mac_from_string(event_bh_roam_req->bssid, bssid);
     event_bh_roam_req->channel = channel;
 
     send_bml_event_to_listeners(cmdu_tx, bml_listeners);
@@ -565,8 +563,8 @@ void network_map::send_bml_client_allow_req_message_to_listeners(
     auto size   = sizeof(BML_EVENT);
     event->data = GET_MESSAGE_POINTER(BML_EVENT_CLIENT_ALLOW_REQ, response->buffer(0), size);
     auto event_client_allow_req = (BML_EVENT_CLIENT_ALLOW_REQ *)event->data;
-    network_utils::mac_from_string(event_client_allow_req->sta_mac, sta_mac);
-    network_utils::mac_from_string(event_client_allow_req->hostap_mac, hostap_mac);
+    tlvf::mac_from_string(event_client_allow_req->sta_mac, sta_mac);
+    tlvf::mac_from_string(event_client_allow_req->hostap_mac, hostap_mac);
     network_utils::ipv4_from_string(event_client_allow_req->ip, ip);
 
     send_bml_event_to_listeners(cmdu_tx, bml_listeners);
@@ -599,8 +597,8 @@ void network_map::send_bml_client_disallow_req_message_to_listeners(
     event->data = GET_MESSAGE_POINTER(BML_EVENT_CLIENT_DISALLOW_REQ, response->buffer(0), size);
 
     auto event_client_disallow_req = (BML_EVENT_CLIENT_DISALLOW_REQ *)event->data;
-    network_utils::mac_from_string(event_client_disallow_req->sta_mac, sta_mac);
-    network_utils::mac_from_string(event_client_disallow_req->hostap_mac, hostap_mac);
+    tlvf::mac_from_string(event_client_disallow_req->sta_mac, sta_mac);
+    tlvf::mac_from_string(event_client_disallow_req->hostap_mac, hostap_mac);
 
     send_bml_event_to_listeners(cmdu_tx, bml_listeners);
 }
@@ -634,7 +632,7 @@ void network_map::send_bml_acs_start_message_to_listeners(db &database,
 
     auto event_acs_start = (BML_EVENT_ACS_START *)event->data;
 
-    network_utils::mac_from_string(event_acs_start->hostap_mac, hostap_mac);
+    tlvf::mac_from_string(event_acs_start->hostap_mac, hostap_mac);
 
     send_bml_event_to_listeners(cmdu_tx, bml_listeners);
 }
@@ -667,7 +665,7 @@ void network_map::send_bml_csa_notification_message_to_listeners(
     event->data = GET_MESSAGE_POINTER(BML_EVENT_CSA_NOTIFICATION, response->buffer(0), size);
 
     auto event_csa_notification = (BML_EVENT_CSA_NOTIFICATION *)event->data;
-    network_utils::mac_from_string(event_csa_notification->hostap_mac, hostap_mac);
+    tlvf::mac_from_string(event_csa_notification->hostap_mac, hostap_mac);
     event_csa_notification->bandwidth                 = bandwidth;
     event_csa_notification->channel                   = channel;
     event_csa_notification->channel_ext_above_primary = channel_ext_above_primary;
@@ -705,7 +703,7 @@ void network_map::send_bml_cac_status_changed_notification_message_to_listeners(
         GET_MESSAGE_POINTER(BML_EVENT_CAC_STATUS_CHANGED_NOTIFICATION, response->buffer(0), size);
 
     auto event_cac_status_changed = (BML_EVENT_CAC_STATUS_CHANGED_NOTIFICATION *)event->data;
-    network_utils::mac_from_string(event_cac_status_changed->hostap_mac, hostap_mac);
+    tlvf::mac_from_string(event_cac_status_changed->hostap_mac, hostap_mac);
     event_cac_status_changed->cac_completed = cac_completed;
 
     send_bml_event_to_listeners(cmdu_tx, bml_listeners);
@@ -757,7 +755,7 @@ std::ptrdiff_t network_map::fill_bml_node_statistics(db &database, std::shared_p
 
         //fill radio stats
         //memset(radio_stats_bulk, 0, stats_bulk_len);
-        network_utils::mac_from_string(radio_stats_bulk->mac, n->mac);
+        tlvf::mac_from_string(radio_stats_bulk->mac, n->mac);
         radio_stats_bulk->type = BML_STAT_TYPE_RADIO;
 
         radio_stats_bulk->bytes_sent              = n->hostap->stats_info->tx_bytes;
@@ -796,7 +794,7 @@ std::ptrdiff_t network_map::fill_bml_node_statistics(db &database, std::shared_p
 
         //fill sta stats
         //memset(sta_stats_bulk, 0, stats_bulk_len);
-        network_utils::mac_from_string(sta_stats_bulk->mac, n->mac);
+        tlvf::mac_from_string(sta_stats_bulk->mac, n->mac);
         sta_stats_bulk->type = BML_STAT_TYPE_CLIENT;
 
         sta_stats_bulk->bytes_sent              = n->stats_info->tx_bytes;

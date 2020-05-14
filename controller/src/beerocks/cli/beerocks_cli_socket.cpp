@@ -567,7 +567,7 @@ int cli_socket::dump_node_info(std::string mac)
     auto request =
         message_com::create_vs_message<beerocks_message::cACTION_CLI_DUMP_NODE_INFO>(cmdu_tx);
 
-    request->mac() = network_utils::mac_from_string(mac);
+    request->mac() = tlvf::mac_from_string(mac);
     wait_response  = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
     waitResponseReady();
@@ -584,8 +584,8 @@ int cli_socket::cross_rx_rssi_measurement(std::string client_mac, std::string ho
         LOG(ERROR) << "Failed building cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT message!";
         return -1;
     }
-    request->client_mac()       = network_utils::mac_from_string(client_mac);
-    request->hostap_mac()       = network_utils::mac_from_string(hostap_mac);
+    request->client_mac()       = tlvf::mac_from_string(client_mac);
+    request->hostap_mac()       = tlvf::mac_from_string(hostap_mac);
     request->center_frequency() = center_frequency;
     wait_response               = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
@@ -602,8 +602,8 @@ int cli_socket::steer_client(std::string client_mac, std::string bssid, int disa
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_BSS_STEER_REQUEST message!";
         return -1;
     }
-    request->client_mac()        = network_utils::mac_from_string(client_mac);
-    request->bssid()             = network_utils::mac_from_string(bssid);
+    request->client_mac()        = tlvf::mac_from_string(client_mac);
+    request->bssid()             = tlvf::mac_from_string(bssid);
     request->disassoc_timer_ms() = disassoc_timer_ms;
     wait_response                = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
@@ -620,8 +620,8 @@ int cli_socket::steer_ire(std::string client_mac, std::string bssid)
         LOG(ERROR) << "Failed building cACTION_CLI_BACKHAUL_ROAM_REQUEST message!";
         return -1;
     }
-    request->slave_mac() = network_utils::mac_from_string(client_mac);
-    request->bssid()     = network_utils::mac_from_string(bssid);
+    request->slave_mac() = tlvf::mac_from_string(client_mac);
+    request->bssid()     = tlvf::mac_from_string(bssid);
     wait_response        = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
     waitResponseReady();
@@ -636,7 +636,7 @@ int cli_socket::optimal_path(std::string client_mac)
         LOG(ERROR) << "Failed building cACTION_CLI_OPTIMAL_PATH_TASK message!";
         return -1;
     }
-    request->client_mac() = network_utils::mac_from_string(client_mac);
+    request->client_mac() = tlvf::mac_from_string(client_mac);
     wait_response         = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
     waitResponseReady();
@@ -654,7 +654,7 @@ int cli_socket::ap_channel_switch(std::string ap_mac, uint8_t channel, uint8_t b
         LOG(ERROR) << "Failed building cACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST message!";
         return -1;
     }
-    request->mac()                 = network_utils::mac_from_string(ap_mac);
+    request->mac()                 = tlvf::mac_from_string(ap_mac);
     request->cs_params().channel   = channel;
     request->cs_params().bandwidth = utils::convert_bandwidth_to_enum(bw);
     request->cs_params().vht_center_frequency =
@@ -675,8 +675,8 @@ int cli_socket::client_allow(std::string client_mac, std::string hostap_mac)
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_ALLOW_REQUEST message!";
         return -1;
     }
-    request->client_mac() = network_utils::mac_from_string(client_mac);
-    request->hostap_mac() = network_utils::mac_from_string(hostap_mac);
+    request->client_mac() = tlvf::mac_from_string(client_mac);
+    request->hostap_mac() = tlvf::mac_from_string(hostap_mac);
     wait_response         = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
     waitResponseReady();
@@ -692,8 +692,8 @@ int cli_socket::client_disallow(std::string client_mac, std::string hostap_mac)
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_DISALLOW_REQUEST message!";
         return -1;
     }
-    request->client_mac() = network_utils::mac_from_string(client_mac);
-    request->hostap_mac() = network_utils::mac_from_string(hostap_mac);
+    request->client_mac() = tlvf::mac_from_string(client_mac);
+    request->hostap_mac() = tlvf::mac_from_string(hostap_mac);
     wait_response         = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
     waitResponseReady();
@@ -709,7 +709,7 @@ int cli_socket::client_disconnect(std::string client_mac, uint32_t type, uint32_
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_DISCONNECT_REQUEST message!";
         return -1;
     }
-    request->client_mac() = network_utils::mac_from_string(client_mac);
+    request->client_mac() = tlvf::mac_from_string(client_mac);
     request->type()       = beerocks_message::eDisconnectType(type);
     request->reason()     = reason;
     wait_response         = true;
@@ -727,7 +727,7 @@ int cli_socket::hostap_stats_measurement(std::string ap_mac)
         LOG(ERROR) << "Failed building cACTION_CLI_HOSTAP_STATS_MEASUREMENT message!";
         return -1;
     }
-    request->ap_mac() = network_utils::mac_from_string(ap_mac);
+    request->ap_mac() = tlvf::mac_from_string(ap_mac);
     wait_response     = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
     waitResponseReady();
@@ -742,7 +742,7 @@ int cli_socket::load_balancer_task(std::string ap_mac)
         LOG(ERROR) << "Failed building cACTION_CLI_LOAD_BALANCER_TASK message!";
         return -1;
     }
-    request->ap_mac() = network_utils::mac_from_string(ap_mac);
+    request->ap_mac() = tlvf::mac_from_string(ap_mac);
     wait_response     = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
     waitResponseReady();
@@ -773,8 +773,8 @@ int cli_socket::client_channel_load_11k_req(std::string hostap_mac, std::string 
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST message!";
         return -1;
     }
-    request->client_mac() = network_utils::mac_from_string(client_mac);
-    request->hostap_mac() = network_utils::mac_from_string(hostap_mac);
+    request->client_mac() = tlvf::mac_from_string(client_mac);
+    request->hostap_mac() = tlvf::mac_from_string(hostap_mac);
     request->channel()    = channel;
     wait_response         = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
@@ -793,8 +793,8 @@ int cli_socket::client_beacon_11k_req(std::string client_mac, std::string bssid,
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_BEACON_11K_REQUEST message!";
         return -1;
     }
-    request->client_mac() = network_utils::mac_from_string(client_mac);
-    request->bssid()      = network_utils::mac_from_string(bssid);
+    request->client_mac() = tlvf::mac_from_string(client_mac);
+    request->bssid()      = tlvf::mac_from_string(bssid);
     request->channel()    = channel;
     request->duration()   = duration;
     request->rand_ival()  = rand_ival;
@@ -828,9 +828,9 @@ int cli_socket::client_statistics_11k_req(std::string hostap_mac, std::string cl
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST message!";
         return -1;
     }
-    request->client_mac()     = network_utils::mac_from_string(client_mac);
-    request->hostap_mac()     = network_utils::mac_from_string(hostap_mac);
-    request->peer_mac()       = network_utils::mac_from_string(peer_mac);
+    request->client_mac()     = tlvf::mac_from_string(client_mac);
+    request->hostap_mac()     = tlvf::mac_from_string(hostap_mac);
+    request->peer_mac()       = tlvf::mac_from_string(peer_mac);
     request->group_identity() = group_identity;
     wait_response             = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
@@ -846,8 +846,8 @@ int cli_socket::client_link_measurement_11k_req(std::string hostap_mac, std::str
         LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST message!";
         return -1;
     }
-    request->client_mac() = network_utils::mac_from_string(client_mac);
-    request->hostap_mac() = network_utils::mac_from_string(hostap_mac);
+    request->client_mac() = tlvf::mac_from_string(client_mac);
+    request->hostap_mac() = tlvf::mac_from_string(hostap_mac);
 
     wait_response = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
@@ -864,8 +864,8 @@ int cli_socket::set_neighbor_11k(std::string ap_mac, std::string bssid, uint8_t 
         LOG(ERROR) << "Failed building cACTION_CLI_HOSTAP_SET_NEIGHBOR_11K_REQUEST message!";
         return -1;
     }
-    request->ap_mac()  = network_utils::mac_from_string(ap_mac);
-    request->bssid()   = network_utils::mac_from_string(bssid);
+    request->ap_mac()  = tlvf::mac_from_string(ap_mac);
+    request->bssid()   = tlvf::mac_from_string(bssid);
     request->channel() = channel;
     request->vap_id()  = vap_id;
     wait_response      = true;
@@ -882,8 +882,8 @@ int cli_socket::rm_neighbor_11k(std::string ap_mac, std::string bssid, int8_t va
         LOG(ERROR) << "Failed building cACTION_CLI_HOSTAP_REMOVE_NEIGHBOR_11K_REQUEST message!";
         return -1;
     }
-    request->ap_mac() = network_utils::mac_from_string(ap_mac);
-    request->bssid()  = network_utils::mac_from_string(bssid);
+    request->ap_mac() = tlvf::mac_from_string(ap_mac);
+    request->bssid()  = tlvf::mac_from_string(bssid);
     request->vap_id() = vap_id;
     wait_response     = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
@@ -899,7 +899,7 @@ int cli_socket::ping_slave(std::string ire_mac, int num_of_req, int ping_size)
         LOG(ERROR) << "Failed building cACTION_CLI_PING_SLAVE_REQUEST message!";
         return -1;
     }
-    request->mac()        = network_utils::mac_from_string(ire_mac);
+    request->mac()        = tlvf::mac_from_string(ire_mac);
     request->num_of_req() = (uint16_t)num_of_req;
     request->size()       = (uint16_t)ping_size;
 

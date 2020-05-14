@@ -212,8 +212,8 @@ bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
         return false;
     }
 
-    std::string src_mac = network_utils::mac_to_string(uds_header->src_bridge_mac);
-    std::string dst_mac = network_utils::mac_to_string(uds_header->dst_bridge_mac);
+    std::string src_mac = tlvf::mac_to_string(uds_header->src_bridge_mac);
+    std::string dst_mac = tlvf::mac_to_string(uds_header->dst_bridge_mac);
 
     // LOG(DEBUG) << "handle_cmdu() - received msg from " << std::string(from_bus(sd) ? "bus" : "uds") << ", src=" << src_mac
     //            << ", dst=" << dst_mac << ", " << print_cmdu_types(uds_header); // floods the log
@@ -348,8 +348,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(const std::string 
         return false;
     }
 
-    auto al_mac =
-        network_utils::mac_to_string((const unsigned char *)tlvAlMacAddressType->mac().oct);
+    auto al_mac = tlvf::mac_to_string((const unsigned char *)tlvAlMacAddressType->mac().oct);
     LOG(DEBUG) << "mac=" << al_mac;
 
     LOG(DEBUG) << "searched_role=" << int(tlvSearchedRole->value());
@@ -452,7 +451,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(const std::string 
         // mark slave as prplMesh
         LOG(DEBUG) << "prplMesh agent: received ACTION_CONTROL_SLAVE_HANDSHAKE_REQUEST from "
                    << src_mac;
-        database.set_prplmesh(network_utils::mac_from_string(src_mac));
+        database.set_prplmesh(tlvf::mac_from_string(src_mac));
         // response with handshake response to mark the controller as prplmesh
         auto response =
             message_com::add_vs_tlv<beerocks_message::cACTION_CONTROL_SLAVE_HANDSHAKE_RESPONSE>(
@@ -746,8 +745,8 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(const std::string &sr
         LOG(ERROR) << "getClass<wfa_map::tlvApRadioBasicCapabilities> failed";
         return false;
     }
-    auto al_mac = network_utils::mac_to_string(m1->mac_addr());
-    auto ruid   = network_utils::mac_to_string(radio_basic_caps->radio_uid());
+    auto al_mac = tlvf::mac_to_string(m1->mac_addr());
+    auto ruid   = tlvf::mac_to_string(radio_basic_caps->radio_uid());
     LOG(INFO) << "AP_AUTOCONFIGURATION_WSC M1 al_mac=" << al_mac << " ruid=" << ruid;
     LOG(DEBUG) << "   device " << m1->manufacturer() << " " << m1->model_name() << " "
                << m1->device_name() << " " << m1->serial_number();
@@ -770,7 +769,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_WSC(const std::string &sr
         return false;
     }
 
-    tlvRuid->radio_uid() = network_utils::mac_from_string(ruid);
+    tlvRuid->radio_uid() = tlvf::mac_from_string(ruid);
 
     const auto &bss_info_confs = database.get_bss_info_configuration(m1->mac_addr());
     uint8_t num_bsss           = 0;
@@ -1040,8 +1039,8 @@ bool master_thread::handle_cmdu_1905_client_capability_report_message(
     //log the details so it can be checked in the test_flows
     LOG(INFO) << "Received CLIENT_CAPABILITY_REPORT_MESSAGE, mid=" << std::hex << int(mid)
               << ", Result Code= " << result_code
-              << ", client MAC= " << network_utils::mac_to_string(client_info_tlv->client_mac())
-              << ", BSSID= " << network_utils::mac_to_string(client_info_tlv->bssid());
+              << ", client MAC= " << tlvf::mac_to_string(client_info_tlv->client_mac())
+              << ", BSSID= " << tlvf::mac_to_string(client_info_tlv->bssid());
 
     LOG_IF(client_capability_report_tlv->result_code() ==
                wfa_map::tlvClientCapabilityReport::SUCCESS,
@@ -1075,7 +1074,7 @@ bool master_thread::handle_cmdu_1905_client_steering_btm_report_message(
     LOG(DEBUG) << "sending ACK message back to agent";
     son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
 
-    std::string client_mac = network_utils::mac_to_string(steering_btm_report->sta_mac());
+    std::string client_mac = tlvf::mac_to_string(steering_btm_report->sta_mac());
     uint8_t status_code    = steering_btm_report->btm_status_code();
 
     LOG(DEBUG) << "BTM_REPORT from source bssid " << steering_btm_report->bssid()
@@ -1529,10 +1528,10 @@ bool master_thread::handle_cmdu_1905_topology_notification(const std::string &sr
     }
 
     auto &client_mac    = client_association_event_tlv->client_mac();
-    auto client_mac_str = network_utils::mac_to_string(client_mac);
+    auto client_mac_str = tlvf::mac_to_string(client_mac);
 
     auto &bssid    = client_association_event_tlv->bssid();
-    auto bssid_str = network_utils::mac_to_string(bssid);
+    auto bssid_str = tlvf::mac_to_string(bssid);
 
     auto association_event = client_association_event_tlv->association_event();
     bool client_connected =
@@ -1640,7 +1639,7 @@ bool master_thread::handle_cmdu_1905_topology_response(const std::string &src_ma
     // as "TODO" for future task. Meanwhile parse properly the TLV, leaving the unused parts in
     // comment for future implementation.
     auto fronthaul_radios_on_db = database.get_node_children(
-        network_utils::mac_to_string(al_mac), beerocks::TYPE_SLAVE, beerocks::STATE_CONNECTED);
+        tlvf::mac_to_string(al_mac), beerocks::TYPE_SLAVE, beerocks::STATE_CONNECTED);
 
     std::unordered_set<std::string> reported_fronthaul_radios;
 
@@ -1655,7 +1654,7 @@ bool master_thread::handle_cmdu_1905_topology_response(const std::string &src_ma
         auto &iface_info = std::get<1>(iface_info_tuple);
 
         const auto &iface_mac = iface_info.mac();
-        auto iface_mac_str    = network_utils::mac_to_string(iface_mac);
+        auto iface_mac_str    = tlvf::mac_to_string(iface_mac);
 
         const auto media_type       = iface_info.media_type();
         const auto media_type_group = media_type >> 8;
@@ -1742,8 +1741,7 @@ bool master_thread::handle_cmdu_1905_topology_response(const std::string &src_ma
                 continue;
             }
 
-            std::string neighbor_al_mac_on_db_str =
-                network_utils::mac_to_string(neighbor_al_mac_on_db);
+            std::string neighbor_al_mac_on_db_str = tlvf::mac_to_string(neighbor_al_mac_on_db);
             auto backhhaul_mac = database.get_node_parent(neighbor_al_mac_on_db_str);
 
             // It is possible that re-routing took place, and the node is now a neighbour of some
@@ -1790,14 +1788,12 @@ bool master_thread::handle_intel_slave_join(
     }
 
     std::string slave_version = std::string(notification->slave_version(message::VERSION_LENGTH));
-    std::string radio_mac     = network_utils::mac_to_string(notification->hostap().iface_mac);
+    std::string radio_mac     = tlvf::mac_to_string(notification->hostap().iface_mac);
     std::string gw_ipv4 = network_utils::ipv4_to_string(notification->backhaul_params().gw_ipv4);
-    std::string gw_bridge_mac =
-        network_utils::mac_to_string(notification->backhaul_params().gw_bridge_mac);
+    std::string gw_bridge_mac = tlvf::mac_to_string(notification->backhaul_params().gw_bridge_mac);
     std::string parent_bssid_mac =
-        network_utils::mac_to_string(notification->backhaul_params().backhaul_bssid);
-    std::string backhaul_mac =
-        network_utils::mac_to_string(notification->backhaul_params().backhaul_mac);
+        tlvf::mac_to_string(notification->backhaul_params().backhaul_bssid);
+    std::string backhaul_mac = tlvf::mac_to_string(notification->backhaul_params().backhaul_mac);
     std::string backhaul_ipv4 =
         network_utils::ipv4_to_string(notification->backhaul_params().backhaul_ipv4);
     beerocks::eIfaceType backhaul_iface_type =
@@ -1805,12 +1801,11 @@ bool master_thread::handle_intel_slave_join(
     bool is_gw_slave         = (backhaul_iface_type == beerocks::IFACE_TYPE_GW_BRIDGE);
     beerocks::eType ire_type = is_gw_slave ? beerocks::TYPE_GW : beerocks::TYPE_IRE;
     int backhaul_channel     = notification->backhaul_params().backhaul_channel;
-    std::string bridge_mac =
-        network_utils::mac_to_string(notification->backhaul_params().bridge_mac);
+    std::string bridge_mac   = tlvf::mac_to_string(notification->backhaul_params().bridge_mac);
     std::string bridge_ipv4 =
         network_utils::ipv4_to_string(notification->backhaul_params().bridge_ipv4);
     bool backhaul_manager        = (bool)notification->backhaul_params().is_backhaul_manager;
-    std::string radio_identifier = network_utils::mac_to_string(notification->radio_identifier());
+    std::string radio_identifier = tlvf::mac_to_string(notification->radio_identifier());
     bool acs_enabled             = (notification->wlan_settings().channel == 0);
 
     std::string gw_name;
@@ -1852,12 +1847,11 @@ bool master_thread::handle_intel_slave_join(
         if (!notification->platform_settings().local_master) {
             // rejecting join if gw haven't joined yet
             if ((parent_bssid_mac != network_utils::ZERO_MAC_STRING) &&
-                (!database.has_node(network_utils::mac_from_string(parent_bssid_mac)) ||
+                (!database.has_node(tlvf::mac_from_string(parent_bssid_mac)) ||
                  (database.get_node_state(parent_bssid_mac) != beerocks::STATE_CONNECTED))) {
                 LOG(DEBUG) << "sending back join reject!";
                 LOG(DEBUG) << "reject_debug: parent_bssid_has_node="
-                           << (int)(database.has_node(
-                                  network_utils::mac_from_string(parent_bssid_mac)));
+                           << (int)(database.has_node(tlvf::mac_from_string(parent_bssid_mac)));
 
                 join_response->err_code() = beerocks::JOIN_RESP_REJECT;
                 return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
@@ -1880,9 +1874,8 @@ bool master_thread::handle_intel_slave_join(
             //add a placeholder
             LOG(DEBUG) << "add a placeholder backhaul_mac = " << backhaul_mac
                        << ", parent_bssid_mac = " << parent_bssid_mac;
-            database.add_node(network_utils::mac_from_string(backhaul_mac),
-                              network_utils::mac_from_string(parent_bssid_mac),
-                              beerocks::TYPE_IRE_BACKHAUL);
+            database.add_node(tlvf::mac_from_string(backhaul_mac),
+                              tlvf::mac_from_string(parent_bssid_mac), beerocks::TYPE_IRE_BACKHAUL);
         } else if (database.get_node_state(backhaul_mac) != beerocks::STATE_CONNECTED) {
             /* if the backhaul node doesn't exist, or is not already marked as connected,
             * we assume it is connected to the GW's LAN switch
@@ -1907,9 +1900,8 @@ bool master_thread::handle_intel_slave_join(
             LOG(DEBUG) << "add a placeholder backhaul_mac = " << backhaul_mac
                        << " gw_lan_switch = " << gw_lan_switch
                        << " TYPE_IRE_BACKHAUL , STATE_CONNECTED";
-            database.add_node(network_utils::mac_from_string(backhaul_mac),
-                              network_utils::mac_from_string(gw_lan_switch),
-                              beerocks::TYPE_IRE_BACKHAUL);
+            database.add_node(tlvf::mac_from_string(backhaul_mac),
+                              tlvf::mac_from_string(gw_lan_switch), beerocks::TYPE_IRE_BACKHAUL);
             database.set_node_state(backhaul_mac, beerocks::STATE_CONNECTED);
         }
     } else {
@@ -1927,15 +1919,15 @@ bool master_thread::handle_intel_slave_join(
 
     // bridge_mac node may have been created from DHCP/ARP event, if so delete it
     // this may only occur once
-    if (database.has_node(network_utils::mac_from_string(bridge_mac)) &&
+    if (database.has_node(tlvf::mac_from_string(bridge_mac)) &&
         (database.get_node_type(bridge_mac) != ire_type)) {
-        database.remove_node(network_utils::mac_from_string(bridge_mac));
+        database.remove_node(tlvf::mac_from_string(bridge_mac));
     }
     // add new GW/IRE bridge_mac
     LOG(DEBUG) << "adding node " << bridge_mac << " under " << backhaul_mac << ", and mark as type "
                << ire_type;
-    database.add_node(network_utils::mac_from_string(bridge_mac),
-                      network_utils::mac_from_string(backhaul_mac), ire_type);
+    database.add_node(tlvf::mac_from_string(bridge_mac), tlvf::mac_from_string(backhaul_mac),
+                      ire_type);
     database.set_node_state(bridge_mac, beerocks::STATE_CONNECTED);
 
     /*
@@ -1963,9 +1955,9 @@ bool master_thread::handle_intel_slave_join(
         auto eth_sw_mac_binary = notification->backhaul_params().bridge_mac;
         ++eth_sw_mac_binary.oct[5];
 
-        std::string eth_switch_mac = network_utils::mac_to_string(eth_sw_mac_binary);
-        database.add_node(network_utils::mac_from_string(eth_switch_mac),
-                          network_utils::mac_from_string(bridge_mac), beerocks::TYPE_ETH_SWITCH);
+        std::string eth_switch_mac = tlvf::mac_to_string(eth_sw_mac_binary);
+        database.add_node(tlvf::mac_from_string(eth_switch_mac), tlvf::mac_from_string(bridge_mac),
+                          beerocks::TYPE_ETH_SWITCH);
         database.set_node_state(eth_switch_mac, beerocks::STATE_CONNECTED);
         database.set_node_name(eth_switch_mac, slave_name + "_ETH");
         database.set_node_ipv4(eth_switch_mac, bridge_ipv4);
@@ -2072,16 +2064,15 @@ bool master_thread::handle_intel_slave_join(
     /*
     * handle the HOSTAP node
     */
-    if (database.has_node(network_utils::mac_from_string(radio_mac))) {
+    if (database.has_node(tlvf::mac_from_string(radio_mac))) {
         if (database.get_node_type(radio_mac) != beerocks::TYPE_SLAVE) {
             database.set_node_type(radio_mac, beerocks::TYPE_SLAVE);
             LOG(ERROR) << "Existing mac node is not TYPE_SLAVE";
         }
         database.clear_hostap_stats_info(radio_mac);
     } else {
-        database.add_node(network_utils::mac_from_string(radio_mac),
-                          network_utils::mac_from_string(bridge_mac), beerocks::TYPE_SLAVE,
-                          network_utils::mac_from_string(radio_identifier));
+        database.add_node(tlvf::mac_from_string(radio_mac), tlvf::mac_from_string(bridge_mac),
+                          beerocks::TYPE_SLAVE, tlvf::mac_from_string(radio_identifier));
     }
     database.set_hostap_is_acs_enabled(radio_mac, acs_enabled);
 
@@ -2128,7 +2119,7 @@ bool master_thread::handle_intel_slave_join(
     }
     autoconfig_wsc_parse_radio_caps(radio_mac, radio_caps);
 
-    auto mac = network_utils::mac_from_string(radio_mac);
+    auto mac = tlvf::mac_from_string(radio_mac);
     if (tasks.is_task_running(database.get_dynamic_channel_selection_task_id(mac))) {
         LOG(DEBUG) << "dynamic channel selection task already running for " << mac;
     } else {
@@ -2194,7 +2185,7 @@ bool master_thread::handle_intel_slave_join(
         cs_new_event->low_pass_filter_on   = notification->low_pass_filter_on();
         LOG(DEBUG) << "cs_new_event->low_pass_filter_on = " << int(cs_new_event->low_pass_filter_on)
                    << " cs_new_event = " << intptr_t(cs_new_event);
-        cs_new_event->hostap_mac = network_utils::mac_from_string(radio_mac);
+        cs_new_event->hostap_mac = tlvf::mac_from_string(radio_mac);
         cs_new_event->cs_params  = notification->cs_params();
         for (auto preferred_channel : notification->hostap().preferred_channels) {
             if (preferred_channel.channel > 0) {
@@ -2305,11 +2296,11 @@ bool master_thread::handle_non_intel_slave_join(
     // Multi-AP Agent doesn't say anything about the backhaul, so simulate ethernet backhaul to satisfy
     // network map. MAC address is the bridge MAC with the last octet incremented by 1.
     // The mac address for the backhaul is the same since it is ethernet backhaul.
-    sMacAddr mac = network_utils::mac_from_string(bridge_mac);
+    sMacAddr mac = tlvf::mac_from_string(bridge_mac);
     mac.oct[5]++;
-    std::string backhaul_mac = network_utils::mac_to_string(mac);
+    std::string backhaul_mac = tlvf::mac_to_string(mac);
     mac.oct[5]++;
-    std::string eth_switch_mac   = network_utils::mac_to_string(mac);
+    std::string eth_switch_mac   = tlvf::mac_to_string(mac);
     std::string parent_bssid_mac = network_utils::ZERO_MAC_STRING;
     auto manufacturer            = m1.manufacturer();
     LOG(INFO) << "IRE generic Slave joined" << std::endl
@@ -2339,8 +2330,8 @@ bool master_thread::handle_non_intel_slave_join(
 
     LOG(DEBUG) << "add a placeholder backhaul_mac = " << backhaul_mac
                << " gw_lan_switch = " << gw_lan_switch << " TYPE_IRE_BACKHAUL , STATE_CONNECTED";
-    database.add_node(network_utils::mac_from_string(backhaul_mac),
-                      network_utils::mac_from_string(gw_lan_switch), beerocks::TYPE_IRE_BACKHAUL);
+    database.add_node(tlvf::mac_from_string(backhaul_mac), tlvf::mac_from_string(gw_lan_switch),
+                      beerocks::TYPE_IRE_BACKHAUL);
     database.set_node_state(backhaul_mac, beerocks::STATE_CONNECTED);
 
     // TODO bridge handling.
@@ -2349,15 +2340,15 @@ bool master_thread::handle_non_intel_slave_join(
 
     // bridge_mac node may have been created from DHCP/ARP event, if so delete it
     // this may only occur once
-    if (database.has_node(network_utils::mac_from_string(bridge_mac)) &&
+    if (database.has_node(tlvf::mac_from_string(bridge_mac)) &&
         (database.get_node_type(bridge_mac) != ire_type)) {
-        database.remove_node(network_utils::mac_from_string(bridge_mac));
+        database.remove_node(tlvf::mac_from_string(bridge_mac));
     }
     // add new GW/IRE bridge_mac
     LOG(DEBUG) << "adding node " << bridge_mac << " under " << backhaul_mac << ", and mark as type "
                << ire_type;
-    database.add_node(network_utils::mac_from_string(bridge_mac),
-                      network_utils::mac_from_string(backhaul_mac), ire_type);
+    database.add_node(tlvf::mac_from_string(bridge_mac), tlvf::mac_from_string(backhaul_mac),
+                      ire_type);
     database.set_node_state(bridge_mac, beerocks::STATE_CONNECTED);
     database.set_node_backhaul_iface_type(backhaul_mac, beerocks::eIfaceType::IFACE_TYPE_ETHERNET);
     database.set_node_backhaul_iface_type(bridge_mac, beerocks::IFACE_TYPE_BRIDGE);
@@ -2366,14 +2357,14 @@ bool master_thread::handle_non_intel_slave_join(
     database.set_node_type(backhaul_mac, beerocks::TYPE_IRE_BACKHAUL);
     database.set_node_name(backhaul_mac, manufacturer + "_BH");
     database.set_node_name(bridge_mac, manufacturer);
-    database.add_node(network_utils::mac_from_string(eth_switch_mac),
-                      network_utils::mac_from_string(bridge_mac), beerocks::TYPE_ETH_SWITCH);
+    database.add_node(tlvf::mac_from_string(eth_switch_mac), tlvf::mac_from_string(bridge_mac),
+                      beerocks::TYPE_ETH_SWITCH);
     database.set_node_state(eth_switch_mac, beerocks::STATE_CONNECTED);
     database.set_node_name(eth_switch_mac, manufacturer + "_ETH");
     database.set_node_manufacturer(eth_switch_mac, eth_switch_mac);
 
     // Update existing node, or add a new one
-    if (database.has_node(network_utils::mac_from_string(radio_mac))) {
+    if (database.has_node(tlvf::mac_from_string(radio_mac))) {
         if (database.get_node_type(radio_mac) != beerocks::TYPE_SLAVE) {
             database.set_node_type(radio_mac, beerocks::TYPE_SLAVE);
             LOG(ERROR) << "Existing mac node is not TYPE_SLAVE";
@@ -2381,9 +2372,8 @@ bool master_thread::handle_non_intel_slave_join(
         database.clear_hostap_stats_info(radio_mac);
     } else {
         // TODO Intel Slave Join has separate radio MAC and UID; we use radio_mac for both.
-        database.add_node(network_utils::mac_from_string(radio_mac),
-                          network_utils::mac_from_string(bridge_mac), beerocks::TYPE_SLAVE,
-                          network_utils::mac_from_string(radio_mac));
+        database.add_node(tlvf::mac_from_string(radio_mac), tlvf::mac_from_string(bridge_mac),
+                          beerocks::TYPE_SLAVE, tlvf::mac_from_string(radio_mac));
     }
     database.set_hostap_is_acs_enabled(radio_mac, false);
 
@@ -2435,8 +2425,7 @@ bool master_thread::handle_non_intel_slave_join(
 bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
                                                 std::shared_ptr<beerocks_header> beerocks_header)
 {
-    std::string hostap_mac =
-        network_utils::mac_to_string(beerocks_header->actionhdr()->radio_mac());
+    std::string hostap_mac = tlvf::mac_to_string(beerocks_header->actionhdr()->radio_mac());
 
     // Sanity tests
     if (hostap_mac.empty()) {
@@ -2520,7 +2509,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
                   << " vap_id=" << vap_id;
 
         std::string radio_mac = hostap_mac;
-        auto bssid            = net::network_utils::mac_to_string(notification->vap_info().mac);
+        auto bssid            = tlvf::mac_to_string(notification->vap_info().mac);
         auto ssid             = std::string((char *)notification->vap_info().ssid);
 
         database.add_vap(radio_mac, vap_id, bssid, ssid, notification->vap_info().backhaul_vap);
@@ -2573,7 +2562,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
 
         auto new_event =
             CHANNEL_SELECTION_ALLOCATE_EVENT(channel_selection_task::sAcsResponse_event);
-        new_event->hostap_mac         = network_utils::mac_from_string(hostap_mac);
+        new_event->hostap_mac         = tlvf::mac_from_string(hostap_mac);
         new_event->cs_params          = notification->cs_params();
         auto tuple_preferred_channels = notification->preferred_channels(0);
         std::copy_n(&std::get<1>(tuple_preferred_channels), notification->preferred_channels_size(),
@@ -2593,7 +2582,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         std::unordered_map<int8_t, sVapElement> vaps_info;
         std::string vaps_list;
         for (int8_t vap_id = beerocks::IFACE_VAP_ID_MIN; vap_id < IFACE_VAP_ID_MAX; vap_id++) {
-            auto vap_mac = network_utils::mac_to_string(notification->params().vaps[vap_id].mac);
+            auto vap_mac = tlvf::mac_to_string(notification->params().vaps[vap_id].mac);
             if (vap_mac != network_utils::ZERO_MAC_STRING) {
                 vaps_info[vap_id].mac = vap_mac;
                 vaps_info[vap_id].ssid =
@@ -2613,9 +2602,9 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         std::string radio_mac = hostap_mac;
 
         for (auto vap : vaps_info) {
-            if (!database.has_node(network_utils::mac_from_string(vap.second.mac))) {
-                database.add_virtual_node(network_utils::mac_from_string(vap.second.mac),
-                                          network_utils::mac_from_string(radio_mac));
+            if (!database.has_node(tlvf::mac_from_string(vap.second.mac))) {
+                database.add_virtual_node(tlvf::mac_from_string(vap.second.mac),
+                                          tlvf::mac_from_string(radio_mac));
             }
         }
 
@@ -2639,7 +2628,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             return false;
         }
 
-        std::string client_mac  = network_utils::mac_to_string(notification->params().mac);
+        std::string client_mac  = tlvf::mac_to_string(notification->params().mac);
         std::string client_ipv4 = network_utils::ipv4_to_string(notification->params().ipv4);
         LOG(DEBUG) << "received arp monitor notification from slave mac " << hostap_mac << ":"
                    << std::endl
@@ -2664,7 +2653,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             break;
         }
 
-        bool new_node = !database.has_node(network_utils::mac_from_string(client_mac));
+        bool new_node = !database.has_node(tlvf::mac_from_string(client_mac));
 
         beerocks::eType new_node_type = database.get_node_type(client_mac);
 
@@ -2764,7 +2753,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             LOG(ERROR) << "addClass cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION failed";
             return false;
         }
-        auto bridge_mac = network_utils::mac_to_string(notification->bridge_mac());
+        auto bridge_mac = tlvf::mac_to_string(notification->bridge_mac());
 
         LOG(TRACE) << "ACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION: " << bridge_mac
                    << ", new_operational_state=" << int(notification->operational());
@@ -2790,7 +2779,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             return false;
         }
 
-        std::string client_mac = network_utils::mac_to_string(notification->params().result.mac);
+        std::string client_mac = tlvf::mac_to_string(notification->params().result.mac);
         std::string ap_mac     = hostap_mac;
         bool is_parent         = (database.get_node_parent(client_mac) ==
                           database.get_hostap_vap_mac(ap_mac, notification->params().vap_id));
@@ -2832,7 +2821,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             new_event.snr = notification->params().rx_snr;
             std::copy_n(notification->params().result.mac.oct, sizeof(new_event.client_mac.oct),
                         new_event.client_mac.oct);
-            new_event.bssid = network_utils::mac_from_string(
+            new_event.bssid = tlvf::mac_from_string(
                 database.get_hostap_vap_mac(ap_mac, notification->params().vap_id));
             tasks.push_event(database.get_rdkb_wlan_task_id(),
                              rdkb_wlan_task::events::STEERING_EVENT_SNR_AVAILABLE, &new_event);
@@ -2847,7 +2836,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION failed";
             return false;
         }
-        std::string client_mac = network_utils::mac_to_string(notification->params().result.mac);
+        std::string client_mac        = tlvf::mac_to_string(notification->params().result.mac);
         std::string client_parent_mac = database.get_node_parent(client_mac);
         std::string bssid = database.get_hostap_vap_mac(hostap_mac, notification->params().vap_id);
         bool is_parent    = (client_parent_mac == bssid);
@@ -2994,7 +2983,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION failed";
             return false;
         }
-        std::string client_mac = network_utils::mac_to_string(notification->mac());
+        std::string client_mac = tlvf::mac_to_string(notification->mac());
 
         LOG(INFO) << "ACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION, client_mac=" << client_mac
                   << " hostap mac=" << hostap_mac;
@@ -3016,14 +3005,14 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             return false;
         }
 
-        std::string client_mac = network_utils::mac_to_string(notification_in->mac());
+        std::string client_mac = tlvf::mac_to_string(notification_in->mac());
         std::string ipv4       = network_utils::ipv4_to_string(notification_in->ipv4());
         LOG(DEBUG) << "dhcp complete for client " << client_mac << " new ip=" << ipv4
                    << " previous ip=" << database.get_node_ipv4(client_mac);
 
-        if (!database.has_node(network_utils::mac_from_string(client_mac))) {
+        if (!database.has_node(tlvf::mac_from_string(client_mac))) {
             LOG(DEBUG) << "client mac not in DB, add temp node " << client_mac;
-            database.add_node(network_utils::mac_from_string(client_mac));
+            database.add_node(tlvf::mac_from_string(client_mac));
             database.update_node_last_seen(client_mac);
         }
 
@@ -3108,7 +3097,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
 
         auto new_event =
             CHANNEL_SELECTION_ALLOCATE_EVENT(channel_selection_task::sCacCompleted_event);
-        new_event->hostap_mac = network_utils::mac_from_string(hostap_mac);
+        new_event->hostap_mac = tlvf::mac_from_string(hostap_mac);
         new_event->params     = notification->params();
         tasks.push_event(database.get_channel_selection_task_id(),
                          (int)channel_selection_task::eEvent::CAC_COMPLETED_EVENT,
@@ -3130,7 +3119,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
 
         auto new_event =
             CHANNEL_SELECTION_ALLOCATE_EVENT(channel_selection_task::sDfsChannelAvailable_event);
-        new_event->hostap_mac = network_utils::mac_from_string(hostap_mac);
+        new_event->hostap_mac = tlvf::mac_from_string(hostap_mac);
         new_event->params     = notification->params();
         tasks.push_event(database.get_channel_selection_task_id(),
                          (int)channel_selection_task::eEvent::DFS_CHANNEL_AVAILABLE_EVENT,
@@ -3153,9 +3142,9 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
                 continue;
             }
             auto &sta_stats = std::get<1>(sta_stats_tuple);
-            auto client_mac = network_utils::mac_to_string(sta_stats.mac);
+            auto client_mac = tlvf::mac_to_string(sta_stats.mac);
 
-            if (!database.has_node(network_utils::mac_from_string(client_mac))) {
+            if (!database.has_node(tlvf::mac_from_string(client_mac))) {
                 LOG(ERROR) << "sta " << client_mac << " is not in DB!";
                 continue;
             } else if (database.get_node_state(client_mac) != beerocks::STATE_CONNECTED) {
@@ -3389,7 +3378,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE failed";
             return false;
         }
-        std::string client_mac = network_utils::mac_to_string(response->mac());
+        std::string client_mac = tlvf::mac_to_string(response->mac());
         int channel            = database.get_node_channel(client_mac);
         LOG(DEBUG) << "ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE client_mac="
                    << client_mac << " received from hostap " << hostap_mac
@@ -3406,7 +3395,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_NO_ACTIVITY_NOTIFICATION failed";
             return false;
         }
-        std::string client_mac = network_utils::mac_to_string(notification->mac());
+        std::string client_mac = tlvf::mac_to_string(notification->mac());
         LOG(INFO) << "CLIENT NO ACTIVITY MSG RX'ed for client" << client_mac;
         int prev_task_id = database.get_roaming_task_id(client_mac);
         if (tasks.is_task_running(prev_task_id)) {
@@ -3434,7 +3423,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             LOG(DEBUG) << "CS_task,sending AP_ACTIVITY_IDLE_EVENT for mac " << hostap_mac;
             auto new_event =
                 CHANNEL_SELECTION_ALLOCATE_EVENT(channel_selection_task::sApActivityIdle_event);
-            new_event->hostap_mac = network_utils::mac_from_string(hostap_mac);
+            new_event->hostap_mac = tlvf::mac_from_string(hostap_mac);
             tasks.push_event(database.get_channel_selection_task_id(),
                              (int)channel_selection_task::eEvent::AP_ACTIVITY_IDLE_EVENT,
                              (void *)new_event);
@@ -3587,7 +3576,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             LOG(ERROR) << "addClass cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_RESPONSE failed";
             return false;
         }
-        auto radio_mac = network_utils::mac_from_string(hostap_mac);
+        auto radio_mac = tlvf::mac_from_string(hostap_mac);
 
         if (!response->success()) {
             LOG(ERROR) << "Failed to trigger scan on radio (" << radio_mac
@@ -3624,7 +3613,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         }
 
         //get the mac from hostap_mac
-        auto radio_mac = network_utils::mac_from_string(hostap_mac);
+        auto radio_mac = tlvf::mac_from_string(hostap_mac);
 
         dynamic_channel_selection_task::sScanEvent new_event;
         new_event.radio_mac = radio_mac;
@@ -3649,7 +3638,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         }
 
         //get the mac from hostap_mac
-        auto radio_mac = network_utils::mac_from_string(hostap_mac);
+        auto radio_mac = tlvf::mac_from_string(hostap_mac);
 
         //send results to dcs task if no scan is in progress for both the
         //single scan (mac, single_scan = true) and the continuous scan (mac, single_scan = false)
@@ -3690,7 +3679,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         }
 
         //get the mac from hostap_mac
-        auto radio_mac = network_utils::mac_from_string(hostap_mac);
+        auto radio_mac = tlvf::mac_from_string(hostap_mac);
 
         dynamic_channel_selection_task::sScanEvent new_event;
         new_event.radio_mac = radio_mac;
@@ -3711,7 +3700,7 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         }
 
         //get the mac from hostap_mac
-        auto radio_mac = network_utils::mac_from_string(hostap_mac);
+        auto radio_mac = tlvf::mac_from_string(hostap_mac);
 
         dynamic_channel_selection_task::sScanEvent new_event;
         new_event.radio_mac = radio_mac;
