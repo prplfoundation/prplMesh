@@ -144,6 +144,32 @@ elseif (TARGET_PLATFORM STREQUAL "linux")
     set(BEEROCKS_BH_WIRE_IFACE "eth0")
 endif()
 
+# Test support
+option(BUILD_TESTS "build multiap unit tests" OFF)
+if (BUILD_TESTS)
+    enable_testing()
+    message(STATUS "Tests are enabled")
+    
+    # Compile GoogleTest statically (so we don't have to install libraries)
+    set(BUILD_SHARED_LIBS_SAVED "${BUILD_SHARED_LIBS}")
+    set(BUILD_SHARED_LIBS OFF)
+        
+    # GoogleTest
+    # https://github.com/google/googletest/blob/master/googletest/README.md#incorporating-into-an-existing-cmake-project
+    include(cmake/googletest.cmake)
+    
+    # Revert it
+    set(BUILD_SHARED_LIBS "${BUILD_SHARED_LIBS_SAVED}")
+endif()
+
+# Code coverage analysis support
+option(COVERAGE "add run-time instrumentation for test coverage analysis" OFF)
+if (COVERAGE)
+    message(STATUS "Coverage support is enabled")
+else()
+    message(STATUS "Coverage support is not enabled")
+endif()
+
 ## Components
 
 add_subdirectory(framework)

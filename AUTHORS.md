@@ -52,3 +52,5 @@ In addition, some parts were copied from other projects.
 - easylogging++ is forked from https://github.com/amrayn/easyloggingpp
   - Zuhd Web Services
   - @abumusamq
+- cmake/googletest.cmake and googletest.CMakeLists.txt.in contain code copied from [Incorporating GoogleTest Into An Existing CMake Project](https://github.com/google/googletest/blob/master/googletest/README.md#incorporating-into-an-existing-cmake-project)
+  - Google Inc.  
