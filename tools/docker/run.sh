@@ -55,7 +55,7 @@ main() {
         esac
     done
 
-    image="${DOCKER_REGISTRY}prplmesh-runner$TAG"
+    image=${PRPLMESH_RUNNER_IMAGE-"${DOCKER_REGISTRY}prplmesh-runner$TAG"}
     dbg "VERBOSE=${VERBOSE}"
     dbg "DETACH=${DETACH}"
     dbg "NETWORK=${NETWORK}"
