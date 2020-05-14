@@ -186,16 +186,13 @@ typedef struct sClientDisconnectionParams {
 
 typedef struct sClientMonitoringParams {
     sMacAddr mac;
-    beerocks::net::sIpv4Addr ipv4;
     int8_t vap_id;
     uint8_t is_ire;
     void struct_swap(){
         mac.struct_swap();
-        ipv4.struct_swap();
     }
     void struct_init(){
         mac.struct_init();
-        ipv4.struct_init();
     }
 } __attribute__((packed)) sClientMonitoringParams;
 

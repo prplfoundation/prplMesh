@@ -149,7 +149,6 @@ sClientDisconnectionParams:
 sClientMonitoringParams:
   _type: struct
   mac: sMacAddr
-  ipv4: beerocks::net::sIpv4Addr
   vap_id: int8_t
   is_ire: uint8_t 
 
