@@ -531,12 +531,9 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         }
 
         std::string client_mac = network_utils::mac_to_string(request_in->params().mac);
-        std::string client_bridge_4addr_mac =
-            network_utils::mac_to_string(request_in->params().bridge_4addr_mac);
         std::string client_ip = network_utils::ipv4_to_string(request_in->params().ipv4);
 
-        LOG(DEBUG) << "START_MONITORING_REQUEST: mac=" << client_mac << " ip=" << client_ip
-                   << " bridge_4addr_mac=" << client_bridge_4addr_mac;
+        LOG(DEBUG) << "START_MONITORING_REQUEST: mac=" << client_mac << " ip=" << client_ip;
 
         if (request_in->params().is_ire) {
             auto request_out = message_com::create_vs_message<
