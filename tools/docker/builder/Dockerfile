@@ -18,6 +18,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     gcc \
     git \
+    googletest \
     libjson-c-dev \
     libncurses-dev \
     libnl-genl-3-dev \
