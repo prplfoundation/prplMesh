@@ -27,6 +27,9 @@ image-build-runner:
 image-build-builder/alpine:
   extends: .image-build
 
+image-build-builder/ubuntu/xenial:
+  extends: .image-build
+
 image-build-tests-runner:
   extends: .image-build
 
@@ -131,9 +134,10 @@ build-in-docker-alpine:
     - schedules
   needs: ["image-build-builder/alpine"]
 
-build-in-docker-xenial:
+build-in-docker-ubuntu-xenial:
   extends: build-in-docker
-  image: prplfoundationinc/prplmesh-builder:ubuntu-16.04
+  image: $CI_REGISTRY_IMAGE/prplmesh-builder-ubuntu-xenial:$CI_PIPELINE_ID
+  needs: ["image-build-builder/ubuntu/xenial"]
 
 build-in-docker-static:
   extends: build-in-docker
