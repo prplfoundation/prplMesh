@@ -167,27 +167,6 @@ class cACTION_MONITOR_HEARTBEAT_NOTIFICATION : public BaseClass
         eActionOp_MONITOR* m_action_op = nullptr;
 };
 
-class cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST : public BaseClass
-{
-    public:
-        cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST();
-
-        static eActionOp_MONITOR get_action_op(){
-            return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST);
-        }
-        sClientMonitoringParams& params();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_MONITOR* m_action_op = nullptr;
-        sClientMonitoringParams* m_params = nullptr;
-};
-
 class cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE : public BaseClass
 {
     public:
