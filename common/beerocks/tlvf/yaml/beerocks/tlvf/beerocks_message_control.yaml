@@ -234,10 +234,6 @@ cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION:
   _type: class
   mac: sMacAddr
 
-cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE:
-  _type: class
-  success: uint8_t
-
 cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST:
   _type: class
   mac: sMacAddr 

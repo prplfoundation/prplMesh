@@ -944,27 +944,6 @@ class cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION : public BaseClass
         sMacAddr* m_mac = nullptr;
 };
 
-class cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE : public BaseClass
-{
-    public:
-        cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE();
-
-        static eActionOp_CONTROL get_action_op(){
-            return (eActionOp_CONTROL)(ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE);
-        }
-        uint8_t& success();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_CONTROL* m_action_op = nullptr;
-        uint8_t* m_success = nullptr;
-};
-
 class cACTION_CONTROL_CLIENT_STOP_MONITORING_REQUEST : public BaseClass
 {
     public:
