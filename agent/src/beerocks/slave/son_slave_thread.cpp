@@ -520,19 +520,19 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         message_com::send_cmdu(ap_manager_socket, cmdu_tx);
         break;
     }
-    case beerocks_message::ACTION_CONTROL_CLIENT_START_MONITORING_REQUEST: {
-        LOG(DEBUG) << "received ACTION_CONTROL_CLIENT_START_MONITORING_REQUEST";
+    case beerocks_message::ACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION: {
+        LOG(DEBUG) << "received ACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION";
         auto request_in =
             beerocks_header
-                ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST>();
+                ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION>();
         if (request_in == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_START_MONITORING_REQUEST failed";
+            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION failed";
             return false;
         }
 
         std::string client_mac = network_utils::mac_to_string(request_in->params().mac);
 
-        LOG(DEBUG) << "START_MONITORING_REQUEST: mac=" << client_mac;
+        LOG(DEBUG) << "IRE_CONNECTED_NOTIFICATION: mac=" << client_mac;
 
         if (request_in->params().is_ire) {
             auto request_out = message_com::create_vs_message<

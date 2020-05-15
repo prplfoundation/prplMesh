@@ -99,11 +99,11 @@ void association_handling_task::work()
         bool is_ire = database.get_node_type(sta_mac) == beerocks::TYPE_IRE_BACKHAUL;
         if (is_ire) {
             auto request = message_com::create_vs_message<
-                beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST>(cmdu_tx, id);
+                beerocks_message::cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION>(cmdu_tx, id);
 
             if (!request) {
                 LOG(ERROR)
-                    << "Failed building ACTION_CONTROL_CLIENT_START_MONITORING_REQUEST message!";
+                    << "Failed building ACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION message!";
                 return;
             }
 

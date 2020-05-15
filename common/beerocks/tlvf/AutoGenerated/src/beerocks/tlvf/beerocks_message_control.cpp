@@ -3283,27 +3283,27 @@ bool cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION::init()
     return true;
 }
 
-cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
     BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
 BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
-cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::~cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST() {
+cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::~cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION() {
 }
-sClientMonitoringParams& cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::params() {
+sClientMonitoringParams& cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::params() {
     return (sClientMonitoringParams&)(*m_params);
 }
 
-void cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::class_swap()
+void cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
     m_params->struct_swap();
 }
 
-bool cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::finalize()
+bool cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::finalize()
 {
     if (m_parse__) {
         TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
@@ -3330,14 +3330,14 @@ bool cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::finalize()
     return true;
 }
 
-size_t cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::get_initial_size()
+size_t cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
     class_size += sizeof(sClientMonitoringParams); // params
     return class_size;
 }
 
-bool cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST::init()
+bool cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::init()
 {
     if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";

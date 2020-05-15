@@ -230,7 +230,7 @@ cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION:
 #################################################
 # CLIENT
 #################################################
-cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST:
+cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION:
   _type: class
   params: sClientMonitoringParams 
 

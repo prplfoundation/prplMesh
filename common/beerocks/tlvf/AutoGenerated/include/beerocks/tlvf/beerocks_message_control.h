@@ -923,15 +923,15 @@ class cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION : public BaseClass
         sVapInfo* m_vap_info = nullptr;
 };
 
-class cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST : public BaseClass
+class cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION : public BaseClass
 {
     public:
-        cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST();
+        cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION();
 
         static eActionOp_CONTROL get_action_op(){
-            return (eActionOp_CONTROL)(ACTION_CONTROL_CLIENT_START_MONITORING_REQUEST);
+            return (eActionOp_CONTROL)(ACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION);
         }
         sClientMonitoringParams& params();
         void class_swap() override;
