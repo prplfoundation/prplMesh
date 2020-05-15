@@ -146,11 +146,6 @@ sClientDisconnectionParams:
   source: uint8_t
   type: uint8_t
 
-sClientMonitoringParams:
-  _type: struct
-  mac: sMacAddr
-  is_ire: uint8_t 
-
 sConfigVapInfo:
   _type: struct
   type: uint8_t
