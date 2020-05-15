@@ -48,10 +48,6 @@ cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE:
   _type: class
   success: uint8_t
 
-cACTION_MONITOR_CLIENT_STOP_MONITORING_REQUEST:
-  _type: class
-  mac: sMacAddr
-
 cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST:
   _type: class
   params: sNodeRssiMeasurementRequest 
