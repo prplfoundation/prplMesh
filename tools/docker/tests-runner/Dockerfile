@@ -6,7 +6,6 @@ RUN apk add --update --no-cache \
     python3 \
     grep \
     coreutils \
-    tcpdump \
     tshark
 
 COPY entrypoint.sh /usr/local/bin/
