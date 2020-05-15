@@ -96,20 +96,24 @@ void association_handling_task::work()
         LOG(DEBUG) << "START_MONITORING_REQUEST hostap_mac=" << new_hostap_mac << " sta_mac "
                    << sta_mac;
 
-        auto request = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST>(cmdu_tx, id);
+        bool is_ire = database.get_node_type(sta_mac) == beerocks::TYPE_IRE_BACKHAUL;
+        if (is_ire) {
+            auto request = message_com::create_vs_message<
+                beerocks_message::cACTION_CONTROL_CLIENT_START_MONITORING_REQUEST>(cmdu_tx, id);
 
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_START_MONITORING_REQUEST message!";
-            return;
+            if (!request) {
+                LOG(ERROR)
+                    << "Failed building ACTION_CONTROL_CLIENT_START_MONITORING_REQUEST message!";
+                return;
+            }
+
+            request->params().mac    = network_utils::mac_from_string(sta_mac);
+            request->params().is_ire = true;
+
+            auto radio_mac = database.get_node_parent_radio(new_hostap_mac);
+            auto agent_mac = database.get_node_parent_ire(radio_mac);
+            son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
         }
-
-        request->params().mac    = network_utils::mac_from_string(sta_mac);
-        request->params().is_ire = database.get_node_type(sta_mac) == beerocks::TYPE_IRE_BACKHAUL;
-
-        auto radio_mac = database.get_node_parent_radio(new_hostap_mac);
-        auto agent_mac = database.get_node_parent_ire(radio_mac);
-        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
 
         if (database.settings_client_11k_roaming() &&
             (database.get_node_beacon_measurement_support_level(sta_mac) ==
