@@ -3293,14 +3293,14 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
 }
 cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::~cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION() {
 }
-sClientMonitoringParams& cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::params() {
-    return (sClientMonitoringParams&)(*m_params);
+sMacAddr& cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::mac() {
+    return (sMacAddr&)(*m_mac);
 }
 
 void cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
-    m_params->struct_swap();
+    m_mac->struct_swap();
 }
 
 bool cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::finalize()
@@ -3333,7 +3333,7 @@ bool cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::finalize()
 size_t cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(sClientMonitoringParams); // params
+    class_size += sizeof(sMacAddr); // mac
     return class_size;
 }
 
@@ -3343,12 +3343,12 @@ bool cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_params = reinterpret_cast<sClientMonitoringParams*>(m_buff_ptr__);
-    if (!buffPtrIncrementSafe(sizeof(sClientMonitoringParams))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sClientMonitoringParams) << ") Failed!";
+    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
         return false;
     }
-    if (!m_parse__) { m_params->struct_init(); }
+    if (!m_parse__) { m_mac->struct_init(); }
     if (m_parse__) { class_swap(); }
     return true;
 }

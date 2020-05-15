@@ -232,9 +232,8 @@ cACTION_CONTROL_HOSTAP_AP_ENABLED_NOTIFICATION:
 #################################################
 cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION:
   _type: class
-  params: sClientMonitoringParams 
+  mac: sMacAddr
 
-  
 cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE:
   _type: class
   success: uint8_t

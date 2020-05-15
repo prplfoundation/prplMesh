@@ -933,7 +933,7 @@ class cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION : public BaseClass
         static eActionOp_CONTROL get_action_op(){
             return (eActionOp_CONTROL)(ACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION);
         }
-        sClientMonitoringParams& params();
+        sMacAddr& mac();
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -941,7 +941,7 @@ class cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION : public BaseClass
     private:
         bool init();
         eActionOp_CONTROL* m_action_op = nullptr;
-        sClientMonitoringParams* m_params = nullptr;
+        sMacAddr* m_mac = nullptr;
 };
 
 class cACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE : public BaseClass

@@ -107,8 +107,7 @@ void association_handling_task::work()
                 return;
             }
 
-            request->params().mac    = network_utils::mac_from_string(sta_mac);
-            request->params().is_ire = true;
+            request->mac() = network_utils::mac_from_string(sta_mac);
 
             auto radio_mac = database.get_node_parent_radio(new_hostap_mac);
             auto agent_mac = database.get_node_parent_ire(radio_mac);

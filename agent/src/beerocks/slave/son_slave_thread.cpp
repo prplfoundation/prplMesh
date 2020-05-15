@@ -525,26 +525,24 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         auto request_in =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION>();
-        if (request_in == nullptr) {
+        if (!request_in) {
             LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_IRE_CONNECTED_NOTIFICATION failed";
             return false;
         }
 
-        std::string client_mac = network_utils::mac_to_string(request_in->params().mac);
+        std::string client_mac = network_utils::mac_to_string(request_in->mac());
 
         LOG(DEBUG) << "IRE_CONNECTED_NOTIFICATION: mac=" << client_mac;
 
-        if (request_in->params().is_ire) {
-            auto request_out = message_com::create_vs_message<
-                beerocks_message::cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION>(cmdu_tx);
-            if (request_out == nullptr) {
-                LOG(ERROR) << "Failed building ACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION "
-                              "message!";
-                return false;
-            }
-            request_out->mac() = request_in->params().mac;
-            message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+        auto request_out = message_com::create_vs_message<
+            beerocks_message::cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION>(cmdu_tx);
+        if (!request_out) {
+            LOG(ERROR) << "Failed building ACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION "
+                          "message!";
+            return false;
         }
+        request_out->mac() = request_in->mac();
+        message_com::send_cmdu(ap_manager_socket, cmdu_tx);
         break;
     }
 
