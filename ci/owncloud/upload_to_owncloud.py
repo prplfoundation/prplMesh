@@ -21,9 +21,9 @@ def get_credentials(options_path=None, force_netrc=True):
     options_path : str, optional
                 path to the options file
 
-    force_netrc : bool
-                flag indicating whether to skip parsing the options
-                file and skip straight to the contents of ~/.netrc
+    force_netrc : bool, optional
+                flag indicating whether to skip parsing the options file and instead directly
+                load the credentials from ~/.netrc
     Returns
     -------
     dictionary with 3 key/value pairs,
