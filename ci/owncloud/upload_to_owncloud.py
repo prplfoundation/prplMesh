@@ -2,6 +2,7 @@ from os import path
 from getpass import getuser
 import netrc
 from webdav3.client import Client
+from uuid import uuid4
 import json
 from opts import debug, message, opts
 
@@ -81,5 +82,50 @@ def mkdir_recursively(webdav_client, remote_path):
             webdav_client.mkdir(p)
         except BaseException as e:
             debug(e)
+
+
+def upload(webdav_client, is_direct, remote_path, local_path, unique_id=None):
+    """
+    upload(webdav_client, is_direct, remote_path, local_path, unique_id)
+
+    Uploads the content of a directory to a directory in the remote webdav server
+
+    The remote directory's tail is a unique directory name.
+
+    Parameters
+    ----------
+
+    webdav_client : webdav3.client.Client
+        the remote dav server's client object
+    is_direct : bool
+        flag dictating whether the directory is uploaded directly into the remote path
+        or copied into a temporary folder first, and then into the remote path.
+
+    remote_path : str
+        path in the webdav server to be created and for the files to be copied to
+
+    local_path : str
+        local path to be copied from
+
+    unique_id : str, optional
+        a uuid to act as the identifier of the uploaded files in the remote directory
+    """
+    if not unique_id:
+        unique_id = str(uuid4())
+    message("""Uploading files from local directory {0} to remote directory {1},\n \
+         username is {2}, remote directory id is: {3}""".format(
+        local_path, remote_path, webdav_client.webdav.options["login"], webdav_client, unique_id))
+    remote_full_path = path.join(remote_path, unique_id)
+    mkdir_recursively(remote_full_path)
+    if not path.isdir(local_path):
+        raise FileNotFoundError("Local path location is not a directory")
+    if is_direct:
+        webdav_client.upload_sync(remote_full_path, local_path)
+    else:
+        remote_temp_path = path.join("temp_uploads", unique_id)
+        mkdir_recursively(remote_temp_path)
+        webdav_client.upload_sync(remote_temp_path, local_path)
+        webdav_client.copy(remote_temp_path, remote_full_path)
+    message("Success")
 
 
