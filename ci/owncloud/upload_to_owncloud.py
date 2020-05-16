@@ -1,3 +1,4 @@
+import argparse
 from os import path
 from getpass import getuser
 import netrc
@@ -129,3 +130,24 @@ def upload(webdav_client, is_direct, remote_path, local_path, unique_id=None):
     message("Success")
 
 
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument("--verbose", "-v", action='store_true', default=False,
+                        help="Enable verbosity.")
+    parser.add_argument("--direct", "-d", action='store_true', default=False,
+                        help="Direct upload without first uploading to a temporary directory")
+    parser.add_argument("--url", "-u", action='store', nargs=1,
+                        default="https://ftp.essensium.com/owncloud/remote.php/dav/files/{0}"
+                        .format(getuser()),
+                        help="webDAV URL")
+    parser.add_argument("local-path", nargs=1, type=str, action='store',
+                        help="Local file or folder to upload")
+    parser.add_argument("remote-path", type=str, nargs=1, action='store',
+                        help="Path in the cloud, relative to the user home to upload")
+    args = parser.parse_args()
+    args.local_path = getattr(args, "local-path")[0]
+    args.remote_path = getattr(args, "remote-path")[0]
+    opts.verbose = args.verbose
+    webdav_options = get_credentials()
+    client = Client(webdav_options)
+    upload(client, args.direct, args.remote_path, args.local_path)
