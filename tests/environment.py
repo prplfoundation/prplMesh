@@ -33,6 +33,7 @@ class ALEntity:
     it is implemented in prplMesh and it allows us to have e.g. a separate UCCSocket to controller
     and agent.
     '''
+
     def __init__(self, mac: str, ucc_socket: UCCSocket, installdir: str,
                  is_controller: bool = False):
         self.mac = mac
@@ -91,8 +92,10 @@ class Station:
     represents a station. Handling the station is actually done through the VirtualAP concrete
     implementation.
     '''
+
     def __init__(self, mac: str):
         self.mac = mac
+        self.bssid = None
 
     __mac_base = 0
 
@@ -106,9 +109,24 @@ class Station:
             Station.__mac_base = 0
         return Station(mac)
 
+    def connect(self, bssid):
+        '''Simulate station connection'''
+        self.bssid = bssid
+
+    def disconnect(self):
+        '''Simulate station disconnection'''
+        self.bssid = None
+
+    def connected(self, bssid=None) -> bool:
+        '''Check if station connected'''
+        if bssid is not None:
+            return self.bssid == bssid
+        return self.bssid is not None
+
 
 class VirtualAP:
     '''Abstract representation of a VAP on a MultiAP Radio.'''
+
     def __init__(self, radio: Radio, bssid: str):
         self.radio = radio
         radio.vaps.append(self)
@@ -265,16 +283,19 @@ class RadioDocker(Radio):
 
 class VirtualAPDocker(VirtualAP):
     '''Docker implementation of a VAP.'''
+
     def __init__(self, radio: RadioDocker, bssid: str):
         super().__init__(radio, bssid)
 
     def associate(self, sta: Station) -> bool:
         '''Associate "sta" with this VAP.'''
         self.radio.send_bwl_event("EVENT AP-STA-CONNECTED {}".format(sta.mac))
+        sta.connect(self.bssid)
 
     def disassociate(self, sta: Station) -> bool:
         '''Disassociate "sta" from this VAP.'''
         self.radio.send_bwl_event("EVENT AP-STA-DISCONNECTED {}".format(sta.mac))
+        sta.disconnect()
 
 
 def _get_bridge_interface(docker_network):
