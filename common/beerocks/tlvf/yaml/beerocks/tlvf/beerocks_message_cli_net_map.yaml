@@ -17,23 +17,23 @@ sCliNetworkMapNodeSta:
 
 sCliNetworkMapsNodeInfo:
   _type: struct
-  mac: sMacAddr 
-  ipv4: beerocks::net::sIpv4Addr 
+  mac: sMacAddr
+  ipv4: beerocks::net::sIpv4Addr
   name:
-    _type: char 
-    _length: [ "beerocks::message::NODE_NAME_LENGTH" ]
-  type: uint8_t 
-  state: uint8_t 
-  channel: uint8_t 
-  bandwidth: uint8_t  #beerocks::eWiFiBandwidth
-  channel_ext_above_secondary: uint8_t 
-  is_dfs: uint8_t 
-  cac_completed: uint8_t 
-  tx_bytes: uint32_t 
-  rx_bytes: uint32_t 
-  stats_delta_ms: uint16_t 
-  tx_load_percent: uint8_t  # for HOSTAP it is the total sta tx_load
-  rx_load_percent: uint8_t  # for HOSTAP it is the total sta rx_load
-  channel_load_percent: uint8_t  # only for HOSTAP  
-  iface_type: uint8_t  #eIfaceType
-  vap_id: int8_t 
+    _type: char
+    _length: ["beerocks::message::NODE_NAME_LENGTH"]
+  type: uint8_t
+  state: uint8_t
+  channel: uint8_t
+  bandwidth: uint8_t #beerocks::eWiFiBandwidth
+  channel_ext_above_secondary: uint8_t
+  is_dfs: uint8_t
+  cac_completed: uint8_t
+  tx_bytes: uint32_t
+  rx_bytes: uint32_t
+  stats_delta_ms: uint16_t
+  tx_load_percent: uint8_t # for HOSTAP it is the total sta tx_load
+  rx_load_percent: uint8_t # for HOSTAP it is the total sta rx_load
+  channel_load_percent: uint8_t # only for HOSTAP
+  iface_type: uint8_t #eIfaceType
+  vap_id: int8_t
