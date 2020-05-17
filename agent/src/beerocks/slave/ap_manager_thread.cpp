@@ -808,7 +808,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         LOG(DEBUG) << "CLIENT_BSS_STEER (802.11v) for sta_mac = " << sta_mac
                    << " to bssid = " << target_bssid
                    << " channel = " << int(request->params().target.channel);
-        ap_wlan_hal->sta_bss_steer(sta_mac, target_bssid, request->params().target.channel,
+        ap_wlan_hal->sta_bss_steer(sta_mac, target_bssid, request->params().target.operating_class,
+                                   request->params().target.channel,
                                    (disassoc_imminent) ? request->params().disassoc_timer_ms : 0,
                                    (disassoc_imminent) ? bss_steer_imminent_valid_int
                                                        : bss_steer_valid_int);

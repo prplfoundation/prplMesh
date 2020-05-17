@@ -41,8 +41,8 @@ public:
     virtual bool sta_deny(const std::string &mac, const std::string &bssid) override;
     virtual bool sta_disassoc(int8_t vap_id, const std::string &mac, uint32_t reason = 0) override;
     virtual bool sta_deauth(int8_t vap_id, const std::string &mac, uint32_t reason = 0) override;
-    virtual bool sta_bss_steer(const std::string &mac, const std::string &bssid, int chan,
-                               int disassoc_timer, int valid_int) override;
+    virtual bool sta_bss_steer(const std::string &mac, const std::string &bssid, int oper_class,
+                               int chan, int disassoc_timer, int valid_int) override;
     virtual bool
     update_vap_credentials(std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list,
                            const std::string &backhaul_wps_ssid,
