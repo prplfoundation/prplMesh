@@ -39,6 +39,7 @@
 #include <easylogging++.h>
 
 #include <beerocks/tlvf/beerocks_message.h>
+#include <beerocks/tlvf/beerocks_message_1905_vs.h>
 #include <beerocks/tlvf/beerocks_message_backhaul.h>
 #include <beerocks/tlvf/beerocks_message_control.h>
 #include <beerocks/tlvf/beerocks_message_platform.h>
@@ -72,6 +73,7 @@
 #include <tlvf/wfa_map/tlvApVhtCapabilities.h>
 #include <tlvf/wfa_map/tlvAssociatedClients.h>
 #include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
+#include <tlvf/wfa_map/tlvClientAssociationEvent.h>
 #include <tlvf/wfa_map/tlvClientCapabilityReport.h>
 #include <tlvf/wfa_map/tlvClientInfo.h>
 #include <tlvf/wfa_map/tlvErrorCode.h>
@@ -1986,6 +1988,41 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
         memcpy(client_info.assoc_req, msg->association_frame(), client_info.asso_len);
         associated_clients[msg->client_mac()] = client_info;
 
+        // build 1905.1 message CMDU to send to the controller
+        if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE)) {
+            LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
+            return false;
+        }
+
+        auto client_association_event_tlv = cmdu_tx.addClass<wfa_map::tlvClientAssociationEvent>();
+        if (!client_association_event_tlv) {
+            LOG(ERROR) << "addClass tlvClientAssociationEvent failed";
+            return false;
+        }
+        client_association_event_tlv->client_mac() = msg->client_mac();
+        client_association_event_tlv->bssid()      = msg->bssid();
+        client_association_event_tlv->association_event() =
+            wfa_map::tlvClientAssociationEvent::CLIENT_HAS_JOINED_THE_BSS;
+
+        if (!is_prplmesh_controller) {
+            LOG(DEBUG) << "non-prlMesh, not adding ClientAssociationEvent VS TLV";
+        } else {
+            // Add vendor specific tlv
+            auto vs_tlv =
+                message_com::add_vs_tlv<beerocks_message::tlvVsClientAssociationEvent>(cmdu_tx);
+
+            if (!vs_tlv) {
+                LOG(ERROR) << "add_vs_tlv tlvVsClientAssociationEvent failed";
+                return false;
+            }
+
+            vs_tlv->mac()          = msg->client_mac();
+            vs_tlv->bssid()        = msg->bssid();
+            vs_tlv->vap_id()       = msg->vap_id();
+            vs_tlv->capabilities() = msg->capabilities();
+        }
+
+        send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
         break;
     }
     case beerocks_message::ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION: {

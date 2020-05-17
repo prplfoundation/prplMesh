@@ -2165,8 +2165,10 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             break;
         }
 
-        notification_out->client_mac() = notification_in->mac();
-        notification_out->bssid()      = notification_in->bssid();
+        notification_out->client_mac()   = notification_in->mac();
+        notification_out->bssid()        = notification_in->bssid();
+        notification_out->capabilities() = notification_in->capabilities();
+        notification_out->vap_id()       = notification_out->vap_id();
         if (!notification_in->association_frame_length()) {
             LOG(DEBUG) << "no association frame";
         } else {
@@ -2180,43 +2182,6 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
             slave_reset();
         }
-
-        // build 1905.1 message CMDU to send to the controller
-        if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE)) {
-            LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
-            return false;
-        }
-
-        auto client_association_event_tlv = cmdu_tx.addClass<wfa_map::tlvClientAssociationEvent>();
-        if (!client_association_event_tlv) {
-            LOG(ERROR) << "addClass tlvClientAssociationEvent failed";
-            return false;
-        }
-        client_association_event_tlv->client_mac() = notification_in->mac();
-        client_association_event_tlv->bssid()      = notification_in->bssid();
-        client_association_event_tlv->association_event() =
-            wfa_map::tlvClientAssociationEvent::CLIENT_HAS_JOINED_THE_BSS;
-
-        if (!backhaul_params.is_prplmesh_controller) {
-            LOG(DEBUG) << "non-prlMesh, not adding ClientAssociationEvent VS TLV";
-        } else {
-            // Add vendor specific tlv
-            auto vs_tlv =
-                message_com::add_vs_tlv<beerocks_message::tlvVsClientAssociationEvent>(cmdu_tx);
-
-            if (!vs_tlv) {
-                LOG(ERROR) << "add_vs_tlv tlvVsClientAssociationEvent failed";
-                return false;
-            }
-
-            vs_tlv->mac()          = notification_in->mac();
-            vs_tlv->bssid()        = notification_in->bssid();
-            vs_tlv->vap_id()       = notification_in->vap_id();
-            vs_tlv->capabilities() = notification_in->capabilities();
-        }
-
-        send_cmdu_to_controller(cmdu_tx);
-
         break;
     }
     case beerocks_message::ACTION_APMANAGER_STEERING_EVENT_PROBE_REQ_NOTIFICATION: {
