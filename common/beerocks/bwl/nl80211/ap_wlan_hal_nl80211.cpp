@@ -223,10 +223,11 @@ bool ap_wlan_hal_nl80211::sta_deauth(int8_t vap_id, const std::string &mac, uint
     return true;
 }
 
-bool ap_wlan_hal_nl80211::sta_bss_steer(const std::string &mac, const std::string &bssid, int chan,
-                                        int disassoc_timer, int valid_int)
+bool ap_wlan_hal_nl80211::sta_bss_steer(const std::string &mac, const std::string &bssid,
+                                        int oper_class, int chan, int disassoc_timer, int valid_int)
 {
-    LOG(TRACE) << __func__ << " mac: " << mac << ", BSS: " << bssid << ", channel: " << chan
+    LOG(TRACE) << __func__ << " mac: " << mac << ", BSS: " << bssid
+               << ", oper_class: " << oper_class << ", channel: " << chan
                << ", disassoc: " << disassoc_timer << ", valid_int: " << valid_int;
 
     // Build command string
@@ -237,7 +238,8 @@ bool ap_wlan_hal_nl80211::sta_bss_steer(const std::string &mac, const std::strin
         // Transition management parameters
         + " pref=" + "1" + " abridged=" + "1" +
         // Target BSSID
-        " neighbor=" + bssid + ",0,0," + std::to_string(chan) + ",0";
+        " neighbor=" + bssid + ",0," + std::to_string(oper_class) + "," + std::to_string(chan) +
+        ",0";
 
     if (disassoc_timer) {
         cmd += std::string() + " disassoc_imminent=" + "1" +

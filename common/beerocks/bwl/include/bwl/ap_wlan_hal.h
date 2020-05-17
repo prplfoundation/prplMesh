@@ -158,8 +158,8 @@ public:
      *
      * @return true on success or false on error.
      */
-    virtual bool sta_bss_steer(const std::string &mac, const std::string &bssid, int chan,
-                               int disassoc_timer, int valid_int) = 0;
+    virtual bool sta_bss_steer(const std::string &mac, const std::string &bssid, int oper_class,
+                               int chan, int disassoc_timer, int valid_int) = 0;
 
     /*!
      * Update wifi credentials.
