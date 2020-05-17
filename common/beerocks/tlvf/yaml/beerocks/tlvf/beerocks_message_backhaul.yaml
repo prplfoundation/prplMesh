@@ -133,6 +133,8 @@ cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION:
   _type: class
   client_mac: sMacAddr
   bssid: sMacAddr
+  capabilities: beerocks::message::sRadioCapabilities
+  vap_id: int8_t
   association_frame:
     _type: uint8_t
     _length: []

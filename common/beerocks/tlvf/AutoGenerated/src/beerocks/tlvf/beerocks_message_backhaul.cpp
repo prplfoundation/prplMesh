@@ -1751,6 +1751,14 @@ sMacAddr& cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::bssid() {
     return (sMacAddr&)(*m_bssid);
 }
 
+beerocks::message::sRadioCapabilities& cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::capabilities() {
+    return (beerocks::message::sRadioCapabilities&)(*m_capabilities);
+}
+
+int8_t& cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::vap_id() {
+    return (int8_t&)(*m_vap_id);
+}
+
 uint8_t* cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::association_frame(size_t idx) {
     if ( (m_association_frame_idx__ == 0) || (m_association_frame_idx__ <= idx) ) {
         TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
@@ -1798,6 +1806,7 @@ void cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::class_swap()
     tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     m_client_mac->struct_swap();
     m_bssid->struct_swap();
+    m_capabilities->struct_swap();
 }
 
 bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::finalize()
@@ -1832,6 +1841,8 @@ size_t cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(sMacAddr); // client_mac
     class_size += sizeof(sMacAddr); // bssid
+    class_size += sizeof(beerocks::message::sRadioCapabilities); // capabilities
+    class_size += sizeof(int8_t); // vap_id
     return class_size;
 }
 
@@ -1853,6 +1864,17 @@ bool cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_bssid->struct_init(); }
+    m_capabilities = reinterpret_cast<beerocks::message::sRadioCapabilities*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(beerocks::message::sRadioCapabilities))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(beerocks::message::sRadioCapabilities) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_capabilities->struct_init(); }
+    m_vap_id = reinterpret_cast<int8_t*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(int8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
+        return false;
+    }
     m_association_frame = (uint8_t*)m_buff_ptr__;
     m_association_frame_idx__ = getBuffRemainingBytes();
     if (m_parse__) { class_swap(); }

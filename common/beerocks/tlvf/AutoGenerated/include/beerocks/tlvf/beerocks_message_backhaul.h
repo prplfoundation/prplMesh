@@ -498,6 +498,8 @@ class cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION : public BaseClass
         }
         sMacAddr& client_mac();
         sMacAddr& bssid();
+        beerocks::message::sRadioCapabilities& capabilities();
+        int8_t& vap_id();
         size_t association_frame_length() { return m_association_frame_idx__ * sizeof(uint8_t); }
         uint8_t* association_frame(size_t idx = 0);
         bool set_association_frame(const void* buffer, size_t size);
@@ -511,6 +513,8 @@ class cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION : public BaseClass
         eActionOp_BACKHAUL* m_action_op = nullptr;
         sMacAddr* m_client_mac = nullptr;
         sMacAddr* m_bssid = nullptr;
+        beerocks::message::sRadioCapabilities* m_capabilities = nullptr;
+        int8_t* m_vap_id = nullptr;
         uint8_t* m_association_frame = nullptr;
         size_t m_association_frame_idx__ = 0;
         int m_lock_order_counter__ = 0;
