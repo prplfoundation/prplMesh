@@ -1899,6 +1899,22 @@ sMacAddr& cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::bssid() {
     return (sMacAddr&)(*m_bssid);
 }
 
+int8_t& cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::vap_id() {
+    return (int8_t&)(*m_vap_id);
+}
+
+uint8_t& cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::disconnect_reason() {
+    return (uint8_t&)(*m_disconnect_reason);
+}
+
+uint8_t& cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::disconnect_source() {
+    return (uint8_t&)(*m_disconnect_source);
+}
+
+uint8_t& cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::disconnect_type() {
+    return (uint8_t&)(*m_disconnect_type);
+}
+
 void cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
@@ -1938,6 +1954,10 @@ size_t cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::get_initial_size()
     size_t class_size = 0;
     class_size += sizeof(sMacAddr); // client_mac
     class_size += sizeof(sMacAddr); // bssid
+    class_size += sizeof(int8_t); // vap_id
+    class_size += sizeof(uint8_t); // disconnect_reason
+    class_size += sizeof(uint8_t); // disconnect_source
+    class_size += sizeof(uint8_t); // disconnect_type
     return class_size;
 }
 
@@ -1959,6 +1979,26 @@ bool cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION::init()
         return false;
     }
     if (!m_parse__) { m_bssid->struct_init(); }
+    m_vap_id = reinterpret_cast<int8_t*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(int8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(int8_t) << ") Failed!";
+        return false;
+    }
+    m_disconnect_reason = reinterpret_cast<uint8_t*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_disconnect_source = reinterpret_cast<uint8_t*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_disconnect_type = reinterpret_cast<uint8_t*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__) { class_swap(); }
     return true;
 }

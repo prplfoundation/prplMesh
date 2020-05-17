@@ -143,6 +143,10 @@ cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION:
   _type: class
   client_mac: sMacAddr
   bssid: sMacAddr
+  vap_id: int8_t
+  disconnect_reason: uint8_t
+  disconnect_source: uint8_t
+  disconnect_type: uint8_t
 
 cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST:
   _type: class

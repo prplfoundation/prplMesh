@@ -532,6 +532,10 @@ class cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION : public BaseClass
         }
         sMacAddr& client_mac();
         sMacAddr& bssid();
+        int8_t& vap_id();
+        uint8_t& disconnect_reason();
+        uint8_t& disconnect_source();
+        uint8_t& disconnect_type();
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -541,6 +545,10 @@ class cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION : public BaseClass
         eActionOp_BACKHAUL* m_action_op = nullptr;
         sMacAddr* m_client_mac = nullptr;
         sMacAddr* m_bssid = nullptr;
+        int8_t* m_vap_id = nullptr;
+        uint8_t* m_disconnect_reason = nullptr;
+        uint8_t* m_disconnect_source = nullptr;
+        uint8_t* m_disconnect_type = nullptr;
 };
 
 class cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST : public BaseClass
