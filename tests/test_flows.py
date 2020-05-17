@@ -201,6 +201,62 @@ class TestFlows:
             result = False
         return result
 
+    def check_topology_notification(self, eth_src: str, neighbors: list,
+                                    sta: env.Station, event: env.StationEvent, bssid: str) -> bool:
+        """Verify topology notification reliable multicast - given a source mac and
+           a list of neighbors macs, check that exactly one relayed multicast CMDU
+           was sent to the IEEE1905.1 multicast MAC address, and a single unicast
+           CMDU with the relayed bit unset to each of the given neighbors destination MACs.
+           Verify correctness of the association event TLV inside the topology notification.
+           Mark failure if any of the above conditions isn't met.
+
+        Parameters
+        ----------
+
+        eth_src: str
+            source AL MAC (origin of the topology notification)
+
+        neighbors: list
+            destination AL MACs (destinations of the topology notification)
+
+        sta: environment.Station
+            station mac
+
+        event: environment.StationEvent
+            station event - CONNECTED / DISCONNECTED
+
+        bssid: str
+            bssid Multi-AP Agent BSSID
+
+        Returns:
+        bool
+            True for valid topology notification, False otherwise
+        """
+        mcast = self.check_cmdu_type_single("topology notification", 0x1, eth_src)
+
+        # relay indication should be set
+        if not mcast.ieee1905_relay_indicator:
+            self.fail("Multicast topology notification should be relayed")
+            return False
+
+        mid = mcast.ieee1905_mid
+        for eth_dst in neighbors:
+            ucast = self.check_cmdu_type_single("topology notification",
+                                                0x1, eth_src, eth_dst, mid)
+            if ucast.ieee1905_relay_indicator:
+                self.fail("Unicast topology notification should not be relayed")
+                return False
+
+        # check for requested event
+        debug("Check for event: sta mac={}, bssid={}, event={}".format(sta.mac, bssid, event))
+        if mcast.ieee1905_tlvs[0].assoc_event_client_mac != sta.mac or \
+                mcast.ieee1905_tlvs[0].assoc_event_agent_bssid != bssid or \
+                int(mcast.ieee1905_tlvs[0].assoc_event_flags, 16) != event.value:
+            self.fail("No match for association event")
+            return False
+
+        return True
+
     def run_tests(self, tests):
         '''Run all tests as specified on the command line.'''
         total_errors = 0
@@ -327,8 +383,9 @@ class TestFlows:
         # Same test as the previous one but using CLI instead of dev_send_1905
 
         env.beerocks_cli_command('bml_clear_wifi_credentials {}'.format(env.agents[0].mac))
-        env.beerocks_cli_command('bml_set_wifi_credentials {} {} {} {} {}'.format(env.agents[0].mac,
-                                 "Multi-AP-24G-3-cli", "maprocks1", "24g", "fronthaul"))
+        env.beerocks_cli_command('bml_set_wifi_credentials {} {} {} {} {}'
+                                 .format(env.agents[0].mac,
+                                         "Multi-AP-24G-3-cli", "maprocks1", "24g", "fronthaul"))
         env.beerocks_cli_command('bml_update_wifi_credentials {}'.format(env.agents[0].mac))
 
         # Wait a bit for the renew to complete
@@ -824,11 +881,40 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
     def test_client_steering_dummy(self):
         sta = env.Station.create()
 
+        env.checkpoint()
+
         debug("Connect dummy STA to wlan0")
         env.agents[0].radios[0].vaps[0].associate(sta)
+        time.sleep(1)
+
+        debug("Check dummy STA connected to repeater1 radio")
+        self.check_topology_notification(env.agents[0].mac,
+                                         [env.controller.mac, env.agents[1].mac],
+                                         sta, env.StationEvent.CONNECT,
+                                         env.agents[0].radios[0].vaps[0].bssid)
+
+        env.checkpoint()
+
         debug("Send steer request ")
         env.beerocks_cli_command("steer_client {} {}".format(sta.mac, env.agents[0].radios[1].mac))
         time.sleep(1)
+        debug("Disconnect dummy STA from wlan0")
+        env.agents[0].radios[0].vaps[0].disassociate(sta)
+        time.sleep(1)
+        self.check_topology_notification(env.agents[0].mac,
+                                         [env.controller.mac, env.agents[1].mac],
+                                         sta, env.StationEvent.DISCONNECT,
+                                         env.agents[0].radios[0].vaps[0].bssid)
+
+        env.checkpoint()
+
+        debug("Connect dummy STA to wlan2")
+        env.agents[0].radios[1].vaps[0].associate(sta)
+        time.sleep(1)
+        self.check_topology_notification(env.agents[0].mac,
+                                         [env.controller.mac, env.agents[1].mac],
+                                         sta, env.StationEvent.CONNECT,
+                                         env.agents[0].radios[1].vaps[0].bssid)
 
         debug("Confirming Client Association Control Request message was received (UNBLOCK)")
         self.check_log(env.agents[0].radios[1], r"Got client allow request")
@@ -851,13 +937,6 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
         debug("Confirming ACK message was received")
         self.check_log(env.agents[0].radios[0], r"ACK_MESSAGE")
 
-        debug("Disconnect dummy STA from wlan0")
-        env.agents[0].radios[0].vaps[0].disassociate(sta)
-        # Make sure that controller sees disconnect before connect by waiting a little
-        time.sleep(1)
-
-        debug("Connect dummy STA to wlan2")
-        env.agents[0].radios[1].vaps[0].associate(sta)
         debug("Confirm steering success by client connected")
         self.check_log(env.controller, r"steering successful for sta {}".format(sta.mac))
         self.check_log(env.controller,
