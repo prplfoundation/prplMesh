@@ -26,6 +26,8 @@ public:
     enum class Event {
         Invalid = 0,
 
+        STA_Connected,
+        STA_Disconnected,
         AP_Enabled,
         AP_Disabled,
         // RRM (802.11k) Events

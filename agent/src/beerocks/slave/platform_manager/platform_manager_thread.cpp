@@ -428,7 +428,7 @@ void main_thread::send_dhcp_notification(const std::string &op, const std::strin
     else if (op == "old")
         dhcp_notif->op() = beerocks_message::eDHCPOp_Old;
 
-    dhcp_notif->mac()  = network_utils::mac_from_string(mac);
+    dhcp_notif->mac()  = tlvf::mac_from_string(mac);
     dhcp_notif->ipv4() = network_utils::ipv4_from_string(ip);
     mapf::utils::copy_string(dhcp_notif->hostname(0), hostname.c_str(), message::NODE_NAME_LENGTH);
 
@@ -1117,7 +1117,7 @@ bool main_thread::handle_arp_monitor()
 
     // After processing the message, copy the ipv4 and mac as strings
     std::string client_ipv4 = network_utils::ipv4_to_string(arp_notif->params().ipv4);
-    std::string client_mac  = network_utils::mac_to_string(arp_notif->params().mac);
+    std::string client_mac  = tlvf::mac_to_string(arp_notif->params().mac);
 
     Socket *sd       = nullptr;
     auto iIfaceIndex = arp_notif->params().iface_idx;
@@ -1145,7 +1145,7 @@ bool main_thread::handle_arp_monitor()
 
     } else if (entry.type != ARP_TYPE_DELNEIGH) {
 
-        std::string mac  = network_utils::mac_to_string(arp_notif->params().mac);
+        std::string mac  = tlvf::mac_to_string(arp_notif->params().mac);
         std::string ipv4 = network_utils::ipv4_to_string(arp_notif->params().ipv4);
         LOG(WARNING) << "Interface index " << int(iIfaceIndex) << " not found! mac=" << mac
                      << ", ipv4=" << ipv4;

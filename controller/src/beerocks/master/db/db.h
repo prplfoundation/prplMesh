@@ -472,7 +472,7 @@ public:
      * @return false on failure 
      */
     bool set_channel_scan_results_status(const sMacAddr &mac,
-                                         beerocks::eChannelScanErrCode error_code,
+                                         beerocks::eChannelScanStatusCode error_code,
                                          bool single_scan);
 
     /**
@@ -482,8 +482,8 @@ public:
      * @param single_scan: Indicated if to use single scan or continuous
      * @return Current status of channel scan results
      */
-    beerocks::eChannelScanErrCode get_channel_scan_results_status(const sMacAddr &mac,
-                                                                  bool single_scan);
+    beerocks::eChannelScanStatusCode get_channel_scan_results_status(const sMacAddr &mac,
+                                                                     bool single_scan);
 
     /**
      * @brief Set the channel scan dwell time msec object

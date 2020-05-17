@@ -89,7 +89,7 @@ void channel_selection_task::handle_event(int event_type, void *obj)
         TASK_LOG(ERROR) << "obj == nullptr";
         return;
     }
-    auto event_hostap_mac = network_utils::mac_to_string(((sMacAddr *)obj)->oct);
+    auto event_hostap_mac = tlvf::mac_to_string(((sMacAddr *)obj)->oct);
     if (hostap_mac == event_hostap_mac) {
         bool handle_event = false;
         switch (eEvent(event_type)) {
@@ -222,7 +222,7 @@ void channel_selection_task::work()
             eEvent event_type;
             auto event_obj = queue_get_event(event_type);
             //TASK_LOG(DEBUG) << "event_obj = " << int(event_obj) ;
-            hostap_mac               = network_utils::mac_to_string(((sMacAddr *)event_obj)->oct);
+            hostap_mac               = tlvf::mac_to_string(((sMacAddr *)event_obj)->oct);
             event_handle_in_progress = true;
             switch (event_type) {
             case eEvent::SLAVE_JOINED_EVENT: {
@@ -1052,7 +1052,7 @@ void channel_selection_task::work()
 
         //inject event for sample client on reentry hostap after steering them to 2.4G hostap
         auto new_event = CHANNEL_SELECTION_ALLOCATE_EVENT(sDfsReEntrySampleSteeredClients_event);
-        new_event->hostap_mac      = network_utils::mac_from_string(hostap_mac);
+        new_event->hostap_mac      = tlvf::mac_from_string(hostap_mac);
         new_event->timestamp       = std::chrono::steady_clock::now();
         new_event->timeout_expired = false;
         tasks.push_event(database.get_channel_selection_task_id(),
@@ -1141,7 +1141,7 @@ void channel_selection_task::queue_clear_mac(std::string mac)
 {
     TASK_LOG(DEBUG) << "queue_clear_mac(), mac = " << mac;
     for (auto it = event_queue.begin(); it != event_queue.end(); it++) {
-        auto event_mac = network_utils::mac_to_string((((sMacAddr *)(it->second))->oct));
+        auto event_mac = tlvf::mac_to_string((((sMacAddr *)(it->second))->oct));
         if (event_mac == mac) {
             TASK_LOG(DEBUG) << "DELETED_EVENT";
             it->first = eEvent::DELETED_EVENT;
@@ -1170,7 +1170,7 @@ bool channel_selection_task::reentry_steered_client_check()
         //inject the event back to the end of the queue
         //TASK_LOG(DEBUG) << "hostap_mac - " << hostap_mac << " sta's are still connected injecting sta sample event ";
         auto new_event = CHANNEL_SELECTION_ALLOCATE_EVENT(sDfsReEntrySampleSteeredClients_event);
-        new_event->hostap_mac      = network_utils::mac_from_string(hostap_mac);
+        new_event->hostap_mac      = tlvf::mac_from_string(hostap_mac);
         new_event->timestamp       = dfs_reentry_pending_steered_clients->timestamp;
         new_event->timeout_expired = false;
         tasks.push_event(database.get_channel_selection_task_id(),
@@ -1206,7 +1206,7 @@ bool channel_selection_task::cac_pending_hostap_check()
             //inject again the event to check for cac completed.
             //TASK_LOG(DEBUG) << "hostap_mac - " << hostap_mac << " inject cac sample event";
             auto new_event        = CHANNEL_SELECTION_ALLOCATE_EVENT(sDfsCacPendinghostap_event);
-            new_event->hostap_mac = network_utils::mac_from_string(hostap_mac);
+            new_event->hostap_mac = tlvf::mac_from_string(hostap_mac);
             new_event->timeout_expired = false;
             //TASK_LOG(DEBUG) << "hostap_mac - " << hostap_mac << " timeout_expired = " << int(new_event->timeout_expired);
             tasks.push_event(database.get_channel_selection_task_id(),
@@ -1237,8 +1237,8 @@ void channel_selection_task::get_hostap_params()
         backhaul_scan_measurement_list.clear();
         for (auto i = 0; i < beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH; i++) {
             if (slave_joined_event->backhaul_scan_measurement_list[i].channel != 0) {
-                auto mac = network_utils::mac_to_string(
-                    slave_joined_event->backhaul_scan_measurement_list[i].mac);
+                auto mac =
+                    tlvf::mac_to_string(slave_joined_event->backhaul_scan_measurement_list[i].mac);
                 backhaul_scan_measurement_list[mac].channel =
                     slave_joined_event->backhaul_scan_measurement_list[i].channel;
                 backhaul_scan_measurement_list[mac].rssi =
@@ -1851,7 +1851,7 @@ void channel_selection_task::wait_for_cac_completed(uint8_t channel, uint8_t ban
     //inject event to check for cac completed.
     TASK_LOG(DEBUG) << "hostap_mac - " << hostap_mac << " inject cac sample event";
     auto new_event             = CHANNEL_SELECTION_ALLOCATE_EVENT(sDfsCacPendinghostap_event);
-    new_event->hostap_mac      = network_utils::mac_from_string(hostap_mac);
+    new_event->hostap_mac      = tlvf::mac_from_string(hostap_mac);
     new_event->timeout_expired = false;
     TASK_LOG(DEBUG) << "hostap_mac - " << hostap_mac
                     << " timeout_expired = " << int(new_event->timeout_expired);

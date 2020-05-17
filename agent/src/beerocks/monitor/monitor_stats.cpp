@@ -14,6 +14,7 @@
 
 #include <beerocks/tlvf/beerocks_message.h>
 #include <beerocks/tlvf/beerocks_message_monitor.h>
+#include <tlvf/wfa_map/tlvApMetrics.h>
 
 using namespace beerocks;
 using namespace net;
@@ -148,7 +149,7 @@ void monitor_stats::send_hostap_measurements(const sMeasurementsRequest &request
 
         auto &sta_stats_msg = std::get<1>(response->sta_stats(sta_count));
 
-        sta_stats_msg.mac               = network_utils::mac_from_string(sta_mac);
+        sta_stats_msg.mac               = tlvf::mac_from_string(sta_mac);
         sta_stats_msg.rx_packets        = sta_stats.hal_stats.rx_packets;
         sta_stats_msg.tx_packets        = sta_stats.hal_stats.tx_packets;
         sta_stats_msg.tx_bytes          = sta_stats.hal_stats.tx_bytes;
@@ -174,8 +175,7 @@ void monitor_stats::send_associated_sta_link_metrics(const sMeasurementsRequest 
                             [&](std::pair<std::string, monitor_sta_node *> sta) {
                                 auto sta_mac  = sta.first;
                                 auto sta_node = sta.second;
-                                return sta_node &&
-                                       (network_utils::mac_from_string(sta_mac) == request.mac);
+                                return sta_node && (tlvf::mac_from_string(sta_mac) == request.mac);
                             });
 
     if (sta == mon_db->sta_end()) {
@@ -464,6 +464,31 @@ void monitor_stats::process()
             // containing one AP Metrics TLV for each of the BSSs on this radio.
         }
     }
+}
+
+bool monitor_stats::add_ap_metrics(ieee1905_1::CmduMessageTx &cmdu_tx, const sMacAddr &bssid)
+{
+    auto ap_metrics_response_tlv = cmdu_tx.addClass<wfa_map::tlvApMetrics>();
+
+    if (!ap_metrics_response_tlv) {
+        LOG(ERROR) << "Couldn't addClass tlvApMetrics";
+        return false;
+    }
+
+    //TODO: fill ap_metrics_response_tlv with valid data (now valid just bssid_response)
+    ap_metrics_response_tlv->bssid()                                      = bssid;
+    ap_metrics_response_tlv->channel_utilization()                        = 10;
+    ap_metrics_response_tlv->number_of_stas_currently_associated()        = 2;
+    ap_metrics_response_tlv->estimated_service_parameters().include_ac_be = 1;
+
+    if (!ap_metrics_response_tlv->alloc_estimated_service_info_field(3)) {
+        LOG(ERROR)
+            << "Couldn't allocate ap_metrics_response_tlv->alloc_estimated_service_info_field";
+        return false;
+    }
+    std::fill_n(ap_metrics_response_tlv->estimated_service_info_field(), 3, 0);
+
+    return true;
 }
 
 void monitor_stats::calculate_client_load(monitor_sta_node *sta_node,

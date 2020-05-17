@@ -97,7 +97,7 @@ endif()
 add_library(${PROJECT_NAME} ${bpl_common_sources} ${bpl_platform_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${prplmesh_VERSION} SOVERSION ${prplmesh_VERSION_MAJOR})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
-target_link_libraries(${PROJECT_NAME} PRIVATE elpp common ${BPL_LIBS})
+target_link_libraries(${PROJECT_NAME} PRIVATE elpp mapfcommon ${BPL_LIBS})
 
 # Install
 target_include_directories(${PROJECT_NAME}

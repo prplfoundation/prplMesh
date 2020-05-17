@@ -544,7 +544,7 @@ bool ap_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
         memset(msg_buff.get(), 0, sizeof(sACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION));
 
         msg->params.vap_id = 0;
-        msg->params.mac    = beerocks::net::network_utils::mac_from_string(parsed_obj["_mac"]);
+        msg->params.mac    = tlvf::mac_from_string(parsed_obj["_mac"]);
 
         // Add the message to the queue
         event_queue_push(Event::STA_Connected, msg_buff);
@@ -566,7 +566,7 @@ bool ap_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
 
         // Store the MAC address of the disconnected STA
         msg->params.vap_id = 0;
-        msg->params.mac    = beerocks::net::network_utils::mac_from_string(parsed_obj["_mac"]);
+        msg->params.mac    = tlvf::mac_from_string(parsed_obj["_mac"]);
 
         // Add the message to the queue
         event_queue_push(Event::STA_Disconnected, msg_buff);
@@ -585,7 +585,7 @@ bool ap_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
         memset(msg_buff.get(), 0, sizeof(sACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE));
 
         // Client params
-        msg->params.mac         = beerocks::net::network_utils::mac_from_string(parsed_obj["_mac"]);
+        msg->params.mac         = tlvf::mac_from_string(parsed_obj["_mac"]);
         msg->params.status_code = beerocks::string_utils::stoi(parsed_obj["status_code"]);
 
         // Add the message to the queue

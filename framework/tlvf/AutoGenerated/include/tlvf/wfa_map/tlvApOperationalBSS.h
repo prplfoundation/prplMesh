@@ -24,7 +24,6 @@
 #include <tuple>
 #include <vector>
 #include "tlvf/common/sMacAddr.h"
-#include <tlvf/tlvfutils.h>
 
 namespace wfa_map {
 

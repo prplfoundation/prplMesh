@@ -30,6 +30,7 @@
 #include <tlvf/ieee_1905_1/tlvWsc.h>
 #include <tlvf/wfa_map/tlvApCapability.h>
 #include <tlvf/wfa_map/tlvApMetricQuery.h>
+#include <tlvf/wfa_map/tlvApMetrics.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
@@ -77,7 +78,8 @@ uint16_t CmduMessageRx::getNextTlvLength() const
 
 std::shared_ptr<BaseClass> CmduMessageRx::parseNextTlv()
 {
-    switch (getNextTlvType()) {
+    auto tlv_type = getNextTlvType();
+    switch (tlv_type) {
     case (0): {
         return msg.addClass<tlvEndOfMessage>();
     }
@@ -200,6 +202,9 @@ std::shared_ptr<BaseClass> CmduMessageRx::parseNextTlv()
     case (147): {
         return msg.addClass<wfa_map::tlvApMetricQuery>();
     }
+    case (148): {
+        return msg.addClass<wfa_map::tlvApMetrics>();
+    }
     case (149): {
         return msg.addClass<wfa_map::tlvStaMacAddressType>();
     }
@@ -219,6 +224,7 @@ std::shared_ptr<BaseClass> CmduMessageRx::parseNextTlv()
         return msg.addClass<wfa_map::tlvApCapability>();
     }
     default: {
+        LOG(DEBUG) << "Unknown TLV type: " << tlv_type;
         return msg.addClass<tlvUnknown>();
     }
     }

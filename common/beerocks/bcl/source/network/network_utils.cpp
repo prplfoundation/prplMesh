@@ -83,62 +83,6 @@ const std::string network_utils::MULTICAST_1905_MAC_ADDR("01:80:c2:00:00:13");
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-// Converts uint64_t mac address to string format
-std::string network_utils::mac_to_string(const uint64_t mac)
-{
-    uint8_t mac_address[MAC_ADDR_LEN];
-    int8_t i;
-    uint8_t *p = mac_address;
-    for (i = 5; i >= 0; i--) {
-        *p++ = mac >> (CHAR_BIT * i);
-    }
-    return mac_to_string(mac_address);
-}
-
-// Converts a mac address in a human-readable format
-std::string network_utils::mac_to_string(const uint8_t *mac_address)
-{
-    std::string mac_addr_string;
-
-    mac_addr_string = string_utils::int_to_hex_string((uint32_t)mac_address[0], 2) + ":" +
-                      string_utils::int_to_hex_string((uint32_t)mac_address[1], 2) + ":" +
-                      string_utils::int_to_hex_string((uint32_t)mac_address[2], 2) + ":" +
-                      string_utils::int_to_hex_string((uint32_t)mac_address[3], 2) + ":" +
-                      string_utils::int_to_hex_string((uint32_t)mac_address[4], 2) + ":" +
-                      string_utils::int_to_hex_string((uint32_t)mac_address[5], 2);
-
-    return mac_addr_string;
-}
-
-std::string network_utils::mac_to_string(const sMacAddr &mac)
-{
-    return mac_to_string((const uint8_t *)mac.oct);
-}
-
-sMacAddr network_utils::mac_from_string(const std::string &mac)
-{
-    sMacAddr ret;
-
-    mac_from_string(ret.oct, mac);
-
-    return ret;
-}
-
-void network_utils::mac_from_string(uint8_t *buf, const std::string &mac)
-{
-    if (mac.empty()) {
-        memset(buf, 0, MAC_ADDR_LEN);
-    } else {
-        std::stringstream mac_ss(mac);
-        std::string token;
-
-        for (int i = 0; i < MAC_ADDR_LEN; i++) {
-            std::getline(mac_ss, token, ':');
-            buf[i] = std::stoul(token, nullptr, 16);
-        }
-    }
-}
-
 bool network_utils::is_valid_mac(std::string mac)
 {
     if (mac.size() != MAC_ADDR_CHAR_SIZE) {
@@ -146,8 +90,8 @@ bool network_utils::is_valid_mac(std::string mac)
     }
     std::transform(mac.begin(), mac.end(), mac.begin(), ::tolower);
     uint8_t str[20];
-    mac_from_string(str, mac);
-    auto mac_out = mac_to_string(str);
+    tlvf::mac_from_string(str, mac);
+    auto mac_out = tlvf::mac_to_string(str);
     return (mac == mac_out);
 }
 
@@ -672,7 +616,7 @@ bool network_utils::linux_iface_get_mac(const std::string &iface, std::string &m
         return false;
     }
     close(fd);
-    mac = network_utils::mac_to_string((uint8_t *)(ifr.ifr_ifru.ifru_hwaddr.sa_data));
+    mac = tlvf::mac_to_string((uint8_t *)(ifr.ifr_ifru.ifru_hwaddr.sa_data));
     std::transform(mac.begin(), mac.end(), mac.begin(), ::tolower);
     return true;
 }
@@ -682,7 +626,7 @@ bool network_utils::linux_iface_get_name(const sMacAddr &mac, std::string &iface
     bool found = false;
     struct if_nameindex *pif;
     struct if_nameindex *head;
-    std::string mac_to_find = network_utils::mac_to_string(mac);
+    std::string mac_to_find = tlvf::mac_to_string(mac);
 
     head = pif = if_nameindex();
     while (pif->if_index && (!found)) {
@@ -976,8 +920,7 @@ std::vector<network_utils::ip_info> network_utils::get_ip_list()
             if (ioctl(fd, SIOCGIFHWADDR, &ifr) == -1) {
                 ip_info.mac.clear();
             } else {
-                ip_info.mac =
-                    network_utils::mac_to_string((uint8_t *)(ifr.ifr_ifru.ifru_hwaddr.sa_data));
+                ip_info.mac = tlvf::mac_to_string((uint8_t *)(ifr.ifr_ifru.ifru_hwaddr.sa_data));
                 std::transform(ip_info.mac.begin(), ip_info.mac.end(), ip_info.mac.begin(),
                                ::tolower);
             }

@@ -1442,7 +1442,7 @@ int bml_internal::set_dcs_continuous_scan_enable(const sMacAddr &mac, int enable
         return (-BML_RET_OP_FAILED);
     }
 
-    if (result != int(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS)) {
+    if (result != int(eChannelScanOperationCode::SUCCESS)) {
         LOG(ERROR) << "ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_REQUEST returned error code:"
                    << result;
         return result;
@@ -1518,7 +1518,7 @@ int bml_internal::set_dcs_continuous_scan_params(const sMacAddr &mac, int dwell_
         return (-BML_RET_OP_FAILED);
     }
 
-    if (result != int(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS)) {
+    if (result != int(eChannelScanOperationCode::SUCCESS)) {
         LOG(ERROR) << "ACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_REQUEST returned error code:"
                    << result;
         return result;
@@ -1685,7 +1685,7 @@ int bml_internal::get_dcs_scan_results(const sMacAddr &mac, BML_NEIGHBOR_AP *res
                << "total count: " << scan_results.size() << ", "
                << "results status: " << int(result_status) << ", "
                << "results opt code: " << int(iRet) << "].";
-    if (iRet != int(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS)) {
+    if (iRet != int(eChannelScanOperationCode::SUCCESS)) {
         LOG(ERROR) << "Results returned with error code:" << iRet << ". Aborting!";
         return iRet;
     }
@@ -1731,7 +1731,7 @@ int bml_internal::start_dcs_single_scan(const sMacAddr &mac, int dwell_time_ms,
         return (-BML_RET_OP_FAILED);
     }
 
-    if (result != int(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS)) {
+    if (result != int(eChannelScanOperationCode::SUCCESS)) {
         LOG(ERROR) << "cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST returned error code:" << result;
         return result;
     }
@@ -2126,8 +2126,7 @@ int bml_internal::clear_wifi_credentials(const sMacAddr &al_mac)
 
     clear_request->al_mac() = al_mac;
 
-    LOG(TRACE) << "Sending clear message to master for AL-MAC: "
-               << network_utils::mac_to_string(al_mac);
+    LOG(TRACE) << "Sending clear message to master for AL-MAC: " << tlvf::mac_to_string(al_mac);
 
     if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
         LOG(ERROR) << "Failed sending clear message!";
@@ -2189,8 +2188,7 @@ int bml_internal::update_wifi_credentials(const sMacAddr &al_mac)
 
     update_request->al_mac() = al_mac;
 
-    LOG(TRACE) << "Sending update message to master for AL-MAC: "
-               << network_utils::mac_to_string(al_mac);
+    LOG(TRACE) << "Sending update message to master for AL-MAC: " << tlvf::mac_to_string(al_mac);
 
     if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
         LOG(ERROR) << "Failed sending update message!";
@@ -2859,7 +2857,7 @@ int bml_internal::set_log_level(const std::string &module_name, const std::strin
         return (-BML_RET_OP_FAILED);
     }
 
-    request->params().mac = network_utils::mac_from_string(mac);
+    request->params().mac = tlvf::mac_from_string(mac);
     if (log_level == "i")
         request->params().log_level = LOG_LEVEL_INFO;
     else if (log_level == "d")
@@ -3024,7 +3022,7 @@ int bml_internal::set_restricted_channels(const uint8_t *restricted_channels,
     std::copy_n(restricted_channels, size, request->params().restricted_channels);
     request->params().is_global = is_global;
     if (!is_global) {
-        request->params().hostap_mac = network_utils::mac_from_string(mac);
+        request->params().hostap_mac = tlvf::mac_from_string(mac);
     }
     LOG(DEBUG) << "mac = " << mac;
 
@@ -3077,7 +3075,7 @@ int bml_internal::get_restricted_channels(uint8_t *restricted_channels, const st
     }
 
     if (!is_global) {
-        request->params().hostap_mac = network_utils::mac_from_string(mac);
+        request->params().hostap_mac = tlvf::mac_from_string(mac);
     }
     request->params().is_global = is_global;
 
@@ -3124,7 +3122,7 @@ int bml_internal::topology_discovery(const char *al_mac)
         return (-BML_RET_OP_FAILED);
     }
 
-    request->al_mac() = network_utils::mac_from_string(al_mac);
+    request->al_mac() = tlvf::mac_from_string(al_mac);
 
     if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
         LOG(ERROR) << "Failed sending CMDU TRIGGER_TOPOLOGY_QUERY message";
@@ -3144,8 +3142,8 @@ int bml_internal::channel_selection(const char *al_mac, const char *ruid)
         return (-BML_RET_OP_FAILED);
     }
 
-    request->al_mac() = network_utils::mac_from_string(al_mac);
-    request->ruid()   = network_utils::mac_from_string(ruid);
+    request->al_mac() = tlvf::mac_from_string(al_mac);
+    request->ruid()   = tlvf::mac_from_string(ruid);
 
     if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
         LOG(ERROR) << "Failed sending message!";

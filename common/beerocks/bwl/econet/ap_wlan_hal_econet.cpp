@@ -164,7 +164,7 @@ bool ap_wlan_hal_dummy::sta_bss_steer(const std::string &mac, const std::string 
 
     memset(msg_buff.get(), 0, sizeof(sACTION_APMANAGER_CLIENT_BSS_STEER_RESPONSE));
 
-    msg->params.mac         = beerocks::net::network_utils::mac_from_string(mac);
+    msg->params.mac         = tlvf::mac_from_string(mac);
     msg->params.status_code = 0;
 
     // Add the message to the queue
@@ -382,7 +382,7 @@ bool ap_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
             return false;
         }
 
-        msg->params.mac = beerocks::net::network_utils::mac_from_string(tmp_str);
+        msg->params.mac = tlvf::mac_from_string(tmp_str);
 
         bool caps_valid = true;
         SRadioCapabilitiesStrings caps_strings;
@@ -455,7 +455,7 @@ bool ap_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
         }
 
         // Store the MAC address of the disconnected STA
-        msg->params.mac = beerocks::net::network_utils::mac_from_string(tmp_str);
+        msg->params.mac = tlvf::mac_from_string(tmp_str);
 
         // Add the message to the queue
         event_queue_push(Event::STA_Disconnected, msg_buff);

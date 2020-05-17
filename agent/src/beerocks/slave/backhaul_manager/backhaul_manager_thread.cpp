@@ -65,6 +65,8 @@
 #include <tlvf/wfa_map/tlvApCapability.h>
 #include <tlvf/wfa_map/tlvApHeCapabilities.h>
 #include <tlvf/wfa_map/tlvApHtCapabilities.h>
+#include <tlvf/wfa_map/tlvApMetricQuery.h>
+#include <tlvf/wfa_map/tlvApMetrics.h>
 #include <tlvf/wfa_map/tlvApOperationalBSS.h>
 #include <tlvf/wfa_map/tlvApRadioBasicCapabilities.h>
 #include <tlvf/wfa_map/tlvApVhtCapabilities.h>
@@ -185,7 +187,7 @@ static bool get_iface_mac(const std::string &iface_name, sMacAddr &iface_mac)
 {
     std::string mac;
     if (network_utils::linux_iface_get_mac(iface_name, mac)) {
-        iface_mac = network_utils::mac_from_string(mac);
+        iface_mac = tlvf::mac_from_string(mac);
         return true;
     }
 
@@ -562,8 +564,7 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
         bool backhaul_manager_exist = false;
 
         notification->params().is_prplmesh_controller = is_prplmesh_controller;
-        notification->params().controller_bridge_mac =
-            network_utils::mac_from_string(controller_bridge_mac);
+        notification->params().controller_bridge_mac = tlvf::mac_from_string(controller_bridge_mac);
 
         if (!local_gw) {
 
@@ -579,15 +580,15 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
             }
 
             notification->params().gw_ipv4 = network_utils::ipv4_from_string(bridge_info.ip_gw);
-            notification->params().gw_bridge_mac = network_utils::mac_from_string(bssid_bridge_mac);
-            notification->params().bridge_mac    = network_utils::mac_from_string(bridge_info.mac);
+            notification->params().gw_bridge_mac = tlvf::mac_from_string(bssid_bridge_mac);
+            notification->params().bridge_mac    = tlvf::mac_from_string(bridge_info.mac);
             notification->params().bridge_ipv4   = network_utils::ipv4_from_string(bridge_info.ip);
-            notification->params().backhaul_mac  = network_utils::mac_from_string(iface_info.mac);
+            notification->params().backhaul_mac  = tlvf::mac_from_string(iface_info.mac);
             notification->params().backhaul_ipv4 = network_utils::ipv4_from_string(iface_info.ip);
 
             if (m_sConfig.eType == SBackhaulConfig::EType::Wired) {
                 notification->params().backhaul_bssid =
-                    network_utils::mac_from_string(network_utils::ZERO_MAC_STRING);
+                    tlvf::mac_from_string(network_utils::ZERO_MAC_STRING);
                 notification->params().backhaul_iface_type  = IFACE_TYPE_ETHERNET;
                 notification->params().backhaul_is_wireless = 0;
                 for (auto soc : slaves_sockets) {
@@ -618,7 +619,7 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
                         backhaul_manager_exist         = true;
 
                         notification->params().backhaul_bssid =
-                            network_utils::mac_from_string(soc->sta_wlan_hal->get_bssid());
+                            tlvf::mac_from_string(soc->sta_wlan_hal->get_bssid());
                         // notification->params().backhaul_freq          = son::wireless_utils::channel_to_freq(soc->sta_wlan_hal->get_channel()); // HACK temp disabled because of a bug on endian converter
                         notification->params().backhaul_channel = soc->sta_wlan_hal->get_channel();
                         // TODO - Specify true WiFi model from config (safe to derive from hostap_iface_type?)
@@ -852,7 +853,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
                 auto selected_ruid_it = std::find_if(
                     slaves_sockets.begin(), slaves_sockets.end(),
                     [&selected_backhaul](std::shared_ptr<sRadioInfo> soc) {
-                        return network_utils::mac_from_string(selected_backhaul) == soc->radio_mac;
+                        return tlvf::mac_from_string(selected_backhaul) == soc->radio_mac;
                     });
 
                 if (!selected_backhaul.empty() && selected_ruid_it == slaves_sockets.end()) {
@@ -1103,13 +1104,13 @@ bool backhaul_manager::send_1905_topology_discovery_message()
         LOG(ERROR) << "Failed to create tlvAlMacAddressType tlv";
         return false;
     }
-    tlvAlMac->mac() = network_utils::mac_from_string(bridge_info.mac);
+    tlvAlMac->mac() = tlvf::mac_from_string(bridge_info.mac);
     auto tlvMac     = cmdu_tx.addClass<ieee1905_1::tlvMacAddress>();
     if (!tlvMac) {
         LOG(ERROR) << "Failed to create tlvMacAddress tlv";
         return false;
     }
-    tlvMac->mac() = network_utils::mac_from_string(bridge_info.mac);
+    tlvMac->mac() = tlvf::mac_from_string(bridge_info.mac);
 
     LOG(DEBUG) << "send_1905_topology_discovery_message, bridge_mac=" << bridge_info.mac;
     return send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
@@ -1140,7 +1141,7 @@ bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<sRadioInfo
         LOG(ERROR) << "addClass ieee1905_1::tlvAlMacAddressType failed";
         return false;
     }
-    network_utils::mac_from_string(tlvAlMacAddressType->mac().oct, bridge_info.mac);
+    tlvf::mac_from_string(tlvAlMacAddressType->mac().oct, bridge_info.mac);
 
     auto tlvSearchedRole = cmdu_tx.addClass<ieee1905_1::tlvSearchedRole>();
     if (!tlvSearchedRole) {
@@ -1578,8 +1579,8 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
     }
 
     uint16_t length     = uds_header->length;
-    std::string src_mac = network_utils::mac_to_string(uds_header->src_bridge_mac);
-    std::string dst_mac = network_utils::mac_to_string(uds_header->dst_bridge_mac);
+    std::string src_mac = tlvf::mac_to_string(uds_header->src_bridge_mac);
+    std::string dst_mac = tlvf::mac_to_string(uds_header->dst_bridge_mac);
 
     // LOG(DEBUG) << "handle_cmdu() - received msg from " << std::string(from_bus(sd) ? "bus" : "uds") << ", src=" << src_mac
     //            << ", dst=" << dst_mac << ", " << int(cmdu_rx.getMessageType()); // floods the log
@@ -1633,7 +1634,11 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
             }
 
             if (soc && soc->slave == sd) {
-                return handle_slave_backhaul_message(soc, cmdu_rx);
+                if (cmdu_rx.getMessageType() == ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE) {
+                    return handle_slave_backhaul_message(soc, cmdu_rx);
+                } else {
+                    return handle_slave_1905_1_message(cmdu_rx, src_mac);
+                }
             } else {
                 LOG(ERROR) << "ACTION_BACKHAUL from none slave socket!";
                 return false;
@@ -1791,8 +1796,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
                                << m_sConfig.bridge_iface;
                 } else {
 
-                    m_sConfig.preferred_bssid =
-                        network_utils::mac_to_string(request->preferred_bssid());
+                    m_sConfig.preferred_bssid = tlvf::mac_to_string(request->preferred_bssid());
                     m_sConfig.ssid.assign(request->ssid(message::WIFI_SSID_MAX_LENGTH));
                     m_sConfig.pass.assign(request->pass(message::WIFI_PASS_MAX_LENGTH));
                     m_sConfig.security_type = static_cast<bwl::WiFiSec>(request->security_type());
@@ -1830,7 +1834,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             return false;
         }
         roam_selected_bssid_channel = request->params().channel;
-        roam_selected_bssid         = network_utils::mac_to_string(request->params().bssid);
+        roam_selected_bssid         = tlvf::mac_to_string(request->params().bssid);
         roam_flag                   = true;
         LOG(DEBUG) << "ACTION_BACKHAUL_ROAM_REQUEST to bssid=" << roam_selected_bssid
                    << " on channel=" << int(roam_selected_bssid_channel);
@@ -1875,7 +1879,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             LOG(ERROR) << "addClass cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST failed";
             return false;
         }
-        std::string sta_mac = network_utils::mac_to_string(request->params().mac);
+        std::string sta_mac = tlvf::mac_to_string(request->params().mac);
         bool ap_busy        = false;
         bool bwl_error      = false;
         if (unassociated_rssi_measurement_header_id == -1) {
@@ -1887,7 +1891,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
                               "ACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE message!";
                 break;
             }
-            response->mac() = network_utils::mac_from_string(sta_mac);
+            response->mac() = tlvf::mac_from_string(sta_mac);
             message_com::send_cmdu(soc->slave, cmdu_tx);
             LOG(DEBUG) << "send ACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE, sta_mac = "
                        << sta_mac;
@@ -1952,7 +1956,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
 
         soc->vaps_list = msg->params();
         if (m_agent_ucc_listener) {
-            m_agent_ucc_listener->update_vaps_list(network_utils::mac_to_string(soc->radio_mac),
+            m_agent_ucc_listener->update_vaps_list(tlvf::mac_to_string(soc->radio_mac),
                                                    msg->params());
         }
         break;
@@ -2117,10 +2121,26 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     }
     case ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE: {
         return handle_multi_ap_policy_config_request(cmdu_rx, src_mac);
+    case ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE: {
+        return handle_ap_metrics_query(cmdu_rx, src_mac);
     }
     default: {
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
         // flows, since we won't expect a 1905 message not handled in this function
+        return false;
+    }
+    }
+    }
+}
+bool backhaul_manager::handle_slave_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                   const std::string &src_mac)
+{
+    switch (cmdu_rx.getMessageType()) {
+    case ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE: {
+        return handle_slave_ap_metrics_response(cmdu_rx, src_mac);
+    }
+    default: {
+        LOG(DEBUG) << "Unexpected 1905 message " << int(cmdu_rx.getMessageType());
         return false;
     }
     }
@@ -2412,6 +2432,162 @@ bool backhaul_manager::handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmd
     return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
 }
 
+bool backhaul_manager::handle_ap_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                               const std::string &src_mac)
+{
+    std::vector<sMacAddr> bssid;
+    const auto mid           = cmdu_rx.getMessageId();
+    auto ap_metric_query_tlv = cmdu_rx.getClass<wfa_map::tlvApMetricQuery>();
+    if (!ap_metric_query_tlv) {
+        LOG(ERROR) << "AP Metrics Query CMDU mid=" << mid << " does not have AP Metric Query TLV";
+        return false;
+    }
+    for (size_t bssid_idx = 0; bssid_idx < ap_metric_query_tlv->bssid_list_length(); bssid_idx++) {
+        auto bssid_tuple = ap_metric_query_tlv->bssid_list(bssid_idx);
+        if (!std::get<0>(bssid_tuple)) {
+            LOG(ERROR) << "Failed to get bssid " << bssid_idx << " from AP_METRICS_QUERY";
+            return false;
+        }
+        bssid.push_back(std::get<1>(bssid_tuple));
+        LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
+                   << "  bssid " << std::get<1>(bssid_tuple);
+    }
+
+    auto ret = false;
+    for (auto socket : slaves_sockets) {
+        for (const auto &mac : bssid) {
+            int i = 0;
+            if (mac == socket->vaps_list.vaps[i].mac) {
+                LOG(DEBUG) << "Forwarding AP_METRICS_QUERY_MESSAGE message to son_slave, bssid: "
+                           << std::hex << tlvf::mac_to_string(mac);
+
+                auto forward =
+                    cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE);
+                if (!forward) {
+                    LOG(ERROR) << "Failed to create AP_METRICS_QUERY_MESSAGE";
+                    return false;
+                }
+
+                auto query = cmdu_tx.addClass<wfa_map::tlvApMetricQuery>();
+                if (!query) {
+                    LOG(ERROR) << "Failed addClass<wfa_map::tlvApMetricQuery>";
+                    return false;
+                }
+
+                if (!query->alloc_bssid_list(1)) {
+                    LOG(ERROR) << "Failed allocate memory for bssid_list";
+                    return false;
+                }
+
+                auto list         = query->bssid_list(0);
+                std::get<0>(list) = true;
+                std::get<1>(list) = mac;
+
+                if (!message_com::send_cmdu(socket->slave, cmdu_tx)) {
+                    LOG(ERROR) << "Failed forwarding AP_METRICS_QUERY_MESSAGE message to son_slave";
+                    ret = false;
+                    continue;
+                } else {
+                    ret = true;
+                    // Fill a query vector
+                    m_ap_metric_query.push_back({socket->slave, mac});
+                }
+            }
+            i++;
+        }
+    }
+    return ret;
+}
+
+bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                        const std::string &src_mac)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received AP_METRICS_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
+
+    auto ap_metrics_tlv = cmdu_rx.getClass<wfa_map::tlvApMetrics>();
+    if (!ap_metrics_tlv) {
+        LOG(ERROR) << "Failed cmdu_rx.getClass<wfa_map::tlvApMetrics>(), mid=" << std::hex
+                   << int(mid);
+        return false;
+    }
+
+    auto bssid_tlv = ap_metrics_tlv->bssid();
+    auto mac       = std::find_if(
+        m_ap_metric_query.begin(), m_ap_metric_query.end(),
+        [&bssid_tlv](sApMetricsQuery const &query) { return query.bssid == bssid_tlv; });
+
+    if (mac == m_ap_metric_query.end()) {
+        LOG(ERROR) << "Failed search in ap_metric_query for bssid: " << bssid_tlv
+                   << " from mid=" << std::hex << int(mid);
+        return false;
+    }
+
+    sApMetrics metric;
+    // Copy data to the response vector
+    metric.bssid               = ap_metrics_tlv->bssid();
+    metric.channel_utilization = ap_metrics_tlv->channel_utilization();
+    metric.number_of_stas_currently_associated =
+        ap_metrics_tlv->number_of_stas_currently_associated();
+    metric.estimated_service_parameters = ap_metrics_tlv->estimated_service_parameters();
+    auto info                           = ap_metrics_tlv->estimated_service_info_field();
+    if (ap_metrics_tlv->estimated_service_info_field_length()) {
+        for (size_t i = 0; i < ap_metrics_tlv->estimated_service_info_field_length(); i++) {
+            metric.estimated_service_info_field.push_back(info[i]);
+        }
+    }
+
+    // Fill a response vector
+    m_ap_metric_response.push_back({metric});
+
+    // Remove an entry from the processed query
+    m_ap_metric_query.erase(
+        std::remove_if(m_ap_metric_query.begin(), m_ap_metric_query.end(),
+                       [&](sApMetricsQuery const &query) { return mac->bssid == query.bssid; }),
+        m_ap_metric_query.end());
+
+    if (!m_ap_metric_query.empty()) {
+        return true;
+    }
+
+    // We received all responses - prepare and send response message to the controller
+    auto cmdu_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE);
+
+    if (!cmdu_header) {
+        LOG(ERROR) << "Failed building IEEE1905 AP_METRICS_RESPONSE_MESSAGE";
+        return false;
+    }
+
+    // Prepare tlvApMetrics for each processed query
+    for (const auto &response : m_ap_metric_response) {
+        auto ap_metrics_response_tlv = cmdu_tx.addClass<wfa_map::tlvApMetrics>();
+        if (!ap_metrics_response_tlv) {
+            LOG(ERROR) << "Failed addClass<wfa_map::tlvApMetrics>";
+            return false;
+        }
+
+        ap_metrics_response_tlv->bssid()               = response.metric.bssid;
+        ap_metrics_response_tlv->channel_utilization() = response.metric.channel_utilization;
+        ap_metrics_response_tlv->number_of_stas_currently_associated() =
+            response.metric.number_of_stas_currently_associated;
+        ap_metrics_response_tlv->estimated_service_parameters() =
+            response.metric.estimated_service_parameters;
+        if (!ap_metrics_response_tlv->alloc_estimated_service_info_field(
+                response.metric.estimated_service_info_field.size())) {
+            LOG(ERROR) << "Couldn't allocate "
+                          "ap_metrics_response_tlv->alloc_estimated_service_info_field";
+            return false;
+        }
+        std::copy_n(response.metric.estimated_service_info_field.begin(),
+                    response.metric.estimated_service_info_field.size(),
+                    ap_metrics_response_tlv->estimated_service_info_field());
+    }
+
+    LOG(DEBUG) << "Sending AP_METRICS_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
+
+    return send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+}
+
 /**
  * @brief Handles 1905 Topology Query message
  * @param cmdu_rx Received CMDU (containing Topology Query)
@@ -2440,7 +2616,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
     /**
      * 1905.1 AL MAC address of the device.
      */
-    tlvDeviceInformation->mac() = network_utils::mac_from_string(bridge_info.mac);
+    tlvDeviceInformation->mac() = tlvf::mac_from_string(bridge_info.mac);
 
     /**
      * Set the number of local interfaces and fill info of each of the local interfaces, according
@@ -2466,7 +2642,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         // default to zero mac if get_mac fails.
         std::string wire_iface_mac = network_utils::ZERO_MAC_STRING;
         network_utils::linux_iface_get_mac(local_interface_name, wire_iface_mac);
-        localInterfaceInfo->mac()               = network_utils::mac_from_string(wire_iface_mac);
+        localInterfaceInfo->mac()               = tlvf::mac_from_string(wire_iface_mac);
         localInterfaceInfo->media_type()        = media_type;
         localInterfaceInfo->media_info_length() = 0;
 
@@ -2493,7 +2669,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
 
             localInterfaceInfo->mac() =
                 front_iface ? soc->radio_mac
-                            : network_utils::mac_from_string(soc->sta_wlan_hal->get_radio_mac());
+                            : tlvf::mac_from_string(soc->sta_wlan_hal->get_radio_mac());
 
             LOG(DEBUG) << "Added radio interface to tlvDeviceInformation: "
                        << localInterfaceInfo->mac();
@@ -2512,7 +2688,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
                 media_info.network_membership = network_utils::ZERO_MAC;
             } else {
                 media_info.network_membership =
-                    network_utils::mac_from_string(soc->sta_wlan_hal->get_bssid());
+                    tlvf::mac_from_string(soc->sta_wlan_hal->get_bssid());
             }
 
             media_info.role =
@@ -2574,7 +2750,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
                    << (int)mid;
         return false;
     }
-    tlv1905NeighborDevice->mac_local_iface() = network_utils::mac_from_string(bridge_info.mac);
+    tlv1905NeighborDevice->mac_local_iface() = tlvf::mac_from_string(bridge_info.mac);
 
     if (!tlv1905NeighborDevice->alloc_mac_al_1905_device(m_1905_neighbor_devices.size())) {
         LOG(ERROR) << "alloc_mac_al_1905_device() has failed";
@@ -2795,7 +2971,7 @@ bool backhaul_manager::handle_1905_link_metric_query(ieee1905_1::CmduMessageRx &
     /**
      * 1905.1 AL MAC address of the device that transmits the response message.
      */
-    sMacAddr reporter_al_mac = network_utils::mac_from_string(bridge_info.mac);
+    sMacAddr reporter_al_mac = tlvf::mac_from_string(bridge_info.mac);
 
     /**
      * 1905.1 AL MAC address of a neighbor of the receiving device.
@@ -2873,7 +3049,7 @@ bool backhaul_manager::handle_1905_link_metric_query(ieee1905_1::CmduMessageRx &
         }
 
         LOG(INFO) << "Invalid neighbor 1905.1 AL ID specified: "
-                  << network_utils::mac_to_string(neighbor_al_mac);
+                  << tlvf::mac_to_string(neighbor_al_mac);
 
         tlvLinkMetricResultCode->value() = ieee1905_1::tlvLinkMetricResultCode::INVALID_NEIGHBOR;
     } else {
@@ -2949,7 +3125,7 @@ bool backhaul_manager::handle_1905_topology_discovery(const std::string &src_mac
     }
 
     // Filter out the messages we have sent.
-    if (tlvAlMac->mac() == network_utils::mac_from_string(bridge_info.mac)) {
+    if (tlvAlMac->mac() == tlvf::mac_from_string(bridge_info.mac)) {
         return true;
     }
 
@@ -3244,7 +3420,7 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
                 if (msg->disconnect_reason == uint32_t(DEAUTH_REASON_PASSPHRASE_MISMACH)) {
                     //enter bssid to black_list trigger timer
                     auto local_time_stamp = std::chrono::steady_clock::now();
-                    auto local_bssid      = network_utils::mac_to_string(msg->bssid);
+                    auto local_bssid      = tlvf::mac_to_string(msg->bssid);
                     LOG(DEBUG) << "insert bssid = " << local_bssid << " to backhaul blacklist";
                     ap_blacklist_entry entry;
                     entry.timestamp           = local_time_stamp;
@@ -3393,7 +3569,7 @@ bool backhaul_manager::select_bssid()
 
         for (auto &scan_result : scan_results) {
 
-            auto bssid = network_utils::mac_to_string(scan_result.bssid);
+            auto bssid = tlvf::mac_to_string(scan_result.bssid);
             LOG(DEBUG) << "select_bssid: bssid = " << bssid
                        << ", channel = " << int(scan_result.channel) << " iface = " << iface
                        << ", rssi=" << int(scan_result.rssi);
@@ -3596,7 +3772,7 @@ void backhaul_manager::get_scan_measurement()
 
         for (auto &scan_result : scan_results) {
 
-            auto bssid = network_utils::mac_to_string(scan_result.bssid);
+            auto bssid = tlvf::mac_to_string(scan_result.bssid);
             LOG(DEBUG) << "get_scan_measurement: bssid = " << bssid
                        << ", channel = " << int(scan_result.channel) << " iface = " << iface;
 
@@ -3963,7 +4139,7 @@ const std::string backhaul_manager::freq_to_radio_mac(eFreqType freq) const
     }
 
     auto slave = *it;
-    return network_utils::mac_to_string(slave->radio_mac);
+    return tlvf::mac_to_string(slave->radio_mac);
 }
 
 bool backhaul_manager::start_wps_pbc(const sMacAddr &radio_mac)

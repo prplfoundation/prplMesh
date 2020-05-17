@@ -44,6 +44,10 @@ static mon_wlan_hal::Event dummy_to_bwl_event(const std::string &opcode)
 {
     if (opcode == "RRM-BEACON-REP-RECEIVED")
         return mon_wlan_hal::Event::RRM_Beacon_Response;
+    else if (opcode == "AP-STA-CONNECTED")
+        return mon_wlan_hal_dummy::Event::STA_Connected;
+    else if (opcode == "AP-STA-DISCONNECTED")
+        return mon_wlan_hal_dummy::Event::STA_Disconnected;
 
     return mon_wlan_hal::Event::Invalid;
 }
@@ -115,8 +119,8 @@ bool mon_wlan_hal_dummy::sta_beacon_11k_request(const SBeaconRequest11k &req, in
 {
     LOG(TRACE) << __func__;
 
-    auto sta_mac = beerocks::net::network_utils::mac_to_string(req.sta_mac.oct);
-    auto bssid   = beerocks::net::network_utils::mac_to_string(req.bssid.oct);
+    auto sta_mac = tlvf::mac_to_string(req.sta_mac.oct);
+    auto bssid   = tlvf::mac_to_string(req.bssid.oct);
 
     LOG(DEBUG) << "Beacon 11k request to sta " << sta_mac << " on bssid " << bssid << " channel "
                << std::to_string(req.channel);
@@ -289,7 +293,7 @@ bool mon_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
             return false;
         }
 
-        beerocks::net::network_utils::mac_from_string(resp->sta_mac.oct, tmp_str);
+        tlvf::mac_from_string(resp->sta_mac.oct, tmp_str);
 
         // Channel
         if (!dummy_obj_read_int("channel", parsed_obj, tmp_int)) {
@@ -345,10 +349,55 @@ bool mon_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj)
             LOG(ERROR) << "Failed reading mac parameter!";
             return false;
         }
-        beerocks::net::network_utils::mac_from_string(resp->bssid.oct, tmp_str);
+        tlvf::mac_from_string(resp->bssid.oct, tmp_str);
 
         // Add the message to the queue
         event_queue_push(event, resp_buff);
+        break;
+    }
+    case Event::STA_Connected: {
+        LOG(TRACE) << "STA_Connected";
+        auto msg_buff = ALLOC_SMART_BUFFER(sizeof(sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION));
+        auto msg =
+            reinterpret_cast<sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION *>(msg_buff.get());
+        LOG_IF(!msg, FATAL) << "Memory allocation failed!";
+
+        // Initialize the message
+        memset(msg_buff.get(), 0, sizeof(sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION));
+
+        msg->vap_id = beerocks::IFACE_VAP_ID_MIN;
+        LOG(DEBUG) << "iface name = " << get_iface_name()
+                   << ", vap_id = " << static_cast<int>(msg->vap_id);
+
+        if (!dummy_obj_read_str(DUMMY_EVENT_KEYLESS_PARAM_MAC, parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading mac parameter!";
+            return false;
+        }
+        msg->mac = tlvf::mac_from_string(tmp_str);
+        // Add the message to the queue
+        event_queue_push(Event::STA_Connected, msg_buff);
+        break;
+    }
+    case Event::STA_Disconnected: {
+        auto msg_buff =
+            ALLOC_SMART_BUFFER(sizeof(sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION));
+        auto msg =
+            reinterpret_cast<sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION *>(msg_buff.get());
+        LOG_IF(!msg, FATAL) << "Memory allocation failed!";
+
+        // Initialize the message
+        memset(msg_buff.get(), 0, sizeof(sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION));
+
+        if (!dummy_obj_read_str(DUMMY_EVENT_KEYLESS_PARAM_MAC, parsed_obj, &tmp_str)) {
+            LOG(ERROR) << "Failed reading mac parameter!";
+            return false;
+        }
+
+        // Store the MAC address of the disconnected STA
+        msg->mac = tlvf::mac_from_string(tmp_str);
+
+        // Add the message to the queue
+        event_queue_push(Event::STA_Disconnected, msg_buff);
         break;
     }
     default:

@@ -121,10 +121,11 @@ private:
     std::chrono::steady_clock::time_point m_sta_stats_polling_start_timestamp;
     bool m_sta_stats_polling_completed = true;
 
-    bool handle_cmdu_vs_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
-    bool handle_cmdu_ieee1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_cmdu_ieee1905_1_message(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 
-    bool handle_multi_ap_policy_config_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_multi_ap_policy_config_request(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_ap_metrics_query(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 };
 } // namespace son
 

@@ -175,7 +175,7 @@ int sta_wlan_hal_dwpal::get_scan_results(const std::string &ssid, std::vector<SS
         }
 
         SScanResult ap;
-        ap.bssid   = beerocks::net::network_utils::mac_from_string(scan_results[i].bssid);
+        ap.bssid   = tlvf::mac_from_string(scan_results[i].bssid);
         ap.channel = son::wireless_utils::freq_to_channel(scan_results[i].frequency);
         ap.rssi    = scan_results[i].rssi;
 
@@ -501,7 +501,7 @@ bool sta_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
             }
         }
 
-        msg->bssid = beerocks::net::network_utils::mac_from_string(bssid);
+        msg->bssid = tlvf::mac_from_string(bssid);
 
         // Forward the event
         event_queue_push(event, msg_buff);
@@ -761,7 +761,7 @@ bool sta_wlan_hal_dwpal::parse_fapi_event(const std::string& opcode, std::shared
                 return false;
             }
 
-            msg->params.mac = beerocks::net::network_utils::mac_from_string(tmpBuff);
+            msg->params.mac = tlvf::mac_from_string(tmpBuff);
 
             // Read the RSSI value
             if (UGW_READ_VALUE(wlObj, "Device.WiFi.AccessPoint.AssociatedDevice", 0, "SignalStrength", tmpBuff) != UGW_SUCCESS) {

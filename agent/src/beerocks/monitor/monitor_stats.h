@@ -31,6 +31,9 @@ public:
 
     void process();
 
+    /** Collect AP metrics and create AP Metrics TLV */
+    bool add_ap_metrics(ieee1905_1::CmduMessageTx &cmdu_tx, const sMacAddr &bssid);
+
     int8_t conf_total_ch_load_notification_lo_th_percent    = 20;
     int8_t conf_total_ch_load_notification_hi_th_percent    = 90;
     int8_t conf_total_ch_load_notification_delta_th_percent = 30;

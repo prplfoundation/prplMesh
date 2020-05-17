@@ -116,14 +116,13 @@ void client_steering_task::steer_sta()
         return;
     }
 
-    association_control_request_tlv->bssid_to_block_client() =
-        network_utils::mac_from_string(target_bssid);
+    association_control_request_tlv->bssid_to_block_client() = tlvf::mac_from_string(target_bssid);
     association_control_request_tlv->association_control() =
         wfa_map::tlvClientAssociationControlRequest::UNBLOCK;
     association_control_request_tlv->validity_period_sec() = 0;
     association_control_request_tlv->alloc_sta_list();
     auto sta_list_unblock         = association_control_request_tlv->sta_list(0);
-    std::get<1>(sta_list_unblock) = network_utils::mac_from_string(sta_mac);
+    std::get<1>(sta_list_unblock) = tlvf::mac_from_string(sta_mac);
 
     auto agent_mac = database.get_node_parent_ire(radio_mac);
     if (agent_mac.empty()) {
@@ -153,7 +152,7 @@ void client_steering_task::steer_sta()
             LOG(ERROR) << "Failed building message!";
             return;
         }
-        roam_request->params().bssid   = network_utils::mac_from_string(target_bssid);
+        roam_request->params().bssid   = tlvf::mac_from_string(target_bssid);
         roam_request->params().channel = database.get_node_channel(target_bssid);
         son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
 
@@ -196,14 +195,14 @@ void client_steering_task::steer_sta()
                 return;
             }
             association_control_block_request_tlv->bssid_to_block_client() =
-                network_utils::mac_from_string(hostap_vap.second.mac);
+                tlvf::mac_from_string(hostap_vap.second.mac);
             association_control_block_request_tlv->association_control() =
                 wfa_map::tlvClientAssociationControlRequest::BLOCK;
             association_control_block_request_tlv->validity_period_sec() =
                 steering_wait_time_ms / 1000;
             association_control_block_request_tlv->alloc_sta_list();
             auto sta_list_block         = association_control_block_request_tlv->sta_list(0);
-            std::get<1>(sta_list_block) = network_utils::mac_from_string(sta_mac);
+            std::get<1>(sta_list_block) = tlvf::mac_from_string(sta_mac);
             son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, hostap);
             TASK_LOG(DEBUG) << "sending disallow request for " << sta_mac << " to bssid "
                             << hostap_vap.second.mac << " with validity period = "
@@ -237,17 +236,17 @@ void client_steering_task::steer_sta()
     steering_request_tlv->request_flags().btm_disassociation_imminent_bit = disassoc_imminent;
 
     steering_request_tlv->btm_disassociation_timer_ms() = disassoc_timer_ms;
-    steering_request_tlv->bssid() = network_utils::mac_from_string(original_bssid);
+    steering_request_tlv->bssid()                       = tlvf::mac_from_string(original_bssid);
 
     steering_request_tlv->alloc_sta_list();
     auto sta_list         = steering_request_tlv->sta_list(0);
-    std::get<1>(sta_list) = network_utils::mac_from_string(sta_mac);
+    std::get<1>(sta_list) = tlvf::mac_from_string(sta_mac);
 
     steering_request_tlv->alloc_target_bssid_list();
     auto bssid_list                      = steering_request_tlv->target_bssid_list(0);
-    std::get<1>(bssid_list).target_bssid = network_utils::mac_from_string(target_bssid);
+    std::get<1>(bssid_list).target_bssid = tlvf::mac_from_string(target_bssid);
     std::get<1>(bssid_list).target_bss_operating_class =
-        database.get_hostap_operating_class(network_utils::mac_from_string(target_bssid));
+        database.get_hostap_operating_class(tlvf::mac_from_string(target_bssid));
     std::get<1>(bssid_list).target_bss_channel_number = database.get_node_channel(target_bssid);
 
     agent_mac = database.get_node_parent_ire(original_bssid);

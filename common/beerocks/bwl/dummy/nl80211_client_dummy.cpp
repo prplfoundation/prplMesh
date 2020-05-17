@@ -18,7 +18,7 @@ bool nl80211_client_dummy::get_interface_info(const std::string &interface_name,
 {
     interface_info.name  = interface_name;
     interface_info.index = 1;
-    interface_info.addr  = beerocks::net::network_utils::mac_from_string("01:02:03:04:05:06");
+    interface_info.addr  = tlvf::mac_from_string("01:02:03:04:05:06");
     interface_info.ssid  = "prplmesh";
     interface_info.type  = 3; // NL80211_IFTYPE_AP
     interface_info.wiphy = 2;

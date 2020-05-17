@@ -96,7 +96,7 @@ void monitor_rssi::arp_recv()
         return;
     }
 
-    std::string sta_mac = network_utils::mac_to_string(arphdr->sender_mac);
+    std::string sta_mac = tlvf::mac_to_string(arphdr->sender_mac);
     std::string sta_ip  = network_utils::ipv4_to_string(arphdr->sender_ip);
     auto sta_node       = mon_db->sta_find(sta_mac);
     if (sta_node == nullptr) {
@@ -125,7 +125,7 @@ void monitor_rssi::arp_recv()
                 break;
             }
 
-            notification->mac() = network_utils::mac_from_string(sta_node->get_mac());
+            notification->mac() = tlvf::mac_from_string(sta_node->get_mac());
 
             message_com::send_cmdu(slave_socket, cmdu_tx);
             LOG(DEBUG)
@@ -162,16 +162,15 @@ void monitor_rssi::arp_recv()
             for (int i = arp_burst_delay; i > 0; i -= 5) {
                 UTILS_SLEEP_MSEC(5);
                 network_utils::arp_send(arp_iface, sta_node->get_ipv4(), arp_iface_ipv4,
-                                        network_utils::mac_from_string(arp_dst_mac),
-                                        network_utils::mac_from_string(arp_iface_mac), 1,
-                                        arp_socket);
+                                        tlvf::mac_from_string(arp_dst_mac),
+                                        tlvf::mac_from_string(arp_iface_mac), 1, arp_socket);
             }
         }
 
         for (int i = 0; i < arp_burst_pkt_num; i++) {
             network_utils::arp_send(arp_iface, sta_node->get_ipv4(), arp_iface_ipv4,
-                                    network_utils::mac_from_string(arp_dst_mac),
-                                    network_utils::mac_from_string(arp_iface_mac), 1, arp_socket);
+                                    tlvf::mac_from_string(arp_dst_mac),
+                                    tlvf::mac_from_string(arp_iface_mac), 1, arp_socket);
             UTILS_SLEEP_MSEC(1);
         }
         sta_node->set_arp_state(monitor_sta_node::WAIT_REPLY);
@@ -234,10 +233,10 @@ void monitor_rssi::process()
                         break;
                     }
 
-                    notification->params().result.mac = network_utils::mac_from_string(sta_mac);
-                    notification->params().rx_rssi    = sta_stats.rx_rssi_curr;
-                    notification->params().rx_snr     = sta_stats.rx_snr_curr;
-                    notification->params().rx_packets = 100; //dummy value
+                    notification->params().result.mac        = tlvf::mac_from_string(sta_mac);
+                    notification->params().rx_rssi           = sta_stats.rx_rssi_curr;
+                    notification->params().rx_snr            = sta_stats.rx_snr_curr;
+                    notification->params().rx_packets        = 100; //dummy value
                     notification->params().rx_phy_rate_100kb = sta_stats.rx_phy_rate_100kb_min;
                     notification->params().tx_phy_rate_100kb = sta_stats.tx_phy_rate_100kb_min;
                     notification->params().vap_id            = sta_vap_id;
@@ -285,7 +284,7 @@ void monitor_rssi::process()
                         break;
                     }
 
-                    notification->mac() = network_utils::mac_from_string(sta_mac);
+                    notification->mac() = tlvf::mac_from_string(sta_mac);
                     message_com::send_cmdu(slave_socket, cmdu_tx);
                     LOG(INFO) << "arp_recv_count == 0, max arp retry no recv, send > "
                                  "NO_ACTIVITY_NOTIFICATION";
@@ -338,9 +337,8 @@ void monitor_rssi::process()
                            << ", dst_mac = " << arp_dst_mac;
 
                 network_utils::arp_send(arp_iface, sta_node->get_ipv4(), arp_iface_ipv4,
-                                        network_utils::mac_from_string(arp_dst_mac),
-                                        network_utils::mac_from_string(arp_iface_mac), 6,
-                                        arp_socket);
+                                        tlvf::mac_from_string(arp_dst_mac),
+                                        tlvf::mac_from_string(arp_iface_mac), 6, arp_socket);
             } else {
                 LOG(DEBUG) << "ARP is disabled, state: SEND_ARP -> SEND_RESPONSE";
                 sta_node->set_arp_state(monitor_sta_node::SEND_RESPONSE);
@@ -372,7 +370,7 @@ void monitor_rssi::send_rssi_measurement_response(std::string &sta_mac, monitor_
             break;
         }
 
-        response->params().result.mac        = network_utils::mac_from_string(sta_mac);
+        response->params().result.mac        = tlvf::mac_from_string(sta_mac);
         response->params().rx_rssi           = sta_stats.rx_rssi_curr;
         response->params().rx_snr            = sta_stats.rx_snr_curr;
         response->params().rx_packets        = rx_packets;
@@ -415,7 +413,7 @@ void monitor_rssi::monitor_idle_station(std::string &sta_mac, monitor_sta_node *
                 return;
             }
 
-            notification->mac() = network_utils::mac_from_string(sta_mac);
+            notification->mac() = tlvf::mac_from_string(sta_mac);
             message_com::send_cmdu(slave_socket, cmdu_tx);
 
             sta_node->idle_detected       = false;

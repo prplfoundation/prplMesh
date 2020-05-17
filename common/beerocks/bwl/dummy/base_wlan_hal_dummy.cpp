@@ -286,7 +286,7 @@ bool base_wlan_hal_dummy::dummy_send_cmd(const std::string &cmd, char **reply) {
 
 bool base_wlan_hal_dummy::process_nl_events()
 {
-    LOG(ERROR) << __func__ << "not implemented";
+    LOG(ERROR) << "not implemented";
     return false;
 }
 
@@ -345,9 +345,9 @@ bool base_wlan_hal_dummy::refresh_radio_info()
     std::string radio_mac;
     beerocks::net::network_utils::linux_iface_get_mac(m_radio_info.iface_name, radio_mac);
     for (int vap_id = 0; vap_id < predefined_vaps_num; vap_id++) {
-        auto mac = beerocks::net::network_utils::mac_from_string(radio_mac);
+        auto mac = tlvf::mac_from_string(radio_mac);
         mac.oct[5] += vap_id;
-        m_radio_info.available_vaps[vap_id].mac = beerocks::net::network_utils::mac_to_string(mac);
+        m_radio_info.available_vaps[vap_id].mac = tlvf::mac_to_string(mac);
     }
     return true;
 }

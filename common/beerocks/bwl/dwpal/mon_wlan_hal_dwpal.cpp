@@ -75,6 +75,10 @@ static mon_wlan_hal::Event dwpal_to_bwl_event(const std::string &opcode)
         return mon_wlan_hal::Event::AP_Enabled;
     } else if (opcode == "AP-DISABLED") {
         return mon_wlan_hal::Event::AP_Disabled;
+    } else if (opcode == "AP-STA-CONNECTED") {
+        return mon_wlan_hal::Event::STA_Connected;
+    } else if (opcode == "AP-STA-DISCONNECTED") {
+        return mon_wlan_hal::Event::STA_Disconnected;
     }
 
     return mon_wlan_hal::Event::Invalid;
@@ -188,13 +192,15 @@ static void get_ht_oper(const uint8_t *data, sChannelScanResults &results)
     }
 
     if (!(data[1] & 0x3)) {
-        results.operating_channel_bandwidth = eChannel_Bandwidth_20MHz;
+        results.operating_channel_bandwidth =
+            eChannelScanResultChannelBandwidth::eChannel_Bandwidth_20MHz;
     } else if ((data[1] & 0x3) != 2) {
-        results.operating_channel_bandwidth = eChannel_Bandwidth_40MHz;
+        results.operating_channel_bandwidth =
+            eChannelScanResultChannelBandwidth::eChannel_Bandwidth_40MHz;
     }
 
-    results.supported_standards.push_back(eStandard_802_11n);
-    results.operating_standards = eStandard_802_11n;
+    results.supported_standards.push_back(eChannelScanResultStandards::eStandard_802_11n);
+    results.operating_standards = eChannelScanResultStandards::eStandard_802_11n;
 }
 
 static void get_vht_oper(const uint8_t *data, sChannelScanResults &results)
@@ -206,27 +212,32 @@ static void get_vht_oper(const uint8_t *data, sChannelScanResults &results)
 
     if (data[0] == 0x01) {
         if (data[2]) {
-            results.operating_channel_bandwidth = eChannel_Bandwidth_160MHz;
+            results.operating_channel_bandwidth =
+                eChannelScanResultChannelBandwidth::eChannel_Bandwidth_160MHz;
         } else {
-            results.operating_channel_bandwidth = eChannel_Bandwidth_80MHz;
+            results.operating_channel_bandwidth =
+                eChannelScanResultChannelBandwidth::eChannel_Bandwidth_80MHz;
         }
     }
 
     if (data[0] == 0x02) {
-        results.operating_channel_bandwidth = eChannel_Bandwidth_80MHz;
+        results.operating_channel_bandwidth =
+            eChannelScanResultChannelBandwidth::eChannel_Bandwidth_80MHz;
     }
 
     if (data[0] == 0x03) {
-        results.operating_channel_bandwidth = eChannel_Bandwidth_80_80;
+        results.operating_channel_bandwidth =
+            eChannelScanResultChannelBandwidth::eChannel_Bandwidth_80_80;
     }
 
     if (data[0] > 0x03) {
         LOG(ERROR) << "illegal TYPE_VHT_OPERATION value=" << data[0];
     }
 
-    if (results.operating_frequency_band == eOperating_Freq_Band_5GHz) {
-        results.supported_standards.push_back(eStandard_802_11ac);
-        results.operating_standards = eStandard_802_11ac;
+    if (results.operating_frequency_band ==
+        eChannelScanResultOperatingFrequencyBand::eOperating_Freq_Band_5GHz) {
+        results.supported_standards.push_back(eChannelScanResultStandards::eStandard_802_11ac);
+        results.operating_standards = eChannelScanResultStandards::eStandard_802_11ac;
     }
 }
 
@@ -244,14 +255,18 @@ static void get_supprates(const uint8_t *data, uint8_t len, sChannelScanResults 
         rate_mbs_fp_8_1 = data[i] & 0x7f;
 
         if (rate_mbs_fp_8_1 / 2 == 11) {
-            if (results.operating_frequency_band == eOperating_Freq_Band_2_4GHz) {
-                results.supported_standards.push_back(eStandard_802_11b);
-                results.operating_standards = eStandard_802_11b;
+            if (results.operating_frequency_band ==
+                eChannelScanResultOperatingFrequencyBand::eOperating_Freq_Band_2_4GHz) {
+                results.supported_standards.push_back(
+                    eChannelScanResultStandards::eStandard_802_11b);
+                results.operating_standards = eChannelScanResultStandards::eStandard_802_11b;
             }
         } else if (rate_mbs_fp_8_1 / 2 == 54) {
-            if (results.operating_frequency_band == eOperating_Freq_Band_5GHz) {
-                results.supported_standards.push_back(eStandard_802_11a);
-                results.operating_standards = eStandard_802_11a;
+            if (results.operating_frequency_band ==
+                eChannelScanResultOperatingFrequencyBand::eOperating_Freq_Band_5GHz) {
+                results.supported_standards.push_back(
+                    eChannelScanResultStandards::eStandard_802_11a);
+                results.operating_standards = eChannelScanResultStandards::eStandard_802_11a;
             }
         }
 
@@ -316,15 +331,19 @@ static void parse_info_elements(unsigned char *ie, int ielen, sChannelScanResult
                 LOG(ERROR) << "TYPE_RSN doesn't match min and max length criteria";
                 break;
             }
-            results.encryption_mode.push_back(eEncryption_Mode_AES);
-            results.security_mode_enabled.push_back(eSecurity_Mode_WPA2);
+            results.encryption_mode.push_back(
+                eChannelScanResultEncryptionMode::eEncryption_Mode_AES);
+            results.security_mode_enabled.push_back(
+                eChannelScanResultSecurityMode::eSecurity_Mode_WPA2);
         } break;
 
         case ie_type::TYPE_EXTENDED_SUPPORTED_RATES: {
 
-            if (results.operating_frequency_band == eOperating_Freq_Band_2_4GHz) {
-                results.supported_standards.push_back(eStandard_802_11g);
-                results.operating_standards = eStandard_802_11g;
+            if (results.operating_frequency_band ==
+                eChannelScanResultOperatingFrequencyBand::eOperating_Freq_Band_2_4GHz) {
+                results.supported_standards.push_back(
+                    eChannelScanResultStandards::eStandard_802_11g);
+                results.operating_standards = eChannelScanResultStandards::eStandard_802_11g;
             }
 
             get_supprates(data, length, results);
@@ -372,9 +391,11 @@ static bool translate_nl_data_to_bwl_results(sChannelScanResults &results,
     if (bss[NL80211_BSS_FREQUENCY]) {
         int freq = nla_get_u32(bss[NL80211_BSS_FREQUENCY]);
         if (freq >= 5180) {
-            results.operating_frequency_band = eOperating_Freq_Band_5GHz;
+            results.operating_frequency_band =
+                eChannelScanResultOperatingFrequencyBand::eOperating_Freq_Band_5GHz;
         } else {
-            results.operating_frequency_band = eOperating_Freq_Band_2_4GHz;
+            results.operating_frequency_band =
+                eChannelScanResultOperatingFrequencyBand::eOperating_Freq_Band_2_4GHz;
         }
         results.channel = son::wireless_utils::freq_to_channel(freq);
     }
@@ -407,16 +428,18 @@ static bool translate_nl_data_to_bwl_results(sChannelScanResults &results,
         uint16_t capa = nla_get_u16(bss[NL80211_BSS_CAPABILITY]);
 
         if (capa & WLAN_CAPABILITY_IBSS) {
-            results.mode = eMode_AdHoc;
+            results.mode = eChannelScanResultMode::eMode_AdHoc;
         } else if (capa & WLAN_CAPABILITY_ESS) {
-            results.mode = eMode_Infrastructure;
+            results.mode = eChannelScanResultMode::eMode_Infrastructure;
         }
 
         if (results.security_mode_enabled.size() == 0) {
             if (capa & WLAN_CAPABILITY_PRIVACY) {
-                results.security_mode_enabled.push_back(eSecurity_Mode_WEP);
+                results.security_mode_enabled.push_back(
+                    eChannelScanResultSecurityMode::eSecurity_Mode_WEP);
             } else {
-                results.security_mode_enabled.push_back(eSecurity_Mode_None);
+                results.security_mode_enabled.push_back(
+                    eChannelScanResultSecurityMode::eSecurity_Mode_None);
             }
         }
     }
@@ -464,7 +487,7 @@ bool mon_wlan_hal_dwpal::update_radio_stats(SRadioStats &radio_stats)
     char *reply = nullptr;
 
     if (!dwpal_send_cmd("GET_RADIO_INFO", &reply)) {
-        LOG(ERROR) << __func__ << " failed";
+        LOG(ERROR) << " failed";
         return false;
     }
 
@@ -718,7 +741,7 @@ bool mon_wlan_hal_dwpal::sta_beacon_11k_request(const SBeaconRequest11k &req, in
     }
 
     // build command
-    std::string cmd = "REQ_BEACON " + beerocks::net::network_utils::mac_to_string(req.sta_mac.oct) +
+    std::string cmd = "REQ_BEACON " + tlvf::mac_to_string(req.sta_mac.oct) +
                       " " +                                 // Destination MAC Address
                       std::to_string(req.repeats) + " " +   // Number of repitions
                       std::to_string(req_mode) + " " +      // Measurements Request Mode
@@ -727,7 +750,7 @@ bool mon_wlan_hal_dwpal::sta_beacon_11k_request(const SBeaconRequest11k &req, in
                       std::to_string(req.rand_ival) + " " + // Random Interval
                       std::to_string(req.duration) + " " +  // Duration
                       measurement_mode + " " +              // Measurement Mode
-                      beerocks::net::network_utils::mac_to_string(req.bssid.oct); // Target BSSID
+                      tlvf::mac_to_string(req.bssid.oct);   // Target BSSID
 
     /////////////////////////////////////////////////
     //////////////// Optional Fields ////////////////
@@ -948,8 +971,8 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
             }
         }
 
-        beerocks::net::network_utils::mac_from_string(resp->sta_mac.oct, MACAddress);
-        beerocks::net::network_utils::mac_from_string(resp->bssid.oct, bssid);
+        tlvf::mac_from_string(resp->sta_mac.oct, MACAddress);
+        tlvf::mac_from_string(resp->bssid.oct, bssid);
 
         // Add the message to the queue
         event_queue_push(event, resp_buff);
@@ -1033,6 +1056,93 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
         msg->vap_id    = iface_ids.vap_id;
 
         event_queue_push(event, msg_buff);
+        break;
+    }
+
+    case Event::STA_Connected: {
+
+        // TODO: Change to HAL objects
+        auto msg_buff = ALLOC_SMART_BUFFER(sizeof(sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION));
+        auto msg =
+            reinterpret_cast<sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION *>(msg_buff.get());
+        LOG_IF(!msg, FATAL) << "Memory allocation failed!";
+
+        // Initialize the message
+        memset(msg_buff.get(), 0, sizeof(sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION));
+
+        char VAP[SSID_MAX_SIZE]        = {0};
+        char MACAddress[MAC_ADDR_SIZE] = {0};
+        size_t numOfValidArgs[3]       = {0};
+
+        FieldsToParse fieldsToParse[] = {
+            {NULL /*opCode*/, &numOfValidArgs[0], DWPAL_STR_PARAM, NULL, 0},
+            {(void *)VAP, &numOfValidArgs[1], DWPAL_STR_PARAM, NULL, sizeof(VAP)},
+            {(void *)MACAddress, &numOfValidArgs[2], DWPAL_STR_PARAM, NULL, sizeof(MACAddress)},
+            /* Must be at the end */
+            {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
+
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(VAP)) ==
+            DWPAL_FAILURE) {
+            LOG(ERROR) << "DWPAL parse error ==> Abort";
+            return false;
+        }
+
+        LOG(DEBUG) << "vap_id           : " << VAP;
+        LOG(DEBUG) << "MACAddress       : " << MACAddress;
+
+        for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
+            if (numOfValidArgs[i] == 0) {
+                LOG(ERROR) << "Failed reading parsed parameter " << static_cast<int>(i);
+                return false;
+            }
+        }
+
+        msg->vap_id = beerocks::utils::get_ids_from_iface_string(VAP).vap_id;
+        msg->mac    = tlvf::mac_from_string(MACAddress);
+
+        event_queue_push(Event::STA_Connected, msg_buff); // send message to the AP manager
+
+        break;
+    }
+
+    case Event::STA_Disconnected: {
+        // TODO: Change to HAL objects
+        auto msg_buff =
+            ALLOC_SMART_BUFFER(sizeof(sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION));
+        auto msg =
+            reinterpret_cast<sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION *>(msg_buff.get());
+        LOG_IF(!msg, FATAL) << "Memory allocation failed!";
+
+        // Initialize the message
+        memset(msg_buff.get(), 0, sizeof(sACTION_MONITOR_CLIENT_DISCONNECTED_NOTIFICATION));
+
+        char VAP[SSID_MAX_SIZE]        = {0};
+        char MACAddress[MAC_ADDR_SIZE] = {0};
+        size_t numOfValidArgs[2]       = {0};
+        FieldsToParse fieldsToParse[]  = {
+            {NULL /*opCode*/, &numOfValidArgs[0], DWPAL_STR_PARAM, NULL, 0},
+            {(void *)MACAddress, &numOfValidArgs[1], DWPAL_STR_PARAM, NULL, sizeof(MACAddress)},
+            /* Must be at the end */
+            {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
+
+        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(VAP)) ==
+            DWPAL_FAILURE) {
+            LOG(ERROR) << "DWPAL parse error ==> Abort";
+            return false;
+        }
+
+        LOG(DEBUG) << "MACAddress : " << MACAddress;
+
+        for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
+            if (numOfValidArgs[i] == 0) {
+                LOG(ERROR) << "Failed reading parsed parameter " << (int)i << " ==> Abort";
+                return false;
+            }
+        }
+
+        msg->mac = tlvf::mac_from_string(MACAddress);
+
+        event_queue_push(Event::STA_Disconnected, msg_buff); // send message to the AP manager
         break;
     }
 

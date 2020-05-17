@@ -394,7 +394,7 @@ cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_PARAMS_RESPONSE:
   _type: class
   op_error_code:
     _type: uint8_t
-    _comment: 0 - Success, Otherwise error according to beerocks_defines:eChannelScanOpErrCode
+    _comment: 0 - Success, Otherwise error according to beerocks_defines:eChannelScanOperationCode
 
 cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_PARAMS_REQUEST:
   _type: class
@@ -413,7 +413,7 @@ cACTION_BML_CHANNEL_SCAN_SET_CONTINUOUS_ENABLE_RESPONSE:
   _type: class
   op_error_code:
     _type: uint8_t
-    _comment: 0 - Success, Otherwise error according to beerocks_defines:eChannelScanOpErrCode
+    _comment: 0 - Success, Otherwise error according to beerocks_defines:eChannelScanOperationCode
 
 cACTION_BML_CHANNEL_SCAN_GET_CONTINUOUS_ENABLE_REQUEST:
   _type: class
@@ -431,7 +431,7 @@ cACTION_BML_CHANNEL_SCAN_START_SCAN_RESPONSE:
   _type: class
   op_error_code:
     _type: uint8_t
-    _comment: 0 - Success, Otherwise error according to beerocks_defines:eChannelScanOpErrCode
+    _comment: 0 - Success, Otherwise error according to beerocks_defines:eChannelScanOperationCode
 
 cACTION_BML_CHANNEL_SCAN_GET_RESULTS_REQUEST:
   _type: class
@@ -447,7 +447,7 @@ cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE:
     _comment: 0 - Success, Otherwise error according to beerocks_defines:eDcsScanErrCode
   op_error_code:
     _type: uint8_t
-    _comment: 0 - Success, Otherwise error according to beerocks_defines:eChannelScanOpErrCode
+    _comment: 0 - Success, Otherwise error according to beerocks_defines:eChannelScanOperationCode
   last:
     _type: uint8_t
     _comment: 0 - Not reached end of response, 1 - reached end of respons

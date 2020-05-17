@@ -302,8 +302,8 @@ void Ieee1905Transport::handle_interface_pollin_event(int fd)
     packet.dst_if_index = 0;
     packet.src_if_type  = CmduRxMessage::IF_TYPE_NET;
     packet.src_if_index = (unsigned int)addr.sll_ifindex;
-    std::copy_n(eh->ether_dhost, ETH_ALEN, packet.dst);
-    std::copy_n(eh->ether_shost, ETH_ALEN, packet.src);
+    std::copy_n(eh->ether_dhost, ETH_ALEN, packet.dst.oct);
+    std::copy_n(eh->ether_shost, ETH_ALEN, packet.src.oct);
     packet.ether_type = ntohs(eh->ether_type);
     packet.header     = {.iov_base = buf, .iov_len = sizeof(struct ether_header)};
     packet.payload    = {.iov_base = buf + sizeof(struct ether_header),
@@ -367,8 +367,8 @@ bool Ieee1905Transport::send_packet_to_network_interface(unsigned int if_index, 
     counters_[CounterId::OUTGOING_NETWORK_PACKETS]++;
 
     struct ether_header eh;
-    std::copy_n(packet.dst, ETH_ALEN, eh.ether_dhost);
-    std::copy_n(packet.src, ETH_ALEN, eh.ether_shost);
+    std::copy_n(packet.dst.oct, ETH_ALEN, eh.ether_dhost);
+    std::copy_n(packet.src.oct, ETH_ALEN, eh.ether_shost);
     eh.ether_type = htons(packet.ether_type);
 
     packet.header = {.iov_base = &eh, .iov_len = sizeof(eh)};

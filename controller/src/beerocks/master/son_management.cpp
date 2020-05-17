@@ -51,7 +51,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string slave = network_utils::mac_to_string(cli_request->mac());
+        std::string slave = tlvf::mac_to_string(cli_request->mac());
         if (database.is_hostap_active(slave)) {
             auto agent_mac = database.get_node_parent_ire(slave);
 
@@ -154,7 +154,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string hostap_mac = network_utils::mac_to_string(request_in->ap_mac());
+        std::string hostap_mac = tlvf::mac_to_string(request_in->ap_mac());
         auto request_out       = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_HOSTAP_STATS_MEASUREMENT_REQUEST>(cmdu_tx);
         if (request_out == nullptr) {
@@ -191,7 +191,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        auto hostap_mac = network_utils::mac_to_string(cli_request->ap_mac());
+        auto hostap_mac = tlvf::mac_to_string(cli_request->ap_mac());
         auto agent_mac  = database.get_node_parent_ire(hostap_mac);
 
         auto request = message_com::create_vs_message<
@@ -219,7 +219,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->ap_mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->ap_mac());
         auto agent_mac         = database.get_node_parent_ire(hostap_mac);
 
         auto request = message_com::create_vs_message<
@@ -284,8 +284,8 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
         LOG(DEBUG) << "CLI client allow request for " << client_mac << " to " << hostap_mac;
 
         auto current_ap_mac = database.get_node_parent(client_mac);
@@ -306,12 +306,12 @@ void son_management::handle_cli_message(Socket *sd,
         }
 
         association_control_request_tlv->bssid_to_block_client() =
-            network_utils::mac_from_string(hostap_mac);
+            tlvf::mac_from_string(hostap_mac);
         association_control_request_tlv->association_control() =
             wfa_map::tlvClientAssociationControlRequest::UNBLOCK;
         association_control_request_tlv->alloc_sta_list();
         auto sta_list         = association_control_request_tlv->sta_list(0);
-        std::get<1>(sta_list) = network_utils::mac_from_string(client_mac);
+        std::get<1>(sta_list) = tlvf::mac_from_string(client_mac);
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
         son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
@@ -327,8 +327,8 @@ void son_management::handle_cli_message(Socket *sd,
             break;
         }
 
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
         std::string sta_parent = database.get_node_parent(client_mac);
         auto agent_mac         = database.get_node_parent_ire(hostap_mac);
 
@@ -341,7 +341,7 @@ void son_management::handle_cli_message(Socket *sd,
             break;
         }
 
-        request->params().mac     = network_utils::mac_from_string(client_mac);
+        request->params().mac     = tlvf::mac_from_string(client_mac);
         request->params().ipv4    = network_utils::ipv4_from_string(network_utils::ZERO_IP_STRING);
         request->params().channel = database.get_node_channel(sta_parent);
         request->params().bandwidth = database.get_node_bw(sta_parent);
@@ -365,8 +365,8 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
         LOG(DEBUG) << "CLI client disallow request for " << client_mac << " to " << hostap_mac;
 
         auto agent_mac      = database.get_node_parent_ire(hostap_mac);
@@ -388,14 +388,14 @@ void son_management::handle_cli_message(Socket *sd,
         }
 
         association_control_request_tlv->bssid_to_block_client() =
-            network_utils::mac_from_string(hostap_mac);
+            tlvf::mac_from_string(hostap_mac);
         association_control_request_tlv->association_control() =
             wfa_map::tlvClientAssociationControlRequest::BLOCK;
         //TODO: Get real validity_period_sec
         association_control_request_tlv->validity_period_sec() = 1;
         association_control_request_tlv->alloc_sta_list();
         auto sta_list         = association_control_request_tlv->sta_list(0);
-        std::get<1>(sta_list) = network_utils::mac_from_string(client_mac);
+        std::get<1>(sta_list) = tlvf::mac_from_string(client_mac);
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
         son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
@@ -409,7 +409,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
         std::string hostap_mac = database.get_node_parent(client_mac);
         LOG(DEBUG) << "CLI client disassociate request, client " << client_mac << " hostap "
                    << hostap_mac;
@@ -427,7 +427,7 @@ void son_management::handle_cli_message(Socket *sd,
             break;
         }
 
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
 
         /////////////// FOR DEBUG ONLY ////////////////
         if (client_mac == network_utils::ZERO_MAC_STRING) {
@@ -502,8 +502,8 @@ void son_management::handle_cli_message(Socket *sd,
             break;
         }
 
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
         auto agent_mac         = database.get_node_parent_ire(hostap_mac);
         LOG(DEBUG) << "CLI channel load request for " << client_mac << " to " << hostap_mac;
 
@@ -553,8 +553,8 @@ void son_management::handle_cli_message(Socket *sd,
             break;
         }
 
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
         auto agent_mac         = database.get_node_parent_ire(hostap_mac);
         LOG(DEBUG) << "CLI statistics request for " << client_mac << " to " << hostap_mac;
 
@@ -642,8 +642,8 @@ void son_management::handle_cli_message(Socket *sd,
             break;
         }
 
-        std::string client_mac = network_utils::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->hostap_mac());
+        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
         auto agent_mac         = database.get_node_parent_ire(hostap_mac);
         LOG(DEBUG) << "CLI link measurement request for " << client_mac << " to " << hostap_mac;
 
@@ -671,7 +671,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string hostap_mac = network_utils::mac_to_string(cli_request->mac());
+        std::string hostap_mac = tlvf::mac_to_string(cli_request->mac());
         auto agent_mac         = database.get_node_parent_ire(hostap_mac);
         LOG(DEBUG) << "CLI ap channel switch request for " << hostap_mac;
 
@@ -733,7 +733,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string mac       = network_utils::mac_to_string(cli_request->mac());
+        std::string mac       = tlvf::mac_to_string(cli_request->mac());
         std::string node_info = database.node_to_string(mac);
         std::size_t length    = node_info.size();
         LOG(TRACE) << "CLI dump node info for " << mac
@@ -779,7 +779,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string client_mac = network_utils::mac_to_string(request->client_mac());
+        std::string client_mac = tlvf::mac_to_string(request->client_mac());
         if (database.get_node_state(client_mac) == beerocks::STATE_CONNECTED) {
 
             int prev_task_id = database.get_roaming_task_id(client_mac);
@@ -813,7 +813,7 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string hostap_mac = network_utils::mac_to_string(request->ap_mac());
+        std::string hostap_mac = tlvf::mac_to_string(request->ap_mac());
         std::string ire_mac    = database.get_node_parent_ire(hostap_mac);
         LOG(TRACE) << "CLI load notification from hostap " << hostap_mac << " ire mac=" << ire_mac;
 
@@ -855,8 +855,8 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string slave_mac  = network_utils::mac_to_string(request->slave_mac());
-        std::string hostap_mac = network_utils::mac_to_string(request->bssid());
+        std::string slave_mac  = tlvf::mac_to_string(request->slave_mac());
+        std::string hostap_mac = tlvf::mac_to_string(request->bssid());
         //TODO: we are passing true for imminent by default
         //extend ACTION_CLI_BACKHAUL_ROAM_REQUEST to have imminent variable
         uint8_t disassoc_imminent = uint8_t(1);
@@ -872,8 +872,8 @@ void son_management::handle_cli_message(Socket *sd,
             isOK = false;
             break;
         }
-        std::string client_mac = network_utils::mac_to_string(request->client_mac());
-        std::string hostap_mac = network_utils::mac_to_string(request->bssid());
+        std::string client_mac = tlvf::mac_to_string(request->client_mac());
+        std::string hostap_mac = tlvf::mac_to_string(request->bssid());
 
         uint8_t disassoc_imminent = request->disassoc_timer_ms() ? uint8_t(1) : uint8_t(0);
         LOG(DEBUG) << "CLI steer sta request for " << client_mac << " to hostap: " << hostap_mac
@@ -1396,7 +1396,7 @@ void son_management::handle_bml_message(Socket *sd,
             database.set_global_restricted_channels(request->params().restricted_channels);
         } else {
             database.set_hostap_conf_restricted_channels(
-                network_utils::mac_to_string(request->params().hostap_mac),
+                tlvf::mac_to_string(request->params().hostap_mac),
                 request->params().restricted_channels);
         }
 
@@ -1440,11 +1440,10 @@ void son_management::handle_bml_message(Socket *sd,
             break;
         }
 
-        auto vec_restricted_channels =
-            request->params().is_global
-                ? database.get_global_restricted_channels()
-                : database.get_hostap_conf_restricted_channels(
-                      network_utils::mac_to_string(request->params().hostap_mac));
+        auto vec_restricted_channels = request->params().is_global
+                                           ? database.get_global_restricted_channels()
+                                           : database.get_hostap_conf_restricted_channels(
+                                                 tlvf::mac_to_string(request->params().hostap_mac));
         std::copy(vec_restricted_channels.begin(), vec_restricted_channels.end(),
                   response->params().restricted_channels);
 
@@ -1478,7 +1477,7 @@ void son_management::handle_bml_message(Socket *sd,
             request->params().log_level   = bml_request->params().log_level;
             request->params().enable      = bml_request->params().enable;
 
-            std::string dst_mac = network_utils::mac_to_string(bml_request->params().mac);
+            std::string dst_mac = tlvf::mac_to_string(bml_request->params().mac);
             if (dst_mac == network_utils::WILD_MAC_STRING) {
                 auto slaves = database.get_active_hostaps();
                 for (const auto &slave : slaves) {
@@ -1526,7 +1525,7 @@ void son_management::handle_bml_message(Socket *sd,
         }
 
         LOG(DEBUG) << "Add wifi credentials to the database for AL-MAC: "
-                   << network_utils::mac_to_string(request->al_mac());
+                   << tlvf::mac_to_string(request->al_mac());
         database.add_bss_info_configuration(request->al_mac(), wifi_credentials);
 
         auto response = message_com::create_vs_message<
@@ -1740,7 +1739,7 @@ void son_management::handle_bml_message(Socket *sd,
         new_event.sd                 = sd;
         new_event.remove             = request->remove();
         new_event.steeringGroupIndex = request->steeringGroupIndex();
-        new_event.bssid              = network_utils::mac_to_string(request->bssid());
+        new_event.bssid              = tlvf::mac_to_string(request->bssid());
         new_event.client_mac         = request->client_mac();
         new_event.config             = request->config();
 
@@ -1784,7 +1783,7 @@ void son_management::handle_bml_message(Socket *sd,
         new_event.sd                 = sd;
         new_event.client_mac         = request->client_mac();
         new_event.steeringGroupIndex = request->steeringGroupIndex();
-        new_event.bssid              = network_utils::mac_to_string(request->bssid());
+        new_event.bssid              = tlvf::mac_to_string(request->bssid());
         new_event.type               = request->type();
         new_event.reason             = request->reason();
 
@@ -1804,11 +1803,11 @@ void son_management::handle_bml_message(Socket *sd,
 
         rdkb_wlan_task::steering_rssi_measurement_request_event new_event;
         new_event.sd           = sd;
-        std::string client_mac = network_utils::mac_to_string(request->client_mac());
+        std::string client_mac = tlvf::mac_to_string(request->client_mac());
         std::string sta_parent = database.get_node_parent(client_mac);
 
-        new_event.bssid            = network_utils::mac_to_string(request->bssid());
-        new_event.params.mac       = network_utils::mac_from_string(client_mac);
+        new_event.bssid            = tlvf::mac_to_string(request->bssid());
+        new_event.params.mac       = tlvf::mac_from_string(client_mac);
         new_event.params.ipv4      = network_utils::ipv4_from_string(network_utils::ZERO_IP_STRING);
         new_event.params.channel   = database.get_node_channel(sta_parent);
         new_event.params.bandwidth = database.get_node_bw(sta_parent);
@@ -1828,7 +1827,7 @@ void son_management::handle_bml_message(Socket *sd,
         auto bml_request =
             beerocks_header->addClass<beerocks_message::cACTION_BML_TRIGGER_TOPOLOGY_QUERY>();
 
-        auto al_mac = network_utils::mac_to_string(bml_request->al_mac());
+        auto al_mac = tlvf::mac_to_string(bml_request->al_mac());
 
         auto cmdu_header = cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE);
 
@@ -1855,8 +1854,8 @@ void son_management::handle_bml_message(Socket *sd,
             return;
         }
 
-        std::string al_mac   = network_utils::mac_to_string(bml_request->al_mac());
-        std::string ruid_mac = network_utils::mac_to_string(bml_request->ruid());
+        std::string al_mac   = tlvf::mac_to_string(bml_request->al_mac());
+        std::string ruid_mac = tlvf::mac_to_string(bml_request->ruid());
         std::string key      = database.get_node_key(al_mac, ruid_mac);
         auto agent_mac       = database.get_node_parent_ire(key);
 
@@ -1898,28 +1897,28 @@ void son_management::handle_bml_message(Socket *sd,
         auto channel_pool_size = request->params().channel_pool_size;
 
         LOG(DEBUG) << "request radio_mac:" << radio_mac;
-        auto op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS;
+        auto op_error_code = eChannelScanOperationCode::SUCCESS;
 
         if (dwell_time_ms != CHANNEL_SCAN_INVALID_PARAM &&
-            op_error_code == eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS) {
+            op_error_code == eChannelScanOperationCode::SUCCESS) {
             op_error_code =
                 database.set_channel_scan_dwell_time_msec(radio_mac, dwell_time_ms, false)
                     ? op_error_code
-                    : eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_DWELLTIME;
+                    : eChannelScanOperationCode::INVALID_PARAMS_DWELLTIME;
         }
         if (interval_time_sec != CHANNEL_SCAN_INVALID_PARAM &&
-            op_error_code == eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS) {
+            op_error_code == eChannelScanOperationCode::SUCCESS) {
             op_error_code = database.set_channel_scan_interval_sec(radio_mac, interval_time_sec)
                                 ? op_error_code
-                                : eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_SCANTIME;
+                                : eChannelScanOperationCode::INVALID_PARAMS_SCANTIME;
         }
         if (channel_pool != nullptr && channel_pool_size != CHANNEL_SCAN_INVALID_PARAM &&
-            op_error_code == eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS) {
+            op_error_code == eChannelScanOperationCode::SUCCESS) {
             auto channel_pool_set =
                 std::unordered_set<uint8_t>(channel_pool, channel_pool + channel_pool_size);
             op_error_code = database.set_channel_scan_pool(radio_mac, channel_pool_set, false)
                                 ? op_error_code
-                                : eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_CHANNELPOOL;
+                                : eChannelScanOperationCode::INVALID_PARAMS_CHANNELPOOL;
         }
         response->op_error_code() = uint8_t(op_error_code);
         //send response to bml
@@ -1979,8 +1978,8 @@ void son_management::handle_bml_message(Socket *sd,
         LOG(DEBUG) << "request radio_mac:" << radio_mac;
         bool success = database.set_channel_scan_is_enabled(radio_mac, enable);
         response->op_error_code() =
-            uint8_t((success) ? eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS
-                              : eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_ENABLE);
+            uint8_t((success) ? eChannelScanOperationCode::SUCCESS
+                              : eChannelScanOperationCode::INVALID_PARAMS_ENABLE);
 
         // on DCS enable - "reset" the interval wait of the task
         // (will perform scan right after change to enable)
@@ -2041,19 +2040,19 @@ void son_management::handle_bml_message(Socket *sd,
                    << ((is_single_scan) ? "single-scan" : "continuous-scan");
 
         // Clear flags
-        auto result_status = eChannelScanErrCode::CHANNEL_SCAN_SUCCESS;
-        auto op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS;
+        auto result_status = eChannelScanStatusCode::SUCCESS;
+        auto op_error_code = eChannelScanOperationCode::SUCCESS;
 
         // Get scan statuses
         auto scan_in_progress = database.get_channel_scan_in_progress(radio_mac, is_single_scan);
         if (scan_in_progress) {
             LOG(ERROR) << "Scan is still running!";
-            op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_SCAN_IN_PROGRESS;
+            op_error_code = eChannelScanOperationCode::SCAN_IN_PROGRESS;
         }
 
         auto last_scan_success =
             database.get_channel_scan_results_status(radio_mac, is_single_scan);
-        if (last_scan_success != eChannelScanErrCode::CHANNEL_SCAN_SUCCESS) {
+        if (last_scan_success != eChannelScanStatusCode::SUCCESS) {
             LOG(ERROR) << "Last scan did not finish successfully!";
             result_status = last_scan_success;
         }
@@ -2075,8 +2074,8 @@ void son_management::handle_bml_message(Socket *sd,
             [&sd, &cmdu_tx](
                 std::shared_ptr<beerocks_message::cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE>
                     &res_msg,
-                const eChannelScanErrCode result_status, const eChannelScanOpErrCode op_error_code,
-                bool is_last = true) {
+                const eChannelScanStatusCode result_status,
+                const eChannelScanOperationCode op_error_code, bool is_last = true) {
                 res_msg->result_status() = uint8_t(result_status);
                 res_msg->op_error_code() = uint8_t(op_error_code);
                 res_msg->last()          = (is_last) ? 1 : 0;
@@ -2084,8 +2083,8 @@ void son_management::handle_bml_message(Socket *sd,
             };
 
         // If there was an error before, send the results with a failed status
-        if (op_error_code != eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS ||
-            result_status != eChannelScanErrCode::CHANNEL_SCAN_SUCCESS) {
+        if (op_error_code != eChannelScanOperationCode::SUCCESS ||
+            result_status != eChannelScanStatusCode::SUCCESS) {
             LOG(ERROR) << "Something went wrong, sending CMDU with error code: ["
                        << (int)op_error_code << "] & result status [" << (int)result_status << "].";
             auto response = gen_new_results_response();
@@ -2098,8 +2097,7 @@ void son_management::handle_bml_message(Socket *sd,
         if (scan_results_size == 0) {
             LOG(DEBUG) << "no scan results are available";
             auto response = gen_new_results_response();
-            send_results_response(response, eChannelScanErrCode::CHANNEL_SCAN_RESULTS_EMPTY,
-                                  op_error_code);
+            send_results_response(response, eChannelScanStatusCode::RESULTS_EMPTY, op_error_code);
             break;
         }
 
@@ -2120,7 +2118,7 @@ void son_management::handle_bml_message(Socket *sd,
             //LOG(DEBUG) << "Allocating space";
             if (!response->alloc_results()) {
                 LOG(ERROR) << "Failed buffer allocation";
-                op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR;
+                op_error_code = eChannelScanOperationCode::ERROR;
                 break;
             }
             max_size -= sizeof(dump);
@@ -2128,7 +2126,7 @@ void son_management::handle_bml_message(Socket *sd,
             auto num_of_res = response->results_size();
             if (!std::get<0>(response->results(num_of_res - 1))) {
                 LOG(ERROR) << "Failed accessing results buffer";
-                op_error_code = eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR;
+                op_error_code = eChannelScanOperationCode::ERROR;
                 break;
             }
             auto &dump_msg = std::get<1>(response->results(num_of_res - 1));
@@ -2163,8 +2161,7 @@ void son_management::handle_bml_message(Socket *sd,
             database.get_channel_scan_in_progress(request->scan_params().radio_mac, true);
         if (single_scan_in_progress) {
             LOG(ERROR) << "Single scan is still running!";
-            response->op_error_code() =
-                uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SCAN_IN_PROGRESS);
+            response->op_error_code() = uint8_t(eChannelScanOperationCode::SCAN_IN_PROGRESS);
             message_com::send_cmdu(sd, cmdu_tx);
             break;
         }
@@ -2180,7 +2177,7 @@ void son_management::handle_bml_message(Socket *sd,
         if (!database.set_channel_scan_dwell_time_msec(radio_mac, dwell_time_ms, true)) {
             LOG(ERROR) << "set_channel_scan_dwell_time_msec failed";
             response->op_error_code() =
-                uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_DWELLTIME);
+                uint8_t(eChannelScanOperationCode::INVALID_PARAMS_DWELLTIME);
             message_com::send_cmdu(sd, cmdu_tx);
             break;
         }
@@ -2189,7 +2186,7 @@ void son_management::handle_bml_message(Socket *sd,
         if (!database.set_channel_scan_pool(radio_mac, channel_pool_set, true)) {
             LOG(ERROR) << "set_channel_scan_pool failed";
             response->op_error_code() =
-                uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_INVALID_PARAMS_CHANNELPOOL);
+                uint8_t(eChannelScanOperationCode::INVALID_PARAMS_CHANNELPOOL);
             message_com::send_cmdu(sd, cmdu_tx);
             break;
         }
@@ -2197,7 +2194,7 @@ void son_management::handle_bml_message(Socket *sd,
         LOG(DEBUG) << "Clearing DB results for a single scan";
         if (!database.clear_channel_scan_results(radio_mac, true)) {
             LOG(ERROR) << "failed to clear scan results";
-            response->op_error_code() = uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_ERROR);
+            response->op_error_code() = uint8_t(eChannelScanOperationCode::ERROR);
             message_com::send_cmdu(sd, cmdu_tx);
             break;
         }
@@ -2208,7 +2205,7 @@ void son_management::handle_bml_message(Socket *sd,
         tasks.push_event(database.get_dynamic_channel_selection_task_id(radio_mac),
                          (int)dynamic_channel_selection_task::eEvent::TRIGGER_SINGLE_SCAN,
                          (void *)&new_event);
-        response->op_error_code() = uint8_t(eChannelScanOpErrCode::CHANNEL_SCAN_OP_SUCCESS);
+        response->op_error_code() = uint8_t(eChannelScanOperationCode::SUCCESS);
         message_com::send_cmdu(sd, cmdu_tx);
         break;
     }

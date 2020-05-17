@@ -131,7 +131,7 @@ int bml_utils_node_to_string(const struct BML_NODE *node, char *buffer, int buff
                                  sizeof(node->data.gw_ire.radio[i].vap[0]);
                 for (int j = 0; j < vap_length; j++) {
                     std::string bssid =
-                        network_utils::mac_to_string(node->data.gw_ire.radio[i].vap[j].bssid);
+                        tlvf::mac_to_string(node->data.gw_ire.radio[i].vap[j].bssid);
                     if (bssid != network_utils::ZERO_MAC_STRING) {
                         ss << "    VAP[" << std::to_string(j) << "]: "
                            << "BSSID: " << bssid << ", SSID: "

@@ -12,6 +12,7 @@
 #include "ieee1905_transport_messages.h"
 #include <mapf/common/poller.h>
 #include <mapf/local_bus.h>
+#include <tlvf/tlvftypes.h>
 
 #include <arpa/inet.h>
 #include <chrono>
@@ -143,8 +144,8 @@ private:
         unsigned int dst_if_index = 0;
         uint8_t src_if_type       = CmduRxMessage::IF_TYPE_NONE;
         unsigned int src_if_index = 0;
-        uint8_t dst[ETH_ALEN]     = {0}; // destination mac address
-        uint8_t src[ETH_ALEN]     = {0}; // source mac address
+        sMacAddr dst              = {.oct = {0}}; // destination mac address
+        sMacAddr src              = {.oct = {0}}; // source mac address
         uint16_t ether_type       = 0x0000;
         struct iovec header       = {.iov_base = NULL, .iov_len = 0};
         struct iovec payload      = {.iov_base = NULL, .iov_len = 0};
@@ -165,8 +166,8 @@ private:
     const int kMaximumDeDuplicationThreads = 1024;
 
     struct DeDuplicationKey {
-        uint8_t src[ETH_ALEN];
-        uint8_t dst[ETH_ALEN];
+        sMacAddr src;
+        sMacAddr dst;
         uint16_t
             messageType; // required to distinguish the case of Request / Reply (when the reply carries an out of sync MID)
         uint16_t messageId;
@@ -177,10 +178,10 @@ private:
         bool operator()(const DeDuplicationKey &lhs, const DeDuplicationKey &rhs) const
         {
             // compare based on src and dst address first then messageId, then fragmentId
-            int srccmp = memcmp(lhs.src, rhs.src, ETH_ALEN);
+            int srccmp = memcmp(lhs.src.oct, rhs.src.oct, ETH_ALEN);
             if (srccmp)
                 return srccmp < 0;
-            int dstcmp = memcmp(lhs.dst, rhs.dst, ETH_ALEN);
+            int dstcmp = memcmp(lhs.dst.oct, rhs.dst.oct, ETH_ALEN);
             if (dstcmp)
                 return dstcmp < 0;
             else if (lhs.messageType != rhs.messageType)
@@ -210,7 +211,7 @@ private:
     static const size_t kMaximumDeFragmentionSize = (64 * 1024);
 
     struct DeFragmentationKey {
-        uint8_t src[ETH_ALEN];
+        sMacAddr src;
         uint16_t
             messageType; // required to distinguish the case of Request / Reply (when the reply carries an out of sync MID)
         uint16_t messageId;
@@ -220,7 +221,7 @@ private:
         bool operator()(const DeFragmentationKey &lhs, const DeFragmentationKey &rhs) const
         {
             // compare based on src address first then messageId
-            int srccmp = memcmp(lhs.src, rhs.src, ETH_ALEN);
+            int srccmp = memcmp(lhs.src.oct, rhs.src.oct, ETH_ALEN);
             if (srccmp)
                 return srccmp < 0;
             else if (lhs.messageType != rhs.messageType)

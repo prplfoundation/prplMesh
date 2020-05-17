@@ -24,6 +24,8 @@
 #include <tlvf/ieee_1905_1/eLinkMetricsType.h>
 #include <tlvf/ieee_1905_1/eMediaType.h>
 
+#include <tlvf/wfa_map/tlvApMetrics.h>
+
 #include "../agent_ucc_listener.h"
 #include "../link_metrics/link_metrics.h"
 
@@ -94,7 +96,8 @@ private:
     bool handle_slave_backhaul_message(std::shared_ptr<sRadioInfo> soc,
                                        ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac);
-
+    bool handle_slave_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                     const std::string &src_mac);
     // 1905 messages handlers
     bool handle_1905_topology_discovery(const std::string &src_mac,
                                         ieee1905_1::CmduMessageRx &cmdu_rx);
@@ -114,6 +117,9 @@ private:
                                                   const std::string &src_mac);
     bool handle_multi_ap_policy_config_request(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                const std::string &src_mac);
+    bool handle_ap_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac);
+    bool handle_slave_ap_metrics_response(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                          const std::string &src_mac);
     //bool sta_handle_event(const std::string &iface,const std::string& event_name, void* event_obj);
     bool hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr, std::string iface);
 
@@ -502,6 +508,26 @@ private:
     bool add_link_metrics(const sMacAddr &reporter_al_mac, const sLinkInterface &link_interface,
                           const sLinkNeighbor &link_neighbor, const sLinkMetrics &link_metrics,
                           ieee1905_1::eLinkMetricsType link_metrics_type);
+
+    struct sApMetricsQuery {
+        Socket *soc;
+        sMacAddr bssid;
+    };
+
+    struct sApMetrics {
+        sMacAddr bssid;
+        uint8_t channel_utilization;
+        uint16_t number_of_stas_currently_associated;
+        wfa_map::tlvApMetrics::sEstimatedService estimated_service_parameters;
+        std::vector<uint8_t> estimated_service_info_field;
+    };
+
+    struct sApMetricsResponse {
+        sApMetrics metric;
+    };
+
+    std::vector<sApMetricsQuery> m_ap_metric_query;
+    std::vector<sApMetricsResponse> m_ap_metric_response;
 
     /*
  * State Machines

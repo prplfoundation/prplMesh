@@ -240,8 +240,8 @@ void monitor_rdkb_hal::send_activity_event(const std::string &sta_mac, bool acti
     }
 
     response->params().active     = active;
-    response->params().client_mac = network_utils::mac_from_string(sta_mac);
-    response->params().bssid      = network_utils::mac_from_string(vap_node->get_mac());
+    response->params().client_mac = tlvf::mac_from_string(sta_mac);
+    response->params().bssid      = tlvf::mac_from_string(vap_node->get_mac());
 
     message_com::send_cmdu(slave_socket, cmdu_tx);
 }
@@ -271,8 +271,8 @@ void monitor_rdkb_hal::send_snr_crossing_event(const std::string &sta_mac,
         LOG(ERROR) << "Failed getting vap_node for id " << int(vap_id);
     }
 
-    response->params().client_mac  = network_utils::mac_from_string(sta_mac);
-    response->params().bssid       = network_utils::mac_from_string(vap_node->get_mac());
+    response->params().client_mac  = tlvf::mac_from_string(sta_mac);
+    response->params().bssid       = tlvf::mac_from_string(vap_node->get_mac());
     response->params().snr         = unsigned(abs(sta_stats.rx_snr_curr));
     response->params().inactveXing = beerocks_message::eSteeringSnrChange(thrs.inactive);
     response->params().highXing    = beerocks_message::eSteeringSnrChange(thrs.high);
