@@ -17,7 +17,6 @@
 #include <easylogging++.h>
 
 #include <beerocks/tlvf/beerocks_message.h>
-#include <beerocks/tlvf/beerocks_message_1905_vs.h>
 #include <beerocks/tlvf/beerocks_message_apmanager.h>
 #include <beerocks/tlvf/beerocks_message_backhaul.h>
 #include <beerocks/tlvf/beerocks_message_control.h>
@@ -37,7 +36,6 @@
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
 #include <tlvf/wfa_map/tlvClientAssociationControlRequest.h>
-#include <tlvf/wfa_map/tlvClientAssociationEvent.h>
 #include <tlvf/wfa_map/tlvMetricReportingPolicy.h>
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvSteeringBTMReport.h>
@@ -1980,8 +1978,12 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             break;
         }
 
-        notification_out->client_mac() = notification_in->params().mac;
-        notification_out->bssid()      = notification_in->params().bssid;
+        notification_out->client_mac()        = notification_in->params().mac;
+        notification_out->bssid()             = notification_in->params().bssid;
+        notification_out->vap_id()            = notification_in->params().vap_id;
+        notification_out->disconnect_reason() = notification_in->params().reason;
+        notification_out->disconnect_source() = notification_in->params().source;
+        notification_out->disconnect_type()   = notification_in->params().type;
 
         // Send the message
         LOG(DEBUG) << "send ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION for client "
@@ -1989,45 +1991,6 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
             slave_reset();
         }
-
-        // build 1905.1 message CMDU to send to the controller
-        if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE)) {
-            LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
-            return false;
-        }
-
-        auto client_association_event_tlv = cmdu_tx.addClass<wfa_map::tlvClientAssociationEvent>();
-        if (!client_association_event_tlv) {
-            LOG(ERROR) << "addClass tlvClientAssociationEvent failed";
-            return false;
-        }
-        client_association_event_tlv->client_mac() = notification_in->params().mac;
-        client_association_event_tlv->bssid()      = notification_in->params().bssid;
-        client_association_event_tlv->association_event() =
-            wfa_map::tlvClientAssociationEvent::CLIENT_HAS_LEFT_THE_BSS;
-
-        if (!backhaul_params.is_prplmesh_controller) {
-            LOG(DEBUG) << "non-prplMesh, not adding ClientAssociationEvent VS TLV";
-        } else {
-            // Add vendor specific tlv
-            auto vs_tlv =
-                message_com::add_vs_tlv<beerocks_message::tlvVsClientAssociationEvent>(cmdu_tx);
-
-            if (!vs_tlv) {
-                LOG(ERROR) << "add_vs_tlv tlvVsClientAssociationEvent failed";
-                return false;
-            }
-
-            vs_tlv->mac()               = notification_in->params().mac;
-            vs_tlv->bssid()             = notification_in->params().bssid;
-            vs_tlv->vap_id()            = notification_in->params().vap_id;
-            vs_tlv->disconnect_reason() = notification_in->params().reason;
-            vs_tlv->disconnect_source() = notification_in->params().source;
-            vs_tlv->disconnect_type()   = notification_in->params().type;
-        }
-
-        send_cmdu_to_controller(cmdu_tx);
-
         break;
     }
     case beerocks_message::ACTION_APMANAGER_ACK: {

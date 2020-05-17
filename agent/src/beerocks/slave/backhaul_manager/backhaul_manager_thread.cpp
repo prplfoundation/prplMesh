@@ -2043,6 +2043,43 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
         if (it != associated_clients.end()) {
             it = associated_clients.erase(it);
         }
+        // build 1905.1 message CMDU to send to the controller
+        if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE)) {
+            LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
+            return false;
+        }
+
+        auto client_association_event_tlv = cmdu_tx.addClass<wfa_map::tlvClientAssociationEvent>();
+        if (!client_association_event_tlv) {
+            LOG(ERROR) << "addClass tlvClientAssociationEvent failed";
+            return false;
+        }
+        client_association_event_tlv->client_mac() = msg->client_mac();
+        client_association_event_tlv->bssid()      = msg->bssid();
+        client_association_event_tlv->association_event() =
+            wfa_map::tlvClientAssociationEvent::CLIENT_HAS_LEFT_THE_BSS;
+
+        if (!is_prplmesh_controller) {
+            LOG(DEBUG) << "non-prplMesh, not adding ClientAssociationEvent VS TLV";
+        } else {
+            // Add vendor specific tlv
+            auto vs_tlv =
+                message_com::add_vs_tlv<beerocks_message::tlvVsClientAssociationEvent>(cmdu_tx);
+
+            if (!vs_tlv) {
+                LOG(ERROR) << "add_vs_tlv tlvVsClientAssociationEvent failed";
+                return false;
+            }
+
+            vs_tlv->mac()               = msg->client_mac();
+            vs_tlv->bssid()             = msg->bssid();
+            vs_tlv->vap_id()            = msg->vap_id();
+            vs_tlv->disconnect_reason() = msg->disconnect_reason();
+            vs_tlv->disconnect_source() = msg->disconnect_source();
+            vs_tlv->disconnect_type()   = msg->disconnect_type();
+        }
+
+        send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
         break;
     }
     case beerocks_message::ACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_RESPONSE: {
