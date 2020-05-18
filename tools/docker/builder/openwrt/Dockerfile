@@ -7,7 +7,7 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends \
     build-essential libncurses5 libncurses5-dev python python3 \
     unzip git ca-certificates gawk wget file bash \
-    python-yaml rsync less vim gnupg software-properties-common \
+    python-yaml python3-yaml rsync less vim gnupg software-properties-common \
 #   yq is available in a separate ppa (needs gnupg and software-properties-common):
     && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64 \
     && add-apt-repository ppa:rmescandon/yq \
@@ -69,47 +69,40 @@ RUN git clone "$OPENWRT_REPOSITORY" openwrt \
 WORKDIR /home/openwrt/openwrt
 
 COPY --chown=openwrt:openwrt configs/base_${BASE_CONFIG}_config /home/openwrt/base_config
+COPY --chown=openwrt:openwrt profiles_feeds/ /home/openwrt/openwrt/profiles_feeds
 
-# We first install from the intel feed preferably, because
-# it replaces some packages from the "packages" feed.
-# If no intel feed is present, nothing will be done so it's still ok.
-RUN cp feeds.conf.default feeds.conf \
-    && echo "src-git prpl $PRPL_FEED" >> feeds.conf \
-    && if [ -n "$INTEL_FEED" ] ; then \
-        echo "src-git intel $INTEL_FEED" >> feeds.conf \
-        && scripts/feeds update intel \
-        && scripts/feeds install intel_mips \
-        && scripts/feeds install -a -p intel ; \
-    fi ;\
-    if [ -n "$IWLWAV_FEED" ] ; then \
-        echo "src-git iwlwav $IWLWAV_FEED" >> feeds.conf \
-        && scripts/feeds update iwlwav \
-        && scripts/feeds install -a -p iwlwav ; \
-    fi ;\
-    scripts/feeds update -a \
-    && scripts/feeds install -a \
-    && cp /home/openwrt/base_config .config \
-    && echo "CONFIG_TARGET_${TARGET_SYSTEM}=y" >> .config \
-    && echo "CONFIG_TARGET_${TARGET_SYSTEM}_${SUBTARGET}=y" >> .config \
-    && echo "CONFIG_TARGET_${TARGET_SYSTEM}_${SUBTARGET}_${TARGET_PROFILE}=y" >> .config \
-    && echo "CONFIG_PACKAGE_prplmesh${PRPLMESH_VARIANT}=y" >> .config \
-    && if [ "$TARGET_PROFILE" = "DEVICE_NETGEAR_RAX40" ] ; then \
-        grep -v -E 'CONFIG_SDK|CONFIG_MAKE_TOOLCHAIN' feeds/intel/rax40.profile >> .config ;\
-    fi ;\
-    : "Installing intel feed doesn't correctly regenerate kernel .package-info"; \
-    : "force regeneration by removing it"; \
-    rm -rf tmp \
-    && make defconfig; \
-    : "We need to keep the hashes in the firmware, to later know whether an upgrade is needed:"; \
-    mkdir -p files/etc \
+RUN mkdir -p files/etc \
+#   We need to keep the hashes in the firmware, to later know if an upgrade is needed:
     && printf '%s=%s\n' "OPENWRT_REPOSITORY" "$OPENWRT_REPOSITORY" >> files/etc/prplwrt-version \
     && printf '%s=%s\n' "OPENWRT_VERSION" "$OPENWRT_VERSION" >> files/etc/prplwrt-version \
-    && printf '%s=%s\n' "PRPLMESH_VARIANT" "$PRPLMESH_VARIANT" >> files/etc/prplwrt-version \
-    && printf '%s=%s\n' "PRPL_FEED" "$PRPL_FEED" >> files/etc/prplwrt-version \
-    && printf '%s=%s\n' "INTEL_FEED" "$INTEL_FEED" >> files/etc/prplwrt-version \
-    && printf '%s=%s\n' "IWLWAV_FEED" "$IWLWAV_FEED" >> files/etc/prplwrt-version \
-    && make -j$(nproc) \
-    && make package/feeds/prpl/prplmesh/clean
+    && if [ "$TARGET_PROFILE" = DEVICE_NETGEAR_RAX40 ] ; then \
+#       Add prplmesh to the list of packages of the profile:
+        sed -i 's/packages:/packages:\n  - prplmesh-dwpal/g' profiles/intel_mips.yml \
+        && yq write --inplace profiles/intel_mips.yml feeds -f profiles_feeds/netgear-rax40.yml \
+        && ./scripts/gen_config.py intel_mips \
+#       Installing intel feed doesn't correctly regenerate kernel .package-info
+#       force regeneration by removing it
+        && rm -rf tmp \
+#       For some reason we have to run gen_config a second time to get a correct .config:
+        && ./scripts/gen_config.py intel_mips \
+#       make sure intel's bridge-utils is the only one that gets installed:
+        && rm -rf ./package/feeds/packages/bridge-utils \
+        && scripts/feeds install -p feed_bridge_utils bridge-utils \
+        && cat profiles_feeds/netgear-rax40.yml >> files/etc/prplwrt-version ;\
+    else \
+        cp feeds.conf.default feeds.conf \
+        && echo "src-git prpl $PRPL_FEED" >> feeds.conf \
+        && scripts/feeds update -a \
+        && scripts/feeds install -a \
+        && echo "CONFIG_TARGET_${TARGET_SYSTEM}=y" >> .config \
+        && echo "CONFIG_TARGET_${TARGET_SYSTEM}_${SUBTARGET}=y" >> .config \
+        && echo "CONFIG_TARGET_${TARGET_SYSTEM}_${SUBTARGET}_${TARGET_PROFILE}=y" >> .config \
+        && echo "CONFIG_PACKAGE_prplmesh${PRPLMESH_VARIANT}=y" >> .config \
+        && make defconfig \
+        && printf '%s=%s\n' "PRPL_FEED" "$PRPL_FEED" >> files/etc/prplwrt-version ;\
+    fi ;\
+    make -j$(nproc) \
+    && make package/prplmesh/clean
     # note that the result from diffconfig.sh with a minimal
     # configuration has the 3 CONFIG_TARGET items we set here, but NOT
     # the individual CONFIG_TARGET_${SUBTARGET} and
