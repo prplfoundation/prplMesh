@@ -5,6 +5,7 @@
 # See LICENSE file for more details.
 ###############################################################
 
+from enum import Enum
 import json
 import os
 import platform
@@ -105,6 +106,13 @@ class Station:
         if Station.__mac_base > 256*256:
             Station.__mac_base = 0
         return Station(mac)
+
+
+class StationEvent(Enum):
+    '''An enum representing the possible station events
+    based on client association event TLV assoc_event_flags'''
+    CONNECT = 0x00000080
+    DISCONNECT = 0x00000000
 
 
 class VirtualAP:
