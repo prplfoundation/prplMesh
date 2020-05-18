@@ -20,7 +20,7 @@ usage() {
     echo "  options:"
     echo "      -h|--help - show this help menu"
     echo "      -p|--push - push each image to the registry (must be logged in)"
-    echo "      -t|--tag - tag to add to the built images"
+    echo "      -t|--tag - specify the tag(s) to add to the built images (can be specified multiple times)"
     echo "      -v|--verbose - verbose output"
 }
 
@@ -38,7 +38,7 @@ main() {
         case "$1" in
             -h | --help)            usage; exit 0; shift ;;
             -p | --push)            push=true; shift ;;
-            -t | --tag)             TAG=":$2"; shift ; shift ;;
+            -t | --tag)             tags+=(":$2"); shift ; shift ;;
             -i | --image)           build_images+=("$2"); shift ; shift ;;
             -v | --verbose)         export VERBOSE=true; shift ;;
             -- ) shift; break ;;
@@ -46,7 +46,7 @@ main() {
         esac
     done
 
-    dbg "TAG=${TAG}"
+    dbg "TAGS=${tags[*]}"
     dbg "BUILD_IMAGES=${build_images[*]}"
     dbg "postfix=$postfix"
     dbg "rootdir=$rootdir"
@@ -59,16 +59,18 @@ main() {
 
     for image in "${build_images[@]}"; do
         image_fixed="$(printf "%s" "$image" | tr -cs 'A-Za-z0-9_' '-')"
-        full_image="${DOCKER_REGISTRY}prplmesh-$image_fixed$postfix$TAG"
-        info "Generating $image docker image ($full_image)"
-        run docker image build \
-            --tag "$full_image" \
-            "${scriptdir}/${image}" || exit $?
-        info "Generated $full_image"
+        for tag in "${tags[@]}"; do
+            full_image="${DOCKER_REGISTRY}prplmesh-$image_fixed$postfix$tag"
+            info "Generating $image docker image ($full_image)"
+            run docker image build \
+                --tag "$full_image" \
+                "${scriptdir}/${image}" || exit $?
+            info "Generated $full_image"
 
-        if [ "$push" = true ]; then
-            run docker push "$full_image"
-        fi
+            if [ "$push" = true ]; then
+                run docker push "$full_image"
+            fi
+        done
     done
 }
 
