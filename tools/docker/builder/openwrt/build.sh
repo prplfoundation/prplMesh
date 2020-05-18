@@ -179,7 +179,7 @@ main() {
 VERBOSE=false
 IMAGE_ONLY=false
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
-OPENWRT_VERSION='30c0f8b1e23a59c3e15c4eb329d5689b55280529'
+OPENWRT_VERSION='bd19f9ab26ad234b6f10cce23cd0dc41b9371929'
 PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^53d1e11003ce318c043c42063bbd2f57d15aac81'
 INTEL_FEED=""
 IWLWAV_FEED=""
