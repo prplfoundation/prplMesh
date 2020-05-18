@@ -13,7 +13,7 @@ rootdir="${scriptdir%/*/*}"
 . "${rootdir}/tools/functions.sh"
 
 main() {
-    image=${PRPLMESH_BUILDER_IMAGE-"${DOCKER_REGISTRY}"prplmesh-builder}
+    image=${PRPLMESH_BUILDER_IMAGE-"${DOCKER_REGISTRY}"prplmesh-builder-ubuntu-bionic}
     # Default docker arguments
     docker_args=(
         --workdir "${rootdir}"
