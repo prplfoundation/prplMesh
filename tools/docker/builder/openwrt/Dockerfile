@@ -7,7 +7,11 @@ RUN apt-get update \
     && apt-get -y install --no-install-recommends \
     build-essential libncurses5 libncurses5-dev python python3 \
     unzip git ca-certificates gawk wget file bash \
-    python-yaml rsync less vim \
+    python-yaml rsync less vim gnupg software-properties-common \
+#   yq is available in a separate ppa (needs gnupg and software-properties-common):
+    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64 \
+    && add-apt-repository ppa:rmescandon/yq \
+    && apt-get -y install --no-install-recommends yq \
     && rm -rf /var/lib/apt/lists/*
     # Building tlvfs currently uses the docker
     # container's python (not the one from OpenWrt)
