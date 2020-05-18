@@ -6,8 +6,8 @@ cp -r /home/openwrt/prplMesh_source /home/openwrt/prplMesh
 # We want to make sure that we do not keep anything built from the host:
 rm -rf /home/openwrt/prplMesh/build
 
-make package/feeds/prpl/prplmesh/prepare USE_SOURCE_DIR="/home/openwrt/prplMesh" V=s
-make package/feeds/prpl/prplmesh/compile V=sc -j"$(nproc)"
+make package/prplmesh/prepare USE_SOURCE_DIR="/home/openwrt/prplMesh" V=s
+make package/prplmesh/compile V=sc -j"$(nproc)"
 mkdir -p artifacts
 cat << EOT >> artifacts/prplmesh.buildinfo
 TARGET_PROFILE=${TARGET_PROFILE}
