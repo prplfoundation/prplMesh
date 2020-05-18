@@ -5,6 +5,7 @@
 # See LICENSE file for more details.
 ###############################################################
 
+from enum import Enum
 import json
 import os
 import platform
@@ -122,6 +123,13 @@ class Station:
         if bssid is not None:
             return self.bssid == bssid
         return self.bssid is not None
+
+
+class StationEvent(Enum):
+    '''An enum representing the possible station events
+    based on client association event TLV assoc_event_flags'''
+    CONNECT = 0x00000080
+    DISCONNECT = 0x00000000
 
 
 class VirtualAP:
