@@ -3681,7 +3681,7 @@ bool db::is_prplmesh(const sMacAddr &mac)
 void db::set_prplmesh(const sMacAddr &mac)
 {
     if (!get_node(mac)) {
-        add_node(mac);
+        add_node(mac, beerocks::net::network_utils::ZERO_MAC, beerocks::TYPE_GW);
     }
     get_node(mac)->is_prplmesh = true;
 }
