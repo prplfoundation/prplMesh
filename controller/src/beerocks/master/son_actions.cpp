@@ -461,6 +461,10 @@ bool son_actions::send_cmdu_to_agent(const std::string &dest_mac,
                                      const std::string &radio_mac)
 {
     if (cmdu_tx.getMessageType() == ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE) {
+        if (!database.is_prplmesh(tlvf::mac_from_string(dest_mac))) {
+            // skip non-prplmesh agents
+            return false;
+        }
         auto beerocks_header = message_com::get_beerocks_header(cmdu_tx);
         if (!beerocks_header) {
             LOG(ERROR) << "Failed getting beerocks_header!";
