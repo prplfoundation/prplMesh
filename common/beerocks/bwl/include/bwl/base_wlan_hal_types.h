@@ -127,9 +127,11 @@ typedef struct {
 //ap_wlan_hal
 
 enum eWiFiBandwidth : uint8_t {
-    BANDWIDTH_20 = 0,
+    BANDWIDTH_UNKNOWN = 0,
+    BANDWIDTH_20,
     BANDWIDTH_40,
     BANDWIDTH_80,
+    BANDWIDTH_80_80,
     BANDWIDTH_160,
     BANDWIDTH_MAX,
 };
