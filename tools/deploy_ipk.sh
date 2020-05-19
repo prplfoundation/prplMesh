@@ -40,7 +40,11 @@ pgrep opkg | xargs kill -SIGINT
 opkg remove --force-depends prplmesh prplmesh-dwpal prplmesh-nl80211
 # currently opkg remove does not remove everything from /opt/prplmesh:
 rm -rf /opt/prplmesh
-opkg install -V2 "$DEST_FOLDER/$IPK_FILENAME"
+# rdkb platforms require --force-dependencies
+. /etc/os-release >/dev/null 2>&1
+if [ "$ID" = "rdk" ]; then FORCE_DEPENDS=true; fi
+
+opkg install -V2 ${FORCE_DEPENDS:+--force-depends} "$DEST_FOLDER/$IPK_FILENAME"
 EOF
 
     if [ "$CERTIFICATION_MODE" = true ] ; then
