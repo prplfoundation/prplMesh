@@ -261,6 +261,8 @@ static void print_sta_capabilities(beerocks::message::sRadioCapabilities &sta_ca
                << std::endl
                << "vht_ss = " << ((int(sta_caps.vht_ss)) ? std::to_string(sta_caps.vht_ss) : "n/a")
                << std::endl
+               << "vht_mcs = "
+               << ((int(sta_caps.vht_mcs)) ? std::to_string(sta_caps.vht_mcs) : "n/a") << std::endl
                << "vht_bw = "
                << ((sta_caps.vht_bw != 0xFF)
                        ? std::to_string(beerocks::utils::convert_bandwidth_to_int(
