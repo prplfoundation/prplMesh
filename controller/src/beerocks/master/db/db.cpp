@@ -3667,10 +3667,13 @@ bool db::is_prplmesh(const sMacAddr &mac)
     }
     return node->is_prplmesh;
 }
+
 void db::set_prplmesh(const sMacAddr &mac)
 {
+    auto local_bridge_mac = tlvf::mac_from_string(get_local_bridge_mac());
+    auto ire_type         = local_bridge_mac == mac ? beerocks::TYPE_GW : beerocks::TYPE_IRE;
     if (!get_node(mac)) {
-        add_node(mac);
+        add_node(mac, beerocks::net::network_utils::ZERO_MAC, ire_type);
     }
     get_node(mac)->is_prplmesh = true;
 }
