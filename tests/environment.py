@@ -212,6 +212,19 @@ def _docker_wait_for_log(container: str, program: str, regex: str, start_line: i
         return (False, start_line, None)
 
 
+def _device_wait_for_log(device: None, log_path: str, regex: str,
+                         start_line: int, timeout: int) -> bool:
+    """Waits for log mathing regex expression to show up."""
+    device.sendline("tail -n10 -f {}".format(log_path))
+    match = device.expect(
+            pattern=[regex, device.pexpect.EOF, device.pexpect.TIMEOUT],
+            timeout=timeout)
+    if match == 1:
+        return True
+    else:
+        return False
+
+
 class ALEntityDocker(ALEntity):
     '''Docker implementation of ALEntity.
 
@@ -373,3 +386,83 @@ def launch_environment_docker(unique_id: str, skip_init: bool = False, tag: str 
     debug('agent2: {}'.format(agents[1].mac))
     debug('agent2 wlan0: {}'.format(agents[1].radios[0].mac))
     debug('agent2 wlan2: {}'.format(agents[1].radios[1].mac))
+
+
+class ALEntityPrplWrt(ALEntity):
+    """Abstraction of ALEntity in real device."""
+
+    def __init__(self, name: str, device: None, is_controller: bool = False):
+        self.device = device
+        self.name = name
+        self.bridge_name = 'br-lan'
+
+        if is_controller:
+            self.config_file_name = '/opt/prplmesh/config/beerocks_controller.conf'
+        else:
+            self.config_file_name = '/opt/prplmesh/config/beerocks_agent.conf'
+
+        ucc_port = self.command(("grep \"ucc_listener_port\" {} "
+                                "| cut -d'=' -f2 | cut -d\" \" -f 1").format(self.config_file_name))
+
+        device_ip_output = self.command(
+                "ip -f inet addr show {} | head -n 2".format(self.bridge_name))
+        device_ip = re.search(
+            r'inet (?P<ip>[0-9.]+)', device_ip_output.decode('utf-8')).group('ip')
+        self.log_folder = self.command(
+            "grep log_files_path {} | cut -d=\'=\' -f2".format(self.config_file_name))
+
+        ucc_socket = UCCSocket(device_ip, ucc_port)
+        mac = ucc_socket.dev_get_parameter('ALid')
+
+        super().__init__(mac, ucc_socket, installdir, is_controller)
+
+        # We always have two radios, wlan0 and wlan2
+        RadioHostapd(self, "wlan0", device=self)
+        RadioHostapd(self, "wlan2", device=self)
+
+    def command(self, *command: str) -> bytes:
+        """Execute `command` in device and return its output."""
+        self.device.sendline(command)
+        return self.device.read()
+
+    def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
+        """Poll the entity's logfile until it contains "regex" or times out."""
+        program = "controller" if self.is_controller else "agent"
+        return _device_wait_for_log(self.device,
+                                    "{}/beerocks_{}.log".format(self.log_folder, program),
+                                    regex, start_line, timeout)
+
+
+class RadioHostapd(Radio):
+    """Abstraction of real Radio in prplWRT device."""
+
+    def __init__(self, agent: ALEntityPrplWrt, bssid: str, device: None):
+        self.iface_name = bssid
+        ip_output = agent.command("ip -o link list dev {}".format(self.iface_name))
+        mac = re.search(r"link/ether (([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})", ip_output).group(1)
+        self.log_folder = self.command(
+            "grep log_files_path {} | cut -d=\'=\' -f2".format(self.config_file_name))
+        super().__init__(agent, mac)
+
+        VirtualAPHostapd(self, mac)
+        VirtualAPHostapd(self, mac)
+
+    def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
+        ''' Poll the Radio's logfile until it match regular expression '''
+        return _device_wait_for_log(self.device, "{}/beerocks_agent_{}.log".format(
+            self.log_folder, self.iface_name), regex, start_line, timeout)
+
+
+class VirtualAPHostapd(VirtualAP):
+    """Docker implementation of a VAP."""
+
+    def __init__(self, radio: RadioHostapd, bssid: str):
+        super().__init__(radio, bssid)
+
+    def associate(self, sta: Station) -> bool:
+        ''' Associate "sta" with this VAP '''
+        # TODO: complete this stub
+
+    def disassociate(self, sta: Station) -> bool:
+        ''' Disassociate "sta" from this VAP.'''
+        # TODO: complete this stub
