@@ -372,14 +372,14 @@ static std::shared_ptr<char> generate_client_assoc_event(const std::string &even
     for (uint i = 0; (i < 8) && (i < sizeof(ht_mcs)); i++) {
         ht_mcs_str[2] = ht_mcs[2 * i];
         ht_mcs_str[3] = ht_mcs[2 * i + 1];
-        HT_MCS[i]     = beerocks::string_utils::stoi(ht_mcs_str);
+        HT_MCS[i]     = std::stoul(ht_mcs_str, nullptr, 16);
     }
 
     vht_mcs_str[2] = vht_mcs[0];
     vht_mcs_str[3] = vht_mcs[1];
     vht_mcs_str[4] = vht_mcs[2];
     vht_mcs_str[5] = vht_mcs[3];
-    VHT_MCS[0]     = beerocks::string_utils::stoi(vht_mcs_str);
+    VHT_MCS[0]     = std::stoul(vht_mcs_str, nullptr, 16);
 
     LOG(DEBUG) << "client_mac      : " << client_mac;
     LOG(DEBUG) << "supported_rates : " << std::dec << supported_rates[0]
