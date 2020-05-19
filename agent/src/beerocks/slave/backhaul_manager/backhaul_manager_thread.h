@@ -90,6 +90,7 @@ private:
 
     bool send_autoconfig_search_message(std::shared_ptr<sRadioInfo> soc);
     bool send_1905_topology_discovery_message();
+    bool send_slave_ap_metric_query_message(uint16_t mid, std::vector<sMacAddr> const &bssid_list);
 
     // cmdu handlers
     bool handle_master_message(ieee1905_1::CmduMessageRx &cmdu_rx,
