@@ -1530,6 +1530,11 @@ bool master_thread::handle_cmdu_1905_topology_notification(const std::string &sr
         return true;
     }
 
+    if (!database.is_prplmesh(tlvf::mac_from_string(src_mac))) {
+        LOG(DEBUG) << "Non-prplMesh agent, skipping VS parsing";
+        return true;
+    }
+
     std::shared_ptr<beerocks_message::tlvVsClientAssociationEvent> vs_tlv = nullptr;
     auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
     if (beerocks_header) {
