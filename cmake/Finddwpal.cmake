@@ -5,9 +5,13 @@
 # This code is subject to the terms of the BSD+Patent license.
 # See LICENSE file for more details.
 
+set(CMAKE_FIND_ROOT_PATH ${CMAKE_PREFIX_PATH}/opt/intel;${CMAKE_FIND_ROOT_PATH})
 find_library(DWPAL_LIBRARY "libdwpal.so")
-find_path(DWPAL_INCLUDE_DIRS 
-    NAMES dwpal.h 
+if(NOT DWPAL_LIBRARY)
+	message(FATAL_ERROR "libdwpal.so not found!")
+endif()
+find_path(DWPAL_INCLUDE_DIRS
+    NAMES dwpal.h
     PATH_SUFFIXES wav-dpal
 )
 
