@@ -1052,13 +1052,14 @@ bool db::set_station_capabilities(const std::string &client_mac,
     auto n = get_node(client_mac);
 
     if (!n) {
-        LOG(ERROR) << "station node not found.... ";
+        LOG(ERROR) << "client node not found " << client_mac;
         return false;
     }
 
     auto parent_radio = get_node_parent_radio(client_mac);
 
     if (parent_radio.empty()) {
+        LOG(ERROR) << "parent radio node found for client " << client_mac;
         return false;
     }
 

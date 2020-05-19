@@ -429,7 +429,9 @@ void optimal_path_task::work()
             auto hostap_is_5ghz = database.is_node_5ghz(hostap);
             if (!force_signal_strength_decision &&
                 !database.settings_client_optimal_path_roaming_prefer_signal_strength()) {
-                //get sta capabilities....
+                // Get sta capabilities
+                TASK_LOG(DEBUG) << "getting capabilities for sta_mac " << sta_mac << " on band "
+                                << (hostap_is_5ghz ? "5GHz" : "2.4GHz");
                 sta_capabilities = database.get_station_capabilities(sta_mac, hostap_is_5ghz);
                 if (sta_capabilities == nullptr) {
                     get_station_default_capabilities(hostap_is_5ghz, default_sta_cap);
@@ -931,7 +933,9 @@ void optimal_path_task::work()
                 continue;
             }
 
-            //get sta capabilities....
+            // Get STA capabilities
+            TASK_LOG(DEBUG) << "getting capabilities for sta_mac " << sta_mac << " on band "
+                            << (hostap_params.is_5ghz ? "5GHz" : "2.4GHz");
             sta_capabilities = database.get_station_capabilities(sta_mac, hostap_params.is_5ghz);
             if (sta_capabilities == nullptr) {
                 TASK_LOG(WARNING) << "STA capabilities are empty - use default capabilities";
