@@ -320,8 +320,8 @@ bool beerocks_ucc_listener::get_send_1905_1_tlv_hex_list(
                 for (auto &value : values) {
                     if (!(validate_hex_notation(value) || net::network_utils::is_valid_mac(value) ||
                           validate_binary_notation(value) || validate_decimal_notation(value))) {
-                        err_string =
-                            "param name '" + lookup_str + "' has value with invalid format";
+                        err_string = "param name '" + lookup_str + "' has value '" + value +
+                                     "' with invalid format";
                         return false;
                     }
                 }
