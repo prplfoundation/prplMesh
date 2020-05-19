@@ -2210,11 +2210,6 @@ bool master_thread::handle_intel_slave_join(
                    << " cs_new_event = " << intptr_t(cs_new_event);
         cs_new_event->hostap_mac = tlvf::mac_from_string(radio_mac);
         cs_new_event->cs_params  = notification->cs_params();
-        for (auto preferred_channel : notification->hostap().preferred_channels) {
-            if (preferred_channel.channel > 0) {
-                LOG(DEBUG) << "preferred_channel = " << int(preferred_channel.channel);
-            }
-        }
 
         std::copy_n(notification->backhaul_params().backhaul_scan_measurement_list,
                     beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH,
