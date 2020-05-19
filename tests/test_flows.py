@@ -703,6 +703,32 @@ class TestFlows:
 
         self.check_cmdu_type_single("ACK", 0x8000, env.agents[0].mac, env.controller.mac, mid)
 
+    # def get_line_from_log_file(self,logfilename):
+
+
+
+    def test_multi_ap_control_messaging_reliability(self):
+        debug("Send topology request to agent 1")
+        env.controller.dev_send_1905(env.agents[0].mac, 0x0002)
+        debug("Confirming topology query was received")
+        self.check_log(env.agents[0], r"TOPOLOGY_QUERY_MESSAGE")
+
+        debug("Confirming a Topology Notification message with relay indicator=1 was sent by MAUT")
+        result, line, match = self.check_log(env.controller, r"Received TOPOLOGY_NOTIFICATION_MESSAGE with relay_indicator= 1")
+
+        line = env.controller.get_line_from_log_file("controller",line)
+        mid1 = line.split("mid=",1)[1]
+
+        debug("Confirming a Topology Notification message with relay indicator=0 was received by controller")
+        result, line, match = self.check_log(env.controller, r"Received TOPOLOGY_NOTIFICATION_MESSAGE with relay_indicator= 0")
+
+        line = env.controller.get_line_from_log_file("controller",line)
+        mid2 = line.split("mid=",1)[1]
+
+        if(mid1 != mid2):
+            self.fail("The MID fields of those messages must be identical")
+        
+
     def test_client_capability_query(self):
         sta1 = env.Station.create()
         sta2 = env.Station.create()

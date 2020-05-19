@@ -1498,8 +1498,9 @@ bool master_thread::handle_cmdu_1905_topology_notification(const std::string &sr
                                                            ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     auto mid = cmdu_rx.getMessageId();
-    LOG(DEBUG) << "Received TOPOLOGY_NOTIFICATION_MESSAGE, from " << src_mac << ", mid=" << std::hex
-               << int(mid);
+    LOG(DEBUG) << "Received TOPOLOGY_NOTIFICATION_MESSAGE with relay_indicator= "
+               << int(cmdu_rx.getCmduHeader()->flags().relay_indicator) << ", from " << src_mac
+               << ", mid=" << std::hex << int(mid);
 
     // IEEE 1905.1 defines that TOPOLOGY_NOTIFICATION_MESSAGE must containt one 1905.1 AL MAC
     // address type TLV, and MultiAp standard extend it with zero or one Client Association Event

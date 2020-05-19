@@ -195,6 +195,7 @@ def _docker_wait_for_log(container: str, program: str, regex: str, start_line: i
     deadline = time.monotonic() + timeout
     try:
         while True:
+            print(logfilename)
             with open(logfilename) as logfile:
                 for (i, v) in enumerate(logfile.readlines()):
                     if i <= start_line:
@@ -262,6 +263,16 @@ class ALEntityDocker(ALEntity):
         '''Poll the entity's logfile until it contains "regex" or times out.'''
         program = "controller" if self.is_controller else "agent"
         return _docker_wait_for_log(self.name, program, regex, start_line, timeout)
+
+    def get_line_from_log_file(self, program: str, line: int) -> str:
+        fullPath = os.path.join(rootdir, 'logs', self.name, 'beerocks_{}.log'.format(program))
+        with open(fullPath) as logfile:
+            for i, l in enumerate(logfile):
+                if(i == line):
+                    return(l)
+                    
+        
+
 
 
 class RadioDocker(Radio):

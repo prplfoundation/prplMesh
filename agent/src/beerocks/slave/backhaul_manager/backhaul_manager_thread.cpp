@@ -424,6 +424,9 @@ bool backhaul_manager::socket_disconnected(Socket *sd)
                 LOG(INFO) << "Sending topology notification on son_slave disconnect";
                 auto cmdu_header =
                     cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE);
+                auto mid = cmdu_tx.getMessageId();
+                LOG(INFO) << "Sending topology notification on son_slave disconnect, mid ="
+                          << int(mid);
                 if (!cmdu_header) {
                     LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
                     return false;
@@ -536,6 +539,8 @@ void backhaul_manager::after_select(bool timeout)
         LOG(INFO) << "Sending topology notification on removeing of 1905.1 neighbors";
         auto cmdu_header =
             cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE);
+        auto mid = cmdu_tx.getMessageId();
+        LOG(INFO) << "Sending topology notification on son_slave disconnect, mid =" << int(mid);
         if (!cmdu_header) {
             LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
             return;
@@ -1763,6 +1768,8 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             LOG(INFO) << "Sending topology notification on reconnected son_slave";
             auto cmdu_header =
                 cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE);
+            auto mid = cmdu_tx.getMessageId();
+            LOG(INFO) << "Sending topology notification on son_slave disconnect, mid =" << int(mid);
             if (!cmdu_header) {
                 LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
                 return false;
@@ -1993,6 +2000,8 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
             return false;
         }
+        auto mid = cmdu_tx.getMessageId();
+        LOG(INFO) << "Sending topology notification on son_slave disconnect, mid =" << int(mid);
 
         auto client_association_event_tlv = cmdu_tx.addClass<wfa_map::tlvClientAssociationEvent>();
         if (!client_association_event_tlv) {
@@ -2048,6 +2057,8 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
             return false;
         }
+        auto mid = cmdu_tx.getMessageId();
+        LOG(INFO) << "Sending topology notification on son_slave disconnect, mid =" << int(mid);
 
         auto client_association_event_tlv = cmdu_tx.addClass<wfa_map::tlvClientAssociationEvent>();
         if (!client_association_event_tlv) {
@@ -3223,6 +3234,12 @@ bool backhaul_manager::handle_1905_topology_discovery(const std::string &src_mac
             LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
             return false;
         }
+
+        LOG(DEBUG) << "Sending TOPOLOGY_NOTIFICATION_MESSAGE, from " << src_mac
+                   << ", mid=" << std::hex << int(mid)
+                   << "To MULTICAST_1905_MAC_ADDR , relay_indicator= "
+                   << int(cmdu_tx.getCmduHeader()->flags().relay_indicator);
+
         send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
     }
     return true;
