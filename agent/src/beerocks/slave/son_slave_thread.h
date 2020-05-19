@@ -201,6 +201,7 @@ private:
     beerocks_message::sNodeHostap hostap_params;
     beerocks_message::sApChannelSwitch hostap_cs_params;
     std::vector<wireless_utils::sChannelPreference> channel_preferences;
+    std::vector<beerocks::message::sWifiChannel> preferred_channels;
     std::vector<beerocks::message::sWifiChannel> supported_channels;
 
     SocketClient *platform_manager_socket = nullptr;

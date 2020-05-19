@@ -27,6 +27,12 @@ cACTION_APMANAGER_JOINED_NOTIFICATION:
   _type: class
   params: sNodeHostap
   cs_params: sApChannelSwitch
+  preferred_channels_size:
+    _type: uint8_t
+    _length_var: True
+  preferred_channels:
+    _type: beerocks::message::sWifiChannel
+    _length: [ preferred_channels_size ]
   supported_channels_size:
     _type: uint8_t
     _length_var: True
