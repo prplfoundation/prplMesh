@@ -1208,6 +1208,54 @@ bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<sRadioInfo
     LOG(DEBUG) << "sending autoconfig search message, bridge_mac=" << bridge_info.mac;
     return send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
 }
+bool backhaul_manager::send_slave_ap_metric_query_message(uint16_t mid,
+                                                          const std::vector<sMacAddr> &bssid_list)
+{
+    bool ret = false;
+    for (auto socket : slaves_sockets) {
+        for (const auto &mac : bssid_list) {
+            int i = 0;
+            if (mac == socket->vaps_list.vaps[i].mac) {
+                LOG(DEBUG) << "Forwarding AP_METRICS_QUERY_MESSAGE message to son_slave, bssid: "
+                           << std::hex << tlvf::mac_to_string(mac);
+
+                auto forward =
+                    cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE);
+                if (!forward) {
+                    LOG(ERROR) << "Failed to create AP_METRICS_QUERY_MESSAGE";
+                    return false;
+                }
+
+                auto query = cmdu_tx.addClass<wfa_map::tlvApMetricQuery>();
+                if (!query) {
+                    LOG(ERROR) << "Failed addClass<wfa_map::tlvApMetricQuery>";
+                    return false;
+                }
+
+                if (!query->alloc_bssid_list(1)) {
+                    LOG(ERROR) << "Failed allocate memory for bssid_list";
+                    return false;
+                }
+
+                auto list         = query->bssid_list(0);
+                std::get<0>(list) = true;
+                std::get<1>(list) = mac;
+
+                if (!message_com::send_cmdu(socket->slave, cmdu_tx)) {
+                    LOG(ERROR) << "Failed forwarding AP_METRICS_QUERY_MESSAGE message to son_slave";
+                    ret = false;
+                    continue;
+                } else {
+                    ret = true;
+                    // Fill a query vector
+                    m_ap_metric_query.push_back({socket->slave, mac});
+                }
+            }
+            i++;
+        }
+    }
+    return ret;
+}
 
 bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
 {
@@ -2476,50 +2524,12 @@ bool backhaul_manager::handle_ap_metrics_query(ieee1905_1::CmduMessageRx &cmdu_r
                    << "  bssid " << std::get<1>(bssid_tuple);
     }
 
-    auto ret = false;
-    for (auto socket : slaves_sockets) {
-        for (const auto &mac : bssid) {
-            int i = 0;
-            if (mac == socket->vaps_list.vaps[i].mac) {
-                LOG(DEBUG) << "Forwarding AP_METRICS_QUERY_MESSAGE message to son_slave, bssid: "
-                           << std::hex << tlvf::mac_to_string(mac);
-
-                auto forward =
-                    cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE);
-                if (!forward) {
-                    LOG(ERROR) << "Failed to create AP_METRICS_QUERY_MESSAGE";
-                    return false;
-                }
-
-                auto query = cmdu_tx.addClass<wfa_map::tlvApMetricQuery>();
-                if (!query) {
-                    LOG(ERROR) << "Failed addClass<wfa_map::tlvApMetricQuery>";
-                    return false;
-                }
-
-                if (!query->alloc_bssid_list(1)) {
-                    LOG(ERROR) << "Failed allocate memory for bssid_list";
-                    return false;
-                }
-
-                auto list         = query->bssid_list(0);
-                std::get<0>(list) = true;
-                std::get<1>(list) = mac;
-
-                if (!message_com::send_cmdu(socket->slave, cmdu_tx)) {
-                    LOG(ERROR) << "Failed forwarding AP_METRICS_QUERY_MESSAGE message to son_slave";
-                    ret = false;
-                    continue;
-                } else {
-                    ret = true;
-                    // Fill a query vector
-                    m_ap_metric_query.push_back({socket->slave, mac});
-                }
-            }
-            i++;
-        }
+    if (!send_slave_ap_metric_query_message(mid, bssid)) {
+        LOG(ERROR) << "Failed to forward AP_METRICS_RESPONSE to the son_slave_thread";
+        return false;
     }
-    return ret;
+
+    return true;
 }
 
 bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageRx &cmdu_rx,
