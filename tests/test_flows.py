@@ -746,6 +746,8 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
         for line in association_frame.splitlines():
             self.check_log(env.controller, r"{}".format(line))
 
+        env.agents[0].radios[0].vaps[0].disassociate(sta2)
+
     def test_client_association_dummy(self):
         sta = env.Station.create()
 
@@ -805,6 +807,8 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
         if sta.mac not in map_vap0.clients:
             self.fail("client {} not in conn_map, clients: {}".format(sta.mac, map_vap0.clients))
 
+        env.agents[0].radios[0].vaps[0].disassociate(sta)
+
     def test_client_association_link_metrics(self):
         ''' This test verifies that a MAUT with an associated STA responds to
         an Associated STA Link Metrics Query message with an Associated STA Link Metrics
@@ -830,6 +834,8 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
         time.sleep(1)
         self.check_log(env.agents[0],
                        "Send AssociatedStaLinkMetrics to controller, mid = {}".format(mid))
+
+        env.agents[0].radios[0].vaps[0].disassociate(sta)
 
     def test_client_steering_mandate(self):
         debug("Send topology request to agent 1")
@@ -955,6 +961,8 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
         debug("Confirming Client Association Control Request message was received (UNBLOCK)")
         self.check_log(env.agents[1].radios[1], r"Got client allow request")
 
+        env.agents[0].radios[1].vaps[0].disassociate(sta)
+
     def test_multi_ap_policy_config_w_steering_policy(self):
         debug("Send multi-ap policy config request with steering policy to agent 1")
         mid = env.controller.dev_send_1905(env.agents[0].mac, 0x8003,
@@ -1064,6 +1072,7 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
         # this line is printed in the monitor log - however currently there is no way to test it -
         # self.check_log(env.agents[0].radios[0].???,
         #                r"inserting 1 RRM_EVENT_BEACON_REP_RXED event(s) to the pending list")
+        env.agents[0].radios[0].vaps[0].disassociate(sta)
 
 
 if __name__ == '__main__':
