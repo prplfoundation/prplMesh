@@ -1064,26 +1064,14 @@ bool db::set_station_capabilities(const std::string &client_mac,
     }
 
     if (is_node_5ghz(parent_radio)) {
-        if (n->m_sta_5ghz_capabilities.cap_flag == true) {
-            //skip setting 5Ghz station parameters if it is already learned once
-            LOG(INFO) << "m_sta_5ghz_capabilities already set once";
-        } else {
-            n->m_sta_5ghz_capabilities          = sta_cap;
-            n->m_sta_5ghz_capabilities.cap_flag = true;
-        }
-
-        n->capabilities = n->m_sta_5ghz_capabilities;
+        n->m_sta_5ghz_capabilities          = sta_cap;
+        n->m_sta_5ghz_capabilities.cap_flag = true;
+        n->capabilities                     = n->m_sta_5ghz_capabilities;
 
     } else {
-        if (n->m_sta_24ghz_capabilities.cap_flag == true) {
-            //skip setting 2.4Ghz station parameters if it is already learned once
-            LOG(INFO) << "m_sta_24ghz_capabilities already set once";
-        } else {
-            n->m_sta_24ghz_capabilities          = sta_cap;
-            n->m_sta_24ghz_capabilities.cap_flag = true;
-        }
-
-        n->capabilities = n->m_sta_24ghz_capabilities;
+        n->m_sta_24ghz_capabilities          = sta_cap;
+        n->m_sta_24ghz_capabilities.cap_flag = true;
+        n->capabilities                      = n->m_sta_24ghz_capabilities;
     }
     return true;
 }
