@@ -50,7 +50,7 @@ typedef struct sRadioCapabilities {
     uint8_t btm_supported         = 0;
     uint8_t nr_enabled            = 0;
     uint8_t cell_capa             = 0;
-    uint8_t cap_flag              = 0;
+    uint8_t valid                 = 0;
     uint8_t rrm_supported         = 0;
     uint8_t band_2g_capable       = 0;
     uint8_t band_5g_capable       = 0;
@@ -88,7 +88,7 @@ typedef struct sRadioCapabilities {
         btm_supported        = 0;
         nr_enabled           = 0;
         cell_capa            = 0;
-        cap_flag             = 0;
+        valid                = 0;
     }
 } __attribute__((packed)) sRadioCapabilities;
 
