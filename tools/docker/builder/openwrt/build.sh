@@ -10,6 +10,7 @@ usage() {
     echo "usage: $(basename "$0") -d <target_device> [-hfiortv]"
     echo "  options:"
     echo "      -h|--help - show this help menu"
+    echo "      -v|--verbose - increase the script's verbosity"
     echo "      -d|--target-device the device to build for"
     echo "      -i|--image - build the docker image only"
     echo "      -o|--openwrt-version - the openwrt version to use"
@@ -73,7 +74,7 @@ main() {
         exit 1
     fi
 
-    if ! OPTS=$(getopt -o 'hd:io:r:t:' --long help,target-device:,image,openwrt-version:,openwrt-repository:,tag: -n 'parse-options' -- "$@"); then
+    if ! OPTS=$(getopt -o 'hvd:io:r:t:' --long help,verbose,target-device:,image,openwrt-version:,openwrt-repository:,tag: -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2
         usage
         exit 1
@@ -86,6 +87,7 @@ main() {
     while true; do
         case "$1" in
             -h | --help)               usage; exit 0; shift ;;
+            -v | --verbose)            VERBOSE=true; shift ;;
             -d | --target-device)      TARGET_DEVICE="$2"; shift ; shift ;;
             -i | --image)              IMAGE_ONLY=true; shift ;;
             -o | --openwrt-version)    OPENWRT_VERSION="$2"; shift; shift ;;
@@ -174,6 +176,7 @@ main() {
 
 }
 
+VERBOSE=false
 IMAGE_ONLY=false
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
 OPENWRT_VERSION='30c0f8b1e23a59c3e15c4eb329d5689b55280529'
