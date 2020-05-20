@@ -1064,14 +1064,14 @@ bool db::set_station_capabilities(const std::string &client_mac,
     }
 
     if (is_node_5ghz(parent_radio)) {
-        n->m_sta_5ghz_capabilities          = sta_cap;
-        n->m_sta_5ghz_capabilities.cap_flag = true;
-        n->capabilities                     = n->m_sta_5ghz_capabilities;
+        n->m_sta_5ghz_capabilities       = sta_cap;
+        n->m_sta_5ghz_capabilities.valid = true;
+        n->capabilities                  = n->m_sta_5ghz_capabilities;
 
     } else {
-        n->m_sta_24ghz_capabilities          = sta_cap;
-        n->m_sta_24ghz_capabilities.cap_flag = true;
-        n->capabilities                      = n->m_sta_24ghz_capabilities;
+        n->m_sta_24ghz_capabilities       = sta_cap;
+        n->m_sta_24ghz_capabilities.valid = true;
+        n->capabilities                   = n->m_sta_24ghz_capabilities;
     }
     return true;
 }
@@ -1087,13 +1087,13 @@ db::get_station_capabilities(const std::string &client_mac, bool is_bandtype_5gh
     }
 
     if (is_bandtype_5ghz) {
-        if (n->m_sta_5ghz_capabilities.cap_flag == true) {
+        if (n->m_sta_5ghz_capabilities.valid == true) {
             return &n->m_sta_5ghz_capabilities;
         } else {
             return nullptr;
         }
     } else {
-        if (n->m_sta_24ghz_capabilities.cap_flag == true) {
+        if (n->m_sta_24ghz_capabilities.valid == true) {
             return &n->m_sta_24ghz_capabilities;
         } else {
             return nullptr;
