@@ -76,6 +76,10 @@ upgrade_prplmesh() {
 }
 
 main() {
+    if [ "$EUID" -ne 0 ]
+        then echo "this script has to be run as root, aborting"
+        exit 1
+    fi
     if ! OPTS=$(getopt -o 'hvb:o:e:d:s:' --long help,verbose,log-folder:,easymesh-cert:,device:,ssh:,owncloud-upload,owncloud-path:,skip-upgrade -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2
         usage
@@ -117,7 +121,7 @@ main() {
     }
     
     info "Start running tests"
-    sudo "$EASYMESH_CERT_PATH"/run_test_file.py -o "$LOG_FOLDER" -d "$TARGET_DEVICE" "$TESTS" ${VERBOSE:+ -v}
+    "$EASYMESH_CERT_PATH"/run_test_file.py ${OWNCLOUD_UPLOAD:+ -u} -o "$LOG_FOLDER" -d "$TARGET_DEVICE" "$TESTS" ${VERBOSE:+ -v}
 
     if [ -n "$OWNCLOUD_UPLOAD" ]; then
         if is_prplmesh_device "$TARGET_DEVICE"; then
