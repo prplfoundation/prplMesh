@@ -153,3 +153,30 @@ install(
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
+
+if (BUILD_TESTS)
+    string(TOLOWER ${BWL_TYPE} BWL_TYPE_LOWERCASE)
+    set(TEST_PROJECT_NAME ${PROJECT_NAME}_${BWL_TYPE_LOWERCASE}_unit_tests)
+    set(unit_tests_sources
+        ${bwl_common_sources} 
+        ${bwl_platform_sources} 
+        ${MODULE_PATH}/unit_tests/nl80211_client_test.cpp
+    )
+    add_executable(${TEST_PROJECT_NAME} 
+        ${unit_tests_sources}
+    )
+    if (COVERAGE)
+        set_target_properties(${TEST_PROJECT_NAME} PROPERTIES COMPILE_FLAGS "--coverage -fPIC -O0")
+        set_target_properties(${TEST_PROJECT_NAME} PROPERTIES LINK_FLAGS "--coverage")
+    endif()
+    target_include_directories(${TEST_PROJECT_NAME}
+        PRIVATE
+            ${PLATFORM_INCLUDE_DIR}
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    )
+    target_link_libraries(${TEST_PROJECT_NAME} bcl elpp ${BWL_LIBS})
+    target_link_libraries(${TEST_PROJECT_NAME} gtest_main)
+    install(TARGETS ${TEST_PROJECT_NAME} DESTINATION bin/tests)
+    add_test(NAME ${TEST_PROJECT_NAME} COMMAND $<TARGET_FILE:${TEST_PROJECT_NAME}>)
+endif()
