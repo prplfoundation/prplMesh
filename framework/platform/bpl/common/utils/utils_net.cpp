@@ -53,7 +53,7 @@ void mac_from_string(uint8_t *buf, const std::string &mac)
 
         for (int i = 0; i < BPL_MAC_ADDR_OCTETS_LEN; i++) {
             std::getline(mac_ss, token, ':');
-            buf[i] = std::stoul(token, nullptr, 16);
+            buf[i] = std::strtoul(token.c_str(), nullptr, 16);
         }
     }
 }
@@ -93,7 +93,7 @@ void ipv4_from_string(uint8_t *buf, const std::string &ip_str)
 
         for (int i = 0; i < BPL_IPV4_ADDR_OCTETS_LEN; i++) {
             std::getline(ipv4_ss, token, '.');
-            buf[i] = std::stoi(token);
+            buf[i] = std::strtoul(token.c_str(), nullptr, 10);
         }
     }
 }

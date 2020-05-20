@@ -134,7 +134,7 @@ static void get_ht_mcs_capabilities(int *HT_MCS, std::string &ht_cap_str,
     sta_caps.ht_bw        = 0xFF;
 
     if (!ht_cap_str.empty() && (HT_MCS != nullptr)) {
-        uint16_t ht_cap = uint16_t(std::stoul(ht_cap_str, nullptr, 16));
+        uint16_t ht_cap = uint16_t(std::strtoul(ht_cap_str.c_str(), nullptr, 16));
         sta_caps.ht_bw  = (ht_cap & HT_CAP_INFO_SUPP_CHANNEL_WIDTH_SET) != 0; // 20 == 0 / 40 == 1
         sta_caps.ht_sm_power_save = ((ht_cap & HT_CAP_INFO_SMPS_MASK) >> 2) &
                                     0x03; // 0=static, 1=dynamic, 2=reserved, 3=disabled
@@ -179,7 +179,7 @@ static void get_vht_mcs_capabilities(int16_t *VHT_MCS, std::string &vht_cap_str,
     sta_caps.vht_bw = 0xFF;
 
     if (!vht_cap_str.empty() && (VHT_MCS != nullptr)) {
-        uint32_t vht_cap          = uint16_t(std::stoul(vht_cap_str, nullptr, 16));
+        uint32_t vht_cap          = uint16_t(std::strtoul(vht_cap_str.c_str(), nullptr, 16));
         uint8_t supported_bw_bits = (vht_cap >> 2) & 0x03;
 
         if (supported_bw_bits == 0x03) { // reserved mode
@@ -372,14 +372,14 @@ static std::shared_ptr<char> generate_client_assoc_event(const std::string &even
     for (uint i = 0; (i < 8) && (i < sizeof(ht_mcs)); i++) {
         ht_mcs_str[2] = ht_mcs[2 * i];
         ht_mcs_str[3] = ht_mcs[2 * i + 1];
-        HT_MCS[i]     = std::stoul(ht_mcs_str, nullptr, 16);
+        HT_MCS[i]     = std::strtoul(ht_mcs_str.c_str(), nullptr, 16);
     }
 
     vht_mcs_str[2] = vht_mcs[0];
     vht_mcs_str[3] = vht_mcs[1];
     vht_mcs_str[4] = vht_mcs[2];
     vht_mcs_str[5] = vht_mcs[3];
-    VHT_MCS[0]     = std::stoul(vht_mcs_str, nullptr, 16);
+    VHT_MCS[0]     = std::strtoul(vht_mcs_str.c_str(), nullptr, 16);
 
     LOG(DEBUG) << "client_mac      : " << client_mac;
     LOG(DEBUG) << "supported_rates : " << std::dec << supported_rates[0]

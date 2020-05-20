@@ -63,7 +63,7 @@ bool controller_ucc_listener::handle_dev_get_param(
             value = "missing ssid";
             return false;
         }
-        auto ruid = tlvf::mac_to_string(std::stoull(params["ruid"], nullptr, 16));
+        auto ruid = tlvf::mac_to_string(std::strtoull(params["ruid"].c_str(), nullptr, 16));
         auto ssid = params["ssid"];
         auto vaps = m_database.get_hostap_vap_list(ruid);
         if (vaps.empty()) {
@@ -218,7 +218,7 @@ controller_ucc_listener::parse_bss_info(const std::string &bss_info_str,
         return std::string();
     }
 
-    uint16_t authentication_type = std::stoi(authentication_type_str, nullptr, 16);
+    uint16_t authentication_type = std::strtol(authentication_type_str.c_str(), nullptr, 16);
 
     if (!WSC::eWscAuthValidate::check(authentication_type)) {
         err_string = "invalid authentication type value";
@@ -233,7 +233,7 @@ controller_ucc_listener::parse_bss_info(const std::string &bss_info_str,
         return std::string();
     }
 
-    uint16_t encryption_type = std::stoi(encryption_type_str, nullptr, 16);
+    uint16_t encryption_type = std::strtol(encryption_type_str.c_str(), nullptr, 16);
 
     if (!WSC::eWscEncrValidate::check(encryption_type)) {
         err_string = "invalid encryption type value";

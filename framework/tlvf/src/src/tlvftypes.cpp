@@ -63,7 +63,7 @@ void mac_from_string(uint8_t *buf, const std::string &mac)
 
             for (int i = 0; i < ETH_ALEN; i++) {
                 std::getline(mac_ss, token, mac_bytes_separator);
-                buf[i] = std::stoul(token, nullptr, 16);
+                buf[i] = std::strtoul(token.c_str(), nullptr, 16);
             }
         }
     }
