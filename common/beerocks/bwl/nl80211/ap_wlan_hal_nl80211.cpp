@@ -467,6 +467,7 @@ bool ap_wlan_hal_nl80211::read_preferred_channels()
                 channel.channel_bandwidth = bw;
                 channel.tx_pow            = channel_info.tx_power;
                 channel.is_dfs_channel    = channel_info.is_dfs;
+                preferred_channels.push_back(channel);
             }
         }
     }
