@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y \
     cmake \
     curl \
     gcc \
+    gcovr \
     git \
     libjson-c-dev \
     libncurses-dev \
