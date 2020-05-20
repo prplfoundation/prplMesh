@@ -34,6 +34,7 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-yaml \
     uuid-runtime \
+    valgrind \
     vim \
     && rm -rf /var/lib/apt/lists/*
 
