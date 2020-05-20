@@ -505,50 +505,50 @@ bool mon_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
         int idx = 0;
 
         // op_class
-        resp->op_class = std::stoi(report.substr(idx, 2), 0, 16);
+        resp->op_class = std::strtoul(report.substr(idx, 2).c_str(), 0, 16);
         idx += 2;
 
         // channel
-        resp->channel = std::stoi(report.substr(idx, 2), 0, 16);
+        resp->channel = std::strtoul(report.substr(idx, 2).c_str(), 0, 16);
         idx += 2;
 
         // start_time
-        resp->start_time = std::stoull(report.substr(idx, 16), 0, 16);
+        resp->start_time = std::strtoull(report.substr(idx, 16).c_str(), 0, 16);
         resp->start_time = be64toh(resp->start_time);
         idx += 16;
 
         // measurement_duration
-        resp->duration = std::stoi(report.substr(idx, 4), 0, 16);
+        resp->duration = std::strtoul(report.substr(idx, 4).c_str(), 0, 16);
         resp->duration = be16toh(resp->duration);
         idx += 4;
 
         // phy_type
-        resp->phy_type = std::stoi(report.substr(idx, 2), 0, 16);
+        resp->phy_type = std::strtoul(report.substr(idx, 2).c_str(), 0, 16);
         idx += 2;
 
         // rcpi
-        resp->rcpi = std::stoi(report.substr(idx, 2), 0, 16);
+        resp->rcpi = std::strtol(report.substr(idx, 2).c_str(), 0, 16);
         idx += 2;
 
         // rsni
-        resp->rsni = std::stoi(report.substr(idx, 2), 0, 16);
+        resp->rsni = std::strtol(report.substr(idx, 2).c_str(), 0, 16);
         idx += 2;
 
         // bssid
-        resp->bssid.oct[0] = std::stoi(report.substr(idx + 0, 2), 0, 16);
-        resp->bssid.oct[1] = std::stoi(report.substr(idx + 2, 2), 0, 16);
-        resp->bssid.oct[2] = std::stoi(report.substr(idx + 4, 2), 0, 16);
-        resp->bssid.oct[3] = std::stoi(report.substr(idx + 6, 2), 0, 16);
-        resp->bssid.oct[4] = std::stoi(report.substr(idx + 8, 2), 0, 16);
-        resp->bssid.oct[5] = std::stoi(report.substr(idx + 10, 2), 0, 16);
+        resp->bssid.oct[0] = std::strtoul(report.substr(idx + 0, 2).c_str(), 0, 16);
+        resp->bssid.oct[1] = std::strtoul(report.substr(idx + 2, 2).c_str(), 0, 16);
+        resp->bssid.oct[2] = std::strtoul(report.substr(idx + 4, 2).c_str(), 0, 16);
+        resp->bssid.oct[3] = std::strtoul(report.substr(idx + 6, 2).c_str(), 0, 16);
+        resp->bssid.oct[4] = std::strtoul(report.substr(idx + 8, 2).c_str(), 0, 16);
+        resp->bssid.oct[5] = std::strtoul(report.substr(idx + 10, 2).c_str(), 0, 16);
         idx += 12;
 
         // ant_id
-        resp->ant_id = std::stoi(report.substr(idx, 2), 0, 16);
+        resp->ant_id = std::strtoul(report.substr(idx, 2).c_str(), 0, 16);
         idx += 2;
 
         // parent_tsf
-        resp->parent_tsf = std::stoull(report.substr(idx, 8), 0, 16);
+        resp->parent_tsf = std::strtoull(report.substr(idx, 8).c_str(), 0, 16);
         idx += 8;
 
         // TODO: Ignore everything else?

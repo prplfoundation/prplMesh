@@ -144,7 +144,7 @@ void network_utils::ipv4_from_string(uint8_t *buf, const std::string &ip_str)
 
         for (int i = 0; i < IP_ADDR_LEN; i++) {
             std::getline(ipv4_ss, token, '.');
-            buf[i] = std::stoi(token);
+            buf[i] = string_utils::stoi(token);
         }
     }
 }

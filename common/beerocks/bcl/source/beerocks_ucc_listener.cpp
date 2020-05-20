@@ -671,7 +671,7 @@ void beerocks_ucc_listener::handle_wfa_ca_command(const std::string &command)
         std::transform(dest_alid.begin(), dest_alid.end(), dest_alid.begin(), ::tolower);
 
         auto &message_type_str = params["messagetypevalue"];
-        auto message_type      = (uint16_t)(std::stoul(message_type_str, nullptr, 16));
+        auto message_type      = (uint16_t)(std::strtoul(message_type_str.c_str(), nullptr, 16));
         if (!ieee1905_1::eMessageTypeValidate::check(message_type)) {
             err_string = "invalid param value '0x" + message_type_str +
                          "' for param name 'MessageTypeValue', message type not found";
@@ -806,7 +806,7 @@ bool tlvPrefilledData::add_tlv_value_hex_string(const std::string &value, uint16
         if (length == 0) {
             return false;
         }
-        *m_buff_ptr__ = std::stoi(value.substr(char_idx, 2), nullptr, 16);
+        *m_buff_ptr__ = std::strtoul(value.substr(char_idx, 2).c_str(), nullptr, 16);
         m_buff_ptr__++;
         length--;
     }
@@ -831,7 +831,7 @@ bool tlvPrefilledData::add_tlv_value_decimal_string(const std::string &value, ui
         num_of_bytes++;
     }
     ss << "0x" << std::setw(num_of_bytes * 2) << std::setfill('0') << std::hex
-       << std::stoi(value.substr(2, value.length()));
+       << string_utils::stoi(value.substr(2, value.length()));
 
     return add_tlv_value_hex_string(ss.str(), length);
 }
@@ -849,7 +849,7 @@ bool tlvPrefilledData::add_tlv_value_binary_string(const std::string &value, uin
         if (length == 0) {
             return false;
         }
-        *m_buff_ptr__ = std::stoi(value.substr(char_idx, 8), nullptr, 2);
+        *m_buff_ptr__ = std::strtoul(value.substr(char_idx, 8).c_str(), nullptr, 2);
         m_buff_ptr__++;
         length--;
     }
@@ -869,7 +869,7 @@ bool tlvPrefilledData::add_tlv_value_mac(const std::string &value, uint16_t &len
         if (length == 0) {
             return false;
         }
-        *m_buff_ptr__ = std::stoi(value.substr(char_idx, 2), nullptr, 16);
+        *m_buff_ptr__ = std::strtoul(value.substr(char_idx, 2).c_str(), nullptr, 16);
         m_buff_ptr__++;
         length--;
     }
@@ -888,9 +888,9 @@ bool tlvPrefilledData::add_tlvs_from_list(std::list<beerocks_ucc_listener::tlv_h
 {
     for (const auto &tlv : tlv_hex_list) {
 
-        uint8_t type = std::stoi(*tlv.type, nullptr, 16);
+        uint8_t type = std::strtoul((*tlv.type).c_str(), nullptr, 16);
 
-        uint16_t length = std::stoi(*tlv.length, nullptr, 16);
+        uint16_t length = std::strtoul((*tlv.length).c_str(), nullptr, 16);
 
         // "+3" = size of type and length fields
         if (getBuffRemainingBytes() < unsigned(length + 3)) {

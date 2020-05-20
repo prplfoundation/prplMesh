@@ -264,15 +264,15 @@ void ProcessArgs(int argc, char **argv)
 
         switch (opt) {
         case 'd':
-            g_cfg.init_delay = std::stoi(optarg);
+            g_cfg.init_delay = std::strtoul(optarg, nullptr, 10);
             std::cout << "Init Delay[us]: " << g_cfg.init_delay << std::endl;
             break;
         case 'i':
-            g_cfg.iterations = std::stoi(optarg);
+            g_cfg.iterations = std::strtoul(optarg, nullptr, 10);
             std::cout << "Iterations: " << g_cfg.iterations << std::endl;
             break;
         case 'a':
-            g_cfg.max_attempts = std::stoi(optarg);
+            g_cfg.max_attempts = std::strtoul(optarg, nullptr, 10);
             std::cout << "Max Attempts (slow joiner): " << g_cfg.max_attempts << std::endl;
             break;
         case 't':

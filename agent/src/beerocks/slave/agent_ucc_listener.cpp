@@ -123,7 +123,7 @@ bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, st
             value = "missing ssid";
             return false;
         }
-        auto ruid = tlvf::mac_to_string(std::stoull(params["ruid"], nullptr, 16));
+        auto ruid = tlvf::mac_to_string(std::strtoull(params["ruid"].c_str(), nullptr, 16));
         auto ssid = params["ssid"];
 
         auto it = vaps_map.find(ruid);
