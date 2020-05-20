@@ -2237,6 +2237,7 @@ bool backhaul_manager::handle_multi_ap_policy_config_request(ieee1905_1::CmduMes
                 if (!message_com::forward_cmdu_to_uds(radio->slave, cmdu_rx, length)) {
                     LOG(ERROR) << "Failed to forward message to slave " << radio->radio_mac;
                 }
+                cmdu_rx.swap(); // swap back to normal after forwarding, for next iteration
             } else {
                 LOG(INFO) << "Radio Unique Identifier " << metrics_reporting_conf.radio_uid
                           << " not found";
