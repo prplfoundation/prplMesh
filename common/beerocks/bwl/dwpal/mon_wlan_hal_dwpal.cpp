@@ -1147,10 +1147,11 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
 
         char VAP[SSID_MAX_SIZE]        = {0};
         char MACAddress[MAC_ADDR_SIZE] = {0};
-        size_t numOfValidArgs[2]       = {0};
+        size_t numOfValidArgs[3]       = {0};
         FieldsToParse fieldsToParse[]  = {
             {NULL /*opCode*/, &numOfValidArgs[0], DWPAL_STR_PARAM, NULL, 0},
-            {(void *)MACAddress, &numOfValidArgs[1], DWPAL_STR_PARAM, NULL, sizeof(MACAddress)},
+            {(void *)VAP, &numOfValidArgs[1], DWPAL_STR_PARAM, NULL, sizeof(VAP)},
+            {(void *)MACAddress, &numOfValidArgs[2], DWPAL_STR_PARAM, NULL, sizeof(MACAddress)},
             /* Must be at the end */
             {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
@@ -1160,6 +1161,7 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
             return false;
         }
 
+        LOG(DEBUG) << "vap_id     : " << VAP;
         LOG(DEBUG) << "MACAddress : " << MACAddress;
 
         for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
