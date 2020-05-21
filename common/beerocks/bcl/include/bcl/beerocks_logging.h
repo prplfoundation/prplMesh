@@ -93,6 +93,7 @@ public:
 
     void set_log_level_state(const eLogLevel &log_level, const bool &new_state);
     void attach_current_thread_to_logger_id();
+    void set_thread_name(const std::string &thread_name);
 
     // TBD: Can/Should these be removed?
     size_t get_log_rollover_size();
