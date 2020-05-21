@@ -7,13 +7,12 @@
  */
 #include "son_slave_thread.h"
 
-#include "../monitor/monitor_thread.h"
+#include "../fronthaul_manager/monitor/monitor_thread.h"
 #include "tlvf_utils.h"
 
 #include <bcl/beerocks_utils.h>
 #include <bcl/beerocks_version.h>
 #include <bcl/network/network_utils.h>
-#include <bcl/son/son_wireless_utils.h>
 #include <easylogging++.h>
 
 #include <beerocks/tlvf/beerocks_message.h>
@@ -94,7 +93,6 @@ slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
     slave_uds   = conf.temp_path + std::string(BEEROCKS_SLAVE_UDS) + "_" + conf.hostap_iface;
     backhaul_manager_uds    = conf.temp_path + std::string(BEEROCKS_BACKHAUL_MGR_UDS);
     platform_manager_uds    = conf.temp_path + std::string(BEEROCKS_PLAT_MGR_UDS);
-    ap_manager              = nullptr;
     backhaul_manager_socket = nullptr;
     master_socket           = nullptr;
     monitor_socket          = nullptr;
@@ -219,20 +217,10 @@ bool slave_thread::socket_disconnected(Socket *sd)
         LOG(DEBUG) << "platform_manager disconnected! - slave_reset()";
         stop_slave_thread();
         return false;
-    } else if (sd == ap_manager_socket || sd == monitor_socket) { //TODO WLANRTSYS-9119
-        // if both ap_manager and monitor disconnected, but monitor disconnection got first
-        auto err_code = ap_manager->get_thread_last_error_code();
-        if (sd == ap_manager_socket ||
-            err_code != ap_manager_thread::eThreadErrors::APMANAGER_THREAD_ERROR_NO_ERROR) {
-            LOG(DEBUG) << "ap_manager socket disconnected, last error code " << int(err_code)
-                       << "  - slave_reset()";
-            slave_reset();
-        } else {
-            // only monitor disconnected
-            LOG(DEBUG) << "monitor socket disconnected! - slave_reset()";
-            slave_reset();
-        }
-
+    } else if (sd == ap_manager_socket || sd == monitor_socket) {
+        LOG(DEBUG) << (sd == ap_manager_socket ? "ap_manager" : "monitor")
+                   << " socket disconnected - slave_reset()";
+        slave_reset();
         return false;
     }
 
@@ -3681,48 +3669,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
     }
 
     return slave_ok;
-}
-
-bool slave_thread::ap_manager_start()
-{
-    ap_manager = new ap_manager_thread(slave_uds);
-
-    ap_manager_thread::ap_manager_conf_t ap_manager_conf;
-    ap_manager_conf.hostap_iface      = config.hostap_iface;
-    ap_manager_conf.hostap_iface_type = config.hostap_iface_type;
-    ap_manager_conf.channel           = wlan_settings.channel;
-    ap_manager_conf.iface_filter_low  = config.backhaul_wireless_iface_filter_low;
-
-    ap_manager->ap_manager_config(ap_manager_conf);
-
-    if (!ap_manager->start()) {
-        delete ap_manager;
-        ap_manager = nullptr;
-        LOG(ERROR) << "ap_manager.start()";
-        return false;
-    }
-
-    return true;
-}
-
-void slave_thread::ap_manager_stop()
-{
-    bool did_stop = false;
-    if (ap_manager_socket) {
-        remove_socket(ap_manager_socket);
-        delete ap_manager_socket;
-        ap_manager_socket = nullptr;
-        did_stop          = true;
-    }
-    if (ap_manager) {
-        LOG(DEBUG) << "ap_manager->stop();";
-        ap_manager->stop();
-        delete ap_manager;
-        ap_manager = nullptr;
-        did_stop   = true;
-    }
-    if (did_stop)
-        LOG(DEBUG) << "ap_manager_stop() - done";
 }
 
 void slave_thread::backhaul_manager_stop()
