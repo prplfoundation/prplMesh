@@ -110,8 +110,7 @@ void association_handling_task::work()
 
         //add bridge mac for ires
         if (database.get_node_type(sta_mac) == beerocks::TYPE_IRE_BACKHAUL) {
-            request->params().is_ire = true;
-            auto bridge_container    = database.get_node_children(sta_mac, beerocks::TYPE_IRE);
+            auto bridge_container = database.get_node_children(sta_mac, beerocks::TYPE_IRE);
             if (!bridge_container.empty()) {
                 std::string bridge_4addr_mac       = *bridge_container.begin();
                 request->params().bridge_4addr_mac = tlvf::mac_from_string(bridge_4addr_mac);

@@ -534,18 +534,6 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         LOG(DEBUG) << "START_MONITORING_REQUEST: mac=" << client_mac << " ip=" << client_ip
                    << " bridge_4addr_mac=" << client_bridge_4addr_mac;
 
-        if (request_in->params().is_ire) {
-            auto request_out = message_com::create_vs_message<
-                beerocks_message::cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION>(cmdu_tx);
-            if (request_out == nullptr) {
-                LOG(ERROR) << "Failed building ACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION "
-                              "message!";
-                return false;
-            }
-            request_out->mac() = request_in->params().mac;
-            message_com::send_cmdu(ap_manager_socket, cmdu_tx);
-        }
-
         //notify monitor
         auto request_out = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST>(

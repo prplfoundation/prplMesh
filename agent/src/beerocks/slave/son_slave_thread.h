@@ -189,7 +189,6 @@ private:
 
     //slave FSM //
     eSlaveState slave_state;
-    bool connected_4addr_mode;
     std::chrono::steady_clock::time_point slave_state_timer;
     int keep_alive_retries = 0;
     bool hostap_params_available;
