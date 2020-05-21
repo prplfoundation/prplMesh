@@ -96,8 +96,9 @@ ap_manager_thread::ap_manager_thread(const std::string &slave_uds_, const std::s
     : socket_thread(), m_logger(logger)
 {
     thread_name = "ap_manager";
-    slave_uds   = slave_uds_;
-    m_iface     = iface;
+    logger.set_thread_name(thread_name);
+    slave_uds = slave_uds_;
+    m_iface   = iface;
     set_select_timeout(SELECT_TIMEOUT_MSC);
 }
 
