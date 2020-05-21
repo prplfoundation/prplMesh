@@ -211,17 +211,6 @@ bool monitor_thread::init()
         return false;
     }
 
-    auto request =
-        message_com::create_vs_message<beerocks_message::cACTION_MONITOR_JOINED_NOTIFICATION>(
-            cmdu_tx);
-
-    if (request == nullptr) {
-        LOG(ERROR) << "Failed building message!";
-        return false;
-    }
-
-    message_com::send_cmdu(slave_socket, cmdu_tx);
-
     add_socket(slave_socket);
     LOG(DEBUG) << "init() end";
     return true;
@@ -307,6 +296,15 @@ void monitor_thread::after_select(bool timeout)
                 mon_hal_nl_events      = nullptr;
                 thread_last_error_code = MONITOR_THREAD_ERROR_NL_ATTACH_FAIL;
             }
+
+            LOG(DEBUG) << "sending ACTION_MONITOR_JOINED_NOTIFICATION";
+            auto request = message_com::create_vs_message<
+                beerocks_message::cACTION_MONITOR_JOINED_NOTIFICATION>(cmdu_tx);
+            if (request == nullptr) {
+                LOG(ERROR) << "Failed building message!";
+                return;
+            }
+            message_com::send_cmdu(slave_socket, cmdu_tx);
 
             // Generate pre-existing client STA_Connected
             mon_wlan_hal->generate_connected_clients_events();
