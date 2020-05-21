@@ -28,6 +28,8 @@ public:
                       beerocks::logging &logger);
     virtual ~ap_manager_thread();
 
+    virtual bool init() override;
+
     struct ap_manager_conf_t {
         std::string hostap_iface;
         beerocks::eIfaceType hostap_iface_type;
@@ -64,7 +66,6 @@ public:
     eApManagerState get_state() const { return m_state; }
 
 protected:
-    virtual bool init() override;
     virtual bool handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx) override;
     virtual void after_select(bool timeout) override;
     virtual void on_thread_stop() override;
