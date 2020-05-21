@@ -56,9 +56,6 @@ cACTION_APMANAGER_ENABLE_APS_RESPONSE:
   _type: class
   success: uint8_t
 
-cACTION_APMANAGER_INIT_DONE_NOTIFICATION:
-  _type: class
-
 cACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_REQUEST:
   _type: class
   params: sApSetRestrictedFailsafe
