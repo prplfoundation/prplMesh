@@ -42,7 +42,10 @@ protected:
     {
         return false;
     }
-    virtual bool skip_filtered_message_type(ieee1905_1::eMessageType msg_type) { return false; }
+    virtual bool skip_filtered_message_type(Socket *sd, ieee1905_1::eMessageType msg_type)
+    {
+        return false;
+    }
     virtual std::string print_cmdu_types(const message::sUdsHeader *cmdu_header)
     {
         return std::string();

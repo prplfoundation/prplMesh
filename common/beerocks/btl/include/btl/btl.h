@@ -62,7 +62,7 @@ private:
     int poll_timeout_ms = 500;
 
 #ifdef UDS_BUS
-    bool skip_filtered_message_type(ieee1905_1::eMessageType msg_type) override;
+    bool skip_filtered_message_type(Socket *sd, ieee1905_1::eMessageType msg_type) override;
 
     Socket *bus = nullptr;
     std::unique_ptr<SocketServer> bus_server_socket;
