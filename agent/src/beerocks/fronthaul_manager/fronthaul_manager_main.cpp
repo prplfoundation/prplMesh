@@ -22,7 +22,8 @@ static int s_signal   = 0;
 static std::string fronthaul_iface;
 
 // Pointer to logger instance
-static beerocks::logging *s_pLogger = nullptr;
+static std::shared_ptr<beerocks::logging> g_logger_ap_mananger;
+static std::shared_ptr<beerocks::logging> g_logger_monitor;
 
 static void handle_signal()
 {
@@ -41,17 +42,20 @@ static void handle_signal()
     // Roll log file
     case SIGUSR1: {
         LOG(INFO) << "LOG Roll Signal!";
-        if (!s_pLogger) {
-            LOG(ERROR) << "Invalid logger pointer!";
-            return;
-        }
+        auto roll_file = [&](std::shared_ptr<beerocks::logging> &logger) {
+            if (!logger) {
+                LOG(ERROR) << "Invalid logger pointer!";
+                return;
+            }
 
-        s_pLogger->apply_settings();
+            logger->apply_settings();
+        };
+
         LOG(INFO) << "--- Start of file after roll ---";
-
+        roll_file(g_logger_ap_mananger);
+        roll_file(g_logger_monitor);
         break;
     }
-
     default:
         LOG(WARNING) << "Unhandled Signal: '" << strsignal(s_signal) << "' Ignoring...";
         break;
@@ -108,6 +112,31 @@ static bool parse_arguments(int argc, char *argv[])
     return true;
 }
 
+static std::shared_ptr<beerocks::logging>
+init_logger(const std::string &file_name, const beerocks::config_file::SConfigLog &log_config,
+            int argc, char **argv, const std::string &logger_id = std::string())
+{
+    auto logger = std::make_shared<beerocks::logging>(file_name, log_config, logger_id);
+    if (!logger) {
+        std::cout << "Failed to allocated logger to " << file_name;
+        return std::shared_ptr<beerocks::logging>();
+    }
+    logger->apply_settings();
+    CLOG(INFO, logger->get_logger_id())
+        << std::endl
+        << "Running " << file_name << " Version " << BEEROCKS_VERSION << " Build date "
+        << BEEROCKS_BUILD_DATE << std::endl
+        << std::endl;
+    beerocks::version::log_version(argc, argv);
+
+    // Redirect stdout / stderr to file
+    if (logger->get_log_files_enabled()) {
+        beerocks::os_utils::redirect_console_std(log_config.files_path + file_name + "_std.log");
+    }
+
+    return logger;
+}
+
 int main(int argc, char *argv[])
 {
     init_signals();
@@ -148,21 +177,19 @@ int main(int argc, char *argv[])
         }
     }
 
-    //init logger
-    std::string base_monitor_name = std::string(BEEROCKS_MONITOR) + "_" + fronthaul_iface;
-    beerocks::logging logger(base_monitor_name, beerocks_slave_conf.sLog);
-    s_pLogger = &logger;
-    logger.apply_settings();
-    LOG(INFO) << std::endl
-              << "Running " << base_monitor_name << " Version " << BEEROCKS_VERSION
-              << " Build date " << BEEROCKS_BUILD_DATE << std::endl
-              << std::endl;
-    beerocks::version::log_version(argc, argv);
+    // Init logger ap_manager
+    std::string base_ap_manager_name = std::string(BEEROCKS_AP_MANAGER) + "_" + fronthaul_iface;
+    g_logger_ap_mananger = init_logger(base_ap_manager_name, beerocks_slave_conf.sLog, argc, argv);
+    if (!g_logger_ap_mananger) {
+        return 0;
+    }
 
-    // Redirect stdout / stderr to file
-    if (logger.get_log_files_enabled()) {
-        beerocks::os_utils::redirect_console_std(beerocks_slave_conf.sLog.files_path +
-                                                 base_monitor_name + "_std.log");
+    // Init logger monitor
+    std::string base_monitor_name = std::string(BEEROCKS_MONITOR) + "_" + fronthaul_iface;
+    g_logger_monitor =
+        init_logger(base_monitor_name, beerocks_slave_conf.sLog, argc, argv, BEEROCKS_MONITOR);
+    if (!g_logger_monitor) {
+        return 0;
     }
 
     // Kill running fronthaul and write pid file
@@ -177,7 +204,7 @@ int main(int argc, char *argv[])
         beerocks_slave_conf.temp_path + std::string(BEEROCKS_SLAVE_UDS) + "_" + fronthaul_iface;
 
     // Create Monitor
-    son::monitor_thread monitor(agent_uds, fronthaul_iface, beerocks_slave_conf, logger);
+    son::monitor_thread monitor(agent_uds, fronthaul_iface, beerocks_slave_conf, *g_logger_monitor);
 
     if (monitor.init()) {
         auto touch_time_stamp_timeout = std::chrono::steady_clock::now();
