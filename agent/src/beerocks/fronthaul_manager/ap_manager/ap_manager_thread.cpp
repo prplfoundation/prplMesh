@@ -132,30 +132,26 @@ bool ap_manager_thread::init()
         return false;
     }
 
-    //connect to slave //
+    return true;
+}
+
+void ap_manager_thread::connect_to_agent()
+{
+    if (slave_socket) {
+        LOG(WARNING) << "Agent socket is already open";
+        return;
+    }
+
     slave_socket    = new SocketClient(slave_uds);
     std::string err = slave_socket->getError();
     if (!err.empty()) {
         LOG(ERROR) << "slave_socket: " << err;
         delete slave_socket;
         slave_socket = nullptr;
-        return false;
-    } else {
-        add_socket(slave_socket);
+        return;
     }
 
-    auto request =
-        message_com::create_vs_message<beerocks_message::cACTION_APMANAGER_INIT_DONE_NOTIFICATION>(
-            cmdu_tx);
-
-    if (request == nullptr) {
-        LOG(ERROR) << "Failed building message!";
-        return false;
-    }
-
-    message_com::send_cmdu(slave_socket, cmdu_tx);
-
-    return true;
+    add_socket(slave_socket);
 }
 
 void ap_manager_thread::ap_manager_fsm()
@@ -183,10 +179,13 @@ void ap_manager_thread::ap_manager_fsm()
 
 void ap_manager_thread::after_select(bool timeout)
 {
-    // continue only if slave is connected
-    if (slave_socket == nullptr) {
+    // Continue only if the Agent is connected, otherwise connect to it.
+    if (!slave_socket) {
+        connect_to_agent();
         return;
     }
+
+    ap_manager_fsm();
 
     auto now = std::chrono::steady_clock::now();
 
