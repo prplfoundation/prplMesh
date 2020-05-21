@@ -166,19 +166,19 @@ std::ostream &operator<<(std::ostream &ost, monitor_sta_node *sta_node)
 }
 } // namespace son
 
-double monitor_sta_node::get_load_rx_phy_rate()
+double monitor_sta_node::get_load_rx_phy_rate() const
 {
     auto &sta_stats = get_stats();
     return (1e+5 * double(sta_stats.rx_phy_rate_100kb_avg));
 }
 
-double monitor_sta_node::get_load_tx_phy_rate()
+double monitor_sta_node::get_load_tx_phy_rate() const
 {
     auto &sta_stats = get_stats();
     return (1e+5 * double(sta_stats.tx_phy_rate_100kb_avg));
 }
 
-double monitor_sta_node::get_load_rx_bit_rate()
+double monitor_sta_node::get_load_rx_bit_rate() const
 {
     auto &sta_stats = get_stats();
     double bit_rate =
@@ -186,7 +186,7 @@ double monitor_sta_node::get_load_rx_bit_rate()
     return bit_rate;
 }
 
-double monitor_sta_node::get_load_tx_bit_rate()
+double monitor_sta_node::get_load_tx_bit_rate() const
 {
     auto &sta_stats = get_stats();
     double bit_rate =
@@ -194,7 +194,7 @@ double monitor_sta_node::get_load_tx_bit_rate()
     return bit_rate;
 }
 
-double monitor_sta_node::get_load_rx_percentage()
+double monitor_sta_node::get_load_rx_percentage() const
 {
     double max_bit_rate_mbps =
         son::wireless_utils::get_load_max_bit_rate_mbps(get_load_rx_phy_rate() / 1e+5);
@@ -203,7 +203,7 @@ double monitor_sta_node::get_load_rx_percentage()
     return (100.0 * get_load_rx_bit_rate() / (max_bit_rate_mbps * 1e6));
 }
 
-double monitor_sta_node::get_load_tx_percentage()
+double monitor_sta_node::get_load_tx_percentage() const
 {
     double max_bit_rate_mbps =
         son::wireless_utils::get_load_max_bit_rate_mbps(get_load_tx_phy_rate() / 1e+5);
@@ -393,13 +393,13 @@ bool monitor_db::is_last_poll()
     return poll_last;
 }
 
-uint32_t monitor_sta_node::get_tx_packets()
+uint32_t monitor_sta_node::get_tx_packets() const
 {
     const auto &sta_stats = get_stats();
     return sta_stats.hal_stats.tx_packets;
 }
 
-uint32_t monitor_sta_node::get_rx_packets()
+uint32_t monitor_sta_node::get_rx_packets() const
 {
     const auto &sta_stats = get_stats();
     return sta_stats.hal_stats.rx_packets;
