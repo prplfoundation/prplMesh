@@ -1,11 +1,12 @@
-project(beerocks_monitor VERSION ${prplmesh_VERSION})
+project(beerocks_fronthaul VERSION ${prplmesh_VERSION})
 message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
 # Set the base path for the current module
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
-file(GLOB beerocks_monitor_sources 
-    ${MODULE_PATH}/../../son/monitor/*.c*
+file(GLOB fronthaul_manager_sources 
+    ${MODULE_PATH}/monitor/*.c*
+    ${MODULE_PATH}/ap_manager/*.c*
     ${MODULE_PATH}/*.c*
 )
 
@@ -25,11 +26,11 @@ endif()
 
 #RDKB
 if (TARGET_PLATFORM STREQUAL "rdkb")
-    file(GLOB RDKB_SOURCES ${MODULE_PATH}/rdkb/*.c*)
-    list(APPEND beerocks_monitor_sources  ${RDKB_SOURCES})
+    file(GLOB RDKB_SOURCES ${MODULE_PATH}/monitor/rdkb/*.c*)
+    list(APPEND fronthaul_manager_sources  ${RDKB_SOURCES})
 endif()
 
-add_executable(${PROJECT_NAME} ${beerocks_monitor_sources})
+add_executable(${PROJECT_NAME} ${fronthaul_manager_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES LINK_FLAGS "-Wl,-z,defs")
 target_link_libraries(${PROJECT_NAME} bcl btlvf rt dl tlvf elpp bwl ${LIBS})
 
