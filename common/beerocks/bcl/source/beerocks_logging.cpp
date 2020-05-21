@@ -444,6 +444,11 @@ void logging::set_log_level_state(const eLogLevel &log_level, const bool &new_st
     apply_settings();
 }
 
+void logging::attach_current_thread_to_logger_id()
+{
+    el::Helpers::attachLoggerIdThreadId(m_logger_id);
+}
+
 void logging::handle_logging_rollover(const char *log_name, std::size_t)
 {
     if (!log_name) {
