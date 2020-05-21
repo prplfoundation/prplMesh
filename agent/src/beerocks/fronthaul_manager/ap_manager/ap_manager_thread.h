@@ -103,6 +103,7 @@ private:
     int bss_steer_valid_int          = BSS_STEER_VALID_INT_BTT;
     int bss_steer_imminent_valid_int = BSS_STEER_IMMINENT_VALID_INT_BTT;
     eApManagerState m_state          = eApManagerState::INIT;
+    std::chrono::steady_clock::time_point m_state_timeout;
     std::vector<disallowed_client_t> m_disallowed_clients;
 
     struct pending_disable_vap_t {
