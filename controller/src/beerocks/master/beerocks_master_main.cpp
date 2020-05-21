@@ -278,7 +278,7 @@ int main(int argc, char *argv[])
     }
 
     //init logger
-    beerocks::logging logger(beerocks_master_conf.sLog, base_master_name);
+    beerocks::logging logger(base_master_name, beerocks_master_conf.sLog);
     s_pLogger = &logger;
     logger.apply_settings();
     LOG(INFO) << std::endl

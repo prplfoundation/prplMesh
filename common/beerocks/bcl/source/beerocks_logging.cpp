@@ -287,7 +287,8 @@ bool log_levels::trace_enabled() { return (m_level_set.end() != m_level_set.find
 const std::string logging::format("%level %datetime{%H:%m:%s:%g} <%thread> %fbase[%line] --> %msg");
 const std::string logging::syslogFormat("<%thread> %fbase[%line] --> %msg");
 
-logging::logging(const std::string &config_path, const std::string &module_name)
+logging::logging(const std::string &module_name, const std::string &config_path,
+                 const std::string &logger_id)
     : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
       m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT)
 {
@@ -301,13 +302,17 @@ logging::logging(const std::string &config_path, const std::string &module_name)
     if (!found_settings) {
         found_settings = load_settings(conf_path);
     }
+    if (!logger_id.empty()) {
+        m_logger_id = logger_id;
+    }
 
     if (found_settings) {
         eval_settings();
     }
 }
 
-logging::logging(const settings_t &settings, bool cache_settings, const std::string &module_name)
+logging::logging(const std::string &module_name, const settings_t &settings,
+                 const std::string &logger_id, bool cache_settings)
     : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
       m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT)
 
@@ -322,11 +327,15 @@ logging::logging(const settings_t &settings, bool cache_settings, const std::str
         save_settings(get_cache_path());
     }
 
+    if (!logger_id.empty()) {
+        m_logger_id = logger_id;
+    }
+
     eval_settings();
 }
 
-logging::logging(const beerocks::config_file::SConfigLog &settings, const std::string &module_name,
-                 bool cache_settings)
+logging::logging(const std::string &module_name, const beerocks::config_file::SConfigLog &settings,
+                 const std::string &logger_id, bool cache_settings)
     : m_module_name(module_name), m_logfile_size(LOGGING_DEFAULT_MAX_SIZE),
       m_levels(LOG_LEVELS_GLOBAL_DEFAULT), m_syslog_levels(LOG_LEVELS_SYSLOG_DEFAULT)
 {
@@ -344,6 +353,10 @@ logging::logging(const beerocks::config_file::SConfigLog &settings, const std::s
         m_settings_map.insert({"log_syslog_enabled", settings.syslog_enabled});
     } else {
         m_settings_map.insert({"log_syslog_enabled", "false"});
+    }
+
+    if (!logger_id.empty()) {
+        m_logger_id = logger_id;
     }
 
     eval_settings();
@@ -506,7 +519,13 @@ void logging::apply_settings()
     syslogConf.set(el::Level::Trace, el::ConfigurationType::Enabled,
                    string_utils::bool_str(m_syslog_levels.trace_enabled()));
 
-    el::Loggers::reconfigureLogger("default", defaultConf);
+    auto logger = el::Loggers::getLogger(m_logger_id);
+    if (!logger) {
+        LOG(ERROR) << "invalid logger!";
+        return;
+    }
+
+    el::Loggers::reconfigureLogger(m_logger_id, defaultConf);
     el::Loggers::reconfigureLogger("syslog", syslogConf);
 
     el::Loggers::addFlag(el::LoggingFlag::ImmediateFlush);
@@ -516,11 +535,6 @@ void logging::apply_settings()
     el::Loggers::addFlag(el::LoggingFlag::ShowBase);
     el::Loggers::addFlag(el::LoggingFlag::BoolAlpha);
 
-    auto logger = el::Loggers::getLogger("default");
-    if (!logger) {
-        LOG(ERROR) << "invalid logger!";
-        return;
-    }
     auto typedConfigurations = logger->typedConfigurations();
     if (!typedConfigurations) {
         LOG(ERROR) << "invalid typedConfigurations!";

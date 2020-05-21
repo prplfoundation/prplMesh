@@ -27,10 +27,6 @@ namespace beerocks {
         std::cout << "\r" << a << std::flush;                                                      \
     } while (0)
 
-extern const std::string BEEROCKS_LOGGING_MODULE_NAME;
-#define BEEROCKS_INIT_LOGGING(module_name)                                                         \
-    const std::string beerocks::BEEROCKS_LOGGING_MODULE_NAME = (module_name);
-
 class log_levels {
 public:
     typedef std::set<std::string> set_t;
@@ -73,12 +69,12 @@ class logging {
 public:
     typedef std::map<std::string, std::string> settings_t;
 
-    logging(const std::string &config_path = std::string(),
-            const std::string &module_name = BEEROCKS_LOGGING_MODULE_NAME);
-    explicit logging(const settings_t &settings, bool cache_settings = false,
-                     const std::string &module_name = BEEROCKS_LOGGING_MODULE_NAME);
-    logging(const beerocks::config_file::SConfigLog &settings, const std::string &module_name,
-            bool cache_settings = false);
+    logging(const std::string &module_name, const std::string &config_path = std::string(),
+            const std::string &logger_id = std::string());
+    logging(const std::string &module_name, const settings_t &settings,
+            const std::string &logger_id = std::string(), bool cache_settings = false);
+    logging(const std::string &module_name, const beerocks::config_file::SConfigLog &settings,
+            const std::string &logger_id = std::string(), bool cache_settings = false);
     ~logging() = default;
 
     void apply_settings();
@@ -100,6 +96,8 @@ public:
     // TBD: Can/Should these be removed?
     size_t get_log_rollover_size();
     size_t get_log_max_size();
+
+    const char *get_logger_id() const { return m_logger_id.c_str(); }
 
 protected:
     bool load_settings(const std::string &config_file_path);
@@ -129,6 +127,8 @@ private:
     bool m_syslog_enabled = false;
 
     settings_t m_settings_map;
+
+    std::string m_logger_id = "default";
 };
 
 } // namespace beerocks

@@ -480,7 +480,7 @@ int main(int argc, char *argv[])
     beerocks_slave_conf.sLog.stdout_enabled = "true";
 
     // Init logger
-    beerocks::logging cli_logger(beerocks_slave_conf.sLog, "beerocks_cli");
+    beerocks::logging cli_logger("beerocks_cli", beerocks_slave_conf.sLog);
     cli_logger.apply_settings();
 
     switch (cli_role) {
