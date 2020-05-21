@@ -16,6 +16,19 @@ _multi_class_auto_insert:
 #################################################
 #################################################
  
+cACTION_APMANAGER_UP_NOTIFICATION:
+  _type: class
+  iface_name_length:
+    _type: uint8_t
+    _length_var: True
+  iface_name:
+    _type: char
+    _length: [iface_name_length]
+
+cACTION_APMANAGER_CONFIGURE:
+  _type: class
+  channel: uint8_t
+
 cACTION_APMANAGER_JOINED_NOTIFICATION:
   _type: class
   params: sNodeHostap
