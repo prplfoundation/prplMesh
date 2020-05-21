@@ -158,6 +158,29 @@ bool ap_manager_thread::init()
     return true;
 }
 
+void ap_manager_thread::ap_manager_fsm()
+{
+    switch (m_state) {
+    case eApManagerState::INIT: {
+        break;
+    }
+    case eApManagerState::WAIT_FOR_CONFIGURATION: {
+        break;
+    }
+    case eApManagerState::ATTACHING: {
+        break;
+    }
+    case eApManagerState::ATTACHED: {
+        break;
+    }
+    case eApManagerState::OPERATIONAL: {
+        break;
+    }
+    default:
+        break;
+    }
+}
+
 void ap_manager_thread::after_select(bool timeout)
 {
     // continue only if slave is connected
@@ -1500,6 +1523,8 @@ void ap_manager_thread::stop_ap_manager_thread()
         delete slave_socket;
         slave_socket = nullptr;
     }
+
+    m_state = eApManagerState::INIT;
 
     should_stop = true;
 }

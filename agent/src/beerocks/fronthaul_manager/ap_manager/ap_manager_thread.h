@@ -35,6 +35,8 @@ public:
         bool iface_filter_low;
     };
 
+    enum class eApManagerState { INIT, WAIT_FOR_CONFIGURATION, ATTACHING, ATTACHED, OPERATIONAL };
+
     void ap_manager_config(ap_manager_conf_t &conf);
 
     /**
@@ -59,6 +61,8 @@ public:
         APMANAGER_THREAD_ERROR_REPORT_PROCESS_FAIL = 6,
     };
 
+    eApManagerState get_state() const { return m_state; }
+
 protected:
     virtual bool init() override;
     virtual bool handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx) override;
@@ -68,6 +72,7 @@ protected:
     virtual std::string print_cmdu_types(const beerocks::message::sUdsHeader *cmdu_header) override;
 
 private:
+    void ap_manager_fsm();
     bool hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr);
     // bool hostap_handle_event(std::string& event, void* event_obj);
     void handle_hostapd_attached();
@@ -95,6 +100,7 @@ private:
 
     int bss_steer_valid_int          = BSS_STEER_VALID_INT_BTT;
     int bss_steer_imminent_valid_int = BSS_STEER_IMMINENT_VALID_INT_BTT;
+    eApManagerState m_state          = eApManagerState::INIT;
     std::vector<disallowed_client_t> m_disallowed_clients;
 
     struct pending_disable_vap_t {
