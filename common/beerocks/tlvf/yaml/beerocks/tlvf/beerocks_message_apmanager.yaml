@@ -15,13 +15,6 @@ _multi_class_auto_insert:
 
 #################################################
 #################################################
-
-###FIXME temp###
-cACTION_APMANAGER_4ADDR_STA_JOINED:
-  _type: class
-  src_mac: sMacAddr
-  dst_mac: sMacAddr
-################
  
 cACTION_APMANAGER_JOINED_NOTIFICATION:
   _type: class
@@ -175,10 +168,6 @@ cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_REQUEST:
 cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE:
   _type: class
   params: sNodeRssiMeasurement
-
-cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION:
-  _type: class
-  mac: sMacAddr
 
 cACTION_APMANAGER_ACK:
   _type: class

@@ -1,9 +1,7 @@
 #
 ---
-_include: {
-  beerocks/tlvf/beerocks_message_action.h,
-  bcl/beerocks_message_structs.h,
-}
+_include:
+  { beerocks/tlvf/beerocks_message_action.h, bcl/beerocks_message_structs.h }
 
 _namespace: beerocks_message
 
@@ -29,7 +27,7 @@ sVapInfo:
   mac: sMacAddr
   ssid:
     _type: char
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: ["beerocks::message::WIFI_SSID_MAX_LENGTH"]
   backhaul_vap: uint8_t
 
 sSonConfig:
@@ -55,22 +53,22 @@ sPlatformSettings:
   _type: struct
   front_ssid:
     _type: char
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: ["beerocks::message::WIFI_SSID_MAX_LENGTH"]
   front_pass:
     _type: char
-    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+    _length: ["beerocks::message::WIFI_PASS_MAX_LENGTH"]
   front_security_type:
     _type: char
-    _length: [ "beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH" ]
+    _length: ["beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH"]
   back_ssid:
     _type: char
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: ["beerocks::message::WIFI_SSID_MAX_LENGTH"]
   back_pass:
     _type: char
-    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+    _length: ["beerocks::message::WIFI_PASS_MAX_LENGTH"]
   back_security_type:
     _type: char
-    _length: [ "beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH" ]
+    _length: ["beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH"]
   onboarding: uint8_t
   local_master: uint8_t
   local_gw: uint8_t
@@ -108,14 +106,14 @@ sApSetRestrictedFailsafe:
   failsafe_channel_bandwidth: uint8_t
   restricted_channels:
     _type: uint8_t
-    _length: [ "beerocks::message::RESTRICTED_CHANNEL_LENGTH" ]
+    _length: ["beerocks::message::RESTRICTED_CHANNEL_LENGTH"]
   vht_center_frequency: uint16_t
 
 sApChannelSwitch:
   _type: struct
   channel: uint8_t
-  bandwidth: uint8_t       #beerocks::eWiFiBandwidth
-  channel_ext_above_primary: int8_t  #bool
+  bandwidth: uint8_t #beerocks::eWiFiBandwidth
+  channel_ext_above_primary: int8_t #bool
   switch_reason: uint8_t
   is_dfs_channel: uint8_t
   vht_center_frequency: uint16_t
@@ -133,9 +131,8 @@ sDfsChannelAvailable:
   _type: struct
   frequency: uint32_t
   channel: uint8_t
-  bandwidth: uint8_t      #beerocks::eWiFiBandwidth
+  bandwidth: uint8_t #beerocks::eWiFiBandwidth
   vht_center_frequency: uint16_t
-
 
 sClientDisconnectionParams:
   _type: struct
@@ -151,7 +148,7 @@ sClientMonitoringParams:
   mac: sMacAddr
   bridge_4addr_mac: sMacAddr
   ipv4: beerocks::net::sIpv4Addr
-  is_ire: uint8_t 
+  is_ire: uint8_t
 
 sConfigVapInfo:
   _type: struct
@@ -160,20 +157,20 @@ sConfigVapInfo:
   enc: uint8_t
   al_mac:
     _type: uint8_t
-    _length: [ "beerocks::net::MAC_ADDR_LEN" ]
+    _length: ["beerocks::net::MAC_ADDR_LEN"]
     _comment: # al_mac
   ruid:
     _type: uint8_t
-    _length: [ "beerocks::net::MAC_ADDR_LEN" ]
+    _length: ["beerocks::net::MAC_ADDR_LEN"]
   bssid:
     _type: uint8_t
-    _length: [ "beerocks::net::MAC_ADDR_LEN" ]
+    _length: ["beerocks::net::MAC_ADDR_LEN"]
   ssid:
     _type: char
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: ["beerocks::message::WIFI_SSID_MAX_LENGTH"]
   key:
     _type: char
-    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+    _length: ["beerocks::message::WIFI_PASS_MAX_LENGTH"]
 
 sStaStatsParams:
   _type: struct
@@ -218,7 +215,7 @@ sApLoadNotificationParams:
 
 sApActivityNotificationParams:
   _type: struct
-  ap_activity_mode: uint8_t  # enum eApActiveMode
+  ap_activity_mode: uint8_t # enum eApActiveMode
 
 sNodeRssiMeasurementRequest:
   _type: struct
@@ -246,8 +243,8 @@ sNodeHostap:
   _type: struct
   iface_name:
     _type: char
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
-  iface_type: uint8_t    #beerocks::eIfaceType
+    _length: ["beerocks::message::IFACE_NAME_LENGTH"]
+  iface_type: uint8_t #beerocks::eIfaceType
   iface_mac: sMacAddr
   iface_is_5ghz: uint8_t
   ant_num: uint8_t
@@ -259,21 +256,21 @@ sNodeHostap:
   ht_capability: uint16_t
   ht_mcs_set:
     _type: uint8_t
-    _length: [ "beerocks::message::HT_MCS_SET_SIZE" ]
+    _length: ["beerocks::message::HT_MCS_SET_SIZE"]
   vht_supported: uint8_t #bool
   vht_capability: uint32_t
   vht_mcs_set:
     _type: uint8_t
-    _length: [ "beerocks::message::VHT_MCS_SET_SIZE" ]
+    _length: ["beerocks::message::VHT_MCS_SET_SIZE"]
   driver_version:
     _type: char
-    _length: [ "beerocks::message::WIFI_DRIVER_VER_LENGTH" ]
+    _length: ["beerocks::message::WIFI_DRIVER_VER_LENGTH"]
 
 sVapsList:
   _type: struct
   vaps:
     _type: sVapInfo
-    _length: [ "beerocks::IFACE_TOTAL_VAPS" ]
+    _length: ["beerocks::IFACE_TOTAL_VAPS"]
 
 sArpMonitorData:
   _type: struct
@@ -312,81 +309,82 @@ sNodeBssSteerResponse:
 
 sNeighborSetParams11k:
   _type: struct
-  bssid: sMacAddr   #ap mac
+  bssid: sMacAddr #ap mac
   ssid:
     _type: char
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: ["beerocks::message::WIFI_SSID_MAX_LENGTH"]
   op_class: uint8_t
   channel: uint8_t
   phy_type: uint8_t
 
   # BSSID inforamtion booleans:
   ap_reachabilty: uint16_t # '0' - reserved, '1' - not reachable, '2' - unknowned, '3' - reachable --> bit 0-1
-  security: uint8_t            # bit 2
-  key_scope: uint8_t           # bit 3
+  security: uint8_t # bit 2
+  key_scope: uint8_t # bit 3
   # BSSID inforamtion -> capabilities:
-  spectrum_managment: uint8_t    # bit 4
-  qos: uint8_t                   # bit 5
-  apsd: uint8_t                    # bit 6
-  radio_measurement: uint8_t       # bit 7
-  delayed_block_ack: uint8_t       # bit 8
-  immediate_block_ack: uint8_t     # bit 9
-  roaming_domain: uint8_t         # bit 10
-  high_throughput: uint8_t         # bit 11
-  very_high_throughput: uint8_t    # bit 12
-  ftm: uint8_t                     # bit 13
+  spectrum_managment: uint8_t # bit 4
+  qos: uint8_t # bit 5
+  apsd: uint8_t # bit 6
+  radio_measurement: uint8_t # bit 7
+  delayed_block_ack: uint8_t # bit 8
+  immediate_block_ack: uint8_t # bit 9
+  roaming_domain: uint8_t # bit 10
+  high_throughput: uint8_t # bit 11
+  very_high_throughput: uint8_t # bit 12
+  ftm: uint8_t # bit 13
   vap_id: int8_t
 
 sNeighborRemoveParams11k:
   _type: struct
-  bssid: sMacAddr     #ap mac
+  bssid: sMacAddr #ap mac
   ssid:
     _type: char
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: ["beerocks::message::WIFI_SSID_MAX_LENGTH"]
   vap_id: int8_t
 
 sStaChannelLoadRequest11k:
   _type: struct
   channel: uint8_t
   op_class: uint8_t
-  repeats: uint16_t   # '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
+  repeats: uint16_t # '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
   rand_ival: uint16_t # random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
-  duration: uint16_t  # measurement duration, expressed in units of TUs [=1024usec]
+  duration: uint16_t # measurement duration, expressed in units of TUs [=1024usec]
   sta_mac: sMacAddr
 
   # Measurement request mode booleans:
-  parallel: uint8_t            # (for multiple requests)'0' - measurements are to be performed in sequence,
-                              #  '1' - request that the measurement is to start at the same time as the measurement described
-                              #  by the next Measurement Request element in the same Measurement Request frame
+  parallel:
+    uint8_t # (for multiple requests)'0' - measurements are to be performed in sequence,
+    #  '1' - request that the measurement is to start at the same time as the measurement described
+    #  by the next Measurement Request element in the same Measurement Request frame
   enable: uint8_t
   request: uint8_t
   report: uint8_t
-  mandatory_duration: uint8_t  # '0' - the duration can be lower than in the duration fiels, '1' - duration is mandantory
+  mandatory_duration: uint8_t # '0' - the duration can be lower than in the duration fiels, '1' - duration is mandantory
 
   # Optional:
-  use_optional_ch_load_rep: uint8_t            # bool
+  use_optional_ch_load_rep: uint8_t # bool
   ch_load_rep_first: uint8_t
   ch_load_rep_second: uint8_t
 
-  use_optional_wide_band_ch_switch: uint8_t    # bool
-  new_ch_width: uint32_t                      # not sure if this type is most fit
-  new_ch_center_freq_seg_0: uint32_t          # not sure if this type is most fit
-  new_ch_center_freq_seg_1: uint32_t          # not sure if this type is most fit
+  use_optional_wide_band_ch_switch: uint8_t # bool
+  new_ch_width: uint32_t # not sure if this type is most fit
+  new_ch_center_freq_seg_0: uint32_t # not sure if this type is most fit
+  new_ch_center_freq_seg_1: uint32_t # not sure if this type is most fit
 
 sStaChannelLoadResponse11k:
   _type: struct
   channel: uint8_t
   channel_load: uint8_t
   op_class: uint8_t
-  rep_mode: uint8_t      # '0x00' - report ok, '0x01' - late, '0x02' - incapable, '0x04' - refused
+  rep_mode: uint8_t # '0x00' - report ok, '0x01' - late, '0x02' - incapable, '0x04' - refused
   dialog_token: uint8_t
   measurement_token: uint8_t
-  duration: uint16_t    # measurement duration, expressed in units of TUs [=1024usec]
+  duration: uint16_t # measurement duration, expressed in units of TUs [=1024usec]
   start_time: uint64_t
   sta_mac: sMacAddr
 
   # Optinal fields:
-  use_optional_wide_band_ch_switch: uint8_t    # bool
+  use_optional_wide_band_ch_switch: uint8_t # bool
 
   new_ch_width: uint32_t
   new_ch_center_freq_seg_0: uint32_t
@@ -394,69 +392,70 @@ sStaChannelLoadResponse11k:
 
 sBeaconRequest11k:
   _type: struct
-  measurement_mode: uint8_t  # beerocks::eWiFiMeasurementMode11K. Should be replaced with string "passive"/"active"/"table"
+  measurement_mode: uint8_t # beerocks::eWiFiMeasurementMode11K. Should be replaced with string "passive"/"active"/"table"
   channel: uint8_t
   op_class: int16_t
-  repeats: uint16_t         # '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
-  rand_ival: uint16_t         # random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
-  duration: uint16_t          # measurement duration, expressed in units of TUs [=1024usec]
+  repeats: uint16_t # '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
+  rand_ival: uint16_t # random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
+  duration: uint16_t # measurement duration, expressed in units of TUs [=1024usec]
   sta_mac: sMacAddr
-  bssid: sMacAddr             # the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
+  bssid: sMacAddr # the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
 
   # Measurement request mode booleans:
-  parallel: uint8_t            # (for multiple requests)'0' - measurements are to be performed in sequence,
-                                #  '1' - request that the measurement is to start at the same time as the measurement described
-                                #  by the next Measurement Request element in the same Measurement Request frame
+  parallel:
+    uint8_t # (for multiple requests)'0' - measurements are to be performed in sequence,
+    #  '1' - request that the measurement is to start at the same time as the measurement described
+    #  by the next Measurement Request element in the same Measurement Request frame
   enable: uint8_t
   request: uint8_t
   report: uint8_t
-  mandatory_duration: uint8_t  # '0' - the duration can be lower than in the duration fiels, '1' - duration is mandantory
+  mandatory_duration: uint8_t # '0' - the duration can be lower than in the duration fiels, '1' - duration is mandantory
 
   expected_reports_count: uint8_t
   # Optional:
-  use_optional_ssid: uint8_t                   # bool
+  use_optional_ssid: uint8_t # bool
   ssid:
     _type: char
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]         # 36 bytes
+    _length: ["beerocks::message::WIFI_SSID_MAX_LENGTH"] # 36 bytes
 
   use_optional_ap_ch_report: uint8_t
   ap_ch_report:
     _type: uint8_t
-    _length: [ 237 ]
+    _length: [237]
 
-  use_optional_req_elements: uint8_t           # bool
+  use_optional_req_elements: uint8_t # bool
   req_elements:
     _type: uint8_t
-    _length: [ 13 ]                   # NOTE: I didnt find any reference to "req_element", and set the max num of elements to 13 randomly
+    _length: [13] # NOTE: I didnt find any reference to "req_element", and set the max num of elements to 13 randomly
 
-  use_optional_wide_band_ch_switch: uint8_t    # bool
-  new_ch_width: uint32_t                      # not sure if this type is most fit
-  new_ch_center_freq_seg_0: uint32_t          # not sure if this type is most fit
-  new_ch_center_freq_seg_1: uint32_t          # not sure if this type is most fit
+  use_optional_wide_band_ch_switch: uint8_t # bool
+  new_ch_width: uint32_t # not sure if this type is most fit
+  new_ch_center_freq_seg_0: uint32_t # not sure if this type is most fit
+  new_ch_center_freq_seg_1: uint32_t # not sure if this type is most fit
 
 sBeaconResponse11k:
   _type: struct
-  channel: uint8_t         # A Channel Number of 0 indicates a request to make iterative measurements for all supported channels in the Regulatory Class
+  channel: uint8_t # A Channel Number of 0 indicates a request to make iterative measurements for all supported channels in the Regulatory Class
   op_class: uint8_t
   dialog_token: uint8_t
   measurement_token: uint8_t
-  rep_mode: uint8_t        # '0x00' - report ok, '0x01' - late, '0x02' - incapable, '0x04' - refused
-  phy_type: uint8_t        # integer 0-127 (bits 0-6 of "frame info")
-  frame_type: uint8_t      # (bool) '0' - beacon/probe response frame, '1' - pilot frame (bits 7 of "frame info")
-  rcpi: int8_t           # received channel power
-  rsni: uint8_t            # received signal to noise
-  ant_id: uint8_t          # number for the antennas used for this measurement
-  duration: uint16_t      # measurement duration, expressed in units of TUs [=1024usec]
-  parent_tsf: uint32_t           # see IEEE part11, page 42
+  rep_mode: uint8_t # '0x00' - report ok, '0x01' - late, '0x02' - incapable, '0x04' - refused
+  phy_type: uint8_t # integer 0-127 (bits 0-6 of "frame info")
+  frame_type: uint8_t # (bool) '0' - beacon/probe response frame, '1' - pilot frame (bits 7 of "frame info")
+  rcpi: int8_t # received channel power
+  rsni: uint8_t # received signal to noise
+  ant_id: uint8_t # number for the antennas used for this measurement
+  duration: uint16_t # measurement duration, expressed in units of TUs [=1024usec]
+  parent_tsf: uint32_t # see IEEE part11, page 42
   start_time: uint64_t
-  sta_mac: sMacAddr       # mac to send response
-  bssid: sMacAddr      # the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
+  sta_mac: sMacAddr # mac to send response
+  bssid: sMacAddr # the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
 
   #optional:
-  new_ch_width: uint32_t                      # not sure if this type is most fit
-  new_ch_center_freq_seg_0: uint32_t          # not sure if this type is most fit
-  new_ch_center_freq_seg_1: uint32_t          # not sure if this type is most fit
-  use_optional_wide_band_ch_switch: uint8_t   # bool
+  new_ch_width: uint32_t # not sure if this type is most fit
+  new_ch_center_freq_seg_0: uint32_t # not sure if this type is most fit
+  new_ch_center_freq_seg_1: uint32_t # not sure if this type is most fit
+  use_optional_wide_band_ch_switch: uint8_t # bool
 
 sStatisticsRequest11k:
   _type: struct
@@ -466,21 +465,22 @@ sStatisticsRequest11k:
   group_identity: uint8_t
 
   # Measurement request mode booleans:
-  parallel: uint8_t            # (for multiple requests)'0' - measurements are to be performed in sequence,
-                                #  '1' - request that the measurement is to start at the same time as the measurement described
-                                #  by the next Measurement Request element in the same Measurement Request frame
+  parallel:
+    uint8_t # (for multiple requests)'0' - measurements are to be performed in sequence,
+    #  '1' - request that the measurement is to start at the same time as the measurement described
+    #  by the next Measurement Request element in the same Measurement Request frame
   enable: uint8_t
   request: uint8_t
 
   report: uint8_t
-  mandatory_duration: uint8_t  # '0' - the duration can be lower than in the duration fiels, '1' - duration is mandantory
-  repeats: uint16_t       # '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
+  mandatory_duration: uint8_t # '0' - the duration can be lower than in the duration fiels, '1' - duration is mandantory
+  repeats: uint16_t # '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
 
-  rand_ival: uint16_t     # random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
-  duration: uint16_t      # measurement duration, expressed in units of TUs [=1024usec]
+  rand_ival: uint16_t # random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
+  duration: uint16_t # measurement duration, expressed in units of TUs [=1024usec]
 
   # Optional:
-  use_optional_trig_rep_sta_counters: uint8_t     # bool
+  use_optional_trig_rep_sta_counters: uint8_t # bool
   measurement_count_1: uint8_t
   trigger_timeout_1: uint8_t
   sta_counter_trigger_condition: uint8_t
@@ -504,7 +504,7 @@ sStatisticsRequest11k:
   dot11QoSAckFailureCountThreshold: uint8_t
   dot11QoSDiscardedCountThreshold: uint8_t
 
-  use_optional_trig_rep_rsna_counters: uint8_t  # bool
+  use_optional_trig_rep_rsna_counters: uint8_t # bool
   measurement_count_3: uint8_t
   trigger_timeout_3: uint8_t
   rsna_counter_trigger_condition: uint8_t
@@ -520,43 +520,43 @@ sStatisticsResponse11k:
   _type: struct
   dialog_token: uint8_t
   measurement_token: uint8_t
-  rep_mode: uint8_t              # '0x00' - report ok, '0x01' - late, '0x02' - incapable, '0x04' - refused
+  rep_mode: uint8_t # '0x00' - report ok, '0x01' - late, '0x02' - incapable, '0x04' - refused
   group_identity: uint8_t
 
   statistics_group_data_size: uint16_t
-  duration: uint16_t            # measurement duration, expressed in units of TUs [=1024usec]
+  duration: uint16_t # measurement duration, expressed in units of TUs [=1024usec]
   statistics_group_data:
     _type: uint32_t
-    _length: [ 13 ] # different data for each group identity, 4 octets counters with commas between them
-  sta_mac: sMacAddr             # mac to send the request to
+    _length: [13] # different data for each group identity, 4 octets counters with commas between them
+  sta_mac: sMacAddr # mac to send the request to
 
   # Optional:
   use_optional_rep_reason: uint8_t
   # Report Reason booleans:
-  average_trigger: uint8_t         # bit 0
-  consecutive_trigger: uint8_t       # bit 1
-  delay_trigger: uint8_t           # bit 2
+  average_trigger: uint8_t # bit 0
+  consecutive_trigger: uint8_t # bit 1
+  delay_trigger: uint8_t # bit 2
 
 sLinkMeasurementsResponse11k:
   _type: struct
   dialog_token: uint8_t
-  rep_mode: uint8_t      # '0x00' - report ok, '0x01' - late, '0x02' - incapable, '0x04' - refused
+  rep_mode: uint8_t # '0x00' - report ok, '0x01' - late, '0x02' - incapable, '0x04' - refused
   rx_ant_id: uint8_t
   tx_ant_id: uint8_t
   rcpi: uint8_t
   rsni: uint8_t
   transmit_power: uint8_t
   link_margin: uint8_t
-  sta_mac: sMacAddr  # mac to send the request to
+  sta_mac: sMacAddr # mac to send the request to
 
   #Optional:
-  use_optional_dmg_link_margin: uint8_t            # bool
+  use_optional_dmg_link_margin: uint8_t # bool
   dmg_link_margin_activity: uint8_t
   dmg_link_margin_mcs: uint8_t
   dmg_link_margin_link_margin: uint8_t
 
   dmg_link_margin_snr: uint8_t
-  use_optional_dmg_link_adapt_ack: uint8_t         # bool
+  use_optional_dmg_link_adapt_ack: uint8_t # bool
   dmg_link_adapt_ack_activity: uint8_t
   dmg_link_margin_reference_timestamp: uint32_t
   dmg_link_adapt_ack_reference_timestamp: uint32_t
@@ -579,7 +579,7 @@ sBackhaulParams:
   is_prplmesh_controller: uint8_t
   backhaul_scan_measurement_list:
     _type: beerocks::net::sScanResult
-    _length: [ "beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH" ]
+    _length: ["beerocks::message::BACKHAUL_SCAN_MEASUREMENT_MAX_LENGTH"]
 
 sBackhaulRoam:
   _type: struct
@@ -593,29 +593,29 @@ sBackhaulRssi:
 sLoggingLevelChange:
   _type: struct
   mac: sMacAddr
-  module_name: uint8_t  # beerocks::eBeeRocksModules
-  log_level: uint8_t    # beerocks::eLogLevel
+  module_name: uint8_t # beerocks::eBeeRocksModules
+  log_level: uint8_t # beerocks::eLogLevel
   enable: uint8_t
 
 sVersions:
   _type: struct
   master_version:
     _type: char
-    _length: [ "beerocks::message::VERSION_LENGTH" ]
+    _length: ["beerocks::message::VERSION_LENGTH"]
   slave_version:
     _type: char
-    _length: [ "beerocks::message::VERSION_LENGTH" ]
+    _length: ["beerocks::message::VERSION_LENGTH"]
 
 sWifiCredentials:
   _type: struct
   wifi_sec: eWiFiSec
   ssid:
-   _type: char
-   _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _type: char
+    _length: ["beerocks::message::WIFI_SSID_MAX_LENGTH"]
   pass:
     _type: char
-    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
-  sec: uint8_t  # eWiFiSec
+    _length: ["beerocks::message::WIFI_PASS_MAX_LENGTH"]
+  sec: uint8_t # eWiFiSec
   # Place holder to use in future to identify diffrent VAPS (Home, Guest....)
   vap_id: uint8_t
   force: uint8_t
@@ -629,29 +629,29 @@ sAdminCredentials:
   _type: struct
   user_password:
     _type: char
-    _length: [ "beerocks::message::USER_PASS_LEN" ]
+    _length: ["beerocks::message::USER_PASS_LEN"]
 
 sDeviceInfo:
   _type: struct
   manufacturer:
     _type: char
-    _length: [ "beerocks::message::DEV_INFO_STR_MAX_LEN" ]
+    _length: ["beerocks::message::DEV_INFO_STR_MAX_LEN"]
   model_name:
     _type: char
-    _length: [ "beerocks::message::DEV_INFO_STR_MAX_LEN" ]
+    _length: ["beerocks::message::DEV_INFO_STR_MAX_LEN"]
   serial_number:
     _type: char
-    _length: [ "beerocks::message::DEV_INFO_STR_MAX_LEN" ]
+    _length: ["beerocks::message::DEV_INFO_STR_MAX_LEN"]
 
   lan_iface_name:
     _type: char
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+    _length: ["beerocks::message::IFACE_NAME_LENGTH"]
   lan_ip_address: uint32_t
   lan_network_mask: uint32_t
 
   wan_iface_name:
     _type: char
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+    _length: ["beerocks::message::IFACE_NAME_LENGTH"]
   wan_ip_address: uint32_t
   wan_network_mask: uint32_t
 
@@ -659,7 +659,7 @@ sIfaceInfo:
   _type: struct
   iface_name:
     _type: char
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH" ]
+    _length: ["beerocks::message::IFACE_NAME_LENGTH"]
   iface_mac: sMacAddr
   iface_status: beerocks::eNodeState
 
@@ -668,7 +668,7 @@ sDeviceData:
   al_mac: sMacAddr
   radios:
     _type: sIfaceInfo
-    _length: [ "beerocks::message::DEV_MAX_RADIOS" ]
+    _length: ["beerocks::message::DEV_MAX_RADIOS"]
   # using const type since LENGTH_TYPE_DYNAMIC is not supported yet in tlvf
   # github issue  https://github.com/prplfoundation/prplMesh/issues/1266
 
@@ -677,7 +677,7 @@ sRestrictedChannels:
   hostap_mac: sMacAddr
   restricted_channels:
     _type: uint8_t
-    _length: [ "beerocks::message::RESTRICTED_CHANNEL_LENGTH" ]
+    _length: ["beerocks::message::RESTRICTED_CHANNEL_LENGTH"]
   is_global: uint8_t
 
 sSteeringApConfig:
@@ -703,7 +703,7 @@ sSteeringSetGroupRequest:
   _type: struct
   steeringGroupIndex: uint32_t
   cfg: sSteeringApConfig
-  remove : uint8_t
+  remove: uint8_t
 
 sSteeringSetGroupResponse:
   _type: struct
@@ -715,7 +715,7 @@ sSteeringClientSetRequest:
   bssid: sMacAddr
   client_mac: sMacAddr
   config: sSteeringClientConfig
-  remove : uint8_t
+  remove: uint8_t
 
 sSteeringClientSetResponse:
   _type: struct
@@ -765,36 +765,34 @@ sSteeringRrmCaps:
 eDisconnectSource:
   _type: enum
   _enum_storage: uint8_t
-  eDisconnect_Source_Unknown : 0
-  eDisconnect_Source_Local : 1
-  eDisconnect_Source_Remote : 2
-
+  eDisconnect_Source_Unknown: 0
+  eDisconnect_Source_Local: 1
+  eDisconnect_Source_Remote: 2
 
 eDisconnectType:
   _type: enum
   _enum_storage: uint8_t
-  eDisconnect_Type_Unknown : 0
-  eDisconnect_Type_Disassoc : 1
-  eDisconnect_Type_Deauth : 2
-
+  eDisconnect_Type_Unknown: 0
+  eDisconnect_Type_Disassoc: 1
+  eDisconnect_Type_Deauth: 2
 
 eSteeringSnrChange:
   _type: enum
   _enum_storage: uint8_t
-  eWifi_Steering_Snr_Unchanged : 0
-  eWifi_Steering_Snr_Higher : 1
-  eWifi_Steering_Snr_Lower : 2
+  eWifi_Steering_Snr_Unchanged: 0
+  eWifi_Steering_Snr_Higher: 1
+  eWifi_Steering_Snr_Lower: 2
 
 eSteeringEventType:
   _type: enum
   _enum_storage: uint8_t
-  eWifi_Steering_Event_Probe_Req : 1
-  eWifi_Steering_Event_Client_Connect : 2
-  eWifi_Steering_Event_Client_Disconnect : 3
-  eWifi_Steering_Event_Client_Activity : 4
-  eWifi_Steering_Event_Snr_Xing : 5
-  eWifi_Steering_Event_Snr : 6
-  eWifi_Steering_Event_Auth_Fail : 7
+  eWifi_Steering_Event_Probe_Req: 1
+  eWifi_Steering_Event_Client_Connect: 2
+  eWifi_Steering_Event_Client_Disconnect: 3
+  eWifi_Steering_Event_Client_Activity: 4
+  eWifi_Steering_Event_Snr_Xing: 5
+  eWifi_Steering_Event_Snr: 6
+  eWifi_Steering_Event_Auth_Fail: 7
 
 sSteeringEvConnect:
   _type: struct
@@ -822,53 +820,53 @@ sSteeringEvActivity:
   active: uint8_t
 
 sSteeringEvSnrXing:
- _type: struct
- client_mac: sMacAddr
- bssid: sMacAddr
- snr: uint32_t
- inactveXing: eSteeringSnrChange
- highXing: eSteeringSnrChange
- lowXing: eSteeringSnrChange
+  _type: struct
+  client_mac: sMacAddr
+  bssid: sMacAddr
+  snr: uint32_t
+  inactveXing: eSteeringSnrChange
+  highXing: eSteeringSnrChange
+  lowXing: eSteeringSnrChange
 
 sSteeringEvSnr:
- _type: struct
- client_mac: sMacAddr
- bssid: sMacAddr
- snr: uint32_t
+  _type: struct
+  client_mac: sMacAddr
+  bssid: sMacAddr
+  snr: uint32_t
 
 sTriggerChannelScanParams:
- _type: struct
- radio_mac: sMacAddr
- dwell_time_ms:
+  _type: struct
+  radio_mac: sMacAddr
+  dwell_time_ms:
     _type: uint32_t
     _value: 0
     _comment: time interval (msec) between channels during scan
- channel_pool_size:
+  channel_pool_size:
     _type: uint8_t
     _value: 0
     _comment: size of provided channel_pool
- channel_pool:
+  channel_pool:
     _type: uint8_t
-    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
+    _length: ["beerocks::message::SUPPORTED_CHANNELS_LENGTH"]
     _comment: pool of channels to be scaned
 
 sChannelScanRequestParams:
- _type: struct
- dwell_time_ms:
+  _type: struct
+  dwell_time_ms:
     _type: int32_t
     _value: -1
     _comment: an invalid (-1) value indicates this value is not requested
- interval_time_sec:
+  interval_time_sec:
     _type: int32_t
     _value: -1
     _comment: an invalid (-1) value indicates this value is not requested
- channel_pool_size:
+  channel_pool_size:
     _type: int8_t
     _value: 0
     _comment: an invalid (-1) value indicates this value is not requested
- channel_pool:
+  channel_pool:
     _type: uint8_t
-    _length: [ "beerocks::message::SUPPORTED_CHANNELS_LENGTH" ]
+    _length: ["beerocks::message::SUPPORTED_CHANNELS_LENGTH"]
 
 eChannelScanResultMode:
   _type: enum
@@ -924,7 +922,7 @@ sChannelScanResults:
   ssid:
     _comment: The current service set identifier in use by the neighboring WiFi SSID. The value MAY be empty for hidden SSIDs.
     _type: char
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: ["beerocks::message::WIFI_SSID_MAX_LENGTH"]
   bssid:
     _comment: The BSSID used for the neighboring WiFi SSID.
     _type: sMacAddr
@@ -983,7 +981,7 @@ sBssidInfo:
   _type: struct
   bssid: sMacAddr
   earliest_measurement_delta:
-    _type:  uint32_t
+    _type: uint32_t
     _comment: |
       The time delta in ms between the time at which the earliest
       measurement that contributed to the data rate estimates were made,
