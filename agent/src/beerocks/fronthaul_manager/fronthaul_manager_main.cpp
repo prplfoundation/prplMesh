@@ -128,7 +128,7 @@ init_logger(const std::string &file_name, const beerocks::config_file::SConfigLo
         << "Running " << file_name << " Version " << BEEROCKS_VERSION << " Build date "
         << BEEROCKS_BUILD_DATE << std::endl
         << std::endl;
-    beerocks::version::log_version(argc, argv);
+    beerocks::version::log_version(argc, argv, logger->get_logger_id());
 
     // Redirect stdout / stderr to file
     if (logger->get_log_files_enabled()) {
@@ -182,7 +182,7 @@ int main(int argc, char *argv[])
     std::string base_ap_manager_name = std::string(BEEROCKS_AP_MANAGER) + "_" + fronthaul_iface;
     g_logger_ap_mananger = init_logger(base_ap_manager_name, beerocks_slave_conf.sLog, argc, argv);
     if (!g_logger_ap_mananger) {
-        return 0;
+        return 1;
     }
 
     // Init logger monitor
@@ -190,7 +190,7 @@ int main(int argc, char *argv[])
     g_logger_monitor =
         init_logger(base_monitor_name, beerocks_slave_conf.sLog, argc, argv, BEEROCKS_MONITOR);
     if (!g_logger_monitor) {
-        return 0;
+        return 1;
     }
 
     // Kill running fronthaul and write pid file
