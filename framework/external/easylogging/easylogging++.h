@@ -2694,6 +2694,19 @@ class Storage : base::NoCopy, public base::threading::ThreadSafe {
   }
 #endif // defined(ELPP_FEATURE_ALL) || defined(ELPP_FEATURE_PERFORMANCE_TRACKING)
 
+  /// @brief Attach the thread ID to a logger ID. Requires std::thread.
+  inline void attachLoggerIdThreadId(const std::string& logger_id) {
+    base::threading::ScopedLock scopedLock(m_threadIdLoggerIdLock);
+    m_threadIdLoggerId[base::threading::getCurrentThreadId()] = logger_id;
+  }
+
+  /// @brief Get attached logger ID of the current thread if exists. Requires std::thread.
+  inline std::string getCurrentThreadLoggerId() {
+    base::threading::ScopedLock scopedLock(m_threadIdLoggerIdLock);
+    auto found = m_threadIdLoggerId.find(base::threading::getCurrentThreadId());
+    return (found == m_threadIdLoggerId.end()) ? std::string() : found->second;
+  }
+
   /// @brief Sets thread name for current thread. Requires std::thread
   inline void setThreadName(const std::string& name) {
     if (name.empty()) return;
@@ -2723,9 +2736,11 @@ class Storage : base::NoCopy, public base::threading::ThreadSafe {
   std::unordered_map<std::string, base::type::LogDispatchCallbackPtr> m_logDispatchCallbacks;
   std::unordered_map<std::string, base::type::PerformanceTrackingCallbackPtr> m_performanceTrackingCallbacks;
   std::unordered_map<std::string, std::string> m_threadNames;
+  std::unordered_map<std::string, std::string> m_threadIdLoggerId; // Key: thread_id , value: logger_id
   std::vector<CustomFormatSpecifier> m_customFormatSpecifiers;
   base::threading::Mutex m_customFormatSpecifiersLock;
   base::threading::Mutex m_threadNamesLock;
+  base::threading::Mutex m_threadIdLoggerIdLock;
   Level m_loggingLevel;
 
   friend class el::Helpers;
@@ -3690,6 +3705,13 @@ class Helpers : base::StaticClass {
   /// @copydoc setArgs(int argc, char** argv)
   static inline void setArgs(int argc, const char** argv) {
     ELPP->setApplicationArguments(argc, const_cast<char**>(argv));
+  }
+  /// @brief Attach the thread ID to a logger ID . Requires std::thread.
+  static inline void attachLoggerIdThreadId(const std::string& logger_id) {
+    ELPP->attachLoggerIdThreadId(logger_id);
+  }
+  static inline const std::string getCurrentThreadLoggerId() {
+    return ELPP->getCurrentThreadLoggerId();
   }
   /// @brief Sets thread name for current thread. Requires std::thread
   static inline void setThreadName(const std::string& name) {

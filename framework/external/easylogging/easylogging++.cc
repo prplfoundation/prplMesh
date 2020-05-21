@@ -2605,7 +2605,10 @@ Writer& Writer::construct(int count, const char* loggerIds, ...) {
 
 void Writer::initializeLogger(const std::string& loggerId, bool lookup, bool needLock) {
   if (lookup) {
-    m_logger = ELPP->registeredLoggers()->get(loggerId, ELPP->hasFlag(LoggingFlag::CreateLoggerAutomatically));
+    auto thread_logger_id = ELPP->getCurrentThreadLoggerId();
+    m_logger = ELPP->registeredLoggers()->get(
+      thread_logger_id.empty() ? loggerId : thread_logger_id, 
+      ELPP->hasFlag(LoggingFlag::CreateLoggerAutomatically));
   }
   if (m_logger == nullptr) {
     {
