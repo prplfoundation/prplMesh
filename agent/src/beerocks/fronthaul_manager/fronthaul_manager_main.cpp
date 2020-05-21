@@ -19,7 +19,7 @@ BEEROCKS_INIT_BEEROCKS_VERSION
 
 static bool g_running = true;
 static int s_signal   = 0;
-static std::string monitor_iface;
+static std::string fronthaul_iface;
 
 // Pointer to logger instance
 static beerocks::logging *s_pLogger = nullptr;
@@ -48,6 +48,7 @@ static void handle_signal()
 
         s_pLogger->apply_settings();
         LOG(INFO) << "--- Start of file after roll ---";
+
         break;
     }
 
@@ -89,7 +90,7 @@ static bool parse_arguments(int argc, char *argv[])
     while ((opt = getopt(argc, argv, "i:")) != -1) {
         switch (opt) {
         case 'i': {
-            monitor_iface.assign(optarg);
+            fronthaul_iface.assign(optarg);
             break;
         }
         case '?': {
@@ -128,7 +129,7 @@ int main(int argc, char *argv[])
 
     //get command line options
     if (!parse_arguments(argc, argv)) {
-        std::cout << "Usage: " << argv[0] << " -i <monitor iface>" << std::endl;
+        std::cout << "Usage: " << argv[0] << " -i <fronthaul iface>" << std::endl;
         return 0;
     }
 
@@ -148,7 +149,7 @@ int main(int argc, char *argv[])
     }
 
     //init logger
-    std::string base_monitor_name = std::string(BEEROCKS_MONITOR) + "_" + monitor_iface;
+    std::string base_monitor_name = std::string(BEEROCKS_MONITOR) + "_" + fronthaul_iface;
     beerocks::logging logger(beerocks_slave_conf.sLog, base_monitor_name);
     s_pLogger = &logger;
     logger.apply_settings();
@@ -164,16 +165,20 @@ int main(int argc, char *argv[])
                                                  base_monitor_name + "_std.log");
     }
 
-    //kill running monitor and write pid file
-    beerocks::os_utils::kill_pid(beerocks_slave_conf.temp_path, base_monitor_name);
-    beerocks::os_utils::write_pid_file(beerocks_slave_conf.temp_path, base_monitor_name);
+    // Kill running fronthaul and write pid file
+    std::string base_fronthaul_name = std::string(BEEROCKS_FRONTHAUL) + "_" + fronthaul_iface;
+    beerocks::os_utils::kill_pid(beerocks_slave_conf.temp_path, base_fronthaul_name);
+    beerocks::os_utils::write_pid_file(beerocks_slave_conf.temp_path, base_fronthaul_name);
     std::string pid_file_path =
-        beerocks_slave_conf.temp_path + "pid/" + base_monitor_name; // for file touching
+        beerocks_slave_conf.temp_path + "pid/" + base_fronthaul_name; // For file touching
 
-    // start monitor
-    std::string slave_uds =
-        beerocks_slave_conf.temp_path + std::string(BEEROCKS_SLAVE_UDS) + "_" + monitor_iface;
-    son::monitor_thread monitor(slave_uds, monitor_iface, beerocks_slave_conf, logger);
+    // Get Agent UDS file
+    std::string agent_uds =
+        beerocks_slave_conf.temp_path + std::string(BEEROCKS_SLAVE_UDS) + "_" + fronthaul_iface;
+
+    // Create Monitor
+    son::monitor_thread monitor(agent_uds, fronthaul_iface, beerocks_slave_conf, logger);
+
     if (monitor.init()) {
         auto touch_time_stamp_timeout = std::chrono::steady_clock::now();
         while (g_running) {
@@ -197,10 +202,8 @@ int main(int argc, char *argv[])
         }
         monitor.stop();
     } else {
-        LOG(ERROR) << "monitor.init(), iface=" << monitor_iface << " slave_uds=" << slave_uds;
+        LOG(ERROR) << "monitor.init(), iface=" << fronthaul_iface << " slave_uds=" << agent_uds;
     }
-
-    s_pLogger = nullptr;
 
     return 0;
 }
