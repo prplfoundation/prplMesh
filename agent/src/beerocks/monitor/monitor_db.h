@@ -37,56 +37,56 @@ public:
     };
 
     void set_last_change_time() { last_change_time = std::chrono::steady_clock::now(); }
-    std::chrono::steady_clock::time_point get_last_change_time() { return last_change_time; }
+    std::chrono::steady_clock::time_point get_last_change_time() const { return last_change_time; }
 
-    int8_t get_vap_id() { return vap_id; }
+    int8_t get_vap_id() const { return vap_id; }
 
     void set_ipv4(const std::string &ip) { ipv4 = ip; }
-    std::string get_ipv4() { return ipv4; }
+    std::string get_ipv4() const { return ipv4; }
 
     void set_bridge_4addr_mac(const std::string &bridge_mac_4addr_)
     {
         bridge_mac_4addr = bridge_mac_4addr_;
     }
-    std::string get_bridge_4addr_mac() { return bridge_mac_4addr; }
+    std::string get_bridge_4addr_mac() const { return bridge_mac_4addr; }
 
-    std::string get_mac() { return mac; }
+    std::string get_mac() const { return mac; }
 
     void set_arp_state(eArpState state) { arp_state = state; }
-    eArpState get_arp_state() { return arp_state; }
+    eArpState get_arp_state() const { return arp_state; }
 
     void set_arp_burst(bool en) { arp_burst = en; }
-    bool get_arp_burst() { return arp_burst; }
+    bool get_arp_burst() const { return arp_burst; }
 
     void set_rx_rssi_ready(bool en) { rx_rssi_ready = en; }
-    bool get_rx_rssi_ready() { return rx_rssi_ready; }
+    bool get_rx_rssi_ready() const { return rx_rssi_ready; }
 
     void set_rx_snr_ready(bool en) { rx_snr_ready = en; }
-    bool get_rx_snr_ready() { return rx_snr_ready; }
+    bool get_rx_snr_ready() const { return rx_snr_ready; }
 
     void push_rx_rssi_request_id(uint16_t id) { pending_rx_rssi_requests_id.push_back(id); }
     std::list<uint16_t> &get_rx_rssi_request_id_list() { return pending_rx_rssi_requests_id; }
     void clear_rx_rssi_request_id_list() { pending_rx_rssi_requests_id.clear(); }
 
     void arp_set_start_time() { arp_time = std::chrono::steady_clock::now(); }
-    std::chrono::steady_clock::time_point arp_get_start_time() { return arp_time; }
+    std::chrono::steady_clock::time_point arp_get_start_time() const { return arp_time; }
 
     void arp_recv_count_clear() { arp_recv_count = 0; }
     void arp_recv_count_inc() { arp_recv_count++; }
-    uint8_t arp_recv_count_get() { return arp_recv_count; }
+    uint8_t arp_recv_count_get() const { return arp_recv_count; }
 
     void arp_retry_count_clear() { arp_retry_count = 0; }
     void arp_retry_count_inc() { arp_retry_count++; }
-    uint8_t arp_retry_count_get() { return arp_retry_count; }
+    uint8_t arp_retry_count_get() const { return arp_retry_count; }
 
-    double get_load_rx_phy_rate();
-    double get_load_tx_phy_rate();
-    double get_load_rx_bit_rate();
-    double get_load_tx_bit_rate();
-    double get_load_rx_percentage();
-    double get_load_tx_percentage();
-    uint32_t get_tx_packets();
-    uint32_t get_rx_packets();
+    double get_load_rx_phy_rate() const;
+    double get_load_tx_phy_rate() const;
+    double get_load_rx_bit_rate() const;
+    double get_load_tx_bit_rate() const;
+    double get_load_rx_percentage() const;
+    double get_load_tx_percentage() const;
+    uint32_t get_tx_packets() const;
+    uint32_t get_rx_packets() const;
     void reset_poll_data();
 
     friend std::ostream &operator<<(std::ostream &os, const monitor_sta_node &sta_node);
@@ -117,6 +117,7 @@ public:
     };
 
     SStaStats &get_stats() { return m_sta_stats; }
+    const SStaStats &get_stats() const { return m_sta_stats; }
 
     // Idle stations //
     bool idle_detected       = false;
