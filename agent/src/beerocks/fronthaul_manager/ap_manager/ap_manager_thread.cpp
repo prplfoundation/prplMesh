@@ -186,85 +186,66 @@ void ap_manager_thread::ap_manager_fsm()
         break;
     }
     case eApManagerState::ATTACHING: {
-        break;
-    }
-    case eApManagerState::ATTACHED: {
-        break;
-    }
-    case eApManagerState::OPERATIONAL: {
-        break;
-    }
-    default:
-        break;
-    }
-}
-
-void ap_manager_thread::after_select(bool timeout)
-{
-    // Continue only if the Agent is connected, otherwise connect to it.
-    if (!slave_socket) {
-        connect_to_agent();
-        return;
-    }
-
-    ap_manager_fsm();
-
-    auto now = std::chrono::steady_clock::now();
-
-    if (ap_hal_int_events == nullptr) { // ap not attached
         auto attach_state = ap_wlan_hal->attach();
 
         if (attach_state == bwl::HALState::Operational) {
+            LOG(DEBUG) << "Move to ATTACHED state";
+            m_state = eApManagerState::ATTACHED;
+            break;
+        }
 
-            // External events
-            int ext_events_fd = ap_wlan_hal->get_ext_events_fd();
-            if (ext_events_fd > 0) {
-                ap_hal_ext_events = new Socket(ext_events_fd);
-                add_socket(ap_hal_ext_events);
-                // No external event FD is available, we will trigger the process method periodically
-            } else if (ext_events_fd == 0) {
-                ap_hal_ext_events = nullptr;
-            } else {
-                LOG(ERROR) << "Invalid external event file descriptor: " << ext_events_fd;
-                thread_last_error_code = APMANAGER_THREAD_ERROR_ATTACH_FAIL;
-                stop_ap_manager_thread();
-                return;
-            }
-
-            // Internal events
-            int int_events_fd = ap_wlan_hal->get_int_events_fd();
-            if (int_events_fd > 0) {
-
-                // NOTE: Eventhough the internal events are not socket based, at this
-                //       point we have to use the Socket class wrapper to add the
-                //       file descriptor into the select()
-                ap_hal_int_events = new Socket(int_events_fd);
-                add_socket(ap_hal_int_events);
-            } else {
-                LOG(ERROR) << "Invalid internal event file descriptor: " << int_events_fd;
-                thread_last_error_code = APMANAGER_THREAD_ERROR_ATTACH_FAIL;
-                stop_ap_manager_thread();
-                return;
-            }
-
-            // Set the time for the first radio info polling
-            next_heartbeat_notification_timestamp =
-                std::chrono::steady_clock::now() +
-                std::chrono::seconds(HEARTBEAT_NOTIFICATION_DELAY_SEC);
-        } else if (attach_state == bwl::HALState::Failed) {
+        if (attach_state == bwl::HALState::Failed) {
             LOG(ERROR) << "Failed attaching to WLAN HAL, call stop_ap_manager_thread()";
             thread_last_error_code = APMANAGER_THREAD_ERROR_ATTACH_FAIL;
             stop_ap_manager_thread();
             return;
-        } else {
-            LOG(INFO) << "waiting to attach to " << ap_wlan_hal->get_radio_info().iface_name;
-            // Set the sleep to little less than the select timeout so we won't get awake timeout
-            // print to the log on the socket thread.
-            UTILS_SLEEP_MSEC(SELECT_TIMEOUT_MSC * 0.9);
         }
 
-        // AP is attached
-    } else {
+        LOG(INFO) << "waiting to attach to " << ap_wlan_hal->get_radio_info().iface_name;
+        break;
+    }
+    case eApManagerState::ATTACHED: {
+        // External events
+        int ext_events_fd = ap_wlan_hal->get_ext_events_fd();
+        if (ext_events_fd > 0) {
+            ap_hal_ext_events = new Socket(ext_events_fd);
+            add_socket(ap_hal_ext_events);
+            // No external event FD is available, we will trigger the process method periodically
+        } else if (ext_events_fd == 0) {
+            ap_hal_ext_events = nullptr;
+        } else {
+            LOG(ERROR) << "Invalid external event file descriptor: " << ext_events_fd;
+            thread_last_error_code = APMANAGER_THREAD_ERROR_ATTACH_FAIL;
+            stop_ap_manager_thread();
+            return;
+        }
+
+        // Internal events
+        int int_events_fd = ap_wlan_hal->get_int_events_fd();
+        if (int_events_fd > 0) {
+
+            // NOTE: Eventhough the internal events are not socket based, at this
+            //       point we have to use the Socket class wrapper to add the
+            //       file descriptor into the select()
+            ap_hal_int_events = new Socket(int_events_fd);
+            add_socket(ap_hal_int_events);
+        } else {
+            LOG(ERROR) << "Invalid internal event file descriptor: " << int_events_fd;
+            thread_last_error_code = APMANAGER_THREAD_ERROR_ATTACH_FAIL;
+            stop_ap_manager_thread();
+            return;
+        }
+
+        // Set the time for the next heartbeat notification
+        next_heartbeat_notification_timestamp =
+            std::chrono::steady_clock::now() +
+            std::chrono::seconds(HEARTBEAT_NOTIFICATION_DELAY_SEC);
+
+        LOG(DEBUG) << "Move to OPERATIONAL state";
+        m_state = eApManagerState::OPERATIONAL;
+        break;
+    }
+    case eApManagerState::OPERATIONAL: {
         // Process external events
         if (ap_hal_ext_events) {
             if (read_ready(ap_hal_ext_events)) {
@@ -299,16 +280,38 @@ void ap_manager_thread::after_select(bool timeout)
             }
         }
 
-        now = std::chrono::steady_clock::now();
+        // Send Heartbeat notification if needed
+        auto now = std::chrono::steady_clock::now();
         if (now > next_heartbeat_notification_timestamp) {
             send_heartbeat();
             next_heartbeat_notification_timestamp =
                 now + std::chrono::seconds(HEARTBEAT_NOTIFICATION_DELAY_SEC);
         }
+
+        // Allow clients with expired blocking period timer
+        allow_expired_clients();
+        break;
+    }
+    default:
+        break;
     }
 
-    // allow clients with expired blocking period timer
-    allow_expired_clients();
+    // There is no point waiting for select timeout on non OPERATIONAL state, except ATTACHING
+    // state which could take a while, so skip it.
+    if (m_state != eApManagerState::OPERATIONAL && m_state != eApManagerState::ATTACHING) {
+        skip_next_select_timeout();
+    }
+}
+
+void ap_manager_thread::after_select(bool timeout)
+{
+    // Continue only if the Agent is connected, otherwise connect to it.
+    if (!slave_socket) {
+        connect_to_agent();
+        return;
+    }
+
+    ap_manager_fsm();
 }
 
 bool ap_manager_thread::socket_disconnected(Socket *sd)
