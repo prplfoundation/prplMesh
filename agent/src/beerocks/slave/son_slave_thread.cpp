@@ -1596,14 +1596,8 @@ bool slave_thread::handle_cmdu_platform_manager_message(
 bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
                                                   std::shared_ptr<beerocks_header> beerocks_header)
 {
-    if (ap_manager_socket == nullptr) {
-        if (beerocks_header->action_op() !=
-            beerocks_message::ACTION_APMANAGER_INIT_DONE_NOTIFICATION) {
-            LOG(ERROR) << "Not ACTION_APMANAGER_INIT_DONE_NOTIFICATION, action_op: "
-                       << int(beerocks_header->action_op());
-            return true;
-        }
-    } else if (ap_manager_socket != sd) {
+    if (ap_manager_socket != sd &&
+        beerocks_header->action_op() != beerocks_message::ACTION_APMANAGER_UP_NOTIFICATION) {
         LOG(ERROR) << "Unknown socket, ACTION_APMANAGER action_op: "
                    << int(beerocks_header->action_op())
                    << ", ap_manager_socket=" << intptr_t(ap_manager_socket)
@@ -1620,10 +1614,29 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
     }
 
     switch (beerocks_header->action_op()) {
-    case beerocks_message::ACTION_APMANAGER_INIT_DONE_NOTIFICATION: {
-        LOG(INFO) << "received ACTION_APMANAGER_INIT_DONE_NOTIFICATION from sd=" << intptr_t(sd);
+    case beerocks_message::ACTION_APMANAGER_UP_NOTIFICATION: {
+        LOG(INFO) << "received ACTION_APMANAGER_UP_NOTIFICATION from sd=" << intptr_t(sd);
+        if (ap_manager_socket) {
+            LOG(ERROR) << "AP manager opened new socket altough there is already open socket to it";
+            remove_socket(ap_manager_socket);
+            delete ap_manager_socket;
+            ap_manager_socket = nullptr;
+        }
+
         ap_manager_socket = sd;
-        slave_state       = STATE_WAIT_FOR_AP_MANAGER_JOINED;
+        add_socket(ap_manager_socket);
+
+        auto config_msg =
+            message_com::create_vs_message<beerocks_message::cACTION_APMANAGER_CONFIGURE>(cmdu_tx);
+        if (!config_msg) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+
+        config_msg->channel() = wlan_settings.channel;
+
+        message_com::send_cmdu(ap_manager_socket, cmdu_tx);
+
         break;
     }
     case beerocks_message::ACTION_APMANAGER_JOINED_NOTIFICATION: {
