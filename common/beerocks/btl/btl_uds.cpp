@@ -125,8 +125,14 @@ bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage &cmdu, const std:
 
 bool transport_socket_thread::from_bus(Socket *sd) { return sd == bus; }
 
-bool transport_socket_thread::skip_filtered_message_type(ieee1905_1::eMessageType msg_type)
+bool transport_socket_thread::skip_filtered_message_type(Socket *sd,
+                                                         ieee1905_1::eMessageType msg_type)
 {
+    // Don't filter out internal messages
+    if (!from_bus(sd)) {
+        return false;
+    }
+
     if (m_subscribed_messages.find(msg_type) == m_subscribed_messages.end()) {
         return true;
     }
