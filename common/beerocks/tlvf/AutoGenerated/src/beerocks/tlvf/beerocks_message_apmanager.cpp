@@ -15,32 +15,76 @@
 
 using namespace beerocks_message;
 
-cACTION_APMANAGER_4ADDR_STA_JOINED::cACTION_APMANAGER_4ADDR_STA_JOINED(uint8_t* buff, size_t buff_len, bool parse) :
+cACTION_APMANAGER_UP_NOTIFICATION::cACTION_APMANAGER_UP_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
     BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_4ADDR_STA_JOINED::cACTION_APMANAGER_4ADDR_STA_JOINED(std::shared_ptr<BaseClass> base, bool parse) :
+cACTION_APMANAGER_UP_NOTIFICATION::cACTION_APMANAGER_UP_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
 BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
     m_init_succeeded = init();
 }
-cACTION_APMANAGER_4ADDR_STA_JOINED::~cACTION_APMANAGER_4ADDR_STA_JOINED() {
+cACTION_APMANAGER_UP_NOTIFICATION::~cACTION_APMANAGER_UP_NOTIFICATION() {
 }
-sMacAddr& cACTION_APMANAGER_4ADDR_STA_JOINED::src_mac() {
-    return (sMacAddr&)(*m_src_mac);
-}
-
-sMacAddr& cACTION_APMANAGER_4ADDR_STA_JOINED::dst_mac() {
-    return (sMacAddr&)(*m_dst_mac);
+uint8_t& cACTION_APMANAGER_UP_NOTIFICATION::iface_name_length() {
+    return (uint8_t&)(*m_iface_name_length);
 }
 
-void cACTION_APMANAGER_4ADDR_STA_JOINED::class_swap()
+std::string cACTION_APMANAGER_UP_NOTIFICATION::iface_name_str() {
+    char *iface_name_ = iface_name();
+    if (!iface_name_) { return std::string(); }
+    return std::string(iface_name_, m_iface_name_idx__);
+}
+
+char* cACTION_APMANAGER_UP_NOTIFICATION::iface_name(size_t length) {
+    if( (m_iface_name_idx__ == 0) || (m_iface_name_idx__ < length) ) {
+        TLVF_LOG(ERROR) << "iface_name length is smaller than requested length";
+        return nullptr;
+    }
+    return ((char*)m_iface_name);
+}
+
+bool cACTION_APMANAGER_UP_NOTIFICATION::set_iface_name(const std::string& str) { return set_iface_name(str.c_str(), str.size()); }
+bool cACTION_APMANAGER_UP_NOTIFICATION::set_iface_name(const char str[], size_t size) {
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_iface_name received a null pointer.";
+        return false;
+    }
+    if (!alloc_iface_name(size)) { return false; }
+    std::copy(str, str + size, m_iface_name);
+    return true;
+}
+bool cACTION_APMANAGER_UP_NOTIFICATION::alloc_iface_name(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list iface_name, abort!";
+        return false;
+    }
+    size_t len = sizeof(char) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)&m_iface_name[*m_iface_name_length];
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_iface_name_idx__ += count;
+    *m_iface_name_length += count;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    return true;
+}
+
+void cACTION_APMANAGER_UP_NOTIFICATION::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
-    m_src_mac->struct_swap();
-    m_dst_mac->struct_swap();
 }
 
-bool cACTION_APMANAGER_4ADDR_STA_JOINED::finalize()
+bool cACTION_APMANAGER_UP_NOTIFICATION::finalize()
 {
     if (m_parse__) {
         TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
@@ -67,32 +111,100 @@ bool cACTION_APMANAGER_4ADDR_STA_JOINED::finalize()
     return true;
 }
 
-size_t cACTION_APMANAGER_4ADDR_STA_JOINED::get_initial_size()
+size_t cACTION_APMANAGER_UP_NOTIFICATION::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(sMacAddr); // src_mac
-    class_size += sizeof(sMacAddr); // dst_mac
+    class_size += sizeof(uint8_t); // iface_name_length
     return class_size;
 }
 
-bool cACTION_APMANAGER_4ADDR_STA_JOINED::init()
+bool cACTION_APMANAGER_UP_NOTIFICATION::init()
 {
     if (getBuffRemainingBytes() < get_initial_size()) {
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_src_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+    m_iface_name_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
+    if (!m_parse__) *m_iface_name_length = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
         return false;
     }
-    if (!m_parse__) { m_src_mac->struct_init(); }
-    m_dst_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+    m_iface_name = (char*)m_buff_ptr__;
+    uint8_t iface_name_length = *m_iface_name_length;
+    m_iface_name_idx__ = iface_name_length;
+    if (!buffPtrIncrementSafe(sizeof(char) * (iface_name_length))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (iface_name_length) << ") Failed!";
         return false;
     }
-    if (!m_parse__) { m_dst_mac->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_APMANAGER_CONFIGURE::cACTION_APMANAGER_CONFIGURE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_APMANAGER_CONFIGURE::cACTION_APMANAGER_CONFIGURE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_APMANAGER_CONFIGURE::~cACTION_APMANAGER_CONFIGURE() {
+}
+uint8_t& cACTION_APMANAGER_CONFIGURE::channel() {
+    return (uint8_t&)(*m_channel);
+}
+
+void cACTION_APMANAGER_CONFIGURE::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
+}
+
+bool cACTION_APMANAGER_CONFIGURE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_APMANAGER_CONFIGURE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // channel
+    return class_size;
+}
+
+bool cACTION_APMANAGER_CONFIGURE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_channel = reinterpret_cast<uint8_t*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__) { class_swap(); }
     return true;
 }
@@ -450,64 +562,6 @@ bool cACTION_APMANAGER_ENABLE_APS_RESPONSE::init()
     m_success = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
-        return false;
-    }
-    if (m_parse__) { class_swap(); }
-    return true;
-}
-
-cACTION_APMANAGER_INIT_DONE_NOTIFICATION::cACTION_APMANAGER_INIT_DONE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
-    BaseClass(buff, buff_len, parse) {
-    m_init_succeeded = init();
-}
-cACTION_APMANAGER_INIT_DONE_NOTIFICATION::cACTION_APMANAGER_INIT_DONE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
-    m_init_succeeded = init();
-}
-cACTION_APMANAGER_INIT_DONE_NOTIFICATION::~cACTION_APMANAGER_INIT_DONE_NOTIFICATION() {
-}
-void cACTION_APMANAGER_INIT_DONE_NOTIFICATION::class_swap()
-{
-    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
-}
-
-bool cACTION_APMANAGER_INIT_DONE_NOTIFICATION::finalize()
-{
-    if (m_parse__) {
-        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
-        return true;
-    }
-    if (m_finalized__) {
-        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
-        return true;
-    }
-    if (!isPostInitSucceeded()) {
-        TLVF_LOG(ERROR) << "post init check failed";
-        return false;
-    }
-    if (m_inner__) {
-        if (!m_inner__->finalize()) {
-            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
-            return false;
-        }
-        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
-        m_buff_ptr__ -= tailroom;
-    }
-    class_swap();
-    m_finalized__ = true;
-    return true;
-}
-
-size_t cACTION_APMANAGER_INIT_DONE_NOTIFICATION::get_initial_size()
-{
-    size_t class_size = 0;
-    return class_size;
-}
-
-bool cACTION_APMANAGER_INIT_DONE_NOTIFICATION::init()
-{
-    if (getBuffRemainingBytes() < get_initial_size()) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
     if (m_parse__) { class_swap(); }
@@ -2536,76 +2590,6 @@ bool cACTION_APMANAGER_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE::init()
         return false;
     }
     if (!m_parse__) { m_params->struct_init(); }
-    if (m_parse__) { class_swap(); }
-    return true;
-}
-
-cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
-    BaseClass(buff, buff_len, parse) {
-    m_init_succeeded = init();
-}
-cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse) :
-BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
-    m_init_succeeded = init();
-}
-cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::~cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION() {
-}
-sMacAddr& cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::mac() {
-    return (sMacAddr&)(*m_mac);
-}
-
-void cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::class_swap()
-{
-    tlvf_swap(8*sizeof(eActionOp_APMANAGER), reinterpret_cast<uint8_t*>(m_action_op));
-    m_mac->struct_swap();
-}
-
-bool cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::finalize()
-{
-    if (m_parse__) {
-        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
-        return true;
-    }
-    if (m_finalized__) {
-        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
-        return true;
-    }
-    if (!isPostInitSucceeded()) {
-        TLVF_LOG(ERROR) << "post init check failed";
-        return false;
-    }
-    if (m_inner__) {
-        if (!m_inner__->finalize()) {
-            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
-            return false;
-        }
-        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
-        m_buff_ptr__ -= tailroom;
-    }
-    class_swap();
-    m_finalized__ = true;
-    return true;
-}
-
-size_t cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::get_initial_size()
-{
-    size_t class_size = 0;
-    class_size += sizeof(sMacAddr); // mac
-    return class_size;
-}
-
-bool cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION::init()
-{
-    if (getBuffRemainingBytes() < get_initial_size()) {
-        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
-        return false;
-    }
-    m_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
-    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
-        return false;
-    }
-    if (!m_parse__) { m_mac->struct_init(); }
     if (m_parse__) { class_swap(); }
     return true;
 }
