@@ -122,7 +122,7 @@ prplmesh_agent_start() {
 prplmesh_agent_stop() {
     echo "prplmesh_agent_stop - stopping beerocks_agent process..."
     killall_program beerocks_agent
-    killall_program beerocks_monitor
+    killall_program beerocks_fronthaul
 }
 
 prplmesh_delete_logs() {
@@ -175,7 +175,7 @@ roll_logs_function()
     # Send USR1 signals to the beerocks processes to trigger log rolling
     killall_program beerocks_controller USR1
     killall_program beerocks_agent USR1
-    killall_program beerocks_monitor USR1
+    killall_program beerocks_fronthaul USR1
 
     # Wait for all the modules to create a new file
     rollTimeout=0
