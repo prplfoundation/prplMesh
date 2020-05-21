@@ -100,9 +100,10 @@ private:
     int server_max_connections;
     SocketSelect select;
 
-    uint32_t m_select_timeout_msec                              = 0;
-    bool m_skip_next_select_timeout                             = false;
-    std::chrono::steady_clock::time_point m_select_wake_up_time = std::chrono::steady_clock::now();
+    uint32_t m_select_timeout_msec  = 0;
+    bool m_skip_next_select_timeout = false;
+    std::chrono::steady_clock::time_point m_select_wake_up_time =
+        std::chrono::steady_clock::time_point::max();
 };
 
 } // namespace beerocks
