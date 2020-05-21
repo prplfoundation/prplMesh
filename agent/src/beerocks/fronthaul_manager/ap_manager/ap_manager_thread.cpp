@@ -167,36 +167,6 @@ void ap_manager_thread::after_select(bool timeout)
 
     auto now = std::chrono::steady_clock::now();
 
-    for (auto it = pending_4addr_stas.begin(); it != pending_4addr_stas.end();) {
-        int time_elapsed_4addr_ms =
-            std::chrono::duration_cast<std::chrono::milliseconds>(now - it->second.joined_timestamp)
-                .count();
-        if (time_elapsed_4addr_ms > beerocks::IRE_MAX_WIRELESS_RECONNECTION_TIME_MSC) {
-            std::string mac = it->first;
-            LOG(DEBUG) << "4addr rejoin timed out for sta mac " << mac
-                       << " deleting from 4addr list";
-
-            if (it->second.pending_reconnect == true) {
-                if (connected_ires.find(mac) != connected_ires.end()) {
-                    connected_ires.erase(mac);
-                }
-                auto notification = message_com::create_vs_message<
-                    beerocks_message::cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION>(cmdu_tx);
-
-                if (notification == nullptr) {
-                    LOG(ERROR) << "Failed building message!";
-                    return;
-                }
-                notification->params().mac = tlvf::mac_from_string(mac);
-                message_com::send_cmdu(slave_socket, cmdu_tx);
-            }
-            it = pending_4addr_stas.erase(it);
-        } else {
-            ++it;
-        }
-    }
-    /////////
-
     if (ap_hal_int_events == nullptr) { // ap not attached
         auto attach_state = ap_wlan_hal->attach();
 
@@ -881,19 +851,6 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         }
         break;
     }
-    case beerocks_message::ACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION: {
-        auto update =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION>();
-        if (update == nullptr) {
-            LOG(ERROR) << "addClass cACTION_APMANAGER_CLIENT_IRE_CONNECTED_NOTIFICATION failed";
-            return false;
-        }
-        auto ire_mac = tlvf::mac_to_string(update->mac());
-        LOG(DEBUG) << "ire connected in 4addr, mac=" << ire_mac;
-        connected_ires.insert(ire_mac);
-        break;
-    }
     case beerocks_message::ACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST: {
         auto request =
             beerocks_header
@@ -1106,12 +1063,6 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
         }
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
-
-        if (pending_4addr_stas.find(client_mac) != pending_4addr_stas.end()) {
-            LOG(INFO) << "sta mac " << client_mac << " rejoined in 4addr mode, removing from list";
-            pending_4addr_stas.erase(client_mac);
-        }
-
     } break;
 
     // STA Disconnected
@@ -1139,43 +1090,27 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
             }));
         }
 
-        if (pending_4addr_stas.find(mac) != pending_4addr_stas.end()) {
-            LOG(INFO) << "sta mac " << mac << " is pending 4addr rejoin, ignoring";
-            return true;
-            //disconnect in 4Addr mode trigger disconnect timer , enter to pending_4addr_stas. (beckaul will get a chance to reconnect in 4addr )
-        } else if (connected_ires.find(mac) != connected_ires.end()) {
-            LOG(INFO) << "sta mac " << mac << " 4addr disconnect , will try to reconnect";
-            auto now = std::chrono::steady_clock::now();
-            pending_4addr_sta_t sta;
-            sta.mac               = mac;
-            sta.joined_timestamp  = now;
-            sta.pending_reconnect = true;
-            pending_4addr_stas.insert({mac, sta});
-            return true;
-        } else {
-            auto notification = message_com::create_vs_message<
-                beerocks_message::cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION>(cmdu_tx);
+        auto notification = message_com::create_vs_message<
+            beerocks_message::cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION>(cmdu_tx);
 
-            if (notification == nullptr) {
-                LOG(ERROR) << "Failed building message!";
-                return false;
-            }
-            auto vap_node = ap_wlan_hal->get_radio_info().available_vaps.find(msg->params.vap_id);
-            if (vap_node == ap_wlan_hal->get_radio_info().available_vaps.end()) {
-                LOG(ERROR) << "Can't find vap with id " << int(msg->params.vap_id);
-                return false;
-            }
-
-            notification->params().mac    = msg->params.mac;
-            notification->params().bssid  = tlvf::mac_from_string(vap_node->second.mac);
-            notification->params().vap_id = msg->params.vap_id;
-            notification->params().reason = msg->params.reason;
-            notification->params().source = msg->params.source;
-            notification->params().type   = msg->params.type;
-
-            message_com::send_cmdu(slave_socket, cmdu_tx);
+        if (notification == nullptr) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
+        auto vap_node = ap_wlan_hal->get_radio_info().available_vaps.find(msg->params.vap_id);
+        if (vap_node == ap_wlan_hal->get_radio_info().available_vaps.end()) {
+            LOG(ERROR) << "Can't find vap with id " << int(msg->params.vap_id);
+            return false;
         }
 
+        notification->params().mac    = msg->params.mac;
+        notification->params().bssid  = tlvf::mac_from_string(vap_node->second.mac);
+        notification->params().vap_id = msg->params.vap_id;
+        notification->params().reason = msg->params.reason;
+        notification->params().source = msg->params.source;
+        notification->params().type   = msg->params.type;
+
+        message_com::send_cmdu(slave_socket, cmdu_tx);
     } break;
 
     // BSS Transition (802.11v)

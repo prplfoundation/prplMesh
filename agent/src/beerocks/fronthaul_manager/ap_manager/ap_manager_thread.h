@@ -112,17 +112,6 @@ private:
 
     std::shared_ptr<bwl::ap_wlan_hal> ap_wlan_hal;
 
-    //FIXME temp 4addr stuff
-    Socket *four_addr_listener_socket = nullptr;
-    struct pending_4addr_sta_t {
-        std::string mac;
-        std::chrono::steady_clock::time_point joined_timestamp;
-        bool pending_reconnect = false;
-    };
-    std::unordered_map<std::string, pending_4addr_sta_t> pending_4addr_stas;
-    //use to diff between ire and client
-    std::set<std::string> connected_ires;
-
     std::chrono::steady_clock::time_point next_heartbeat_notification_timestamp;
     std::chrono::steady_clock::time_point next_tx_polling_timestamp;
 
