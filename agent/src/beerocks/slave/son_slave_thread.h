@@ -9,11 +9,10 @@
 #ifndef _SON_SLAVE_THREAD_H
 #define _SON_SLAVE_THREAD_H
 
-#include "ap_manager_thread.h"
-
 #include <bcl/beerocks_backport.h>
 #include <bcl/beerocks_logging.h>
 #include <bcl/beerocks_socket_thread.h>
+#include <bcl/son/son_wireless_utils.h>
 
 #include <beerocks/tlvf/beerocks_header.h>
 
@@ -142,8 +141,8 @@ private:
     void platform_manager_stop();
     void hostap_services_off();
     bool hostap_services_on();
-    bool ap_manager_start();
-    void ap_manager_stop();
+    bool ap_manager_start() { return true; };
+    void ap_manager_stop(){};
     void monitor_start();
     void monitor_stop();
     void log_son_config();
@@ -217,8 +216,6 @@ private:
     int ap_manager_retries_counter = 0;
 
     int last_reported_backhaul_rssi = beerocks::RSSI_INVALID;
-
-    ap_manager_thread *ap_manager = nullptr;
 
     // Encryption support - move to common library
     bool autoconfig_wsc_calculate_keys(WSC::m2 &m2, uint8_t authkey[32], uint8_t keywrapkey[16]);

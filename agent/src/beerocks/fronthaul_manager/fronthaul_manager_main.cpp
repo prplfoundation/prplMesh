@@ -6,7 +6,7 @@
  * See LICENSE file for more details.
  */
 
-#include "monitor_thread.h"
+#include "monitor/monitor_thread.h"
 
 #include <bcl/beerocks_logging.h>
 #include <bcl/beerocks_os_utils.h>
