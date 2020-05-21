@@ -14,6 +14,8 @@
 // AP HAL
 #include <bwl/ap_wlan_hal.h>
 
+#include <bcl/beerocks_logging.h>
+
 #include <beerocks/tlvf/beerocks_message_apmanager.h>
 #include <list>
 #include <set>
@@ -22,7 +24,8 @@ namespace son {
 class ap_manager_thread : public beerocks::socket_thread {
 
 public:
-    explicit ap_manager_thread(std::string slave_uds_);
+    ap_manager_thread(const std::string &slave_uds_, const std::string &iface,
+                      beerocks::logging &logger);
     virtual ~ap_manager_thread();
 
     struct ap_manager_conf_t {
@@ -77,12 +80,21 @@ private:
     void remove_client_from_disallowed_list(const sMacAddr &mac, const sMacAddr &bssid);
     void allow_expired_clients();
 
+    // Class constants
+    static constexpr uint8_t BEACON_TRANSMIT_TIME_MS = 100;
+    static constexpr uint8_t BSS_STEER_IMMINENT_VALID_INT_BTT =
+        (beerocks::BSS_STEER_DISASSOC_TIMER_MS / BEACON_TRANSMIT_TIME_MS);
+    static constexpr uint8_t BSS_STEER_VALID_INT_BTT = 2; // 200ms
+
     std::string slave_uds;
+    std::string m_iface;
+    beerocks::logging &m_logger;
     uint8_t wifi_channel;
     bool acs_enabled;
     bool low_filter;
-    int bss_steer_valid_int;
-    int bss_steer_imminent_valid_int;
+
+    int bss_steer_valid_int          = BSS_STEER_VALID_INT_BTT;
+    int bss_steer_imminent_valid_int = BSS_STEER_IMMINENT_VALID_INT_BTT;
     std::vector<disallowed_client_t> m_disallowed_clients;
 
     struct pending_disable_vap_t {

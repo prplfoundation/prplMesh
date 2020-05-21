@@ -91,12 +91,13 @@ static void copy_vaps_info(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal,
 using namespace beerocks;
 using namespace son;
 
-ap_manager_thread::ap_manager_thread(std::string slave_uds_)
-    : socket_thread(), bss_steer_valid_int(BSS_STEER_VALID_INT_BTT),
-      bss_steer_imminent_valid_int(BSS_STEER_IMMINENT_VALID_INT_BTT)
+ap_manager_thread::ap_manager_thread(const std::string &slave_uds_, const std::string &iface,
+                                     beerocks::logging &logger)
+    : socket_thread(), m_logger(logger)
 {
     thread_name = "ap_manager";
     slave_uds   = slave_uds_;
+    m_iface     = iface;
     set_select_timeout(SELECT_TIMEOUT_MSC);
 }
 
@@ -811,9 +812,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         ap_wlan_hal->sta_bss_steer(
             sta_mac, target_bssid, request->params().target.operating_class,
             request->params().target.channel,
-            (disassoc_imminent)
-                ? (request->params().disassoc_timer_ms / beerocks::BEACON_TRANSMIT_TIME_MS)
-                : 0,
+            (disassoc_imminent) ? (request->params().disassoc_timer_ms / BEACON_TRANSMIT_TIME_MS)
+                                : 0,
             (disassoc_imminent) ? bss_steer_imminent_valid_int : bss_steer_valid_int);
         break;
     }
