@@ -80,6 +80,7 @@ private:
     bool handle_ap_enabled(int vap_id);
     void fill_cs_params(beerocks_message::sApChannelSwitch &params);
     void stop_ap_manager_thread();
+    void connect_to_agent();
     void send_heartbeat();
     void send_steering_return_status(beerocks_message::eActionOp_APMANAGER ActionOp,
                                      int32_t status);
