@@ -36,6 +36,7 @@ class ALEntity:
     it is implemented in prplMesh and it allows us to have e.g. a separate UCCSocket to controller
     and agent.
     '''
+
     def __init__(self, mac: str, ucc_socket: UCCSocket, installdir: str,
                  is_controller: bool = False):
         self.mac = mac
@@ -108,6 +109,7 @@ class Station:
     represents a station. Handling the station is actually done through the VirtualAP concrete
     implementation.
     '''
+
     def __init__(self, mac: str):
         self.mac = mac
 
@@ -133,6 +135,7 @@ class StationEvent(Enum):
 
 class VirtualAP:
     '''Abstract representation of a VAP on a MultiAP Radio.'''
+
     def __init__(self, radio: Radio, bssid: str):
         self.radio = radio
         radio.vaps.append(self)
@@ -180,35 +183,44 @@ installdir = os.path.join(rootdir, 'build', 'install')
 on_wsl = "microsoft" in platform.uname()[3].lower()
 
 
-def _docker_wait_for_log(container: str, program: str, regex: str, start_line: int,
+# Temporary workaround
+# Since we have multiple log files that correspond to a radio, multiple programs are passed
+# as argument. In the log messages, we only use the first one.
+# This should be reverted again as part of Unified Agent.
+def _docker_wait_for_log(container: str, programs: [str], regex: str, start_line: int,
                          timeout: float) -> bool:
-    logfilename = os.path.join(rootdir, 'logs', container, 'beerocks_{}.log'.format(program))
-    # WSL doesn't support symlinks on NTFS, so resolve the symlink manually
-    if on_wsl:
-        logfilename = os.path.join(
-            rootdir, 'logs', container,
-            subprocess.check_output(["tail", "-2", logfilename]).decode('utf-8').
-            rstrip(' \t\r\n\0'))
+    def logfilename(program):
+        logfilename = os.path.join(rootdir, 'logs', container, 'beerocks_{}.log'.format(program))
+        # WSL doesn't support symlinks on NTFS, so resolve the symlink manually
+        if on_wsl:
+            logfilename = os.path.join(
+                rootdir, 'logs', container,
+                subprocess.check_output(["tail", "-2", logfilename]).decode('utf-8').
+                rstrip(' \t\r\n\0'))
+        return logfilename
+
+    logfilenames = [logfilename(program) for program in programs]
 
     deadline = time.monotonic() + timeout
     try:
         while True:
-            with open(logfilename, 'rb') as logfile:
-                for (i, v) in enumerate(logfile.readlines()):
-                    if i <= start_line:
-                        continue
-                    search = re.search(regex.encode('utf-8'), v)
-                    if search:
-                        debug("Found '{}'\n\tin {}".format(regex, logfilename))
-                        return (True, i, search.groups())
+            for logfilename in logfilenames:
+                with open(logfilename, 'rb') as logfile:
+                    for (i, v) in enumerate(logfile.readlines()):
+                        if i <= start_line:
+                            continue
+                        search = re.search(regex.encode('utf-8'), v)
+                        if search:
+                            debug("Found '{}'\n\tin {}".format(regex, logfilename))
+                            return (True, i, search.groups())
             if time.monotonic() < deadline:
                 time.sleep(.3)
             else:
-                err("Can't find '{}'\n\tin log of {} on {} after {}s".format(regex, program,
+                err("Can't find '{}'\n\tin log of {} on {} after {}s".format(regex, programs[0],
                                                                              container, timeout))
                 return (False, start_line, None)
     except OSError:
-        err("Can't read log of {} on {}".format(program, container))
+        err("Can't read log of {} on {}".format(programs[0], container))
         return (False, start_line, None)
 
 
@@ -217,8 +229,8 @@ def _device_wait_for_log(device: None, log_path: str, regex: str,
     """Waits for log mathing regex expression to show up."""
     device.sendline("tail -n10 -f {}".format(log_path))
     match = device.expect(
-            pattern=[regex, device.pexpect.EOF, device.pexpect.TIMEOUT],
-            timeout=timeout)
+        pattern=[regex, device.pexpect.EOF, device.pexpect.TIMEOUT],
+        timeout=timeout)
     if match == 1:
         return True
     else:
@@ -272,7 +284,7 @@ class ALEntityDocker(ALEntity):
     def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
         '''Poll the entity's logfile until it contains "regex" or times out.'''
         program = "controller" if self.is_controller else "agent"
-        return _docker_wait_for_log(self.name, program, regex, start_line, timeout)
+        return _docker_wait_for_log(self.name, [program], regex, start_line, timeout)
 
 
 class RadioDocker(Radio):
@@ -290,8 +302,8 @@ class RadioDocker(Radio):
 
     def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
         '''Poll the radio's logfile until it contains "regex" or times out.'''
-        program = "agent_" + self.iface_name
-        return _docker_wait_for_log(self.agent.name, program, regex, start_line, timeout)
+        programs = ("agent_" + self.iface_name, "ap_manager_" + self.iface_name)
+        return _docker_wait_for_log(self.agent.name, programs, regex, start_line, timeout)
 
     def send_bwl_event(self, event: str) -> None:
         # The file is only available within the docker container so we need to use an echo command.
@@ -315,6 +327,7 @@ class RadioDocker(Radio):
 
 class VirtualAPDocker(VirtualAP):
     '''Docker implementation of a VAP.'''
+
     def __init__(self, radio: RadioDocker, bssid: str):
         super().__init__(radio, bssid)
 
@@ -405,7 +418,7 @@ class ALEntityPrplWrt(ALEntity):
                                 "| cut -d'=' -f2 | cut -d\" \" -f 1").format(self.config_file_name))
 
         device_ip_output = self.command(
-                "ip -f inet addr show {} | head -n 2".format(self.bridge_name))
+            "ip -f inet addr show {} | head -n 2".format(self.bridge_name))
         device_ip = re.search(
             r'inet (?P<ip>[0-9.]+)', device_ip_output.decode('utf-8')).group('ip')
         self.log_folder = self.command(
