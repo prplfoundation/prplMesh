@@ -6,6 +6,7 @@
  * See LICENSE file for more details.
  */
 
+#include "ap_manager/ap_manager_thread.h"
 #include "monitor/monitor_thread.h"
 
 #include <bcl/beerocks_logging.h>
@@ -203,34 +204,50 @@ int main(int argc, char *argv[])
     std::string agent_uds =
         beerocks_slave_conf.temp_path + std::string(BEEROCKS_SLAVE_UDS) + "_" + fronthaul_iface;
 
+    // Create ap_manager
+    son::ap_manager_thread ap_manager(agent_uds, fronthaul_iface, *g_logger_ap_mananger);
+
+    if (!ap_manager.init()) {
+        CLOG(ERROR, g_logger_ap_mananger->get_logger_id()) << "ap manager init() has failed!";
+        return 1;
+    }
+
     // Create Monitor
     son::monitor_thread monitor(agent_uds, fronthaul_iface, beerocks_slave_conf, *g_logger_monitor);
 
-    if (monitor.init()) {
-        auto touch_time_stamp_timeout = std::chrono::steady_clock::now();
-        while (g_running) {
+    auto touch_time_stamp_timeout = std::chrono::steady_clock::now();
+    while (g_running) {
 
-            // Handle signals
-            if (s_signal) {
-                handle_signal();
+        // Handle signals
+        if (s_signal) {
+            handle_signal();
+            continue;
+        }
+
+        if (std::chrono::steady_clock::now() > touch_time_stamp_timeout) {
+            beerocks::os_utils::touch_pid_file(pid_file_path);
+            touch_time_stamp_timeout = std::chrono::steady_clock::now() +
+                                       std::chrono::seconds(beerocks::TOUCH_PID_TIMEOUT_SECONDS);
+        }
+
+        if (!ap_manager.work()) {
+            break;
+        }
+
+        // The ap_manager is the main process thread. After the ap_manager is finished the attach
+        // process, start the monitor thread. There is no point to start it before.
+        auto ap_manager_state = ap_manager.get_state();
+        if (ap_manager_state == son::ap_manager_thread::eApManagerState::ATTACHED) {
+            if (monitor.is_running()) {
                 continue;
-            }
-
-            if (std::chrono::steady_clock::now() > touch_time_stamp_timeout) {
-                beerocks::os_utils::touch_pid_file(pid_file_path);
-                touch_time_stamp_timeout =
-                    std::chrono::steady_clock::now() +
-                    std::chrono::seconds(beerocks::TOUCH_PID_TIMEOUT_SECONDS);
-            }
-
-            if (!monitor.work()) {
+            } else if (!monitor.start()) {
+                CLOG(ERROR, g_logger_monitor->get_logger_id()) << "monitor.start() has failed";
                 break;
             }
         }
-        monitor.stop();
-    } else {
-        LOG(ERROR) << "monitor.init(), iface=" << fronthaul_iface << " slave_uds=" << agent_uds;
     }
+
+    monitor.stop();
 
     return 0;
 }
