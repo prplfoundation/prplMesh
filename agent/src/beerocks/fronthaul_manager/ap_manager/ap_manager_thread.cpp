@@ -158,9 +158,34 @@ void ap_manager_thread::ap_manager_fsm()
 {
     switch (m_state) {
     case eApManagerState::INIT: {
+        if (!slave_socket) {
+            return;
+        }
+        auto request =
+            message_com::create_vs_message<beerocks_message::cACTION_APMANAGER_UP_NOTIFICATION>(
+                cmdu_tx);
+
+        if (!request) {
+            LOG(ERROR) << "Failed building message!";
+            return;
+        }
+        request->set_iface_name(m_iface);
+        message_com::send_cmdu(slave_socket, cmdu_tx);
+
+        m_state = eApManagerState::WAIT_FOR_CONFIGURATION;
+
+        // Set the timout to next select cycle
+        m_state_timeout =
+            std::chrono::steady_clock::now() + std::chrono::milliseconds(SELECT_TIMEOUT_MSC);
         break;
     }
     case eApManagerState::WAIT_FOR_CONFIGURATION: {
+        // On ACTION_APMANAGER_CONFIGURE handler, the ap_hal will be created, and the state will
+        // change to ATTACHING state.
+        if (std::chrono::steady_clock::now() > m_state_timeout) {
+            LOG(ERROR) << "Agent did not send configuration message";
+            stop_ap_manager_thread();
+        }
         break;
     }
     case eApManagerState::ATTACHING: {
