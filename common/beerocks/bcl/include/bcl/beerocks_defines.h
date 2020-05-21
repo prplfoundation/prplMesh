@@ -17,6 +17,8 @@ namespace beerocks {
 
 #define BEEROCKS_CONTROLLER "beerocks_controller"
 #define BEEROCKS_AGENT "beerocks_agent"
+#define BEEROCKS_FRONTHAUL "beerocks_fronthaul"
+#define BEEROCKS_AP_MANAGER "beerocks_ap_manager"
 #define BEEROCKS_MONITOR "beerocks_monitor"
 #define BEEROCKS_CLI "beerocks_cli"
 
