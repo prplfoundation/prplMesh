@@ -145,6 +145,8 @@ private:
     void ap_manager_stop(){};
     void monitor_start();
     void monitor_stop();
+    void fronthaul_start();
+    void fronthaul_stop();
     void log_son_config();
     void platform_notify_error(beerocks::bpl::eErrorCode code, const std::string &error_data);
     bool monitor_heartbeat_check();
