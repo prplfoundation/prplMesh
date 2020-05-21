@@ -103,12 +103,10 @@ ap_manager_thread::ap_manager_thread(const std::string &slave_uds_, const std::s
 
 ap_manager_thread::~ap_manager_thread() { stop_ap_manager_thread(); }
 
-void ap_manager_thread::ap_manager_config(ap_manager_conf_t &conf)
-{
-    acs_enabled  = (conf.channel == 0);
-    wifi_channel = conf.channel;
-    low_filter   = conf.iface_filter_low;
+void ap_manager_thread::on_thread_stop() { stop_ap_manager_thread(); }
 
+bool ap_manager_thread::create_ap_wlan_hal()
+{
     using namespace std::placeholders; // for `_1`
 
     bwl::hal_conf_t hal_conf;
@@ -116,22 +114,21 @@ void ap_manager_thread::ap_manager_config(ap_manager_conf_t &conf)
 
     // Create a new AP HAL instance
     ap_wlan_hal = bwl::ap_wlan_hal_create(
-        conf.hostap_iface, hal_conf, std::bind(&ap_manager_thread::hal_event_handler, this, _1));
+        m_iface, hal_conf, std::bind(&ap_manager_thread::hal_event_handler, this, _1));
 
     LOG_IF(!ap_wlan_hal, FATAL) << "Failed creating HAL instance!";
-}
-
-void ap_manager_thread::on_thread_stop() { stop_ap_manager_thread(); }
-
-bool ap_manager_thread::init()
-{
-    stop_ap_manager_thread();
 
     if (!ap_wlan_hal->wds_set_mode(bwl::ap_wlan_hal::WDSMode::Dynamic)) {
         LOG(ERROR) << "Failed to enabling WDS Dynamic mode!";
         return false;
     }
 
+    return true;
+}
+
+bool ap_manager_thread::init()
+{
+    stop_ap_manager_thread();
     return true;
 }
 
@@ -357,6 +354,30 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
     }
 
     switch (beerocks_header->action_op()) {
+    case beerocks_message::ACTION_APMANAGER_CONFIGURE: {
+        if (m_ap_manager_configured) {
+            break;
+        }
+
+        LOG(TRACE) << "ACTION_APMANAGER_CONFIGURE";
+
+        auto config = beerocks_header->addClass<beerocks_message::cACTION_APMANAGER_CONFIGURE>();
+        if (!config) {
+            LOG(ERROR) << "addClass cACTION_APMANAGER_CONFIGURE failed";
+            return false;
+        }
+
+        acs_enabled = config->channel() == 0;
+
+        m_ap_manager_configured = true;
+
+        create_ap_wlan_hal();
+
+        LOG(DEBUG) << "Move to ATTACHING state";
+        m_state = eApManagerState::ATTACHING;
+
+        break;
+    }
     case beerocks_message::ACTION_APMANAGER_ENABLE_APS_REQUEST: {
         LOG(TRACE) << "ACTION_APMANAGER_ENABLE_APS_REQUEST";
 
@@ -1549,6 +1570,8 @@ void ap_manager_thread::stop_ap_manager_thread()
     }
 
     m_state = eApManagerState::INIT;
+
+    m_ap_manager_configured = false;
 
     should_stop = true;
 }
