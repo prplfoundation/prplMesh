@@ -150,7 +150,7 @@ int main(int argc, char *argv[])
 
     //init logger
     std::string base_monitor_name = std::string(BEEROCKS_MONITOR) + "_" + fronthaul_iface;
-    beerocks::logging logger(beerocks_slave_conf.sLog, base_monitor_name);
+    beerocks::logging logger(base_monitor_name, beerocks_slave_conf.sLog);
     s_pLogger = &logger;
     logger.apply_settings();
     LOG(INFO) << std::endl

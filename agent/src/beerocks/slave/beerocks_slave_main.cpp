@@ -211,7 +211,7 @@ static int system_hang_test(const beerocks::config_file::sConfigSlave &beerocks_
     std::string name = std::string("system_hang_test");
 
     //init logger
-    beerocks::logging logger(beerocks_slave_conf.sLog, name);
+    beerocks::logging logger(name, beerocks_slave_conf.sLog);
     s_pLogger = &logger;
     logger.apply_settings();
     LOG(INFO) << std::endl
@@ -274,7 +274,7 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
     std::ofstream versionfile;
 
     //init logger
-    beerocks::logging slave_logger(beerocks_slave_conf.sLog, base_slave_name);
+    beerocks::logging slave_logger(base_slave_name, beerocks_slave_conf.sLog);
     s_pLogger = &slave_logger;
     slave_logger.apply_settings();
     LOG(INFO) << std::endl
@@ -395,7 +395,7 @@ static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &bee
     std::string base_slave_name = std::string(BEEROCKS_AGENT) + "_" + hostap_iface;
 
     //init logger
-    beerocks::logging slave_logger(beerocks_slave_conf.sLog, base_slave_name);
+    beerocks::logging slave_logger(base_slave_name, beerocks_slave_conf.sLog);
     s_pLogger = &slave_logger;
     slave_logger.apply_settings();
     LOG(INFO) << std::endl
