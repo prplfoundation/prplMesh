@@ -19,6 +19,14 @@ public:
     CmduMessageRx() = delete;
     CmduMessageRx(uint8_t *buff, size_t buff_len) : CmduMessage(buff, buff_len){};
     ~CmduMessageRx(){};
+
+    // Forward wrapper functions
+    template <class T> std::shared_ptr<T> getClass() const { return msg.getClass<T>(); };
+    template <class T> std::list<std::shared_ptr<T>> getClassList() const
+    {
+        return msg.getClassList<T>();
+    };
+
     bool parse();
     CmduMessageRx &operator=(const CmduMessageRx &) = delete;
 

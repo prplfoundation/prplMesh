@@ -36,13 +36,6 @@ public:
     uint16_t getMessageId();
     void setMessageId(uint16_t mid);
 
-    // Forward wrapper functions
-    // TODO check which of them can be removed
-    template <class T> std::shared_ptr<T> getClass() const { return msg.getClass<T>(); };
-    template <class T> std::list<std::shared_ptr<T>> getClassList() const
-    {
-        return msg.getClassList<T>();
-    };
     size_t getMessageLength() const { return msg.getMessageLength(); };
     size_t getMessageBuffLength() const { return msg.getMessageBuffLength(); };
     uint8_t *getMessageBuff() const { return msg.getMessageBuff(); };
