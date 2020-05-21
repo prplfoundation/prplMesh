@@ -56,7 +56,7 @@ public:
                               const std::string &description = std::string());
     static bool handle_version_query(int argc, char **argv,
                                      const std::string &description = std::string());
-    static void log_version(int argc, char **argv);
+    static void log_version(int argc, char **argv, const std::string &logger_id = std::string());
 
     static std::string get_module_version();
     static std::string get_module_timestamp();

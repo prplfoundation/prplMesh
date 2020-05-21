@@ -109,12 +109,19 @@ void beerocks::version::print_version(bool verbose, const std::string &name,
               << std::endl;
 }
 
-void beerocks::version::log_version(int, char **argv)
+void beerocks::version::log_version(int argc, char **argv, const std::string &logger_id)
 {
     std::string name(get_last_path(argv[0]));
 
-    LOG(INFO) << name << " " << version::get_module_version() << " ("
-              << version::get_module_timestamp() << ") [" << version::get_module_revision() << "]";
+    std::stringstream ss;
+    ss << name << " " << version::get_module_version() << " (" << version::get_module_timestamp()
+       << ") [" << version::get_module_revision() << "]";
+
+    if (logger_id.empty()) {
+        LOG(INFO) << ss.str();
+    } else {
+        CLOG(INFO, logger_id.c_str()) << ss.str();
+    }
 }
 
 bool beerocks::version::handle_version_query(int argc, char **argv, const std::string &description)

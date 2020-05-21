@@ -508,26 +508,28 @@ void logging::apply_settings()
     defaultConf.set(el::Level::Trace, el::ConfigurationType::Enabled,
                     string_utils::bool_str(m_levels.trace_enabled()));
 
-    // configure syslog settings
-    el::Configurations syslogConf;
-    syslogConf.setToDefault();
+    // Override with syslog settings
+    if (m_syslog_enabled) {
+        // el::Configurations syslogConf;
+        //syslogConf.setToDefault();
 
-    // Prepend the module name to the syslog message format.
-    // This can help splitting module specific logs into separate files
-    syslogConf.setGlobally(el::ConfigurationType::Format, m_module_name + ": " + syslogFormat);
+        // Prepend the module name to the syslog message format.
+        // This can help splitting module specific logs into separate files
+        defaultConf.setGlobally(el::ConfigurationType::Format, m_module_name + ": " + syslogFormat);
 
-    syslogConf.set(el::Level::Fatal, el::ConfigurationType::Enabled,
-                   string_utils::bool_str(m_syslog_levels.fatal_enabled()));
-    syslogConf.set(el::Level::Error, el::ConfigurationType::Enabled,
-                   string_utils::bool_str(m_syslog_levels.error_enabled()));
-    syslogConf.set(el::Level::Warning, el::ConfigurationType::Enabled,
-                   string_utils::bool_str(m_syslog_levels.warning_enabled()));
-    syslogConf.set(el::Level::Info, el::ConfigurationType::Enabled,
-                   string_utils::bool_str(m_syslog_levels.info_enabled()));
-    syslogConf.set(el::Level::Debug, el::ConfigurationType::Enabled,
-                   string_utils::bool_str(m_syslog_levels.debug_enabled()));
-    syslogConf.set(el::Level::Trace, el::ConfigurationType::Enabled,
-                   string_utils::bool_str(m_syslog_levels.trace_enabled()));
+        defaultConf.set(el::Level::Fatal, el::ConfigurationType::Enabled,
+                        string_utils::bool_str(m_syslog_levels.fatal_enabled()));
+        defaultConf.set(el::Level::Error, el::ConfigurationType::Enabled,
+                        string_utils::bool_str(m_syslog_levels.error_enabled()));
+        defaultConf.set(el::Level::Warning, el::ConfigurationType::Enabled,
+                        string_utils::bool_str(m_syslog_levels.warning_enabled()));
+        defaultConf.set(el::Level::Info, el::ConfigurationType::Enabled,
+                        string_utils::bool_str(m_syslog_levels.info_enabled()));
+        defaultConf.set(el::Level::Debug, el::ConfigurationType::Enabled,
+                        string_utils::bool_str(m_syslog_levels.debug_enabled()));
+        defaultConf.set(el::Level::Trace, el::ConfigurationType::Enabled,
+                        string_utils::bool_str(m_syslog_levels.trace_enabled()));
+    }
 
     auto logger = el::Loggers::getLogger(m_logger_id);
     if (!logger) {
@@ -536,7 +538,6 @@ void logging::apply_settings()
     }
 
     el::Loggers::reconfigureLogger(m_logger_id, defaultConf);
-    el::Loggers::reconfigureLogger("syslog", syslogConf);
 
     el::Loggers::addFlag(el::LoggingFlag::ImmediateFlush);
     el::Loggers::addFlag(el::LoggingFlag::LogDetailedCrashReason);

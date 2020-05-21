@@ -2236,7 +2236,7 @@ void DefaultLogDispatchCallback::handle(const LogDispatchData* data) {
 	  syslogData.setDispatchAction(base::DispatchAction::SysLog);
 	  LogMessage log_message(data->logMessage()->level(), data->logMessage()->file(),
 			   data->logMessage()->line(), data->logMessage()->func(), data->logMessage()->verboseLevel(),
-			   Loggers::getLogger(base::consts::kSysLogLoggerId), data->logMessage()->message());
+			   m_data->logMessage()->logger(), data->logMessage()->message());
 	  syslogData.setLogMessage(&log_message);
 
 	  dispatch(m_data->logMessage()->logger()->logBuilder()->build(m_data->logMessage(),
