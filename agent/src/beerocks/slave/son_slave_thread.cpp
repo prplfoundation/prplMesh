@@ -3735,6 +3735,44 @@ void slave_thread::monitor_start()
     SYSTEM_CALL(cmd, 2, true);
 }
 
+void slave_thread::fronthaul_stop()
+{
+    LOG(INFO) << "fronthaul stop";
+
+    if (monitor_socket) {
+        remove_socket(monitor_socket);
+        delete monitor_socket;
+        monitor_socket = nullptr;
+    }
+
+    if (ap_manager_socket) {
+        remove_socket(ap_manager_socket);
+        delete ap_manager_socket;
+        ap_manager_socket = nullptr;
+    }
+
+    // Kill Fronthaul pid
+    os_utils::kill_pid(config.temp_path,
+                       std::string(BEEROCKS_FRONTHAUL) + "_" + config.hostap_iface);
+}
+
+void slave_thread::fronthaul_start()
+{
+    fronthaul_stop();
+
+    LOG(INFO) << "fronthaul start";
+
+    // Start new Fronthaul process
+    std::string file_name = "./" + std::string(BEEROCKS_FRONTHAUL);
+
+    // Check if file does not exist in current location
+    if (access(file_name.c_str(), F_OK) == -1) {
+        file_name = BEEROCKS_BIN_PATH + std::string(BEEROCKS_FRONTHAUL);
+    }
+    std::string cmd = file_name + " -i " + config.hostap_iface;
+    SYSTEM_CALL(cmd, 2, true);
+}
+
 void slave_thread::log_son_config()
 {
     LOG(DEBUG) << "SON_CONFIG_UPDATE: " << std::endl
