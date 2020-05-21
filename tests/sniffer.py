@@ -26,7 +26,7 @@ class TlvStruct:
                 # However, there seems to be a bug for an operating class's channel list in the
                 # channel preference TLV: the middle dictionary is left out, and only a single
                 # channel is shown. To work around this, treat the channel list specially.
-                if len(value) == 1 and not isinstance(list(value.values())[0], dict):
+                if not isinstance(list(value.values())[0], dict):
                     value = [TlvStruct(value, level + 1)]
                 else:
                     value = [TlvStruct(v, level + 1) for k, v in value.items()]
