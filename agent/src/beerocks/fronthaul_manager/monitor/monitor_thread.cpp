@@ -10,7 +10,9 @@
 
 #include <bcl/beerocks_utils.h>
 #include <bcl/network/network_utils.h>
-#include <easylogging++.h>
+
+#define BEEROCKS_CUSTOM_LOGGER_ID BEEROCKS_MONITOR
+#include <bcl/beerocks_logging_custom.h>
 
 #include <beerocks/tlvf/beerocks_message.h>
 
