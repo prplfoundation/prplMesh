@@ -1670,12 +1670,6 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             supported_channels.begin(), &std::get<1>(tuple_supported_channels),
             &std::get<1>(tuple_supported_channels) + notification->supported_channels_size());
 
-        if (slave_state == STATE_WAIT_FOR_AP_MANAGER_JOINED) {
-            slave_state = STATE_AP_MANAGER_JOINED;
-        } else {
-            LOG(ERROR) << "ACTION_APMANAGER_JOINED_NOTIFICATION, slave_state != "
-                          "STATE_WAIT_FOR_AP_MANAGER_JOINED";
-        }
         break;
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_SET_RESTRICTED_FAILSAFE_CHANNEL_RESPONSE: {
@@ -2382,15 +2376,20 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
 
     switch (beerocks_header->action_op()) {
     case beerocks_message::ACTION_MONITOR_JOINED_NOTIFICATION: {
-        if (slave_state == STATE_WAIT_FOR_MONITOR_JOINED) {
-            LOG(INFO) << "ACTION_MONITOR_JOINED_NOTIFICATION";
-            monitor_socket = sd;
-            LOG(INFO) << "goto STATE_BACKHAUL_ENABLE ";
-            slave_state = STATE_BACKHAUL_ENABLE;
-        } else {
-            LOG(ERROR) << "ACTION_MONITOR_JOINED_NOTIFICATION, but slave_state != "
-                          "STATE_WAIT_FOR_MONITOR_JOINED";
+        LOG(DEBUG) << "Received ACTION_MONITOR_JOINED_NOTIFICATION";
+        if (slave_state != STATE_WAIT_FOR_FRONTHAUL_THREADS_JOINED) {
+            LOG(WARNING) << "ACTION_MONITOR_JOINED_NOTIFICATION, but slave_state != "
+                            "STATE_WAIT_FOR_FRONTHAUL_THREADS_JOINED";
         }
+
+        if (monitor_socket) {
+            LOG(ERROR) << "Monitor opened a new socket altough there is already open socket to it";
+            remove_socket(monitor_socket);
+            delete monitor_socket;
+            monitor_socket = nullptr;
+        }
+
+        monitor_socket = sd;
         break;
     }
     case beerocks_message::ACTION_MONITOR_HOSTAP_AP_DISABLED_NOTIFICATION: {
@@ -3252,40 +3251,19 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             is_backhaul_manager = false;
         }
 
-        LOG(TRACE) << "goto STATE_START_AP_MANAGER";
-        is_slave_reset = false;
-        slave_state    = STATE_START_AP_MANAGER;
-        break;
-    }
-    case STATE_START_AP_MANAGER: {
+        fronthaul_start();
 
-        LOG(INFO) << "STATE_START_AP_MANAGER";
-        if (ap_manager_start()) {
-            LOG(TRACE) << "goto STATE_WAIT_FOR_AP_MANAGER_JOINED";
-            slave_state = STATE_WAIT_FOR_AP_MANAGER_JOINED;
-        } else {
-            LOG(ERROR) << "ap_manager_start() failed!";
-            platform_notify_error(bpl::eErrorCode::AP_MANAGER_START, "");
-            stop_on_failure_attempts--;
-            slave_reset();
+        is_slave_reset = false;
+
+        LOG(TRACE) << "goto STATE_WAIT_FOR_FRONTHAUL_THREADS_JOINED";
+        slave_state = STATE_WAIT_FOR_FRONTHAUL_THREADS_JOINED;
+        break;
+    }
+    case STATE_WAIT_FOR_FRONTHAUL_THREADS_JOINED: {
+        if (ap_manager_socket && monitor_socket) {
+            LOG(TRACE) << "goto STATE_BACKHAUL_ENABLE";
+            slave_state = STATE_BACKHAUL_ENABLE;
         }
-        break;
-    }
-    case STATE_WAIT_FOR_AP_MANAGER_JOINED: {
-        break;
-    }
-    case STATE_AP_MANAGER_JOINED: {
-        LOG(TRACE) << "goto STATE_START_MONITOR";
-        slave_state = STATE_START_MONITOR;
-        break;
-    }
-    case STATE_START_MONITOR: {
-        monitor_start();
-        LOG(TRACE) << "goto STATE_WAIT_FOR_MONITOR_JOINED";
-        slave_state = STATE_WAIT_FOR_MONITOR_JOINED;
-        break;
-    }
-    case STATE_WAIT_FOR_MONITOR_JOINED: {
         break;
     }
     case STATE_BACKHAUL_ENABLE: {
