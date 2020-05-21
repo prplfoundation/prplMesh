@@ -50,6 +50,7 @@ public:
 
 protected:
     virtual bool handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx) override;
+    virtual void before_select() override;
     virtual void after_select(bool timeout) override;
     virtual void on_thread_stop() override;
     virtual bool socket_disconnected(Socket *sd) override;
@@ -116,6 +117,7 @@ private:
     Socket *mon_hal_int_events = nullptr;
     Socket *mon_hal_nl_events  = nullptr;
     beerocks::logging &logger;
+    bool m_logger_configured = false;
 
     typedef struct {
         std::string sta_mac;
