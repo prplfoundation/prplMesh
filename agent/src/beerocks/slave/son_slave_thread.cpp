@@ -141,8 +141,7 @@ void slave_thread::slave_reset()
     }
     platform_manager_stop();
     hostap_services_off();
-    ap_manager_stop();
-    monitor_stop();
+    fronthaul_stop();
     is_backhaul_manager   = false;
     detach_on_conf_change = false;
 
@@ -201,8 +200,7 @@ bool slave_thread::socket_disconnected(Socket *sd)
         LOG(DEBUG) << "configuration is in progress, ignoring";
         detach_on_conf_change = true;
         if (sd == ap_manager_socket || sd == monitor_socket) {
-            ap_manager_stop();
-            monitor_stop();
+            fronthaul_stop();
             return false;
         }
         return true;
@@ -3678,39 +3676,6 @@ bool slave_thread::hostap_services_on()
     bool success = true;
     LOG(DEBUG) << "hostap_services_on() - done";
     return success;
-}
-
-void slave_thread::monitor_stop()
-{
-    bool did_stop = false;
-    if (monitor_socket) {
-        remove_socket(monitor_socket);
-        delete monitor_socket;
-        monitor_socket = nullptr;
-        did_stop       = true;
-    }
-
-    // kill monitor slave pid
-    os_utils::kill_pid(config.temp_path, std::string(BEEROCKS_MONITOR) + "_" + config.hostap_iface);
-
-    if (did_stop)
-        LOG(DEBUG) << "monitor_stop() - done";
-}
-
-void slave_thread::monitor_start()
-{
-    monitor_stop();
-
-    LOG(DEBUG) << "monitor_start()";
-
-    //start new monitor process
-    std::string file_name = "./" + std::string(BEEROCKS_MONITOR);
-    if (access(file_name.c_str(), F_OK) == -1) //file does not exist in current location
-    {
-        file_name = BEEROCKS_BIN_PATH + std::string(BEEROCKS_MONITOR);
-    }
-    std::string cmd = file_name + " -i " + config.hostap_iface;
-    SYSTEM_CALL(cmd, 2, true);
 }
 
 void slave_thread::fronthaul_stop()
