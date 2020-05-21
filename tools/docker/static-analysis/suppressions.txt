@@ -1,0 +1,5 @@
+// Suppress warning: Member variable 'X' is not initialized in the constructor.
+uninitMemberVar
+
+// Suppress performance: Variable 'X' is assigned in constructor body. Consider performing initialization in initialization list.
+useInitializationList
