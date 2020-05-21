@@ -136,10 +136,6 @@ private:
     void platform_manager_stop();
     void hostap_services_off();
     bool hostap_services_on();
-    bool ap_manager_start() { return true; };
-    void ap_manager_stop(){};
-    void monitor_start();
-    void monitor_stop();
     void fronthaul_start();
     void fronthaul_stop();
     void log_son_config();
