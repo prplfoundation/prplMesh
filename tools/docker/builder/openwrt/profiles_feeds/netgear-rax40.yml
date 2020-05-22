@@ -14,8 +14,8 @@
     uri: https://intel.prpl.dev/intel/feed_switch_api.git
     hash: af078af5408654ca2e759ea7afcf92163282e86e
   - name: feed_wlan_6x
-    uri: https://intel.prpl.dev/intel/feed_wlan_6x.git
-    hash: 5cb7bcfac4fef85de1ce2723d34498b80af80a78
+    uri: https://intel.prpl.dev/prplmesh/feed_wlan_6x.git
+    hash: 8b7ff7d902f35b41864fbf306d45ad4ed91eaa89
   - name: feed_prpl
     uri: https://git.prpl.dev/prplmesh/feed-prpl.git
     hash: 20e08bdc3539e1f07c63af8bc75c7aeec24b1356
