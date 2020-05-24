@@ -118,7 +118,7 @@ int bml_nw_map_query(BML_CTX ctx);
  *
  * @return BML_RET_OK on success.
  */
-int bml_device_oper_radios_query(BML_CTX ctx, BML_DEVICE_DATA *device_data);
+int bml_device_oper_radios_query(BML_CTX ctx, struct BML_DEVICE_DATA *device_data);
 
 /**
  * Registers a callback function to periodic statistics update from 
