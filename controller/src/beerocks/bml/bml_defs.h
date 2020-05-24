@@ -473,8 +473,8 @@ struct BML_EVENT_CAC_STATUS_CHANGED_NOTIFICATION {
  * @iface_name: name of radio interface.
  */
 struct BML_RADIO_DATA {
-    bool is_connected;
-    bool is_operational;
+    uint8_t is_connected;
+    uint8_t is_operational;
     char iface_name[BML_IFACE_NAME_LEN];
 };
 
