@@ -145,7 +145,7 @@ class CmduRxMessage : public CmduXxMessage {
 public:
     static const std::string kTopicPrefix;
 
-    virtual const std::string topic_prefix() const { return kTopicPrefix; }
+    virtual const std::string topic_prefix() const override { return kTopicPrefix; }
 
     static const std::string ieee1905_topic(uint16_t msg_type)
     {
@@ -161,7 +161,7 @@ class CmduTxMessage : public CmduXxMessage {
 public:
     static const std::string kTopicPrefix;
 
-    virtual const std::string topic_prefix() const { return kTopicPrefix; }
+    virtual const std::string topic_prefix() const override { return kTopicPrefix; }
 };
 
 class CmduTxConfirmationMessage : public Message {
@@ -340,7 +340,7 @@ class InterfaceConfigurationRequestMessage : public InterfaceConfigurationMessag
 public:
     static const std::string kTopicPrefix;
 
-    virtual const std::string topic_prefix() const { return kTopicPrefix; }
+    virtual const std::string topic_prefix() const override { return kTopicPrefix; }
 };
 // same as InterfaceConfigurationRequestMessage - only with different topic
 class InterfaceConfigurationIndicationMessage : public InterfaceConfigurationMessage {
@@ -350,7 +350,7 @@ class InterfaceConfigurationIndicationMessage : public InterfaceConfigurationMes
 public:
     static const std::string kTopicPrefix;
 
-    virtual const std::string topic_prefix() const { return kTopicPrefix; }
+    virtual const std::string topic_prefix() const override { return kTopicPrefix; }
 };
 
 }; // namespace mapf
