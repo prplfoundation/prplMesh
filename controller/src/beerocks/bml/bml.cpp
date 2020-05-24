@@ -164,7 +164,7 @@ int bml_nw_map_query(BML_CTX ctx)
     return (pBML->nw_map_query());
 }
 
-int bml_device_oper_radios_query(BML_CTX ctx, BML_DEVICE_DATA *device_data)
+int bml_device_oper_radios_query(BML_CTX ctx, struct BML_DEVICE_DATA *device_data)
 {
     if (!ctx)
         return (-BML_RET_INVALID_ARGS);
