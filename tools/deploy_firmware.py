@@ -194,6 +194,8 @@ class NetgearRax40(PrplwrtDevice):
             shell.sendline("exit")
         if not self.reach(attempts=10):
             raise ValueError("The device was not reachable after the upgrade!")
+        # Wait at least for the CAC timer:
+        time.sleep(60)
 
 
 class Generic(PrplwrtDevice):
