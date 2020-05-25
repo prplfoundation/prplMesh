@@ -521,8 +521,9 @@ load_hostapd_config(const std::string &radio_iface_name, std::string &fname,
                     std::map<std::string, std::vector<std::string>> &hostapd_config_vaps)
 {
     bool loaded                                = false;
-    std::vector<std::string> hostapd_cfg_names = {"/var/run/hostapd-phy0.conf",
-                                                  "/var/run/hostapd-phy1.conf"};
+    std::vector<std::string> hostapd_cfg_names = {
+        "/var/run/hostapd-phy0.conf", "/var/run/hostapd-phy1.conf", "/var/run/hostapd-phy2.conf",
+        "/var/run/hostapd-phy3.conf"};
 
     for (const auto &try_fname : hostapd_cfg_names) {
         LOG(DEBUG) << "Trying to load " << try_fname << "...";
