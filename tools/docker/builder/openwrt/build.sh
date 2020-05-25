@@ -30,16 +30,16 @@ usage() {
 build_image() {
     # We first need to build the corresponding images
     docker build --tag "$image_tag" \
-           --build-arg OPENWRT_REPOSITORY \
-           --build-arg OPENWRT_VERSION \
-           --build-arg TARGET_SYSTEM \
-           --build-arg SUBTARGET \
-           --build-arg TARGET_PROFILE \
-           --build-arg PRPL_FEED \
-           --build-arg PRPLMESH_VARIANT \
-           --build-arg INTEL_FEED \
-           --build-arg IWLWAV_FEED \
-           --build-arg BASE_CONFIG \
+           --build-arg OPENWRT_REPOSITORY="$OPENWRT_REPOSITORY" \
+           --build-arg OPENWRT_VERSION="$OPENWRT_VERSION" \
+           --build-arg TARGET_SYSTEM="$TARGET_SYSTEM" \
+           --build-arg SUBTARGET="$SUBTARGET" \
+           --build-arg TARGET_PROFILE="$TARGET_PROFILE" \
+           --build-arg PRPL_FEED="$PRPL_FEED" \
+           --build-arg PRPLMESH_VARIANT="$PRPLMESH_VARIANT" \
+           --build-arg INTEL_FEED="$INTEL_FEED" \
+           --build-arg IWLWAV_FEED="$IWLWAV_FEED" \
+           --build-arg BASE_CONFIG="$BASE_CONFIG" \
            "$scriptdir/"
 }
 
