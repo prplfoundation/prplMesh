@@ -152,11 +152,10 @@ upload-artifacts:
     - sed --follow-symlinks -i 's/^/machine ftp.essensium.com login prplmesh-robot-ci password /' ~/.netrc
     - |
       echo "Updating the 'latest' folder"
-      # Copying takes a lot of time, and we want the "latest" folder
-      # to be updated "as fast as possible", so we rely on the script
-      # to upload to a temporary directory first, and move it to
-      # "latest" afterwards:
-      ci/owncloud/upload_to_owncloud.sh -v "artifacts/latest" ./build
+      python3 ci/owncloud/upload_to_owncloud.py -v "artifacts/$CI_COMMIT_SHA-$CI_JOB_ID" ./build
+      # Copying takes a lot of time, and we want the "latest" folder to be updated
+      # "as fast as possible", so we make a copy and move it:
+      ci/owncloud/owncloud_definitions.sh move "artifacts/$CI_COMMIT_SHA-$CI_JOB_ID" "artifacts/latest"
   rules:
     - if: '$CI_COMMIT_BRANCH == "master"'
       when: on_success
