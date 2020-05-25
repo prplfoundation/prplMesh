@@ -132,6 +132,7 @@ bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, st
             return false;
         }
         for (const auto &vap : it->second.vaps) {
+            LOG(DEBUG) << "XXX [ruid = " << ruid << "] ssid = " << std::string(vap.ssid);
             if (std::string(vap.ssid) == ssid) {
                 value = tlvf::mac_to_string(vap.mac);
                 return true;
