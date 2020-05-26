@@ -435,7 +435,9 @@ void monitor_stats::process()
     }
 }
 
-bool monitor_stats::add_ap_metrics(ieee1905_1::CmduMessageTx &cmdu_tx, const sMacAddr &bssid)
+bool monitor_stats::add_ap_metrics(ieee1905_1::CmduMessageTx &cmdu_tx,
+                                   const monitor_vap_node &vap_node,
+                                   const monitor_radio_node &radio_node) const
 {
     auto ap_metrics_response_tlv = cmdu_tx.addClass<wfa_map::tlvApMetrics>();
 
@@ -444,10 +446,14 @@ bool monitor_stats::add_ap_metrics(ieee1905_1::CmduMessageTx &cmdu_tx, const sMa
         return false;
     }
 
-    //TODO: fill ap_metrics_response_tlv with valid data (now valid just bssid_response)
-    ap_metrics_response_tlv->bssid()                                      = bssid;
-    ap_metrics_response_tlv->channel_utilization()                        = 10;
-    ap_metrics_response_tlv->number_of_stas_currently_associated()        = 2;
+    auto bssid               = tlvf::mac_from_string(vap_node.get_mac());
+    auto channel_utilization = radio_node.get_channel_utilization();
+    auto sta_count           = vap_node.sta_get_count();
+
+    ap_metrics_response_tlv->bssid()                               = bssid;
+    ap_metrics_response_tlv->channel_utilization()                 = channel_utilization;
+    ap_metrics_response_tlv->number_of_stas_currently_associated() = sta_count;
+    //TODO: fill ap_metrics_response_tlv->estimated_service_parameters() with correct value
     ap_metrics_response_tlv->estimated_service_parameters().include_ac_be = 1;
 
     if (!ap_metrics_response_tlv->alloc_estimated_service_info_field(3)) {

@@ -161,7 +161,7 @@ public:
     int8_t get_vap_id() { return vap_id; }
 
     void set_mac(const std::string &ap_mac_) { mac = ap_mac_; }
-    std::string get_mac() { return mac; }
+    std::string get_mac() const { return mac; }
 
     std::string get_ipv4();
 
@@ -180,7 +180,7 @@ public:
         if (sta_count > 0)
             sta_count -= 1;
     }
-    int sta_get_count() { return sta_count; }
+    int sta_get_count() const { return sta_count; }
 
     double get_rx_bit_rate();
     double get_tx_bit_rate();
@@ -307,6 +307,11 @@ public:
     };
 
     sApMetricsReportingInfo &ap_metrics_reporting_info() { return m_ap_metrics_reporting_info; }
+
+    uint8_t get_channel_utilization() const
+    {
+        return m_ap_metrics_reporting_info.ap_metrics_channel_utilization_reporting_value;
+    }
 
     // Statistics //
     struct SRadioStats {
