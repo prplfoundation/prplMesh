@@ -1893,7 +1893,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 #ifdef BEEROCKS_RDKB
         //clean rdkb monitor data if already in database.
         auto client = mon_rdkb_hal.conf_get_client(sta_mac);
-        if (!client) {
+        if (client) {
             client->setStartTime(std::chrono::steady_clock::now());
             client->setLastSampleTime(std::chrono::steady_clock::now());
             client->setAccumulatedPackets(0);
