@@ -32,7 +32,8 @@ public:
     void process();
 
     /** Collect AP metrics and create AP Metrics TLV */
-    bool add_ap_metrics(ieee1905_1::CmduMessageTx &cmdu_tx, const sMacAddr &bssid);
+    bool add_ap_metrics(ieee1905_1::CmduMessageTx &cmdu_tx, const monitor_vap_node &vap_node,
+                        const monitor_radio_node &radio_node) const;
     bool add_ap_assoc_sta_traffic_stat(ieee1905_1::CmduMessageTx &cmdu_tx,
                                        const monitor_sta_node &sta_node);
     bool add_ap_assoc_sta_link_metric(ieee1905_1::CmduMessageTx &cmdu_tx, const sMacAddr &bssid,

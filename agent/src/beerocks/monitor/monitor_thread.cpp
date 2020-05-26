@@ -579,6 +579,8 @@ void monitor_thread::on_channel_utilization_measurement_period_elapsed()
                << std::to_string(info.ap_channel_utilization_reporting_threshold)
                << ", threshold_crossed=" << std::to_string(threshold_crossed);
 
+    info.ap_metrics_channel_utilization_reporting_value = channel_utilization;
+
     if (threshold_crossed) {
         std::vector<sMacAddr> bssid_list;
         mon_db.get_bssid_list(bssid_list);
@@ -590,8 +592,6 @@ void monitor_thread::on_channel_utilization_measurement_period_elapsed()
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
     }
-
-    info.ap_metrics_channel_utilization_reporting_value = channel_utilization;
 }
 
 bool monitor_thread::create_ap_metrics_response(uint16_t mid,
@@ -605,24 +605,23 @@ bool monitor_thread::create_ap_metrics_response(uint16_t mid,
     }
 
     for (const auto &bssid : bssid_list) {
-        auto vap_id = mon_db.get_vap_id(tlvf::mac_to_string(bssid));
-        if (vap_id == IFACE_ID_INVALID) {
+        auto vap_node = mon_db.get_vap_node(tlvf::mac_to_string(bssid));
+        if (!vap_node) {
             LOG(WARNING) << "Unknown BSSID " << bssid << " - skipping";
             continue;
         }
 
-        if (!mon_stats.add_ap_metrics(cmdu_tx, bssid)) {
+        auto radio_node = mon_db.get_radio_node();
+        if (!mon_stats.add_ap_metrics(cmdu_tx, *vap_node, *radio_node)) {
             return false;
         }
 
+        auto reporting_info = radio_node->ap_metrics_reporting_info();
+
         auto include_sta_traffic_stats_tlv =
-            mon_db.get_radio_node()
-                ->ap_metrics_reporting_info()
-                .include_associated_sta_traffic_stats_tlv_in_ap_metrics_response;
+            reporting_info.include_associated_sta_traffic_stats_tlv_in_ap_metrics_response;
         auto include_sta_link_metrics_tlv =
-            mon_db.get_radio_node()
-                ->ap_metrics_reporting_info()
-                .include_associated_sta_link_metrics_tlv_in_ap_metrics_response;
+            reporting_info.include_associated_sta_link_metrics_tlv_in_ap_metrics_response;
 
         if (include_sta_traffic_stats_tlv || include_sta_link_metrics_tlv) {
             for (auto it = mon_db.sta_begin(); it != mon_db.sta_end(); ++it) {
@@ -633,7 +632,7 @@ bool monitor_thread::create_ap_metrics_response(uint16_t mid,
                     LOG(WARNING) << "Invalid node pointer for STA = " << sta_mac;
                     continue;
                 }
-                if (sta_node->get_vap_id() != vap_id) {
+                if (sta_node->get_vap_id() != vap_node->get_vap_id()) {
                     continue;
                 }
 
