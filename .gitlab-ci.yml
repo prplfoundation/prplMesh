@@ -178,6 +178,9 @@ upload-artifacts:
 tlvf_test:
   extends: .run-test-in-docker
 
+bwl_dummy_unit_tests:
+  extends: .run-test-in-docker
+
 run-tests:
   stage: test
   image: $CI_REGISTRY_IMAGE/prplmesh-tests-runner:$CI_PIPELINE_ID
