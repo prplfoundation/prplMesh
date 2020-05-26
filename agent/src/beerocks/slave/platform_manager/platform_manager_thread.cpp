@@ -93,7 +93,7 @@ static bool fill_platform_settings(
                << " sec=" << msg->platform_settings().back_security_type
                << " mem_only_psk=" << int(msg->platform_settings().mem_only_psk) << " pass=***";
 
-    struct bpl::BPL_WLAN_PARAMS params;
+    bpl::BPL_WLAN_PARAMS params;
     if (bpl::cfg_get_wifi_params(iface_name.c_str(), &params) < 0) {
         LOG(ERROR) << "Failed reading '" << iface_name << "' parameters!";
         return false;
@@ -504,7 +504,7 @@ bool main_thread::wlan_params_changed_check()
             return false;
         }
         bool wlan_params_changed = false;
-        struct bpl::BPL_WLAN_PARAMS params;
+        bpl::BPL_WLAN_PARAMS params;
         if (bpl::cfg_get_wifi_params(elm.first.c_str(), &params) < 0) {
             LOG(ERROR) << "Failed reading '" << elm.first << "' parameters!";
             return false;
