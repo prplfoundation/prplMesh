@@ -1019,7 +1019,22 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
             if (elapsed_time_s >= ap_metrics_reporting_info.reporting_interval_s) {
                 ap_metrics_reporting_info.last_reporting_time_point = now;
 
-                // TODO: report AP metrics
+                std::vector<sMacAddr> bssid_list;
+                for (const auto &socket : slaves_sockets) {
+                    if (socket) {
+                        for (int i = 0; i < beerocks::IFACE_TOTAL_VAPS; ++i) {
+                            if (socket->vaps_list.vaps[i].mac != network_utils::ZERO_MAC) {
+                                bssid_list.push_back(socket->vaps_list.vaps[i].mac);
+                            }
+                        }
+                    }
+                }
+                // We must generate a new MID for the response, so set MID to 0 here.
+                if (!bssid_list.empty()) {
+                    send_slave_ap_metric_query_message(0, bssid_list);
+                } else {
+                    LOG(DEBUG) << "Skipping AP_METRICS_QUERY for slave, empty BSSID list";
+                }
             }
         }
 
@@ -1208,6 +1223,7 @@ bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<sRadioInfo
     LOG(DEBUG) << "sending autoconfig search message, bridge_mac=" << bridge_info.mac;
     return send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
 }
+
 bool backhaul_manager::send_slave_ap_metric_query_message(uint16_t mid,
                                                           const std::vector<sMacAddr> &bssid_list)
 {
@@ -2298,6 +2314,9 @@ bool backhaul_manager::handle_multi_ap_policy_config_request(ieee1905_1::CmduMes
          * to be enabled, and if so the cadence.
          *
          * Store configured interval value and restart the timer.
+         *
+         * Reporting interval value works just for enabling/disabling auto sending AP Metrics Response,
+         * which will be send every 500 ms.
          */
         ap_metrics_reporting_info.reporting_interval_s =
             metric_reporting_policy_tlv->metrics_reporting_interval_sec();
