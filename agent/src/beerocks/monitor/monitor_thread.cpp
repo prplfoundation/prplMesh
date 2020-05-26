@@ -193,8 +193,6 @@ bool monitor_thread::init()
 
     received_error_notification_ack_retry = -1;
 
-    mon_rssi.conf_disable_arp = (beerocks_slave_conf.debug_disable_arp == "1");
-
     // Initialize the monitor hal
     // if(!mon_hal.init(&mon_db)){
     //     LOG(ERROR) << "mon_hal initialization failed";
