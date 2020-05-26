@@ -140,9 +140,9 @@ class Sniffer:
         tshark_result = subprocess.run(tshark_command, stdout=subprocess.PIPE,
                                        stderr=subprocess.PIPE)
         if tshark_result.returncode != 0:
-            err(tshark_result.stderr)
-            err("tshark failed: {}".format(tshark_result.returncode))
-            return []
+            debug(tshark_result.stderr)
+            debug("tshark failed: {}".format(tshark_result.returncode))
+        # Regardless of the exit code, try to make something of the JSON that comes out, if any.
         try:
             capture = json.loads(tshark_result.stdout)
             return [Packet(x) for x in capture]
