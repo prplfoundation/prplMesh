@@ -110,7 +110,6 @@ if (NOT DEFINED BEEROCKS_BH_WIRE_IFACE)
     set(BEEROCKS_BH_WIRE_IFACE "eth1")
 endif()
 set(BEEROCKS_REPEATER_MODE 0)
-set(BEEROCKS_ENABLE_ARP_MONITOR 1)
 
 # Logging configuration
 set(BEEROCKS_LOG_FILES_ENABLED      "true")
@@ -133,7 +132,6 @@ elseif (TARGET_PLATFORM STREQUAL "rdkb")
     add_definitions(-DBEEROCKS_RDKB)
     set(BEEROCKS_BRIDGE_IFACE "brlan0")
     set(BEEROCKS_BH_WIRE_IFACE "nsgmii0")
-    set(BEEROCKS_ENABLE_ARP_MONITOR 0)
     # Disable file and enable syslog logging
     set(BEEROCKS_LOG_FILES_ENABLED "false")
     set(BEEROCKS_LOG_SYSLOG_ENABLED "true")
