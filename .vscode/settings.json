@@ -63,7 +63,6 @@
     "files.exclude": {
         "build": true
     },
-    "editor.formatOnSave": true,
     "C_Cpp.default.defines": [
         "BEEROCKS_LINUX",
         "BEEROCKS_CONF_PATH=\"build/install/config\"",
@@ -99,5 +98,7 @@
         "backhual",
         "fronthaul"
     ],
-    "git.alwaysSignOff": true
+    "git.alwaysSignOff": true,
+    "editor.renderWhitespace": "all",
+    "search.useIgnoreFiles": false
 }

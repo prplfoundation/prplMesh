@@ -43,6 +43,7 @@
 #include <tlvf/wfa_map/tlvSteeringBTMReport.h>
 #include <tlvf/wfa_map/tlvSteeringRequest.h>
 #include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
+#include <tlvf/wfa_map/tlvChannelScanRequest.h>
 
 #include "gate/1905_beacon_query_to_vs.h"
 
@@ -393,6 +394,8 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         return handle_client_steering_request(sd, cmdu_rx);
     case ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE:
         return handle_multi_ap_policy_config_request(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::CHANNEL_SCAN_REQUEST:
+        return handle_channel_scan_request(sd, cmdu_rx);
 
     default:
         LOG(ERROR) << "Unknown CMDU message type: " << std::hex << int(cmdu_message_type);
@@ -4399,6 +4402,56 @@ bool slave_thread::parse_non_intel_join_response(Socket *sd)
     slave_state = STATE_UPDATE_MONITOR_SON_CONFIG;
 
     return true;
+}
+
+bool slave_thread::handle_channel_scan_request(Socket *sd,
+                                               ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received CHANNEL_SCAN_REQUEST, mid=" << std::dec
+               << int(mid);
+    
+    if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE)) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
+
+    //1. read the channel scan request
+    std::shared_ptr<beerocks_message::tlvVsChannelScanRequest> vs_tlv = nullptr;
+    auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
+    if (beerocks_header) {
+        vs_tlv = beerocks_header->addClass<beerocks_message::tlvVsChannelScanRequest>();
+        if (!vs_tlv) {
+            LOG(ERROR) << "addClass wfa_map::tlvVsClientAssociationEvent failed";
+            return false;
+        }
+    }
+
+    //2. create a CMDU request to the monitor from that request
+    auto request_out = message_com::create_vs_message<
+        beerocks_message::cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST>(cmdu_tx);
+    if (!request_out) {
+        LOG(ERROR)
+            << "Failed building cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST message!";
+        return false;
+    }
+
+    // TODO: read the parameters using the non-vs-tlv message
+    if (vs_tlv) {
+        request_out->scan_params().radio_mac = vs_tlv->mac();
+        request_out->scan_params().dwell_time_ms = vs_tlv->dwell_time_msec();
+        auto channel_pool_size = vs_tlv->channel_pool_length();
+        request_out->scan_params().channel_pool_size = channel_pool_size;
+        if (channel_pool_size > 0) {
+            std::copy_n(vs_tlv->channel_pool(), channel_pool_size, request_out->scan_params().channel_pool);
+        }
+    }
+    
+    LOG(DEBUG) << "send cACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST";
+    message_com::send_cmdu(monitor_socket, cmdu_tx);
+    
+    LOG(DEBUG) << "sending ACK message back to controller";
+    return send_cmdu_to_controller(cmdu_tx);
 }
 
 bool slave_thread::handle_multi_ap_policy_config_request(Socket *sd,

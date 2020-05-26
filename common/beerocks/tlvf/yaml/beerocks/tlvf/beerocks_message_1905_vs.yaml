@@ -35,3 +35,15 @@ tlvVsClientAssociationEvent:
   disconnect_type: 
     _type: uint8_t
     _comment: relevant only on disconnect event
+
+tlvVsChannelScanRequest:
+  _type: class
+  _comment: CHANNEL_SCAN_REQUEST
+  mac: sMacAddr
+  dwell_time_msec: int32_t
+  channel_pool_length:
+    _type: uint8_t
+    _length_var: True
+  channel_pool:
+    _type: uint8_t
+    _length: [ channel_pool_length ]

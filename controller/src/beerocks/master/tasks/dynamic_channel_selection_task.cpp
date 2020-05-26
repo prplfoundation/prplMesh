@@ -11,6 +11,8 @@
 #include <bcl/beerocks_defines.h>
 #include <bcl/network/network_utils.h>
 #include <easylogging++.h>
+#include <beerocks/tlvf/beerocks_message_1905_vs.h>
+#include <tlvf/wfa_map/tlvChannelScanRequest.h>
 
 #define SCAN_TRIGGERED_WAIT_TIME_MSEC 20000     //20 Sec
 #define SCAN_RESULTS_DUMP_WAIT_TIME_MSEC 210000 //3.5 Min
@@ -54,12 +56,14 @@ beerocks::eChannelScanStatusCode dynamic_channel_selection_task::dcs_request_sca
 }
 beerocks::eChannelScanStatusCode dynamic_channel_selection_task::dcs_request_scan_trigger()
 {
-    // When a scan is requested send the scan parameters Channel pool & Dwell time
-
-    auto request = beerocks::message_com::create_vs_message<
-        beerocks_message::cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST>(cmdu_tx);
-    if (!request) {
-        LOG(ERROR) << "Failed building message cACTION_CONTROL_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST";
+    // build 1905.1 message CMDU to send to the agent
+    if (!cmdu_tx.create(0, ieee1905_1::eMessageType::CHANNEL_SCAN_REQUEST)) {
+        LOG(ERROR) << "cmdu creation of type CHANNEL_SCAN_REQUEST has failed";
+        return beerocks::eChannelScanStatusCode::INTERNAL_FAILURE;
+    }
+    auto channel_scan_request_tlv = cmdu_tx.addClass<wfa_map::tlvChannelScanRequest>();
+    if (!channel_scan_request_tlv) {
+        LOG(ERROR) << "addClass tlvChannelScanRequest failed";
         return beerocks::eChannelScanStatusCode::INTERNAL_FAILURE;
     }
 
@@ -83,11 +87,20 @@ beerocks::eChannelScanStatusCode dynamic_channel_selection_task::dcs_request_sca
         return beerocks::eChannelScanStatusCode::POOL_TOO_BIG;
     }
 
-    request->scan_params().radio_mac         = m_radio_mac;
-    request->scan_params().dwell_time_ms     = dwell_time_msec;
-    request->scan_params().channel_pool_size = curr_channel_pool.size();
+    // Add vendor specific tlv
+    auto vs_tlv = beerocks::message_com::add_vs_tlv<beerocks_message::tlvVsChannelScanRequest>(cmdu_tx);
+    if (!vs_tlv) {
+        LOG(ERROR) << "add_vs_tlv tlvVsChannelScanRequest failed";
+        return beerocks::eChannelScanStatusCode::INTERNAL_FAILURE;
+    }
+
+    // add the parameters to the vs tlv
+    // TODO: pass the parameters using the non-vs-tlv message
+    vs_tlv->mac()         = m_radio_mac;
+    vs_tlv->dwell_time_msec() = dwell_time_msec;
+    vs_tlv->channel_pool_length() = curr_channel_pool.size();
     std::copy(curr_channel_pool.begin(), curr_channel_pool.end(),
-              request->scan_params().channel_pool);
+              vs_tlv->channel_pool());
 
     // get the parent node to send the CMDU to the agent
     auto radio_mac_str = tlvf::mac_to_string(m_radio_mac);

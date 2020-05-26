@@ -1,0 +1,110 @@
+#
+---
+_namespace: wfa_map
+
+tlvChannelScanResult:
+  _type: class
+  _is_tlv_class : True
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_CHANNEL_SCAN_RESULT
+  length: uint16_t
+  radio_uid: sMacAddr
+  operating_class: uint8_t
+  channel: uint8_t
+  success: eScanStatus
+  timestamp_length:
+    _type: uint8_t
+    _length_var: True
+  timestamp:
+    _type: uint8_t
+    _comment: |
+      The timestamp shall be formatted as a string using the typedef dateandtime string
+      format as defined in section 3 of [1] and shall include timesecfrac and time-offset
+      as defined in section 5.6 of [1]
+    _length: [ timestamp_length ]
+  utilization:
+    _type: uint8_t
+    _comment: |
+      The current channel utilization measured by the radio on the scanned 20 MHz channel
+  noise:
+    _type: uint8_t
+    _comment: |
+      An indicator of the average radio noise plus interference power measured
+      on the 20 MHz channel during a channel scan.
+  neighbors_list_length:
+    _type: uint16_t
+    _length_var: True
+  neighbors_list:
+    _type: sNeighbors
+    _length: [ neighbors_list_length ]
+  aggregate_scan_duration:
+    _type: uint32_t
+    _comment: |
+      Total time spent performing the scan of this channel in milliseconds
+  scan_type: eScanType
+
+eBssLoadElementPresent:
+  _type: enum
+  _enum_storage: uint8_t
+  FIELD_PRESENT: 0x80
+  FIELD_NOT_PRESENT: 0x00
+
+eScanStatus:
+  _type: enum
+  SUCCESS: 0x00
+  SCAN_NOT_SUPPORTED_ON_THIS_OPERATING_CLASS_AND_CHANNEL_ON_THIS_RADIO: 0x01
+  REQUEST_TOO_SOON_AFTER_LAST_SCAN: 0x02
+  RADIO_TOO_BUSY_TO_PERFORM_SCAN: 0x03
+  SCAN_NOT_COMPLETED: 0x04
+  SCAN_ABORTED: 0x05
+  FRESH_SCAN_NOT_SUPPORTED_RADIO_ONLY_SUPPORTS_ON_BOOT_SCANS: 0x06
+  #0x07 – 0xFF: Reserved
+
+eScanType:
+  _type: enum
+  _enum_storage: uint8_t
+  SCAN_WAS_ACTIVE_SCAN: 0x80
+  SCAN_WAS_PASSIVE_SCAN: 0x00
+
+sNeighbors:
+  _type: struct
+  bssid: sMacAddr
+  ssid_length:
+    _type: uint8_t
+    _length_var: True
+  ssid:
+    _type: uint8_t
+    _comment: The SSID indicated by the neighboring BSS
+    _length: [ ssid_length ]
+  signal_strength:
+    _type: uint8_t
+    _comment: |
+      An indicator of radio signal strength (RSSI) of the Beacon or Probe
+      Response frames of the neighboring BSS as received by the radio
+      measured in dBm
+  channel_bw_length:
+    _type: uint8_t
+    _length_var: True
+  channels_bw_list:
+    _type: uint8_t
+    _comment: |
+      String indicating the maximum bandwidth at which the neighbor BSS is
+      operating, e.g., "20" or "40" or "80" or "80+80" or "160" MHz.
+    _length: [ channel_bw_length ]
+  bss_load_element_present: eBssLoadElementPresent
+  channel_utilization:
+    _type: uint8_t
+    _comment: |
+      If "BSS Load Element Present" bit is set to one, this field is present.
+      Otherwise it is omitted.
+      The value of the "Channel Utilization" field as reported by the neighboring
+      BSS in the BSS Load element
+  station_count:
+    _type: uint16_t
+    _comment: |
+      If "BSS Load Element Present" bit is set to one, this field is present.
+      Otherwise it is omitted.
+      The value of the "Channel Utilization" field as reported by the neighboring
+      BSS in the BSS Load element
+

@@ -88,6 +88,9 @@
 			"set": "cpp",
 			"string": "cpp",
 			"random": "cpp"
-		}
+		},
+		"search.useIgnoreFiles": false,
+		"search.quickOpen.includeSymbols": true,
+		"task.quickOpen.showAll": true
 	}
 }
