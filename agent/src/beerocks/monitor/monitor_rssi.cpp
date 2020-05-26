@@ -133,10 +133,6 @@ void monitor_rssi::arp_recv()
                 << sta_node->get_mac() << " id=" << request_id;
         }
 
-        if (conf_disable_arp) {
-            LOG(DEBUG) << "ARP is disabled, returning";
-            return;
-        }
         // send arp burst
         auto sta_vap_id = sta_node->get_vap_id();
         auto vap_node   = mon_db->vap_get_by_id(sta_vap_id);
@@ -200,13 +196,6 @@ void monitor_rssi::process()
         auto arp_state  = sta_node->get_arp_state();
         auto &sta_stats = sta_node->get_stats();
 
-        // If the arp is disabled, there is no point being in any other state that is not IDLE,
-        // since all other states are arp related. Thus, override the arp state to IDLE when arp is
-        // disabled.
-        if (!arp_enabled()) {
-            sta_node->set_arp_state(monitor_sta_node::IDLE);
-        }
-
         if (arp_state == monitor_sta_node::IDLE) {
             if (!poll_last)
                 continue;
@@ -246,7 +235,7 @@ void monitor_rssi::process()
                                << " delta_val=" << int(delta_val);
                 }
             }
-            if (arp_enabled() && !conf_disable_initiative_arp) {
+            if (!conf_disable_initiative_arp) {
                 if (std::chrono::steady_clock::now() >=
                     (sta_node->get_last_change_time() +
                      std::chrono::milliseconds(mon_db->MONITOR_LAST_CHANGE_TIMEOUT_MSEC))) {
@@ -319,31 +308,24 @@ void monitor_rssi::process()
                 return;
             }
 
-            if (!conf_disable_arp) {
-                std::string arp_iface            = vap_node->get_bridge_iface();
-                std::string arp_iface_ipv4       = vap_node->get_bridge_ipv4();
-                std::string arp_iface_mac        = vap_node->get_bridge_mac();
-                std::string sta_bridge_4addr_mac = sta_node->get_bridge_4addr_mac();
-                bool is_4addr_client    = (sta_bridge_4addr_mac != network_utils::ZERO_MAC_STRING);
-                std::string arp_dst_mac = is_4addr_client ? sta_bridge_4addr_mac : sta_mac;
+            std::string arp_iface            = vap_node->get_bridge_iface();
+            std::string arp_iface_ipv4       = vap_node->get_bridge_ipv4();
+            std::string arp_iface_mac        = vap_node->get_bridge_mac();
+            std::string sta_bridge_4addr_mac = sta_node->get_bridge_4addr_mac();
+            bool is_4addr_client    = (sta_bridge_4addr_mac != network_utils::ZERO_MAC_STRING);
+            std::string arp_dst_mac = is_4addr_client ? sta_bridge_4addr_mac : sta_mac;
 
-                LOG(DEBUG) << "state: SEND_ARP -> "
-                           << (sta_node->get_arp_burst() ? "WAIT_FIRST_REPLY" : "WAIT_REPLY")
-                           << ", arp_iface = " << arp_iface
-                           << ", arp_iface_ipv4 = " << arp_iface_ipv4
-                           << ", arp_iface_mac = " << arp_iface_mac
-                           << ", is_4addr_client = " << int(is_4addr_client)
-                           << ", sta_mac = " << sta_mac << ", dest_ip = " << sta_node->get_ipv4()
-                           << ", dst_mac = " << arp_dst_mac;
+            LOG(DEBUG) << "state: SEND_ARP -> "
+                       << (sta_node->get_arp_burst() ? "WAIT_FIRST_REPLY" : "WAIT_REPLY")
+                       << ", arp_iface = " << arp_iface << ", arp_iface_ipv4 = " << arp_iface_ipv4
+                       << ", arp_iface_mac = " << arp_iface_mac
+                       << ", is_4addr_client = " << int(is_4addr_client)
+                       << ", sta_mac = " << sta_mac << ", dest_ip = " << sta_node->get_ipv4()
+                       << ", dst_mac = " << arp_dst_mac;
 
-                network_utils::arp_send(arp_iface, sta_node->get_ipv4(), arp_iface_ipv4,
-                                        tlvf::mac_from_string(arp_dst_mac),
-                                        tlvf::mac_from_string(arp_iface_mac), 6, arp_socket);
-            } else {
-                LOG(DEBUG) << "ARP is disabled, state: SEND_ARP -> SEND_RESPONSE";
-                sta_node->set_arp_state(monitor_sta_node::SEND_RESPONSE);
-                sta_node->set_rx_rssi_ready(false);
-            }
+            network_utils::arp_send(arp_iface, sta_node->get_ipv4(), arp_iface_ipv4,
+                                    tlvf::mac_from_string(arp_dst_mac),
+                                    tlvf::mac_from_string(arp_iface_mac), 6, arp_socket);
         }
         // Monitor for idle station
         if (sta_node->enable_idle_monitor) {

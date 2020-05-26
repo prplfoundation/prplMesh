@@ -35,15 +35,12 @@ public:
 
     int conf_rx_rssi_notification_delta_db      = 8;
     int conf_rx_rssi_notification_threshold_dbm = -60;
-    bool conf_disable_arp                       = false;
     bool conf_disable_initiative_arp            = false;
     bool is_5ghz                                = false;
 
 private:
     void send_rssi_measurement_response(std::string &sta_mac, monitor_sta_node *sta_node);
     void monitor_idle_station(std::string &sta_mac, monitor_sta_node *sta_node);
-
-    bool arp_enabled() { return arp_socket > 0; }
 
     monitor_db *mon_db = nullptr;
     Socket *slave_socket;
