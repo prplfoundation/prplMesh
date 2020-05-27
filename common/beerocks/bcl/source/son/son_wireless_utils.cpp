@@ -47,7 +47,7 @@ static const std::map<uint8_t, sOperatingClass> operating_classes_list = {
 //  {OP Class   {Channel center Frequency index},                              Bandwidth              }}
     {128,       {{42, 58, 106, 122, 138, 155},                                 beerocks::BANDWIDTH_80}},
     {129,       {{50, 114},                                                    beerocks::BANDWIDTH_160}},
-    {130,       {{42, 58, 106, 122, 138, 155},                                 beerocks::BANDWIDTH_80}}
+    {130,       {{42, 58, 106, 122, 138, 155},                                 beerocks::BANDWIDTH_80_80}}
 };
 // clang-format on
 
