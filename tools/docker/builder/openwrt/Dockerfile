@@ -56,10 +56,6 @@ ARG SUBTARGET
 # Example: TARGET_PROFILE=DEVICE_cznic_turris-omnia
 ARG TARGET_PROFILE
 
-# .config file to use as base. Can include be used to specify a custom
-# toolchain for example. It has to be in the "configs" directory.
-ARG BASE_CONFIG=default
-
 WORKDIR /home/openwrt
 
 RUN git clone "$OPENWRT_REPOSITORY" openwrt \
@@ -68,7 +64,6 @@ RUN git clone "$OPENWRT_REPOSITORY" openwrt \
 
 WORKDIR /home/openwrt/openwrt
 
-COPY --chown=openwrt:openwrt configs/base_${BASE_CONFIG}_config /home/openwrt/base_config
 COPY --chown=openwrt:openwrt profiles_feeds/ /home/openwrt/openwrt/profiles_feeds
 
 RUN mkdir -p files/etc \
