@@ -30,6 +30,7 @@ static const std::map<uint8_t, sOperatingClass> operating_classes_list = {
     {81,        {{1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13},                  beerocks::BANDWIDTH_20}},
     {82,        {{14},                                                         beerocks::BANDWIDTH_20}},
     {83,        {{1, 2, 3, 4, 5, 6, 7, 8, 9},                                  beerocks::BANDWIDTH_40}},
+    {84,        {{5, 6, 7, 8, 9, 10, 11, 12, 13},                              beerocks::BANDWIDTH_40}},
     {115,       {{36, 40, 44, 48},                                             beerocks::BANDWIDTH_20}},
     {116,       {{36, 44},                                                     beerocks::BANDWIDTH_40}},
     {117,       {{40, 48},                                                     beerocks::BANDWIDTH_40}},
