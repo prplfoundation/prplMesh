@@ -21,10 +21,6 @@ usage() {
     echo "The following environment variables will affect the build:"
     echo " - PRPL_FEED: the prpl feed that will be used to install prplMesh."
     echo "   default: $PRPL_FEED"
-    echo " - INTEL_FEED: only used for targets which needs the additional intel feed."
-    echo "   default: empty"
-    echo " - IWLWAV_FEED: only used for targets which needs the additional iwlwav feed."
-    echo "   default: empty"
 
 }
 
@@ -38,8 +34,6 @@ build_image() {
            --build-arg TARGET_PROFILE="$TARGET_PROFILE" \
            --build-arg PRPL_FEED="$PRPL_FEED" \
            --build-arg PRPLMESH_VARIANT="$PRPLMESH_VARIANT" \
-           --build-arg INTEL_FEED="$INTEL_FEED" \
-           --build-arg IWLWAV_FEED="$IWLWAV_FEED" \
            --build-arg BASE_CONFIG="$BASE_CONFIG" \
            "$scriptdir/"
 }
@@ -114,9 +108,6 @@ main() {
             SUBTARGET=xrx500
             TARGET_PROFILE=DEVICE_NETGEAR_RAX40
             PRPLMESH_VARIANT="-dwpal"
-            INTEL_FEED="https://git.prpl.dev/prplmesh/feed-intel.git^2ed4bb749bc2d9e67bc293a831f69a6c8a77ce49"
-            IWLWAV_FEED="https://git.prpl.dev/prplmesh/iwlwav.git^cf95c322f28cb1ae7016b6a5a613bc69c19c4f54"
-            BASE_CONFIG=gcc8
             ;;
         *)
             err "Unknown target device: $TARGET_DEVICE"
@@ -132,8 +123,6 @@ main() {
     dbg "OPENWRT_VERSION=$OPENWRT_VERSION"
     dbg "BASE_CONFIG=$BASE_CONFIG"
     dbg "PRPL_FEED=$PRPL_FEED"
-    dbg "INTEL_FEED=$INTEL_FEED"
-    dbg "IWLWAV_FEED=$IWLWAV_FEED"
     dbg "IMAGE_ONLY=$IMAGE_ONLY"
     dbg "TARGET_DEVICE=$TARGET_DEVICE"
     dbg "TAG=$TAG"
@@ -162,8 +151,6 @@ main() {
     export PRPLMESH_VERSION
     export PRPL_FEED
     export PRPLMESH_VARIANT
-    export INTEL_FEED
-    export IWLWAV_FEED
     export BASE_CONFIG
 
     if [ $IMAGE_ONLY = true ] ; then
@@ -181,8 +168,6 @@ IMAGE_ONLY=false
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
 OPENWRT_VERSION='bd19f9ab26ad234b6f10cce23cd0dc41b9371929'
 PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^53d1e11003ce318c043c42063bbd2f57d15aac81'
-INTEL_FEED=""
-IWLWAV_FEED=""
 PRPLMESH_VARIANT="-nl80211"
 BASE_CONFIG=default
 
