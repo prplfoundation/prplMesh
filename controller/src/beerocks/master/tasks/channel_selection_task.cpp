@@ -1533,8 +1533,7 @@ bool channel_selection_task::ccl_fill_channel_switch_request_with_least_used_cha
         align_channel_to_80Mhz();
         channel_switch_request.vht_center_frequency = wireless_utils::channel_to_vht_center_freq(
             channel_switch_request.channel,
-            beerocks::utils::convert_bandwidth_to_int(
-                beerocks::eWiFiBandwidth(channel_switch_request.bandwidth)),
+            beerocks::eWiFiBandwidth(channel_switch_request.bandwidth),
             min_channels.begin()->second.channel_ext_above_secondary);
         TASK_LOG(DEBUG) << "channel_switch_request.channel = " << int(min_channels.begin()->first)
                         << " channel_switch_request.channel_ext_above_secondary = "
@@ -1577,8 +1576,7 @@ bool channel_selection_task::ccl_fill_channel_switch_request_with_least_used_cha
         align_channel_to_80Mhz();
         channel_switch_request.vht_center_frequency = wireless_utils::channel_to_vht_center_freq(
             channel_switch_request.channel,
-            utils::convert_bandwidth_to_int(
-                beerocks::eWiFiBandwidth(channel_switch_request.bandwidth)),
+            beerocks::eWiFiBandwidth(channel_switch_request.bandwidth),
             it_res->second.channel_ext_above_secondary);
     }
     TASK_LOG(DEBUG) << "channel_switch_request.channel = " << int(channel_switch_request.channel)

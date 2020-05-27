@@ -656,11 +656,12 @@ int cli_socket::ap_channel_switch(std::string ap_mac, uint8_t channel, uint8_t b
     }
     request->mac()                 = tlvf::mac_from_string(ap_mac);
     request->cs_params().channel   = channel;
-    request->cs_params().bandwidth = utils::convert_bandwidth_to_enum(bw);
+    auto bandwidth                 = utils::convert_bandwidth_to_enum(bw);
+    request->cs_params().bandwidth = bandwidth;
     request->cs_params().vht_center_frequency =
         vht_center_frequency ? vht_center_frequency
                              : son::wireless_utils::channel_to_vht_center_freq(
-                                   channel, bw, channel_ext_above_secondary);
+                                   channel, bandwidth, channel_ext_above_secondary);
     wait_response = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
     waitResponseReady();

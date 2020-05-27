@@ -383,26 +383,27 @@ int wireless_utils::freq_to_channel(int freq)
     }
 }
 
-uint16_t wireless_utils::channel_to_vht_center_freq(int channel, int bandwidth,
+uint16_t wireless_utils::channel_to_vht_center_freq(int channel, beerocks::eWiFiBandwidth bandwidth,
                                                     bool channel_ext_above_secondary)
 {
     int freq = channel_to_freq(channel);
     uint16_t vht_center_freq;
     switch (bandwidth) {
-    case 20:
+    case beerocks::eWiFiBandwidth::BANDWIDTH_20:
         vht_center_freq = freq;
         break;
-    case 40:
+    case beerocks::eWiFiBandwidth::BANDWIDTH_40:
         vht_center_freq = freq + (channel_ext_above_secondary ? 10 : -10);
         break;
-    case 80:
+    case beerocks::eWiFiBandwidth::BANDWIDTH_80:
+    case beerocks::eWiFiBandwidth::BANDWIDTH_80_80:
         vht_center_freq = freq + (channel_ext_above_secondary ? 30 : -30);
         break;
-    case 160:
+    case beerocks::eWiFiBandwidth::BANDWIDTH_160:
         vht_center_freq = freq + (channel_ext_above_secondary ? 70 : -70);
         break;
     default:
-        LOG(ERROR) << "invalid bandwidth!";
+        LOG(ERROR) << "invalid bandwidth " << bandwidth;
         return -1;
     }
     return vht_center_freq;
@@ -704,9 +705,8 @@ uint8_t wireless_utils::get_5g_center_channel(uint8_t start_channel,
                                               beerocks::eWiFiBandwidth channel_bandwidth,
                                               bool channel_ext_above_secondary)
 {
-    auto bw = beerocks::utils::convert_bandwidth_to_int(channel_bandwidth);
     auto vht_center_freq =
-        channel_to_vht_center_freq(start_channel, bw, channel_ext_above_secondary);
+        channel_to_vht_center_freq(start_channel, channel_bandwidth, channel_ext_above_secondary);
     return freq_to_channel(vht_center_freq);
 }
 
