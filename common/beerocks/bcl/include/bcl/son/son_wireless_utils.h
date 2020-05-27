@@ -131,7 +131,7 @@ public:
      * @return channel number.
      */
     static int freq_to_channel(int freq);
-    static uint16_t channel_to_vht_center_freq(int channel, int bandwidth,
+    static uint16_t channel_to_vht_center_freq(int channel, beerocks::eWiFiBandwidth bandwidth,
                                                bool channel_ext_above_secondary);
     static beerocks::eFreqType which_freq(uint32_t chn);
     static bool is_same_freq_band(int chn1, int chn2);
