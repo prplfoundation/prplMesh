@@ -22,6 +22,7 @@ run_cppcheck() {
              --error-exitcode=1 \
              --enable=warning,style,information \
              -i"$rootdir/common/beerocks/bwl/unit_tests" \
+             -i"$rootdir/common/beerocks/bcl/unit_tests" \
              -i"$rootdir/build" \
              -rp="$rootdir" \
              -j"$(nproc)" \
