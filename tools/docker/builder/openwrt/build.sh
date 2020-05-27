@@ -34,7 +34,6 @@ build_image() {
            --build-arg TARGET_PROFILE="$TARGET_PROFILE" \
            --build-arg PRPL_FEED="$PRPL_FEED" \
            --build-arg PRPLMESH_VARIANT="$PRPLMESH_VARIANT" \
-           --build-arg BASE_CONFIG="$BASE_CONFIG" \
            "$scriptdir/"
 }
 
@@ -121,7 +120,6 @@ main() {
 
     dbg "OPENWRT_REPOSITORY=$OPENWRT_REPOSITORY"
     dbg "OPENWRT_VERSION=$OPENWRT_VERSION"
-    dbg "BASE_CONFIG=$BASE_CONFIG"
     dbg "PRPL_FEED=$PRPL_FEED"
     dbg "IMAGE_ONLY=$IMAGE_ONLY"
     dbg "TARGET_DEVICE=$TARGET_DEVICE"
@@ -151,7 +149,6 @@ main() {
     export PRPLMESH_VERSION
     export PRPL_FEED
     export PRPLMESH_VARIANT
-    export BASE_CONFIG
 
     if [ $IMAGE_ONLY = true ] ; then
         build_image
@@ -169,6 +166,5 @@ OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
 OPENWRT_VERSION='bd19f9ab26ad234b6f10cce23cd0dc41b9371929'
 PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^53d1e11003ce318c043c42063bbd2f57d15aac81'
 PRPLMESH_VARIANT="-nl80211"
-BASE_CONFIG=default
 
 main "$@"
