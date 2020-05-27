@@ -38,3 +38,28 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/include/${PROJECT_NAME}/
 install(EXPORT bclConfig NAMESPACE beerocks:: DESTINATION lib/cmake/beerocks/${PROJECT_NAME})
 
 add_definitions(-DBEEROCKS_VERSION="${prplmesh_VERSION}")
+
+if (BUILD_TESTS)
+    set(TEST_PROJECT_NAME ${PROJECT_NAME}_unit_tests)
+    set(unit_tests_sources
+        ${bcl_sources}
+        ${MODULE_PATH}/unit_tests/wireless_utils_test.cpp
+    )
+    add_executable(${TEST_PROJECT_NAME}
+        ${unit_tests_sources}
+    )
+    if (COVERAGE)
+        set_target_properties(${TEST_PROJECT_NAME} PROPERTIES COMPILE_FLAGS "--coverage -fPIC -O0")
+        set_target_properties(${TEST_PROJECT_NAME} PROPERTIES LINK_FLAGS "--coverage")
+    endif()
+    target_include_directories(${TEST_PROJECT_NAME}
+        PRIVATE
+            ${PLATFORM_INCLUDE_DIR}
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    )
+    target_link_libraries(${TEST_PROJECT_NAME} tlvf elpp mapfcommon)
+    target_link_libraries(${TEST_PROJECT_NAME} gtest_main)
+    install(TARGETS ${TEST_PROJECT_NAME} DESTINATION bin/tests)
+    add_test(NAME ${TEST_PROJECT_NAME} COMMAND $<TARGET_FILE:${TEST_PROJECT_NAME}>)
+endif()
