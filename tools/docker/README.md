@@ -2,7 +2,7 @@
 
 prplMesh provides docker images and helper scripts for building and running prplMesh using docker.
 
-The `image-build.sh` supports building 2 images:
+The `./image-build.sh` supports building 2 images:
 
 - **builder image** for building prplMesh using docker
 - **runner image** for running prplMesh using docker
@@ -46,7 +46,7 @@ The all docker allows building and running prplMesh inside containers. It includ
 Build this image:
 
 ```bash
-cd tools/docker/all
+cd ./all
 docker image build --tag prplmesh-all .
 ```
 
@@ -68,6 +68,12 @@ containers).
 
 ```bash
 ./maptools.py build map -f MSGLIB=zmq BUILD_TESTS=ON CMAKE_BUILD_TYPE=Debug
+```
+
+If you want to see more verbose build output use "--make-verbose" option
+
+```bash
+./maptools.py build map -f MSGLIB=zmq BUILD_TESTS=ON CMAKE_BUILD_TYPE=Debug --make-verbose
 ```
 
 ### Run the Containers
