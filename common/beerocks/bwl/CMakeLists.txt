@@ -9,8 +9,10 @@ file(GLOB_RECURSE bwl_common_sources ${MODULE_PATH}/common/*.c*)
 # Support more permissive c++ language
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=gnu++11")
 
-# Default defaults
-set(BWL_TYPE "DUMMY")
+# Defaults
+if (NOT DEFINED BWL_TYPE)
+    set(BWL_TYPE "DUMMY")
+endif()
 add_definitions(-DBEEROCKS_TMP_PATH="${TMP_PATH}")
 
 if (TARGET_PLATFORM STREQUAL "rdkb")
@@ -27,12 +29,19 @@ elseif(TARGET_PLATFORM STREQUAL "openwrt")
         set(BWL_TYPE "NL80211")
     endif()
 
-    # hostapd directory
-    file(GLOB HOSTAPD_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/hostapd*/hostapd-*")
+endif()
+
+if (NOT BWL_TYPE STREQUAL "DUMMY")
+
+    file(GLOB HOSTAPD_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/hostapd*/hostapd-*" "${PLATFORM_BUILD_DIR}/wpa-*")
     find_path(HOSTAPD_INCLUDE_DIR NAMES "src/common/wpa_ctrl.h" PATHS ${HOSTAPD_SEARCH_PATHS} NO_CMAKE_FIND_ROOT_PATH)
     set(HOSTAPD_DIR "${HOSTAPD_INCLUDE_DIR}")
+    message(STATUS "[IVANE] ${HOSTAPD_DIR}")
 
 endif()
+
+# If it's needed to build prplMesh with BWL_TYPE=NL80211
+# you should pass this variable via cmake cmdline options
 
 set(BWL_TYPE ${BWL_TYPE} CACHE STRING "Which BWL backend to use")
 
@@ -41,7 +50,7 @@ set(BWL_TYPE ${BWL_TYPE} CACHE STRING "Which BWL backend to use")
 ##########################################################################
 
 if(BWL_TYPE STREQUAL "DWPAL")
-    
+
     include_directories(
         ${HOSTAPD_DIR}/src/drivers
         ${PLATFORM_BUILD_DIR}/iwlwav-iw-4.14
@@ -91,19 +100,29 @@ elseif(BWL_TYPE STREQUAL "NL80211")
     )
 
     # Hostapd/NL80211 include directories
-    include_directories(
+    list(APPEND BWL_INC_DIRS
         ${HOSTAPD_DIR}/src/utils
         ${HOSTAPD_DIR}/src/common
         ${HOSTAPD_DIR}/src/drivers
-        ${PLATFORM_INCLUDE_DIR}/libnl-tiny
     )
+    # OpenWrt support only libnl-tiny
+    if (TARGET_PLATFORM STREQUAL "openwrt")
+        list(APPEND BWL_INC_DIRS ${PLATFORM_INCLUDE_DIR}/libnl-tiny)
+    endif()
+    include_directories(${BWL_INC_DIRS})
 
     # Platform libraries
     link_directories(
         ${PLATFORM_STAGING_DIR}/usr/lib
     )
 
-    list(APPEND BWL_LIBS nl-tiny)
+    if (TARGET_PLATFORM STREQUAL "openwrt")
+        list(APPEND BWL_LIBS nl-tiny wpa_client)
+    else()
+        find_package(nl-3 REQUIRED)
+        find_package(nl-genl-3 REQUIRED)
+        list(APPEND BWL_LIBS nl-3 nl-genl-3 wpa_client)
+    endif()
 
 elseif(BWL_TYPE STREQUAL "DUMMY")
 
@@ -116,7 +135,7 @@ elseif(BWL_TYPE STREQUAL "DUMMY")
         ${MODULE_PATH}/dummy/base_wlan_hal_dummy.cpp
         ${MODULE_PATH}/dummy/sta_wlan_hal_dummy.cpp
     )
-    
+
 else()
 
     string(TOLOWER ${BWL_TYPE} BWL_PATH)

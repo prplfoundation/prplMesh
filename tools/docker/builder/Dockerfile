@@ -24,7 +24,6 @@ RUN apt-get update && apt-get install -y \
     libnl-genl-3-dev \
     libreadline-dev \
     libssl-dev \
-    libssl-dev \
     libtool \
     libzmq3-dev \
     ninja-build \

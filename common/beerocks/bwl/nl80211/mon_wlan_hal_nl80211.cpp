@@ -16,7 +16,7 @@
 #include <cmath>
 
 extern "C" {
-#include <wpa_ctrl.h>
+#include "wpa_ctrl.h"
 }
 
 #include <linux/nl80211.h>
