@@ -12,9 +12,6 @@
 namespace bwl {
 namespace dwpal {
 
-#define NL_MAX_REPLY_BUFFSIZE 8192
-#define NL_ATTR_HDR 4
-
 /**
  * @brief channel scan driver configuration parameters.
  * 
