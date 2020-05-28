@@ -55,7 +55,9 @@ public:
      *
      * @see base_wlan_hal::get_channel_utilization
      *
-     * This implementation gets channel utilization through NL80211.
+     * This implementation gets channel utilization via sub-command
+     * LTQ_NL80211_VENDOR_SUBCMD_GET_PHY_CHAN_STATUS of NL80211_CMD_VENDOR command, issued through
+     * DWPAL interface.
      *
      * @param[out] channel_utilization Channel utilization value.
      *
