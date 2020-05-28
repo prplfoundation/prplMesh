@@ -1052,5 +1052,22 @@ bool base_wlan_hal_dwpal::get_channel_utilization(uint8_t &channel_utilization)
     return true;
 }
 
+bool base_wlan_hal_dwpal::dwpal_get_phy_chan_status(sPhyChanStatus &status)
+{
+    const ssize_t expected_result_size = sizeof(status) + NL_ATTR_HDR;
+    ssize_t received_result_size =
+        dwpal_nl_cmd_get(get_iface_name(), LTQ_NL80211_VENDOR_SUBCMD_GET_PHY_CHAN_STATUS,
+                         m_nl_buffer, NL_MAX_REPLY_BUFFSIZE);
+
+    if (expected_result_size != received_result_size) {
+        LOG(ERROR) << "LTQ_NL80211_VENDOR_SUBCMD_GET_PHY_CHAN_STATUS failed! expected size = "
+                   << expected_result_size << ", received size = " << received_result_size;
+        return false;
+    }
+    std::copy_n(&m_nl_buffer[NL_ATTR_HDR], sizeof(status),
+                reinterpret_cast<unsigned char *>(&status));
+    return true;
+}
+
 } // namespace dwpal
 } // namespace bwl

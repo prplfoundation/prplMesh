@@ -134,6 +134,17 @@ private:
     size_t m_wpa_ctrl_buffer_size = HOSTAPD_TO_DWPAL_MSG_LENGTH;
 
     int m_nl_get_failed_attempts = 0;
+
+    /**
+     * @brief Gets PHY channel status information
+     *
+     * Sends sub-command LTQ_NL80211_VENDOR_SUBCMD_GET_PHY_CHAN_STATUS of NL80211_CMD_VENDOR
+     * command through DWPAL and fills given structure with response obtained.
+     *
+     * @param status PHY channel status information structure to fill in.
+     * @return True on success and false otherwise.
+     */
+    bool dwpal_get_phy_chan_status(sPhyChanStatus &status);
 };
 
 } // namespace dwpal
