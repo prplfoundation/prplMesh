@@ -85,9 +85,6 @@ protected:
     virtual bool set(const std::string &param, const std::string &value,
                      int vap_id = beerocks::IFACE_RADIO_ID) override;
 
-    bool dummy_send_cmd(const std::string &cmd, char **reply); // for external process
-    bool dummy_send_cmd(const std::string &cmd);
-
     static const int predefined_vaps_num = 4;
 
     // Private data-members:

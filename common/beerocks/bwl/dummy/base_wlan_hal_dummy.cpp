@@ -280,10 +280,6 @@ bool base_wlan_hal_dummy::set(const std::string &param, const std::string &value
 
 bool base_wlan_hal_dummy::ping() { return true; }
 
-bool base_wlan_hal_dummy::dummy_send_cmd(const std::string &cmd) { return false; }
-
-bool base_wlan_hal_dummy::dummy_send_cmd(const std::string &cmd, char **reply) { return false; }
-
 bool base_wlan_hal_dummy::process_nl_events()
 {
     LOG(ERROR) << "not implemented";
