@@ -9,6 +9,8 @@
 #ifndef _BWL_BASE_WLAN_HAL_DWPAL_H_
 #define _BWL_BASE_WLAN_HAL_DWPAL_H_
 
+#include "base_wlan_hal_dwpal_types.h"
+
 #include <bwl/base_wlan_hal.h>
 #include <bwl/nl80211_client.h>
 
@@ -103,6 +105,11 @@ protected:
     void *get_dwpal_nl_ctx() const { return (m_dwpal_nl_ctx); }
 
     std::unique_ptr<nl80211_client> m_nl80211_client;
+
+    /**
+     * Re-usable buffer to hold the response of NL80211_CMD_VENDOR commands
+     */
+    unsigned char m_nl_buffer[NL_MAX_REPLY_BUFFSIZE] = {'\0'};
 
     // Private data-members:
 private:

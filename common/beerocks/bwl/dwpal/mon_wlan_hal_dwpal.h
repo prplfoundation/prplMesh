@@ -111,8 +111,7 @@ private:
     }
 
     std::shared_ptr<char> m_temp_dwpal_value;
-    uint32_t m_nl_seq                                = 0;
-    unsigned char m_nl_buffer[NL_MAX_REPLY_BUFFSIZE] = {'\0'};
+    uint32_t m_nl_seq = 0;
 };
 
 } // namespace dwpal
