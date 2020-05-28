@@ -1664,25 +1664,8 @@ bool ap_wlan_hal_dwpal::generate_connected_clients_events()
 
 bool ap_wlan_hal_dwpal::start_wps_pbc()
 {
-    // refresh vaps info just to be on the safe side since we
-    // don't know when this function will be called and we better
-    // have the latest information.
-    refresh_vaps_info(beerocks::IFACE_RADIO_ID);
-    // start wps on the first fronthaul vap since Intel hostapd (and therefore BWL DWPAL)
-    // doesn't support upstream hostapd wps_pbc command which takes no parameters.
-    auto it = std::find_if(m_radio_info.available_vaps.begin(), m_radio_info.available_vaps.end(),
-                           [&](const std::pair<int, VAPElement> &vap) -> bool {
-                               return (!vap.second.ssid.empty() && vap.second.fronthaul);
-                           });
-    if (it == m_radio_info.available_vaps.end()) {
-        LOG(ERROR) << "Failed to find fronthaul VAP for WPS";
-        return false;
-    }
-    int vap_id = (*it).first;
-    std::string ifname =
-        beerocks::utils::get_iface_string_from_iface_vap_ids(m_radio_info.iface_name, vap_id);
-    LOG(DEBUG) << "Start WPS PBC on interface " << ifname;
-    std::string cmd = "WPS_PBC " + ifname;
+    LOG(DEBUG) << "Start WPS PBC on interface " << m_radio_info.iface_name;
+    std::string cmd = "WPS_PBC";
     if (!dwpal_send_cmd(cmd)) {
         LOG(ERROR) << "start_wps_pbc() failed!";
         return false;
