@@ -969,6 +969,7 @@ static bool set_vap_multiap_mode(std::vector<std::string> &vap_hostapd_config, b
         return false;
     }
     hostapd_config_set_value(vap_hostapd_config, "wps_state", fronthaul ? "2" : "");
+    hostapd_config_set_value(vap_hostapd_config, "wps_independent", "0");
     hostapd_config_set_value(vap_hostapd_config, "mesh_mode", backhaul ? "bAP" : "fAP");
     hostapd_config_set_value(vap_hostapd_config, "sFourAddrMode", backhaul ? "1" : "");
     hostapd_config_set_value(vap_hostapd_config, "max_num_sta", backhaul ? "1" : "");
