@@ -85,6 +85,13 @@ protected:
     virtual bool set(const std::string &param, const std::string &value,
                      int vap_id = beerocks::IFACE_RADIO_ID) override;
 
+    /** @brief Write/update a dummy status file.
+     *
+     * Write the @a value to a status file with name @a filename. This is used by test scripts to
+     * verify if the proper bwl commands were given.
+     */
+    bool write_status_file(const std::string &filename, const std::string &value) const;
+
     /** @brief Get the status directory.
      *
      * The dummy implementation interacts with the test framework through files in the test
