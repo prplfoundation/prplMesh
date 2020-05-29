@@ -9,6 +9,7 @@ import os
 import json
 import subprocess
 from opts import debug, err, status
+from typing import Callable
 
 
 class TlvStruct:
@@ -149,6 +150,56 @@ class Sniffer:
         except json.JSONDecodeError as error:
             err("capture JSON decoding failed: %s".format(error))
             return []
+
+    def get_cmdu_capture(self, match_function: Callable[[Packet], bool]) -> [Packet]:
+        """Get a list of filtered IEEE1905.1 packets from the last started tcpdump.
+
+        Parameters
+        ----------
+        match_function: Callable[[Packet], bool]
+            A function that returns True if it is the expected packet. It is called on every packet
+            returned by get_packet_capture.
+
+        Returns
+        -------
+        [Packet]
+            The matching packets.
+        """
+        capture = self.get_packet_capture()
+        return [packet for packet in capture if packet.ieee1905 and match_function(packet)]
+
+    def get_cmdu_capture_type(
+        self, msg_type: int, eth_src: str, eth_dst: str = None, mid: int = None
+    ) -> [Packet]:
+        """Get a list of IEEE1905.1 packets matching criteria from the last started tcpdump.
+
+        Parameters
+        ----------
+        msg_type: int
+            CMDU message type that is expected.
+
+        eth_src: str
+            MAC address of the sender that is expected.
+
+        eth_dst: str
+            MAC address of the destination that is expected. If omitted, the IEEE1905.1 multicast
+            MAC address is used.
+
+        mid: int
+            Message Identifier that is expected. If omitted, the MID is not checked.
+
+        Returns
+        -------
+        [Packet]
+            The matching packets.
+        """
+        if eth_dst is None:
+            eth_dst = "01:80:c2:00:00:13"
+        return self.get_cmdu_capture(
+            lambda packet: (packet.eth_src == eth_src and
+                            packet.eth_dst == eth_dst and
+                            packet.ieee1905_message_type == msg_type and
+                            (mid is None or packet.ieee1905_mid == mid)))
 
     def checkpoint(self):
         '''Checkpoint the capture.
