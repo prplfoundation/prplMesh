@@ -4775,6 +4775,8 @@ bool slave_thread::channel_selection_get_channel_preference(ieee1905_1::CmduMess
             }
             auto &op_class_channels = std::get<1>(operating_class_tuple);
             auto operating_class    = op_class_channels.operating_class();
+            const auto &op_class_chan_set =
+                wireless_utils::operating_class_to_channel_set(operating_class);
             ss << "operating class=" << int(operating_class);
 
             const auto &flags        = op_class_channels.flags();
@@ -4792,6 +4794,13 @@ bool slave_thread::channel_selection_get_channel_preference(ieee1905_1::CmduMess
                 auto channel = op_class_channels.channel_list(ch_idx);
                 if (!channel) {
                     LOG(ERROR) << "getting channel entry has failed!";
+                    return false;
+                }
+
+                // Check if channel is valid for operating class
+                if (op_class_chan_set.find(*channel) == op_class_chan_set.end()) {
+                    LOG(ERROR) << "Channel " << +*channel << " invalid for operating class "
+                               << +operating_class;
                     return false;
                 }
 
@@ -4841,19 +4850,30 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received CHANNEL_SELECTION_REQUEST_MESSAGE, mid=" << std::dec << int(mid);
 
-    if (!channel_selection_get_channel_preference(cmdu_rx)) {
-        LOG(ERROR) << "Failed to update channel preference";
-        return false;
-    }
-
     int power_limit           = 0;
     bool power_limit_received = channel_selection_get_transmit_power_limit(cmdu_rx, power_limit);
 
-    // According to design only Resticted channels should be included in channel selection request
-    auto switch_required = channel_selection_current_channel_restricted();
+    auto response_code = wfa_map::tlvChannelSelectionResponse::eResponseCode::ACCEPT;
     beerocks::message::sWifiChannel channel_to_switch;
-    if (switch_required) {
-        channel_to_switch = channel_selection_select_channel();
+    bool switch_required = false;
+    if (channel_selection_get_channel_preference(cmdu_rx)) {
+        // Only restricted channels are be included in channel selection request.
+        if (channel_selection_current_channel_restricted()) {
+            channel_to_switch = channel_selection_select_channel();
+            if (channel_to_switch.channel != 0) {
+                switch_required = true;
+                LOG(INFO) << "Switch to channel " << +channel_to_switch.channel << " bw "
+                          << +channel_to_switch.channel_bandwidth;
+            } else {
+                LOG(INFO) << "Decline channel selection request " << hostap_params.iface_mac;
+                response_code = wfa_map::tlvChannelSelectionResponse::eResponseCode::
+                    DECLINE_VIOLATES_MOST_RECENTLY_REPORTED_PREFERENCES;
+            }
+        }
+    } else {
+        LOG(ERROR) << "Failed to update channel preference";
+        response_code = wfa_map::tlvChannelSelectionResponse::eResponseCode::
+            DECLINE_VIOLATES_MOST_RECENTLY_REPORTED_PREFERENCES;
     }
 
     // build and send channel response message
@@ -4868,22 +4888,8 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
         return false;
     }
 
-    if (switch_required && channel_to_switch.channel == 0) {
-        channel_selection_response_tlv->radio_uid()     = hostap_params.iface_mac;
-        channel_selection_response_tlv->response_code() = wfa_map::tlvChannelSelectionResponse::
-            eResponseCode::DECLINE_VIOLATES_MOST_RECENTLY_REPORTED_PREFERENCES;
-        LOG(INFO) << "Decline channel selection request " << hostap_params.iface_mac;
-        if (!send_cmdu_to_controller(cmdu_tx)) {
-            LOG(ERROR) << "failed to send CHANNEL_SELECTION_RESPONSE_MESSAGE";
-            return false;
-        }
-        return true;
-    }
-
-    channel_selection_response_tlv->radio_uid() = hostap_params.iface_mac;
-    channel_selection_response_tlv->response_code() =
-        wfa_map::tlvChannelSelectionResponse::eResponseCode::ACCEPT;
-
+    channel_selection_response_tlv->radio_uid()     = hostap_params.iface_mac;
+    channel_selection_response_tlv->response_code() = response_code;
     if (!send_cmdu_to_controller(cmdu_tx)) {
         LOG(ERROR) << "failed to send CHANNEL_SELECTION_RESPONSE_MESSAGE";
         return false;
