@@ -67,8 +67,8 @@ class TestFlows:
             "No CMDU <msg> found".
 
         match_function: Callable[[sniffer.Packet], bool]
-            A function that returns True if it is the expected packet. It is called on every
-            packet returned by Sniffer.get_packet_capture until it returns True.
+            A function that returns True if it is the expected packet. It is called on every packet
+            returned by get_packet_capture.
 
         Returns
         -------
@@ -76,8 +76,7 @@ class TestFlows:
             The matching packets.
         """
         debug("Checking for CMDU {}".format(msg))
-        capture = env.wired_sniffer.get_packet_capture()
-        result = [packet for packet in capture if packet.ieee1905 and match_function(packet)]
+        result = env.wired_sniffer.get_cmdu_capture(match_function)
         if not result:
             self.fail("No CMDU {} found".format(msg))
         return result
@@ -113,13 +112,11 @@ class TestFlows:
         [sniffer.Packet]
             The matching packets.
         """
-        if eth_dst is None:
-            eth_dst = "01:80:c2:00:00:13"
-        return self.check_cmdu(msg, lambda packet:
-                               packet.eth_src == eth_src and
-                               packet.eth_dst == eth_dst and
-                               packet.ieee1905_message_type == msg_type and
-                               (mid is None or packet.ieee1905_mid == mid))
+        debug("Checking for CMDU {} (0x{:04x}) from {}".format(msg, msg_type, eth_src))
+        result = env.wired_sniffer.get_cmdu_capture_type(msg_type, eth_src, eth_dst, mid)
+        if not result:
+            self.fail("No CMDU {} found".format(msg))
+        return result
 
     def check_cmdu_type_single(
         self, msg: str, msg_type: int, eth_src: str, eth_dst: str = None, mid: int = None
