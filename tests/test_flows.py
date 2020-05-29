@@ -507,6 +507,28 @@ class TestFlows:
 
             env.checkpoint()
 
+        debug("Send invalid channel selection request to radio 0")
+        cs_req_mid = env.controller.dev_send_1905(
+            env.agents[0].mac, 0x8006,
+            # Single operating class with a single channel that doesn't exist in it.
+            tlv(0x8B, 0x000B, env.agents[0].radios[0].mac + ' 0x01 {0x52 {0x01 {0x01}} 0x00}'))
+        time.sleep(1)
+
+        cs_resp = self.check_cmdu_type("channel selection response", 0x8007, env.agents[0].mac,
+                                       env.controller.mac, cs_req_mid)
+
+        # TODO should be a single response (currently two are sent)
+        for response in cs_resp:
+            cs_resp_tlv = self.check_cmdu_has_tlv_single(response, 0x8e)
+            if cs_resp_tlv and \
+               cs_resp_tlv.channel_select_radio_id == env.agents[0].radios[0].mac:
+                if int(cs_resp_tlv.channel_select_response_code, 16) != 0x02:
+                    self.fail("Channel selection response with unexpected response code {}".format(
+                        cs_resp_tlv.channel_select_response_code
+                    ))
+
+        env.checkpoint()
+
         # payload_wlan0 - request for change channel on 6
         payload_wlan0 = (
             "0x14 "
