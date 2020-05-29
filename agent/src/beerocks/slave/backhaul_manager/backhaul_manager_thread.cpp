@@ -2557,6 +2557,19 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received AP_METRICS_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
 
+    /**
+     * If AP Metrics Response message does not correspond to a previously received and forwarded
+     * AP Metrics Query message (which we know because message id is not set), then forward message
+     * to controller.
+     * This might happen when channel utilization value has crossed configured threshold or when
+     * periodic metrics reporting interval has elapsed.
+     */
+    if (0 == mid) {
+        uint16_t length = message_com::get_uds_header(cmdu_rx)->length;
+        cmdu_rx.swap(); //swap back before forwarding
+        return send_cmdu_to_bus(cmdu_rx, controller_bridge_mac, bridge_info.mac, length);
+    }
+
     auto ap_metrics_tlv = cmdu_rx.getClass<wfa_map::tlvApMetrics>();
     if (!ap_metrics_tlv) {
         LOG(ERROR) << "Failed cmdu_rx.getClass<wfa_map::tlvApMetrics>(), mid=" << std::hex
