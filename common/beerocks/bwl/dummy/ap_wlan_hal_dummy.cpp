@@ -17,6 +17,7 @@
 #include <bcl/son/son_wireless_utils.h>
 #include <easylogging++.h>
 #include <math.h>
+#include <sstream>
 
 //////////////////////////////////////////////////////////////////////////////
 ////////////////////////// Local Module Definitions //////////////////////////
@@ -114,6 +115,13 @@ HALState ap_wlan_hal_dummy::attach(bool block)
 {
     auto state = base_wlan_hal_dummy::attach(block);
 
+    // Initialize status files
+    if (m_radio_info.is_5ghz) {
+        set_channel(149, int{eWiFiBandwidth::BANDWIDTH_80}, 5775);
+    } else {
+        set_channel(1, int{eWiFiBandwidth::BANDWIDTH_40}, 0);
+    }
+
     // On Operational send the AP_Attached event to the AP Manager
     if (state == HALState::Operational) {
         event_queue_push(Event::AP_Attached);
@@ -128,7 +136,19 @@ bool ap_wlan_hal_dummy::disable() { return true; }
 
 bool ap_wlan_hal_dummy::set_start_disabled(bool enable, int vap_id) { return true; }
 
-bool ap_wlan_hal_dummy::set_channel(int chan, int bw, int center_channel) { return true; }
+bool ap_wlan_hal_dummy::set_channel(int chan, int bw, int center_channel)
+{
+    m_radio_info.channel = chan;
+    m_radio_info.bandwidth =
+        beerocks::utils::convert_bandwidth_to_int((beerocks::eWiFiBandwidth)bw);
+    m_radio_info.vht_center_freq = center_channel;
+    m_radio_info.is_dfs_channel  = son::wireless_utils::is_dfs_channel(chan);
+    std::stringstream value;
+    value << "channel: " << chan << std::endl;
+    value << "bw: " << m_radio_info.bandwidth << std::endl;
+    value << "center_channel: " << center_channel << std::endl;
+    return write_status_file("channel", value.str());
+}
 
 bool ap_wlan_hal_dummy::sta_allow(const std::string &mac, const std::string &bssid)
 {
@@ -249,18 +269,13 @@ bool ap_wlan_hal_dummy::switch_channel(int chan, int bw, int vht_center_frequenc
     LOG(TRACE) << __func__ << " channel: " << chan << ", bw: " << bw
                << ", vht_center_frequency: " << vht_center_frequency;
 
-    m_radio_info.channel = chan;
-    m_radio_info.bandwidth =
-        beerocks::utils::convert_bandwidth_to_int((beerocks::eWiFiBandwidth)bw);
-    m_radio_info.vht_center_freq    = vht_center_frequency;
-    m_radio_info.is_dfs_channel     = son::wireless_utils::is_dfs_channel(chan);
     m_radio_info.last_csa_sw_reason = ChanSwReason::Unknown;
 
     event_queue_push(Event::ACS_Started);
     event_queue_push(Event::ACS_Completed);
     event_queue_push(Event::CSA_Finished);
 
-    return true;
+    return set_channel(chan, bw, vht_center_frequency);
 }
 
 bool ap_wlan_hal_dummy::set_antenna_mode(AntMode mode) { return true; }
@@ -288,7 +303,6 @@ bool ap_wlan_hal_dummy::read_acs_report()
 {
     uint8_t idx = 0;
     if (m_radio_info.is_5ghz == false) {
-        m_radio_info.channel = 1;
         // 2.4G simulated report
         for (uint16_t ch = 1; ch <= 11; ch++) {
             m_radio_info.preferred_channels[idx].channel = ch;
@@ -300,7 +314,6 @@ bool ap_wlan_hal_dummy::read_acs_report()
         }
     } else {
         // 5G simulated report
-        m_radio_info.channel = 149;
         for (uint16_t ch = 36; ch <= 64; ch += 4) {
             for (uint16_t step = 0; step < 3; step++) {
                 m_radio_info.preferred_channels[idx].channel = ch;

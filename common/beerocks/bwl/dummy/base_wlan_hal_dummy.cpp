@@ -280,6 +280,37 @@ bool base_wlan_hal_dummy::set(const std::string &param, const std::string &value
 
 bool base_wlan_hal_dummy::ping() { return true; }
 
+bool base_wlan_hal_dummy::write_status_file(const std::string &filename,
+                                            const std::string &value) const
+{
+    // To make sure the file is written atomically, use the following procedure.
+    // 1. Write to a temporary file on the same filesystem. To make sure it's the same filesystem,
+    //    put it in the same directory. We don't need to use tempfile() here because there can be
+    //    only one bwl running in parallel (otherwise we have bigger problems) and we do want to
+    //    overwrite/remove any dangling file from a previous run.
+    // 2. Write the temporary file.
+    // 3. Close it (making sure it is flushed to the filesystem).
+    // At this point, we can check for failure (which covers steps 1-3).
+    // 4. Rename to the final filename.
+    // To be really fully atomic, between steps 3 and 4 we should also do an fsync of the file and
+    // of the directory. However, that is only needed for atomicity over reboots; for atomicity
+    // between processes, the rename after close is sufficient.
+    auto full_path{get_status_dir() + "/" + filename};
+    auto full_path_tmp{full_path + ".tmp"};
+    std::ofstream statusfile(full_path_tmp);
+    statusfile << value;
+    statusfile.close();
+    if (!statusfile) {
+        LOG(ERROR) << "Failed writing to " << full_path;
+        return false;
+    }
+    if (rename(full_path_tmp.c_str(), full_path.c_str()) < 0) {
+        LOG(ERROR) << "Failed to rename " << full_path_tmp;
+        return false;
+    }
+    return true;
+}
+
 bool base_wlan_hal_dummy::process_nl_events()
 {
     LOG(ERROR) << "not implemented";
