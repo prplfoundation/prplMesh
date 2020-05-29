@@ -73,8 +73,13 @@ private:
 
     /**
      * @brief Creates AP Metrics Response message
+     *
+     * @param mid Message ID.
+     * @param bssid_list list of BSSID of BSS operated by the Multi-AP Agent to include in the AP
+     * Metrics Response message.
+     * @return True on success and false otherwise.
      */
-    bool create_ap_metrics_response();
+    bool create_ap_metrics_response(uint16_t mid, const std::vector<sMacAddr> &bssid_list);
 
     bool update_ap_stats();
     bool update_sta_stats();

@@ -558,8 +558,17 @@ void monitor_thread::on_channel_utilization_measurement_period_elapsed()
         threshold_crossed = true;
     }
 
+    LOG(DEBUG) << "Channel utilization: previous_value="
+               << std::to_string(info.ap_metrics_channel_utilization_reporting_value)
+               << ", current_value=" << std::to_string(channel_utilization) << ", threshold_value="
+               << std::to_string(info.ap_channel_utilization_reporting_threshold)
+               << ", threshold_crossed=" << std::to_string(threshold_crossed);
+
     if (threshold_crossed) {
-        if (!create_ap_metrics_response()) {
+        std::vector<sMacAddr> bssid_list;
+        mon_db.get_bssid_list(bssid_list);
+
+        if (!create_ap_metrics_response(0, bssid_list)) {
             LOG(ERROR) << "Unable to create AP Metrics Response message";
             return;
         }
@@ -570,15 +579,64 @@ void monitor_thread::on_channel_utilization_measurement_period_elapsed()
     info.ap_metrics_channel_utilization_reporting_value = channel_utilization;
 }
 
-bool monitor_thread::create_ap_metrics_response()
+bool monitor_thread::create_ap_metrics_response(uint16_t mid,
+                                                const std::vector<sMacAddr> &bssid_list)
 {
-    auto cmdu_tx_header = cmdu_tx.create(0, ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE);
+    auto cmdu_tx_header =
+        cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE);
     if (!cmdu_tx_header) {
         LOG(ERROR) << "Failed creating AP_METRICS_RESPONSE_MESSAGE";
         return false;
     }
 
-    // TODO: add TLVs to message
+    for (const auto &bssid : bssid_list) {
+        auto vap_id = mon_db.get_vap_id(tlvf::mac_to_string(bssid));
+        if (vap_id == IFACE_ID_INVALID) {
+            LOG(WARNING) << "Unknown BSSID " << bssid << " - skipping";
+            continue;
+        }
+
+        if (!mon_stats.add_ap_metrics(cmdu_tx, bssid)) {
+            return false;
+        }
+
+        auto include_sta_traffic_stats_tlv =
+            mon_db.get_radio_node()
+                ->ap_metrics_reporting_info()
+                .include_associated_sta_traffic_stats_tlv_in_ap_metrics_response;
+        auto include_sta_link_metrics_tlv =
+            mon_db.get_radio_node()
+                ->ap_metrics_reporting_info()
+                .include_associated_sta_link_metrics_tlv_in_ap_metrics_response;
+
+        if (include_sta_traffic_stats_tlv || include_sta_link_metrics_tlv) {
+            for (auto it = mon_db.sta_begin(); it != mon_db.sta_end(); ++it) {
+                const auto &sta_mac  = it->first;
+                const auto &sta_node = it->second;
+
+                if (sta_node == nullptr) {
+                    LOG(WARNING) << "Invalid node pointer for STA = " << sta_mac;
+                    continue;
+                }
+                if (sta_node->get_vap_id() != vap_id) {
+                    continue;
+                }
+
+                if (include_sta_traffic_stats_tlv) {
+                    LOG(TRACE) << "Include STA traffic stats for " << sta_node->get_mac();
+                    if (!mon_stats.add_ap_assoc_sta_traffic_stat(cmdu_tx, *sta_node)) {
+                        LOG(ERROR) << "Failed to add sta_traffic_stat tlv";
+                    }
+                }
+                if (include_sta_link_metrics_tlv) {
+                    LOG(TRACE) << "Include STA link metrics for " << sta_node->get_mac();
+                    if (!mon_stats.add_ap_assoc_sta_link_metric(cmdu_tx, bssid, *sta_node)) {
+                        LOG(ERROR) << "Failed to add sta_link_metric tlv";
+                    }
+                }
+            }
+        }
+    }
 
     return true;
 }
@@ -1468,11 +1526,7 @@ bool monitor_thread::handle_ap_metrics_query(Socket &sd, ieee1905_1::CmduMessage
         return false;
     }
 
-    auto cmdu_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE);
-    if (!cmdu_header) {
-        LOG(ERROR) << "Failed building AP_METRICS_RESPONSE_MESSAGE";
-        return false;
-    }
+    std::vector<sMacAddr> bssid_list;
 
     for (size_t bssid_idx = 0; bssid_idx < ap_metric_query_tlv->bssid_list_length(); bssid_idx++) {
         auto bssid_tuple = ap_metric_query_tlv->bssid_list(bssid_idx);
@@ -1484,52 +1538,12 @@ bool monitor_thread::handle_ap_metrics_query(Socket &sd, ieee1905_1::CmduMessage
         LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
                    << "  bssid " << bssid;
 
-        auto vap_id = mon_db.get_vap_id(tlvf::mac_to_string(bssid));
-        if (vap_id == IFACE_ID_INVALID) {
-            LOG(WARNING) << "Unknown BSSID " << bssid << " - skipping";
-            continue;
-        }
+        bssid_list.emplace_back(bssid);
+    }
 
-        if (!mon_stats.add_ap_metrics(cmdu_tx, bssid)) {
-            return false;
-        }
-
-        auto include_sta_traffic_stats_tlv =
-            mon_db.get_radio_node()
-                ->ap_metrics_reporting_info()
-                .include_associated_sta_traffic_stats_tlv_in_ap_metrics_response;
-        auto include_sta_link_metrics_tlv =
-            mon_db.get_radio_node()
-                ->ap_metrics_reporting_info()
-                .include_associated_sta_link_metrics_tlv_in_ap_metrics_response;
-
-        if (include_sta_traffic_stats_tlv || include_sta_link_metrics_tlv) {
-            for (auto it = mon_db.sta_begin(); it != mon_db.sta_end(); it++) {
-                const auto &sta_mac  = it->first;
-                const auto &sta_node = it->second;
-
-                if (sta_node == nullptr) {
-                    LOG(WARNING) << "Invalid node pointer for STA = " << sta_mac;
-                    continue;
-                }
-                if (sta_node->get_vap_id() != vap_id) {
-                    continue;
-                }
-
-                if (include_sta_traffic_stats_tlv) {
-                    LOG(TRACE) << "Include STA traffic stats for " << sta_node->get_mac();
-                    if (!mon_stats.add_ap_assoc_sta_traffic_stat(cmdu_tx, *sta_node)) {
-                        LOG(ERROR) << "Failed to add sta_traffic_stat tlv";
-                    }
-                }
-                if (include_sta_link_metrics_tlv) {
-                    LOG(TRACE) << "Include STA link metrics for " << sta_node->get_mac();
-                    if (!mon_stats.add_ap_assoc_sta_link_metric(cmdu_tx, bssid, *sta_node)) {
-                        LOG(ERROR) << "Failed to add sta_link_metric tlv";
-                    }
-                }
-            }
-        }
+    if (!create_ap_metrics_response(mid, bssid_list)) {
+        LOG(ERROR) << "Unable to create AP Metrics Response message";
+        return false;
     }
 
     LOG(DEBUG) << "Sending AP_METRICS_RESPONSE_MESSAGE to slave_socket, mid=" << std::hex
