@@ -85,6 +85,16 @@ protected:
     virtual bool set(const std::string &param, const std::string &value,
                      int vap_id = beerocks::IFACE_RADIO_ID) override;
 
+    /** @brief Get the status directory.
+     *
+     * The dummy implementation interacts with the test framework through files in the test
+     * directory. This function returns the path to that directory.
+     */
+    std::string get_status_dir() const
+    {
+        return std::string(BEEROCKS_TMP_PATH) + "/" + get_iface_name();
+    }
+
     static const int predefined_vaps_num = 4;
 
     // Private data-members:

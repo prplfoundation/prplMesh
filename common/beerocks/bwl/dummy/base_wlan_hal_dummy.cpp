@@ -253,7 +253,7 @@ base_wlan_hal_dummy::base_wlan_hal_dummy(HALType type, const std::string &iface_
         LOG(FATAL) << "Failed creating m_fd_ext_events: " << strerror(errno);
     }
 
-    std::string path = std::string(BEEROCKS_TMP_PATH) + "/" + get_iface_name();
+    auto path = get_status_dir();
     mkdir(path.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     inotify_add_watch(m_fd_ext_events, path.c_str(), (IN_CREATE | IN_DELETE | IN_MODIFY));
 
@@ -386,7 +386,7 @@ bool base_wlan_hal_dummy::process_ext_events()
         return false;
     }
 
-    std::string event_file = std::string(BEEROCKS_TMP_PATH) + "/" + get_iface_name() + "/EVENT";
+    std::string event_file = get_status_dir() + "/EVENT";
     std::ifstream stream;
     stream.open(event_file);
     if (!stream.is_open()) {
