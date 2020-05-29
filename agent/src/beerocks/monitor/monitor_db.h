@@ -379,6 +379,13 @@ public:
     int get_vap_count() { return vap_nodes.size(); }
     void vap_erase_all();
 
+    /**
+     * @brief Gets a list containing the BSSID of all VAPs.
+     *
+     * @param[out] bssid_list list of BSSID to fill in.
+     */
+    void get_bssid_list(std::vector<sMacAddr> &bssid_list) const;
+
     // STA's //
     monitor_sta_node *sta_add(const std::string &sta_mac, const int8_t vap_id);
     void sta_erase(const std::string &sta_mac);

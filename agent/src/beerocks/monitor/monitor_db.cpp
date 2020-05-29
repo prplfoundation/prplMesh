@@ -298,6 +298,15 @@ int monitor_db::get_vap_id(const std::string &bssid)
     return beerocks::IFACE_ID_INVALID;
 }
 
+void monitor_db::get_bssid_list(std::vector<sMacAddr> &bssid_list) const
+{
+    for (const auto &vap : vap_nodes) {
+        const auto &vap_node = vap.second;
+        auto bssid           = tlvf::mac_from_string(vap_node->get_mac());
+        bssid_list.emplace_back(bssid);
+    }
+}
+
 monitor_sta_node *monitor_db::sta_find(const std::string &sta_mac)
 {
     auto it = sta_nodes.find(sta_mac);
