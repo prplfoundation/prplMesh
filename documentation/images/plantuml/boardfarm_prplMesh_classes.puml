@@ -76,19 +76,19 @@ package prplMesh_entities <<Frame>> {
     class Radio {
         string mac
 
-        {abstract} get_status()
+        {abstract} get_current_channel()
         {abstract} get_txpower()
         {abstract} wait_for_log()
     }
 
     class RadioDocker {
-        get_status()
+        get_current_channel()
         get_txpower()
         wait_for_log()
     }
 
     class RadioHostapd {
-        get_status()
+        get_current_channel()
         get_txpower()
         wait_for_log()
     }

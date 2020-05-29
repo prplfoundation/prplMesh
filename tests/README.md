@@ -26,6 +26,9 @@ The test environment prepares these before the tests are started.
 - `Radio` objects are accessed through the agents and have the following attributes:
     - `mac`:  The radio UID of this radio.
     - `vaps`: list of VAPs configured on this radio, see below.
+    - `get_current_channel`: read the current channel from the radio.
+       Returns a tuple (channel, bandwidth, center_channel).
+       Note that 80+80 bandwidth is not supported: bandwidth is reported as an integer, and 80+80 requires two center channels.
     - `wait_for_log(regex, start_line, timeout)`: wait for maximum `timeout` seconds for `regex` to appear in the log of the device on a line after `start_line`.
       This looks in the `beerocks_agent_wlanX.log` file, where wlanX corresponds to the radio.
       Don't use this function directly, use `self.wait_for_log` or `self.check_log` instead (see below).

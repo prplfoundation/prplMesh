@@ -12,8 +12,10 @@ import platform
 import re
 import subprocess
 import time
+import yaml
 
 from capi import UCCSocket
+from collections import namedtuple
 from opts import opts, debug, err
 import sniffer
 
@@ -67,6 +69,9 @@ class ALEntity:
         raise NotImplementedError("wait_for_log is not implemented in abstract class ALEntity")
 
 
+ChannelInfo = namedtuple("ChannelInfo", "channel bandwidth center_channel")
+
+
 class Radio:
     '''Abstract representation of a radio on a MultiAP agent.
 
@@ -83,6 +88,17 @@ class Radio:
     def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
         '''Poll the radio's logfile until it contains "regex" or times out.'''
         raise NotImplementedError("wait_for_log is not implemented in abstract class Radio")
+
+    def get_current_channel(self) -> ChannelInfo:
+        '''Get the current channel information.
+
+        Returns
+        -------
+        ChannelInfo
+            3-tuple with the channel information: channel index, bandwidth as an integer, and
+            center channel for VHT.
+        '''
+        raise NotImplementedError("get_current_channel is not implemented in abstract class Radio")
 
 
 class Station:
@@ -269,6 +285,19 @@ class RadioDocker(Radio):
         # Inside the container, $USER is set to the username that was used for starting it.
         command = "echo \"{}\" > /tmp/$USER/beerocks/{}/EVENT".format(event, self.iface_name)
         self.agent.command('sh', '-c', command)
+
+    def read_tmp_file(self, filename: str) -> bytes:
+        '''Read the file given by `filename` from the radio's status directory'''
+        # The file is only available within the docker container so we need to use cat.
+        # Inside the container, $USER is set to the username that was used for starting it.
+        # We need to pass through shell to expand it.
+        path = "/tmp/$USER/beerocks/{}/{}".format(self.iface_name, filename)
+        return self.agent.command("sh", "-c", 'cat "{}"'.format(path))
+
+    def get_current_channel(self) -> ChannelInfo:
+        channel_info = yaml.safe_load(self.read_tmp_file("channel"))
+        return ChannelInfo(channel_info["channel"], channel_info["bw"],
+                           channel_info["center_channel"])
 
 
 class VirtualAPDocker(VirtualAP):
