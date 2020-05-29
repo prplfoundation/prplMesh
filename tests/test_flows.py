@@ -423,15 +423,17 @@ class TestFlows:
                 self.fail('Wrong SSID: {vap.ssid} instead torn down'.format(vap=vap))
 
     def test_channel_selection(self):
+        orig_chan_0 = env.agents[0].radios[0].get_current_channel()
+        orig_chan_1 = env.agents[0].radios[1].get_current_channel()
+        debug("Starting channel wlan0: {}, wlan2: {}".format(orig_chan_0, orig_chan_1))
+
         debug("Send channel preference query")
         ch_pref_query_mid = env.controller.dev_send_1905(env.agents[0].mac, 0x8004)
         time.sleep(1)
         debug("Confirming channel preference query has been received on agent")
-        self.check_log(env.agents[0].radios[0], "CHANNEL_PREFERENCE_QUERY_MESSAGE")
-        self.check_log(env.agents[0].radios[1], "CHANNEL_PREFERENCE_QUERY_MESSAGE")
 
         # TODO should be a single response (currently two are sent)
-        self.check_cmdu_type("channel preferency response", 0x8005, env.agents[0].mac,
+        self.check_cmdu_type("channel preference response", 0x8005, env.agents[0].mac,
                              env.controller.mac, ch_pref_query_mid)
 
         debug("Send empty channel selection request")
@@ -439,13 +441,17 @@ class TestFlows:
                                                   0x8006, tlv(0x00, 0x0000, "{}"))
         time.sleep(1)
 
-        debug("Confirming empty channel selection request has been received on agent")
-        self.check_log(env.agents[0].radios[0], "CHANNEL_SELECTION_REQUEST_MESSAGE")
-        self.check_log(env.agents[0].radios[1], "CHANNEL_SELECTION_REQUEST_MESSAGE")
-
         # TODO should be a single response (currently two are sent)
         self.check_cmdu_type("channel selection response", 0x8007, env.agents[0].mac,
                              env.controller.mac, cs_req_mid)
+
+        cur_chan_0 = env.agents[0].radios[0].get_current_channel()
+        cur_chan_1 = env.agents[0].radios[1].get_current_channel()
+        if cur_chan_0 != orig_chan_0:
+            self.fail("Radio 0 channel switched to {}".format(cur_chan_0))
+        if cur_chan_1 != orig_chan_1:
+            self.fail("Radio 1 channel switched to {}".format(cur_chan_1))
+
         oper_channel_reports = self.check_cmdu_type("operating channel report", 0x8008,
                                                     env.agents[0].mac, env.controller.mac)
         for report in oper_channel_reports:
@@ -469,9 +475,6 @@ class TestFlows:
             )
             time.sleep(1)
 
-            self.check_log(env.agents[0].radios[0], "CHANNEL_SELECTION_REQUEST_MESSAGE")
-            self.check_log(env.agents[0].radios[1], "CHANNEL_SELECTION_REQUEST_MESSAGE")
-
             self.check_log(env.agents[0].radios[0],
                            "tlvTransmitPowerLimit {}".format(payload_transmit_power))
             self.check_log(env.agents[0].radios[1],
@@ -480,6 +483,13 @@ class TestFlows:
             # TODO should be a single response (currently two are sent)
             self.check_cmdu_type("channel selection response", 0x8007, env.agents[0].mac,
                                  env.controller.mac, cs_req_mid)
+
+            cur_chan_0 = env.agents[0].radios[0].get_current_channel()
+            cur_chan_1 = env.agents[0].radios[1].get_current_channel()
+            if cur_chan_0 != orig_chan_0:
+                self.fail("Radio 0 channel switched to {}".format(cur_chan_0))
+            if cur_chan_1 != orig_chan_1:
+                self.fail("Radio 1 channel switched to {}".format(cur_chan_1))
 
             oper_channel_reports = self.check_cmdu_type("operating channel report", 0x8008,
                                                         env.agents[0].mac, env.controller.mac)
@@ -568,29 +578,23 @@ class TestFlows:
             )
             time.sleep(1)
 
-            debug(
-                "Confirming channel selection request has been received on agent,step {}".format(i))
-
-            self.check_log(env.agents[0].radios[0], "CHANNEL_SELECTION_REQUEST_MESSAGE")
-            self.check_log(env.agents[0].radios[1], "CHANNEL_SELECTION_REQUEST_MESSAGE")
-
-            debug(
-                "Confirming tlvTransmitPowerLimit has been received with correct value on \
-                    agent, step {}".format(i))
+            debug("Confirming tlvTransmitPowerLimit has been received with correct value on agent,"
+                  " step {}".format(i))
 
             self.check_log(env.agents[0].radios[0], "tlvTransmitPowerLimit {}".format(tp20dBm))
-
-            self.check_log(env.agents[0].radios[0],
-                           "ACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START")
-
             self.check_log(env.agents[0].radios[1], "tlvTransmitPowerLimit {}".format(tp20dBm))
-
-            self.check_log(env.agents[0].radios[0],
-                           "ACTION_APMANAGER_HOSTAP_CHANNEL_SWITCH_ACS_START")
 
             # TODO should be a single response (currently two are sent)
             self.check_cmdu_type("channel selection response", 0x8007, env.agents[0].mac,
                                  env.controller.mac, cs_req_mid)
+
+            # payload_wlan0 and payload_wlan1 forced to channel 6 resp. 36, check that this happened
+            (cur_chan_channel_0, _, _) = env.agents[0].radios[0].get_current_channel()
+            (cur_chan_channel_1, _, _) = env.agents[0].radios[1].get_current_channel()
+            if cur_chan_channel_0 != 6:
+                self.fail("Radio 0 channel switched to {} instead of 6".format(cur_chan_channel_0))
+            if cur_chan_channel_1 != 36:
+                self.fail("Radio 1 channel switched to {} instead of 36".format(cur_chan_channel_1))
 
             oper_channel_reports = self.check_cmdu_type("operating channel report", 0x8008,
                                                         env.agents[0].mac, env.controller.mac)
