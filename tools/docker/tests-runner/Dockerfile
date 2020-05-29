@@ -3,9 +3,10 @@ FROM docker.io/library/docker@sha256:a490c83561c1cef49b6fe12aba2c31f908391ec3efe
 
 RUN apk add --update --no-cache \
     bash \
-    python3 \
-    grep \
     coreutils \
+    grep \
+    py3-yaml \
+    python3 \
     tshark
 
 COPY entrypoint.sh /usr/local/bin/
