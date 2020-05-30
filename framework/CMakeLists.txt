@@ -8,7 +8,6 @@ set_property(CACHE MSGLIB PROPERTY STRINGS "zmq" "nng" "None")
 find_package(json-c REQUIRED)
 
 add_subdirectory(external)
-add_subdirectory(tlvf)
 add_subdirectory(common)
 if (NOT MSGLIB STREQUAL "None")
 #add_subdirectory(discovery_agent)
@@ -16,4 +15,3 @@ add_subdirectory(examples)
 endif()
 
 add_dependencies(mapfcommon elpp)
-add_dependencies(tlvf elpp)

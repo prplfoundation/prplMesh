@@ -73,7 +73,7 @@ flake8:
   image: pipelinecomponents/flake8:f087c4c
   script:
     - apk add --update --no-cache git
-    - git ls-files -z -- '*.py' ':(exclude)tools/maptools.py' ':(exclude)framework/tlvf/tlvf.py' |
+    - git ls-files -z -- '*.py' ':(exclude)tools/maptools.py' ':(exclude)common/tlvf/tlvf.py' |
       xargs -0 -t flake8 --verbose
   needs: []
 
