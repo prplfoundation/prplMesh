@@ -77,11 +77,6 @@ common/beerocks/bwl/dwpal/ap_wlan_hal_dwpal.cpp: information: This file is not a
 common/beerocks/bwl/dwpal/base_wlan_hal_dwpal.cpp: style: Consider using std::count_if algorithm instead of a raw loop. [useStlAlgorithm]                        attached++;
 common/beerocks/bwl/dwpal/mon_wlan_hal_dwpal.cpp: style: The scope of the variable 'rate_kbs' can be reduced. [variableScope]    uint32_t rate_kbs;
 common/beerocks/bwl/dwpal/mon_wlan_hal_dwpal.cpp: style: The scope of the variable 'rate_mbs_fp_8_1' can be reduced. [variableScope]    uint8_t rate_mbs_fp_8_1;
-common/beerocks/bwl/econet/ap_wlan_hal_econet.cpp: style: struct member 'DUMMY_acs_report_get::BW' is never used. [unusedStructMember]    int BW;
-common/beerocks/bwl/econet/ap_wlan_hal_econet.cpp: style: struct member 'DUMMY_acs_report_get::Ch' is never used. [unusedStructMember]    int Ch;
-common/beerocks/bwl/econet/ap_wlan_hal_econet.cpp: style: struct member 'DUMMY_acs_report_get::DFS' is never used. [unusedStructMember]    int DFS;
-common/beerocks/bwl/econet/ap_wlan_hal_econet.cpp: style: struct member 'DUMMY_acs_report_get::bss' is never used. [unusedStructMember]    int bss;
-common/beerocks/bwl/econet/mon_wlan_hal_econet.cpp: style: The scope of the variable 'tmp_int' can be reduced. [variableScope]    int64_t tmp_int;
 common/beerocks/bwl/nl80211/base_wlan_hal_nl80211.cpp: style: A pointer can not be negative so it is either pointless or an error to check if it is. [pointerLessThanZero]    if (err < 0) {
 common/beerocks/bwl/nl80211/base_wlan_hal_nl80211.cpp: style: C-style pointer casting [cstyleCast]                m_fd_ext_events = wpa_ctrl_get_fd((wpa_ctrl *)m_wpa_ctrl_event);
 common/beerocks/bwl/shared/netlink_socket.cpp: style: Local variable 'rc' shadows outer variable [shadowVariable]        int rc = nl_recvmsgs(m_nl_socket.get(), nl_callback.get());
