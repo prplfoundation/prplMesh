@@ -115,7 +115,7 @@ static uint8_t wpa_bw_to_beerocks_bw(const std::string &chan_width)
 ap_wlan_hal_nl80211::ap_wlan_hal_nl80211(const std::string &iface_name, hal_event_cb_t callback,
                                          hal_conf_t hal_conf)
     : base_wlan_hal(bwl::HALType::AccessPoint, iface_name, IfaceType::Intel, callback, hal_conf),
-      base_wlan_hal_nl80211(bwl::HALType::AccessPoint, iface_name, callback, BUFFER_SIZE)
+      base_wlan_hal_nl80211(bwl::HALType::AccessPoint, iface_name, callback, BUFFER_SIZE, hal_conf)
 {
 }
 

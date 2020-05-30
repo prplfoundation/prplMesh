@@ -102,13 +102,15 @@ public:
         std::string enable_system_hang_test;
         std::string enable_son_slaves_watchdog;
         std::string const_backhaul_slave;
-        //[slaveX]
+        //[agentX]
         std::string radio_identifier[IRE_MAX_SLAVES]; // mAP RUID
         std::string enable_repeater_mode[IRE_MAX_SLAVES];
         std::string hostap_iface_type[IRE_MAX_SLAVES];
         std::string sta_iface[IRE_MAX_SLAVES];
         std::string sta_iface_filter_low[IRE_MAX_SLAVES];
         std::string hostap_ant_gain[IRE_MAX_SLAVES];
+        std::string hostap_ctrl_iface[IRE_MAX_SLAVES];
+        std::string wpa_supplicant_ctrl_iface[IRE_MAX_SLAVES];
         //[log]
         SConfigLog sLog;
     } sConfigSlave;

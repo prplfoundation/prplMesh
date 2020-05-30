@@ -168,6 +168,9 @@ static void fill_son_slave_config(const beerocks::config_file::sConfigSlave &bee
         beerocks::string_utils::stoi(beerocks_slave_conf.sta_iface_filter_low[slave_num]);
     son_slave_conf.backhaul_wireless_iface_type = son_slave_conf.hostap_iface_type;
 
+    son_slave_conf.hostap_ctrl_iface = beerocks_slave_conf.hostap_ctrl_iface[slave_num];
+    son_slave_conf.wpa_supplicant_ctrl_iface = beerocks_slave_conf.wpa_supplicant_ctrl_iface[slave_num];
+
     // disable stopping on failure initially. Later on, it will be read from BPL as part of
     // cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE
     son_slave_conf.stop_on_failure_attempts = 0;
@@ -559,7 +562,7 @@ int main(int argc, char *argv[])
         std::string base_name = std::string(BEEROCKS_AGENT) + "_" + hostap_iface;
         beerocks::os_utils::kill_pid(beerocks_slave_conf.temp_path, base_name);
 
-        //start new slave process
+        // start new slave process
         LOG(INFO) << "Starting slave for iface '" << hostap_iface << "'";
 
         std::string file_name = "./" + std::string(BEEROCKS_AGENT);

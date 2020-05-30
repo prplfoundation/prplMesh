@@ -19,6 +19,7 @@ This file lists all contributors.
 - Frederik Van Bogaert
 - Gal Wiener
 - Intel Corporation
+- Ivan Efimov (Inango Systems Ltd.)
 - Itay Elenzweig
 - Juan Schroeder
 - KC Chen

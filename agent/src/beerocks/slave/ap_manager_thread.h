@@ -30,6 +30,7 @@ public:
         beerocks::eIfaceType hostap_iface_type;
         int channel;
         bool iface_filter_low;
+        std::string wpa_ctrl_path;
     };
 
     void ap_manager_config(ap_manager_conf_t &conf);

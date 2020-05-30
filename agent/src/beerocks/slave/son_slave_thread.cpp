@@ -3692,6 +3692,7 @@ bool slave_thread::ap_manager_start()
     ap_manager_conf.hostap_iface_type = config.hostap_iface_type;
     ap_manager_conf.channel           = wlan_settings.channel;
     ap_manager_conf.iface_filter_low  = config.backhaul_wireless_iface_filter_low;
+    ap_manager_conf.wpa_ctrl_path     = config.hostap_ctrl_iface;
 
     ap_manager->ap_manager_config(ap_manager_conf);
 

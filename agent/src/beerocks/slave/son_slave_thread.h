@@ -53,6 +53,8 @@ public:
         beerocks::eIfaceType hostap_iface_type;
         int hostap_ant_gain;
         std::string radio_identifier; //mAP RUID
+        std::string hostap_ctrl_iface;
+        std::string wpa_supplicant_ctrl_iface;
     } sSlaveConfig;
 
     typedef struct {

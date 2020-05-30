@@ -112,6 +112,7 @@ void ap_manager_thread::ap_manager_config(ap_manager_conf_t &conf)
 
     bwl::hal_conf_t hal_conf;
     hal_conf.ap_acs_enabled = acs_enabled;
+    hal_conf.wpa_ctrl_path = conf.wpa_ctrl_path;
 
     // Create a new AP HAL instance
     ap_wlan_hal = bwl::ap_wlan_hal_create(

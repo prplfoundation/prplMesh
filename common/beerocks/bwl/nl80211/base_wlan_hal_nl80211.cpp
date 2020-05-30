@@ -35,7 +35,6 @@ namespace nl80211 {
 ///////////////////////// Local Module Definitions ///////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-#define BASE_CTRL_PATH "/var/run/"
 #define AP_ENABELED_TIMEOUT_SEC 15
 #define AP_ENABELED_FIXED_DFS_TIMEOUT_SEC 660
 
@@ -206,7 +205,8 @@ base_wlan_hal_nl80211::base_wlan_hal_nl80211(HALType type, const std::string &if
     : base_wlan_hal(type, iface_name, IfaceType::Intel, callback, hal_conf),
       beerocks::beerocks_fsm<nl80211_fsm_state, nl80211_fsm_event>(nl80211_fsm_state::Delay),
       m_nl80211_client(nl80211_client_factory::create_instance()),
-      m_wpa_ctrl_buffer_size(wpa_ctrl_buffer_size)
+      m_wpa_ctrl_buffer_size(wpa_ctrl_buffer_size),
+      m_wpa_ctrl_path(hal_conf.wpa_ctrl_path)
 {
     LOG_IF(!m_nl80211_client, FATAL) << "Failed to create nl80211_client instance";
     // Allocate wpa_ctrl buffer
@@ -217,18 +217,6 @@ base_wlan_hal_nl80211::base_wlan_hal_nl80211(HALType type, const std::string &if
             }
         });
     }
-
-    m_wpa_ctrl_path = BASE_CTRL_PATH;
-    if (get_type() == HALType::AccessPoint || get_type() == HALType::Monitor) {
-        m_wpa_ctrl_path += "hostapd/";
-    } else if (get_type() == HALType::Station) {
-        m_wpa_ctrl_path += "wpa_supplicant/";
-    } else {
-        LOG(ERROR) << "Unsupported HAL Type: " << int(get_type());
-        return; // HACK TODO what should we do in that case?
-    }
-
-    m_wpa_ctrl_path += m_radio_info.iface_name;
 
     // Initialize the FSM
     fsm_setup();
