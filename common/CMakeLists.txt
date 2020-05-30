@@ -4,4 +4,5 @@ message("${BoldWhite}Preparing ${BoldGreen}common${BoldWhite} for the ${BoldGree
 set(BEEROCKS_PLATFORM_INIT "false")
 
 # Modules
+add_subdirectory(bpl)
 add_subdirectory(beerocks)
