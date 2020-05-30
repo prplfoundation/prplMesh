@@ -37,8 +37,6 @@ It is recommended to build "out of tree". This is specially useful if the same s
     git clone ssh://git@gts-chd.intel.com:29418/sw_ugw/multiap.git 
     mkdir build && cd build
     cmake ../multiap && make install
-> For building examples, add -DBUILD_EXAMPLES=ON to the cmake command.
-See examples/*/README.md for each example instructions
 
 At this point multiap framework is built, binaries are available in `build/install` folder.
 
