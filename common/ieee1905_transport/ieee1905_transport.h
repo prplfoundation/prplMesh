@@ -9,9 +9,9 @@
 #ifndef MAP_TRANSPORT_IEEE1905_TRANSPORT_H_
 #define MAP_TRANSPORT_IEEE1905_TRANSPORT_H_
 
-#include "ieee1905_transport_messages.h"
 #include <mapf/common/poller.h>
 #include <mapf/local_bus.h>
+#include <mapf/transport/ieee1905_transport_messages.h>
 #include <tlvf/tlvftypes.h>
 
 #include <arpa/inet.h>

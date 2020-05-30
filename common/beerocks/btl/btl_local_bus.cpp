@@ -11,7 +11,7 @@
 #include <btl/btl.h>
 #include <easylogging++.h>
 #include <mapf/local_bus.h>
-#include <mapf/transport/ieee1905_transport.h>
+#include <mapf/transport/ieee1905_transport_messages.h>
 
 using namespace beerocks::btl;
 using namespace beerocks::net;
