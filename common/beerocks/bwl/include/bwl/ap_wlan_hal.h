@@ -150,16 +150,17 @@ public:
      * @param [in] mac The MAC address of the station.
      * @param [in] bssid The MAC address of the target AP.
      * @param [in] chan The channel of the target AP.
-     * @param [in] disassoc_timer Time in TU (time units, 1 TU = 1.024ms) before the AP should 
-     *             forcefully disconnect the client. Setting a non-ZERO value
-     *             should enable the "disassociation imminent" function and
+     * @param [in] disassoc_timer_btt Time in beacon transmit inteval units  (1 BTT = ~100ms)
+     *             before the AP should forcefully disconnect the client. 
+     *             Setting a non-ZERO value should enable the "disassociation imminent" function and
      *             arm the internal AP timer (usually performed by the hardware).
-     * @param [in] valid_int number of beacons for which the neighbor list is valid
+     * @param [in] valid_int_btt  the number of beacon transmission times (TBTTs) 
+     *             until the BSS transition candidate list is no longer valid.
      *
      * @return true on success or false on error.
      */
     virtual bool sta_bss_steer(const std::string &mac, const std::string &bssid, int oper_class,
-                               int chan, int disassoc_timer, int valid_int) = 0;
+                               int chan, int disassoc_timer_btt, int valid_int_btt) = 0;
 
     /*!
      * Update wifi credentials.
