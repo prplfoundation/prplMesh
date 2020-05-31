@@ -4,6 +4,8 @@ project(bcl VERSION ${prplmesh_VERSION})
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
 find_package(PythonInterp REQUIRED)
+find_package(nl-3 REQUIRED)
+find_package(nl-route-3 REQUIRED)
 
 message(STATUS ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -23,7 +25,7 @@ target_include_directories(${PROJECT_NAME}
         $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC tlvf elpp mapfcommon)
+target_link_libraries(${PROJECT_NAME} PUBLIC nl-3 nl-route-3 tlvf elpp mapfcommon)
 
 install(TARGETS ${PROJECT_NAME} EXPORT bclConfig
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -58,7 +60,7 @@ if (BUILD_TESTS)
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     )
-    target_link_libraries(${TEST_PROJECT_NAME} tlvf elpp mapfcommon)
+    target_link_libraries(${TEST_PROJECT_NAME} nl-3 nl-route-3 tlvf elpp mapfcommon)
     target_link_libraries(${TEST_PROJECT_NAME} gtest_main)
     install(TARGETS ${TEST_PROJECT_NAME} DESTINATION bin/tests)
     add_test(NAME ${TEST_PROJECT_NAME} COMMAND $<TARGET_FILE:${TEST_PROJECT_NAME}>)
