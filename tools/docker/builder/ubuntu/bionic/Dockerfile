@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     cmake \
     curl \
     gcc \
+    gcovr \
     git \
     libjson-c-dev \
     libncurses-dev \
@@ -23,5 +24,6 @@ RUN apt-get update && apt-get install -y \
     python3 \
     python3-yaml \
     uuid-runtime \
+    valgrind \
     vim \
     && rm -rf /var/lib/apt/lists/*
