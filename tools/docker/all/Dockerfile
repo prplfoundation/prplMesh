@@ -25,6 +25,8 @@ RUN apt-get update && apt-get install -y \
 	libncurses-dev \
 	libssl-dev \
 	libjson-c-dev \
+	libnl-3-dev \
+	libnl-route-3-dev \
 	libnl-genl-3-dev \
 	libzmq3-dev \
 	python \

@@ -12,6 +12,8 @@ RUN apt-get update && apt-get install -y \
     git \
     libjson-c-dev \
     libncurses-dev \
+    libnl-3-dev \
+    libnl-route-3-dev \
     libnl-genl-3-dev \
     libreadline-dev \
     libssl-dev \
