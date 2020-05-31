@@ -25,6 +25,7 @@
 #include <net/if.h>
 #include <netinet/in.h>
 #include <netinet/ip_icmp.h>
+#include <netlink/route/neighbour.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -39,6 +40,7 @@ using namespace beerocks::net;
 
 #define NL_BUFSIZE 8192
 #define MAC_ADDR_CHAR_SIZE 17
+#define IPV4_ADDR_CHAR_SIZE 15
 
 struct route_info {
     struct in_addr dstAddr;
@@ -361,6 +363,102 @@ static int parseRoutes(struct nlmsghdr *nlHdr, std::shared_ptr<route_info> rtInf
         return (2);
     }
     return (0);
+}
+
+std::shared_ptr<std::unordered_map<std::string, std::string>>
+network_utils::get_arp_table(bool mac_as_key)
+{
+    auto arp_table_ptr = std::make_shared<std::unordered_map<std::string, std::string>>();
+    auto &arp_table    = *arp_table_ptr.get();
+
+    // Allocate a new netlink socket
+    std::unique_ptr<nl_sock, decltype(&nl_socket_free)> nl_socket(nl_socket_alloc(),
+                                                                  &nl_socket_free);
+    if (!nl_socket) {
+        LOG(ERROR) << "Failed allocating netlink socket!";
+        return nullptr;
+    }
+
+    int err = nl_connect(nl_socket.get(), NETLINK_ROUTE);
+    if (err != 0) {
+        LOG(ERROR) << "Failed connecting the netlink socket: " << nl_geterror(err);
+        return nullptr;
+    }
+
+    // ARP table cache
+    struct nl_cache *neighbor_table_cache = nullptr;
+
+    // Allocate the cache and fill it with data
+    err = rtnl_neigh_alloc_cache(nl_socket.get(), &neighbor_table_cache);
+    if (err != 0) {
+        LOG(ERROR) << "Failed probing ARP table: " << nl_geterror(err);
+        return nullptr;
+    }
+
+    auto entries_count = nl_cache_nitems(neighbor_table_cache);
+    if (entries_count <= 0) {
+        return arp_table_ptr;
+    }
+
+    auto neighbor_entry = reinterpret_cast<rtnl_neigh *>(nl_cache_get_first(neighbor_table_cache));
+    if (!neighbor_entry) {
+        LOG(ERROR) << "neighbor_entry is null";
+        nl_cache_free(neighbor_table_cache);
+        return nullptr;
+    }
+
+    char buffer_mac[MAC_ADDR_CHAR_SIZE + 1]; // +1 for null terminator
+    char buffer_ip[IPV4_ADDR_CHAR_SIZE + 1]; // +1 for null terminator
+
+    for (int i = 0; i < entries_count; i++) {
+
+        if (neighbor_entry == nullptr) {
+            break;
+        }
+
+        // Skip NOARP state and non IPv4 records
+        if (rtnl_neigh_get_state(neighbor_entry) == NUD_NOARP ||
+            rtnl_neigh_get_family(neighbor_entry) != AF_INET) {
+            // Advance to the next record
+            neighbor_entry = reinterpret_cast<rtnl_neigh *>(
+                nl_cache_get_next(reinterpret_cast<nl_object *>(neighbor_entry)));
+            continue;
+        }
+
+        auto nl_addr_mac = rtnl_neigh_get_lladdr(neighbor_entry);
+        if (!nl_addr_mac) {
+            // Advance to the next record
+            neighbor_entry = reinterpret_cast<rtnl_neigh *>(
+                nl_cache_get_next(reinterpret_cast<nl_object *>(neighbor_entry)));
+            continue;
+        }
+
+        auto nl_addr_ip = rtnl_neigh_get_dst(neighbor_entry);
+        if (!nl_addr_ip) {
+            // Advance to the next record
+            neighbor_entry = reinterpret_cast<rtnl_neigh *>(
+                nl_cache_get_next(reinterpret_cast<nl_object *>(neighbor_entry)));
+            continue;
+        }
+
+        char *mac = nl_addr2str(nl_addr_mac, buffer_mac, sizeof(buffer_mac));
+        char *ip  = nl_addr2str(nl_addr_ip, buffer_ip, sizeof(buffer_ip));
+
+        if (mac_as_key) {
+            arp_table[mac] = ip;
+        } else {
+            arp_table[ip] = mac;
+        }
+
+        // Advance to the next record
+        neighbor_entry = reinterpret_cast<rtnl_neigh *>(
+            nl_cache_get_next(reinterpret_cast<nl_object *>(neighbor_entry)));
+    }
+
+    // Free the cache
+    nl_cache_free(neighbor_table_cache);
+
+    return arp_table_ptr;
 }
 
 std::string network_utils::get_mac_from_arp_table(const std::string &ipv4)

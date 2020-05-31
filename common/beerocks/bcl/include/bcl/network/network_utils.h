@@ -94,6 +94,19 @@ public:
     static int get_iface_info(network_utils::iface_info &info, const std::string &iface_name);
     static bool get_raw_iface_info(const std::string &iface_name, raw_iface_info &info);
 
+    /**
+     * @brief Get the arp table as unordered map object of pairs <MAC, IP> or <IP, MAC>.
+     * The key of the map can be either a MAC address or an IP address, depends on the 'mac_as_key'
+     * argument value.
+     * If 'mac_as_key' is 'true' then the key is a MAC address, otherwise the key is an IP address.
+     * 
+     * @param[in] mac_as_key Decide whether the key of the returned unordered map object 
+     * is a MAC or an IP.
+     * @return std::shared_ptr<std::unordered_map<std::string, std::string>> 
+     */
+    static std::shared_ptr<std::unordered_map<std::string, std::string>>
+    get_arp_table(bool mac_as_key = true);
+
     //temp
     static std::string get_mac_from_arp_table(const std::string &ipv4);
 
