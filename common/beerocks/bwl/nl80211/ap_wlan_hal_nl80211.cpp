@@ -224,11 +224,12 @@ bool ap_wlan_hal_nl80211::sta_deauth(int8_t vap_id, const std::string &mac, uint
 }
 
 bool ap_wlan_hal_nl80211::sta_bss_steer(const std::string &mac, const std::string &bssid,
-                                        int oper_class, int chan, int disassoc_timer, int valid_int)
+                                        int oper_class, int chan, int disassoc_timer_btt,
+                                        int valid_int_btt)
 {
     LOG(TRACE) << __func__ << " mac: " << mac << ", BSS: " << bssid
                << ", oper_class: " << oper_class << ", channel: " << chan
-               << ", disassoc: " << disassoc_timer << ", valid_int: " << valid_int;
+               << ", disassoc: " << disassoc_timer_btt << ", valid_int: " << valid_int_btt;
 
     // Build command string
     std::string cmd =
@@ -236,22 +237,23 @@ bool ap_wlan_hal_nl80211::sta_bss_steer(const std::string &mac, const std::strin
         "BSS_TM_REQ " +
         mac
         // Transition management parameters
-        + " pref=" + "1" + " abridged=" + "1" +
-        // Target BSSID
-        " neighbor=" + bssid + ",0," + std::to_string(oper_class) + "," + std::to_string(chan) +
-        ",0";
+        + " pref=" + "1" + " abridged=" + "1";
 
-    if (disassoc_timer) {
+    if (disassoc_timer_btt) {
         cmd += std::string() + " disassoc_imminent=" + "1" +
-               " disassoc_timer=" + std::to_string(disassoc_timer);
+               " disassoc_timer=" + std::to_string(disassoc_timer_btt);
     }
     // " bss_term="  // Unused Param
     // " url="       // Unused Param
     // " mbo="       // Unused Param
 
-    if (valid_int) {
-        cmd += " valid_int=" + std::to_string(valid_int);
+    if (valid_int_btt) {
+        cmd += " valid_int=" + std::to_string(valid_int_btt);
     }
+
+    // Target BSSID
+    cmd += std::string() + " neighbor=" + bssid + ",0," + std::to_string(oper_class) + "," +
+           std::to_string(chan) + ",0,255";
 
     // Send command
     if (!wpa_ctrl_send_msg(cmd)) {

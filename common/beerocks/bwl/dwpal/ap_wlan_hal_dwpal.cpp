@@ -905,12 +905,13 @@ bool ap_wlan_hal_dwpal::sta_deauth(int8_t vap_id, const std::string &mac, uint32
 }
 
 bool ap_wlan_hal_dwpal::sta_bss_steer(const std::string &mac, const std::string &bssid,
-                                      int oper_class, int chan, int disassoc_timer, int valid_int)
+                                      int oper_class, int chan, int disassoc_timer_btt,
+                                      int valid_int_btt)
 {
 
     LOG(TRACE) << __func__ << " mac: " << mac << ", BSS: " << bssid
                << ", oper_class: " << oper_class << ", channel: " << chan
-               << ", disassoc: " << disassoc_timer << ", valid_int: " << valid_int;
+               << ", disassoc: " << disassoc_timer_btt << ", valid_int: " << valid_int_btt;
 
     // Build command string
     std::string cmd =
@@ -919,20 +920,22 @@ bool ap_wlan_hal_dwpal::sta_bss_steer(const std::string &mac, const std::string 
         mac
 
         // Transition management parameters
-        + " dialog_token=" + "0" + " Mode=" + "0" + " pref=" + "1" + " abridged=" + "1" +
-        " neighbor=" + bssid + ",0," + std::to_string(oper_class) + "," + std::to_string(chan) +
-        ",0,255";
+        + " dialog_token=" + "0" + " pref=" + "1" + " abridged=" + "1";
 
     // Divide disassoc_timer by 100, because the hostapd expects it to be in beacon interval
     // which is 100ms.
-    if (disassoc_timer) {
+    if (disassoc_timer_btt) {
         cmd += std::string() + " disassoc_imminent=" + "1" +
-               " disassoc_timer=" + std::to_string(disassoc_timer / 100);
+               " disassoc_timer=" + std::to_string(disassoc_timer_btt);
     }
 
-    if (valid_int) {
-        cmd += " valid_int=" + std::to_string(valid_int);
+    if (valid_int_btt) {
+        cmd += " valid_int=" + std::to_string(valid_int_btt);
     }
+
+    // Target BSSID
+    cmd += std::string() + " neighbor=" + bssid + ",0," + std::to_string(oper_class) + "," +
+           std::to_string(chan) + ",0,255";
 
     // Send command
     if (!dwpal_send_cmd(cmd)) {
