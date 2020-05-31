@@ -46,7 +46,7 @@
 // TODO: this could be considered a platform bug that should be solved at the platform level - see https://jira-chd.intel.com/browse/UGW_SW-25961
 //
 
-namespace mapf {
+namespace beerocks {
 
 class Ieee1905Transport {
 public:
@@ -309,6 +309,6 @@ inline std::ostream &operator<<(std::ostream &os, const Ieee1905Transport::Packe
     return m.print(os);
 }
 
-}; // namespace mapf
+}; // namespace beerocks
 
 #endif // MAP_TRANSPORT_IEEE1905_TRANSPORT_H_

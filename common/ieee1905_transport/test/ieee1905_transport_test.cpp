@@ -143,7 +143,7 @@ static std::string ieee1905_ifnames[MAX_IFS];
 static bool only_configure_interfaces = false;
 static bool use_unicast_address       = false;
 static uint8_t unicast_address[6];
-using namespace mapf;
+using namespace beerocks;
 
 int fork_local_bus()
 {
@@ -154,7 +154,7 @@ int fork_local_bus()
         return pid;
 
     MAPF_INFO("staring local bus broker");
-    Broker localbus(kLocalBusConf);
+    mapf::Broker localbus(mapf::kLocalBusConf);
     localbus.PrintConfig();
     localbus.Run();
 
@@ -297,12 +297,12 @@ int main(int argc, char *argv[])
 
     do {
         MAPF_INFO("initializing local bus interface");
-        LocalBusInterface bus(Context::Instance());
+        mapf::LocalBusInterface bus(mapf::Context::Instance());
         bus.Init();
 
         int rc;
 
-        Poller poller;
+        mapf::Poller poller;
         rc = poller.Add(bus.subscriber());
         if (rc != 0)
             break;

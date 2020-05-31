@@ -18,7 +18,7 @@
 
 #define ETHER_IS_SAME(addr1, addr2) (memcmp((addr1), (addr2), ETH_ALEN) == 0)
 
-namespace mapf {
+namespace beerocks {
 
 static const uint8_t ieee1905_max_message_version = 0x00;
 
@@ -686,4 +686,4 @@ std::ostream &Ieee1905Transport::Packet::print(std::ostream &os) const
     return os << ss.str();
 }
 
-} //namespace mapf
+} //namespace beerocks

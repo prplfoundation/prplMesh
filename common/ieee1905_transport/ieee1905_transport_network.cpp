@@ -19,7 +19,7 @@
 #include <sys/uio.h>
 #include <unistd.h>
 
-namespace mapf {
+namespace beerocks {
 
 // helper class to manage socket filter programs (Berkely Socket Filter)
 //
@@ -406,7 +406,7 @@ void Ieee1905Transport::set_al_mac_addr(const uint8_t *addr)
     }
 }
 
-} // namespace mapf
+} // namespace beerocks
 
 #if 0
     static const uint8_t ieee1905_multicast_address[ETH_ALEN] = { 0x01, 0x80, 0xc2, 0x00, 0x00, 0x13 }; // 01:80:c2:00:00:13

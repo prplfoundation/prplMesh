@@ -21,7 +21,7 @@
 // and we should then re-open the interface's raw socket, and add it to the poll list. To do that we need an event
 // to tell us that the interface is up and running - This is what we use netlink for.
 
-namespace mapf {
+namespace beerocks {
 
 bool Ieee1905Transport::open_netlink_socket()
 {
@@ -117,4 +117,4 @@ void Ieee1905Transport::handle_netlink_pollin_event()
     return;
 }
 
-} // namespace mapf
+} // namespace beerocks

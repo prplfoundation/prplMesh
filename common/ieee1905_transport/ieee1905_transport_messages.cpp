@@ -8,7 +8,7 @@
 
 #include <mapf/transport/ieee1905_transport_messages.h>
 
-namespace mapf {
+namespace beerocks {
 
 const std::string CmduRxMessage::kTopicPrefix = "cmdu.rx.";
 const std::string CmduTxMessage::kTopicPrefix = "cmdu.tx.";
@@ -19,4 +19,4 @@ const std::string InterfaceConfigurationQueryMessage::kTopicPrefix      = "if_co
 const std::string InterfaceConfigurationRequestMessage::kTopicPrefix    = "if_config.req.";
 const std::string InterfaceConfigurationIndicationMessage::kTopicPrefix = "if_config.ind.";
 
-}; // namespace mapf
+}; // namespace beerocks

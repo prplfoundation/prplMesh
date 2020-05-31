@@ -12,7 +12,7 @@
 #include <arpa/inet.h>
 #include <net/if.h>
 
-namespace mapf {
+namespace beerocks {
 
 void Ieee1905Transport::handle_local_bus_pollin_event()
 {
@@ -204,4 +204,4 @@ uint16_t Ieee1905Transport::get_next_message_id()
     return message_id_;
 }
 
-} // namespace mapf
+} // namespace beerocks

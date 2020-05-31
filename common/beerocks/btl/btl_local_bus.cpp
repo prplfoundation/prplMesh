@@ -13,8 +13,10 @@
 #include <mapf/local_bus.h>
 #include <mapf/transport/ieee1905_transport_messages.h>
 
-using namespace beerocks::btl;
 using namespace beerocks::net;
+
+namespace beerocks {
+namespace btl {
 
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////// Local Module Functions ///////////////////////////
@@ -41,8 +43,8 @@ static bool subscribe_topic_to_bus(std::shared_ptr<mapf::LocalBusInterface> bus,
                                    const ieee1905_1::eMessageType msg_type)
 {
     LOG(INFO) << "subscribing topic=" << (int)msg_type;
-    int rc = bus->subscriber().Subscribe<mapf::CmduRxMessage>(
-        mapf::CmduRxMessage::ieee1905_topic((uint16_t)msg_type));
+    int rc = bus->subscriber().Subscribe<CmduRxMessage>(
+        CmduRxMessage::ieee1905_topic((uint16_t)msg_type));
     if (rc) {
         LOG(ERROR) << "Subscribe error rc=" << rc << ", on topic=" << (int)msg_type;
         return false;
@@ -107,8 +109,8 @@ bool transport_socket_thread::configure_ieee1905_transport_interfaces(
 {
     LOG_IF(!bus, FATAL) << "Bus is not allocated!";
 
-    mapf::InterfaceConfigurationRequestMessage interface_configuration_request_msg;
-    using Flags = mapf::InterfaceConfigurationRequestMessage::Flags;
+    InterfaceConfigurationRequestMessage interface_configuration_request_msg;
+    using Flags = InterfaceConfigurationRequestMessage::Flags;
 
     uint32_t n = 0;
     mapf::utils::copy_string(interface_configuration_request_msg.metadata()->interfaces[n].ifname,
@@ -180,7 +182,7 @@ bool transport_socket_thread::handle_cmdu_message_bus()
         return false;
     }
 
-    auto cmdu_rx_msg = dynamic_cast<mapf::CmduRxMessage *>(msg.get());
+    auto cmdu_rx_msg = dynamic_cast<CmduRxMessage *>(msg.get());
     if (cmdu_rx_msg) {
     } else {
         THREAD_LOG(ERROR) << "received non CmduRxMessage:\n\tMessage: " << *msg
@@ -200,9 +202,9 @@ bool transport_socket_thread::handle_cmdu_message_bus()
 
     // fill UDS Header
     message::sUdsHeader *uds_header = (message::sUdsHeader *)rx_buffer;
-    std::copy_n((uint8_t *)cmdu_rx_msg->metadata()->src, sizeof(mapf::CmduRxMessage::Metadata::src),
+    std::copy_n((uint8_t *)cmdu_rx_msg->metadata()->src, sizeof(CmduRxMessage::Metadata::src),
                 uds_header->src_bridge_mac);
-    std::copy_n((uint8_t *)cmdu_rx_msg->metadata()->dst, sizeof(mapf::CmduRxMessage::Metadata::dst),
+    std::copy_n((uint8_t *)cmdu_rx_msg->metadata()->dst, sizeof(CmduRxMessage::Metadata::dst),
                 uds_header->dst_bridge_mac);
     uds_header->length = cmdu_rx_msg->metadata()->length;
 
@@ -227,7 +229,7 @@ bool transport_socket_thread::handle_cmdu_message_bus()
 bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
                                        const std::string &src_mac, uint16_t length)
 {
-    mapf::CmduTxMessage msg;
+    CmduTxMessage msg;
 
     tlvf::mac_from_string(msg.metadata()->src, src_mac);
     tlvf::mac_from_string(msg.metadata()->dst, dst_mac);
@@ -323,3 +325,6 @@ bool transport_socket_thread::work()
 
     return true;
 }
+
+} // namespace btl
+} // namespace beerocks

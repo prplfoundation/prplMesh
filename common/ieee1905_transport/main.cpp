@@ -11,7 +11,7 @@
 #include <net/if.h>
 #include <unistd.h>
 
-using namespace mapf;
+using namespace beerocks;
 
 int main(int argc, char *argv[])
 {

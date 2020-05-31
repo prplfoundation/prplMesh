@@ -10,14 +10,14 @@
 
 #include <unistd.h>
 
-namespace mapf {
+namespace beerocks {
 
 void Ieee1905Transport::run()
 {
     MAPF_INFO("starting 1905 transport.");
 
     // init Local Bus interface, subscribe to specific topics
-    local_bus_ = new LocalBusInterface(Context::Instance());
+    local_bus_ = new mapf::LocalBusInterface(mapf::Context::Instance());
     local_bus_->Init();
     if (local_bus_->subscriber().Subscribe<CmduTxMessage>() < 0) {
         MAPF_ERR("cannot subscribe to local bus.");
@@ -96,4 +96,4 @@ void Ieee1905Transport::run()
     }
 }
 
-} // namespace mapf
+} // namespace beerocks

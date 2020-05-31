@@ -23,13 +23,13 @@
 #define ETH_P_LLDP 0x88CC
 #endif
 
-namespace mapf {
+namespace beerocks {
 
 // Notes:
 //
 // This class will use one and only one Frame!!!
 // Do not use this class directly - please use CmduTxMessage and CmduRxMessage instead.
-class CmduXxMessage : public Message {
+class CmduXxMessage : public mapf::Message {
     static const uint8_t kVersion = 0;
 
 public:
@@ -164,7 +164,7 @@ public:
     virtual const std::string topic_prefix() const override { return kTopicPrefix; }
 };
 
-class CmduTxConfirmationMessage : public Message {
+class CmduTxConfirmationMessage : public mapf::Message {
     static const uint8_t kVersion = 0;
 
 public:
@@ -252,7 +252,7 @@ protected:
     }
 };
 
-class InterfaceConfigurationQueryMessage : public Message {
+class InterfaceConfigurationQueryMessage : public mapf::Message {
     using Message::Message; // inherit base class constructors
 
 public:
@@ -261,7 +261,7 @@ public:
     virtual const std::string topic_prefix() const { return kTopicPrefix; }
 };
 
-class InterfaceConfigurationMessage : public Message {
+class InterfaceConfigurationMessage : public mapf::Message {
     static const uint8_t kVersion   = 0;
     static const int kMaxInterfaces = 32;
 
@@ -353,6 +353,6 @@ public:
     virtual const std::string topic_prefix() const override { return kTopicPrefix; }
 };
 
-}; // namespace mapf
+}; // namespace beerocks
 
 #endif // MAP_IEEE1905_TRANSPORT_MESSAGES_H_
