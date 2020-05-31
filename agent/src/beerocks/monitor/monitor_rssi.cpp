@@ -315,6 +315,21 @@ void monitor_rssi::process()
             bool is_4addr_client    = (sta_bridge_4addr_mac != network_utils::ZERO_MAC_STRING);
             std::string arp_dst_mac = is_4addr_client ? sta_bridge_4addr_mac : sta_mac;
 
+            auto sta_ipv4 = sta_node->get_ipv4();
+            if (sta_ipv4.empty() || sta_ipv4 == network_utils::ZERO_IP_STRING) {
+                LOG(DEBUG) << "Sta " << sta_mac << " IP is missing, looking at the ARP Table";
+                auto arp_table = network_utils::get_arp_table();
+                if (arp_table) {
+                    auto arp_entry_it = arp_table->find(sta_mac);
+                    if (arp_entry_it != arp_table->end()) {
+                        sta_ipv4 = arp_entry_it->second;
+                        LOG(DEBUG) << "Found IP on ARP Table, setting Sta " << sta_mac << " IP to "
+                                   << sta_ipv4;
+                        sta_node->set_ipv4(arp_entry_it->second);
+                    }
+                }
+            }
+
             LOG(DEBUG) << "state: SEND_ARP -> "
                        << (sta_node->get_arp_burst() ? "WAIT_FIRST_REPLY" : "WAIT_REPLY")
                        << ", arp_iface = " << arp_iface << ", arp_iface_ipv4 = " << arp_iface_ipv4
