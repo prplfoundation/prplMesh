@@ -297,7 +297,7 @@ void client_steering_task::handle_event(int event_type, void *obj)
 void client_steering_task::handle_task_end()
 {
     if (!btm_report_received) {
-        TASK_LOG(DEBUG) << "node didn't respond to 11v request, updating failed attempt";
+        TASK_LOG(DEBUG) << "client didn't respond to 11v request, updating responsiveness";
         database.update_node_11v_responsiveness(sta_mac, false);
     }
     database.set_node_handoff_flag(sta_mac, false);
