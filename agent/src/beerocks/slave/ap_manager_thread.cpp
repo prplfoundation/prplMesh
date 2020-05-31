@@ -92,8 +92,8 @@ using namespace beerocks;
 using namespace son;
 
 ap_manager_thread::ap_manager_thread(std::string slave_uds_)
-    : socket_thread(), bss_steer_valid_int(BSS_STEER_VALID_INT),
-      bss_steer_imminent_valid_int(BSS_STEER_IMMINENT_VALID_INT)
+    : socket_thread(), bss_steer_valid_int(BSS_STEER_VALID_INT_BTT),
+      bss_steer_imminent_valid_int(BSS_STEER_IMMINENT_VALID_INT_BTT)
 {
     thread_name = "ap_manager";
     slave_uds   = slave_uds_;
