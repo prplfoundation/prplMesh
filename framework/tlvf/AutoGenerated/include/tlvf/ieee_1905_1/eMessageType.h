@@ -66,6 +66,8 @@ enum class eMessageType : uint16_t {
     HIGHER_LAYER_DATA_MESSAGE = 0x8018,
     BACKHAUL_STEERING_REQUEST_MESSAGE = 0x8019,
     BACKHAUL_STEERING_RESPONSE_MESSAGE = 0x801a,
+    CHANNEL_SCAN_REQUEST_MESSAGE = 0x801b,
+    CHANNEL_SCAN_REPORT_MESSAGE = 0x801c,
 };
 class eMessageTypeValidate {
 public:
@@ -118,6 +120,8 @@ public:
         case 0x8018:
         case 0x8019:
         case 0x801a:
+        case 0x801b:
+        case 0x801c:
                 ret = true;
                 break;
             default:
