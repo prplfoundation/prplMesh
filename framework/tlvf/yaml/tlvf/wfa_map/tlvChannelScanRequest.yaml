@@ -1,0 +1,52 @@
+#
+---
+_namespace: wfa_map
+
+tlvChannelScanRequest:
+  _type: class
+  _is_tlv_class : True
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_CHANNEL_SCAN_REQUEST
+  length: uint16_t
+  perform_fresh_scan: ePerformFreshScan
+  radio_list_length:
+    _type: uint8_t
+    _length_var: True
+  radio_list:
+    _type: cRadiosToScan
+    _length: [ radio_list_length ]
+
+ePerformFreshScan:
+  _type: enum
+  _enum_storage: uint8_t
+  PERFORM_A_FRESH_SCAN_AND_RETURN_RESULTS: 0x80
+  RETURN_STORED_RESULTS_OF_LAST_SUCCESSFUL_SCAN: 0x00
+
+cRadiosToScan:
+  _type: class
+  radio_uid: sMacAddr
+  operating_classes_list_length:
+    _type: uint8_t
+    _length_var: True
+  operating_classes_list:
+    _type: sOperatingClasses
+    _length: [ operating_classes_list_length ]
+
+sOperatingClasses:
+  _type: struct
+  _comment: |
+    Operating Class contains an enumerated value from Table E-4 in Annex E
+    of [1], specifying the global operating class in which the subsequent
+    Channel List is valid
+  operating_class: uint8_t
+  channel_list_length:
+    _type: uint8_t
+    _length_var: True
+    _comment: |
+      Number of channels specified in the Channel List. channel_list_length=0
+      indicates that the Multi-AP Agent is requested to scan on all channels
+      in the Operating Class
+  channels_list:
+    _type: uint8_t
+    _length: [ channel_list_length ]
