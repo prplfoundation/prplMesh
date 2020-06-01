@@ -1,0 +1,21 @@
+#
+---
+_namespace: wfa_map
+
+tlvTimestamp:
+  _type: class
+  _is_tlv_class : True
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_TIMESTAMP
+  length: uint16_t
+  timestamp_length:
+    _type: uint8_t
+    _length_var: True
+  timestamp:
+    _type: uint8_t
+    _comment: |
+      The timestamp shall be formatted as a string using the typedef dateandtime string
+      format as defined in section 3 of [1] and shall include timesecfrac and time-offset
+      as defined in section 5.6 of [1]
+    _length: [ timestamp_length ]
