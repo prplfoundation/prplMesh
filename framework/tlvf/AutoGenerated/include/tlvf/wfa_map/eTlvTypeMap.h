@@ -57,6 +57,8 @@ enum class eTlvTypeMap : uint8_t {
     TLV_ASSOCIATED_STA_TRAFFIC_STATS = 0xa2,
     TLV_ERROR_CODE = 0xa3,
     TLV_CHANNEL_SCAN_REQUEST = 0xa6,
+    TLV_CHANNEL_SCAN_RESULT = 0xa7,
+    TLV_TIMESTAMP = 0xa8,
 };
 class eTlvTypeMapValidate {
 public:
@@ -100,6 +102,8 @@ public:
         case 0xa2:
         case 0xa3:
         case 0xa6:
+        case 0xa7:
+        case 0xa8:
                 ret = true;
                 break;
             default:
