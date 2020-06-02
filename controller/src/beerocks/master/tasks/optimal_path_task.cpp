@@ -84,15 +84,12 @@ void optimal_path_task::work()
     case START: {
 
         current_hostap_vap = database.get_node_parent(sta_mac);
-
-        auto current_vap_name = database.get_hostap_iface_name(current_hostap_vap);
-        current_vap_name.append(".");
-        current_vap_name.append(std::to_string(database.get_node_vap_id(sta_mac)));
-        auto steer_vaps = database.config.load_steer_on_vaps;
-        if (steer_vaps.find(current_vap_name) == std::string::npos) {
-            TASK_LOG(INFO) << "current hostap vap:" << current_vap_name << " mac:" << sta_mac
-                           << " is not in steer list:" << steer_vaps << " aborting optimal task"
-                           << std::endl;
+        // Steering allowed on all vaps unless load_steer_on_vaps list is defined
+        // on the platform , in that case verify that vap is on that list
+        if (!database.is_vap_on_steer_list(current_hostap_vap)) {
+            TASK_LOG(WARNING) << "client " << sta_mac << " is connected to vap "
+                              << current_hostap_vap << " that is currently not in steer list: "
+                              << database.config.load_steer_on_vaps << " aborting optimal task";
             finish();
             return;
         }
@@ -198,16 +195,28 @@ void optimal_path_task::work()
             }
         }
 
-        // Check if hostapd has suitable ssid
+        // Check if hostap has suitable ssid
         auto it = potential_11k_aps.begin();
         while (it != potential_11k_aps.end()) {
-            if (database.get_hostap_vap_with_ssid(it->first, current_hostap_ssid).empty()) {
+
+            std::string candidate_bssid =
+                database.get_hostap_vap_with_ssid(it->first, current_hostap_ssid);
+
+            if (candidate_bssid.empty()) {
                 LOG(INFO) << "Remove candidate " << it->first
                           << ". Hostap doesn't have current_hostap_ssid " << current_hostap_ssid;
                 it = potential_11k_aps.erase(it);
-            } else {
-                ++it;
+                continue;
             }
+
+            // Steering allowed on all vaps unless load_steer_on_vaps list is defined
+            // on the platform , in that case verify that vap is on that list
+            if (!database.is_vap_on_steer_list(candidate_bssid)) {
+                TASK_LOG(INFO) << "Remove candidate " << it->first << " , vap " << candidate_bssid
+                               << " is not in steer list: " << database.config.load_steer_on_vaps;
+                it = potential_11k_aps.erase(it);
+            }
+            ++it;
         }
 
         potential_ap_iter = potential_11k_aps.begin();
@@ -732,16 +741,28 @@ void optimal_path_task::work()
             }
         }
 
-        // Check if hostapd has suitable ssid
+        // Check if hostap has suitable ssid
         auto it = hostaps.begin();
         while (it != hostaps.end()) {
-            if (database.get_hostap_vap_with_ssid(*it, current_hostap_ssid).empty()) {
+
+            std::string candidate_bssid =
+                database.get_hostap_vap_with_ssid(*it, current_hostap_ssid);
+
+            if (candidate_bssid.empty()) {
                 LOG(INFO) << "Remove candidate " << *it
                           << ". Hostap doesn't have current_hostap_ssid " << current_hostap_ssid;
                 it = hostaps.erase(it);
-            } else {
-                ++it;
+                continue;
             }
+
+            // Steering allowed on all vaps unless load_steer_on_vaps list is defined
+            // on the platform , in that case verify that vap is on that list
+            if (!database.is_vap_on_steer_list(candidate_bssid)) {
+                TASK_LOG(INFO) << "Remove candidate " << *it << " , vap " << candidate_bssid
+                               << " is not in steer list: " << database.config.load_steer_on_vaps;
+                it = hostaps.erase(it);
+            }
+            ++it;
         }
 
         state = REQUEST_CROSS_RSSI_MEASUREMENTS;
