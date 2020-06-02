@@ -346,6 +346,13 @@ public:
                  bool backhual);
 
     std::string get_hostap_ssid(const std::string &mac);
+    /**
+     * @brief checks if vap name is on the steer list.
+     * 
+     * @param[in] bssid vap mac address.
+     * @return true if vap name is on the steer list.
+     */
+    bool is_vap_on_steer_list(const std::string &bssid);
     std::string get_hostap_vap_with_ssid(const std::string &mac, const std::string &ssid);
     std::string get_hostap_vap_mac(const std::string &mac, const int vap_id);
     std::string get_node_parent_radio(const std::string &mac);
