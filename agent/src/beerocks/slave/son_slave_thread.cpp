@@ -2135,26 +2135,42 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return true;
         }
 
+        // Build VS CMDU message to send to the monitor
+        auto mon_notification = message_com::create_vs_message<
+            beerocks_message::cACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION>(cmdu_tx);
+        if (!mon_notification) {
+            LOG(ERROR) << "Failed building cACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION message!";
+            break;
+        }
+
+        mon_notification->sta_mac() = notification_in->mac();
+        mon_notification->vap_id()  = notification_in->vap_id();
+
+        LOG(DEBUG) << "send cACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION to monitor";
+        if (!message_com::send_cmdu(monitor_socket, cmdu_tx)) {
+            slave_reset();
+        }
+
         // Build VS CMDU message to send to backhaul manager
-        auto notification_out = message_com::create_vs_message<
+        auto bh_notification = message_com::create_vs_message<
             beerocks_message::cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION>(cmdu_tx);
-        if (!notification_out) {
+        if (!bh_notification) {
             LOG(ERROR) << "Failed building ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION message!";
             break;
         }
 
-        notification_out->client_mac() = notification_in->mac();
-        notification_out->bssid()      = notification_in->bssid();
+        bh_notification->client_mac() = notification_in->mac();
+        bh_notification->bssid()      = notification_in->bssid();
         if (!notification_in->association_frame_length()) {
             LOG(DEBUG) << "no association frame";
         } else {
-            notification_out->set_association_frame(notification_in->association_frame(),
-                                                    notification_in->association_frame_length());
+            bh_notification->set_association_frame(notification_in->association_frame(),
+                                                   notification_in->association_frame_length());
         }
 
         // Send the message
         LOG(DEBUG) << "send ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION for client "
-                   << notification_out->client_mac();
+                   << bh_notification->client_mac();
         if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
             slave_reset();
         }
