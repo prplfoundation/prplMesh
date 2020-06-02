@@ -1595,18 +1595,15 @@ std::string db::get_hostap_vap_with_ssid(const std::string &mac, const std::stri
         return std::string();
     }
 
-    auto vap_name = get_hostap_iface_name(mac);
-    vap_name.append(".");
+    auto it = std::find_if(
+        n->hostap->vaps_info.begin(), n->hostap->vaps_info.end(),
+        [&](const std::pair<int8_t, sVapElement> &vap) { return vap.second.ssid == ssid; });
 
-    for (auto const &it : n->hostap->vaps_info) {
-        auto tmp_vap_name = vap_name;
-        tmp_vap_name.append(std::to_string(get_hostap_vap_id(it.second.mac)));
-        if ((it.second.ssid == ssid) &&
-            (config.load_steer_on_vaps.find(tmp_vap_name) != std::string::npos)) {
-            return it.second.mac;
-        }
+    if (it == n->hostap->vaps_info.end()) {
+        // no vap with same ssid is found
+        return std::string();
     }
-    return std::string();
+    return it->second.mac;
 }
 
 std::string db::get_hostap_vap_mac(const std::string &mac, const int vap_id)
