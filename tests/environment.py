@@ -193,11 +193,11 @@ def _docker_wait_for_log(container: str, program: str, regex: str, start_line: i
     deadline = time.monotonic() + timeout
     try:
         while True:
-            with open(logfilename) as logfile:
+            with open(logfilename, 'rb') as logfile:
                 for (i, v) in enumerate(logfile.readlines()):
                     if i <= start_line:
                         continue
-                    search = re.search(regex, v)
+                    search = re.search(regex.encode('utf-8'), v)
                     if search:
                         debug("Found '{}'\n\tin {}".format(regex, logfilename))
                         return (True, i, search.groups())
