@@ -510,10 +510,22 @@ void monitor_thread::after_select(bool timeout)
          * crossed the reporting threshold in either direction (with respect to the previous
          * measurement), it shall send an AP Metrics Response message to the Multi-AP Controller
          * containing one AP Metrics TLV for each of the BSSs on that radio.
+         *
+         * Note that data included in AP Metrics Response message is not fresh data but the data
+         * that was obtained in the last polling cycle. If the device in turn implements a similar
+         * polling mechanism, returned data can be quite stale. This behavior leads to a situation
+         * in which after detecting that channel utilization has crossed the threshold value,
+         * statistics have never been obtained yet (all counters are 0). This is actually the case
+         * with a RAX40 and test 4.7.6 fails because bytes received is 0.
+         * To avoid reporting invalid data, a `vap_stats_available` flag has been created that
+         * changes to true when both transmitted and received bytes are greater than 0 for any VAP.
+         * Then we do check the flag before checking if channel utilization has crossed the
+         * threshold value (and thus, before reporting metrics).
          */
         auto radio_node = mon_db.get_radio_node();
         auto &info      = radio_node->ap_metrics_reporting_info();
-        if (0 != info.ap_channel_utilization_reporting_threshold) {
+        if (radio_node->get_stats().vap_stats_available &&
+            (0 != info.ap_channel_utilization_reporting_threshold)) {
             int elapsed_time_s =
                 std::chrono::duration_cast<std::chrono::seconds>(
                     now - info.ap_metrics_channel_utilization_last_reporting_time_point)
@@ -778,6 +790,7 @@ bool monitor_thread::update_ap_stats()
     // VAP Statistics
     radio_stats.total_retrans_count = 0;
     radio_stats.sta_count           = 0;
+    radio_stats.vap_stats_available = false;
     // For every available VAP
     for (int vap_id = beerocks::IFACE_VAP_ID_MIN; vap_id <= beerocks::IFACE_VAP_ID_MAX; vap_id++) {
 
@@ -796,7 +809,15 @@ bool monitor_thread::update_ap_stats()
             return false;
         }
 
-        // Update radio countnters
+        /**
+         * If both transmitted and received bytes counters contain sensible data, then set the flag
+         * signaling that VAP statistics are available
+         */
+        if ((vap_stats.hal_stats.rx_bytes_cnt > 0) && (vap_stats.hal_stats.tx_bytes_cnt > 0)) {
+            radio_stats.vap_stats_available = true;
+        }
+
+        // Update radio counters
         radio_stats.total_retrans_count += vap_stats.hal_stats.retrans_count;
         radio_stats.sta_count += vap_node->sta_get_count();
 

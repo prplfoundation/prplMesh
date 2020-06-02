@@ -331,6 +331,14 @@ public:
         int active_client_count_prev         = 0;
         int active_client_count_curr         = 0;
         uint32_t sta_count                   = 0;
+
+        /**
+         * Flag that signals if last VAP statistics read contain meaningful data for at least one
+         * VAP. This flag is updated whenever VAP statistics are updated.
+         * The term "available" in this context means that both transmitted and received bytes are
+         * set to a value greater than 0.
+         */
+        bool vap_stats_available = false;
     };
 
     SRadioStats &get_stats() { return m_radio_stats; }
