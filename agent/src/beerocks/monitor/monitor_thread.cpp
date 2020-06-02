@@ -1435,6 +1435,16 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
         break;
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION: {
+        auto notif =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION>();
+        if (!notif) {
+            LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION failed";
+            return false;
+        }
+
+        //Add pre-existing clients to the monitor DB
+        mon_wlan_hal->generate_sta_connected_event(notif->sta_mac(), notif->vap_id());
         break;
     }
     default: {
