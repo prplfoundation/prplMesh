@@ -1558,6 +1558,32 @@ std::string db::get_hostap_ssid(const std::string &mac)
     return std::string();
 }
 
+bool db::is_vap_on_steer_list(const std::string &bssid)
+{
+    if (config.load_steer_on_vaps.empty()) {
+        return true;
+    }
+
+    auto vap_name = get_hostap_iface_name(bssid);
+    if (vap_name == "INVALID") {
+        LOG(ERROR) << "vap name is invalid for bssid " << bssid;
+        return false;
+    }
+
+    auto vap_id = get_hostap_vap_id(bssid);
+    if (vap_id == IFACE_ID_INVALID) {
+        LOG(ERROR) << "vap id is invalid for bssid " << bssid;
+        return false;
+    }
+
+    vap_name         = utils::get_iface_string_from_iface_vap_ids(vap_name, vap_id);
+    auto &steer_vaps = config.load_steer_on_vaps;
+    if (steer_vaps.find(vap_name) == std::string::npos) {
+        return false;
+    }
+    return true;
+}
+
 std::string db::get_hostap_vap_with_ssid(const std::string &mac, const std::string &ssid)
 {
     auto n = get_node(mac);
