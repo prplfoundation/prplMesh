@@ -402,6 +402,12 @@ bool mon_wlan_hal_nl80211::channel_scan_dump_results()
     return false;
 }
 
+bool mon_wlan_hal_nl80211::generate_sta_connected_event(const sMacAddr sta_mac, const int8_t vap_id)
+{
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED";
+    return false;
+}
+
 bool mon_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
 {
     // Filter out empty events

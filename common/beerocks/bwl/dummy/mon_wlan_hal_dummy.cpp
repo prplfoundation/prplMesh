@@ -167,6 +167,12 @@ bool mon_wlan_hal_dummy::channel_scan_dump_results()
     return false;
 }
 
+bool mon_wlan_hal_dummy::generate_sta_connected_event(const sMacAddr sta_mac, const int8_t vap_id)
+{
+    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED";
+    return false;
+}
+
 bool mon_wlan_hal_dummy::process_dummy_data(parsed_obj_map_t &parsed_obj)
 {
     char *tmp_str;

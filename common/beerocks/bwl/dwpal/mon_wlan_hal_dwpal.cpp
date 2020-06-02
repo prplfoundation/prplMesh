@@ -930,6 +930,23 @@ bool mon_wlan_hal_dwpal::channel_scan_dump_results()
     return true;
 }
 
+bool mon_wlan_hal_dwpal::generate_sta_connected_event(const sMacAddr sta_mac, const int8_t vap_id)
+{
+    auto msg_buff = ALLOC_SMART_BUFFER(sizeof(sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION));
+    auto msg = reinterpret_cast<sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION *>(msg_buff.get());
+    if (!msg) {
+        LOG(FATAL) << "Memory allocation failed";
+        return false;
+    }
+    // Initialize the message
+    memset(msg_buff.get(), 0, sizeof(sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION));
+    msg->mac    = sta_mac;
+    msg->vap_id = vap_id;
+    // send message to the Monitor with the STA_Connected event.
+    event_queue_push(Event::STA_Connected, msg_buff);
+    return true;
+}
+
 bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std::string &opcode)
 {
     LOG(TRACE) << __func__ << " - opcode: |" << opcode << "|";
