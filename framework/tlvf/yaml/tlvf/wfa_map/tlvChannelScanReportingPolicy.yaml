@@ -1,0 +1,18 @@
+#
+---
+_namespace: wfa_map
+
+tlvChannelScanReportingPolicy:
+  _type: class
+  _is_tlv_class : True
+  type:
+    _type: eTlvTypeMap
+    _value_const: TLV_CHANNEL_SCAN_REPORTING_POLICY
+  length: uint16_t
+  report_independent_channel_scans: eReportIndependentChannelScan
+  
+eReportIndependentChannelScan:
+  _type: enum
+  _enum_storage: uint8_t
+  REPORT_INDEPENDENT_CHANNEL_SCANS: 0x80
+  DO_NOT_REPORT_INDEPENDENT_CHANNEL_SCANS: 0x00
