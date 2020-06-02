@@ -15,6 +15,10 @@ class InitialApConfig(PrplMeshBaseTest):
                 dev.wired_sniffer.start(self.__class__.__name__ + "-" + dev.name)
 
                 self.check_log(dev.agent_entity.radios[0],
+                               r"Controller configuration \(WSC M2 Encrypted Settings\)")
+                self.check_log(dev.agent_entity.radios[1],
+                               r"Controller configuration \(WSC M2 Encrypted Settings\)")
+                self.check_log(dev.agent_entity.radios[0],
                                r"WSC Global authentication success")
                 self.check_log(dev.agent_entity.radios[1],
                                r"WSC Global authentication success")
@@ -22,13 +26,13 @@ class InitialApConfig(PrplMeshBaseTest):
                                r"KWA \(Key Wrap Auth\) success")
                 self.check_log(dev.agent_entity.radios[1],
                                r"KWA \(Key Wrap Auth\) success")
-                self.check_log(dev.agent_entity.radios[0],
-                               r".* Controller configuration \(WSC M2 Encrypted Settings\)")
-                self.check_log(dev.agent_entity.radios[1],
-                               r".* Controller configuration \(WSC M2 Encrypted Settings\)")
-
-                dev.wired_sniffer.stop()
 
     @classmethod
     def teardown_class(cls):
         """Teardown method, optional for boardfarm tests."""
+        test = cls.test_obj
+        for dev in test.dev:
+            if dev.agent_entity:
+                print("Sniffer - stop")
+                dev.agent_entity.device.send('\003')
+                dev.wired_sniffer.stop()

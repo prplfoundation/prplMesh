@@ -16,7 +16,7 @@ class PrplMeshBaseTest(bft_base_test.BftBaseTest):
     """
 
     def check_log(self, entity_or_radio: Union[env.ALEntity, env.Radio], regex: str,
-                  start_line: int = 0, timeout: float = 0.3) -> bool:
+                  start_line: int = 0, timeout: float = 0.6) -> bool:
         result, line, match = entity_or_radio.wait_for_log(regex, start_line, timeout)
         if not result:
             raise Exception
