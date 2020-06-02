@@ -627,20 +627,20 @@ void optimal_path_task::work()
                                << " could not find a better path for sta " << sta_mac << std::endl);
             finish();
         } else {
-            chosen_hostap = database.get_hostap_vap_with_ssid(chosen_hostap, current_hostap_ssid);
+            chosen_bssid = database.get_hostap_vap_with_ssid(chosen_hostap, current_hostap_ssid);
             if (!database.settings_client_optimal_path_roaming_prefer_signal_strength()) {
                 LOG_CLI(DEBUG, "optimal_path_task:" << std::endl
                                                     << "    best hostap for " << sta_mac << " is "
-                                                    << chosen_hostap << " with weighted_phy_rate="
+                                                    << chosen_bssid << " with weighted_phy_rate="
                                                     << (best_weighted_phy_rate / (1024.0 * 1024.0))
                                                     << " [Mbps]" << std::endl
                                                     << "    --> steering " << sta_mac << " to "
-                                                    << chosen_hostap << std::endl);
+                                                    << chosen_bssid << std::endl);
             } else {
                 LOG_CLI(DEBUG,
                         "optimal_path_task:" << std::endl
                                              << "    best hostap (signal strength metric) for "
-                                             << sta_mac << " is " << chosen_hostap
+                                             << sta_mac << " is " << chosen_bssid
                                              << " with dl_rssi=" << (best_dl_rssi) << " [dBm]");
             }
 
@@ -1143,7 +1143,7 @@ void optimal_path_task::work()
             }
         }
 
-        TASK_LOG(DEBUG) << "end of for loop";
+        TASK_LOG(DEBUG) << "end of hostap candidate list";
 
         if (all_hostaps_below_cutoff && current_hostap_is_5ghz) {
             best_weighted_phy_rate = best_weighted_phy_rate_below_cutoff;
@@ -1167,32 +1167,29 @@ void optimal_path_task::work()
             }
         }
 
-        auto chosen_hostap_vap =
-            database.get_hostap_vap_with_ssid(chosen_hostap, current_hostap_ssid);
+        chosen_bssid = database.get_hostap_vap_with_ssid(chosen_hostap, current_hostap_ssid);
 
-        if (chosen_hostap.empty() || (chosen_hostap == current_hostap) ||
-            chosen_hostap_vap.empty()) {
+        if (chosen_hostap.empty() || (chosen_hostap == current_hostap) || chosen_bssid.empty()) {
             LOG_CLI(DEBUG, "optimal_path_task:" << std::endl
                                                 << "   could not find a better path for sta "
                                                 << sta_mac << std::endl);
             finish();
         } else {
-            chosen_hostap = chosen_hostap_vap;
             if (!database.settings_client_optimal_path_roaming_prefer_signal_strength()) {
                 LOG_CLI(DEBUG, "optimal_path_task:" << std::endl
                                                     << "    best hostap for " << sta_mac << " is "
-                                                    << chosen_hostap << " with weighted_phy_rate="
+                                                    << chosen_bssid << " with weighted_phy_rate="
                                                     << (best_weighted_phy_rate / (1024.0 * 1024.0))
                                                     << " [Mbps]" << std::endl
                                                     << "    --> steering " << sta_mac << " to "
-                                                    << chosen_hostap << std::endl);
+                                                    << chosen_bssid << std::endl);
             } else {
                 LOG_CLI(DEBUG, "optimal_path_task:"
                                    << std::endl
                                    << "    best hostap (signal strength metric) for " << sta_mac
-                                   << " is " << chosen_hostap << " with ul_rssi=" << (best_ul_rssi)
+                                   << " is " << chosen_bssid << " with ul_rssi=" << (best_ul_rssi)
                                    << " [dBm]" << std::endl
-                                   << "    --> steering " << sta_mac << " to " << chosen_hostap
+                                   << "    --> steering " << sta_mac << " to " << chosen_bssid
                                    << std::endl);
             }
             state = SEND_STEER_ACTION;
@@ -1207,26 +1204,26 @@ void optimal_path_task::work()
         if (database.get_node_11v_capability(sta_mac)) {
             if (sticky_roaming_rssi <= database.config.roaming_sticky_client_rssi_threshold) {
                 TASK_LOG(DEBUG) << "optimal_path_task: steering with disassociate imminent, sta "
-                                << sta_mac << " steer from AP " << current_hostap_vap << " to AP "
-                                << chosen_hostap;
+                                << sta_mac << " steer from BSSID " << current_hostap_vap
+                                << " to BSSID " << chosen_bssid;
                 bool disassoc_imminent = true;
                 steering_task_id       = son_actions::steer_sta(database, cmdu_tx, tasks, sta_mac,
-                                                          chosen_hostap, disassoc_imminent);
+                                                          chosen_bssid, disassoc_imminent);
             } else {
                 TASK_LOG(DEBUG) << "optimal_path_task: steering without disassociate imminent, sta "
-                                << sta_mac << " steer from AP " << current_hostap_vap << " to AP "
-                                << chosen_hostap;
+                                << sta_mac << " steer from BSSID " << current_hostap_vap
+                                << " to BSSID " << chosen_bssid;
                 bool disassoc_imminent = false;
                 steering_task_id       = son_actions::steer_sta(database, cmdu_tx, tasks, sta_mac,
-                                                          chosen_hostap, disassoc_imminent);
+                                                          chosen_bssid, disassoc_imminent);
             }
         } else if (database.settings_legacy_client_roaming()) {
             TASK_LOG(DEBUG) << "optimal_path_task: steering with disassociate imminent 1sec, sta "
-                            << sta_mac << " steer from AP " << current_hostap_vap << " to AP "
-                            << chosen_hostap;
+                            << sta_mac << " steer from BSSID " << current_hostap_vap << " to BSSID "
+                            << chosen_bssid;
             bool disassoc_imminent = true;
             steering_task_id       = son_actions::steer_sta(database, cmdu_tx, tasks, sta_mac,
-                                                      chosen_hostap, disassoc_imminent);
+                                                      chosen_bssid, disassoc_imminent);
         }
 
         wait_for_task_end(steering_task_id, 30000);
