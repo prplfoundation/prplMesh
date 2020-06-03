@@ -308,6 +308,9 @@ void monitor_thread::after_select(bool timeout)
                 thread_last_error_code = MONITOR_THREAD_ERROR_NL_ATTACH_FAIL;
             }
 
+            // Generate pre-existing client STA_Connected
+            mon_wlan_hal->generate_connected_clients_events();
+
             // start local monitors //
             LOG(TRACE) << "mon_stats.start()";
             if (!mon_stats.start(&mon_db, slave_socket)) {
