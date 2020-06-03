@@ -4890,7 +4890,7 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
 
     channel_selection_response_tlv->radio_uid()     = hostap_params.iface_mac;
     channel_selection_response_tlv->response_code() = response_code;
-    if (!send_cmdu_to_controller(cmdu_tx)) {
+    if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
         LOG(ERROR) << "failed to send CHANNEL_SELECTION_RESPONSE_MESSAGE";
         return false;
     }
