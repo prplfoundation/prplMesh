@@ -26,6 +26,7 @@
 
 #include <tlvf/wfa_map/tlvApMetrics.h>
 #include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
+#include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
 
 #include "../agent_ucc_listener.h"
 #include "../link_metrics/link_metrics.h"
@@ -125,6 +126,10 @@ private:
     bool handle_ap_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac);
     bool handle_slave_ap_metrics_response(ieee1905_1::CmduMessageRx &cmdu_rx,
                                           const std::string &src_mac);
+    bool handle_channel_selection_request(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                          const std::string &src_mac);
+    bool handle_slave_channel_selection_response(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                 const std::string &src_mac);
     //bool sta_handle_event(const std::string &iface,const std::string& event_name, void* event_obj);
     bool hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr, std::string iface);
 
@@ -551,6 +556,18 @@ private:
 
     std::vector<sApMetricsQuery> m_ap_metric_query;
     std::vector<sApMetricsResponse> m_ap_metric_response;
+
+    struct sChannelSelectionResponse {
+        sMacAddr radio_mac;
+        wfa_map::tlvChannelSelectionResponse::eResponseCode response_code;
+    };
+    struct sExpectedChannelSelection {
+        uint16_t mid;
+        std::vector<sMacAddr> requests;
+        std::vector<sChannelSelectionResponse> responses;
+    };
+
+    sExpectedChannelSelection m_expected_channel_selection;
 
     /*
  * State Machines

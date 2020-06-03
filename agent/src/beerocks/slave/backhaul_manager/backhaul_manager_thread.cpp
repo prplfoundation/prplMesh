@@ -74,6 +74,7 @@
 #include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
 #include <tlvf/wfa_map/tlvAssociatedStaTrafficStats.h>
 #include <tlvf/wfa_map/tlvBeaconMetricsQuery.h>
+#include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvClientCapabilityReport.h>
 #include <tlvf/wfa_map/tlvClientInfo.h>
 #include <tlvf/wfa_map/tlvErrorCode.h>
@@ -83,6 +84,7 @@
 #include <tlvf/wfa_map/tlvStaMacAddressType.h>
 #include <tlvf/wfa_map/tlvSteeringPolicy.h>
 #include <tlvf/wfa_map/tlvSupportedService.h>
+#include <tlvf/wfa_map/tlvTransmitPowerLimit.h>
 
 // BPL Error Codes
 #include <bpl/bpl_cfg.h>
@@ -2216,6 +2218,9 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     case ieee1905_1::eMessageType::BEACON_METRICS_QUERY_MESSAGE: {
         return handle_1905_beacon_metrics_query(cmdu_rx, src_mac, forward_to);
     }
+    case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE: {
+        return handle_channel_selection_request(cmdu_rx, src_mac);
+    }
     default: {
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
         // flows, since we won't expect a 1905 message not handled in this function
@@ -2230,6 +2235,9 @@ bool backhaul_manager::handle_slave_1905_1_message(ieee1905_1::CmduMessageRx &cm
     switch (cmdu_rx.getMessageType()) {
     case ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE: {
         return handle_slave_ap_metrics_response(cmdu_rx, src_mac);
+    }
+    case ieee1905_1::eMessageType::CHANNEL_SELECTION_RESPONSE_MESSAGE: {
+        return handle_slave_channel_selection_response(cmdu_rx, src_mac);
     }
     default: {
         LOG(DEBUG) << "Unexpected 1905 message " << int(cmdu_rx.getMessageType());
@@ -4350,6 +4358,94 @@ bool backhaul_manager::add_link_metrics(const sMacAddr &reporter_al_mac,
 
     return true;
 }
+
+bool backhaul_manager::handle_channel_selection_request(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                        const std::string &src_mac)
+{
+    const auto mid = cmdu_rx.getMessageId();
+
+    LOG(DEBUG) << "Forwarding CHANNEL_SELECTION_REQUEST to son_slave, mid=" << std::hex << int(mid);
+
+    // Clear previous request, if any
+    m_expected_channel_selection.requests.clear();
+    m_expected_channel_selection.responses.clear();
+
+    m_expected_channel_selection.mid = mid;
+
+    // Save radio mac for each connected radio
+    for (auto &socket : slaves_sockets) {
+        m_expected_channel_selection.requests.emplace_back(socket->radio_mac);
+    }
+
+    // According to the WFA documentation, each radio should send channel selection
+    // response even if that radio was not marked in the request. After filling radio
+    // mac vector need to do forwarding for the channel selection request to all slaves.
+    // In this scope return false forwards the message to the son_slave.
+    return false;
+}
+
+bool backhaul_manager::handle_slave_channel_selection_response(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                               const std::string &src_mac)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received CHANNEL_SELECTION_RESPONSE message, mid=" << std::hex << int(mid);
+
+    if (mid != m_expected_channel_selection.mid) {
+        return false;
+    }
+
+    auto channel_selection_response = cmdu_rx.getClass<wfa_map::tlvChannelSelectionResponse>();
+    if (!channel_selection_response) {
+        LOG(ERROR) << "Failed cmdu_rx.getClass<wfa_map::tlvChannelSelectionResponse>(), mid="
+                   << std::hex << int(mid);
+        return false;
+    }
+
+    m_expected_channel_selection.responses.push_back(
+        {channel_selection_response->radio_uid(), channel_selection_response->response_code()});
+
+    // Remove an entry from the processed query
+    m_expected_channel_selection.requests.erase(
+        std::remove_if(m_expected_channel_selection.requests.begin(),
+                       m_expected_channel_selection.requests.end(),
+                       [&](sMacAddr const &query) {
+                           return channel_selection_response->radio_uid() == query;
+                       }),
+        m_expected_channel_selection.requests.end());
+
+    if (!m_expected_channel_selection.requests.empty()) {
+        return true;
+    }
+
+    // We received all responses - prepare and send response message to the controller
+    auto cmdu_header =
+        cmdu_tx.create(mid, ieee1905_1::eMessageType::CHANNEL_SELECTION_RESPONSE_MESSAGE);
+
+    if (!cmdu_header) {
+        LOG(ERROR) << "Failed building IEEE1905 CHANNEL_SELECTION_RESPONSE_MESSAGE";
+        return false;
+    }
+
+    for (const auto &response : m_expected_channel_selection.responses) {
+        auto channel_selection_response_tlv =
+            cmdu_tx.addClass<wfa_map::tlvChannelSelectionResponse>();
+
+        if (!channel_selection_response_tlv) {
+            LOG(ERROR) << "Failed addClass<wfa_map::tlvChannelSelectionResponse>";
+            continue;
+        }
+
+        channel_selection_response_tlv->radio_uid()     = response.radio_mac;
+        channel_selection_response_tlv->response_code() = response.response_code;
+    }
+
+    // Clear the m_expected_channel_selection.responses vector after preparing response to the controller
+    m_expected_channel_selection.responses.clear();
+
+    LOG(DEBUG) << "Sending CHANNEL_SELECTION_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
+    return send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+}
+
 const std::string backhaul_manager::freq_to_radio_mac(eFreqType freq) const
 {
     auto it =
