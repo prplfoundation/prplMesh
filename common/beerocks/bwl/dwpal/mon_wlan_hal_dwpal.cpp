@@ -470,6 +470,73 @@ static bool get_scan_results_from_nl_msg(sChannelScanResults &results, struct nl
     return true;
 }
 
+static std::shared_ptr<char> generate_client_assoc_event(const std::string &event, int vap_id)
+{
+    auto msg_buff = ALLOC_SMART_BUFFER(sizeof(sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION));
+    auto msg = reinterpret_cast<sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION *>(msg_buff.get());
+
+    if (!msg) {
+        LOG(FATAL) << "Memory allocation failed";
+        return nullptr;
+    }
+
+    // Initialize the message
+    memset(msg_buff.get(), 0, sizeof(sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION));
+
+    char client_mac[MAC_ADDR_SIZE] = {0};
+    // These parameters are not needed, but the dwpal_string_to_struct_parse fails without them.
+    int supported_rates[16]  = {0};
+    int HT_MCS[16]           = {0};
+    int16_t VHT_MCS[1]       = {0};
+    char ht_cap[8]           = {0};
+    char ht_mcs[64]          = {0};
+    char vht_cap[16]         = {0};
+    char vht_mcs[24]         = {0};
+    int8_t max_tx_power      = 0;
+    size_t numOfValidArgs[7] = {0};
+
+    FieldsToParse fieldsToParse[] = {
+        {(void *)client_mac, &numOfValidArgs[0], DWPAL_STR_PARAM, NULL, sizeof(client_mac)},
+        {(void *)supported_rates, &numOfValidArgs[1], DWPAL_INT_HEX_ARRAY_PARAM,
+         "supported_rates=", sizeof(supported_rates)},
+        {(void *)ht_cap, &numOfValidArgs[2], DWPAL_STR_PARAM, "ht_caps_info=", sizeof(ht_cap)},
+        {(void *)ht_mcs, &numOfValidArgs[3], DWPAL_STR_PARAM, "ht_mcs_bitmask=", sizeof(ht_mcs)},
+        {(void *)vht_cap, &numOfValidArgs[4], DWPAL_STR_PARAM, "vht_caps_info=", sizeof(vht_cap)},
+        {(void *)vht_mcs, &numOfValidArgs[5], DWPAL_STR_PARAM, "rx_vht_mcs_map=", sizeof(vht_mcs)},
+        {(void *)&max_tx_power, &numOfValidArgs[6], DWPAL_CHAR_PARAM, "max_txpower=", 0},
+        /* Must be at the end */
+        {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
+
+    if (dwpal_string_to_struct_parse((char *)event.c_str(), event.length(), fieldsToParse,
+                                     sizeof(client_mac)) == DWPAL_FAILURE) {
+        LOG(ERROR) << "DWPAL parse error ==> Abort";
+        return nullptr;
+    }
+
+    (void)supported_rates;
+    (void)HT_MCS;
+    (void)VHT_MCS;
+    (void)ht_cap;
+    (void)ht_mcs;
+    (void)vht_cap;
+    (void)vht_mcs;
+
+    LOG(DEBUG) << "client_mac: " << client_mac;
+
+    for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
+        if (numOfValidArgs[i] == 0) {
+            LOG(ERROR) << "Failed reading parsed parameter " << (int)i
+                       << " ==> Continue with default values";
+        }
+    }
+
+    msg->vap_id = vap_id;
+    msg->mac    = tlvf::mac_from_string(client_mac);
+
+    // return the buffer
+    return msg_buff;
+}
+
 //////////////////////////////////////////////////////////////////////////////
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -928,6 +995,72 @@ bool mon_wlan_hal_dwpal::channel_scan_dump_results()
     }
 
     return true;
+}
+
+bool mon_wlan_hal_dwpal::generate_connected_clients_events()
+{
+    bool queried_first = false;
+    std::string cmd;
+    std::string client_mac;
+    bool ret = true;
+
+    for (const auto &vap_element : m_radio_info.available_vaps) {
+        char *reply;
+        size_t replyLen;
+
+        const int &vap_id = vap_element.first;
+        auto vap_iface_name =
+            beerocks::utils::get_iface_string_from_iface_vap_ids(get_iface_name(), vap_id);
+        LOG(TRACE) << __func__ << " for vap interface: " << vap_iface_name;
+
+        do {
+            if (queried_first) {
+                cmd = "STA-NEXT " + vap_iface_name + " " + client_mac;
+            } else {
+                cmd           = "STA-FIRST " + vap_iface_name;
+                queried_first = true;
+            }
+
+            reply = nullptr;
+
+            // Send command
+            if (!dwpal_send_cmd(cmd, &reply)) {
+                LOG(ERROR) << __func__ << ": cmd='" << cmd << "' failed!";
+                ret = false;
+                break;
+            }
+
+            replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
+
+            if (replyLen == 0) {
+                LOG(DEBUG) << "cmd:" << cmd << ", reply: EMPTY";
+                break;
+            } else {
+                LOG(DEBUG) << "cmd: " << cmd << ", replylen: " << (int)replyLen
+                           << ", reply: " << reply;
+            }
+
+            auto msg_buff = generate_client_assoc_event(reply, vap_id);
+
+            if (!msg_buff)
+                break;
+
+            // update client mac
+            auto msg =
+                reinterpret_cast<sACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION *>(msg_buff.get());
+            client_mac = tlvf::mac_to_string(msg->mac);
+
+            event_queue_push(Event::STA_Connected, msg_buff); // send message to the Monitor
+
+        } while (replyLen > 0);
+
+        if (!ret)
+            return false;
+
+        queried_first = false;
+    }
+
+    return ret;
 }
 
 bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std::string &opcode)

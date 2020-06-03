@@ -60,6 +60,7 @@ public:
     virtual bool channel_scan_trigger(int dwell_time_msec,
                                       const std::vector<unsigned int> &channel_pool)     = 0;
     virtual bool channel_scan_dump_results()                                             = 0;
+    virtual bool generate_connected_clients_events()                                     = 0;
 };
 
 // mon HAL factory types
