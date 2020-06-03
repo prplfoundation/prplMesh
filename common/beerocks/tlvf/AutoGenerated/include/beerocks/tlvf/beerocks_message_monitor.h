@@ -455,6 +455,29 @@ class cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE : public BaseCl
         int m_lock_order_counter__ = 0;
 };
 
+class cACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION : public BaseClass
+{
+    public:
+        cACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION();
+
+        static eActionOp_MONITOR get_action_op(){
+            return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION);
+        }
+        sMacAddr& sta_mac();
+        int8_t& vap_id();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_MONITOR* m_action_op = nullptr;
+        sMacAddr* m_sta_mac = nullptr;
+        int8_t* m_vap_id = nullptr;
+};
+
 class cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST : public BaseClass
 {
     public:
