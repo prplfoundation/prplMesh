@@ -525,6 +525,22 @@ void monitor_thread::after_select(bool timeout)
                 on_channel_utilization_measurement_period_elapsed();
             }
         }
+
+        /**
+         * If periodic AP metrics reporting is enabled, check if time interval has elapsed and if
+         * so, then report AP metrics.
+         */
+        if (0 != info.reporting_interval_s) {
+            int elapsed_time_s = std::chrono::duration_cast<std::chrono::seconds>(
+                                     now - info.last_reporting_time_point)
+                                     .count();
+
+            if (elapsed_time_s >= info.reporting_interval_s) {
+                info.last_reporting_time_point = now;
+
+                on_reporting_interval_elapsed();
+            }
+        }
     }
 }
 
@@ -573,10 +589,23 @@ void monitor_thread::on_channel_utilization_measurement_period_elapsed()
             return;
         }
 
-        message_com::send_cmdu(slave_socket, cmdu_tx);
+        send_ap_metrics_response();
     }
 
     info.ap_metrics_channel_utilization_reporting_value = channel_utilization;
+}
+
+void monitor_thread::on_reporting_interval_elapsed()
+{
+    std::vector<sMacAddr> bssid_list;
+    mon_db.get_bssid_list(bssid_list);
+
+    if (!create_ap_metrics_response(0, bssid_list)) {
+        LOG(ERROR) << "Unable to create AP Metrics Response message";
+        return;
+    }
+
+    send_ap_metrics_response();
 }
 
 bool monitor_thread::create_ap_metrics_response(uint16_t mid,
@@ -639,6 +668,14 @@ bool monitor_thread::create_ap_metrics_response(uint16_t mid,
     }
 
     return true;
+}
+
+bool monitor_thread::send_ap_metrics_response()
+{
+    const auto mid = cmdu_tx.getMessageId();
+    LOG(DEBUG) << "Sending AP_METRICS_RESPONSE_MESSAGE to slave_socket, mid=" << std::hex
+               << int(mid);
+    return message_com::send_cmdu(slave_socket, cmdu_tx);
 }
 
 bool monitor_thread::update_sta_stats()
@@ -1472,6 +1509,17 @@ bool monitor_thread::handle_multi_ap_policy_config_request(Socket &sd,
 
     auto metric_reporting_policy_tlv = cmdu_rx.getClass<wfa_map::tlvMetricReportingPolicy>();
     if (metric_reporting_policy_tlv) {
+        auto &info = mon_db.get_radio_node()->ap_metrics_reporting_info();
+
+        /**
+         * The AP Metrics Reporting Interval field indicates if periodic AP metrics reporting is
+         * to be enabled, and if so the cadence.
+         *
+         * Store configured interval value and restart the timer.
+         */
+        info.reporting_interval_s = metric_reporting_policy_tlv->metrics_reporting_interval_sec();
+        info.last_reporting_time_point = std::chrono::steady_clock::now();
+
         /**
          * Metric Reporting Policy TLV contains configuration for several radios
          */
@@ -1495,8 +1543,6 @@ bool monitor_thread::handle_multi_ap_policy_config_request(Socket &sd,
             /**
              * Extract and store configuration for this radio
              */
-            auto &info = mon_db.get_radio_node()->ap_metrics_reporting_info();
-
             info.sta_metrics_reporting_rcpi_threshold =
                 metrics_reporting_conf.sta_metrics_reporting_rcpi_threshold;
             info.sta_metrics_reporting_rcpi_hysteresis_margin_override =
@@ -1546,9 +1592,7 @@ bool monitor_thread::handle_ap_metrics_query(Socket &sd, ieee1905_1::CmduMessage
         return false;
     }
 
-    LOG(DEBUG) << "Sending AP_METRICS_RESPONSE_MESSAGE to slave_socket, mid=" << std::hex
-               << int(mid);
-    return message_com::send_cmdu(slave_socket, cmdu_tx);
+    return send_ap_metrics_response();
 }
 
 bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr)

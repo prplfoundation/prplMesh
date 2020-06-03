@@ -259,28 +259,6 @@ private:
 
     std::unique_ptr<beerocks::agent_ucc_listener> m_agent_ucc_listener;
 
-    /**
-     * AP Metrics Reporting configuration and status information type.
-     */
-    struct sApMetricsReportingInfo {
-        /**
-         * AP Metrics Reporting Interval in seconds (0: Do not report AP Metrics periodically).
-         * This value is set by the controller through a Multi-AP Policy Config Request message,
-         * inside the Metric Reporting Policy TLV.
-         */
-        uint8_t reporting_interval_s = 0;
-
-        /**
-         * Time point at which AP metrics were reported for the last time.
-         */
-        std::chrono::steady_clock::time_point last_reporting_time_point;
-    };
-
-    /**
-     * AP Metrics Reporting configuration and status information.
-     */
-    sApMetricsReportingInfo ap_metrics_reporting_info;
-
     struct sClientInfo {
         sMacAddr client_mac;
         sMacAddr bssid; // VAP mac

@@ -975,7 +975,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
          * Get current time. It is later used to compute elapsed time since some start time and
          * check if a timeout has expired to perform periodic actions.
          */
-        auto now = std::chrono::steady_clock::now();
+        //auto now = std::chrono::steady_clock::now();
 
         /*
         * TODO
@@ -1005,37 +1005,6 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
         // } else {
         if (pending_enable && m_sConfig.eType != SBackhaulConfig::EType::Invalid) {
             pending_enable = false;
-        }
-
-        /**
-         * If periodic AP metrics reporting is enabled, check if time interval has elapsed and if
-         * so, then report AP metrics.
-         */
-        if (0 != ap_metrics_reporting_info.reporting_interval_s) {
-            int elapsed_time_s = std::chrono::duration_cast<std::chrono::seconds>(
-                                     now - ap_metrics_reporting_info.last_reporting_time_point)
-                                     .count();
-
-            if (elapsed_time_s >= ap_metrics_reporting_info.reporting_interval_s) {
-                ap_metrics_reporting_info.last_reporting_time_point = now;
-
-                std::vector<sMacAddr> bssid_list;
-                for (const auto &socket : slaves_sockets) {
-                    if (socket) {
-                        for (int i = 0; i < beerocks::IFACE_TOTAL_VAPS; ++i) {
-                            if (socket->vaps_list.vaps[i].mac != network_utils::ZERO_MAC) {
-                                bssid_list.push_back(socket->vaps_list.vaps[i].mac);
-                            }
-                        }
-                    }
-                }
-                // We must generate a new MID for the response, so set MID to 0 here.
-                if (!bssid_list.empty()) {
-                    send_slave_ap_metric_query_message(0, bssid_list);
-                } else {
-                    LOG(DEBUG) << "Skipping AP_METRICS_QUERY for slave, empty BSSID list";
-                }
-            }
         }
 
         break;
@@ -2281,46 +2250,16 @@ bool backhaul_manager::handle_multi_ap_policy_config_request(ieee1905_1::CmduMes
         /**
          * The Multi-AP Policy Config Request message containing a Metric Reporting Policy TLV is
          * sent by the controller and received by the backhaul manager.
-         * The backhaul manager forwards the request message "as is" to all the slaves managing the
-         * radios which Radio Unique Identifier has been specified.
+         * The backhaul manager forwards the request message "as is" to all the slaves.
          */
-        for (size_t i = 0; i < metric_reporting_policy_tlv->metrics_reporting_conf_list_length();
-             i++) {
-            auto tuple = metric_reporting_policy_tlv->metrics_reporting_conf_list(i);
-            if (!std::get<0>(tuple)) {
-                LOG(ERROR) << "Failed to get metrics_reporting_conf[" << i
-                           << "] from TLV_METRIC_REPORTING_POLICY";
-                return false;
+        for (auto socket : slaves_sockets) {
+            uint16_t length = message_com::get_uds_header(cmdu_rx)->length;
+            cmdu_rx.swap(); // swap back before forwarding
+            if (!message_com::forward_cmdu_to_uds(socket->slave, cmdu_rx, length)) {
+                LOG(ERROR) << "Failed to forward message to slave " << socket->radio_mac;
             }
-
-            auto metrics_reporting_conf = std::get<1>(tuple);
-
-            std::shared_ptr<sRadioInfo> radio = get_radio(metrics_reporting_conf.radio_uid);
-            if (radio) {
-                uint16_t length = message_com::get_uds_header(cmdu_rx)->length;
-                cmdu_rx.swap(); // swap back before forwarding
-                if (!message_com::forward_cmdu_to_uds(radio->slave, cmdu_rx, length)) {
-                    LOG(ERROR) << "Failed to forward message to slave " << radio->radio_mac;
-                }
-                cmdu_rx.swap(); // swap back to normal after forwarding, for next iteration
-            } else {
-                LOG(INFO) << "Radio Unique Identifier " << metrics_reporting_conf.radio_uid
-                          << " not found";
-            }
+            cmdu_rx.swap(); // swap back to normal after forwarding, for next iteration
         }
-
-        /**
-         * The AP Metrics Reporting Interval field indicates if periodic AP metrics reporting is
-         * to be enabled, and if so the cadence.
-         *
-         * Store configured interval value and restart the timer.
-         *
-         * Reporting interval value works just for enabling/disabling auto sending AP Metrics Response,
-         * which will be send every 500 ms.
-         */
-        ap_metrics_reporting_info.reporting_interval_s =
-            metric_reporting_policy_tlv->metrics_reporting_interval_sec();
-        ap_metrics_reporting_info.last_reporting_time_point = std::chrono::steady_clock::now();
     }
 
     // send ACK_MESSAGE back to the controller

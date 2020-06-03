@@ -72,6 +72,15 @@ private:
     void on_channel_utilization_measurement_period_elapsed();
 
     /**
+     * @brief Executes when reporting interval has elapsed.
+     *
+     * This method is periodically invoked if AP Metrics Reporting Interval has been set to a
+     * non-zero value in last received Metric Reporting Policy TLV.
+     * On invocation, method shall send an AP Metrics Response message to the controller.
+     */
+    void on_reporting_interval_elapsed();
+
+    /**
      * @brief Creates AP Metrics Response message
      *
      * @param mid Message ID.
@@ -80,6 +89,12 @@ private:
      * @return True on success and false otherwise.
      */
     bool create_ap_metrics_response(uint16_t mid, const std::vector<sMacAddr> &bssid_list);
+
+    /**
+     * @brief Sends AP Metrics Response message to controller through slave.
+     * @return True on success and false otherwise.
+     */
+    bool send_ap_metrics_response();
 
     bool update_ap_stats();
     bool update_sta_stats();
