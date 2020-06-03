@@ -103,6 +103,11 @@ cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE:
     _type: sBssidInfo
     _length: [ bssid_info_list_length ]
 
+cACTION_MONITOR_CLIENT_ASSOCIATED_NOTIFICATION:
+  _type: class
+  sta_mac: sMacAddr
+  vap_id: int8_t
+
 #################################################
 # HOSTAP
 #################################################
