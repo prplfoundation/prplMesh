@@ -119,27 +119,13 @@ set(BEEROCKS_LOG_FILES_AUTO_ROLL    "true")
 set(BEEROCKS_LOG_STDOUT_ENABLED     "false")
 set(BEEROCKS_LOG_SYSLOG_ENABLED     "false")
 
-# hostapd ctrl ifaces paths
-if(NOT DEFINED BEEROCKS_HOSTAP_WLAN1_CTRL_IFACE)
-    set(BEEROCKS_HOSTAP_WLAN1_CTRL_IFACE "/var/run/hostapd/${BEEROCKS_WLAN1_IFACE}")
-endif()
-if(NOT DEFINED BEEROCKS_HOSTAP_WLAN2_CTRL_IFACE)
-    set(BEEROCKS_HOSTAP_WLAN2_CTRL_IFACE "/var/run/hostapd/${BEEROCKS_WLAN2_IFACE}")
-endif()
-if(NOT DEFINED BEEROCKS_HOSTAP_WLAN3_CTRL_IFACE)
-    set(BEEROCKS_HOSTAP_WLAN3_CTRL_IFACE "/var/run/hostapd/${BEEROCKS_WLAN3_IFACE}")
-endif()
+set(BEEROCKS_HOSTAP_WLAN1_CTRL_IFACE "/var/run/hostapd/${BEEROCKS_WLAN1_IFACE}" CACHE PATH "hostapd ctrl iface path for 1st WLAN")
+set(BEEROCKS_HOSTAP_WLAN2_CTRL_IFACE "/var/run/hostapd/${BEEROCKS_WLAN2_IFACE}" CACHE PATH "hostapd ctrl iface path for 2nd WLAN")
+set(BEEROCKS_HOSTAP_WLAN3_CTRL_IFACE "/var/run/hostapd/${BEEROCKS_WLAN3_IFACE}" CACHE PATH "hostapd ctrl iface path for 3rd WLAN")
 
-# wpa supplicant ctrl ifaces paths
-if(NOT DEFINED BEEROCKS_WPA_SUPPLICANT_WLAN1_CTRL_IFACE)
-    set(BEEROCKS_WPA_SUPPLICANT_WLAN1_CTRL_IFACE "/var/run/wpa_supplicant/${BEEROCKS_WLAN1_IFACE}")
-endif()
-if(NOT DEFINED BEEROCKS_WPA_SUPPLICANT_WLAN2_CTRL_IFACE)
-    set(BEEROCKS_WPA_SUPPLICANT_WLAN2_CTRL_IFACE "/var/run/wpa_supplicant/${BEEROCKS_WLAN2_IFACE}")
-endif()
-if(NOT DEFINED BEEROCKS_WPA_SUPPLICANT_WLAN3_CTRL_IFACE)
-    set(BEEROCKS_WPA_SUPPLICANT_WLAN3_CTRL_IFACE "/var/run/wpa_supplicant/${BEEROCKS_WLAN3_IFACE}")
-endif()
+set(BEEROCKS_WPA_SUPPLICANT_WLAN1_CTRL_IFACE "/var/run/wpa_supplicant/${BEEROCKS_WLAN1_IFACE}" CACHE PATH "wpa_supplicant ctrl iface path for 1st WLAN")
+set(BEEROCKS_WPA_SUPPLICANT_WLAN2_CTRL_IFACE "/var/run/wpa_supplicant/${BEEROCKS_WLAN2_IFACE}" CACHE PATH "wpa_supplicant ctrl iface path for 2nd WLAN")
+set(BEEROCKS_WPA_SUPPLICANT_WLAN3_CTRL_IFACE "/var/run/wpa_supplicant/${BEEROCKS_WLAN3_IFACE}" CACHE PATH "wpa_supplicant ctrl iface path for 3rd WLAN")
 
 # Platform specific flags
 if (TARGET_PLATFORM STREQUAL "openwrt")
