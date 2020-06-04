@@ -89,7 +89,7 @@ if ("${isSystemDir}" STREQUAL "-1")
 endif ("${isSystemDir}" STREQUAL "-1")
 set (CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
 
-set(INSTALL_PATH "/opt/prplmesh")
+set(INSTALL_PATH "/opt/prplmesh" CACHE PATH "prplMesh installation directory")
 set(TMP_PATH "/tmp/beerocks")
 
 if(TARGET_PLATFORM STREQUAL "linux")
@@ -102,22 +102,20 @@ if(TARGET_PLATFORM STREQUAL "linux")
 endif()
 
 # Default values
-set(BEEROCKS_WLAN1_IFACE "wlan0")
-set(BEEROCKS_WLAN2_IFACE "wlan2")
-set(BEEROCKS_WLAN3_IFACE "wlan4")
-set(BEEROCKS_BRIDGE_IFACE "br-lan")
-if (NOT DEFINED BEEROCKS_BH_WIRE_IFACE)
-    set(BEEROCKS_BH_WIRE_IFACE "eth1")
-endif()
+set(BEEROCKS_WLAN1_IFACE   "wlan0" CACHE STRING "1st WLAN iface")
+set(BEEROCKS_WLAN2_IFACE   "wlan2" CACHE STRING "2nd WLAN iface")
+set(BEEROCKS_WLAN3_IFACE   "wlan4" CACHE STRING "3rd WLAN iface")
+set(BEEROCKS_BRIDGE_IFACE  "br-lan" CACHE STRING "LAN bridge")
+set(BEEROCKS_BH_WIRE_IFACE "eth1" CACHE STRING "Backhaul wire iface")
 set(BEEROCKS_REPEATER_MODE 0)
 
 # Logging configuration
-set(BEEROCKS_LOG_FILES_ENABLED      "true")
-set(BEEROCKS_LOG_FILES_PATH         "${TMP_PATH}/logs")
-set(BEEROCKS_LOG_FILES_SUFFIX       ".log")
-set(BEEROCKS_LOG_FILES_AUTO_ROLL    "true")
-set(BEEROCKS_LOG_STDOUT_ENABLED     "false")
-set(BEEROCKS_LOG_SYSLOG_ENABLED     "false")
+set(BEEROCKS_LOG_FILES_ENABLED   "true" CACHE STRING "Write prplMesh logs into files")
+set(BEEROCKS_LOG_FILES_PATH      "${TMP_PATH}/logs" CACHE PATH "prplMesh logs directory")
+set(BEEROCKS_LOG_FILES_SUFFIX    ".log" CACHE STRING "prplMesh logs filenames suffix")
+set(BEEROCKS_LOG_FILES_AUTO_ROLL "true" CACHE STRING "Auto rollback prplMesh logs")
+set(BEEROCKS_LOG_STDOUT_ENABLED  "false" CACHE STRING "Print logs to stdout")
+set(BEEROCKS_LOG_SYSLOG_ENABLED  "false" CACHE STRING "Send logs to syslog")
 
 # Platform specific flags
 if (TARGET_PLATFORM STREQUAL "openwrt")
