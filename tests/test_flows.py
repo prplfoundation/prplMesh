@@ -423,6 +423,22 @@ class TestFlows:
                 self.fail('Wrong SSID: {vap.ssid} instead torn down'.format(vap=vap))
 
     def test_channel_selection(self):
+
+        def check_single_channel_response(self, resp_code) -> None:
+            cs_resp = self.check_cmdu_type_single("channel selection response", 0x8007, env.agents[0].mac,  # noqa E501
+                                                  env.controller.mac, cs_req_mid)
+            if cs_resp:
+                cs_resp_tlvs = self.check_cmdu_has_tlvs(cs_resp, 0x8e)
+                for cs_resp_tlv in cs_resp_tlvs:
+                    if cs_resp_tlv.channel_select_radio_id not in (env.agents[0].radios[0].mac,
+                                                                   env.agents[0].radios[1].mac):
+                        self.fail("Unepxected radio ID {}".fomrat(
+                            cs_resp_tlv.channel_select_radio_id))
+                        if int(cs_resp_tlv.channel_select_response_code, 16) != resp_code:
+                            self.fail("Channel selection response with unexpected response code {}".format(  # noqa E501
+                                    cs_resp_tlv.channel_select_response_code
+                            ))
+
         orig_chan_0 = env.agents[0].radios[0].get_current_channel()
         orig_chan_1 = env.agents[0].radios[1].get_current_channel()
         debug("Starting channel wlan0: {}, wlan2: {}".format(orig_chan_0, orig_chan_1))
@@ -441,9 +457,10 @@ class TestFlows:
                                                   0x8006, tlv(0x00, 0x0000, "{}"))
         time.sleep(1)
 
-        # TODO should be a single response (currently two are sent)
-        self.check_cmdu_type("channel selection response", 0x8007, env.agents[0].mac,
-                             env.controller.mac, cs_req_mid)
+        check_single_channel_response(self, 0x00)
+
+        cur_chan_0 = env.agents[0].radios[0].get_current_channel()
+        cur_chan_1 = env.agents[0].radios[1].get_current_channel()
 
         cur_chan_0 = env.agents[0].radios[0].get_current_channel()
         cur_chan_1 = env.agents[0].radios[1].get_current_channel()
@@ -514,18 +531,7 @@ class TestFlows:
             tlv(0x8B, 0x000B, env.agents[0].radios[0].mac + ' 0x01 {0x52 {0x01 {0x01}} 0x00}'))
         time.sleep(1)
 
-        cs_resp = self.check_cmdu_type("channel selection response", 0x8007, env.agents[0].mac,
-                                       env.controller.mac, cs_req_mid)
-
-        # TODO should be a single response (currently two are sent)
-        for response in cs_resp:
-            cs_resp_tlv = self.check_cmdu_has_tlv_single(response, 0x8e)
-            if cs_resp_tlv and \
-               cs_resp_tlv.channel_select_radio_id == env.agents[0].radios[0].mac:
-                if int(cs_resp_tlv.channel_select_response_code, 16) != 0x02:
-                    self.fail("Channel selection response with unexpected response code {}".format(
-                        cs_resp_tlv.channel_select_response_code
-                    ))
+        check_single_channel_response(self, 0x02)
 
         env.checkpoint()
 
@@ -606,9 +612,7 @@ class TestFlows:
             self.check_log(env.agents[0].radios[0], "tlvTransmitPowerLimit {}".format(tp20dBm))
             self.check_log(env.agents[0].radios[1], "tlvTransmitPowerLimit {}".format(tp20dBm))
 
-            # TODO should be a single response (currently two are sent)
-            self.check_cmdu_type("channel selection response", 0x8007, env.agents[0].mac,
-                                 env.controller.mac, cs_req_mid)
+            check_single_channel_response(self, 0x00)
 
             # payload_wlan0 and payload_wlan1 forced to channel 6 resp. 36, check that this happened
             (cur_chan_channel_0, _, _) = env.agents[0].radios[0].get_current_channel()
