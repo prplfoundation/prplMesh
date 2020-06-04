@@ -7,7 +7,7 @@ project(prplmesh
 include(cmake/multiap-helpers.cmake)
 
 if(NOT DEFINED TARGET_PLATFORM)
-set(TARGET_PLATFORM "linux")
+    set(TARGET_PLATFORM "linux")
 endif()
 
 option (BUILD_AGENT "Build EasyMesh agent" ON)
@@ -39,7 +39,7 @@ message(STATUS "CMAKE_PREFIX_PATH - ${CMAKE_PREFIX_PATH}")
 message(STATUS "CMAKE_MULTIAP_OUTPUT_DIRECTORY - ${CMAKE_MULTIAP_OUTPUT_DIRECTORY}")
 
 if(NOT CMAKE_BUILD_TYPE)
-set(CMAKE_BUILD_TYPE "Release")
+    set(CMAKE_BUILD_TYPE "Release")
 endif()
 
 set(CMAKE_CXX_STANDARD 11)
@@ -175,10 +175,10 @@ endif()
 add_subdirectory(framework)
 add_subdirectory(common)
 if (BUILD_AGENT)
-add_subdirectory(agent)
+    add_subdirectory(agent)
 endif()
 if (BUILD_CONTROLLER)
-add_subdirectory(controller)
+    add_subdirectory(controller)
 endif()
 
 ## Version
