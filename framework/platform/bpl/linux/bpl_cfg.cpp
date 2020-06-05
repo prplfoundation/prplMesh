@@ -280,8 +280,7 @@ int cfg_get_sta_iface(const char iface[BPL_IFNAME_LEN], char sta_iface[BPL_IFNAM
         return RETURN_ERR;
     }
 
-    // return empty STA interface name
-    sta_iface[0] = '\0';
+    mapf::utils::copy_string(sta_iface, iface, BPL_IFNAME_LEN);
     return RETURN_OK;
 }
 
