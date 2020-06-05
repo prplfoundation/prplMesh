@@ -422,40 +422,17 @@ class ALEntityPrplWrt(ALEntity):
         else:
             self.config_file_name = '/opt/prplmesh/config/beerocks_agent.conf'
 
-<<<<<<< HEAD
-        ucc_port = self.command(("grep \"ucc_listener_port\" {} "
-                                "| cut -d'=' -f2 | cut -d\" \" -f 1").format(self.config_file_name))
-
-        device_ip_output = self.command(
-            "ip -f inet addr show {} | head -n 2".format(self.bridge_name))
-        device_ip = re.search(
-            r'inet (?P<ip>[0-9.]+)', device_ip_output.decode('utf-8')).group('ip')
-        self.log_folder = self.command(
-            "grep log_files_path {} | cut -d=\'=\' -f2".format(self.config_file_name))
-
-        ucc_socket = UCCSocket(device_ip, ucc_port)
-=======
         ucc_port_raw = self.command("grep \"ucc_listener_port\" {}".format(self.config_file_name))
         ucc_port = int(re.search(r'ucc_listener_port=(?P<port>[0-9]+)',
                                  ucc_port_raw).group('port'))
         bridge_name_raw = self.command("grep \"bridge_iface\" {}".format(self.config_file_name))
         self.bridge_name = re.search(r'bridge_iface=(?P<bridge>.+)\r\n',
                                      bridge_name_raw).group('bridge')
-
-        # Multiple IPs may be set to same interface. We are interested in the last one, which is set
-        # by test during board init procedure.
-        device_ip_raw = self.command(
-            "ip -family inet addr show {} | tail -n 2".format(self.bridge_name))
-        self.device_ip = re.search(r'inet (?P<ip>[0-9.]+)',
-                                   device_ip_raw).group('ip')
-
         log_folder_raw = self.command(
             "grep log_files_path {}".format(self.config_file_name))
         self.log_folder = re.search(r'log_files_path=(?P<log_path>[a-zA-Z0-9_\/]+)',
                                     log_folder_raw).group('log_path')
-
-        ucc_socket = UCCSocket(self.device_ip, int(ucc_port))
->>>>>>> tests:  environment.py: complete prplWRT entities
+        ucc_socket = UCCSocket(str(self.device.wan_ip), int(ucc_port))
         mac = ucc_socket.dev_get_parameter('ALid')
 
         super().__init__(mac, ucc_socket, installdir, is_controller)
