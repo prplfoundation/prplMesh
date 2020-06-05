@@ -33,6 +33,7 @@ This file lists all contributors.
 - Ram Marzin
 - Ran Regev
 - Raphaël Mélotte
+- Segev Ravgad
 - Semyon Barenboym
 - Tomer Eliyahu
 - Vitalii Komisarenko
