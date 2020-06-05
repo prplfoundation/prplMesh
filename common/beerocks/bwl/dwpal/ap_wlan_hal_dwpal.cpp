@@ -2546,7 +2546,8 @@ bool ap_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
 
 } // namespace dwpal
 
-std::shared_ptr<ap_wlan_hal> ap_wlan_hal_create(std::string iface_name, hal_conf_t hal_conf,
+std::shared_ptr<ap_wlan_hal> ap_wlan_hal_create(const std::string &iface_name,
+                                                hal_conf_t hal_conf,
                                                 base_wlan_hal::hal_event_cb_t callback)
 {
     return std::make_shared<dwpal::ap_wlan_hal_dwpal>(iface_name, callback, hal_conf);

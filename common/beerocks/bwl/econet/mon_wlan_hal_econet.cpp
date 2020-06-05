@@ -360,10 +360,11 @@ bool mon_wlan_hal_dummy::set(const std::string &param, const std::string &value,
 
 } // namespace dummy
 
-std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(std::string iface_name,
+std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(const std::string &iface_name,
+                                                  hal_conf_t hal_conf,
                                                   base_wlan_hal::hal_event_cb_t callback)
 {
-    return std::make_shared<dummy::mon_wlan_hal_dummy>(iface_name, callback);
+    return std::make_shared<dummy::mon_wlan_hal_dummy>(iface_name, callback, hal_conf);
 }
 
 } // namespace bwl

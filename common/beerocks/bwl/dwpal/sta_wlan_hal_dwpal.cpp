@@ -832,9 +832,10 @@ bool sta_wlan_hal_dwpal::parse_fapi_event(const std::string& opcode, std::shared
 } // namespace dwpal
 
 std::shared_ptr<sta_wlan_hal> sta_wlan_hal_create(const std::string &iface_name,
+                                                  hal_conf_t hal_conf,
                                                   base_wlan_hal::hal_event_cb_t callback)
 {
-    return std::make_shared<dwpal::sta_wlan_hal_dwpal>(iface_name, callback);
+    return std::make_shared<dwpal::sta_wlan_hal_dwpal>(iface_name, callback, hal_conf);
 }
 
 } // namespace bwl

@@ -28,9 +28,7 @@ public:
      * @param [in] iface_name AP interface name.
      * @param [in] callback Callback for handling internal events.
      */
-    ap_wlan_hal_nl80211(const std::string &iface_name, hal_event_cb_t callback,
-                        hal_conf_t hal_conf);
-
+    ap_wlan_hal_nl80211(const std::string &iface_name, hal_event_cb_t callback, hal_conf_t hal_conf);
     virtual ~ap_wlan_hal_nl80211();
 
     virtual HALState attach(bool block = false) override;

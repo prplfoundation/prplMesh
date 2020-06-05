@@ -240,6 +240,7 @@ backhaul_manager::backhaul_manager(const config_file::sConfigSlave &config,
     m_sConfig.bridge_iface      = config.bridge_iface;
     m_sConfig.vendor            = config.vendor;
     m_sConfig.model             = config.model;
+    std::copy_n(config.wpa_supplicant_ctrl_iface, IRE_MAX_SLAVES, m_sConfig.wpa_supplicant_ctrl_iface);
 
     m_eFSMState = EState::INIT;
     set_select_timeout(SELECT_TIMEOUT_MSC);
@@ -1298,8 +1299,13 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
             // Create a HAL instance if doesn't exists
             if (!soc->sta_wlan_hal) {
                 using namespace std::placeholders; // for `_1`
+
+                bwl::hal_conf_t hal_conf;
+                // FIXME: got config of [agent0] instead of config according wlan iface
+                hal_conf.wpa_ctrl_path = m_sConfig.wpa_supplicant_ctrl_iface[0];
+
                 soc->sta_wlan_hal = bwl::sta_wlan_hal_create(
-                    iface, std::bind(&backhaul_manager::hal_event_handler, this, _1, iface));
+                    iface, hal_conf, std::bind(&backhaul_manager::hal_event_handler, this, _1, iface));
                 LOG_IF(!soc->sta_wlan_hal, FATAL) << "Failed creating HAL instance!";
             } else {
                 LOG(DEBUG) << "STA HAL exists...";

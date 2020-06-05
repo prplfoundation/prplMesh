@@ -167,6 +167,7 @@ private:
         bwl::WiFiSec security_type;
         bool mem_only_psk;
         eFreqType backhaul_preferred_radio_band;
+        std::string wpa_supplicant_ctrl_iface[IRE_MAX_SLAVES];
 
         // Slave handling the active wireless connection
         // std::shared_ptr<bwl::sta_wlan_hal> active_slave_hal;

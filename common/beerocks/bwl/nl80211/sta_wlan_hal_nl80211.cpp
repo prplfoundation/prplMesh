@@ -16,8 +16,9 @@
 namespace bwl {
 namespace nl80211 {
 
-sta_wlan_hal_nl80211::sta_wlan_hal_nl80211(const std::string &iface_name, hal_event_cb_t callback)
-    : base_wlan_hal(), base_wlan_hal_nl80211(bwl::HALType::Station, iface_name, callback, {})
+sta_wlan_hal_nl80211::sta_wlan_hal_nl80211(const std::string &iface_name, hal_event_cb_t callback, hal_conf_t hal_conf)
+    : base_wlan_hal(bwl::HALType::Station, iface_name, IfaceType::Intel, callback, hal_conf),
+      base_wlan_hal_nl80211(bwl::HALType::Station, iface_name, callback, hal_conf)
 {
 }
 
@@ -70,9 +71,10 @@ bool sta_wlan_hal_nl80211::update_status() { return false; }
 } // namespace nl80211
 
 std::shared_ptr<sta_wlan_hal> sta_wlan_hal_create(const std::string &iface_name,
+                                                  hal_conf_t hal_conf,
                                                   base_wlan_hal::hal_event_cb_t callback)
 {
-    return std::make_shared<nl80211::sta_wlan_hal_nl80211>(iface_name, callback);
+    return std::make_shared<nl80211::sta_wlan_hal_nl80211>(iface_name, callback, hal_conf);
 }
 
 } // namespace bwl

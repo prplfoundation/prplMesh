@@ -1303,10 +1303,11 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
 
 } // namespace dwpal
 
-std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(std::string iface_name,
+std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(const std::string &iface_name,
+                                                  hal_conf_t hal_conf,
                                                   base_wlan_hal::hal_event_cb_t callback)
 {
-    return std::make_shared<dwpal::mon_wlan_hal_dwpal>(iface_name, callback);
+    return std::make_shared<dwpal::mon_wlan_hal_dwpal>(iface_name, callback, hal_conf);
 }
 
 } // namespace bwl
