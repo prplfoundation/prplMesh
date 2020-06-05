@@ -21,3 +21,12 @@ class PrplMeshBaseTest(bft_base_test.BftBaseTest):
         if not result:
             raise Exception
         return result, line, match
+
+    def prplmesh_status_check(self, entity_or_radio: Union[env.ALEntity, env.Radio]) -> bool:
+        """Check prplMesh status by executing status command to initd service.
+        Return True if operational.
+        """
+        result = entity_or_radio.prprlmesh_status_check()
+        if not result:
+            raise Exception
+        return result
