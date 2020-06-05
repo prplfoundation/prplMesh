@@ -83,3 +83,10 @@ class PrplMeshDocker(PrplMeshBase):
         States that device is operational and its consoles are accessible.
         """
         return True
+
+    def prprlmesh_status_check(self) -> bool:
+        """Check prplMesh status by executing status command to initd service.
+        Return True if operational.
+        """
+        self.check_status()
+        return True

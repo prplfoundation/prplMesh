@@ -14,10 +14,11 @@ class InitialApConfig(PrplMeshBaseTest):
             if dev.agent_entity:
                 dev.wired_sniffer.start(self.__class__.__name__ + "-" + dev.name)
 
+                self.prplmesh_status_check(dev.agent_entity.device)
                 self.check_log(dev.agent_entity.radios[0],
-                               r"Controller configuration \(WSC M2 Encrypted Settings\)")
+                               r"\(WSC M2 Encrypted Settings\)")
                 self.check_log(dev.agent_entity.radios[1],
-                               r"Controller configuration \(WSC M2 Encrypted Settings\)")
+                               r"\(WSC M2 Encrypted Settings\)")
                 self.check_log(dev.agent_entity.radios[0],
                                r"WSC Global authentication success")
                 self.check_log(dev.agent_entity.radios[1],
