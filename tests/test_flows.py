@@ -130,6 +130,18 @@ class TestFlows:
             return None
         return cmdus[0]
 
+    def check_no_cmdu_type(
+        self, msg: str, msg_type: int, eth_src: str, eth_dst: str = None
+    ) -> [sniffer.Packet]:
+        '''Like check_cmdu_type, but check that *no* machting CMDU is found.'''
+        debug("Checking for no CMDU {} (0x{:04x}) from {}".format(msg, msg_type, eth_src))
+        result = env.wired_sniffer.get_cmdu_capture_type(msg_type, eth_src, eth_dst)
+        if result:
+            self.fail("Unexpected CMDU {}".format(msg))
+            for packet in result:
+                debug("  {}".format(packet))
+        return result
+
     def check_cmdu_has_tlvs(
         self, packet: Union[sniffer.Packet, None], tlv_type: int
     ) -> [sniffer.Tlv]:
