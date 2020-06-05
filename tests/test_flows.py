@@ -289,6 +289,18 @@ class TestFlows:
 
     # TEST DEFINITIONS #
 
+    def test_dev_reset_default(self):
+        '''Check behaviour of dev_reset_default CAPI command.'''
+        agent = env.agents[0]
+        agent.cmd_reply("dev_reset_default,devrole,agent,program,map,type,DUT")
+        env.checkpoint()
+        time.sleep(2)
+        self.check_no_cmdu_type("autoconfig search while in reset", 0x0007, agent.mac)
+        env.checkpoint()
+        agent.cmd_reply("dev_set_config,backhaul,eth")
+        time.sleep(1)
+        self.check_cmdu_type("autoconfig search", 0x0007, agent.mac)
+
     def test_initial_ap_config(self):
         '''Check initial configuration on repeater1.'''
         self.check_log(env.agents[0].radios[0], r"WSC Global authentication success")
