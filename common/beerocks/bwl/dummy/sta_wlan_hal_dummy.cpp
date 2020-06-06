@@ -17,7 +17,8 @@ namespace bwl {
 namespace dummy {
 
 sta_wlan_hal_dummy::sta_wlan_hal_dummy(const std::string &iface_name, hal_event_cb_t callback)
-    : base_wlan_hal(), base_wlan_hal_dummy(bwl::HALType::Station, iface_name, callback, {})
+    : base_wlan_hal(bwl::HALType::Station, iface_name, IfaceType::Intel, callback, {}),
+      base_wlan_hal_dummy(bwl::HALType::Station, iface_name, callback, {})
 {
 }
 
