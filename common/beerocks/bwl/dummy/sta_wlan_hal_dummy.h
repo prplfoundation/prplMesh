@@ -73,15 +73,7 @@ private:
     // Active network parameters
     std::string m_active_ssid;
     std::string m_active_bssid;
-    std::string m_active_pass;
-    WiFiSec m_active_secutiry = WiFiSec::Invalid;
-    uint8_t m_active_channel  = 0;
-    int m_active_network_id   = -1;
-
-    // Unassociated measurement state variables
-    std::chrono::steady_clock::time_point m_unassoc_measure_start;
-    int m_unassoc_measure_window_size = 0;
-    int m_unassoc_measure_delay       = 0;
+    uint8_t m_active_channel = 0;
 };
 
 } // namespace dummy
