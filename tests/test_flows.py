@@ -301,6 +301,31 @@ class TestFlows:
         time.sleep(1)
         self.check_cmdu_type("autoconfig search", 0x0007, agent.mac)
 
+    def test_capi_wireless_onboarding(self):
+        '''Check configuration of wireless backhaul.'''
+        agent = env.agents[0]
+
+        # Step 1: reset
+        agent.cmd_reply("dev_reset_default,devrole,agent,program,map,type,DUT")
+        env.checkpoint()
+        time.sleep(2)
+        self.check_no_cmdu_type("autoconfig search while in reset", 0x0007, agent.mac)
+
+        # Step 2: config
+        env.checkpoint()
+        agent.cmd_reply("dev_set_config,backhaul,0x{}".format(agent.radios[0].mac.replace(':', '')))
+        # TODO
+        # At this point, the wired backhaul should be removed from the bridge so autoconfig search
+        # should still not come through.
+        time.sleep(2)
+        # self.check_no_cmdu_type("autoconfig search while awaiting onboarding", 0x0007, agent.mac)
+
+        # Step 3: start WPS
+        # TODO do backhaul onboarding
+
+        # Clean up: reset to ethernet backhaul
+        self.test_dev_reset_default()
+
     def test_initial_ap_config(self):
         '''Check initial configuration on repeater1.'''
         self.check_log(env.agents[0].radios[0], r"WSC Global authentication success")
