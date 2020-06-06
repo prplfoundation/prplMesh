@@ -215,14 +215,21 @@ bool agent_ucc_listener::handle_dev_set_config(std::unordered_map<std::string, s
 
     auto &backhaul_param = params["backhaul"];
     std::transform(backhaul_param.begin(), backhaul_param.end(), backhaul_param.begin(), ::tolower);
-    // TODO - add wireless backhaul support.
-    // For now, this causes slave reset and the test to hang,
-    // so return not supported.
-    if (backhaul_param != "eth") {
-        err_string = "wireless backhaul not supported";
-        return false;
+    if (backhaul_param == DEV_SET_ETH) {
+        m_selected_backhaul = DEV_SET_ETH;
+    } else {
+        // backhaul param must be a radio UID, in hex, starting with 0x
+        if (backhaul_param.substr(0, 2) != "0x" || backhaul_param.size() != 14 ||
+            backhaul_param.find_first_not_of("0123456789abcdef", 2) != std::string::npos) {
+            err_string = "parameter 'backhaul' is not 'eth' or MAC address";
+            return false;
+        }
+        sMacAddr backhaul_radio_uid = net::network_utils::ZERO_MAC;
+        for (size_t idx = 0; idx < 6; idx++) {
+            backhaul_radio_uid.oct[idx] = std::stoul(backhaul_param.substr(2 + 2 * idx, 2), 0, 16);
+        }
+        m_selected_backhaul = tlvf::mac_to_string(backhaul_radio_uid);
     }
-    m_selected_backhaul = backhaul_param;
 
     auto timeout =
         std::chrono::steady_clock::now() + std::chrono::seconds(UCC_REPLY_COMPLETE_TIMEOUT_SEC);
