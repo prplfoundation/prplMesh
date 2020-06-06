@@ -68,7 +68,13 @@ bool sta_wlan_hal_dummy::process_dummy_data(parsed_obj_map_t &parsed_obj) { retu
 
 bool sta_wlan_hal_dummy::process_dummy_event(parsed_obj_map_t &parsed_obj) { return true; }
 
-bool sta_wlan_hal_dummy::update_status() { return false; }
+bool sta_wlan_hal_dummy::update_status()
+{
+    m_active_bssid   = "00:00:00:00:00:00";
+    m_active_channel = 6;
+    m_active_ssid    = "test";
+    return true;
+}
 
 } // namespace dummy
 
