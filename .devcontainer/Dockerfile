@@ -19,7 +19,7 @@ RUN apt-get update \
     bash-completion locales ninja-build pkg-config shellcheck \
     flake8 clang-format vim \
     # Network capturing
-    tcpdump openssh-server
+    tcpdump openssh-server \
     # uuid
     uuid-runtime
 
