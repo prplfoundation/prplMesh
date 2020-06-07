@@ -20,6 +20,8 @@ RUN apt-get update \
     flake8 clang-format vim \
     # Network capturing
     tcpdump openssh-server
+    # uuid
+    uuid-runtime
 
 # Install podman
 RUN echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_$(lsb_release -sr)/ /" \
