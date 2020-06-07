@@ -322,6 +322,7 @@ include:
   extends: .certification-generic
   variables:
     DEVICE_UNDER_TEST: "mediatek"
+
 MAP-5.4.1_ETH_FH5GH:mediatek-1:
   extends: .MAP-5.4.1:mediatek
 
@@ -336,3 +337,26 @@ MAP-5.4.1_ETH_FH5GH:mediatek-4:
 
 MAP-5.4.1_ETH_FH5GH:mediatek-5:
   extends: .MAP-5.4.1:mediatek
+
+
+.MAP-5.4.1:marvell:
+  extends: .certification-generic
+  variables:
+    DEVICE_UNDER_TEST: "marvell"
+
+MAP-5.4.1_ETH_FH5GH:marvell-1:
+  extends: .MAP-5.4.1:marvell
+
+MAP-5.4.1_ETH_FH5GH:marvell-2:
+  extends: .MAP-5.4.1:marvell
+
+MAP-5.4.1_ETH_FH5GH:marvell-3:
+  extends: .MAP-5.4.1:marvell
+
+MAP-5.4.1_ETH_FH5GH:marvell-4:
+  extends: .MAP-5.4.1:marvell
+
+MAP-5.4.1_ETH_FH5GH:marvell-5:
+  extends: .MAP-5.4.1:marvell
+
+
