@@ -317,3 +317,22 @@ include:
   - local: "/ci/certification/generic.yml"
   - local: "/ci/certification/dummy.yml"
   - local: "/ci/certification/netgear-rax40.yml"
+
+.MAP-5.4.1:mediatek:
+  extends: .certification-generic
+  variables:
+    DEVICE_UNDER_TEST: "mediatek"
+MAP-5.4.1_ETH_FH5GH:mediatek-1:
+  extends: .MAP-5.4.1:mediatek
+
+MAP-5.4.1_ETH_FH5GH:mediatek-2:
+  extends: .MAP-5.4.1:mediatek
+
+MAP-5.4.1_ETH_FH5GH:mediatek-3:
+  extends: .MAP-5.4.1:mediatek
+
+MAP-5.4.1_ETH_FH5GH:mediatek-4:
+  extends: .MAP-5.4.1:mediatek
+
+MAP-5.4.1_ETH_FH5GH:mediatek-5:
+  extends: .MAP-5.4.1:mediatek
