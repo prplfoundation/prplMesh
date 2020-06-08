@@ -61,6 +61,8 @@ static void fill_conn_map_node(
                 // VAP
                 int vap_length = sizeof(node->data.gw_ire.radio[i].vap) /
                                  sizeof(node->data.gw_ire.radio[i].vap[0]);
+
+                // The index of of the VAP 'j' represents the VAP ID.
                 for (int j = 0; j < vap_length; j++) {
                     auto vap_mac = tlvf::mac_to_string(node->data.gw_ire.radio[i].vap[j].bssid);
                     if (vap_mac != network_utils::ZERO_MAC_STRING) {
@@ -71,6 +73,7 @@ static void fill_conn_map_node(
                                            ? node->data.gw_ire.radio[i].vap[j].ssid
                                            : std::string("N/A"));
                         v->backhaul_vap = node->data.gw_ire.radio[i].vap[j].backhaul_vap;
+                        v->vap_id       = j;
                         r->vap.push_back(v);
                     }
                 }
@@ -198,8 +201,8 @@ static void bml_utils_dump_conn_map(
                 for (auto vap = radio->vap.begin(); vap != radio->vap.end(); vap++) {
                     if ((*vap)->bssid != network_utils::ZERO_MAC_STRING) {
                         ss << ind_str << std::string((*vap)->backhaul_vap ? "b" : "f") << "VAP["
-                           << std::to_string(j) << "]:"
-                           << " " << radio->ifname << "." << std::to_string(j)
+                           << std::to_string((*vap)->vap_id) << "]:"
+                           << " " << radio->ifname << "." << std::to_string((*vap)->vap_id)
                            << " bssid: " << (*vap)->bssid << ", ssid: " << (*vap)->ssid
                            << std::endl;
                         // add clients which are connected to the vap
