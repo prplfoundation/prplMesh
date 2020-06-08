@@ -2829,7 +2829,10 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
                     << " | " << int(notification->params().tx_phy_rate_100kb)
                     << " is_parent=" << (is_parent ? "1" : "0")
                     << " src_module=" << int(notification->params().src_module)
-                    << " id=" << int(beerocks_header->id()));
+                    << " id=" << int(beerocks_header->id())
+                    << " bssid=" << database.get_node_parent(client_mac)
+                    << " vap_id=" << int(notification->params().vap_id));
+
         //response return from slave backhaul manager , updating the matching same band sibling.
         if (database.is_hostap_backhaul_manager(ap_mac) &&
             database.is_node_wireless(database.get_node_parent_backhaul(ap_mac)) &&

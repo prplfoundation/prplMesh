@@ -373,6 +373,7 @@ void monitor_rssi::send_rssi_measurement_response(std::string &sta_mac, monitor_
         response->params().rx_packets        = rx_packets;
         response->params().rx_phy_rate_100kb = sta_stats.rx_phy_rate_100kb_min;
         response->params().tx_phy_rate_100kb = sta_stats.tx_phy_rate_100kb_min;
+        response->params().vap_id            = sta_node->get_vap_id();
 
         message_com::send_cmdu(slave_socket, cmdu_tx);
         LOG(DEBUG) << "RSSI_MEASUREMENT_RESPONSE sta_mac=" << sta_mac
