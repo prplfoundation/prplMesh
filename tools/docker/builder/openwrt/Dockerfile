@@ -9,7 +9,8 @@ RUN apt-get update \
     unzip git ca-certificates gawk wget file bash \
     python-yaml python3-yaml rsync less vim gnupg software-properties-common \
     #   yq is available in a separate ppa (needs gnupg and software-properties-common):
-    && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64 \
+    && if [ -n "$HTTP_PROXY" ]; then KEYSERVER_OPTIONS="--keyserver-options http-proxy=$HTTP_PROXY"; fi \
+    && apt-key adv --keyserver keyserver.ubuntu.com $KEYSERVER_OPTIONS --recv-keys CC86BB64 \
     && add-apt-repository ppa:rmescandon/yq \
     && apt-get -y install --no-install-recommends yq \
     && rm -rf /var/lib/apt/lists/*
