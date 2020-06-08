@@ -46,6 +46,7 @@ if (BUILD_TESTS)
     set(unit_tests_sources
         ${bcl_sources}
         ${MODULE_PATH}/unit_tests/wireless_utils_test.cpp
+        ${MODULE_PATH}/unit_tests/topology_utils_test.cpp
     )
     add_executable(${TEST_PROJECT_NAME}
         ${unit_tests_sources}
