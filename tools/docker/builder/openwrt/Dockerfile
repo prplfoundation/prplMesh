@@ -8,15 +8,15 @@ RUN apt-get update \
     build-essential libncurses5 libncurses5-dev python python3 \
     unzip git ca-certificates gawk wget file bash \
     python-yaml python3-yaml rsync less vim gnupg software-properties-common \
-#   yq is available in a separate ppa (needs gnupg and software-properties-common):
+    #   yq is available in a separate ppa (needs gnupg and software-properties-common):
     && apt-key adv --keyserver keyserver.ubuntu.com --recv-keys CC86BB64 \
     && add-apt-repository ppa:rmescandon/yq \
     && apt-get -y install --no-install-recommends yq \
     && rm -rf /var/lib/apt/lists/*
-    # Building tlvfs currently uses the docker
-    # container's python (not the one from OpenWrt)
-    # python-yaml is needed to build the tlvfs
-    # vim and less are there to debug builds at run time
+# Building tlvfs currently uses the docker
+# container's python (not the one from OpenWrt)
+# python-yaml is needed to build the tlvfs
+# vim and less are there to debug builds at run time
 
 RUN useradd -ms /bin/bash openwrt
 
@@ -67,20 +67,20 @@ WORKDIR /home/openwrt/openwrt
 COPY --chown=openwrt:openwrt profiles_feeds/ /home/openwrt/openwrt/profiles_feeds
 
 RUN mkdir -p files/etc \
-#   We need to keep the hashes in the firmware, to later know if an upgrade is needed:
+    #   We need to keep the hashes in the firmware, to later know if an upgrade is needed:
     && printf '%s=%s\n' "OPENWRT_REPOSITORY" "$OPENWRT_REPOSITORY" >> files/etc/prplwrt-version \
     && printf '%s=%s\n' "OPENWRT_VERSION" "$OPENWRT_VERSION" >> files/etc/prplwrt-version \
     && if [ "$TARGET_PROFILE" = DEVICE_NETGEAR_RAX40 ] ; then \
-#       Add prplmesh to the list of packages of the profile:
+        #       Add prplmesh to the list of packages of the profile:
         sed -i 's/packages:/packages:\n  - prplmesh-dwpal/g' profiles/intel_mips.yml \
         && yq write --inplace profiles/intel_mips.yml feeds -f profiles_feeds/netgear-rax40.yml \
         && ./scripts/gen_config.py intel_mips \
-#       Installing intel feed doesn't correctly regenerate kernel .package-info
-#       force regeneration by removing it
+        #       Installing intel feed doesn't correctly regenerate kernel .package-info
+        #       force regeneration by removing it
         && rm -rf tmp \
-#       For some reason we have to run gen_config a second time to get a correct .config:
+        #       For some reason we have to run gen_config a second time to get a correct .config:
         && ./scripts/gen_config.py intel_mips \
-#       make sure intel's bridge-utils is the only one that gets installed:
+        #       make sure intel's bridge-utils is the only one that gets installed:
         && rm -rf ./package/feeds/packages/bridge-utils \
         && scripts/feeds install -p feed_bridge_utils bridge-utils \
         && cat profiles_feeds/netgear-rax40.yml >> files/etc/prplwrt-version ;\
@@ -98,8 +98,8 @@ RUN mkdir -p files/etc \
     fi ;\
     make -j$(nproc) \
     && make package/prplmesh/clean
-    # note that the result from diffconfig.sh with a minimal
-    # configuration has the 3 CONFIG_TARGET items we set here, but NOT
-    # the individual CONFIG_TARGET_${SUBTARGET} and
-    # CONFIG_TARGET_${TARGET_PROFILE}, which means we don't need to
-    # set them.
+# note that the result from diffconfig.sh with a minimal
+# configuration has the 3 CONFIG_TARGET items we set here, but NOT
+# the individual CONFIG_TARGET_${SUBTARGET} and
+# CONFIG_TARGET_${TARGET_PROFILE}, which means we don't need to
+# set them.
