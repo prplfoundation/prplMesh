@@ -1895,6 +1895,10 @@ bool db::set_supported_channel_radar_affected(const std::string &mac, std::vecto
     }
     auto channels_count = channels.size();
     LOG(DEBUG) << " channels_count = " << int(channels_count);
+    if (channels_count < 1) {
+        LOG(ERROR) << "the given channel list must contain at least one value";
+        return false;
+    }
     auto it =
         find_if(std::begin(n->hostap->supported_channels), std::end(n->hostap->supported_channels),
                 [&](beerocks::message::sWifiChannel supported_channel) {
