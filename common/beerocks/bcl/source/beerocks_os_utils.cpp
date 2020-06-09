@@ -81,7 +81,7 @@ std::string os_utils::system_call(std::string cmd, int log_lvl, bool detached)
     // }
 
     auto ret = system(cmd.c_str());
-    LOG_IF(!ret, ERROR) << cmd << " failed with return code " << ret;
+    LOG_IF(ret, ERROR) << cmd << " failed with return code " << ret;
 
 #endif
     return ret_str;
