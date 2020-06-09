@@ -1025,21 +1025,16 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
                 for (const auto &socket : slaves_sockets) {
                     if (socket) {
                         for (int i = 0; i < beerocks::IFACE_TOTAL_VAPS; ++i) {
-                            if (socket->vaps_list.vaps[i].mac != network_utils::ZERO_MAC) {
+                            if ((socket->vaps_list.vaps[i].mac != network_utils::ZERO_MAC) &&
+                                (socket->vaps_list.vaps[i].ssid[0] != '\0')) {
                                 bssid_list.push_back(socket->vaps_list.vaps[i].mac);
                             }
                         }
                     }
                 }
-                // We must generate a new MID for the periodic AP Metrics Response messages that
-                // do not correspond to an AP Metrics Query message.
-                // We cannot set MID to 0 here because we must also differentiate periodic
-                // AP Metrics Response messages and messages received from monitor thread
-                // due to channel utilization crossed configured threshold value.
-                // As a temporary solution, set MID to UINT16_MAX here.
-                // TODO: to be fixed as part of #1328
+
                 if (!bssid_list.empty()) {
-                    send_slave_ap_metric_query_message(UINT16_MAX, bssid_list);
+                    send_slave_ap_metric_query_message(0, bssid_list);
                 } else {
                     LOG(DEBUG) << "Skipping AP_METRICS_QUERY for slave, empty BSSID list";
                 }
@@ -1235,51 +1230,52 @@ bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<sRadioInfo
 bool backhaul_manager::send_slave_ap_metric_query_message(uint16_t mid,
                                                           const std::vector<sMacAddr> &bssid_list)
 {
-    bool ret = false;
+
+    // Save mid and clear previous query
+    m_expected_ap_metrics_response.mid = mid;
+    m_expected_ap_metrics_response.expected_bssids.clear();
+    m_expected_ap_metrics_response.response.create(
+        mid, ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE);
+
+    auto forward = cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE);
+    if (!forward) {
+        LOG(ERROR) << "Failed to create AP_METRICS_QUERY_MESSAGE";
+        return false;
+    }
+
+    auto query = cmdu_tx.addClass<wfa_map::tlvApMetricQuery>();
+    if (!query) {
+        LOG(ERROR) << "Failed addClass<wfa_map::tlvApMetricQuery>";
+        return false;
+    }
+
+    if (!query->alloc_bssid_list(bssid_list.size())) {
+        LOG(ERROR) << "Failed allocate memory for bssid_list, size: " << bssid_list.size();
+        return false;
+    }
+
+    int i = 0;
+    for (const auto &mac : bssid_list) {
+        auto list         = query->bssid_list(i);
+        std::get<0>(list) = true;
+        std::get<1>(list) = mac;
+        i++;
+        m_ap_metric_query.push_back({nullptr, mac}); // Old implementation will be removed
+    }
+
+    auto ret = false;
     for (auto socket : slaves_sockets) {
-        for (const auto &mac : bssid_list) {
-            int i = 0;
-            if (mac == socket->vaps_list.vaps[i].mac) {
-                LOG(DEBUG) << "Forwarding AP_METRICS_QUERY_MESSAGE message to son_slave, bssid: "
-                           << std::hex << tlvf::mac_to_string(mac);
-
-                auto forward =
-                    cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE);
-                if (!forward) {
-                    LOG(ERROR) << "Failed to create AP_METRICS_QUERY_MESSAGE";
-                    return false;
-                }
-
-                auto query = cmdu_tx.addClass<wfa_map::tlvApMetricQuery>();
-                if (!query) {
-                    LOG(ERROR) << "Failed addClass<wfa_map::tlvApMetricQuery>";
-                    return false;
-                }
-
-                if (!query->alloc_bssid_list(1)) {
-                    LOG(ERROR) << "Failed allocate memory for bssid_list";
-                    return false;
-                }
-
-                auto list         = query->bssid_list(0);
-                std::get<0>(list) = true;
-                std::get<1>(list) = mac;
-
-                if (!message_com::send_cmdu(socket->slave, cmdu_tx)) {
-                    LOG(ERROR) << "Failed forwarding AP_METRICS_QUERY_MESSAGE message to son_slave";
-                    ret = false;
-                    continue;
-                } else {
-                    ret = true;
-                    // Fill a query vector
-                    m_ap_metric_query.push_back({socket->slave, mac});
-                }
-            }
-            i++;
+        if (!message_com::send_cmdu(socket->slave, cmdu_tx)) {
+            LOG(ERROR) << "Failed forwarding AP_METRICS_QUERY_MESSAGE message to son_slave";
+            ret = false;
+            continue;
+        } else {
+            ret = true;
         }
     }
+
     return ret;
-}
+} // namespace beerocks
 
 bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
 {
@@ -2585,32 +2581,20 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
                                                         const std::string &src_mac)
 {
     auto mid = cmdu_rx.getMessageId();
+
+    if (mid != m_expected_ap_metrics_response.mid) {
+        LOG(ERROR) << "Received AP_METRICS_RESPONSE_MESSAGE with bad mid=" << std::hex << int(mid);
+        return false;
+    }
+
+    if (mid == 0) {
+        LOG(DEBUG) << "Forward AP_METRICS_RESPONSE_MESSAGE to controller, mid=" << std::hex
+                   << int(mid);
+        return send_cmdu_to_bus(cmdu_rx, controller_bridge_mac, bridge_info.mac,
+                                cmdu_rx.getMessageLength());
+    }
+
     LOG(DEBUG) << "Received AP_METRICS_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
-
-    /**
-     * If AP Metrics Response message does not correspond to a previously received and forwarded
-     * AP Metrics Query message (which we know because message id is not set), then forward message
-     * to controller.
-     * This might happen when channel utilization value has crossed configured threshold or when
-     * periodic metrics reporting interval has elapsed.
-     */
-    if (0 == mid) {
-        uint16_t length = message_com::get_uds_header(cmdu_rx)->length;
-        cmdu_rx.swap(); //swap back before forwarding
-        return send_cmdu_to_bus(cmdu_rx, controller_bridge_mac, bridge_info.mac, length);
-    }
-
-    /**
-     * When periodic metrics reporting interval has elapsed, we emulate that we have received an
-     * AP Metrics Query message from controller. To differentiate real queries from emulated ones,
-     * we use a "special" mid value.
-     * Note that this design is flaw as a real query might also have this special mid value. This
-     * is just a quick and dirty fix to pass 4.7.5 and 4.7.6 for M1
-     * TODO: to be fixed as part of #1328
-     */
-    if (UINT16_MAX == mid) {
-        mid = 0;
-    }
 
     auto ap_metrics_tlv = cmdu_rx.getClass<wfa_map::tlvApMetrics>();
     if (!ap_metrics_tlv) {
@@ -2759,7 +2743,7 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
 
     LOG(DEBUG) << "Sending AP_METRICS_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
     return send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
-}
+} // namespace beerocks
 
 /**
  * @brief Handles 1905 Topology Query message
