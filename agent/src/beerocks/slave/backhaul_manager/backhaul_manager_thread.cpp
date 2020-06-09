@@ -2539,8 +2539,15 @@ bool backhaul_manager::handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmd
 bool backhaul_manager::handle_ap_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                const std::string &src_mac)
 {
-    std::vector<sMacAddr> bssid;
-    const auto mid           = cmdu_rx.getMessageId();
+
+    const auto mid = cmdu_rx.getMessageId();
+
+    // Save mid and erase data for previous query and response
+    m_expected_ap_metrics_response.mid = mid;
+    m_expected_ap_metrics_response.expected_bssids.clear();
+    m_expected_ap_metrics_response.response.create(
+        mid, ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE);
+
     auto ap_metric_query_tlv = cmdu_rx.getClass<wfa_map::tlvApMetricQuery>();
     if (!ap_metric_query_tlv) {
         LOG(ERROR) << "AP Metrics Query CMDU mid=" << mid << " does not have AP Metric Query TLV";
@@ -2552,14 +2559,23 @@ bool backhaul_manager::handle_ap_metrics_query(ieee1905_1::CmduMessageRx &cmdu_r
             LOG(ERROR) << "Failed to get bssid " << bssid_idx << " from AP_METRICS_QUERY";
             return false;
         }
-        bssid.push_back(std::get<1>(bssid_tuple));
+        auto mac = std::get<1>(bssid_tuple);
+
+        m_expected_ap_metrics_response.expected_bssids.push_back(
+            std::get<1>(bssid_tuple));               //New implementation
+        m_ap_metric_query.push_back({nullptr, mac}); // Old implementation will be removed
         LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
                    << "  bssid " << std::get<1>(bssid_tuple);
     }
 
-    if (!send_slave_ap_metric_query_message(mid, bssid)) {
-        LOG(ERROR) << "Failed to forward AP_METRICS_RESPONSE to the son_slave_thread";
-        return false;
+    LOG(DEBUG) << "Forwarding AP_METRICS_QUERY_MESSAGE to all slaves, mid=" << std::hex << int(mid);
+    uint16_t length = message_com::get_uds_header(cmdu_rx)->length;
+    cmdu_rx.swap(); // swap back before forwarding
+    for (const auto &soc : slaves_sockets) {
+        if (!message_com::forward_cmdu_to_uds(soc->slave, cmdu_rx, length)) {
+            LOG(ERROR) << "Failed forwarding AP_METRICS_QUERY_MESSAGE message to slave: "
+                       << tlvf::mac_to_string(soc->radio_mac);
+        }
     }
 
     return true;
