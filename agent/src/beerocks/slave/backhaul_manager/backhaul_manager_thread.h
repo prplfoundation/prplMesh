@@ -9,6 +9,7 @@
 #ifndef _BACKHAUL_MANAGER_THREAD_H
 #define _BACKHAUL_MANAGER_THREAD_H
 
+#include "internal/expected_ap_metrics_response.h"
 #include "wan_monitor.h"
 
 #include <bcl/beerocks_backport.h>
@@ -24,6 +25,7 @@
 #include <tlvf/ieee_1905_1/eLinkMetricsType.h>
 #include <tlvf/ieee_1905_1/eMediaType.h>
 
+#include <tlvf/CmduMessageTx.h>
 #include <tlvf/wfa_map/tlvApMetrics.h>
 #include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
@@ -544,43 +546,7 @@ private:
                           const sLinkNeighbor &link_neighbor, const sLinkMetrics &link_metrics,
                           ieee1905_1::eLinkMetricsType link_metrics_type);
 
-    struct sStaTrafficStats {
-        sMacAddr sta_mac;
-        uint32_t byte_sent;
-        uint32_t byte_recived;
-        uint32_t packets_sent;
-        uint32_t packets_recived;
-        uint32_t tx_packets_error;
-        uint32_t rx_packets_error;
-        uint32_t retransmission_count;
-    };
-
-    struct sStaLinkMetrics {
-        sMacAddr sta_mac;
-        wfa_map::tlvAssociatedStaLinkMetrics::sBssidInfo bssid_info;
-    };
-
-    struct sApMetricsQuery {
-        Socket *soc;
-        sMacAddr bssid;
-    };
-
-    struct sApMetrics {
-        sMacAddr bssid;
-        uint8_t channel_utilization;
-        uint16_t number_of_stas_currently_associated;
-        wfa_map::tlvApMetrics::sEstimatedService estimated_service_parameters;
-        std::vector<uint8_t> estimated_service_info_field;
-    };
-
-    struct sApMetricsResponse {
-        sApMetrics metric;
-        std::vector<sStaTrafficStats> sta_traffic_stats;
-        std::vector<sStaLinkMetrics> sta_link_metrics;
-    };
-
-    std::vector<sApMetricsQuery> m_ap_metric_query;
-    std::vector<sApMetricsResponse> m_ap_metric_response;
+    ExpectedApMetricsResponse m_expected_ap_metrics_response;
 
     struct sChannelSelectionResponse {
         sMacAddr radio_mac;
