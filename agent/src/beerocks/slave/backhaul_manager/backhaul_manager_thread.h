@@ -24,6 +24,7 @@
 #include <tlvf/ieee_1905_1/eLinkMetricsType.h>
 #include <tlvf/ieee_1905_1/eMediaType.h>
 
+#include <tlvf/CmduMessageTx.h>
 #include <tlvf/wfa_map/tlvApMetrics.h>
 #include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
@@ -518,6 +519,15 @@ private:
     bool add_link_metrics(const sMacAddr &reporter_al_mac, const sLinkInterface &link_interface,
                           const sLinkNeighbor &link_neighbor, const sLinkMetrics &link_metrics,
                           ieee1905_1::eLinkMetricsType link_metrics_type);
+
+    struct sExpectedApMetricsResponse {
+        uint16_t mid;
+        std::vector<sMacAddr> expected_bssids;
+        uint8_t response_buffer[message::MESSAGE_BUFFER_LENGTH];
+        ieee1905_1::CmduMessageTx response = {response_buffer, sizeof(response_buffer)};
+    };
+
+    sExpectedApMetricsResponse m_expected_ap_metrics_response;
 
     struct sStaTrafficStats {
         sMacAddr sta_mac;
