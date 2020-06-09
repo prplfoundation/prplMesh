@@ -11,6 +11,7 @@ file(GLOB beerocks_agent_sources
     ${MODULE_PATH}/link_metrics/*.c*
     ${MODULE_PATH}/platform_manager/*.c*
     ${MODULE_PATH}/gate/*.c*
+    ${MODULE_PATH}/backhaul_manager/internal/*.c*
     ${MODULE_PATH}/*.c*
 )
 
