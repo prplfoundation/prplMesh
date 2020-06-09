@@ -98,32 +98,25 @@ static ap_wlan_hal::Event dwpal_to_bwl_event(const std::string &opcode)
 
 static uint8_t dwpal_bw_to_beerocks_bw(const uint8_t chan_width)
 {
+    // clang-format off
+    std::map<uint8_t, beerocks::eWiFiBandwidth> bandwidths {
+        // prplMesh does not distinguish between 'CHAN_WIDTH_20_NOHT' and 'CHAN_WIDTH_20'
+        { 0 /*CHAN_WIDTH_20_NOHT*/, beerocks::BANDWIDTH_20 },
+        { 1 /*CHAN_WIDTH_20     */, beerocks::BANDWIDTH_20 },
+        { 2 /*CHAN_WIDTH_40     */, beerocks::BANDWIDTH_40 },
+        { 3 /*CHAN_WIDTH_80     */, beerocks::BANDWIDTH_80 },
+        { 4 /*CHAN_WIDTH_80P80  */, beerocks::BANDWIDTH_80_80 },
+        { 5 /*CHAN_WIDTH_160    */, beerocks::BANDWIDTH_160 },
+    };
+    // clang-format on
 
-    // 0 => CHAN_WIDTH_20_NOHT
-    // 1 => CHAN_WIDTH_20
-    // 2 => CHAN_WIDTH_40
-    // 3 => CHAN_WIDTH_80
-    // 4 => CHAN_WIDTH_80P80
-    // 5 => CHAN_WIDTH_160
-    // 6 => CHAN_WIDTH_UNKNOWN
-    uint8_t bw = chan_width;
-
-    if (chan_width > 6) {
-        LOG(ERROR) << "Invalid bandwidth value: " << int(chan_width);
-        return 0;
+    auto it = bandwidths.find(chan_width);
+    if (bandwidths.end() == it) {
+        LOG(ERROR) << "Invalid bandwidth value: " << chan_width;
+        return beerocks::BANDWIDTH_UNKNOWN;
     }
 
-    // Convert to beerocks value (we have only one value for 20Mhz bandwidth)
-    if (chan_width > 0) {
-        bw -= 1;
-    }
-
-    // Treat 80P80 as 160
-    if (chan_width >= 3) {
-        bw = (uint8_t)BANDWIDTH_160;
-    }
-
-    return bw;
+    return it->second;
 }
 
 static void get_ht_mcs_capabilities(int *HT_MCS, std::string &ht_cap_str,
