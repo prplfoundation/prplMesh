@@ -111,7 +111,14 @@ public:
     static std::string get_mac_from_arp_table(const std::string &ipv4);
 
     static std::vector<std::string> linux_get_iface_list_from_bridge(const std::string &bridge);
-    static int linux_get_iface_index(const std::string &iface);
+
+    /**
+     * @brief Gets the interface index corresponding to a particular name.
+     *
+     * @param iface_name The name of the network interface.
+     * @return interface index or 0 if no interface exists with the name given.
+     */
+    static uint32_t linux_get_iface_index(const std::string &iface_name);
     static bool linux_add_iface_to_bridge(const std::string &bridge, const std::string &iface);
     static bool linux_remove_iface_from_bridge(const std::string &bridge, const std::string &iface);
     static bool linux_iface_ctrl(const std::string &iface, bool up, std::string ip = "",
