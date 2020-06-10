@@ -249,10 +249,13 @@ class ALEntityDocker(ALEntity):
 
     The entity is defined from the name of the container, the rest is derived from that.
     '''
-
-    def __init__(self, name: str, is_controller: bool = False):
+    # NOTE: name arg can be also extracted from the device class itself, but test_flows.py
+    # don't have it. We can remove this arg as soon, as we drop test_flows.py
+    def __init__(self, name: str, device: None = None, is_controller: bool = False):
         self.name = name
         self.bridge_name = 'br-lan'
+        if device:
+            self.device = device
 
         # First, get the UCC port from the config file
         if is_controller:
@@ -294,10 +297,12 @@ class ALEntityDocker(ALEntity):
         program = "controller" if self.is_controller else "agent"
         return _docker_wait_for_log(self.name, [program], regex, start_line, timeout)
 
+    def prprlmesh_status_check(self):
+        return self.device.prprlmesh_status_check()
+
 
 class RadioDocker(Radio):
     '''Docker implementation of a radio.'''
-
     def __init__(self, agent: ALEntityDocker, iface_name: str):
         self.iface_name = iface_name
         ip_output = agent.command("ip", "-o",  "link", "list", "dev", self.iface_name).decode()
@@ -398,8 +403,8 @@ def launch_environment_docker(unique_id: str, skip_init: bool = False, tag: str 
             wired_sniffer.stop()
 
     global controller, agents
-    controller = ALEntityDocker(gateway, True)
-    agents = (ALEntityDocker(repeater1), ALEntityDocker(repeater2))
+    controller = ALEntityDocker(name=gateway, is_controller=True)
+    agents = (ALEntityDocker(name=repeater1), ALEntityDocker(name=repeater2))
 
     debug('controller: {}'.format(controller.mac))
     debug('agent1: {}'.format(agents[0].mac))
@@ -454,6 +459,9 @@ class ALEntityPrplWrt(ALEntity):
         return _device_wait_for_log(self.device,
                                     "{}/beerocks_{}.log".format(self.log_folder, program),
                                     regex, start_line, timeout*100)
+
+    def prprlmesh_status_check(self):
+        return self.device.prprlmesh_status_check()
 
 
 class RadioHostapd(Radio):
