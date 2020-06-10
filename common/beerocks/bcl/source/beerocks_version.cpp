@@ -105,8 +105,7 @@ void beerocks::version::print_version(bool verbose, const std::string &name,
     if (description.length() > 0) {
         std::cout << description << std::endl;
     }
-    std::cout << "Copyright (c) 2018 Intel Corporation, All Rights Reserved." << std::endl
-              << std::endl;
+    std::cout << "Copyright (c) 2020 prplMesh, All Rights Reserved." << std::endl << std::endl;
 }
 
 void beerocks::version::log_version(int argc, char **argv, const std::string &logger_id)
