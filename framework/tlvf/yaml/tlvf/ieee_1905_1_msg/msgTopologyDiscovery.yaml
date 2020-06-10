@@ -8,6 +8,6 @@ msgTopologyDiscovery:
     _type: cmduHeader
     _setValue: { "messageType" : TOPOLOGY_DISCOVERY_MESSAGE }
   tlv_al_mac_tlv: tlvAlMacAddressType
-  tlv_mac_tlv: tlvAlMacAddressType
+  tlv_mac_tlv: tlvMacAddress
   tlv_eof: tlvEndOfMessage
   
