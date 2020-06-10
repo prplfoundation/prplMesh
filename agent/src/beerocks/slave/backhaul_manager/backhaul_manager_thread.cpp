@@ -1260,7 +1260,6 @@ bool backhaul_manager::send_slave_ap_metric_query_message(uint16_t mid,
         std::get<0>(list) = true;
         std::get<1>(list) = mac;
         i++;
-        m_ap_metric_query.push_back({nullptr, mac}); // Old implementation will be removed
     }
 
     auto ret = false;
@@ -2555,11 +2554,10 @@ bool backhaul_manager::handle_ap_metrics_query(ieee1905_1::CmduMessageRx &cmdu_r
             LOG(ERROR) << "Failed to get bssid " << bssid_idx << " from AP_METRICS_QUERY";
             return false;
         }
-        auto mac = std::get<1>(bssid_tuple);
 
         m_expected_ap_metrics_response.expected_bssids.push_back(
-            std::get<1>(bssid_tuple));               //New implementation
-        m_ap_metric_query.push_back({nullptr, mac}); // Old implementation will be removed
+            std::get<1>(bssid_tuple)); //New implementation
+
         LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
                    << "  bssid " << std::get<1>(bssid_tuple);
     }

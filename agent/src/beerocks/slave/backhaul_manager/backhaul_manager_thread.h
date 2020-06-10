@@ -529,44 +529,6 @@ private:
 
     sExpectedApMetricsResponse m_expected_ap_metrics_response;
 
-    struct sStaTrafficStats {
-        sMacAddr sta_mac;
-        uint32_t byte_sent;
-        uint32_t byte_recived;
-        uint32_t packets_sent;
-        uint32_t packets_recived;
-        uint32_t tx_packets_error;
-        uint32_t rx_packets_error;
-        uint32_t retransmission_count;
-    };
-
-    struct sStaLinkMetrics {
-        sMacAddr sta_mac;
-        wfa_map::tlvAssociatedStaLinkMetrics::sBssidInfo bssid_info;
-    };
-
-    struct sApMetricsQuery {
-        Socket *soc;
-        sMacAddr bssid;
-    };
-
-    struct sApMetrics {
-        sMacAddr bssid;
-        uint8_t channel_utilization;
-        uint16_t number_of_stas_currently_associated;
-        wfa_map::tlvApMetrics::sEstimatedService estimated_service_parameters;
-        std::vector<uint8_t> estimated_service_info_field;
-    };
-
-    struct sApMetricsResponse {
-        sApMetrics metric;
-        std::vector<sStaTrafficStats> sta_traffic_stats;
-        std::vector<sStaLinkMetrics> sta_link_metrics;
-    };
-
-    std::vector<sApMetricsQuery> m_ap_metric_query;
-    std::vector<sApMetricsResponse> m_ap_metric_response;
-
     struct sChannelSelectionResponse {
         sMacAddr radio_mac;
         wfa_map::tlvChannelSelectionResponse::eResponseCode response_code;
