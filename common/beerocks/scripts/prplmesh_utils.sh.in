@@ -253,6 +253,7 @@ execute_beerocks_command() {
         return $?
     else
         err "BML CLI not found"
+        output=""
         return 1
     fi
 }
@@ -287,21 +288,45 @@ status_function() {
     pgrep -l ieee1905_transport
     pgrep -l local_bus
 
-    # check for operational status
-    LOGS_PATH=@BEEROCKS_LOG_FILES_PATH@
+    bridge_mac="$(ip link show dev @BEEROCKS_BRIDGE_IFACE@ | awk '/^ *link\/ether / {print $2}')"
+    bml_cmd="bml_get_device_operational_radios $bridge_mac"
 
-    error=0
-    report "Main agent operational" main_agent_operational $LOGS_PATH
-    report "@BEEROCKS_WLAN1_IFACE@ radio agent operational" radio_agent_operational $LOGS_PATH @BEEROCKS_WLAN1_IFACE@
-    report "@BEEROCKS_WLAN2_IFACE@ radio agent operational" radio_agent_operational $LOGS_PATH @BEEROCKS_WLAN2_IFACE@
+    if  pgrep -l beerocks_cont ; then
+        if execute_beerocks_command "$bml_cmd" ; then
+            # Expecting
+            # > OK Main radio agent operational
+            # > OK wlan0 radio agent operational
+            # > OK wlan2 radio agent operational
+            OK_Count=$(echo "$output" | grep -c -e "OK.*operational")
+            if [ "$OK_Count" -eq 3 ]; then
+                success "operational test success!"
+                exit 0
+            else
+                err "operational test failed!"
+                err "$output"
+                exit 1
+            fi
+        else
+            err "Beerocks command failed to execute!"
+            exit 1
+        fi
+    else
+        # check for operational status
+        LOGS_PATH=@BEEROCKS_LOG_FILES_PATH@
 
-    [ "$VERBOSE" = "true" ] && [  $error = 1 ] && {
-        cat $LOGS_PATH/beerocks_agent@BEEROCKS_LOG_FILES_SUFFIX@
-        cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN1_IFACE@@BEEROCKS_LOG_FILES_SUFFIX@
-        cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN2_IFACE@@BEEROCKS_LOG_FILES_SUFFIX@
-    }
+        error=0
+        report "Main agent operational" main_agent_operational $LOGS_PATH
+        report "@BEEROCKS_WLAN1_IFACE@ radio agent operational" radio_agent_operational $LOGS_PATH @BEEROCKS_WLAN1_IFACE@
+        report "@BEEROCKS_WLAN2_IFACE@ radio agent operational" radio_agent_operational $LOGS_PATH @BEEROCKS_WLAN2_IFACE@
 
-    exit $error
+        [ "$VERBOSE" = "true" ] && [  $error = 1 ] && {
+            cat $LOGS_PATH/beerocks_agent@BEEROCKS_LOG_FILES_SUFFIX@
+            cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN1_IFACE@@BEEROCKS_LOG_FILES_SUFFIX@
+            cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN2_IFACE@@BEEROCKS_LOG_FILES_SUFFIX@
+        }
+
+        exit $error
+    fi
 }
 
 usage() {
