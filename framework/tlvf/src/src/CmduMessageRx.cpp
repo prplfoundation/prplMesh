@@ -9,7 +9,7 @@
 #include <tlvf/CmduMessageRx.h>
 #include <tlvf/WSC/AttrList.h>
 #include <tlvf/ieee_1905_1/tlv1905NeighborDevice.h>
-#include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
+#include <tlvf/ieee_1905_1/tlvAlMacAddress.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvDeviceBridgingCapability.h>
 #include <tlvf/ieee_1905_1/tlvDeviceInformation.h>
@@ -88,7 +88,7 @@ std::shared_ptr<BaseClass> CmduMessageRx::parseNextTlv()
         return msg.addClass<tlvEndOfMessage>();
     }
     case (1): {
-        return msg.addClass<tlvAlMacAddressType>();
+        return msg.addClass<tlvAlMacAddress>();
     }
     case (2): {
         return msg.addClass<tlvMacAddress>();

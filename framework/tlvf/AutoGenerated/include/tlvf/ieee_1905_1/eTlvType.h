@@ -21,7 +21,7 @@ namespace ieee1905_1 {
 
 enum class eTlvType : uint8_t {
     TLV_END_OF_MESSAGE = 0x0,
-    TLV_AL_MAC_ADDRESS_TYPE = 0x1,
+    TLV_AL_MAC_ADDRESS = 0x1,
     TLV_MAC_ADDRESS = 0x2,
     TLV_DEVICE_INFORMATION = 0x3,
     TLV_DEVICE_BRIDGING_CAPABILITY = 0x4,

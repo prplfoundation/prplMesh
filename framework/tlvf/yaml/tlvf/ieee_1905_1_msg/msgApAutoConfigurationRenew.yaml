@@ -7,7 +7,7 @@ msgApAutoConfigurationRenew:
   header:
     _type: cmduHeader
     _setValue: { "messageType" : AP_AUTOCONFIGURATION_RENEW_MESSAGE }
-  tlv_al_mac_tlv: tlvAlMacAddressType
+  tlv_al_mac_tlv: tlvAlMacAddress
   tlv_supported_role: tlvSupportedRole
   tlv_supported_freq_band: tlvSupportedFreqBand
   tlv_eof: tlvEndOfMessage
