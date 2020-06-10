@@ -246,6 +246,17 @@ stop_function() {
     [ "$DELETE_LOGS" = "true" ] && prplmesh_delete_logs
 }
 
+execute_beerocks_command() {
+    dbg "Executing beerocks cli command: $*"
+    if [ -e $PRPLMESH_BIN_DIR/beerocks_cli ]; then
+        output=$(${PRPLMESH_BIN_DIR}/beerocks_cli -c "$@")
+        return $?
+    else
+        err "BML CLI not found"
+        return 1
+    fi
+}
+
 # Note: Apparently on some Linux version space is added to the process name.
 # Therefore added "($|[[:blank:]])" to the end of the regex expression which means the end of the
 # line ($) or blank character ([[:blank:]])
