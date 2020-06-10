@@ -7,6 +7,6 @@ msgPushButtonJoinNotification:
   header:
     _type: cmduHeader
     _setValue: { "messageType" : PUSH_BUTTON_JOIN_NOTIFICATION_MESSAGE }
-  tlv_al_mac_tlv: tlvAlMacAddressType
+  tlv_al_mac_tlv: tlvAlMacAddress
   tlv_push_butt_join_notif: tlvPushButtonJoinNotification
   tlv_eof: tlvEndOfMessage

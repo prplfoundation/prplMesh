@@ -38,7 +38,7 @@
 #include <tlvf/ieee_1905_1/eTlvType.h>
 #include <tlvf/ieee_1905_1/s802_11SpecificInformation.h>
 #include <tlvf/ieee_1905_1/tlv1905NeighborDevice.h>
-#include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
+#include <tlvf/ieee_1905_1/tlvAlMacAddress.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvDeviceInformation.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
@@ -326,9 +326,9 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(const std::string 
 {
     LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_SEARCH_MESSAGE";
 
-    auto tlvAlMacAddressType = cmdu_rx.getClass<ieee1905_1::tlvAlMacAddressType>();
-    if (!tlvAlMacAddressType) {
-        LOG(ERROR) << "getClass<tlvAlMacAddressType> failed";
+    auto tlvAlMacAddress = cmdu_rx.getClass<ieee1905_1::tlvAlMacAddress>();
+    if (!tlvAlMacAddress) {
+        LOG(ERROR) << "getClass<tlvAlMacAddress> failed";
         return false;
     }
     auto tlvSearchedRole = cmdu_rx.getClass<ieee1905_1::tlvSearchedRole>();
@@ -352,7 +352,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(const std::string 
         return false;
     }
 
-    auto al_mac = tlvf::mac_to_string((const unsigned char *)tlvAlMacAddressType->mac().oct);
+    auto al_mac = tlvf::mac_to_string((const unsigned char *)tlvAlMacAddress->mac().oct);
     LOG(DEBUG) << "mac=" << al_mac;
 
     LOG(DEBUG) << "searched_role=" << int(tlvSearchedRole->value());
