@@ -51,14 +51,14 @@ class PrplMeshDocker(PrplMeshBase):
             self._run_shell_cmd(docker_cmd, docker_args)
 
             time.sleep(self.delay)
-            self.controller_entity = ALEntityDocker(self.name, is_controller=True)
+            self.controller_entity = ALEntityDocker(self.name, device=self, is_controller=True)
         else:
             # Spawn dockerized agent
             docker_args.append("start-agent")
             self._run_shell_cmd(docker_cmd, docker_args)
 
             time.sleep(self.delay)
-            self.agent_entity = ALEntityDocker(self.name, is_controller=False)
+            self.agent_entity = ALEntityDocker(self.name, device=self, is_controller=False)
 
         self.wired_sniffer = Sniffer(_get_bridge_interface(self.docker_network),
                                      boardfarm.config.output_dir)
