@@ -29,9 +29,9 @@ RUN apt-get update \
 RUN useradd -ms /bin/bash openwrt
 
 ####
-## Prebuilt OpenWrt and prplMesh dependencies, but not the prplMesh ipk itself
+## OpenWrt tree and scripts to build it.
 ####
-FROM openwrt-prerequisites as prplmesh-builder
+FROM openwrt-prerequisites as openwrt-builder
 
 USER openwrt
 
@@ -83,5 +83,10 @@ WORKDIR /home/openwrt/openwrt
 
 COPY --chown=openwrt:openwrt profiles_feeds/ /home/openwrt/openwrt/profiles_feeds
 COPY --chown=openwrt:openwrt scripts/build-openwrt.sh /home/openwrt/openwrt/scripts/build-openwrt.sh
+
+####
+## Prebuilt OpenWrt and prplMesh dependencies, but not the prplMesh ipk itself
+####
+FROM openwrt-builder as prplmesh-builder
 
 RUN scripts/build-openwrt.sh

@@ -1,4 +1,10 @@
 #!/bin/sh -e
+###############################################################
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+# SPDX-FileCopyrightText: 2019-2020 the prplMesh contributors (see AUTHORS.md)
+# This code is subject to the terms of the BSD+Patent license.
+# See LICENSE file for more details.
+###############################################################
 
 scriptdir="$(cd "${0%/*}"; pwd)"
 rootdir="${scriptdir%/*/*/*/*}"
@@ -12,6 +18,7 @@ usage() {
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - increase the script's verbosity"
     echo "      -d|--target-device the device to build for"
+    echo "      --docker-target-stage docker target build stage (implies -i)"
     echo "      -i|--image - build the docker image only"
     echo "      -o|--openwrt-version - the openwrt version to use"
     echo "      -r|--openwrt-repository - the openwrt repository to use"
@@ -34,6 +41,7 @@ build_image() {
            --build-arg TARGET_PROFILE="$TARGET_PROFILE" \
            --build-arg PRPL_FEED="$PRPL_FEED" \
            --build-arg PRPLMESH_VARIANT="$PRPLMESH_VARIANT" \
+           --target="$DOCKER_TARGET_STAGE" \
            "$scriptdir/"
 }
 
@@ -67,7 +75,7 @@ main() {
         exit 1
     fi
 
-    if ! OPTS=$(getopt -o 'hvd:io:r:t:' --long help,verbose,target-device:,image,openwrt-version:,openwrt-repository:,tag: -n 'parse-options' -- "$@"); then
+    if ! OPTS=$(getopt -o 'hvd:io:r:t:' --long help,verbose,target-device:,docker-target-stage:,image,openwrt-version:,openwrt-repository:,tag: -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2
         usage
         exit 1
@@ -82,6 +90,7 @@ main() {
             -h | --help)               usage; exit 0; shift ;;
             -v | --verbose)            VERBOSE=true; shift ;;
             -d | --target-device)      TARGET_DEVICE="$2"; shift ; shift ;;
+            --docker-target-stage)     DOCKER_TARGET_STAGE="$2"; IMAGE_ONLY=true; shift 2 ;;
             -i | --image)              IMAGE_ONLY=true; shift ;;
             -o | --openwrt-version)    OPENWRT_VERSION="$2"; shift; shift ;;
             -r | --openwrt-repository) OPENWRT_REPOSITORY="$2"; shift; shift ;;
@@ -132,7 +141,7 @@ main() {
     if [ -n "$TAG" ] ; then
         image_tag="$TAG"
     else
-        image_tag="prplmesh-builder-${TARGET_DEVICE}:${OPENWRT_VERSION}"
+        image_tag="${DOCKER_TARGET_STAGE}-${TARGET_DEVICE}:${OPENWRT_VERSION}"
         dbg "image tag not set, using default value $image_tag"
     fi
 
@@ -167,5 +176,6 @@ OPENWRT_VERSION='bd19f9ab26ad234b6f10cce23cd0dc41b9371929'
 # TODO use hash instead of branch
 PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^dev/prplmesh-enable-wireless-backhaul'
 PRPLMESH_VARIANT="-nl80211"
+DOCKER_TARGET_STAGE="prplmesh-builder"
 
 main "$@"
