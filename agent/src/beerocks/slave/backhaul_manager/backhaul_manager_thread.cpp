@@ -2604,43 +2604,71 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
     }
 
     auto bssid_tlv = ap_metrics_tlv->bssid();
-    auto mac       = std::find_if(
-        m_ap_metric_query.begin(), m_ap_metric_query.end(),
-        [&bssid_tlv](sApMetricsQuery const &query) { return query.bssid == bssid_tlv; });
+    auto mac       = std::find_if(m_expected_ap_metrics_response.expected_bssids.begin(),
+                            m_expected_ap_metrics_response.expected_bssids.end(),
+                            [&bssid_tlv](sMacAddr const &query) { return query == bssid_tlv; });
 
-    if (mac == m_ap_metric_query.end()) {
+    if (mac == m_expected_ap_metrics_response.expected_bssids.end()) {
         LOG(ERROR) << "Failed search in ap_metric_query for bssid: " << bssid_tlv
                    << " from mid=" << std::hex << int(mid);
         return false;
     }
 
-    sApMetrics metric;
-    // Copy data to the response vector
-    metric.bssid               = ap_metrics_tlv->bssid();
-    metric.channel_utilization = ap_metrics_tlv->channel_utilization();
-    metric.number_of_stas_currently_associated =
-        ap_metrics_tlv->number_of_stas_currently_associated();
-    metric.estimated_service_parameters = ap_metrics_tlv->estimated_service_parameters();
-    auto info                           = ap_metrics_tlv->estimated_service_info_field();
-    for (size_t i = 0; i < ap_metrics_tlv->estimated_service_info_field_length(); i++) {
-        metric.estimated_service_info_field.push_back(info[i]);
-    }
-    std::vector<sStaTrafficStats> traffic_stats_response;
+    m_expected_ap_metrics_response.response.create(
+        mid, ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE);
 
+    // Prepare AP Metrics TLV
+    auto ap_metrics_response_tlv =
+        m_expected_ap_metrics_response.response.addClass<wfa_map::tlvApMetrics>();
+    if (!ap_metrics_response_tlv) {
+        LOG(ERROR) << "Failed addClass<wfa_map::tlvApMetrics>";
+        return false;
+    }
+    ap_metrics_response_tlv->bssid()               = ap_metrics_tlv->bssid();
+    ap_metrics_response_tlv->channel_utilization() = ap_metrics_tlv->channel_utilization();
+    ap_metrics_response_tlv->number_of_stas_currently_associated() =
+        ap_metrics_tlv->number_of_stas_currently_associated();
+    ap_metrics_response_tlv->estimated_service_parameters() =
+        ap_metrics_tlv->estimated_service_parameters();
+
+    if (!ap_metrics_response_tlv->alloc_estimated_service_info_field(
+            ap_metrics_tlv->estimated_service_info_field_length())) {
+        LOG(ERROR) << "Couldn't allocate "
+                      "ap_metrics_response_tlv->alloc_estimated_service_info_field";
+        return false;
+    }
+    auto rx_info = ap_metrics_tlv->estimated_service_info_field();
+    auto tx_info = ap_metrics_response_tlv->estimated_service_info_field();
+    for (size_t i = 0; i < ap_metrics_tlv->estimated_service_info_field_length(); i++) {
+        tx_info[i] = rx_info[i];
+    }
+
+    // Prepare STA Traffic Stats TLV's
     for (auto &sta_traffic : cmdu_rx.getClassList<wfa_map::tlvAssociatedStaTrafficStats>()) {
         if (!sta_traffic) {
             LOG(ERROR) << "Failed to get class list for tlvAssociatedStaTrafficStats";
             continue;
         }
 
-        traffic_stats_response.push_back(
-            {sta_traffic->sta_mac(), sta_traffic->byte_sent(), sta_traffic->byte_recived(),
-             sta_traffic->packets_sent(), sta_traffic->packets_recived(),
-             sta_traffic->tx_packets_error(), sta_traffic->rx_packets_error(),
-             sta_traffic->retransmission_count()});
+        auto sta_traffic_response_tlv = m_expected_ap_metrics_response.response
+                                            .addClass<wfa_map::tlvAssociatedStaTrafficStats>();
+
+        if (!sta_traffic_response_tlv) {
+            LOG(ERROR) << "Failed addClass<wfa_map::tlvAssociatedStaTrafficStats>";
+            continue;
+        }
+
+        sta_traffic_response_tlv->sta_mac()              = sta_traffic->sta_mac();
+        sta_traffic_response_tlv->byte_sent()            = sta_traffic->byte_sent();
+        sta_traffic_response_tlv->byte_recived()         = sta_traffic->byte_recived();
+        sta_traffic_response_tlv->packets_sent()         = sta_traffic->packets_sent();
+        sta_traffic_response_tlv->packets_recived()      = sta_traffic->packets_recived();
+        sta_traffic_response_tlv->tx_packets_error()     = sta_traffic->tx_packets_error();
+        sta_traffic_response_tlv->rx_packets_error()     = sta_traffic->rx_packets_error();
+        sta_traffic_response_tlv->retransmission_count() = sta_traffic->retransmission_count();
     }
 
-    std::vector<sStaLinkMetrics> link_metrics_response;
+    // Prepare STA Link Metrics TLV's
     for (auto &sta_link_metric : cmdu_rx.getClassList<wfa_map::tlvAssociatedStaLinkMetrics>()) {
         if (!sta_link_metric) {
             LOG(ERROR) << "Failed getClassList<wfa_map::tlvAssociatedStaLinkMetrics>";
@@ -2651,98 +2679,39 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
             continue;
         }
         auto response_list = sta_link_metric->bssid_info_list(0);
-        link_metrics_response.push_back({sta_link_metric->sta_mac(), std::get<1>(response_list)});
+
+        auto sta_link_metric_response_tlv = m_expected_ap_metrics_response.response
+                                                .addClass<wfa_map::tlvAssociatedStaLinkMetrics>();
+
+        if (!sta_link_metric_response_tlv) {
+            LOG(ERROR) << "Failed addClass<wfa_map::tlvAssociatedStaLinkMetrics>";
+            continue;
+        }
+
+        sta_link_metric_response_tlv->sta_mac() = sta_link_metric->sta_mac();
+        if (!sta_link_metric_response_tlv->alloc_bssid_info_list(1)) {
+            LOG(ERROR) << "Failed alloc_bssid_info_list";
+            continue;
+        }
+        auto &sta_link_metric_response =
+            std::get<1>(sta_link_metric_response_tlv->bssid_info_list(0));
+        sta_link_metric_response = std::get<1>(response_list);
     }
 
-    // Fill a response vector
-    m_ap_metric_response.push_back({metric, traffic_stats_response, link_metrics_response});
-
     // Remove an entry from the processed query
-    m_ap_metric_query.erase(
-        std::remove_if(m_ap_metric_query.begin(), m_ap_metric_query.end(),
-                       [&](sApMetricsQuery const &query) { return mac->bssid == query.bssid; }),
-        m_ap_metric_query.end());
+    m_expected_ap_metrics_response.expected_bssids.erase(
+        std::remove_if(m_expected_ap_metrics_response.expected_bssids.begin(),
+                       m_expected_ap_metrics_response.expected_bssids.end(),
+                       [&](sMacAddr const &query) { return *mac == query; }),
+        m_expected_ap_metrics_response.expected_bssids.end());
 
-    if (!m_ap_metric_query.empty()) {
+    if (!m_expected_ap_metrics_response.expected_bssids.empty()) {
         return true;
     }
 
-    // We received all responses - prepare and send response message to the controller
-    auto cmdu_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE);
-
-    if (!cmdu_header) {
-        LOG(ERROR) << "Failed building IEEE1905 AP_METRICS_RESPONSE_MESSAGE";
-        return false;
-    }
-
-    // Prepare tlvApMetrics for each processed query
-    for (const auto &response : m_ap_metric_response) {
-        auto ap_metrics_response_tlv = cmdu_tx.addClass<wfa_map::tlvApMetrics>();
-        if (!ap_metrics_response_tlv) {
-            LOG(ERROR) << "Failed addClass<wfa_map::tlvApMetrics>";
-            return false;
-        }
-
-        ap_metrics_response_tlv->bssid()               = response.metric.bssid;
-        ap_metrics_response_tlv->channel_utilization() = response.metric.channel_utilization;
-        ap_metrics_response_tlv->number_of_stas_currently_associated() =
-            response.metric.number_of_stas_currently_associated;
-        ap_metrics_response_tlv->estimated_service_parameters() =
-            response.metric.estimated_service_parameters;
-        if (!ap_metrics_response_tlv->alloc_estimated_service_info_field(
-                response.metric.estimated_service_info_field.size())) {
-            LOG(ERROR) << "Couldn't allocate "
-                          "ap_metrics_response_tlv->alloc_estimated_service_info_field";
-            return false;
-        }
-        std::copy_n(response.metric.estimated_service_info_field.begin(),
-                    response.metric.estimated_service_info_field.size(),
-                    ap_metrics_response_tlv->estimated_service_info_field());
-
-        for (auto &stat : response.sta_traffic_stats) {
-            auto sta_traffic_response_tlv =
-                cmdu_tx.addClass<wfa_map::tlvAssociatedStaTrafficStats>();
-
-            if (!sta_traffic_response_tlv) {
-                LOG(ERROR) << "Failed addClass<wfa_map::tlvAssociatedStaTrafficStats>";
-                continue;
-            }
-
-            sta_traffic_response_tlv->sta_mac()              = stat.sta_mac;
-            sta_traffic_response_tlv->byte_sent()            = stat.byte_sent;
-            sta_traffic_response_tlv->byte_recived()         = stat.byte_recived;
-            sta_traffic_response_tlv->packets_sent()         = stat.packets_sent;
-            sta_traffic_response_tlv->packets_recived()      = stat.packets_recived;
-            sta_traffic_response_tlv->tx_packets_error()     = stat.tx_packets_error;
-            sta_traffic_response_tlv->rx_packets_error()     = stat.rx_packets_error;
-            sta_traffic_response_tlv->retransmission_count() = stat.retransmission_count;
-        }
-
-        for (auto &link_metric : response.sta_link_metrics) {
-            auto sta_link_metric_response_tlv =
-                cmdu_tx.addClass<wfa_map::tlvAssociatedStaLinkMetrics>();
-
-            if (!sta_link_metric_response_tlv) {
-                LOG(ERROR) << "Failed addClass<wfa_map::tlvAssociatedStaLinkMetrics>";
-                continue;
-            }
-
-            sta_link_metric_response_tlv->sta_mac() = link_metric.sta_mac;
-            if (!sta_link_metric_response_tlv->alloc_bssid_info_list(1)) {
-                LOG(ERROR) << "Failed alloc_bssid_info_list";
-                continue;
-            }
-            auto &sta_link_metric_response =
-                std::get<1>(sta_link_metric_response_tlv->bssid_info_list(0));
-            sta_link_metric_response = link_metric.bssid_info;
-        }
-    }
-
-    // Clear the m_ap_metric_response vector after preparing response to the controller
-    m_ap_metric_response.clear();
-
     LOG(DEBUG) << "Sending AP_METRICS_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
-    return send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+    return send_cmdu_to_bus(m_expected_ap_metrics_response.response, controller_bridge_mac,
+                            bridge_info.mac);
 } // namespace beerocks
 
 /**
