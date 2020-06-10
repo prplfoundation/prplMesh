@@ -75,7 +75,8 @@ ENV TARGET_PROFILE=$TARGET_PROFILE
 
 WORKDIR /home/openwrt
 
-RUN git clone "$OPENWRT_REPOSITORY" openwrt \
+RUN printf '\033[1;35m%s Cloning prplWrt\n\033[0m' "$(date --iso-8601=seconds --universal)" \
+    && git clone "$OPENWRT_REPOSITORY" openwrt \
     && cd openwrt \
     && git checkout "$OPENWRT_VERSION"
 
