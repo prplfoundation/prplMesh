@@ -100,7 +100,7 @@ class PrplMeshPrplWRT(OpenWrtRouter, PrplMeshBase):
         """
         deadline = time.monotonic() + timeout
         while time.monotonic() < deadline:
-            if self.prplMesh_check_state():
+            if self.get_prplMesh_status():
                 break
             time.sleep(5)
         else:
@@ -115,7 +115,7 @@ class PrplMeshPrplWRT(OpenWrtRouter, PrplMeshBase):
         """
         return True
 
-    def prplMesh_check_state(self) -> bool:
+    def get_prplMesh_status(self) -> bool:
         """ Check prplMesh status. Return True if operational."""
         self.sendline("/etc/init.d/prplmesh status")
         self.expect(
