@@ -24,7 +24,7 @@
 #include <beerocks/tlvf/beerocks_message_platform.h>
 
 #include <tlvf/WSC/AttrList.h>
-#include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
+#include <tlvf/ieee_1905_1/tlvAlMacAddress.h>
 #include <tlvf/ieee_1905_1/tlvLinkMetricQuery.h>
 #include <tlvf/ieee_1905_1/tlvMacAddress.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
@@ -3990,7 +3990,7 @@ bool slave_thread::handle_autoconfiguration_renew(Socket *sd, ieee1905_1::CmduMe
 {
     LOG(INFO) << "received autoconfig renew message";
 
-    auto tlvAlMac = cmdu_rx.getClass<ieee1905_1::tlvAlMacAddressType>();
+    auto tlvAlMac = cmdu_rx.getClass<ieee1905_1::tlvAlMacAddress>();
     if (tlvAlMac) {
         LOG(DEBUG) << "tlvAlMac=" << tlvAlMac->mac();
         // TODO register/update mapping of AL-MAC to interface, cfr. #81

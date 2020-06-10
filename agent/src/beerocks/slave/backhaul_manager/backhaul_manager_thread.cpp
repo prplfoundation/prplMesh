@@ -50,7 +50,7 @@
  */
 #include <tlvf/ieee_1905_1/s802_11SpecificInformation.h>
 #include <tlvf/ieee_1905_1/tlv1905NeighborDevice.h>
-#include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
+#include <tlvf/ieee_1905_1/tlvAlMacAddress.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvDeviceInformation.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
@@ -1125,9 +1125,9 @@ bool backhaul_manager::send_1905_topology_discovery_message()
         LOG(ERROR) << "Failed to create TOPOLOGY_DISCOVERY_MESSAGE cmdu";
         return false;
     }
-    auto tlvAlMac = cmdu_tx.addClass<ieee1905_1::tlvAlMacAddressType>();
+    auto tlvAlMac = cmdu_tx.addClass<ieee1905_1::tlvAlMacAddress>();
     if (!tlvAlMac) {
-        LOG(ERROR) << "Failed to create tlvAlMacAddressType tlv";
+        LOG(ERROR) << "Failed to create tlvAlMacAddress tlv";
         return false;
     }
     tlvAlMac->mac() = tlvf::mac_from_string(bridge_info.mac);
@@ -1162,12 +1162,12 @@ bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<sRadioInfo
     auto p_cmdu_header =
         cmdu_tx.create(0, ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE);
 
-    auto tlvAlMacAddressType = cmdu_tx.addClass<ieee1905_1::tlvAlMacAddressType>();
-    if (!tlvAlMacAddressType) {
-        LOG(ERROR) << "addClass ieee1905_1::tlvAlMacAddressType failed";
+    auto tlvAlMacAddress = cmdu_tx.addClass<ieee1905_1::tlvAlMacAddress>();
+    if (!tlvAlMacAddress) {
+        LOG(ERROR) << "addClass ieee1905_1::tlvAlMacAddress failed";
         return false;
     }
-    tlvf::mac_from_string(tlvAlMacAddressType->mac().oct, bridge_info.mac);
+    tlvf::mac_from_string(tlvAlMacAddress->mac().oct, bridge_info.mac);
 
     auto tlvSearchedRole = cmdu_tx.addClass<ieee1905_1::tlvSearchedRole>();
     if (!tlvSearchedRole) {
@@ -3275,9 +3275,9 @@ bool backhaul_manager::handle_1905_combined_infrastructure_metrics(
 bool backhaul_manager::handle_1905_topology_discovery(const std::string &src_mac,
                                                       ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    auto tlvAlMac = cmdu_rx.getClass<ieee1905_1::tlvAlMacAddressType>();
+    auto tlvAlMac = cmdu_rx.getClass<ieee1905_1::tlvAlMacAddress>();
     if (!tlvAlMac) {
-        LOG(ERROR) << "getClass tlvAlMacAddressType failed";
+        LOG(ERROR) << "getClass tlvAlMacAddress failed";
         return false;
     }
 

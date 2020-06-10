@@ -7,5 +7,5 @@ msgTopologyNotification:
   header:
     _type: cmduHeader
     _setValue: { "messageType" : TOPOLOGY_NOTIFICATION_MESSAGE }
-  tlv_al_mac_tlv: tlvAlMacAddressType
+  tlv_al_mac_tlv: tlvAlMacAddress
   tlv_eof: tlvEndOfMessage
