@@ -1,0 +1,84 @@
+@startuml backahul_manager_fsm
+
+[*] --> INIT
+INIT --> WAIT_ENABLE
+WAIT_ENABLE --> ENABLED
+ENABLED --> MASTER_DISCOVERY : wired
+ENABLED --> WIRELESS_FSM : wireless
+state WIRELESS_FSM {
+    [*] --> INIT_HAL
+    INIT_HAL --> WPA_ATTACH
+    WPA_ATTACH --> CONNECT
+    CONNECT --> MASTER_DISCOVERY : connection success
+}
+MASTER_DISCOVERY --> OPERATIONAL
+OPERATIONAL --> RESTART : wired link status change
+RESTART --> INIT
+
+@enduml
+
+@startuml dynamic_backhaul_switch
+
+box "controller" #LightSlateGray
+participant controller
+end box
+
+box "prplmesh agent" #LightBlue
+participant backhaul_manager
+participant radio_agent
+end box
+
+box "platoform"
+participant hostapd
+participant supplicant
+end box
+
+== platform init ==
+hostapd <- : start disabled (static channel)
+activate hostapd
+deactivate hostapd
+supplicant <- : start (no network config)
+activate supplicant
+deactivate supplicant
+
+== init ==
+...
+== operational ==
+controller -> backhaul_manager : switch_backhaul(backhaul)
+activate backhaul_manager
+backhaul_manager -> backhaul_manager : restart
+note left
+m_preferred_backhaul = backhaul
+end note
+backhaul_manager -> supplicant : tear down
+note right
+disable all supplicants
+disable wired interface
+end note
+backhaul_manager -> radio_agent: disconnect
+deactivate backhaul_manager
+activate radio_agent
+radio_agent -> radio_agent : restart
+radio_agent -> hostapd : tear down
+deactivate radio_agent
+== init ==
+...
+backhaul_manager -> controller : autoconfig search
+alt wireless backhaul
+activate backhaul_manager
+backhaul_manager -> supplicant : attach(m_preferred_backhaul)
+backhaul_manager -> supplicant : connect
+end
+backhaul_manager -> backhaul_manager : enable_interface(m_preferred_backhaul)
+controller -> backhaul_manager : autoconfig search response
+deactivate backhaul_manager
+activate radio_agent
+radio_agent -> controller : autoconfig M1
+radio_agent <- controller : autoconfig M2
+radio_agent -> hostapd : set credentials
+deactivate radio_agent
+...
+== operational ==
+...
+
+@enduml
