@@ -1120,26 +1120,68 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
 
 bool backhaul_manager::send_1905_topology_discovery_message()
 {
+    // TODO: get the list of interfaces that are up_and_running using the event-driven mechanism
+    // to be implemented in #866
+
+    /**
+     * Transmission type of Topology Discovery message is 'neighbor multicast'.
+     * That is, the CMDU must be transmitted once on each and every of its 1905.1 interfaces.
+     * Also, according to IEEE1905.1, the message should include a MAC Address TLV which contains
+     * the address of the interface on which the message is sent. Thus, a different message should
+     * be sent on each interface.
+     */
+    auto ifaces = network_utils::linux_get_iface_list_from_bridge(m_sConfig.bridge_iface);
+    for (const auto &iface_name : ifaces) {
+
+        if (!network_utils::linux_iface_is_up_and_running(iface_name)) {
+            continue;
+        }
+
+        uint32_t iface_index = network_utils::linux_get_iface_index(iface_name);
+        if (0 == iface_index) {
+            return false;
+        }
+
+        sMacAddr iface_mac;
+        if (!get_iface_mac(iface_name, iface_mac)) {
+            return false;
+        }
+
+        if (!send_1905_topology_discovery_message(iface_index, iface_mac)) {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool backhaul_manager::send_1905_topology_discovery_message(uint32_t iface_index,
+                                                            const sMacAddr &iface_mac)
+{
     auto cmdu_hdr = cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE);
     if (!cmdu_hdr) {
         LOG(ERROR) << "Failed to create TOPOLOGY_DISCOVERY_MESSAGE cmdu";
         return false;
     }
-    auto tlvAlMac = cmdu_tx.addClass<ieee1905_1::tlvAlMacAddress>();
-    if (!tlvAlMac) {
+
+    auto tlvAlMacAddress = cmdu_tx.addClass<ieee1905_1::tlvAlMacAddress>();
+    if (!tlvAlMacAddress) {
         LOG(ERROR) << "Failed to create tlvAlMacAddress tlv";
         return false;
     }
-    tlvAlMac->mac() = tlvf::mac_from_string(bridge_info.mac);
-    auto tlvMac     = cmdu_tx.addClass<ieee1905_1::tlvMacAddress>();
-    if (!tlvMac) {
+    tlvAlMacAddress->mac() = tlvf::mac_from_string(bridge_info.mac);
+
+    auto tlvMacAddress = cmdu_tx.addClass<ieee1905_1::tlvMacAddress>();
+    if (!tlvMacAddress) {
         LOG(ERROR) << "Failed to create tlvMacAddress tlv";
         return false;
     }
-    tlvMac->mac() = tlvf::mac_from_string(bridge_info.mac);
+    tlvMacAddress->mac() = iface_mac;
 
-    LOG(DEBUG) << "send_1905_topology_discovery_message, bridge_mac=" << bridge_info.mac;
-    return send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
+    LOG(DEBUG) << "send_1905_topology_discovery_message, bridge_mac=" << bridge_info.mac
+               << ", iface_mac=" << iface_mac;
+    return send_cmdu_to_bus(cmdu_tx, iface_index, network_utils::MULTICAST_1905_MAC_ADDR,
+                            bridge_info.mac);
 }
 
 bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<sRadioInfo> soc)

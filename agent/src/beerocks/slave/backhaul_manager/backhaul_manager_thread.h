@@ -91,6 +91,16 @@ private:
 
     bool send_autoconfig_search_message(std::shared_ptr<sRadioInfo> soc);
     bool send_1905_topology_discovery_message();
+
+    /**
+     * @brief Sends Topology Discovery message on given interface.
+     *
+     * @param iface_index Index of the interface on which the message is transmitted.
+     * @param iface_mac MAC address of the interface on which the message is transmitted.
+     * @return True on success and false otherwise
+     */
+    bool send_1905_topology_discovery_message(uint32_t iface_index, const sMacAddr &iface_mac);
+
     bool send_slave_ap_metric_query_message(uint16_t mid, std::vector<sMacAddr> const &bssid_list);
 
     // cmdu handlers
