@@ -108,8 +108,10 @@ void transport_socket_thread::bus_connected(Socket *sd)
     add_socket(bus);
 }
 
-bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
-                                       const std::string &src_mac, uint16_t length)
+bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage &cmdu,
+                                       [[gnu::unused]] const std::string &iface_name,
+                                       const std::string &dst_mac, const std::string &src_mac,
+                                       uint16_t length)
 {
     auto uds_header = message_com::get_uds_header(cmdu);
     if (!uds_header) {
