@@ -224,8 +224,9 @@ bool transport_socket_thread::handle_cmdu_message_bus()
     return true;
 }
 
-bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
-                                       const std::string &src_mac, uint16_t length)
+bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage &cmdu, uint32_t iface_index,
+                                       const std::string &dst_mac, const std::string &src_mac,
+                                       uint16_t length)
 {
     mapf::CmduTxMessage msg;
 
@@ -236,6 +237,7 @@ bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage &cmdu, const std:
     msg.metadata()->length            = length;
     msg.metadata()->msg_type          = static_cast<uint16_t>(cmdu.getMessageType());
     msg.metadata()->preset_message_id = cmdu.getMessageId() ? 1 : 0;
+    msg.metadata()->if_index          = iface_index;
 
     std::copy_n((uint8_t *)cmdu.getMessageBuff(), msg.metadata()->length, (uint8_t *)msg.data());
     return bus->publisher().Send(msg);

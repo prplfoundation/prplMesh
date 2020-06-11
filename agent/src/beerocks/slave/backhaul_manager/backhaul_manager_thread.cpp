@@ -1738,7 +1738,7 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
         } else { // Forward the data (cmdu) to bus
             // LOG(DEBUG) << "forwarding slave->master message, controller_bridge_mac=" << controller_bridge_mac;
             cmdu_rx.swap(); //swap back before forwarding
-            send_cmdu_to_bus(cmdu_rx, dst_mac, bridge_info.mac, length);
+            send_cmdu_to_bus(cmdu_rx, 0, dst_mac, bridge_info.mac, length);
         }
     }
 
@@ -2581,7 +2581,7 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
     if (0 == mid) {
         uint16_t length = message_com::get_uds_header(cmdu_rx)->length;
         cmdu_rx.swap(); //swap back before forwarding
-        return send_cmdu_to_bus(cmdu_rx, controller_bridge_mac, bridge_info.mac, length);
+        return send_cmdu_to_bus(cmdu_rx, 0, controller_bridge_mac, bridge_info.mac, length);
     }
 
     /**

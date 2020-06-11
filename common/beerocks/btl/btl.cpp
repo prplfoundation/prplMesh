@@ -42,15 +42,22 @@ bool transport_socket_thread::send_cmdu_to_bus(ieee1905_1::CmduMessageTx &cmdu_t
                                                const std::string &dst_mac,
                                                const std::string &src_mac)
 {
+    return send_cmdu_to_bus(cmdu_tx, 0, dst_mac, src_mac);
+}
+
+bool transport_socket_thread::send_cmdu_to_bus(ieee1905_1::CmduMessageTx &cmdu_tx,
+                                               uint32_t iface_index, const std::string &dst_mac,
+                                               const std::string &src_mac)
+{
     if (!cmdu_tx.finalize()) {
         THREAD_LOG(ERROR) << "finalize failed";
         return false;
     }
 
-    return send_cmdu_to_bus(cmdu_tx, dst_mac, src_mac, cmdu_tx.getMessageLength());
+    return send_cmdu_to_bus(cmdu_tx, iface_index, dst_mac, src_mac, cmdu_tx.getMessageLength());
 }
 
-bool transport_socket_thread::send_cmdu_to_bus(ieee1905_1::CmduMessage &cmdu,
+bool transport_socket_thread::send_cmdu_to_bus(ieee1905_1::CmduMessage &cmdu, uint32_t iface_index,
                                                const std::string &dst_mac,
                                                const std::string &src_mac, uint16_t length)
 {
@@ -68,5 +75,5 @@ bool transport_socket_thread::send_cmdu_to_bus(ieee1905_1::CmduMessage &cmdu,
         return false;
     }
 
-    return bus_send(cmdu, dst_mac, src_mac, length);
+    return bus_send(cmdu, iface_index, dst_mac, src_mac, length);
 }

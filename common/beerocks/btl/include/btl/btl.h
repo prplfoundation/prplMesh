@@ -38,6 +38,18 @@ public:
     bool send_cmdu_to_bus(ieee1905_1::CmduMessageTx &cmdu, const std::string &dst_mac,
                           const std::string &src_mac);
 
+    /**
+     * @brief Sends CDMU to transport for dispatching.
+     *
+     * @param cmdu Control Message Data Unit to send.
+     * @param iface_index Network interface index (set to 0 to send on all interfaces).
+     * @param dst_mac Destination MAC address.
+     * @param src_mac Source MAC address.
+     * @return True on success and false otherwise.
+     */
+    bool send_cmdu_to_bus(ieee1905_1::CmduMessageTx &cmdu, uint32_t iface_index,
+                          const std::string &dst_mac, const std::string &src_mac);
+
 protected:
     void add_socket(Socket *s, bool add_to_vector = true) override;
     void remove_socket(Socket *s) override;
@@ -50,12 +62,22 @@ protected:
     bool bus_connect(const std::string &beerocks_temp_path, const bool local_master);
     void bus_connected(Socket *sd);
 
-    bool send_cmdu_to_bus(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
-                          const std::string &src_mac, uint16_t length);
+    /**
+     * @brief Sends CDMU to transport for dispatching.
+     *
+     * @param cmdu Control Message Data Unit to send.
+     * @param iface_index Network interface index (set to 0 to send on all interfaces).
+     * @param dst_mac Destination MAC address.
+     * @param src_mac Source MAC address.
+     * @param length Message length.
+     * @return True on success and false otherwise.
+     */
+    bool send_cmdu_to_bus(ieee1905_1::CmduMessage &cmdu, uint32_t iface_index,
+                          const std::string &dst_mac, const std::string &src_mac, uint16_t length);
 
 private:
     bool bus_init();
-    bool bus_send(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
+    bool bus_send(ieee1905_1::CmduMessage &cmdu, uint32_t iface_index, const std::string &dst_mac,
                   const std::string &src_mac, uint16_t length);
     bool handle_cmdu_message_bus();
 
