@@ -164,7 +164,8 @@ VERBOSE=false
 IMAGE_ONLY=false
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
 OPENWRT_VERSION='bd19f9ab26ad234b6f10cce23cd0dc41b9371929'
-PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^53d1e11003ce318c043c42063bbd2f57d15aac81'
+# TODO use hash instead of branch
+PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^dev/prplmesh-enable-wireless-backhaul'
 PRPLMESH_VARIANT="-nl80211"
 
 main "$@"
