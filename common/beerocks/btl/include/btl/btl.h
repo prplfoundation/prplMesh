@@ -35,8 +35,18 @@ public:
     virtual void set_select_timeout(unsigned msec) override;
     virtual bool work() override;
 
+    /**
+     * @brief Sends CDMU to transport for dispatching.
+     *
+     * @param cmdu Control Message Data Unit to send.
+     * @param dst_mac Destination MAC address.
+     * @param src_mac Source MAC address.
+     * @param iface_name Name of the network interface to use (set to empty string to send on all
+     * available interfaces).
+     * @return True on success and false otherwise.
+     */
     bool send_cmdu_to_bus(ieee1905_1::CmduMessageTx &cmdu, const std::string &dst_mac,
-                          const std::string &src_mac);
+                          const std::string &src_mac, const std::string &iface_name = "");
 
 protected:
     void add_socket(Socket *s, bool add_to_vector = true) override;
@@ -50,13 +60,25 @@ protected:
     bool bus_connect(const std::string &beerocks_temp_path, const bool local_master);
     void bus_connected(Socket *sd);
 
+    /**
+     * @brief Sends CDMU to transport for dispatching.
+     *
+     * @param cmdu Control Message Data Unit to send.
+     * @param dst_mac Destination MAC address.
+     * @param src_mac Source MAC address.
+     * @param length Message length.
+     * @param iface_name Name of the network interface to use (set to empty string to send on all
+     * available interfaces).
+     * @return True on success and false otherwise.
+     */
     bool send_cmdu_to_bus(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
-                          const std::string &src_mac, uint16_t length);
+                          const std::string &src_mac, uint16_t length,
+                          const std::string &iface_name = "");
 
 private:
     bool bus_init();
-    bool bus_send(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
-                  const std::string &src_mac, uint16_t length);
+    bool bus_send(ieee1905_1::CmduMessage &cmdu, const std::string &iface_name,
+                  const std::string &dst_mac, const std::string &src_mac, uint16_t length);
     bool handle_cmdu_message_bus();
 
     int poll_timeout_ms = 500;
