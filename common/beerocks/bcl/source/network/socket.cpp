@@ -212,6 +212,29 @@ ssize_t Socket::readBytes(uint8_t *buf, size_t buf_size, bool blocking, size_t b
     return len;
 }
 
+ssize_t Socket::discardBytes(size_t bytes_to_discard)
+{
+    constexpr size_t buf_size = 256;
+    uint8_t buf[buf_size];
+
+    size_t already_discarded = 0;
+
+    while (already_discarded < bytes_to_discard) {
+        size_t remaining_bytes = bytes_to_discard - already_discarded;
+        size_t request_size    = remaining_bytes > buf_size ? buf_size : remaining_bytes;
+
+        ssize_t len = readBytes(buf, request_size, true, request_size, false, true);
+        if (len < 0) {
+            return len;
+        } else if (len == 0) {
+            break;
+        } else {
+            already_discarded += len;
+        }
+    }
+    return already_discarded;
+}
+
 ssize_t Socket::writeBytes(const uint8_t *buf, size_t buf_len, int port, struct sockaddr_in addr_in)
 {
     if (m_socket == INVALID_SOCKET) {
