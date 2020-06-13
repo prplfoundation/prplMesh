@@ -1,0 +1,3 @@
+  - name: feed_prpl
+    uri: https://git.prpl.dev/prplmesh/feed-prpl.git
+    hash: 6453bb7a20eff2efb031ae4aecbc51a329d68957

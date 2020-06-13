@@ -172,7 +172,7 @@ main() {
 VERBOSE=false
 IMAGE_ONLY=false
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
-OPENWRT_VERSION='bd19f9ab26ad234b6f10cce23cd0dc41b9371929'
+OPENWRT_VERSION='554a739fe870ea017b075fa1aec71ca95a237384'
 PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^53d1e11003ce318c043c42063bbd2f57d15aac81'
 PRPLMESH_VARIANT="-nl80211"
 DOCKER_TARGET_STAGE="prplmesh-builder"
