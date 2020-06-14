@@ -5,7 +5,7 @@
 # This code is subject to the terms of the BSD+Patent license.
 # See LICENSE file for more details.
 
-find_library(DWPAL_LIBRARY "libdwpal.so")
+find_library(DWPAL_LIBRARY "libdwpal.so" PATHS ${CMAKE_PREFIX_PATH}/opt/intel/lib)
 find_path(DWPAL_INCLUDE_DIRS 
     NAMES dwpal.h 
     PATH_SUFFIXES wav-dpal
