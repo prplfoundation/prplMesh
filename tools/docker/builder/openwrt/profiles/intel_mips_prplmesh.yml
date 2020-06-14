@@ -1,0 +1,129 @@
+---
+profile: NETGEAR_RAX40
+target: intel_mips
+subtarget: xrx500
+external_target: True
+description: Build image for the Netgear RAX40
+feeds:
+  - name: feed_target_mips
+    uri: https://intel.prpl.dev/prplmesh/feed_target_mips.git
+    hash: 78b0b2e9675ced7dd57829da7a27592dbb483fd3
+  - name: feed_datapath
+    uri: https://intel.prpl.dev/intel/feed_datapath.git
+    hash: 23afe7e659ed6717224659aef74af2bb11d8091a
+  - name: feed_ppa
+    uri: https://intel.prpl.dev/intel/feed_ppa.git
+    hash: 4f49fa34bbd51c7dd218df164e32c17694bed421
+  - name: feed_gphy_firmware
+    uri: https://intel.prpl.dev/intel/feed_gphy_firmware.git
+    hash: cbf75f2abde587ac2c5462d117b98e3dadaae5b6
+  - name: feed_switch_api
+    uri: https://intel.prpl.dev/intel/feed_switch_api.git
+    hash: af078af5408654ca2e759ea7afcf92163282e86e
+  - name: feed_wlan_6x
+    uri: https://intel.prpl.dev/prplmesh/feed_wlan_6x.git
+    hash: 8b7ff7d902f35b41864fbf306d45ad4ed91eaa89
+  - name: feed_prpl
+    uri: https://git.prpl.dev/prplmesh/feed-prpl.git
+    hash: 6453bb7a20eff2efb031ae4aecbc51a329d68957
+  - name: feed_opensource_apps
+    uri: https://intel.prpl.dev/intel/feed_opensource_apps.git
+    hash: 4ab5c90e08ce40b5208e6aea3e594a275f8940e9
+  - name: feed_pending
+    uri: https://intel.prpl.dev/intel/feed-pending.git
+    hash: 352365b31f968ab37e772b23c30ea32dbff9e337
+  - name: feed_bridge_utils
+    uri: https://git.prpl.dev/prplmesh/feed-intel-bridge-utils.git
+    hash: 35de289cc67706f1016fa8f34512eb4c337bca47
+
+
+packages:
+  - dwpal_6x-uci
+  - iwlwav-base-files
+  - iwlwav-hostap-uci
+  - iwlwav-iw
+  - iwlwav-tools
+  - kmod-crypto-aead
+  - kmod-crypto-authenc
+  - kmod-crypto-cbc
+  - kmod-crypto-cmac
+  - kmod-crypto-deflate
+  - kmod-crypto-des
+  - kmod-crypto-echainiv
+  - kmod-crypto-hash
+  - kmod-crypto-hmac
+  - kmod-crypto-iv
+  - kmod-crypto-manager
+  - kmod-crypto-md5
+  - kmod-crypto-null
+  - kmod-crypto-pcompress
+  - kmod-crypto-rng
+  - kmod-crypto-sha1
+  - kmod-crypto-sha256
+  - kmod-crypto-sha512
+  - kmod-crypto-wq
+  - kmod-directconnect-dp
+  - kmod-eip97
+  - kmod-gpio-button-hotplug
+  - kmod-intel_eth_toe_drv_xrx500
+  - kmod-ipsec
+  - kmod-ipsec4
+  - kmod-ipsec6
+  - kmod-iptunnel4
+  - kmod-iptunnel6
+  - kmod-iwlwav-driver-uci
+  - kmod-lib-zlib-deflate
+  - kmod-lib-zlib-inflate
+  - kmod-litepath-hwacc
+  - kmod-mac-violation-mirror
+  - kmod-nls-base
+  - kmod-ppa-drv
+  - kmod-ppa-drv-accel
+  - kmod-ppa-drv-grx500
+  - kmod-ppa-drv-grx500-mpe
+  - kmod-ppa-drv-mpe-ip97
+  - kmod-ppa-drv-stack-al
+  - kmod-usb-core
+  - kmod-usb-dwc3
+  - kmod-usb-dwc3-grx500
+  - kmod-veth
+  - iwinfo
+  - libncurses
+  - libnl
+  - libnl-core
+  - libnl-genl
+  - libnl-nf
+  - libnl-route
+  - libopenssl
+  - libreadline
+  - librt
+  - libuuid
+  - ltq-gphy-fw-xrx500
+  - ltq-wlan-wave_6x-uci
+  - nand-utils
+  - ppacmd
+  - safeclibs
+  - safeclibs3
+  - switch_cli_ugw8
+  - swpal_6x-uci
+  - terminfo
+  - uuidgen
+  - prplmesh-dwpal
+
+diffconfig: |
+  CONFIG_DEVEL=y
+  CONFIG_KERNEL_GIT_CLONE_URI="https://intel.prpl.dev/intel/linux.git"
+  CONFIG_KERNEL_GIT_DEPTH="1000"
+  CONFIG_KERNEL_GIT_REF="727acdb060410a936330a2456f641b9473bf5121"
+  CONFIG_LTQ_SWITCH_CLI_UGW8_HELP_PRINTOUT=y
+  CONFIG_OPENSSL_ENGINE=y
+  CONFIG_OPENSSL_PREFER_CHACHA_OVER_GCM=y
+  CONFIG_OPENSSL_WITH_ASM=y
+  CONFIG_OPENSSL_WITH_CHACHA_POLY1305=y
+  CONFIG_OPENSSL_WITH_CMS=y
+  CONFIG_OPENSSL_WITH_DEPRECATED=y
+  CONFIG_OPENSSL_WITH_ERROR_MESSAGES=y
+  CONFIG_OPENSSL_WITH_PSK=y
+  CONFIG_OPENSSL_WITH_SRP=y
+  CONFIG_OPENSSL_WITH_TLS13=y
+

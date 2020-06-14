@@ -8,11 +8,6 @@ RUN apt-get update \
     build-essential libncurses5 libncurses5-dev python python3 \
     unzip git ca-certificates gawk wget file bash \
     python-yaml python3-yaml rsync less vim gnupg software-properties-common \
-    #   yq is available in a separate ppa (needs gnupg and software-properties-common):
-    && if [ -n "$HTTP_PROXY" ]; then KEYSERVER_OPTIONS="--keyserver-options http-proxy=$HTTP_PROXY"; fi \
-    && apt-key adv --keyserver keyserver.ubuntu.com $KEYSERVER_OPTIONS --recv-keys CC86BB64 \
-    && add-apt-repository ppa:rmescandon/yq \
-    && apt-get -y install --no-install-recommends yq \
     && rm -rf /var/lib/apt/lists/*
 # Building tlvfs currently uses the docker
 # container's python (not the one from OpenWrt)
@@ -65,26 +60,23 @@ RUN git clone "$OPENWRT_REPOSITORY" openwrt \
 
 WORKDIR /home/openwrt/openwrt
 
-COPY --chown=openwrt:openwrt profiles_feeds/ /home/openwrt/openwrt/profiles_feeds
+COPY --chown=openwrt:openwrt profiles/* /home/openwrt/openwrt/profiles/
 
 RUN mkdir -p files/etc \
     #   We need to keep the hashes in the firmware, to later know if an upgrade is needed:
     && printf '%s=%s\n' "OPENWRT_REPOSITORY" "$OPENWRT_REPOSITORY" >> files/etc/prplwrt-version \
     && printf '%s=%s\n' "OPENWRT_VERSION" "$OPENWRT_VERSION" >> files/etc/prplwrt-version \
     && if [ "$TARGET_PROFILE" = DEVICE_NETGEAR_RAX40 ] ; then \
-        #       Add prplmesh to the list of packages of the profile:
-        sed -i 's/packages:/packages:\n  - prplmesh-dwpal/g' profiles/intel_mips.yml \
-        && yq write --inplace profiles/intel_mips.yml feeds -f profiles_feeds/netgear-rax40.yml \
-        && ./scripts/gen_config.py intel_mips \
+        ./scripts/gen_config.py intel_mips_prplmesh \
         #       Installing intel feed doesn't correctly regenerate kernel .package-info
         #       force regeneration by removing it
         && rm -rf tmp \
         #       For some reason we have to run gen_config a second time to get a correct .config:
-        && ./scripts/gen_config.py intel_mips \
+        && ./scripts/gen_config.py intel_mips_prplmesh \
         #       make sure intel's bridge-utils is the only one that gets installed:
         && rm -rf ./package/feeds/packages/bridge-utils \
         && scripts/feeds install -p feed_bridge_utils bridge-utils \
-        && cat profiles_feeds/netgear-rax40.yml >> files/etc/prplwrt-version ;\
+        && cat profiles/intel_mips_prplmesh.yml >> files/etc/prplwrt-version ;\
     else \
         cp feeds.conf.default feeds.conf \
         && echo "src-git prpl $PRPL_FEED" >> feeds.conf \
