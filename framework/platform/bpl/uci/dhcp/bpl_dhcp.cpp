@@ -129,11 +129,11 @@ int dhcp_mon_start(dhcp_mon_cb cb)
         return (-1);
 
     if ((s_pUbusCtx = ubus_connect(NULL)) == NULL)
-        return (-1);
+        return (-2);
 
     // Register our object with the UBUS
     if (ubus_add_object(s_pUbusCtx, &dhcp_ubus_object) != 0)
-        return (-1);
+        return (-3);
 
     // Store the callback
     s_pCallback = cb;
