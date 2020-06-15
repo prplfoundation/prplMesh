@@ -174,8 +174,12 @@ class NetgearRax40(PrplwrtDevice):
             # make the shell prompt appear:
             self.set_prompt(shell)
             shell.expect(self.serial_prompt)
+            # kill any instance of the init script, if the current
+            # firmware doesn't have working wireless interfaces it
+            # will prevent it from rebooting:
+            shell.sendline("pgrep -f 'S99prplmesh boot' | xargs kill")
             # reboot:
-            shell.sendline("reboot")
+            shell.sendline("reboot -f")
             shell.expect(["Hit any key to stop autoboot:",
                           pexpect.EOF, pexpect.TIMEOUT], timeout=120)
             # stop autoboot:
