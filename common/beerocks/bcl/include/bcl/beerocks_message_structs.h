@@ -17,6 +17,7 @@ namespace beerocks {
 namespace message {
 
 typedef struct {
+    uint32_t if_index = 0; // index of the network interface the message was received on
     uint8_t dst_bridge_mac[net::MAC_ADDR_LEN] = {};
     uint8_t src_bridge_mac[net::MAC_ADDR_LEN] = {};
     uint16_t length                           = 0;

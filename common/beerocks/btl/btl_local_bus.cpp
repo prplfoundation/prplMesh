@@ -200,6 +200,7 @@ bool transport_socket_thread::handle_cmdu_message_bus()
 
     // fill UDS Header
     message::sUdsHeader *uds_header = (message::sUdsHeader *)rx_buffer;
+    uds_header->if_index            = cmdu_rx_msg->metadata()->if_index;
     std::copy_n((uint8_t *)cmdu_rx_msg->metadata()->src, sizeof(mapf::CmduRxMessage::Metadata::src),
                 uds_header->src_bridge_mac);
     std::copy_n((uint8_t *)cmdu_rx_msg->metadata()->dst, sizeof(mapf::CmduRxMessage::Metadata::dst),
