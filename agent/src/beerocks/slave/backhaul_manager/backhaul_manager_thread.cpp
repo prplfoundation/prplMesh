@@ -523,7 +523,7 @@ void backhaul_manager::after_select(bool timeout)
     // and send a Topology Notification message.
     bool neighbors_list_changed = false;
     for (auto it = m_1905_neighbor_devices.begin(); it != m_1905_neighbor_devices.end();) {
-        const auto &last_topology_discovery = it->second;
+        const auto &last_topology_discovery = it->second.timestamp;
         if (last_topology_discovery + std::chrono::seconds(DISCOVERY_NEIGHBOUR_REMOVAL_TIMEOUT) <
             std::chrono::steady_clock::now()) {
             const auto &device_al_mac = it->first;
@@ -3290,11 +3290,23 @@ bool backhaul_manager::handle_1905_topology_discovery(const std::string &src_mac
     LOG(INFO) << "Received TOPOLOGY_DISCOVERY_MESSAGE from AL MAC=" << tlvAlMac->mac()
               << ", mid=" << std::hex << int(mid);
 
+    auto tlvMac = cmdu_rx.getClass<ieee1905_1::tlvMacAddress>();
+    if (!tlvMac) {
+        LOG(ERROR) << "getClass tlvMacAddress failed";
+        return false;
+    }
+
     auto new_device =
         m_1905_neighbor_devices.find(tlvAlMac->mac()) == m_1905_neighbor_devices.end();
 
     // Add/Update the device on our list.
-    m_1905_neighbor_devices[tlvAlMac->mac()] = std::chrono::steady_clock::now();
+    sNeighborDevice neighbor_device;
+    neighbor_device.al_mac    = tlvAlMac->mac();
+    neighbor_device.mac       = tlvMac->mac();
+    neighbor_device.if_index  = message_com::get_uds_header(cmdu_rx)->if_index;
+    neighbor_device.timestamp = std::chrono::steady_clock::now();
+
+    m_1905_neighbor_devices[tlvAlMac->mac()] = neighbor_device;
 
     // If it is a new device, then our 1905.1 neighbors list has changed and we are required to send
     // Topology Notification Message.
