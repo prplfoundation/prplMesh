@@ -135,6 +135,7 @@ int socket_thread::socket_disconnected_uds(Socket *sd)
 
     // handle disconnection
     if (socket_disconnected(sd)) {
+        LOG(DEBUG) << "Handling disconnection!";
         remove_socket(sd);
         sd->closeSocket();
         if (sd->isAcceptedSocket()) {
@@ -289,11 +290,13 @@ bool socket_thread::work()
 
     // If select was skipped, rest the select timeout to default value
     if (m_skip_next_select_timeout) {
+        LOG(DEBUG) << "select was skipped, reset timeout to " << m_select_timeout_msec;
         m_skip_next_select_timeout = false;
         set_select_timeout(m_select_timeout_msec);
     }
     m_select_wake_up_time = std::chrono::steady_clock::now();
 
+    LOG(DEBUG) << "Calling after_select. sel_ret=" << sel_ret;
     after_select(bool(sel_ret == 0));
 
     if (sel_ret == 0) {
