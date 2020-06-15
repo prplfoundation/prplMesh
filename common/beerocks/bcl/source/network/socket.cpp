@@ -170,7 +170,8 @@ ssize_t Socket::getBytesReady()
     return (ssize_t)cnt;
 }
 
-ssize_t Socket::readBytes(uint8_t *buf, size_t buf_size, bool blocking, size_t buf_len, bool isPeek)
+ssize_t Socket::readBytes(uint8_t *buf, size_t buf_size, bool blocking, size_t buf_len, bool isPeek,
+                          bool waitAll)
 {
     if (m_socket == INVALID_SOCKET) {
         return 0;
@@ -195,6 +196,11 @@ ssize_t Socket::readBytes(uint8_t *buf, size_t buf_size, bool blocking, size_t b
     // Add the MSG_DONTWAIT flag to prevent blocking on the recv() call
     if (!blocking) {
         flags |= MSG_DONTWAIT;
+    }
+
+    // Add the MSG_WAITALL flag to read all required bytes
+    if (waitAll) {
+        flags |= MSG_WAITALL;
     }
 
     len = recv(m_socket, (char *)buf, (int)buf_len, flags);

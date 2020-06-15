@@ -52,7 +52,7 @@ public:
 
     ssize_t getBytesReady();
     ssize_t readBytes(uint8_t *buf, size_t buf_size, bool blocking, size_t buf_len = 0,
-                      bool isPeek = false);
+                      bool isPeek = false, bool waitAll = false);
     ssize_t writeBytes(const uint8_t *buf, size_t buf_len, int port = 0,
                        struct sockaddr_in addr_in = {});
     ssize_t writeString(std::string msg)
