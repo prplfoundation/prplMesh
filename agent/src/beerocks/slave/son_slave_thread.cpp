@@ -3266,6 +3266,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
     }
     case STATE_BACKHAUL_ENABLE: {
         bool error = false;
+        LOG(DEBUG) << "Checking wire iface type";
         if (!config.backhaul_wire_iface.empty()) {
             if (config.backhaul_wire_iface_type == beerocks::IFACE_TYPE_UNSUPPORTED) {
                 LOG(DEBUG) << "backhaul_wire_iface_type is UNSUPPORTED";
@@ -3274,6 +3275,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 error = true;
             }
         }
+        LOG(DEBUG) << "Checking wireless iface type";
         if (!config.backhaul_wireless_iface.empty()) {
             if (config.backhaul_wireless_iface_type == beerocks::IFACE_TYPE_UNSUPPORTED) {
                 LOG(DEBUG) << "backhaul_wireless_iface is UNSUPPORTED";
@@ -3282,13 +3284,15 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 error = true;
             }
         }
+        LOG(DEBUG) << "Checking if wire and wireless iface are empty";
         if (config.backhaul_wire_iface.empty() && config.backhaul_wireless_iface.empty()) {
             LOG(DEBUG) << "No valid backhaul iface!";
             platform_notify_error(bpl::eErrorCode::CONFIG_NO_VALID_BACKHAUL_INTERFACE, "");
             error = true;
         }
-
+        LOG(DEBUG) << "Checks done, error is: " << error;
         if (error) {
+            LOG(DEBUG) << "Error is non-zero! slave reset " << error;
             stop_on_failure_attempts--;
             slave_reset();
         } else {
