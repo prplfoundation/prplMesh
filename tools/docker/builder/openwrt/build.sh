@@ -173,8 +173,7 @@ VERBOSE=false
 IMAGE_ONLY=false
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
 OPENWRT_VERSION='bd19f9ab26ad234b6f10cce23cd0dc41b9371929'
-# TODO use hash instead of branch
-PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^dev/prplmesh-enable-wireless-backhaul'
+PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^c9f9407af79dd7ae8cfbe424ab6cf31fb09f5d57'
 PRPLMESH_VARIANT="-nl80211"
 DOCKER_TARGET_STAGE="prplmesh-builder"
 
