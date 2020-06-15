@@ -170,6 +170,13 @@ bool socket_thread::handle_cmdu_message_uds(Socket *sd)
     if (available_bytes != message_size) {
         THREAD_LOG(ERROR) << "available bytes = " << available_bytes
                           << " message_size = " << message_size;
+        // discard remaining bytes
+        ssize_t bytes_to_discard = message_size - available_bytes;
+        ssize_t bytes_discarded  = sd->discardBytes(bytes_to_discard);
+        if (bytes_discarded != bytes_to_discard) {
+            THREAD_LOG(ERROR) << "discardBytes expected to return " << bytes_to_discard
+                              << " but returned " << bytes_discarded;
+        }
         return false;
     }
 
