@@ -400,7 +400,7 @@ public:
     void get_bssid_list(std::vector<sMacAddr> &bssid_list) const;
 
     // STA's //
-    monitor_sta_node *sta_add(const std::string &sta_mac, const int8_t vap_id);
+    monitor_sta_node *sta_add(const std::string sta_mac, const int8_t vap_id);
     void sta_erase(const std::string &sta_mac);
     void sta_erase_all();
     monitor_sta_node *sta_find(const std::string &mac);

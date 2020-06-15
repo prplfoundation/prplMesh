@@ -1953,17 +1953,19 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
         auto sta_mac = tlvf::mac_to_string(msg->mac);
         auto vap_id  = msg->vap_id;
 
-        LOG(INFO) << "STA_Connected: mac=" << sta_mac << " vap_id=" << vap_id;
+        LOG(INFO) << "STA_Connected: mac=" << sta_mac << " vap_id=" << static_cast<int>(vap_id);
 
         std::string sta_ipv4             = network_utils::ZERO_IP_STRING;
         std::string set_bridge_4addr_mac = network_utils::ZERO_MAC_STRING;
-
+        LOG(DEBUG) << "Looking in mon_db";
         auto old_node = mon_db.sta_find(sta_mac);
+        LOG(DEBUG) << "Done looking in mon_db";
         if (old_node) {
             sta_ipv4             = old_node->get_ipv4();
             set_bridge_4addr_mac = old_node->get_bridge_4addr_mac();
         }
 
+        LOG(DEBUG) << "Erasing sta from db";
         mon_db.sta_erase(sta_mac);
 
         auto vap_node = mon_db.vap_get_by_id(vap_id);
@@ -1971,7 +1973,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
             LOG(ERROR) << "vap_id " << vap_id << " does not exist";
             return false;
         }
-
+        LOG(DEBUG) << "Adding the sta to the db";
         auto sta_node = mon_db.sta_add(sta_mac, vap_id);
         sta_node->set_ipv4(sta_ipv4);
         sta_node->set_bridge_4addr_mac(set_bridge_4addr_mac);
@@ -1986,6 +1988,7 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
             client->clearData();
         }
 #endif
+        LOG(DEBUG) << "Done, STA was added to the db";
         break;
     }
     case Event::STA_Disconnected: {

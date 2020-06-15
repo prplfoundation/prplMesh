@@ -326,7 +326,7 @@ monitor_sta_node *monitor_db::sta_find_by_ipv4(const std::string &ipv4)
     return nullptr;
 }
 
-monitor_sta_node *monitor_db::sta_add(const std::string &sta_mac, const int8_t vap_id)
+monitor_sta_node *monitor_db::sta_add(const std::string sta_mac, const int8_t vap_id)
 {
     auto node = new monitor_sta_node(vap_id, sta_mac);
     sta_nodes.insert(std::make_pair(sta_mac, node));
