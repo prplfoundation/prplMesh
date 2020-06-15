@@ -29,19 +29,17 @@
  */
 
 #include "backhaul_manager_thread.h"
-
 #include "../link_metrics/ieee802_11_link_metrics_collector.h"
 #include "../link_metrics/ieee802_3_link_metrics_collector.h"
 #include "../tlvf_utils.h"
-
+#include "internal/expected_ap_metrics_response.h"
 #include <bcl/beerocks_utils.h>
 #include <bcl/son/son_wireless_utils.h>
-#include <easylogging++.h>
-
 #include <beerocks/tlvf/beerocks_message.h>
 #include <beerocks/tlvf/beerocks_message_backhaul.h>
 #include <beerocks/tlvf/beerocks_message_control.h>
 #include <beerocks/tlvf/beerocks_message_platform.h>
+#include <easylogging++.h>
 
 /*
  * TODO:
@@ -1230,12 +1228,8 @@ bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<sRadioInfo
 bool backhaul_manager::send_slave_ap_metric_query_message(uint16_t mid,
                                                           const std::vector<sMacAddr> &bssid_list)
 {
-
     // Save mid and clear previous query
-    m_expected_ap_metrics_response.mid = mid;
-    m_expected_ap_metrics_response.expected_bssids.clear();
-    m_expected_ap_metrics_response.response.create(
-        mid, ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE);
+    m_expected_ap_metrics_response.reset_to_new_mid(mid);
 
     auto forward = cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE);
     if (!forward) {
@@ -2538,10 +2532,7 @@ bool backhaul_manager::handle_ap_metrics_query(ieee1905_1::CmduMessageRx &cmdu_r
     const auto mid = cmdu_rx.getMessageId();
 
     // Save mid and erase data for previous query and response
-    m_expected_ap_metrics_response.mid = mid;
-    m_expected_ap_metrics_response.expected_bssids.clear();
-    m_expected_ap_metrics_response.response.create(
-        mid, ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE);
+    m_expected_ap_metrics_response.reset_to_new_mid(mid);
 
     auto ap_metric_query_tlv = cmdu_rx.getClass<wfa_map::tlvApMetricQuery>();
     if (!ap_metric_query_tlv) {
@@ -2555,8 +2546,8 @@ bool backhaul_manager::handle_ap_metrics_query(ieee1905_1::CmduMessageRx &cmdu_r
             return false;
         }
 
-        m_expected_ap_metrics_response.expected_bssids.push_back(
-            std::get<1>(bssid_tuple)); //New implementation
+        // #1421 implementation
+        m_expected_ap_metrics_response.add_expected_bssid(std::get<1>(bssid_tuple));
 
         LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
                    << "  bssid " << std::get<1>(bssid_tuple);
@@ -2580,8 +2571,9 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
 {
     auto mid = cmdu_rx.getMessageId();
 
-    if (mid != m_expected_ap_metrics_response.mid) {
-        LOG(ERROR) << "Received AP_METRICS_RESPONSE_MESSAGE with bad mid=" << std::hex << int(mid);
+    if (m_expected_ap_metrics_response.get_mid() != mid) {
+        LOG(ERROR) << "Received AP_METRICS_RESPONSE_MESSAGE with bad mid: existing:" << std::hex
+                   << m_expected_ap_metrics_response.get_mid() << " received: " << int(mid);
         return false;
     }
 
@@ -2601,23 +2593,16 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
         return false;
     }
 
-    auto bssid_tlv = ap_metrics_tlv->bssid();
-    auto mac       = std::find_if(m_expected_ap_metrics_response.expected_bssids.begin(),
-                            m_expected_ap_metrics_response.expected_bssids.end(),
-                            [&bssid_tlv](sMacAddr const &query) { return query == bssid_tlv; });
-
-    if (mac == m_expected_ap_metrics_response.expected_bssids.end()) {
-        LOG(ERROR) << "Failed search in ap_metric_query for bssid: " << bssid_tlv
+    if (!m_expected_ap_metrics_response.find_expected_bssid(ap_metrics_tlv->bssid())){
+        LOG(ERROR) << "Failed search in ap_metric_query for bssid: " << ap_metrics_tlv->bssid()
                    << " from mid=" << std::hex << int(mid);
         return false;
     }
 
-    m_expected_ap_metrics_response.response.create(
-        mid, ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE);
-
-    // Prepare AP Metrics TLV
-    auto ap_metrics_response_tlv =
-        m_expected_ap_metrics_response.response.addClass<wfa_map::tlvApMetrics>();
+    // prepare ap metrics tlv
+    auto& ap_metrics_tx_message  =
+        m_expected_ap_metrics_response.create_tx_message();
+    auto ap_metrics_response_tlv = ap_metrics_tx_message.addClass<wfa_map::tlvApMetrics>();
     if (!ap_metrics_response_tlv) {
         LOG(ERROR) << "Failed addClass<wfa_map::tlvApMetrics>";
         return false;
@@ -2648,8 +2633,8 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
             continue;
         }
 
-        auto sta_traffic_response_tlv = m_expected_ap_metrics_response.response
-                                            .addClass<wfa_map::tlvAssociatedStaTrafficStats>();
+        auto sta_traffic_response_tlv =
+            ap_metrics_tx_message.addClass<wfa_map::tlvAssociatedStaTrafficStats>();
 
         if (!sta_traffic_response_tlv) {
             LOG(ERROR) << "Failed addClass<wfa_map::tlvAssociatedStaTrafficStats>";
@@ -2678,8 +2663,8 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
         }
         auto response_list = sta_link_metric->bssid_info_list(0);
 
-        auto sta_link_metric_response_tlv = m_expected_ap_metrics_response.response
-                                                .addClass<wfa_map::tlvAssociatedStaLinkMetrics>();
+        auto sta_link_metric_response_tlv =
+            ap_metrics_tx_message.addClass<wfa_map::tlvAssociatedStaLinkMetrics>();
 
         if (!sta_link_metric_response_tlv) {
             LOG(ERROR) << "Failed addClass<wfa_map::tlvAssociatedStaLinkMetrics>";
@@ -2697,18 +2682,14 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
     }
 
     // Remove an entry from the processed query
-    m_expected_ap_metrics_response.expected_bssids.erase(
-        std::remove_if(m_expected_ap_metrics_response.expected_bssids.begin(),
-                       m_expected_ap_metrics_response.expected_bssids.end(),
-                       [&](sMacAddr const &query) { return *mac == query; }),
-        m_expected_ap_metrics_response.expected_bssids.end());
+    m_expected_ap_metrics_response.remove_expected_bssid(ap_metrics_tlv->bssid());
 
-    if (!m_expected_ap_metrics_response.expected_bssids.empty()) {
+    if (!m_expected_ap_metrics_response.is_expected_bssid_empty()) {
         return true;
     }
 
     LOG(DEBUG) << "Sending AP_METRICS_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
-    return send_cmdu_to_bus(m_expected_ap_metrics_response.response, controller_bridge_mac,
+    return send_cmdu_to_bus(ap_metrics_tx_message, controller_bridge_mac,
                             bridge_info.mac);
 } // namespace beerocks
 

@@ -9,6 +9,7 @@
 #ifndef _BACKHAUL_MANAGER_THREAD_H
 #define _BACKHAUL_MANAGER_THREAD_H
 
+#include "internal/expected_ap_metrics_response.h"
 #include "wan_monitor.h"
 
 #include <bcl/beerocks_backport.h>
@@ -520,14 +521,7 @@ private:
                           const sLinkNeighbor &link_neighbor, const sLinkMetrics &link_metrics,
                           ieee1905_1::eLinkMetricsType link_metrics_type);
 
-    struct sExpectedApMetricsResponse {
-        uint16_t mid;
-        std::vector<sMacAddr> expected_bssids;
-        uint8_t response_buffer[message::MESSAGE_BUFFER_LENGTH];
-        ieee1905_1::CmduMessageTx response = {response_buffer, sizeof(response_buffer)};
-    };
-
-    sExpectedApMetricsResponse m_expected_ap_metrics_response;
+    ExpectedApMetricsResponse m_expected_ap_metrics_response;
 
     struct sChannelSelectionResponse {
         sMacAddr radio_mac;
