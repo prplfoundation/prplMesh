@@ -6,6 +6,9 @@ cp -r /home/openwrt/prplMesh_source /home/openwrt/prplMesh
 # We want to make sure that we do not keep anything built from the host:
 rm -rf /home/openwrt/prplMesh/build
 
+# Somehow, aclocal got removed...
+cp tools/automake/files/aclocal staging_dir/host/bin/
+
 make package/prplmesh/prepare USE_SOURCE_DIR="/home/openwrt/prplMesh" V=s
 make package/prplmesh/compile V=sc -j"$(nproc)"
 mkdir -p artifacts
