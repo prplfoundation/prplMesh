@@ -458,7 +458,7 @@ class ALEntityPrplWrt(ALEntity):
         # Multiply timeout by 100, as test sets it in float.
         return _device_wait_for_log(self.device,
                                     "{}/beerocks_{}.log".format(self.log_folder, program),
-                                    regex, start_line, timeout*100)
+                                    regex, start_line, timeout)
 
     def prprlmesh_status_check(self):
         return self.device.prprlmesh_status_check()
@@ -483,7 +483,7 @@ class RadioHostapd(Radio):
         ''' Poll the Radio's logfile until it match regular expression '''
         # Multiply timeout by 100, as test sets it in float.
         return _device_wait_for_log(self.agent.device, "{}/beerocks_agent_{}.log".format(
-            self.log_folder, self.iface_name), regex, timeout*100, start_line)
+            self.log_folder, self.iface_name), regex, timeout, start_line)
 
 
 class VirtualAPHostapd(VirtualAP):
