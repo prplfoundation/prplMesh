@@ -30,9 +30,9 @@ public:
 
     // bssid related operations
 public:
-    void add_expected_bssid(const sMacAddr&);
-    void remove_expected_bssid(const sMacAddr&);
-    bool find_expected_bssid(const sMacAddr&) const;
+    void add_expected_bssid(const sMacAddr &);
+    void remove_expected_bssid(const sMacAddr &);
+    bool find_expected_bssid(const sMacAddr &) const;
     bool is_expected_bssid_empty() const;
 
 private:

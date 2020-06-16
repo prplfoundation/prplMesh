@@ -2593,15 +2593,14 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
         return false;
     }
 
-    if (!m_expected_ap_metrics_response.find_expected_bssid(ap_metrics_tlv->bssid())){
+    if (!m_expected_ap_metrics_response.find_expected_bssid(ap_metrics_tlv->bssid())) {
         LOG(ERROR) << "Failed search in ap_metric_query for bssid: " << ap_metrics_tlv->bssid()
                    << " from mid=" << std::hex << int(mid);
         return false;
     }
 
     // prepare ap metrics tlv
-    auto& ap_metrics_tx_message  =
-        m_expected_ap_metrics_response.create_tx_message();
+    auto &ap_metrics_tx_message  = m_expected_ap_metrics_response.create_tx_message();
     auto ap_metrics_response_tlv = ap_metrics_tx_message.addClass<wfa_map::tlvApMetrics>();
     if (!ap_metrics_response_tlv) {
         LOG(ERROR) << "Failed addClass<wfa_map::tlvApMetrics>";
@@ -2689,9 +2688,8 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
     }
 
     LOG(DEBUG) << "Sending AP_METRICS_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
-    return send_cmdu_to_bus(ap_metrics_tx_message, controller_bridge_mac,
-                            bridge_info.mac);
-} // namespace beerocks
+    return send_cmdu_to_bus(ap_metrics_tx_message, controller_bridge_mac, bridge_info.mac);
+}
 
 /**
  * @brief Handles 1905 Topology Query message
