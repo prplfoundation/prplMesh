@@ -1112,28 +1112,33 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
 
         auto notification = message_com::create_vs_message<
             beerocks_message::cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION>(cmdu_tx);
+        LOG(DEBUG) << "Notification is built";
         if (notification == nullptr) {
             LOG(ERROR) << "Failed building message!";
             return false;
         }
-
+        LOG(DEBUG) << "Finding the vap in the radio_info()";
         auto vap_node = ap_wlan_hal->get_radio_info().available_vaps.find(msg->params.vap_id);
         if (vap_node == ap_wlan_hal->get_radio_info().available_vaps.end()) {
             LOG(ERROR) << "Can't find vap with id " << int(msg->params.vap_id);
             return false;
         }
 
+        LOG(DEBUG) << "Found the vap, filling the notification";
+
         notification->mac()          = msg->params.mac;
         notification->vap_id()       = msg->params.vap_id;
         notification->bssid()        = tlvf::mac_from_string(vap_node->second.mac);
         notification->capabilities() = msg->params.capabilities;
+        LOG(DEBUG) << "Notification is filled, checking for association frame";
         if (!msg->params.association_frame) {
             LOG(DEBUG) << "no association frame";
         } else {
+            LOG(DEBUG) << "Found association frame, setting it";
             notification->set_association_frame(msg->params.association_frame,
                                                 msg->params.association_frame_length);
         }
-
+        LOG(DEBUG) << "Done, now sending client associated notification";
         message_com::send_cmdu(slave_socket, cmdu_tx);
     } break;
 
