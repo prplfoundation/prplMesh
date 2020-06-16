@@ -1,21 +1,18 @@
 #
 ---
-_include: {
-  beerocks/tlvf/beerocks_message_common.h,
-  tlvf/WSC/WSC_Attributes.h,
-}
+_include: { beerocks/tlvf/beerocks_message_common.h, tlvf/WSC/WSC_Attributes.h }
 
 _namespace: beerocks_message
 _multi_class: True
 _multi_class_auto_insert:
   action_op:
     _type: eActionOp_APMANAGER
-    _value_const: [_auto_value_by_name, 1]  
+    _value_const: [_auto_value_by_name, 1]
     _class_const: True
 
 #################################################
 #################################################
- 
+
 cACTION_APMANAGER_UP_NOTIFICATION:
   _type: class
   iface_name_length:
@@ -38,13 +35,13 @@ cACTION_APMANAGER_JOINED_NOTIFICATION:
     _length_var: True
   preferred_channels:
     _type: beerocks::message::sWifiChannel
-    _length: [ preferred_channels_size ]
+    _length: [preferred_channels_size]
   supported_channels_size:
     _type: uint8_t
     _length_var: True
   supported_channels:
     _type: beerocks::message::sWifiChannel
-    _length: [ supported_channels_size ]
+    _length: [supported_channels_size]
 
 cACTION_APMANAGER_ENABLE_APS_REQUEST:
   _type: class
@@ -109,7 +106,7 @@ cACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION:
     _length_var: True
   preferred_channels:
     _type: beerocks::message::sWifiChannel
-    _length: [ preferred_channels_size ]
+    _length: [preferred_channels_size]
 
 cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION:
   _type: class
@@ -143,7 +140,7 @@ cACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION:
   vap_id: int8_t
   association_frame:
     _type: uint8_t
-    _length: [] 
+    _length: []
 
 cACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION:
   _type: class
@@ -219,7 +216,7 @@ cACTION_APMANAGER_WIFI_CREDENTIALS_UPDATE_REQUEST:
     _length_var: True
   wifi_credentials:
     _type: WSC::cConfigData
-    _length: [ wifi_credentials_size ]
+    _length: [wifi_credentials_size]
 
 cACTION_APMANAGER_START_WPS_PBC_REQUEST:
   _type: class
@@ -237,5 +234,4 @@ cACTION_APMANAGER_READ_ACS_REPORT_RESPONSE:
     _length_var: True
   preferred_channels:
     _type: beerocks::message::sWifiChannel
-    _length: [ preferred_channels_size ]
-
+    _length: [preferred_channels_size]

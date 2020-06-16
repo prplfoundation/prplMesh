@@ -1,15 +1,16 @@
 #
 ---
-_include: {
-  beerocks/tlvf/beerocks_message_common.h,
-  beerocks/tlvf/beerocks_message_cli_net_map.h,
-}
+_include:
+  {
+    beerocks/tlvf/beerocks_message_common.h,
+    beerocks/tlvf/beerocks_message_cli_net_map.h,
+  }
 _namespace: beerocks_message
 _multi_class: True
 _multi_class_auto_insert:
   action_op:
     _type: eActionOp_CLI
-    _value_const: [_auto_value_by_name, 1]  
+    _value_const: [_auto_value_by_name, 1]
     _class_const: True
 
 #################################################
@@ -41,9 +42,9 @@ cACTION_CLI_RESPONSE_STR:
   buffer_size:
     _type: uint32_t
     _length_var: True
-  buffer: 
+  buffer:
     _type: char
-    _length: [ buffer_size ]
+    _length: [buffer_size]
 
 cACTION_CLI_CROSS_RX_RSSI_MEASUREMENT:
   _type: class
@@ -127,22 +128,22 @@ cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST:
 
 cACTION_CLI_CLIENT_BEACON_11K_REQUEST:
   _type: class
-  client_mac: sMacAddr 
-  bssid: sMacAddr 
+  client_mac: sMacAddr
+  bssid: sMacAddr
   ssid:
-    _type: uint8_t 
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
-  use_optional_ssid: uint8_t 
-  channel: uint8_t 
-  measurement_mode: uint8_t 
-  duration: uint16_t 
-  rand_ival: uint16_t 
-  repeats: uint16_t 
-  op_class: int16_t 
+    _type: uint8_t
+    _length: ["beerocks::message::WIFI_SSID_MAX_LENGTH"]
+  use_optional_ssid: uint8_t
+  channel: uint8_t
+  measurement_mode: uint8_t
+  duration: uint16_t
+  rand_ival: uint16_t
+  repeats: uint16_t
+  op_class: int16_t
 
 cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST:
   _type: class
-  hostap_mac: sMacAddr 
+  hostap_mac: sMacAddr
   client_mac: sMacAddr
   peer_mac: sMacAddr
   group_identity: uint8_t

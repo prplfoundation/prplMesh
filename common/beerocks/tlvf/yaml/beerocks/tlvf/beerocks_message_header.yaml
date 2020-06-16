@@ -1,10 +1,11 @@
 #
 ---
 _namespace: beerocks_message
-_include: {
-  beerocks/tlvf/beerocks_message_common.h,
-  beerocks/tlvf/beerocks_message_action.h,
-}
+_include:
+  {
+    beerocks/tlvf/beerocks_message_common.h,
+    beerocks/tlvf/beerocks_message_action.h,
+  }
 
 cACTION_HEADER:
   _type: class
@@ -14,11 +15,11 @@ cACTION_HEADER:
   version:
     _type: uint8_t
     _value_const: "beerocks::message::MESSAGE_VERSION"
-  action: eAction 
+  action: eAction
   action_op:
     _type: uint8_t
     _comment: need to cast eActionOp_XXXX to uint8_t
-  direction: 
+  direction:
     _type: uint8_t
     _value: 1 #BEEROCKS_DIRECTION_AGENT
   radio_mac: sMacAddr
