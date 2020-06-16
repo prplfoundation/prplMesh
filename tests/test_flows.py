@@ -908,7 +908,7 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
         if sta.mac in map_vap0.clients:
             self.fail("client {} still in conn_map, clients: {}".format(sta.mac, map_vap0.clients))
 
-        # Associate with other radio implies disassociate from first
+        env.agents[0].radios[1].vaps[0].disassociate(sta)
         env.agents[0].radios[0].vaps[0].associate(sta)
         time.sleep(1)  # Wait for conn_map to be updated
         conn_map = connmap.get_conn_map()
@@ -1188,6 +1188,68 @@ e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
         # self.check_log(env.agents[0].radios[0].???,
         #                r"inserting 1 RRM_EVENT_BEACON_REP_RXED event(s) to the pending list")
         env.agents[0].radios[0].vaps[0].disassociate(sta)
+
+    def test_ap_metrics_interval_response(self):
+        # Trigger(
+        #   DEV_SEND_1905,DestAL id,
+        #   WTS_REPLACE_DEST_A LID,
+        #   MessageTypeValue,0x8003,
+        #   tlv_type,0x8A,
+        #   tlv_length,0x000C,
+        #   tlv_value,{0x05 0x01 {WTS_REPLACE_MAUT_RUID 0x00 0x00 0x00 0xC0})
+
+        # set vaps for both agents
+        for agent in range(0, 2):
+            env.beerocks_cli_command('bml_clear_wifi_credentials {}'.format(env.agents[agent].mac))
+            env.beerocks_cli_command('bml_set_wifi_credentials {} {} {} {} {}'
+                                     .format(env.agents[agent].mac,
+                                             "Multi-AP-24G-3-cli", "maprocks1", "24g", "fronthaul"))
+            env.beerocks_cli_command('bml_update_wifi_credentials {}'.format(env.agents[agent].mac))
+
+        # create and associate stations
+
+        sta1 = env.Station.create()
+        debug("Connect dummy STA (" + sta1.mac + ") to wlan0")
+        env.agents[0].radios[0].vaps[0].associate(sta1)
+
+        sta2 = env.Station.create()
+        debug("Connect dummy STA (" + sta2.mac + ") to wlan2")
+        env.agents[1].radios[1].vaps[0].associate(sta2)
+
+        debug("sending multi-ap policy config request")
+
+        # in seconds
+        interval_time = 5
+        tlv_value = '0x{:02} 0x01 0x{ruid} 0x00 0x00 0x00 0xC0'.format(
+                interval_time, ruid=env.agents[0].radios[0].mac.replace(':', ''))
+
+        debug(tlv_value)
+
+        # sending two commands to the controller, for each agent
+        env.controller.dev_send_1905(env.agents[0].mac, 0x8003,
+                                     tlv(0x8A, 0x000C, "{" + tlv_value + "}"))
+
+        env.controller.dev_send_1905(env.agents[1].mac, 0x8003,
+                                     tlv(0x8A, 0x000C, "{" + tlv_value + "}"))
+
+        # wait for ACK
+        time.sleep(1)
+        self.check_cmdu_type_single("ACK", 0x8000, env.agents[0].mac, env.controller.mac)
+        self.check_cmdu_type_single("ACK", 0x8000, env.agents[1].mac, env.controller.mac)
+
+        # wait for report
+        # since it is a periodic report and we want to verify that
+        # we have only _one_ response, we wait for a time correlated with the request itself
+        time.sleep(interval_time + interval_time/2)
+
+        # expect two single reports
+        self.check_cmdu_type_single("ap metrics response agent1", 0x800C,
+                                    env.agents[0].mac, env.controller.mac)
+        self.check_cmdu_type_single("ap metrics response agent2", 0x800C,
+                                    env.agents[1].mac, env.controller.mac)
+
+        env.agents[0].radios[0].vaps[0].disassociate(sta1)
+        env.agents[1].radios[1].vaps[0].disassociate(sta2)
 
 
 if __name__ == '__main__':
