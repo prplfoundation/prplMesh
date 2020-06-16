@@ -674,23 +674,28 @@ bool monitor_thread::update_sta_stats()
 {
     auto poll_cnt  = mon_db.get_poll_cnt();
     auto poll_last = mon_db.is_last_poll();
-
+    LOG(DEBUG) << "Updating sta stats";
     if (m_sta_stats_polling_completed) {
         m_sta_stats_polling_start_timestamp = std::chrono::steady_clock::now();
         m_sta_stats_polling_completed       = false;
     }
 
     for (auto it = mon_db.sta_begin(); it != mon_db.sta_end(); ++it) {
-
+        LOG(DEBUG) << "in sta loop";
         auto sta_mac  = it->first;
+        LOG(DEBUG) << "sta mac: " << sta_mac;
         auto sta_node = it->second;
+        LOG(DEBUG) << "sta node";
 
         if (sta_node == nullptr) {
             LOG(WARNING) << "Invalid node pointer for STA = " << sta_mac;
             continue;
         }
 
-        auto vap_node   = mon_db.vap_get_by_id(sta_node->get_vap_id());
+        auto vap_id = sta_node->get_vap_id();
+        LOG(DEBUG) << "vap_id: " << static_cast<int>(vap_id);
+        auto vap_node   = mon_db.vap_get_by_id(vap_id);
+        LOG(DEBUG) << "vap_node: " << vap_id;
         auto &sta_stats = sta_node->get_stats();
 
         // Skip stations that were already updated in the current cycle
@@ -706,8 +711,10 @@ bool monitor_thread::update_sta_stats()
             return true;
         }
 
+        auto vap_iface = vap_node->get_iface();
+        LOG(DEBUG) << "vap_iface: " << vap_iface;
         // Update the stats
-        if (!mon_wlan_hal->update_stations_stats(vap_node->get_iface(), sta_mac,
+        if (!mon_wlan_hal->update_stations_stats(vap_iface, sta_mac,
                                                  sta_stats.hal_stats)) {
             LOG(ERROR) << "Failed updating STA (" << sta_mac << ") statistics!";
             return false;
