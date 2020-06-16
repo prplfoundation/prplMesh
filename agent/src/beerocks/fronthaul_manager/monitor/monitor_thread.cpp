@@ -275,7 +275,7 @@ void monitor_thread::after_select(bool timeout)
             // External events
             int ext_events_fd = mon_wlan_hal->get_ext_events_fd();
             if (ext_events_fd > 0) {
-                mon_hal_ext_events = new Socket(ext_events_fd);
+                mon_hal_ext_events = Socket::socketFactory(ext_events_fd);
                 add_socket(mon_hal_ext_events);
                 // No external event FD is available, we will trigger the process method periodically
             } else if (ext_events_fd == 0) {
@@ -294,7 +294,7 @@ void monitor_thread::after_select(bool timeout)
                 // NOTE: Eventhough the internal events are not socket based, at this
                 //       point we have to use the Socket class wrapper to add the
                 //       file descriptor into the select()
-                mon_hal_int_events = new Socket(int_events_fd);
+                mon_hal_int_events = Socket::socketFactory(int_events_fd);
                 add_socket(mon_hal_int_events);
             } else {
                 LOG(ERROR) << "Invalid internal event file descriptor: " << int_events_fd;
@@ -305,7 +305,7 @@ void monitor_thread::after_select(bool timeout)
 
             int nl_events_fd = mon_wlan_hal->get_nl_events_fd();
             if (nl_events_fd > 0) {
-                mon_hal_nl_events = new Socket(nl_events_fd);
+                mon_hal_nl_events = Socket::socketFactory(nl_events_fd);
                 add_socket(mon_hal_nl_events);
                 LOG(DEBUG) << "nl socket created for FD #" << nl_events_fd;
             } else {
