@@ -6,7 +6,7 @@ _multi_class: True
 _multi_class_auto_insert:
   action_op:
     _type: eActionOp_BACKHAUL
-    _value_const: [_auto_value_by_name, 1]  
+    _value_const: [_auto_value_by_name, 1]
     _class_const: True
 
 #################################################
@@ -16,10 +16,10 @@ cACTION_BACKHAUL_REGISTER_REQUEST:
   _type: class
   sta_iface:
     _type: char
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
+    _length: ["beerocks::message::IFACE_NAME_LENGTH"]
   hostap_iface:
     _type: char
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
+    _length: ["beerocks::message::IFACE_NAME_LENGTH"]
   local_master: uint8_t
   local_gw: uint8_t
   sta_iface_filter_low: uint8_t
@@ -38,40 +38,40 @@ cACTION_BACKHAUL_ENABLE:
   iface_mac: sMacAddr
   wire_iface:
     _type: char
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
+    _length: ["beerocks::message::IFACE_NAME_LENGTH"]
   sta_iface:
     _type: char
-    _length: [ "beerocks::message::IFACE_NAME_LENGTH"  ]
+    _length: ["beerocks::message::IFACE_NAME_LENGTH"]
   ssid:
     _type: char
-    _length: [ "beerocks::message::WIFI_SSID_MAX_LENGTH" ]
+    _length: ["beerocks::message::WIFI_SSID_MAX_LENGTH"]
   pass:
     _type: char
-    _length: [ "beerocks::message::WIFI_PASS_MAX_LENGTH" ]
+    _length: ["beerocks::message::WIFI_PASS_MAX_LENGTH"]
   security_type: uint32_t # bwl::sta_wlan_hal::Security
   preferred_bssid: sMacAddr
-  wire_iface_type: uint8_t  
-  wireless_iface_type: uint8_t  
+  wire_iface_type: uint8_t
+  wireless_iface_type: uint8_t
   mem_only_psk: uint8_t
   backhaul_preferred_radio_band: uint8_t
   frequency_band: beerocks::eFreqType
-  max_bandwidth: beerocks::eWiFiBandwidth 
+  max_bandwidth: beerocks::eWiFiBandwidth
   ht_supported: uint8_t #bool
   ht_capability: uint16_t
   ht_mcs_set:
     _type: uint8_t
-    _length: [ "beerocks::message::HT_MCS_SET_SIZE" ]
+    _length: ["beerocks::message::HT_MCS_SET_SIZE"]
   vht_supported: uint8_t #bool
   vht_capability: uint32_t
   vht_mcs_set:
     _type: uint8_t
-    _length: [ "beerocks::message::VHT_MCS_SET_SIZE" ]
+    _length: ["beerocks::message::VHT_MCS_SET_SIZE"]
   preferred_channels_size:
     _type: uint8_t
     _length_var: True
   preferred_channels:
     _type: beerocks::message::sWifiChannel
-    _length: [ preferred_channels_size ]
+    _length: [preferred_channels_size]
 
 cACTION_BACKHAUL_CONNECTED_NOTIFICATION:
   _type: class
@@ -93,7 +93,7 @@ cACTION_BACKHAUL_ROAM_REQUEST:
 
 cACTION_BACKHAUL_ROAM_RESPONSE:
   _type: class
-  connected: uint8_t 
+  connected: uint8_t
 
 cACTION_BACKHAUL_RESET:
   _type: class
@@ -134,8 +134,8 @@ cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION:
   client_mac: sMacAddr
   bssid: sMacAddr
   association_frame:
-    _type: uint8_t 
-    _length: [] 
+    _type: uint8_t
+    _length: []
 
 cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION:
   _type: class
@@ -149,7 +149,7 @@ cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST:
 
 cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_RESPONSE:
   _type: class
-  _is_tlv_class : True
+  _is_tlv_class: True
   length: uint16_t
   sta_mac: sMacAddr
   bssid_info_list_length:
@@ -157,7 +157,7 @@ cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_RESPONSE:
     _length_var: True
   bssid_info_list:
     _type: sBssidInfo
-    _length: [ bssid_info_list_length ]
+    _length: [bssid_info_list_length]
 
 cACTION_BACKHAUL_START_WPS_PBC_REQUEST:
   _type: class
