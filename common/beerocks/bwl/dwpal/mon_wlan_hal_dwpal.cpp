@@ -693,27 +693,27 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name
     char SNR[32][HOSTAPD_TO_DWPAL_VALUE_STRING_LENGTH]                  = {'\0'};
     LOG(DEBUG) << "test the logging";
     LOG(DEBUG) << "the reply is: " << reply;
-    //    (void*)replyLen;
-    // FieldsToParse fieldsToParse[]                                       = {
-    //     {(void *)&BytesSent, &numOfValidArgs[0], DWPAL_LONG_LONG_INT_PARAM, "BytesSent=", 0},
-    //     {(void *)&BytesReceived, &numOfValidArgs[1], DWPAL_LONG_LONG_INT_PARAM,
-    //      "BytesReceived=", 0},
-    //     {(void *)&PacketsSent, &numOfValidArgs[2], DWPAL_LONG_LONG_INT_PARAM, "PacketsSent=", 0},
-    //     {(void *)&PacketsReceived, &numOfValidArgs[3], DWPAL_LONG_LONG_INT_PARAM,
-    //      "PacketsReceived=", 0},
-    //     {(void *)&sta_stats.retrans_count, &numOfValidArgs[4], DWPAL_INT_PARAM, "RetransCount=", 0},
-    //     {(void *)ShortTermRSSIAverage, &numOfValidArgs[5], DWPAL_STR_ARRAY_PARAM,
-    //      "ShortTermRSSIAverage=", sizeof(ShortTermRSSIAverage)},
-    //     {(void *)SNR, &numOfValidArgs[6], DWPAL_STR_ARRAY_PARAM, "SNR=", sizeof(SNR)},
-    //     {(void *)&Active, &numOfValidArgs[7], DWPAL_LONG_LONG_INT_PARAM, "Active=", 0},
-    //     {(void *)&LastDataDownlinkRate, &numOfValidArgs[8], DWPAL_LONG_LONG_INT_PARAM,
-    //      "LastDataDownlinkRate=", 0},
-    //     {(void *)&LastDataUplinkRate, &numOfValidArgs[9], DWPAL_LONG_LONG_INT_PARAM,
-    //      "LastDataUplinkRate=", 0},
+       (void*)replyLen;
+    FieldsToParse fieldsToParse[]                                       = {
+        {(void *)&BytesSent, &numOfValidArgs[0], DWPAL_LONG_LONG_INT_PARAM, "BytesSent=", 0},
+        {(void *)&BytesReceived, &numOfValidArgs[1], DWPAL_LONG_LONG_INT_PARAM,
+         "BytesReceived=", 0},
+        {(void *)&PacketsSent, &numOfValidArgs[2], DWPAL_LONG_LONG_INT_PARAM, "PacketsSent=", 0},
+        {(void *)&PacketsReceived, &numOfValidArgs[3], DWPAL_LONG_LONG_INT_PARAM,
+         "PacketsReceived=", 0},
+        {(void *)&sta_stats.retrans_count, &numOfValidArgs[4], DWPAL_INT_PARAM, "RetransCount=", 0},
+        {(void *)ShortTermRSSIAverage, &numOfValidArgs[5], DWPAL_STR_ARRAY_PARAM,
+         "ShortTermRSSIAverage=", sizeof(ShortTermRSSIAverage)},
+        {(void *)SNR, &numOfValidArgs[6], DWPAL_STR_ARRAY_PARAM, "SNR=", sizeof(SNR)},
+        {(void *)&Active, &numOfValidArgs[7], DWPAL_LONG_LONG_INT_PARAM, "Active=", 0},
+        {(void *)&LastDataDownlinkRate, &numOfValidArgs[8], DWPAL_LONG_LONG_INT_PARAM,
+         "LastDataDownlinkRate=", 0},
+        {(void *)&LastDataUplinkRate, &numOfValidArgs[9], DWPAL_LONG_LONG_INT_PARAM,
+         "LastDataUplinkRate=", 0},
 
-        // /* Must be at the end */
-        // {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
-    //    LOG(DEBUG) << "About to call dwpal parse" << std::endl;
+        /* Must be at the end */
+        {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
+       LOG(DEBUG) << "About to call dwpal parse" << std::endl;
     // if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse, (7*sizeof(uint64_t)+ sizeof(sta_stats.retrans_count) + sizeof(ShortTermRSSIAverage) + sizeof(SNR) )) ==
     //     DWPAL_FAILURE) {
     //     LOG(ERROR) << "DWPAL parse error ==> Abort";
