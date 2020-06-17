@@ -726,7 +726,7 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name
     // LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " BytesReceived= " << BytesReceived;
     // LOG(DEBUG) << "numOfValidArgs[2]= " << numOfValidArgs[2] << " PacketsSent= " << PacketsSent;
     // LOG(DEBUG) << "numOfValidArgs[3]= " << numOfValidArgs[3] << " PacketsReceived= " << PacketsReceived;
-    // LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4] << " RetransCount= " << sta_stats.retrans_count;
+     LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4] << " RetransCount= " << sta_stats.retrans_count;
     // LOG(DEBUG) << "numOfValidArgs[5]= " << numOfValidArgs[5] << " ShortTermRSSIAverage= " << ShortTermRSSIAverage;
     // LOG(DEBUG) << "numOfValidArgs[6]= " << numOfValidArgs[6] << " SNR= " << SNR;
     // LOG(DEBUG) << "numOfValidArgs[0]= " << numOfValidArgs[7] << " Active= " << Active;
