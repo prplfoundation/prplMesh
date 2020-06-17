@@ -25,9 +25,11 @@
 #include <tlvf/ieee_1905_1/eLinkMetricsType.h>
 #include <tlvf/ieee_1905_1/eMediaType.h>
 
+#include <tlvf/CmduMessageTx.h>
 #include <tlvf/wfa_map/tlvApMetrics.h>
 #include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
+#include <tlvf/wfa_map/tlvErrorCode.h>
 
 #include "../agent_ucc_listener.h"
 #include "../link_metrics/link_metrics.h"
@@ -102,6 +104,15 @@ private:
     bool send_1905_topology_discovery_message(const std::string &iface_name);
 
     bool send_slave_ap_metric_query_message(uint16_t mid, std::vector<sMacAddr> const &bssid_list);
+
+    /**
+     * @brief Creates Backhaul STA Steering Response message with 2 tlvs Steering Response
+     *        and Error Code.
+     *
+     * @param error_code One of the error codes presented in wfa_map::tlvErrorCode::eReasonCode.
+     * @return True on success and false otherwise
+     */
+    bool create_backhaul_steering_response(const wfa_map::tlvErrorCode::eReasonCode &error_code);
 
     // cmdu handlers
     bool handle_master_message(ieee1905_1::CmduMessageRx &cmdu_rx,
