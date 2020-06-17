@@ -4581,6 +4581,56 @@ bool backhaul_manager::handle_backhaul_steering_request(ieee1905_1::CmduMessageR
     return true;
 }
 
+bool backhaul_manager::create_backhaul_steering_response(
+    const wfa_map::tlvErrorCode::eReasonCode &error_code)
+{
+    auto cmdu_tx_header =
+        cmdu_tx.create(0, ieee1905_1::eMessageType::BACKHAUL_STEERING_RESPONSE_MESSAGE);
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "Failed to create Backhoul STA Steering Response message";
+        return false;
+    }
+
+    auto bh_steering_resp_tlv = cmdu_tx.addClass<wfa_map::tlvBackhaulSteeringResponse>();
+    if (!bh_steering_resp_tlv) {
+        LOG(ERROR) << "Couldn't addClass<wfa_map::tlvBackhaulSteeringResponse>";
+        return false;
+    }
+
+    auto active_hal = get_wireless_hal();
+    if (!active_hal) {
+        LOG(ERROR) << "Couldn't get active HAL";
+        return false;
+    }
+
+    sMacAddr sta_mac;
+    auto interface = active_hal->get_iface_name();
+    get_iface_mac(interface, sta_mac);
+
+    LOG(DEBUG) << "Interface: " << interface << "MAC: " << sta_mac;
+
+    bh_steering_resp_tlv->target_bssid()         = tlvf::mac_from_string(active_hal->get_bssid());
+    bh_steering_resp_tlv->backhaul_station_mac() = sta_mac;
+
+    if (!error_code) {
+        bh_steering_resp_tlv->result_code() =
+            wfa_map::tlvBackhaulSteeringResponse::eResultCode::SUCCESS;
+    } else {
+        bh_steering_resp_tlv->result_code() =
+            wfa_map::tlvBackhaulSteeringResponse::eResultCode::FAILURE;
+
+        auto error_code_tlv = cmdu_tx.addClass<wfa_map::tlvErrorCode>();
+        if (!bh_steering_resp_tlv) {
+            LOG(ERROR) << "Couldn't addClass<wfa_map::tlvErrorCode>";
+            return false;
+        }
+
+        error_code_tlv->reason_code() = error_code;
+    }
+
+    return true;
+}
+
 const std::string backhaul_manager::freq_to_radio_mac(eFreqType freq) const
 {
     auto it =
