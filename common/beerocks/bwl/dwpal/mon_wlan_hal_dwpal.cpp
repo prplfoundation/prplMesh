@@ -686,11 +686,11 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name
         return false;
     }
 
-    size_t numOfValidArgs[10] = {0}, replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
+    size_t numOfValidArgs[8] = {0}, replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
     uint64_t BytesSent = 0, BytesReceived = 0, PacketsSent = 0, PacketsReceived = 0,
         LastDataDownlinkRate = 0, LastDataUplinkRate = 0, Active = 0;
-    char ShortTermRSSIAverage[32][HOSTAPD_TO_DWPAL_VALUE_STRING_LENGTH] = {'\0'};
-    char SNR[32][HOSTAPD_TO_DWPAL_VALUE_STRING_LENGTH]                  = {'\0'};
+    //char ShortTermRSSIAverage[32][HOSTAPD_TO_DWPAL_VALUE_STRING_LENGTH] = {'\0'};
+    //char SNR[32][HOSTAPD_TO_DWPAL_VALUE_STRING_LENGTH]                  = {'\0'};
     LOG(DEBUG) << "test the logging";
     LOG(DEBUG) << "the reply is: " << reply;
        (void*)replyLen;
@@ -705,10 +705,10 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name
         //        {(void *)ShortTermRSSIAverage, &numOfValidArgs[5], DWPAL_STR_ARRAY_PARAM,
         //         "ShortTermRSSIAverage=", sizeof(ShortTermRSSIAverage)},
         //        {(void *)SNR, &numOfValidArgs[6], DWPAL_STR_ARRAY_PARAM, "SNR=", sizeof(SNR)},
-        {(void *)&Active, &numOfValidArgs[7], DWPAL_LONG_LONG_INT_PARAM, "Active=", 0},
-        {(void *)&LastDataDownlinkRate, &numOfValidArgs[8], DWPAL_LONG_LONG_INT_PARAM,
+        {(void *)&Active, &numOfValidArgs[5], DWPAL_LONG_LONG_INT_PARAM, "Active=", 0},
+        {(void *)&LastDataDownlinkRate, &numOfValidArgs[6], DWPAL_LONG_LONG_INT_PARAM,
          "LastDataDownlinkRate=", 0},
-        {(void *)&LastDataUplinkRate, &numOfValidArgs[9], DWPAL_LONG_LONG_INT_PARAM,
+        {(void *)&LastDataUplinkRate, &numOfValidArgs[7], DWPAL_LONG_LONG_INT_PARAM,
          "LastDataUplinkRate=", 0},
 
         /* Must be at the end */
@@ -726,46 +726,13 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name
     // LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " BytesReceived= " << BytesReceived;
     // LOG(DEBUG) << "numOfValidArgs[2]= " << numOfValidArgs[2] << " PacketsSent= " << PacketsSent;
     // LOG(DEBUG) << "numOfValidArgs[3]= " << numOfValidArgs[3] << " PacketsReceived= " << PacketsReceived;
-     LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4] << " RetransCount= " << sta_stats.retrans_count;
+    //     LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4] << " RetransCount= " << sta_stats.retrans_count;
     // LOG(DEBUG) << "numOfValidArgs[5]= " << numOfValidArgs[5] << " ShortTermRSSIAverage= " << ShortTermRSSIAverage;
     // LOG(DEBUG) << "numOfValidArgs[6]= " << numOfValidArgs[6] << " SNR= " << SNR;
     // LOG(DEBUG) << "numOfValidArgs[0]= " << numOfValidArgs[7] << " Active= " << Active;
     // LOG(DEBUG) << "numOfValidArgs[7]= " << numOfValidArgs[8] << " LastDataDownlinkRate= " << LastDataDownlinkRate;
     // LOG(DEBUG) << "numOfValidArgs[8]= " << numOfValidArgs[9] << " LastDataUplinkRate= " << LastDataUplinkRate;
     /* End of TEMP: Traces... */
-
-    for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
-        if (numOfValidArgs[i] == 0) {
-            LOG(ERROR) << "Failed reading parsed parameter " << (int)i << " ==> Abort";
-            return false;
-        }
-    }
-
-    //save avarage RSSI in watt
-    for (uint8_t i = 0; i < numOfValidArgs[5]; i++) {
-        float s_float = float(beerocks::string_utils::stoi(std::string(ShortTermRSSIAverage[i])));
-        if (s_float > beerocks::RSSI_MIN) {
-            sta_stats.rx_rssi_watt += std::pow(10, s_float / float(10));
-            sta_stats.rx_rssi_watt_samples_cnt++;
-        }
-    }
-
-    //save avarage SNR in watt
-    for (uint8_t i = 0; i < numOfValidArgs[6]; i++) {
-        float s_float = float(beerocks::string_utils::stoi(std::string(SNR[i])));
-        if (s_float > beerocks::SNR_MIN) {
-            sta_stats.rx_snr_watt += std::pow(10, s_float / float(10));
-            sta_stats.rx_snr_watt_samples_cnt++;
-        }
-    }
-
-    // TODO: Update RSSI externally!
-    sta_stats.tx_phy_rate_100kb = (LastDataDownlinkRate / 100);
-    sta_stats.rx_phy_rate_100kb = (LastDataUplinkRate / 100);
-    calc_curr_traffic(BytesSent, sta_stats.tx_bytes_cnt, sta_stats.tx_bytes);
-    calc_curr_traffic(BytesReceived, sta_stats.rx_bytes_cnt, sta_stats.rx_bytes);
-    calc_curr_traffic(PacketsSent, sta_stats.tx_packets_cnt, sta_stats.tx_packets);
-    calc_curr_traffic(PacketsReceived, sta_stats.rx_packets_cnt, sta_stats.rx_packets);
 
     return true;
 }
