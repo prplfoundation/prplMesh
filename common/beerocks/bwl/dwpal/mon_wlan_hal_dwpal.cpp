@@ -686,12 +686,12 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name
         return false;
     }
 
-    size_t numOfValidArgs[10] = {0}, replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
+    size_t numOfValidArgs[10] = {0};//, replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
     uint64_t BytesSent = 0, BytesReceived = 0, PacketsSent = 0, PacketsReceived = 0,
         LastDataDownlinkRate = 0, LastDataUplinkRate = 0, Active = 0;
     char ShortTermRSSIAverage[32][HOSTAPD_TO_DWPAL_VALUE_STRING_LENGTH] = {'\0'};
     char SNR[32][HOSTAPD_TO_DWPAL_VALUE_STRING_LENGTH]                  = {'\0'};
-    (void*)replyLen;
+    //    (void*)replyLen;
     // FieldsToParse fieldsToParse[]                                       = {
     //     {(void *)&BytesSent, &numOfValidArgs[0], DWPAL_LONG_LONG_INT_PARAM, "BytesSent=", 0},
     //     {(void *)&BytesReceived, &numOfValidArgs[1], DWPAL_LONG_LONG_INT_PARAM,
