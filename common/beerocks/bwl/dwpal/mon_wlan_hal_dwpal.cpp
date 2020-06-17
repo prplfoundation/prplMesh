@@ -711,7 +711,7 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name
 
         // /* Must be at the end */
         // {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
-    LOG(DEBUG) << "About to call dwpal parse" << std::endl;
+    //    LOG(DEBUG) << "About to call dwpal parse" << std::endl;
     // if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse, (7*sizeof(uint64_t)+ sizeof(sta_stats.retrans_count) + sizeof(ShortTermRSSIAverage) + sizeof(SNR) )) ==
     //     DWPAL_FAILURE) {
     //     LOG(ERROR) << "DWPAL parse error ==> Abort";
@@ -719,17 +719,17 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name
     // }
 
     /* TEMP: Traces... */
-    LOG(DEBUG) << "GET_STA_MEASUREMENTS reply= \n" << reply;
-    LOG(DEBUG) << "numOfValidArgs[0]= " << numOfValidArgs[0] << " BytesSent= " << BytesSent;
-    LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " BytesReceived= " << BytesReceived;
-    LOG(DEBUG) << "numOfValidArgs[2]= " << numOfValidArgs[2] << " PacketsSent= " << PacketsSent;
-    LOG(DEBUG) << "numOfValidArgs[3]= " << numOfValidArgs[3] << " PacketsReceived= " << PacketsReceived;
-    LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4] << " RetransCount= " << sta_stats.retrans_count;
-    LOG(DEBUG) << "numOfValidArgs[5]= " << numOfValidArgs[5] << " ShortTermRSSIAverage= " << ShortTermRSSIAverage;
-    LOG(DEBUG) << "numOfValidArgs[6]= " << numOfValidArgs[6] << " SNR= " << SNR;
-    LOG(DEBUG) << "numOfValidArgs[0]= " << numOfValidArgs[7] << " Active= " << Active;
-    LOG(DEBUG) << "numOfValidArgs[7]= " << numOfValidArgs[8] << " LastDataDownlinkRate= " << LastDataDownlinkRate;
-    LOG(DEBUG) << "numOfValidArgs[8]= " << numOfValidArgs[9] << " LastDataUplinkRate= " << LastDataUplinkRate;
+    // LOG(DEBUG) << "GET_STA_MEASUREMENTS reply= \n" << reply;
+    // LOG(DEBUG) << "numOfValidArgs[0]= " << numOfValidArgs[0] << " BytesSent= " << BytesSent;
+    // LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " BytesReceived= " << BytesReceived;
+    // LOG(DEBUG) << "numOfValidArgs[2]= " << numOfValidArgs[2] << " PacketsSent= " << PacketsSent;
+    // LOG(DEBUG) << "numOfValidArgs[3]= " << numOfValidArgs[3] << " PacketsReceived= " << PacketsReceived;
+    // LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4] << " RetransCount= " << sta_stats.retrans_count;
+    // LOG(DEBUG) << "numOfValidArgs[5]= " << numOfValidArgs[5] << " ShortTermRSSIAverage= " << ShortTermRSSIAverage;
+    // LOG(DEBUG) << "numOfValidArgs[6]= " << numOfValidArgs[6] << " SNR= " << SNR;
+    // LOG(DEBUG) << "numOfValidArgs[0]= " << numOfValidArgs[7] << " Active= " << Active;
+    // LOG(DEBUG) << "numOfValidArgs[7]= " << numOfValidArgs[8] << " LastDataDownlinkRate= " << LastDataDownlinkRate;
+    // LOG(DEBUG) << "numOfValidArgs[8]= " << numOfValidArgs[9] << " LastDataUplinkRate= " << LastDataUplinkRate;
     /* End of TEMP: Traces... */
 
     for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
