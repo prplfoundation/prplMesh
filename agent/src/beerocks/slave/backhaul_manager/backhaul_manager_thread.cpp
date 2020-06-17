@@ -1139,7 +1139,7 @@ bool backhaul_manager::send_1905_topology_discovery_message()
 
         uint32_t iface_index = network_utils::linux_get_iface_index(iface_name);
         if (0 == iface_index) {
-            return false;
+            continue;
         }
 
         sMacAddr iface_mac;
