@@ -1144,12 +1144,10 @@ bool backhaul_manager::send_1905_topology_discovery_message()
 
         sMacAddr iface_mac;
         if (!get_iface_mac(iface_name, iface_mac)) {
-            return false;
+            continue;
         }
 
-        if (!send_1905_topology_discovery_message(iface_index, iface_mac)) {
-            return false;
-        }
+        send_1905_topology_discovery_message(iface_index, iface_mac);
     }
 
     return true;
