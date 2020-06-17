@@ -691,6 +691,8 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name
         LastDataDownlinkRate = 0, LastDataUplinkRate = 0, Active = 0;
     char ShortTermRSSIAverage[32][HOSTAPD_TO_DWPAL_VALUE_STRING_LENGTH] = {'\0'};
     char SNR[32][HOSTAPD_TO_DWPAL_VALUE_STRING_LENGTH]                  = {'\0'};
+    LOG(DEBUG) << "test the logging";
+    LOG(DEBUG) << "the reply is: " << reply;
     //    (void*)replyLen;
     // FieldsToParse fieldsToParse[]                                       = {
     //     {(void *)&BytesSent, &numOfValidArgs[0], DWPAL_LONG_LONG_INT_PARAM, "BytesSent=", 0},
