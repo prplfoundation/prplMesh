@@ -689,9 +689,9 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name
     size_t numOfValidArgs[10] = {0}, replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
     uint64_t BytesSent = 0, BytesReceived = 0, PacketsSent = 0, PacketsReceived = 0,
              LastDataDownlinkRate = 0, LastDataUplinkRate = 0, Active = 0;
-    char ShortTermRSSIAverage[32][HOSTAPD_TO_DWPAL_VALUE_STRING_LENGTH] = {'\0'};
-    char SNR[32][HOSTAPD_TO_DWPAL_VALUE_STRING_LENGTH]                  = {'\0'};
-    FieldsToParse fieldsToParse[]                                       = {
+    char ShortTermRSSIAverage[32] = {'\0'};
+    char SNR[32]                  = {'\0'};
+    FieldsToParse fieldsToParse[] = {
         {(void *)&BytesSent, &numOfValidArgs[0], DWPAL_LONG_LONG_INT_PARAM, "BytesSent=", 0},
         {(void *)&BytesReceived, &numOfValidArgs[1], DWPAL_LONG_LONG_INT_PARAM,
          "BytesReceived=", 0},
@@ -699,9 +699,9 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name
         {(void *)&PacketsReceived, &numOfValidArgs[3], DWPAL_LONG_LONG_INT_PARAM,
          "PacketsReceived=", 0},
         {(void *)&sta_stats.retrans_count, &numOfValidArgs[4], DWPAL_INT_PARAM, "RetransCount=", 0},
-        {(void *)ShortTermRSSIAverage, &numOfValidArgs[5], DWPAL_STR_ARRAY_PARAM,
+        {(void *)ShortTermRSSIAverage, &numOfValidArgs[5], DWPAL_STR_PARAM,
          "ShortTermRSSIAverage=", sizeof(ShortTermRSSIAverage)},
-        {(void *)SNR, &numOfValidArgs[6], DWPAL_STR_ARRAY_PARAM, "SNR=", sizeof(SNR)},
+        {(void *)SNR, &numOfValidArgs[6], DWPAL_STR_PARAM, "SNR=", sizeof(SNR)},
         {(void *)&Active, &numOfValidArgs[7], DWPAL_LONG_LONG_INT_PARAM, "Active=", 0},
         {(void *)&LastDataDownlinkRate, &numOfValidArgs[8], DWPAL_LONG_LONG_INT_PARAM,
          "LastDataDownlinkRate=", 0},
@@ -738,18 +738,20 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name
         }
     }
 
-    //save avarage RSSI in watt
-    for (uint8_t i = 0; i < numOfValidArgs[5]; i++) {
-        float s_float = float(beerocks::string_utils::stoi(std::string(ShortTermRSSIAverage[i])));
+    //save average RSSI in watt
+    // ShortTermRSSIAverage values are space-separated:
+    for (const auto &rssi : beerocks::string_utils::str_split(ShortTermRSSIAverage, ' ')) {
+        float s_float = float(beerocks::string_utils::stoi(std::string(rssi)));
         if (s_float > beerocks::RSSI_MIN) {
             sta_stats.rx_rssi_watt += std::pow(10, s_float / float(10));
             sta_stats.rx_rssi_watt_samples_cnt++;
         }
     }
 
-    //save avarage SNR in watt
-    for (uint8_t i = 0; i < numOfValidArgs[6]; i++) {
-        float s_float = float(beerocks::string_utils::stoi(std::string(SNR[i])));
+    //save average SNR in watt
+    // SNR values are space-separated:
+    for (const auto &snr : beerocks::string_utils::str_split(SNR, ' ')) {
+        float s_float = float(beerocks::string_utils::stoi(std::string(snr)));
         if (s_float > beerocks::SNR_MIN) {
             sta_stats.rx_snr_watt += std::pow(10, s_float / float(10));
             sta_stats.rx_snr_watt_samples_cnt++;
