@@ -438,9 +438,15 @@ bool beerocks_ucc_listener::custom_message_handler(Socket *sd, uint8_t *rx_buffe
                                                    size_t rx_buffer_size)
 {
     std::string command_string;
-    auto available_bytes       = sd->readBytes(rx_buffer, rx_buffer_size, true);
+    auto available_bytes = sd->readBytes(rx_buffer, rx_buffer_size, true);
+
+    if (available_bytes <= 0) {
+        LOG(ERROR) << "Cannot read from socket";
+        return true;
+    }
+
     rx_buffer[available_bytes] = '\0';
-    command_string.assign(reinterpret_cast<char *>(rx_buffer));
+    command_string.assign(reinterpret_cast<char *>(rx_buffer), available_bytes);
 
     beerocks::string_utils::trim(command_string);
 
