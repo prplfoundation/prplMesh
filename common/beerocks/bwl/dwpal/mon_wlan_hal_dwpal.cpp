@@ -702,7 +702,7 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name
         {(void *)&PacketsReceived, &numOfValidArgs[3], DWPAL_LONG_LONG_INT_PARAM,
          "PacketsReceived=", 0},
         {(void *)&sta_stats.retrans_count, &numOfValidArgs[4], DWPAL_UNSIGNED_INT_PARAM, "RetransCount=", 0},
-               {(void *)ShortTermRSSIAverage, &numOfValidArgs[5], DWPAL_STR_ARRAY_PARAM,
+               {(void *)ShortTermRSSIAverage, &numOfValidArgs[5], DWPAL_STR_PARAM,
                 "ShortTermRSSIAverage=", sizeof(ShortTermRSSIAverage)},
         //        {(void *)SNR, &numOfValidArgs[6], DWPAL_STR_ARRAY_PARAM, "SNR=", sizeof(SNR)},
         {(void *)&Active, &numOfValidArgs[6], DWPAL_LONG_LONG_INT_PARAM, "Active=", 0},
