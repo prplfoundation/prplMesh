@@ -528,11 +528,8 @@ std::vector<std::string> network_utils::linux_get_iface_list_from_bridge(const s
 uint32_t network_utils::linux_get_iface_index(const std::string &iface_name)
 {
     uint32_t iface_index = if_nametoindex(iface_name.c_str());
-    if (0 == iface_index) {
-        LOG(ERROR) << "Failed to read the index of interface " << iface_name << ": "
-                   << strerror(errno);
-    }
-
+    LOG_IF(!iface_index, ERROR) << "Failed to read the index of interface " << iface_name << ": "
+                                << strerror(errno);
     return iface_index;
 }
 
