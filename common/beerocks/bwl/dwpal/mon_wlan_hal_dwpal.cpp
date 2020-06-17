@@ -714,11 +714,11 @@ bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name
         /* Must be at the end */
         {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
        LOG(DEBUG) << "About to call dwpal parse" << std::endl;
-    // if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse, (7*sizeof(uint64_t)+ sizeof(sta_stats.retrans_count) + sizeof(ShortTermRSSIAverage) + sizeof(SNR) )) ==
-    //     DWPAL_FAILURE) {
-    //     LOG(ERROR) << "DWPAL parse error ==> Abort";
-    //     return false;
-    // }
+    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse, (7*sizeof(uint64_t)+ sizeof(sta_stats.retrans_count) + sizeof(ShortTermRSSIAverage) + sizeof(SNR) )) ==
+        DWPAL_FAILURE) {
+        LOG(ERROR) << "DWPAL parse error ==> Abort";
+        return false;
+    }
 
     /* TEMP: Traces... */
     // LOG(DEBUG) << "GET_STA_MEASUREMENTS reply= \n" << reply;
