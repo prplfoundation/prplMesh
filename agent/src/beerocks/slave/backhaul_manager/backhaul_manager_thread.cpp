@@ -73,6 +73,8 @@
 #include <tlvf/wfa_map/tlvAssociatedClients.h>
 #include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
 #include <tlvf/wfa_map/tlvAssociatedStaTrafficStats.h>
+#include <tlvf/wfa_map/tlvBackhaulSteeringRequest.h>
+#include <tlvf/wfa_map/tlvBackhaulSteeringResponse.h>
 #include <tlvf/wfa_map/tlvBeaconMetricsQuery.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvClientCapabilityReport.h>
@@ -279,6 +281,7 @@ bool backhaul_manager::init()
             ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE,
             ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE,
             ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE,
+            ieee1905_1::eMessageType::BACKHAUL_STEERING_REQUEST_MESSAGE,
         })) {
         LOG(ERROR) << "Failed to init mapf_bus";
         return false;
@@ -2244,6 +2247,9 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     }
     case ieee1905_1::eMessageType::CHANNEL_SELECTION_REQUEST_MESSAGE: {
         return handle_channel_selection_request(cmdu_rx, src_mac);
+    }
+    case ieee1905_1::eMessageType::BACKHAUL_STEERING_REQUEST_MESSAGE: {
+        return handle_backhaul_steering_request(cmdu_rx, src_mac);
     }
     default: {
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
@@ -4515,6 +4521,64 @@ bool backhaul_manager::handle_slave_channel_selection_response(ieee1905_1::CmduM
 
     LOG(DEBUG) << "Sending CHANNEL_SELECTION_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
     return send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+}
+
+bool backhaul_manager::handle_backhaul_steering_request(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                        const std::string &src_mac)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received BACKHAUL_STA_STEERING message, mid=" << std::hex << mid;
+
+    auto bh_sta_steering_req = cmdu_rx.getClass<wfa_map::tlvBackhaulSteeringRequest>();
+    if (!bh_sta_steering_req) {
+        LOG(WARNING) << "Failed cmdu_rx.getClass<wfa_map::tlvBackhaulSteeringRequest>(), mid="
+                     << std::hex << mid;
+        return false;
+    }
+
+    // build ACK message CMDU
+    auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
+
+    LOG(DEBUG) << "Sending ACK message to the originator, mid=" << std::hex << mid;
+    send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+
+    /*
+        TODO: Need to do channel validation. If channel invalid, send ACK and Backhaul STA Steering
+              Response with the error code without trigerring HAL.
+    */
+
+    /*
+        TODO: BACKHAUL_STA_STEERING can be accepted in wired backhaul too.
+              Code below is incorrect in that case.
+    */
+    auto active_hal = get_wireless_hal();
+    if (!active_hal) {
+        LOG(ERROR) << "Couldn't get active HAL";
+        return false;
+    }
+
+    auto channel = bh_sta_steering_req->target_channel_number();
+    auto bssid   = bh_sta_steering_req->target_bssid();
+
+    auto associate = active_hal->roam(bssid, channel);
+    if (!associate) {
+        LOG(ERROR) << "Couldn't associate active HAL with bssid: " << bssid;
+
+        LOG(DEBUG) << "Sending ACK message to the originator, mid=" << std::hex << mid;
+        send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+
+        /*
+            TODO: Need to add sending Backhaul STA Steering Response with the FAILURE error code.
+        */
+
+        return false;
+    }
+
+    return true;
 }
 
 const std::string backhaul_manager::freq_to_radio_mac(eFreqType freq) const
