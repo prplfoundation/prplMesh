@@ -478,7 +478,7 @@ bool base_wlan_hal_dwpal::dwpal_send_cmd(const std::string &cmd, int vap_id)
     }
 
     do {
-        LOG(DEBUG) << "Send dwpal cmd: " << cmd.c_str();
+        LOG(DEBUG) << "Send dwpal cmd: " << cmd.c_str() << std::endl;
         result = dwpal_hostap_cmd_send(m_dwpal_ctx[ctx_index], cmd.c_str(), NULL, buffer,
                                        &buff_size_copy);
         if (result != 0) {
