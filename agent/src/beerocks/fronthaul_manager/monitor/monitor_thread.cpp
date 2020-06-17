@@ -695,7 +695,10 @@ bool monitor_thread::update_sta_stats()
         auto vap_id = sta_node->get_vap_id();
         LOG(DEBUG) << "vap_id: " << static_cast<int>(vap_id);
         auto vap_node   = mon_db.vap_get_by_id(vap_id);
-        LOG(DEBUG) << "vap_node: " << vap_id;
+        if(!vap_node) {
+            LOG(ERROR) << "couldn't find vap node! id :" << static_cast<int>(vap_id);
+        }
+        LOG(DEBUG) << "vap_node ";
         auto &sta_stats = sta_node->get_stats();
 
         // Skip stations that were already updated in the current cycle
