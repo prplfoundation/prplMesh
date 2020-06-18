@@ -2212,6 +2212,7 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     }
     case ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE: {
         return handle_multi_ap_policy_config_request(cmdu_rx, src_mac);
+    }
     case ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE: {
         return handle_ap_metrics_query(cmdu_rx, src_mac);
     }
@@ -2225,7 +2226,6 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
         // flows, since we won't expect a 1905 message not handled in this function
         return false;
-    }
     }
     }
 }
