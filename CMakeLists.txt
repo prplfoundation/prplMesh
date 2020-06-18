@@ -178,6 +178,7 @@ endif()
 if (BUILD_CONTROLLER)
     add_subdirectory(controller)
 endif()
+add_subdirectory(source/reactor)
 
 ## Version
 configure_file(
