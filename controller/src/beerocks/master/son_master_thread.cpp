@@ -49,6 +49,7 @@
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
 #include <tlvf/wfa_map/tlvApMetrics.h>
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
+#include <tlvf/wfa_map/tlvBackhaulSteeringResponse.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
 #include <tlvf/wfa_map/tlvClientAssociationEvent.h>
@@ -111,6 +112,7 @@ bool master_thread::init()
             ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE,
             ieee1905_1::eMessageType::TOPOLOGY_RESPONSE_MESSAGE,
             ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE,
+            ieee1905_1::eMessageType::BACKHAUL_STEERING_RESPONSE_MESSAGE,
 
         })) {
         LOG(ERROR) << "Failed subscribing to the Bus";
@@ -312,6 +314,9 @@ bool master_thread::handle_cmdu_1905_1_message(const std::string &src_mac,
         return handle_cmdu_1905_topology_notification(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::TOPOLOGY_RESPONSE_MESSAGE:
         return handle_cmdu_1905_topology_response(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::BACKHAUL_STEERING_RESPONSE_MESSAGE:
+        return handle_cmdu_1905_backhaul_sta_steering_response(src_mac, cmdu_rx);
+
     default:
         break;
     }
@@ -1792,6 +1797,44 @@ bool master_thread::handle_cmdu_1905_topology_response(const std::string &src_ma
     }
 
     return true;
+}
+
+bool master_thread::handle_cmdu_1905_backhaul_sta_steering_response(
+    const std::string &src_mac, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received BACKHAUL_STA_STEERING_MESSAGE from " << src_mac << ", mid=" << std::hex
+               << mid;
+
+    auto tlv_backhaul_sta_steering_resp = cmdu_rx.getClass<wfa_map::tlvBackhaulSteeringResponse>();
+    if (!tlv_backhaul_sta_steering_resp) {
+        LOG(ERROR) << "Failed getClass<wfa_map::tlvBackhaulSteeringResponse>";
+        return false;
+    }
+
+    auto bh_steering_resp_code = tlv_backhaul_sta_steering_resp->result_code();
+    LOG(DEBUG) << "BACKHAUL_STA_STEERING_MESSAGE result_code: " << int(bh_steering_resp_code);
+
+    if (bh_steering_resp_code) {
+        auto error_code_tlv = cmdu_rx.getClass<wfa_map::tlvErrorCode>();
+        if (!error_code_tlv) {
+            LOG(ERROR) << "Failed getClass<wfa_map::tlvErrorCode>";
+            return false;
+        }
+        LOG(DEBUG) << "BACKHAUL_STA_STEERING_MESSAGE error_code: "
+                   << int(error_code_tlv->reason_code());
+    }
+
+    // build ACK message CMDU
+    auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
+
+    LOG(DEBUG) << "sending ACK message to the agent, mid=" << std::hex << mid;
+
+    return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
 }
 
 bool master_thread::handle_cmdu_1905_beacon_response(const std::string &src_mac,
