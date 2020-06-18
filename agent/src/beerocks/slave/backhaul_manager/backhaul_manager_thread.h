@@ -611,6 +611,8 @@ private:
 
     sExpectedChannelSelection m_expected_channel_selection;
 
+    bool m_backhaul_sta_steering_enable = false;
+
     /*
  * State Machines
  */

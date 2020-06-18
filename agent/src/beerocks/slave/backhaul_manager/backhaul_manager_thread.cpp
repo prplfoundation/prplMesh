@@ -973,6 +973,18 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
         eth_link_poll_timer = std::chrono::steady_clock::now();
         m_eth_link_up       = network_utils::linux_iface_is_up_and_running(m_sConfig.wire_iface);
         FSM_MOVE_STATE(OPERATIONAL);
+
+        // This event may come as a result of enabling the backhaul, but also as a result
+        // of steering. *Only* in case it was the result of steering, we need to send a steering
+        // response.
+        if (m_backhaul_sta_steering_enable) {
+            m_backhaul_sta_steering_enable = false;
+
+            create_backhaul_steering_response(wfa_map::tlvErrorCode::eReasonCode::RESERVED);
+
+            LOG(DEBUG) << "Sending BACKHAUL_STA_STEERING_RESPONSE_MESSAGE";
+            send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+        }
         break;
     }
     // Backhaul manager is OPERATIONAL!
@@ -4571,12 +4583,21 @@ bool backhaul_manager::handle_backhaul_steering_request(ieee1905_1::CmduMessageR
         LOG(DEBUG) << "Sending ACK message to the originator, mid=" << std::hex << mid;
         send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
 
-        /*
-            TODO: Need to add sending Backhaul STA Steering Response with the FAILURE error code.
-        */
+        auto response = create_backhaul_steering_response(
+            wfa_map::tlvErrorCode::eReasonCode::
+                BACKHAUL_STEERING_REQUEST_REJECTED_TARGET_BSS_SIGNAL_NOT_SUITABLE);
+
+        if (!response) {
+            LOG(ERROR) << "Failed to build Backhaul STA Steering Response message.";
+            return false;
+        }
+
+        send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
 
         return false;
     }
+
+    m_backhaul_sta_steering_enable = true;
 
     return true;
 }
