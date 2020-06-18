@@ -27,7 +27,7 @@ run() {
 
 killall_program() {
     PROGRAM_NAME=$1
-    KILL_SIG=${2:-KILL}
+    KILL_SIG=${2:-TERM}
     echo "killing $PROGRAM_NAME ($KILL_SIG)"
     start-stop-daemon -K -s "$KILL_SIG" -x "$PRPLMESH_BIN_DIR"/"$PROGRAM_NAME" > /dev/null 2>&1
 }
