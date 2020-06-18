@@ -1,0 +1,19 @@
+version: '3'
+services:
+    controller:
+        image: registry.gitlab.com/prpl-foundation/prplmesh/prplmesh-runner
+        privileged: true
+        environment:
+            - USER=pablo
+            - INSTALL_DIR=/home/pablo/assia/prpl/git/prplMesh/build/install
+        expose:
+            - "5000"
+        volumes:
+            -  "/home/pablo/assia/prpl/git/prplMesh/build/install:/home/pablo/assia/prpl/git/prplMesh/build/install"
+            - "/home/pablo/assia/prpl/git/prplMesh:/home/pablo/assia/prpl/git/prplMesh"
+            - "/home/pablo/assia/prpl/git/prplMesh/logs/controller:/tmp/pablo/beerocks/logs"
+
+    boardfarm:
+        build: .
+        ports:
+            - "5000:5000"
