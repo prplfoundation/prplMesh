@@ -24,6 +24,7 @@ usage() {
     echo "      -v|--verbose - set verbosity (ucc logs also redirected to stdout)"
     echo "      -o|--log-folder - path to put the logs to (make sure it does not contain previous logs)."
     echo "      -e|--easymesh-cert - path to easymesh_cert repository (default ../easymesh_cert)"
+    echo "      --reset-easymesh-cert - reset the easymesh_cert repository to the version specified in this file."
     echo "      -d|--device - select DUT device to use, valid options - glinet-1300, netgear-rax40, turris-omnia, marvell, qualcomm, broadcom, mediatek (default: netgear-rax40)"
     echo "      -s|--ssh - target device ssh name (defined in ~/.ssh/config). (default: $TARGET_DEVICE_SSH)"
     echo "      --owncloud-upload - whether or not to upload results to owncloud. (default: false)"
@@ -80,7 +81,7 @@ main() {
         then echo "this script has to be run as root, aborting"
         exit 1
     fi
-    if ! OPTS=$(getopt -o 'hvb:o:e:d:s:' --long help,verbose,log-folder:,easymesh-cert:,device:,ssh:,owncloud-upload,owncloud-path:,skip-upgrade -n 'parse-options' -- "$@"); then
+    if ! OPTS=$(getopt -o 'hvb:o:e:d:s:' --long help,verbose,log-folder:,easymesh-cert:,device:,ssh:,owncloud-upload,owncloud-path:,reset-easymesh-cert,skip-upgrade -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2
         usage
         exit 1
@@ -95,6 +96,7 @@ main() {
             -o | --log-folder)      LOG_FOLDER="$2"; shift 2;;
             -e | --easymesh-cert)   EASYMESH_CERT_PATH="$2"; shift 2;;
             -d | --device)          TARGET_DEVICE="$2"; shift 2;;
+            --reset-easymesh-cert)  RESET_EASYMESH_CERT=true; shift ;;
             -s | --ssh)             TARGET_DEVICE_SSH="$2"; shift 2;;
             --owncloud-upload)      OWNCLOUD_UPLOAD=true; shift;;
             --owncloud-path)        OWNCLOUD_PATH="$2"; shift 2;;
@@ -108,6 +110,10 @@ main() {
 
     [ -n "$TESTS" ] || TESTS="$EASYMESH_CERT_PATH/tests/all_agent_tests.txt"
     [ -n "$LOG_FOLDER" ] || LOG_FOLDER="$EASYMESH_CERT_PATH/logs/$(date +%F_%H-%M-%S)"
+
+    if [ -n "$RESET_EASYMESH_CERT" ] ; then
+        "$rootdir"/ci/git-clean-reset.sh "$EASYMESH_CERT_PATH" "$(<"$rootdir/ci/easymesh_cert_version")"
+    fi
 
     mkdir -p "$LOG_FOLDER"
     info "Logs location: $LOG_FOLDER"
