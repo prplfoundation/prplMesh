@@ -119,6 +119,15 @@ public:
      * @return interface index or 0 if no interface exists with the name given.
      */
     static uint32_t linux_get_iface_index(const std::string &iface_name);
+
+    /**
+     * @brief Gets the interface name corresponding to a particular index.
+     *
+     * @param iface_index The index of the network interface.
+     * @return interface name or empty string if no interface exists with the index given.
+     */
+    static std::string linux_get_iface_name(uint32_t iface_index);
+
     static bool linux_add_iface_to_bridge(const std::string &bridge, const std::string &iface);
     static bool linux_remove_iface_from_bridge(const std::string &bridge, const std::string &iface);
     static bool linux_iface_ctrl(const std::string &iface, bool up, std::string ip = "",
