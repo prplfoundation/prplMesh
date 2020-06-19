@@ -3915,6 +3915,7 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(WSC::m2 &m2, uint8
         LOG(ERROR) << "aes decrypt failure";
         return false;
     }
+    LOG(WARNING) << "Decrypted M2 dump:" << '\n' << utils::dump_buffer(decrypted, datalen);
 
     LOG(DEBUG) << "M2 Parse: parse config_data, len = " << datalen;
 
