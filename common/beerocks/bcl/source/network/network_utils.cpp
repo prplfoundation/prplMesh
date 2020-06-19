@@ -533,6 +533,18 @@ uint32_t network_utils::linux_get_iface_index(const std::string &iface_name)
     return iface_index;
 }
 
+std::string network_utils::linux_get_iface_name(uint32_t iface_index)
+{
+    char iface_name[IF_NAMESIZE] = {0};
+    if (!if_indextoname(iface_index, iface_name)) {
+        LOG(ERROR) << "Failed to read the name of interface with index " << iface_index << ": "
+                   << strerror(errno);
+        return "";
+    }
+
+    return iface_name;
+}
+
 bool network_utils::linux_add_iface_to_bridge(const std::string &bridge, const std::string &iface)
 {
     LOG(DEBUG) << "add iface " << iface << " to bridge " << bridge;
