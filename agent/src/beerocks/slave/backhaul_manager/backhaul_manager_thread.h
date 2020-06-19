@@ -473,8 +473,8 @@ private:
             ZERO_MAC; /**< 1905.1 AL MAC address of the Topology Discovery message transmitting device. */
         sMacAddr mac = beerocks::net::network_utils::
             ZERO_MAC; /**< MAC address of the interface on which the Topology Discovery message is transmitted. */
-        uint32_t if_index =
-            0; /**< Index of the network interface the Topology Discovery message was received on */
+        std::string
+            if_name; /**< Name of the network interface the Topology Discovery message was received on */
         std::chrono::steady_clock::time_point
             timestamp; /**< Timestamp of the last Topology Discovery message received from this neighbor device. */
     };

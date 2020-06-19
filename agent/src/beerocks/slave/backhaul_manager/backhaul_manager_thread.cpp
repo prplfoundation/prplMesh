@@ -3329,6 +3329,12 @@ bool backhaul_manager::handle_1905_topology_discovery(const std::string &src_mac
         return false;
     }
 
+    uint32_t if_index   = message_com::get_uds_header(cmdu_rx)->if_index;
+    std::string if_name = network_utils::linux_get_iface_name(if_index);
+    if (if_name.empty()) {
+        return false;
+    }
+
     auto new_device =
         m_1905_neighbor_devices.find(tlvAlMac->mac()) == m_1905_neighbor_devices.end();
 
@@ -3336,7 +3342,7 @@ bool backhaul_manager::handle_1905_topology_discovery(const std::string &src_mac
     sNeighborDevice neighbor_device;
     neighbor_device.al_mac    = tlvAlMac->mac();
     neighbor_device.mac       = tlvMac->mac();
-    neighbor_device.if_index  = message_com::get_uds_header(cmdu_rx)->if_index;
+    neighbor_device.if_name   = if_name;
     neighbor_device.timestamp = std::chrono::steady_clock::now();
 
     m_1905_neighbor_devices[tlvAlMac->mac()] = neighbor_device;
