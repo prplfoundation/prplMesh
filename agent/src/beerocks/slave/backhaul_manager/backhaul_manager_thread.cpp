@@ -2927,40 +2927,64 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         }
     }
 
-    // The tlv1905NeighborDevice we construct here is not entirely correct, but close enough.
-    // We should create a tlv1905NeighborDevice for every local interface on which a 1905 neighbor
-    // is visible, and then add a list of neighbors visible on that interface. However, since we
-    // don't keep track of the incoming interface of the received topology discovery messages, we
-    // can't do that. Instead, we model it as a single interface, the bridge interface, behind which
-    // all neighbors are visible, with a bridge between them. This is accurate enough to allow us to
-    // work in practice.
-    auto tlv1905NeighborDevice = cmdu_tx.addClass<ieee1905_1::tlv1905NeighborDevice>();
-    if (!tlv1905NeighborDevice) {
-        LOG(ERROR) << "addClass ieee1905_1::tlv1905NeighborDevice failed, mid=" << std::hex
-                   << (int)mid;
-        return false;
-    }
-    tlv1905NeighborDevice->mac_local_iface() = tlvf::mac_from_string(bridge_info.mac);
+    /**
+     * Add a 1905.1 neighbor device TLV for each local interface for which this management entity
+     * has inferred the presence of a 1905.1 neighbor device. Include each discovered neighbor
+     * device in its corresponding 1905.1 neighbor device TLV.
+     *
+     * First, group known 1905 neighbor devices by the local interface that links to them. Create
+     * a map which key is the name of the local interface and the value is the list of neighbor
+     * devices inferred from that interface.
+     */
+    std::unordered_map<std::string, std::vector<sNeighborDevice>> neighbor_devices_by_local_iface;
+    for (const auto &entry : m_1905_neighbor_devices) {
+        const auto &neighbor_device = entry.second;
+        auto &neighbor_devices      = neighbor_devices_by_local_iface[neighbor_device.if_name];
 
-    if (!tlv1905NeighborDevice->alloc_mac_al_1905_device(m_1905_neighbor_devices.size())) {
-        LOG(ERROR) << "alloc_mac_al_1905_device() has failed";
-        return true;
+        neighbor_devices.emplace_back(neighbor_device);
     }
 
-    size_t index = 0;
-    for (const auto &neighbor_device : m_1905_neighbor_devices) {
-        const auto &neighbor_al_mac = neighbor_device.first;
+    /**
+     * Second, create a tlv1905NeighborDevice for every local interface on which a 1905 neighbor
+     * is visible, and then add the list of neighbors visible on that interface
+     */
+    for (const auto &entry : neighbor_devices_by_local_iface) {
+        const auto &iface_name       = entry.first;
+        const auto &neighbor_devices = entry.second;
 
-        auto mac_al_1905_device_tuple = tlv1905NeighborDevice->mac_al_1905_device(index);
-        if (!std::get<0>(mac_al_1905_device_tuple)) {
-            LOG(ERROR) << "getting mac_al_1905_device element has failed";
+        sMacAddr iface_mac;
+        if (!get_iface_mac(iface_name, iface_mac)) {
+            return false;
+        }
+
+        auto tlv1905NeighborDevice = cmdu_tx.addClass<ieee1905_1::tlv1905NeighborDevice>();
+        if (!tlv1905NeighborDevice) {
+            LOG(ERROR) << "addClass ieee1905_1::tlv1905NeighborDevice failed, mid=" << std::hex
+                       << mid;
+            return false;
+        }
+
+        tlv1905NeighborDevice->mac_local_iface() = iface_mac;
+
+        if (!tlv1905NeighborDevice->alloc_mac_al_1905_device(neighbor_devices.size())) {
+            LOG(ERROR) << "alloc_mac_al_1905_device() has failed";
             return true;
         }
-        auto &mac_al_1905_device = std::get<1>(mac_al_1905_device_tuple);
-        mac_al_1905_device.mac   = neighbor_al_mac;
-        mac_al_1905_device.bridges_exist =
-            ieee1905_1::tlv1905NeighborDevice::eBridgesExist::AT_LEAST_ONE_BRIDGES_EXIST;
-        index++;
+
+        size_t index = 0;
+        for (const auto &neighbor_device : neighbor_devices) {
+            auto mac_al_1905_device_tuple = tlv1905NeighborDevice->mac_al_1905_device(index);
+            if (!std::get<0>(mac_al_1905_device_tuple)) {
+                LOG(ERROR) << "getting mac_al_1905_device element has failed";
+                return true;
+            }
+
+            auto &mac_al_1905_device = std::get<1>(mac_al_1905_device_tuple);
+            mac_al_1905_device.mac   = neighbor_device.al_mac;
+            mac_al_1905_device.bridges_exist =
+                ieee1905_1::tlv1905NeighborDevice::eBridgesExist::AT_LEAST_ONE_BRIDGES_EXIST;
+            index++;
+        }
     }
 
     auto tlvSupportedService = cmdu_tx.addClass<wfa_map::tlvSupportedService>();
