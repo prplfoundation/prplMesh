@@ -4,8 +4,10 @@
 # write access to it, and openwrt needs to at least write '.source_dir':
 cp -r /home/openwrt/prplMesh_source /home/openwrt/prplMesh
 # We want to make sure that we do not keep anything built from the host:
-rm -rf /home/openwrt/prplMesh/build
+cd /home/openwrt/prplMesh && \
+    rm -rf build ipkg-* .built* .configured* .pkgdir .prepared .quilt_checked .source_dir
 
+cd /home/openwrt/openwrt
 make package/prplmesh/prepare USE_SOURCE_DIR="/home/openwrt/prplMesh" V=s
 make package/prplmesh/compile V=sc -j"$(nproc)"
 mkdir -p artifacts
