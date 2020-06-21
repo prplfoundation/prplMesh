@@ -172,7 +172,7 @@ main() {
 VERBOSE=false
 IMAGE_ONLY=false
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
-OPENWRT_VERSION='add783ec25be542fdf3ba414a6b08345b5d76a5e'
+OPENWRT_VERSION='345ca6855ac59690f74ab1258d12b2c68bb034e3'
 # TODO use hash instead of branch
 PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^590ba854951ec3a24594c3e030980edb9cbe18ed'
 PRPLMESH_VARIANT="-nl80211"
