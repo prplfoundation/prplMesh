@@ -1,4 +1,6 @@
 agent/src/beerocks/fronthaul_manager/monitor/monitor_rssi.cpp: style: Local variable 'sta_vap_id' shadows outer variable [shadowVariable]            auto sta_vap_id = sta_node->get_vap_id();
+agent/src/beerocks/fronthaul_manager/monitor/monitor_rssi.cpp: style: Parameter 'sta_mac' can be declared with const [constParameter]void monitor_rssi::monitor_idle_station(std::string &sta_mac, monitor_sta_node *sta_node)
+agent/src/beerocks/fronthaul_manager/monitor/monitor_rssi.cpp: style: Parameter 'sta_mac' can be declared with const [constParameter]void monitor_rssi::send_rssi_measurement_response(std::string &sta_mac, monitor_sta_node *sta_node)
 agent/src/beerocks/fronthaul_manager/monitor/monitor_thread.cpp: style: Local variable 'time_span' shadows outer variable [shadowVariable]        auto time_span =
 agent/src/beerocks/fronthaul_manager/monitor/monitor_thread.cpp: style: The if condition is the same as the previous if condition [duplicateCondition]        if (poll_last) {
 agent/src/beerocks/fronthaul_manager/monitor/monitor_thread.cpp: style: Variable 'id' is assigned a value that is never used. [unreadVariable]        int id        = 0;
@@ -19,7 +21,6 @@ agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: 
 agent/src/beerocks/slave/son_slave_thread.cpp: style: Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm]        if (channel_to_check == ch.channel) {
 agent/src/beerocks/slave/son_slave_thread.cpp: style: Local variable 'notification' shadows outer variable [shadowVariable]        auto notification = message_com::create_vs_message<
 common/beerocks/bcl/include/bcl/beerocks_logging.h: style: Class 'logging' has a constructor with 1 argument that is not explicit. [noExplicitConstructor]    logging(const std::string &module_name, const std::string &config_path = std::string(),
-common/beerocks/bcl/include/bcl/network/socket.h: style: Statements following return, break, continue, goto or throw will never be executed. [unreachableCode]        m_error.clear();
 common/beerocks/bcl/source/beerocks_logging.cpp: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]        str += elt + ", ";
 common/beerocks/bcl/source/beerocks_logging.cpp: style: The class 'NetLogger' does not have a constructor although it has private member variables. [noConstructor]class NetLogger : public el::LogDispatchCallback {
 common/beerocks/bcl/source/beerocks_ucc_listener.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]                          validate_binary_notation(value) || validate_decimal_notation(value))) {
@@ -106,6 +107,7 @@ controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is ass
 controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]    event->data = GET_MESSAGE_POINTER(BML_EVENT_CLIENT_DISALLOW_REQ, response->buffer(0), size);
 controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is assigned a value that is never used. [unreadVariable]    event->data = GET_MESSAGE_POINTER(BML_EVENT_CSA_NOTIFICATION, response->buffer(0), size);
 controller/src/beerocks/master/son_actions.cpp: performance: Function parameter 'bssid' should be passed by const reference. [passedByValue]                                                     std::string sta_mac, std::string bssid)
+controller/src/beerocks/master/son_actions.cpp: performance: Function parameter 'hostap_mac' should be passed by const reference. [passedByValue]void son_actions::handle_dead_node(std::string mac, std::string hostap_mac, db &database,
 controller/src/beerocks/master/son_actions.cpp: performance: Function parameter 'sta_mac' should be passed by const reference. [passedByValue]                                                     std::string sta_mac, std::string bssid)
 controller/src/beerocks/master/son_actions.cpp: style: Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm]            if (operating_class == operating_class_info.operating_class()) {
 controller/src/beerocks/master/son_actions.cpp: style: Local variable 'prev_task_id' shadows outer variable [shadowVariable]        int prev_task_id = database.get_association_handling_task_id(mac);
