@@ -15,11 +15,6 @@ RUN apt-get update \
     build-essential libncurses5 libncurses5-dev python python3 \
     unzip git ca-certificates gawk wget file bash \
     python-yaml python3-yaml rsync less vim gnupg software-properties-common \
-    #   yq is available in a separate ppa (needs gnupg and software-properties-common):
-    && if [ -n "$HTTP_PROXY" ]; then KEYSERVER_OPTIONS="--keyserver-options http-proxy=$HTTP_PROXY"; fi \
-    && apt-key adv --keyserver keyserver.ubuntu.com $KEYSERVER_OPTIONS --recv-keys CC86BB64 \
-    && add-apt-repository ppa:rmescandon/yq \
-    && apt-get -y install --no-install-recommends yq \
     && rm -rf /var/lib/apt/lists/*
 # Building tlvfs currently uses the docker
 # container's python (not the one from OpenWrt)
@@ -82,7 +77,6 @@ RUN printf '\033[1;35m%s Cloning prplWrt\n\033[0m' "$(date --iso-8601=seconds --
 
 WORKDIR /home/openwrt/openwrt
 
-COPY --chown=openwrt:openwrt profiles_feeds/ /home/openwrt/openwrt/profiles_feeds
 COPY --chown=openwrt:openwrt scripts/build-openwrt.sh /home/openwrt/openwrt/scripts/build-openwrt.sh
 
 ####
