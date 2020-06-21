@@ -12,9 +12,6 @@ mkdir -p files/etc
 printf '%s=%s\n' "OPENWRT_REPOSITORY" "$OPENWRT_REPOSITORY" >> files/etc/prplwrt-version
 printf '%s=%s\n' "OPENWRT_VERSION" "$OPENWRT_VERSION" >> files/etc/prplwrt-version
 if [ "$TARGET_PROFILE" = DEVICE_NETGEAR_RAX40 ] ; then
-    # Add prplmesh to the list of packages of the profile:
-    sed -i 's/packages:/packages:\n  - prplmesh-dwpal/g' profiles/intel_mips.yml
-    yq write --inplace profiles/intel_mips.yml feeds -f profiles_feeds/netgear-rax40.yml
     ./scripts/gen_config.py intel_mips
     # Installing intel feed doesn't correctly regenerate kernel .package-info
     # force regeneration by removing it
@@ -24,7 +21,7 @@ if [ "$TARGET_PROFILE" = DEVICE_NETGEAR_RAX40 ] ; then
     #       make sure intel's bridge-utils is the only one that gets installed:
     rm -rf ./package/feeds/packages/bridge-utils
     scripts/feeds install -p feed_bridge_utils bridge-utils
-    cat profiles_feeds/netgear-rax40.yml >> files/etc/prplwrt-version
+    cat profiles/intel_mips.yml >> files/etc/prplwrt-version
 else
     cp feeds.conf.default feeds.conf
     echo "src-git prpl $PRPL_FEED" >> feeds.conf
