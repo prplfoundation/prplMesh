@@ -288,7 +288,7 @@ bool sta_wlan_hal_dwpal::disconnect()
     return true;
 }
 
-bool sta_wlan_hal_dwpal::roam(const std::string &bssid, uint8_t channel)
+bool sta_wlan_hal_dwpal::roam(const sMacAddr &bssid, uint8_t channel)
 {
     if (m_active_network_id == -1) {
         LOG(ERROR) << "Incorrect active network " << m_active_network_id;
@@ -300,7 +300,9 @@ bool sta_wlan_hal_dwpal::roam(const std::string &bssid, uint8_t channel)
         return false;
     }
 
-    const std::string cmd = "ROAM " + bssid;
+    auto bssid_str = tlvf::mac_to_string(bssid);
+
+    const std::string cmd = "ROAM " + bssid_str;
     if (!dwpal_send_cmd(cmd)) {
         LOG(ERROR) << get_iface_name() << " ROAM failed!";
         return false;
@@ -313,7 +315,7 @@ bool sta_wlan_hal_dwpal::roam(const std::string &bssid, uint8_t channel)
     }
 
     // Update the active channel and bssid
-    m_active_bssid.assign(bssid);
+    m_active_bssid.assign(bssid_str);
     m_active_channel = channel;
 
     return false;

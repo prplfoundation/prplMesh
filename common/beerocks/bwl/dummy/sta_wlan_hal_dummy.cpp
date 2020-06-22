@@ -43,7 +43,7 @@ bool sta_wlan_hal_dummy::connect(const std::string &ssid, const std::string &pas
 
 bool sta_wlan_hal_dummy::disconnect() { return true; }
 
-bool sta_wlan_hal_dummy::roam(const std::string &bssid, uint8_t channel) { return true; }
+bool sta_wlan_hal_dummy::roam(const sMacAddr &bssid, uint8_t channel) { return true; }
 
 bool sta_wlan_hal_dummy::get_4addr_mode() { return true; }
 
