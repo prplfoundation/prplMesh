@@ -986,7 +986,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
         * The high CPU load is due to a call to linux_iface_is_up_and_running() performed every
         * second to check if the wired interface changed its state. The implementation of the above
         * polls the interface flags using ioctl() which is very costly (~120 milliseconds).
-        * 
+        *
         * An event-driven solution will be implemented as part of the task:
         * [TASK] Dynamic switching between wired and wireless
         * https://github.com/prplfoundation/prplMesh/issues/866
@@ -1966,7 +1966,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
         /*
         * NOTE: Why moving to RESTART state? It causing BACKHAUL DISCONNECTED to the son slaves,
         * which in the past (when we had TCP socket to the controller instead of the bus)
-        * disconnected the socket, but now when we have bus it is not happening anyway. 
+        * disconnected the socket, but now when we have bus it is not happening anyway.
         * Another thing it is causing is to re-scan the for networks. Is it really necessary?
         * Can we just move immediately to WIRELESS_ASSOCIATE_4ADDR, and then when successfully
         * connected, notify the agent about the ne bssid?
