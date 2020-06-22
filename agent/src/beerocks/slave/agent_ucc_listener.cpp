@@ -44,7 +44,7 @@ bool agent_ucc_listener::init()
 
 /**
  * @brief Returns string filled with reply to "DEVICE_GET_INFO" command.
- * 
+ *
  * @return const std::string Device info in UCC reply format.
  */
 std::string agent_ucc_listener::fill_version_reply_string()
@@ -55,7 +55,7 @@ std::string agent_ucc_listener::fill_version_reply_string()
 
 /**
  * @brief Clear configuration on Agent, and initiate onboarding sequence.
- * 
+ *
  * @return None.
  */
 void agent_ucc_listener::clear_configuration()
@@ -80,7 +80,7 @@ void agent_ucc_listener::clear_configuration()
 
 /**
  * @brief Update list of VAPs for ruid.
- * 
+ *
  * @return None.
  */
 
@@ -146,7 +146,7 @@ bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, st
 
 /**
  * @brief Send CMDU to destined Agent.
- * 
+ *
  * @param[in] dest_mac Controllers mac address
  * @param[in] cmdu_tx CMDU object
  * @return true if successful, false if not.
@@ -194,7 +194,7 @@ bool agent_ucc_listener::handle_start_wps_registration(const std::string &band,
 
 /**
  * @brief Handle DEV_SET_CONFIG command. Parse the command and save the parameters on the agent.
- * 
+ *
  * @param[in] params Command parameters.
  * @param[out] err_string Contains an error description if the function fails.
  * @return true if successful, false if not.
@@ -294,8 +294,8 @@ void agent_ucc_listener::set_onboarding_status(bool success)
 
 /**
  * @brief Get the selected backhaul which has been received on "DEV_SET_CONFIG" command from UCC.
- * 
- * @return std::string "eth" or RUID of selected radio or empty string if "DEV_SET_CONFIG" has not 
+ *
+ * @return std::string "eth" or RUID of selected radio or empty string if "DEV_SET_CONFIG" has not
  * been received.
  */
 std::string agent_ucc_listener::get_selected_backhaul() { return m_selected_backhaul; }
