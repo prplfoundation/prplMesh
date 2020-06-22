@@ -31,9 +31,7 @@ public:
 
     struct sScanEvent {
         sMacAddr radio_mac;
-        union {
-            beerocks_message::sChannelScanResults scan_results;
-        } udata;
+        beerocks_message::sChannelScanResults scan_results;
     };
 
 #define FOREACH_DCS_EVENT(EVENT)                                                                   \

@@ -332,13 +332,12 @@ void dynamic_channel_selection_task::handle_event(int event_type, void *obj)
             event_handled                = true;
             TASK_LOG(DEBUG) << "SCAN_RESULTS_DUMP handled on: "
                             << scan_results_dump_event->radio_mac;
-            auto channel = scan_results_dump_event->udata.scan_results.channel;
+            auto channel = scan_results_dump_event->scan_results.channel;
 
             if (!database.is_channel_in_pool(m_radio_mac, channel, m_single_scan)) {
                 LOG(DEBUG) << "channel is not in channel pool - ignoring results";
             } else if (!database.add_channel_scan_results(
-                           m_radio_mac, scan_results_dump_event->udata.scan_results,
-                           m_single_scan)) {
+                           m_radio_mac, scan_results_dump_event->scan_results, m_single_scan)) {
                 TASK_LOG(ERROR) << "failed to save scan results";
                 m_last_scan_error_code = beerocks::eChannelScanStatusCode::INTERNAL_FAILURE;
                 fsm_move_state(eState::ABORT_SCAN);

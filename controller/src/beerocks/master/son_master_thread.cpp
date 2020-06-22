@@ -553,10 +553,10 @@ void master_thread::autoconfig_wsc_calculate_keys(WSC::m1 &m1, WSC::m2::config &
 
 /**
  * @brief autoconfig global authenticator attribute calculation
- * 
+ *
  * Calculate authentication on the Full M1 || M2* whereas M2* = M2 without the authenticator
  * attribute.
- * 
+ *
  * @param m1 WSC M1 attribute list
  * @param m2 WSC M2 TLV
  * @param authkey authentication key
@@ -724,7 +724,7 @@ bool master_thread::autoconfig_wsc_add_m2(WSC::m1 &m1,
 /**
  * @brief Parse AP-Autoconfiguration WSC which should include one AP Radio Basic Capabilities
  *        TLV and one WSC TLV containing M1. If this is Intel agent, it will also have vendor specific tlv.
- * 
+ *
  * @param sd socket descriptor
  * @param cmdu_rx received CMDU which contains M1
  * @return true on success
@@ -2268,7 +2268,7 @@ bool master_thread::handle_intel_slave_join(
 /**
  * @brief Parse the radio basic capabilities TLV and store the operating class
  * in the database as supported channels.
- * 
+ *
  * @param radio_mac radio mac address (RUID in non-Intel agent case)
  * @param radio_caps radio basic capabilities TLV received from the remote agent
  * @return true on success
@@ -3690,8 +3690,8 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             new_event.radio_mac = radio_mac;
 
             if (notification->is_dump() == 1) {
-                new_event_type = dynamic_channel_selection_task::eEvent::SCAN_RESULTS_DUMP;
-                new_event.udata.scan_results = notification->scan_results();
+                new_event_type         = dynamic_channel_selection_task::eEvent::SCAN_RESULTS_DUMP;
+                new_event.scan_results = notification->scan_results();
             } else {
                 new_event_type = dynamic_channel_selection_task::eEvent::SCAN_RESULTS_READY;
             }
