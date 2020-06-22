@@ -19,16 +19,6 @@ namespace beerocks {
 
 static const auto DEV_SET_ETH = std::string("eth");
 
-enum class eOnboardingState {
-    NOT_IN_PROGRESS,
-    WAIT_FOR_RESET,
-    RESET_TO_DEFAULT,
-    WAIT_FOR_CONFIG,
-    IN_PROGRESS,
-    SUCCESS,
-    FAIL
-};
-
 // Forward decleration for backhaul_manager context saving
 class backhaul_manager;
 
@@ -44,12 +34,17 @@ public:
     void lock() override { mutex.lock(); }
     void unlock() override { mutex.unlock(); }
 
-    eOnboardingState get_and_update_onboarding_state();
-    void set_onboarding_status(bool success);
+    bool is_in_reset();
     std::string get_selected_backhaul();
     void update_vaps_list(std::string ruid, beerocks_message::sVapsList &vaps);
 
 private:
+    enum class eOnboardingState {
+        WAIT_FOR_RESET,
+        RESET_TO_DEFAULT,
+        CONFIGURED,
+    };
+
     std::string fill_version_reply_string() override;
     void clear_configuration() override;
     bool send_cmdu_to_destination(ieee1905_1::CmduMessageTx &cmdu_tx,
@@ -67,7 +62,7 @@ private:
     const std::string &m_bridge_iface;
     std::string m_bridge_mac;
 
-    eOnboardingState m_onboarding_state = eOnboardingState::NOT_IN_PROGRESS;
+    eOnboardingState m_onboarding_state = eOnboardingState::CONFIGURED;
     std::string m_selected_backhaul; // "ETH" or "<RUID of the selected radio>"
     std::unordered_map<std::string, beerocks_message::sVapsList> vaps_map;
 
