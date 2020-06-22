@@ -869,3 +869,10 @@ std::list<uint8_t> wireless_utils::string_to_wsc_oper_class(const std::string &o
         return {};
     }
 }
+
+bool wireless_utils::is_channel_in_operating_class(uint8_t operating_class, uint8_t channel)
+{
+    auto channel_set = operating_class_to_channel_set(operating_class);
+
+    return (channel_set.find(channel) != channel_set.end());
+}

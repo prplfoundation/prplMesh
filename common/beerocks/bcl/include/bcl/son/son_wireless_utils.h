@@ -171,6 +171,15 @@ public:
     static std::list<sChannelPreference>
     get_channel_preferences(const beerocks::message::sWifiChannel supported_channels[]);
 
+    /**
+    * @brief Match channel number in the given operating class.
+    *
+    * @param operating_class operating class
+    * @param channel channel number
+    * @return True if channel matches to operating class
+    */
+    static bool is_channel_in_operating_class(uint8_t operating_class, uint8_t channel);
+
 private:
     enum eAntennaFactor {
         ANT_FACTOR_1X1 = 0,
