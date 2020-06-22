@@ -291,16 +291,6 @@ bool backhaul_manager::work()
 {
     bool skip_select = false;
 
-    // Calling get_and_update_onboarding_state returns RESET_TO_DEFAULT only once
-    if (m_agent_ucc_listener && m_agent_ucc_listener->get_and_update_onboarding_state() ==
-                                    eOnboardingState::RESET_TO_DEFAULT) {
-        auto active_hal = get_wireless_hal();
-        if (active_hal) {
-            active_hal->disconnect();
-        }
-        FSM_MOVE_STATE(RESTART);
-    }
-
     if (!backhaul_fsm_main(skip_select))
         return false;
 
@@ -763,6 +753,20 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
     // Process internal FSMs before the main one, to prevent
     // falling into the "default" case...
 
+    // UCC FSM. If UCC is in RESET, we have to stay in (or move to) ENABLED state.
+    if (m_agent_ucc_listener && m_agent_ucc_listener->is_in_reset()) {
+        if (m_eFSMState == EState::ENABLED) {
+            // Stay in ENABLE state until onboarding_state will change
+            return true;
+        } else if (m_eFSMState > EState::ENABLED) {
+            auto active_hal = get_wireless_hal();
+            if (active_hal) {
+                active_hal->disconnect();
+            }
+            FSM_MOVE_STATE(RESTART);
+        }
+    }
+
     // Wireless FSM
     if (m_eFSMState > EState::_WIRELESS_START_ && m_eFSMState < EState::_WIRELESS_END_) {
         return backhaul_fsm_wireless(skip_select);
@@ -793,19 +797,12 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
     // Received Backhaul Enable command
     case EState::ENABLED: {
 
-        // If reached here without getting DEV_REST_DEFAULT from UCC, 'selected_backhaul' will stay
-        // empty, and the state machine will not be affected.
         std::string selected_backhaul;
-
         if (m_agent_ucc_listener) {
-            auto onboarding_state = m_agent_ucc_listener->get_and_update_onboarding_state();
-            if (onboarding_state == eOnboardingState::WAIT_FOR_CONFIG) {
-                // Stay in ENABLE state until onboarding_state will change
-                break;
-            } else if (onboarding_state == eOnboardingState::IN_PROGRESS) {
-                selected_backhaul = m_agent_ucc_listener->get_selected_backhaul();
-            }
+            selected_backhaul = m_agent_ucc_listener->get_selected_backhaul();
         }
+        // If reached here without getting DEV_RESET_DEFAULT from UCC, 'selected_backhaul' will stay
+        // empty, and the state machine will not be affected.
 
         LOG(TRACE) << "backhaul manager state=ENABLED";
 
@@ -1051,14 +1048,6 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
     case EState::RESTART: {
 
         LOG(DEBUG) << "Restarting ...";
-
-        if (m_agent_ucc_listener) {
-            auto onboarding_state = m_agent_ucc_listener->get_and_update_onboarding_state();
-            if (onboarding_state == eOnboardingState::WAIT_FOR_CONFIG ||
-                onboarding_state == eOnboardingState::IN_PROGRESS) {
-                m_agent_ucc_listener->set_onboarding_status(false);
-            }
-        }
 
         for (auto soc : slaves_sockets) {
             std::string iface = soc->sta_iface;
@@ -2062,9 +2051,6 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
     }
     case beerocks_message::ACTION_BACKHAUL_ONBOARDING_FINISHED_NOTIFICATION: {
         LOG(DEBUG) << "ACTION_BACKHAUL_ONBOARDING_FINISHED_NOTIFICATION";
-        if (m_agent_ucc_listener) {
-            m_agent_ucc_listener->set_onboarding_status(true);
-        }
 
         break;
     }
@@ -2144,8 +2130,8 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
 
         if (!cmdu_tx.create(
                 mid, ieee1905_1::eMessageType::ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE)) {
-            LOG(ERROR)
-                << "cmdu creation of type ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE has failed";
+            LOG(ERROR) << "cmdu creation of type ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE "
+                          "has failed";
             return false;
         }
 
