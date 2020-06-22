@@ -2049,11 +2049,6 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
         }
         break;
     }
-    case beerocks_message::ACTION_BACKHAUL_ONBOARDING_FINISHED_NOTIFICATION: {
-        LOG(DEBUG) << "ACTION_BACKHAUL_ONBOARDING_FINISHED_NOTIFICATION";
-
-        break;
-    }
     case beerocks_message::ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION: {
         LOG(DEBUG) << "ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION received from iface "
                    << soc->hostap_iface;
