@@ -170,6 +170,7 @@ public:
     static uint8_t get_operating_class_by_channel(const beerocks::message::sWifiChannel &channel);
     static std::list<sChannelPreference>
     get_channel_preferences(const beerocks::message::sWifiChannel supported_channels[]);
+    static bool channel_validate(const uint8_t &channel);
 
 private:
     enum eAntennaFactor {

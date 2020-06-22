@@ -869,3 +869,15 @@ std::list<uint8_t> wireless_utils::string_to_wsc_oper_class(const std::string &o
         return {};
     }
 }
+
+bool wireless_utils::channel_validate(const uint8_t &channel)
+{
+    for (auto oper_class : operating_classes_list) {
+        auto ch = oper_class.second.channels.find(channel);
+
+        if (ch != oper_class.second.channels.end()) {
+            return true;
+        }
+    }
+    return false;
+}
