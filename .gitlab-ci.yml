@@ -300,6 +300,7 @@ run-certification-tests:
           echo "Deploying to $DEVICE_UNDER_TEST"
           tools/deploy_ipk.sh --certification-mode $DEVICE_UNDER_TEST build/$DEVICE_UNDER_TEST/prplmesh.ipk
       fi
+    - ci/git-clean-reset.sh /easymesh_cert "$(<"ci/easymesh_cert_version")"
     - sudo /easymesh_cert/run_test_file.py --upload-results  --verbose --log-folder logs --device-under-test $DEVICE_UNDER_TEST $TESTS_TO_RUN
   artifacts:
     paths:
