@@ -42,7 +42,7 @@ bool sta_wlan_hal_nl80211::connect(const std::string &ssid, const std::string &p
 
 bool sta_wlan_hal_nl80211::disconnect() { return true; }
 
-bool sta_wlan_hal_nl80211::roam(const std::string &bssid, uint8_t channel) { return true; }
+bool sta_wlan_hal_nl80211::roam(const sMacAddr &bssid, uint8_t channel) { return true; }
 
 bool sta_wlan_hal_nl80211::get_4addr_mode() { return true; }
 

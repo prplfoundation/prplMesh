@@ -43,7 +43,7 @@ public:
 
     virtual bool disconnect() override;
 
-    virtual bool roam(const std::string &bssid, uint8_t channel) override;
+    virtual bool roam(const sMacAddr &bssid, uint8_t channel) override;
 
     virtual bool get_4addr_mode() override;
     virtual bool set_4addr_mode(bool enable) override;

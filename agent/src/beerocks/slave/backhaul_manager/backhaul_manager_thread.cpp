@@ -1537,7 +1537,7 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
         if (roam_flag) {
             selected_bssid         = roam_selected_bssid;
             selected_bssid_channel = roam_selected_bssid_channel;
-            if (!active_hal->roam(selected_bssid, selected_bssid_channel)) {
+            if (!active_hal->roam(tlvf::mac_from_string(selected_bssid), selected_bssid_channel)) {
                 platform_notify_error(bpl::eErrorCode::BH_ROAMING,
                                       "BSSID='" + selected_bssid + "'");
                 stop_on_failure_attempts--;
