@@ -5,7 +5,6 @@ pull_request_rules:
       - "#changes-requested-reviews-by=0" # Changes requested blocks the merge
       - "label=ready for merge" # Must have ready for merge label
       - "label!=don't merge" # Don't merge label blocks the merge
-      - "#status-failure=0"
       # Just to be sure that we don't consider it as passed when the status checks haven't even
       # started yet.
       - "#status-success>=3"
