@@ -396,7 +396,7 @@ typedef struct sChannelScanResults {
     char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH] = {'\0'};
 
     //The BSSID used for the neighboring WiFi SSID.
-    sMacAddr bssid = {.oct = {0}};
+    sMacAddr bssid;
 
     //The mode the neighboring WiFi radio is operating in. Enumerate
     eChannelScanResultMode mode = eChannelScanResultMode::eMode_NA;

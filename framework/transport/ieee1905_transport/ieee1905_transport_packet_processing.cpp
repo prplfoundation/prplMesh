@@ -49,10 +49,10 @@ void Ieee1905Transport::update_neighbours(const Packet &packet)
     // Add new neighbours
     auto neighbor_iter = neighbors_map_.find(packet.src);
     if (neighbor_iter == neighbors_map_.end()) {
-        Ieee1905Transport::ieee1905_neighbor neigh = {0};
-        neigh.al_mac                               = packet.src;
-        neigh.if_index                             = packet.src_if_index;
-        neigh.last_seen                            = std::chrono::steady_clock::now();
+        Ieee1905Transport::ieee1905_neighbor neigh;
+        neigh.al_mac    = packet.src;
+        neigh.if_index  = packet.src_if_index;
+        neigh.last_seen = std::chrono::steady_clock::now();
         MAPF_INFO("Adding new neighbour with almac " << packet.src);
         neighbors_map_[packet.src] = neigh;
     } else {
@@ -581,13 +581,13 @@ bool Ieee1905Transport::forward_packet_single(Packet &packet)
 
 /**
  * @brief forward a 1905.1 packet.
- * 
+ *
  * Basically a wrapper to forward_packet_single, which also takes into account the reliable
  * multicast procedure - according to section 15.1 in the Multi-AP specification, a reliable multicast
  * transmission includes sending the packet with the relay bit set to a multicast address once,
  * and once for each discovered Multi-AP agent in the network as unicast
  * with the same MID and the relay bit unset.
- * 
+ *
  * @param packet packet to forward
  * @return true on success
  * @return false on failure (one or more packets failed in transmission)

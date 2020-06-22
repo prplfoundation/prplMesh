@@ -144,11 +144,11 @@ private:
         unsigned int dst_if_index = 0;
         uint8_t src_if_type       = CmduRxMessage::IF_TYPE_NONE;
         unsigned int src_if_index = 0;
-        sMacAddr dst              = {.oct = {0}}; // destination mac address
-        sMacAddr src              = {.oct = {0}}; // source mac address
-        uint16_t ether_type       = 0x0000;
-        struct iovec header       = {.iov_base = NULL, .iov_len = 0};
-        struct iovec payload      = {.iov_base = NULL, .iov_len = 0};
+        sMacAddr dst; // destination mac address
+        sMacAddr src; // source mac address
+        uint16_t ether_type  = 0x0000;
+        struct iovec header  = {.iov_base = NULL, .iov_len = 0};
+        struct iovec payload = {.iov_base = NULL, .iov_len = 0};
 
         virtual std::ostream &print(std::ostream &os) const;
     };

@@ -17,7 +17,7 @@
 #include <stdint.h>
 #include <tlvf/swap.h>
 typedef struct sMacAddr {
-    uint8_t oct[6];
+    uint8_t oct[6] = {0};
     void struct_swap(){
     }
     void struct_init(){
