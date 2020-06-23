@@ -34,17 +34,28 @@ public:
     void lock() override { mutex.lock(); }
     void unlock() override { mutex.unlock(); }
 
-    bool is_in_reset();
+    /** @brief Check if reset CAPI command was given.
+     *
+     * When the DEV_RESET_DEFAULT CAPI command is given, the agent must be held in reset until the
+     * DEV_SET_CONFIG command is given. This function returns true when this is the case. It will
+     * return true as soon as the DEV_SET_CONFIG command is given. At that point,
+     * get_selected_backhaul() will return a valid result.
+     */
+    bool is_in_reset() const { return m_in_reset; }
+
+    /** @brief Signal that reset is completed.
+     *
+     * The DEV_RESET_DEFAULT CAPI command should only return when reset is completed, i.e. when
+     * the device is ready to accept commands. In particular, when later on a DEV_SET_CONFIG is
+     * done, that command should be able to configure the backhaul right away. Therefore, the
+     * DEV_RESET_DEFAULT command should only return when the backhaul is connected to the slaves
+     * again. This function allows the backhaul to signal that it has reached that state.
+     */
+    void reset_completed() { m_reset_completed = true; }
     std::string get_selected_backhaul();
     void update_vaps_list(std::string ruid, beerocks_message::sVapsList &vaps);
 
 private:
-    enum class eOnboardingState {
-        WAIT_FOR_RESET,
-        RESET_TO_DEFAULT,
-        CONFIGURED,
-    };
-
     std::string fill_version_reply_string() override;
     void clear_configuration() override;
     bool send_cmdu_to_destination(ieee1905_1::CmduMessageTx &cmdu_tx,
@@ -62,7 +73,8 @@ private:
     const std::string &m_bridge_iface;
     std::string m_bridge_mac;
 
-    eOnboardingState m_onboarding_state = eOnboardingState::CONFIGURED;
+    bool m_in_reset        = false;
+    bool m_reset_completed = false;
     std::string m_selected_backhaul; // "ETH" or "<RUID of the selected radio>"
     std::unordered_map<std::string, beerocks_message::sVapsList> vaps_map;
 
