@@ -1758,6 +1758,19 @@ unsigned long TypedConfigurations::getULong(std::string confVal) {
   return atol(confVal.c_str());
 }
 
+std::string TypedConfigurations::getDateTimeForFilename(const std::string &fmt) {
+  m_dateTimeMutex.lock();
+
+  if (m_dateTimeNow.empty()) {
+    base::SubsecondPrecision ssPrec(3);
+    m_dateTimeNow = base::utils::DateTime::getDateTime(fmt.c_str(), &ssPrec);
+  }
+
+  m_dateTimeMutex.unlock();
+
+  return m_dateTimeNow;
+}
+
 std::string TypedConfigurations::resolveFilename(const std::string& filename) {
   std::string resultingFilename = filename;
   std::size_t dateIndex = std::string::npos;
@@ -1788,8 +1801,7 @@ std::string TypedConfigurations::resolveFilename(const std::string& filename) {
       } else {
         fmt = std::string(base::consts::kDefaultDateTimeFormatInFilename);
       }
-      base::SubsecondPrecision ssPrec(3);
-      std::string now = base::utils::DateTime::getDateTime(fmt.c_str(), &ssPrec);
+      std::string now = getDateTimeForFilename(fmt);
       base::utils::Str::replaceAll(now, '/', '-'); // Replace path element since we are dealing with filename
       base::utils::Str::replaceAll(resultingFilename, dateTimeFormatSpecifierStr, now);
     }
@@ -1847,6 +1859,7 @@ bool TypedConfigurations::unsafeValidateFileRolling(Level level, const PreRollOu
     ELPP_INTERNAL_INFO(1, "Truncating log file [" << fname << "] as a result of configurations for level ["
                        << LevelHelper::convertToString(level) << "]");
     fs->close();
+    m_dateTimeNow.clear();
     preRollOutCallback(fname.c_str(), currFileSize);
     fs->open(fname, std::fstream::out | std::fstream::trunc);
     return true;
