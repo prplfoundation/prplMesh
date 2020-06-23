@@ -60,12 +60,13 @@ std::string agent_ucc_listener::fill_version_reply_string()
  */
 void agent_ucc_listener::clear_configuration()
 {
-    m_onboarding_state = eOnboardingState::WAIT_FOR_RESET;
+    m_in_reset        = true;
+    m_reset_completed = false;
 
     auto timeout =
         std::chrono::steady_clock::now() + std::chrono::seconds(UCC_REPLY_COMPLETE_TIMEOUT_SEC);
 
-    while (m_onboarding_state != eOnboardingState::RESET_TO_DEFAULT) {
+    while (!m_reset_completed) {
 
         if (std::chrono::steady_clock::now() > timeout) {
             LOG(ERROR) << "Reached timeout!";
@@ -231,26 +232,8 @@ bool agent_ucc_listener::handle_dev_set_config(std::unordered_map<std::string, s
         m_selected_backhaul = tlvf::mac_to_string(backhaul_radio_uid);
     }
 
-    m_onboarding_state = eOnboardingState::CONFIGURED;
-    return true;
-}
-
-/** @brief Check if reset CAPI command was given.
- *
- * When the DEV_RESET_DEFAULT CAPI command is given, the agent must be held in reset until the
- * DEV_SET_CONFIG command is given. This function returns true when this is the case.
- *
- * In addition, it flags the UCC thread that the reset was "seen" by the backhaul manager thread,
- * so the DEV_RESET_DEFAULT command can return.
- */
-bool agent_ucc_listener::is_in_reset()
-{
-    if (m_onboarding_state == eOnboardingState::CONFIGURED) {
-        return false;
-    }
-    if (m_onboarding_state == eOnboardingState::WAIT_FOR_RESET) {
-        m_onboarding_state = eOnboardingState::RESET_TO_DEFAULT;
-    }
+    // Signal to backhaul that it can continue onboarding.
+    m_in_reset = false;
     return true;
 }
 
