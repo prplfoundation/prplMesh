@@ -4,32 +4,26 @@ services:
         image: registry.gitlab.com/prpl-foundation/prplmesh/prplmesh-runner
         privileged: true    # For the creation of the bridge to work
         environment:
-            - USER=pablo
-            - INSTALL_DIR=/home/pablo/assia/prpl/git/prplMesh/build/install
+            - USER=$USER
+            - INSTALL_DIR=$ROOT_DIR/build/install
         expose:
             - "5000"
             - "8002"
         volumes:
-            - "/home/pablo/assia/prpl/git/prplMesh/build/install:/home/pablo/assia/prpl/git/prplMesh/build/install"
-            - "/home/pablo/assia/prpl/git/prplMesh:/home/pablo/assia/prpl/git/prplMesh"
-            - "/home/pablo/assia/prpl/git/prplMesh/logs/controller:/tmp/pablo/beerocks/logs"
-            - "/lib/modules:/lib/modules"
+            - "$ROOT_DIR:$ROOT_DIR"
         entrypoint: ["/root/entrypoint.sh", "/usr/bin/start-controller-agent"]
 
     agent:
         image: registry.gitlab.com/prpl-foundation/prplmesh/prplmesh-runner
         privileged: true
         environment:
-            - USER=pablo
-            - INSTALL_DIR=/home/pablo/assia/prpl/git/prplMesh/build/install
+            - USER=$USER
+            - INSTALL_DIR=$ROOT_DIR/build/install
         expose:
             - "5000"
             - "8002"
         volumes:
-            - "/home/pablo/assia/prpl/git/prplMesh/build/install:/home/pablo/assia/prpl/git/prplMesh/build/install"
-            - "/home/pablo/assia/prpl/git/prplMesh:/home/pablo/assia/prpl/git/prplMesh"
-            - "/home/pablo/assia/prpl/git/prplMesh/logs/controller:/tmp/pablo/beerocks/logs"
-            - "/lib/modules:/lib/modules"
+          - "$ROOT_DIR:$ROOT_DIR"
         entrypoint: ["/root/entrypoint.sh", "/usr/bin/start-agent"]
 
     boardfarm:
@@ -37,10 +31,7 @@ services:
         ports:
             - "5000:5000"
         volumes:
-            -  "/home/pablo/assia/prpl/git/prplMesh/build/install:/home/pablo/assia/prpl/git/prplMesh/build/install"
-            - "/home/pablo/assia/prpl/git/prplMesh:/home/pablo/assia/prpl/git/prplMesh"
-            - "/home/pablo/assia/prpl/git/prplMesh/logs/controller:/tmp/pablo/beerocks/logs"
-            - "/home/pablo/assia/prpl/git/boardfarm:/home/pablo/assia/prpl/git/boardfarm"
+            - "$ROOT_DIR:$ROOT_DIR"
             - "/var/run/docker:/var/run/docker"
             - "/var/run/docker.sock:/var/run/docker.sock"
         entrypoint: ["tail", "-f", "/dev/null"]
