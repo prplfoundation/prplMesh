@@ -2308,6 +2308,91 @@ void son_management::handle_bml_message(Socket *sd,
         LOG(TRACE) << "ACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST";
         break;
     }
+    case beerocks_message::ACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST";
+
+        auto request =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST failed";
+            break;
+        }
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE>(cmdu_tx);
+        if (!response) {
+            LOG(ERROR) << "Failed building message "
+                          "cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE !";
+            break;
+        }
+
+        std::string client_list = "";
+        // TODO: replace empty string with a list of configured clients read from controller-db
+        if (!response->alloc_client_list(client_list.size())) {
+            LOG(ERROR) << "Failed client_list allocation to size=" << client_list.size();
+            break;
+        }
+        response->set_client_list(client_list);
+
+        message_com::send_cmdu(sd, cmdu_tx);
+        break;
+    }
+    case beerocks_message::ACTION_BML_CLIENT_SET_CLIENT_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_CLIENT_SET_CLIENT_REQUEST";
+
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_BML_CLIENT_SET_CLIENT_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_CLIENT_SET_CLIENT_REQUEST failed";
+            break;
+        }
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_CLIENT_SET_CLIENT_RESPONSE>(cmdu_tx);
+        if (!response) {
+            LOG(ERROR) << "Failed building message "
+                          "cACTION_BML_CLIENT_SET_CLIENT_RESPONSE !";
+            break;
+        }
+
+        //TODO: add client to persistent DB if required and set client parameters
+        response->result() = 0; //Success.
+
+        message_com::send_cmdu(sd, cmdu_tx);
+        break;
+    }
+    case beerocks_message::ACTION_BML_CLIENT_GET_CLIENT_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_CLIENT_GET_CLIENT_REQUEST";
+
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_CLIENT_GET_CLIENT_REQUEST failed";
+            break;
+        }
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_RESPONSE>(cmdu_tx);
+        if (!response) {
+            LOG(ERROR) << "Failed building message "
+                          "cACTION_BML_CLIENT_GET_CLIENT_RESPONSE !";
+            break;
+        }
+
+        //TODO: fill client information from controller DB
+        response->client().sta_mac                 = request->sta_mac();
+        response->client().timestamp_sec           = 0;
+        response->client().stay_on_initial_radio   = PARAMETER_NOT_CONFIGURED;
+        response->client().stay_on_selected_device = PARAMETER_NOT_CONFIGURED;
+        response->client().selected_bands          = eClientSelectedBands::eSelectedBands_Disabled;
+        response->client().single_band             = PARAMETER_NOT_CONFIGURED;
+        response->client().time_life_delay_days    = PARAMETER_NOT_CONFIGURED;
+        response->result()                         = 0; //Success.
+
+        message_com::send_cmdu(sd, cmdu_tx);
+        break;
+    }
     default: {
         LOG(ERROR) << "Unsupported BML action_op:" << int(beerocks_header->action_op());
         break;
