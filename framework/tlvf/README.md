@@ -485,7 +485,7 @@ eMediaType:
    IEEE_802_11G_2_4_GHZ: 0x0101
    IEEE_802_11A_5_GHZ: 0x0102
    MOCA_V1_1: 0x0300
-   UNKNONWN_MEDIA: 0xFFFF
+   UNKNOWN_MEDIA: 0xFFFF
 ```
 
 #### Multi class

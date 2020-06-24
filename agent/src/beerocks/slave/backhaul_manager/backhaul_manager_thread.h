@@ -398,7 +398,7 @@ private:
         sMacAddr iface_mac =
             beerocks::net::network_utils::ZERO_MAC; /**< The MAC address of the interface. */
         ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::
-            UNKNONWN_MEDIA; /**< The underlying network technology of the connecting interface. */
+            UNKNOWN_MEDIA; /**< The underlying network technology of the connecting interface. */
         bool operator<(const sLinkInterface &rhs) const { return iface_name < rhs.iface_name; }
     };
 

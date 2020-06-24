@@ -161,7 +161,7 @@ static const std::vector<std::tuple<eFreqType, eWiFiBandwidth, ieee1905_1::eMedi
  * @brief Gets media type from given frequency band and max bandwidth values.
  *
  * Media type value is obtained by looking up into table_6_12_media_type_802_11 table.
- * Returns UNKNONWN_MEDIA if frequency band and max bandwidth are not found in table.
+ * Returns UNKNOWN_MEDIA if frequency band and max bandwidth are not found in table.
  *
  * @param frequency_band Frequency band
  * @param max_bandwidth Maximum bandwidth
@@ -176,7 +176,7 @@ static ieee1905_1::eMediaType get_802_11_media_type(eFreqType frequency_band,
         }
     }
 
-    return ieee1905_1::eMediaType::UNKNONWN_MEDIA;
+    return ieee1905_1::eMediaType::UNKNOWN_MEDIA;
 }
 
 /**
@@ -2819,7 +2819,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
     std::string local_interface_name = m_sConfig.wire_iface;
     if (!local_interface_name.empty() &&
         network_utils::linux_iface_is_up_and_running(local_interface_name)) {
-        ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
+        ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::UNKNOWN_MEDIA;
         if (!get_media_type(local_interface_name, ieee1905_1::eMediaTypeGroup::IEEE_802_3,
                             media_type)) {
             LOG(ERROR) << "Unable to compute media type for interface " << local_interface_name;
@@ -2908,7 +2908,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         std::string local_interface_name = soc->hostap_iface;
 
         ieee1905_1::eMediaTypeGroup media_type_group = ieee1905_1::eMediaTypeGroup::IEEE_802_11;
-        ieee1905_1::eMediaType media_type            = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
+        ieee1905_1::eMediaType media_type            = ieee1905_1::eMediaType::UNKNOWN_MEDIA;
         if (!get_media_type(local_interface_name, media_type_group, media_type)) {
             LOG(ERROR) << "Unable to compute media type for interface " << local_interface_name;
             return false;
@@ -4138,7 +4138,7 @@ bool backhaul_manager::get_media_type(const std::string &interface_name,
             } else if (SPEED_1000 <= speed) {
                 media_type = ieee1905_1::eMediaType::IEEE_802_3AB_GIGABIT_ETHERNET;
             } else {
-                media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
+                media_type = ieee1905_1::eMediaType::UNKNOWN_MEDIA;
             }
 
             result = true;
@@ -4163,7 +4163,7 @@ bool backhaul_manager::get_media_type(const std::string &interface_name,
         // TODO: Not supported yet
         LOG(ERROR) << "MoCA media is not supported yet";
     } else {
-        media_type = ieee1905_1::eMediaType::UNKNONWN_MEDIA;
+        media_type = ieee1905_1::eMediaType::UNKNOWN_MEDIA;
         result     = true;
     }
 
@@ -4242,7 +4242,7 @@ bool backhaul_manager::get_neighbor_links(
             interface.media_type =
                 beerocks::get_802_11_media_type(slave->freq_type, slave->max_bandwidth);
 
-            if (ieee1905_1::eMediaType::UNKNONWN_MEDIA == interface.media_type) {
+            if (ieee1905_1::eMediaType::UNKNOWN_MEDIA == interface.media_type) {
                 LOG(ERROR) << "Unknown media type for interface " << interface.iface_name;
                 return false;
             }
