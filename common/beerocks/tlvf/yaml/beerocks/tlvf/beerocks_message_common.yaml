@@ -989,3 +989,59 @@ sBssidInfo:
   downlink_estimated_mac_data_rate_mbps: uint32_t
   uplink_estimated_mac_data_rate_mbps: uint32_t
   sta_measured_uplink_rssi_dbm_enc: uint8_t
+
+eClientSelectedBands:
+  _type: enum
+  _enum_storage: uint8_t
+  eSelectedBands_Disabled: 0
+  eSelectedBands_24G: 1
+  eSelectedBands_5G: 2
+  eSelectedBands_6G: 4
+  eSelectedBands_60G: 8
+
+sClientConfig:
+  _type: struct
+  stay_on_initial_radio:
+    _type: int8_t
+    _value: -1
+    _comment: 1 for true, 0 for false, -1 for "not configured".
+  stay_on_selected_device:
+    _type: int8_t
+    _value: -1
+    _comment: 1 for true, 0 for false, -1 for "not configured".
+  selected_bands:
+    _type: int8_t
+    _comment: Bitset of selected bands supported by the client according to eClientSelectedBands
+
+sClient:
+  _type: struct
+  sta_mac:
+    _type: sMacAddr
+    _comment: Client MAC
+  timestamp_sec:
+    _type: uint32_t
+    _value: 0
+    _comment: Time of last client configuration edit (in Seconds)
+  stay_on_initial_radio:
+    _type: int8_t
+    _value: -1
+    _comment: 1 for true, 0 for false, -1 for "not configured".
+  stay_on_selected_device:
+    _type: int8_t
+    _value: -1
+    _comment: 1 for true, 0 for false, -1 for "not configured".
+  selected_bands:
+    _type: int8_t
+    _comment: Bitset of selected bands supported by the client according to eClientSelectedBands
+  single_band:
+    _type: int8_t
+    _value: -1
+    _comment: 1 for true, 0 for false, -1 for "not configured".
+  time_life_delay_days:
+    _type: int32_t
+    _value: -1
+    _comment: |
+      Optional parameter,
+      Determines the period of time after which the client configuration should be cleared,
+      0 - Never age.
+      -1 - Not Configured.
