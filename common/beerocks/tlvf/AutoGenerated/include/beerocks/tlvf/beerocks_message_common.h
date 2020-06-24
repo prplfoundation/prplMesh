@@ -1364,6 +1364,58 @@ typedef struct sBssidInfo {
     }
 } __attribute__((packed)) sBssidInfo;
 
+enum eClientSelectedBands: uint8_t {
+    eSelectedBands_Disabled = 0x0,
+    eSelectedBands_24G = 0x1,
+    eSelectedBands_5G = 0x2,
+    eSelectedBands_6G = 0x4,
+    eSelectedBands_60G = 0x8,
+};
+
+typedef struct sClientConfig {
+    //1 for true, 0 for false, -1 for "not configured".
+    int8_t stay_on_initial_radio;
+    //1 for true, 0 for false, -1 for "not configured".
+    int8_t stay_on_selected_device;
+    //Bitset of selected bands supported by the client according to eClientSelectedBands
+    int8_t selected_bands;
+    void struct_swap(){
+    }
+    void struct_init(){
+        stay_on_initial_radio = -0x1;
+        stay_on_selected_device = -0x1;
+    }
+} __attribute__((packed)) sClientConfig;
+
+typedef struct sClient {
+    //Client MAC
+    sMacAddr sta_mac;
+    //Time of last client update (in Seconds)
+    uint32_t timestamp_sec;
+    //1 for true, 0 for false, -1 for "not configured".
+    int8_t stay_on_initial_radio;
+    //1 for true, 0 for false, -1 for "not configured".
+    int8_t stay_on_selected_device;
+    //Bitset of selected bands supported by the client according to eClientSelectedBands
+    int8_t selected_bands;
+    //1 for true, 0 for false, -1 for "not configured".
+    int8_t single_band;
+    //Optional parameter, Time life delay of the client configuration. 0 - Never age, -1 - Not Configured.
+    int32_t time_life_delay_days;
+    void struct_swap(){
+        sta_mac.struct_swap();
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&timestamp_sec));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&time_life_delay_days));
+    }
+    void struct_init(){
+        timestamp_sec = 0x0;
+        stay_on_initial_radio = -0x1;
+        stay_on_selected_device = -0x1;
+        single_band = -0x1;
+        time_life_delay_days = -0x1;
+    }
+} __attribute__((packed)) sClient;
+
 
 }; // close namespace: beerocks_message
 
