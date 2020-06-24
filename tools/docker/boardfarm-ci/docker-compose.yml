@@ -3,9 +3,11 @@ services:
     controller:
         image: registry.gitlab.com/prpl-foundation/prplmesh/prplmesh-runner
         privileged: true    # For the creation of the bridge to work
+        container_name: controller
         environment:
             - USER=$USER
             - INSTALL_DIR=$ROOT_DIR/build/install
+            - ROOT_DIR=$ROOT_DIR
         expose:
             - "5000"
             - "8002"
@@ -16,9 +18,11 @@ services:
     agent:
         image: registry.gitlab.com/prpl-foundation/prplmesh/prplmesh-runner
         privileged: true
+        container_name: agent
         environment:
             - USER=$USER
             - INSTALL_DIR=$ROOT_DIR/build/install
+            - ROOT_DIR=$ROOT_DIR
         expose:
             - "5000"
             - "8002"
@@ -28,6 +32,10 @@ services:
 
     boardfarm:
         build: .
+        container_name: boardfarm
+        environment:
+            - USER=$USER
+            - ROOT_DIR=$ROOT_DIR
         ports:
             - "5000:5000"
         volumes:
