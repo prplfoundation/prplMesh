@@ -1,18 +1,24 @@
 {
     "prplmesh_docker": {
-        "name": "dockerized_device",
+        "name": "controller",
         "board_type": "prplmesh_docker",
         "role": "controller",
         "conn_cmd": "",
         "devices": [
             {
-                "name": "repeater1",
+                "name": "lan",
                 "type": "prplmesh_docker",
                 "conn_cmd": ""
             },
             {
-                "name": "repeater2",
+                "name": "lan2",
                 "type": "prplmesh_docker",
+                "conn_cmd": ""
+            },
+            {
+                "name": "wifi",
+                "type": "STA_dummy",
+                "mac": "51:a1:10:20:00:01",
                 "conn_cmd": ""
             }
         ]

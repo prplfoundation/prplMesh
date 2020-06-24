@@ -8,8 +8,9 @@
 import time
 
 from .prplmesh_base_test import PrplMeshBaseTest
+# TODO: Remove as soon, as test works for prplWRT device
+from ..devices.prplmesh_prplwrt import PrplMeshPrplWRT
 from capi import tlv
-from environment import Station
 from opts import debug
 
 
@@ -19,16 +20,20 @@ class ClientAssociationLinkMetrics(PrplMeshBaseTest):
     Response message containing an Associated STA Link Metrics TLV for the associated STA.'''
 
     def runTest(self):
-        # Locate test participants in array
-        for dev in self.dev:
-            if dev.controller_entity:
-                controller = dev.controller_entity
-            if dev.agent_entity:
-                agent = dev.agent_entity
+        # Locate test participants
+        controller = self.dev.DUT.controller_entity
+        agent = self.dev.lan.agent_entity
+        sta = self.dev.wifi
+
+        # This test doesn't work for real HW.
+        # Skip it for prplWRT device.
+        # TODO: Remove as soon, as test works for prplWRT device
+        if self.dev.DUT is PrplMeshPrplWRT:
+            self.skipTest("This test isn't ready for prplWRT devices")
 
         # Regression check
-        # Don't connect not existing STAtion
-        dev.wired_sniffer.start(self.__class__.__name__ + "-" + dev.name)
+        # Don't connect nonexistent Station
+        self.dev.lan.wired_sniffer.start(self.__class__.__name__ + "-" + self.dev.lan.name)
         sta_mac = "11:11:33:44:55:66"
         debug("Send link metrics query for unconnected STA")
         controller.ucc_socket.dev_send_1905(agent.mac, 0x800D,
@@ -38,10 +43,8 @@ class ClientAssociationLinkMetrics(PrplMeshBaseTest):
                        timeout=30)
         time.sleep(1)
 
-        sta = Station.create()
         debug('sta: {}'.format(sta.mac))
-
-        agent.radios[0].vaps[0].associate(sta)
+        sta.wifi_connect(agent.radios[0].vaps[0])
 
         time.sleep(1)
 
@@ -52,13 +55,10 @@ class ClientAssociationLinkMetrics(PrplMeshBaseTest):
         self.check_log(agent,
                        "Send AssociatedStaLinkMetrics to controller, mid = {}".format(mid),
                        timeout=30)
-        dev.agent_entity.radios[0].vaps[0].disassociate(sta)
+        sta.wifi_disconnect(agent.radios[0].vaps[0])
 
     @classmethod
     def teardown_class(cls):
         """Teardown method, optional for boardfarm tests."""
         test = cls.test_obj
-        for dev in test.dev:
-            if dev.agent_entity:
-                print("Sniffer - stop")
-                dev.wired_sniffer.stop()
+        test.dev.lan.wired_sniffer.stop()
