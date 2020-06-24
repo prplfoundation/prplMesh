@@ -122,6 +122,15 @@ extern "C" {
 #define BML_CHANNEL_SCAN_MAX_CHANNEL_POOL_SIZE 32 /* Maximal size of the channel pool */
 #define BML_CHANNEL_SCAN_ENUM_LIST_SIZE 8
 
+/* BML Client Selected Bands */
+#define BML_CLIENT_SELECTED_BANDS_DISABLED 0
+#define BML_CLIENT_SELECTED_BANDS_24G 1
+#define BML_CLIENT_SELECTED_BANDS_5G 2
+#define BML_CLIENT_SELECTED_BANDS_6G 4
+#define BML_CLIENT_SELECTED_BANDS_60G 8
+
+#define BML_PARAMETER_NOT_CONFIGURED -1
+
 /****************************************************************************/
 /******************************* General Types ******************************/
 /****************************************************************************/
@@ -608,6 +617,32 @@ struct BML_NEIGHBOR_AP {
     uint32_t ap_DTIMPeriod;
     //Indicates the fraction of the time AP senses that the channel is in use by the neighboring AP for transmissions.
     uint32_t ap_ChannelUtilization;
+};
+
+struct BML_CLIENT_CONFIG {
+    // 1 for true, 0 for false, -1 for "not configured".
+    int8_t stay_on_initial_radio;
+
+    // 1 for true, 0 for false, -1 for "not configured".
+    int8_t stay_on_selected_device;
+
+    // Type of selected band for the client.
+    int8_t selected_bands;
+};
+
+struct BML_CLIENT : BML_CLIENT_CONFIG {
+    // Client MAC.
+    char sta_mac[BML_MAC_ADDR_LEN];
+
+    // Time of last client update (in Seconds)
+    uint32_t timestamp_sec;
+
+    // 1 for true, 0 for false, -1 for "parameter is not configured".
+    int8_t single_band;
+
+    // Optional parameter
+    // The timelife delay of the client configuration, 0 - not configured.
+    uint32_t time_life_delay_days;
 };
 
 /****************************************************************************/
