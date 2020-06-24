@@ -10,6 +10,7 @@ import argparse
 import os
 import sys
 import time
+import traceback
 from typing import Callable, Union
 
 import connmap
@@ -278,6 +279,17 @@ class TestFlows:
             self.check_error = 0
             try:
                 getattr(self, test_full)()
+            except AssertionError as ae:
+                # do not add empty message if test has already been marked as failed
+                # and AssertionError does not contain a message
+                if str(ae):
+                    self.fail("{}".format(ae))
+                elif not self.check_error:
+                    self.fail("Assertion failed")
+
+            except Exception as e:
+                self.fail("Test failed unexpectedly: {}\n{}"
+                          .format(e.__repr__(), traceback.format_exc()))
             finally:
                 env.wired_sniffer.stop()
             if self.check_error != 0:
