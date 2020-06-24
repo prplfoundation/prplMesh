@@ -27,9 +27,24 @@ run() {
 
 killall_program() {
     PROGRAM_NAME=$1
-    KILL_SIG=${2:-TERM}
-    echo "killing $PROGRAM_NAME ($KILL_SIG)"
-    start-stop-daemon -K -s "$KILL_SIG" -x "$PRPLMESH_BIN_DIR"/"$PROGRAM_NAME" > /dev/null 2>&1
+    TERM_SIG=${2:-TERM}
+    TIMEOUT=10
+    echo "terminating $PROGRAM_NAME ($TERM_SIG)"
+    start-stop-daemon -K -s "$TERM_SIG" -x "$PRPLMESH_BIN_DIR"/"$PROGRAM_NAME" > /dev/null 2>&1
+
+    # If an explicit signal was provided, we don't do a SIGKILL
+    if [ -n "$2" ]; then return; fi
+
+    # `-R` option is not always available for `start-stop-daemon`, we need to imitate it
+    for _ in $(seq 1 "$TIMEOUT"); do
+        if ! pgrep "$PROGRAM_NAME" > /dev/null; then
+           return
+        fi
+        sleep 1
+    done
+
+    echo "killing $PROGRAM_NAME (KILL)"
+    start-stop-daemon -K -s "KILL" -x "$PRPLMESH_BIN_DIR"/"$PROGRAM_NAME" > /dev/null 2>&1
 }
 
 platform_init() {
