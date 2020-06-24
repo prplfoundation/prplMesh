@@ -7534,4 +7534,490 @@ bool cACTION_BML_WIFI_CREDENTIALS_CLEAR_RESPONSE::init()
     return true;
 }
 
+cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST::cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST::cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST::~cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST() {
+}
+void cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+}
+
+bool cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    return class_size;
+}
+
+bool cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::~cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE() {
+}
+uint32_t& cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::client_list_size() {
+    return (uint32_t&)(*m_client_list_size);
+}
+
+std::string cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::client_list_str() {
+    char *client_list_ = client_list();
+    if (!client_list_) { return std::string(); }
+    return std::string(client_list_, m_client_list_idx__);
+}
+
+char* cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::client_list(size_t length) {
+    if( (m_client_list_idx__ == 0) || (m_client_list_idx__ < length) ) {
+        TLVF_LOG(ERROR) << "client_list length is smaller than requested length";
+        return nullptr;
+    }
+    return ((char*)m_client_list);
+}
+
+bool cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::set_client_list(const std::string& str) { return set_client_list(str.c_str(), str.size()); }
+bool cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::set_client_list(const char str[], size_t size) {
+    if (str == nullptr) {
+        TLVF_LOG(WARNING) << "set_client_list received a null pointer.";
+        return false;
+    }
+    if (!alloc_client_list(size)) { return false; }
+    std::copy(str, str + size, m_client_list);
+    return true;
+}
+bool cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::alloc_client_list(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list client_list, abort!";
+        return false;
+    }
+    size_t len = sizeof(char) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)&m_client_list[*m_client_list_size];
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_client_list_idx__ += count;
+    *m_client_list_size += count;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    return true;
+}
+
+void cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_client_list_size));
+}
+
+bool cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint32_t); // client_list_size
+    return class_size;
+}
+
+bool cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_client_list_size = reinterpret_cast<uint32_t*>(m_buff_ptr__);
+    if (!m_parse__) *m_client_list_size = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
+        return false;
+    }
+    m_client_list = (char*)m_buff_ptr__;
+    uint32_t client_list_size = *m_client_list_size;
+    if (m_parse__) {  tlvf_swap(32, reinterpret_cast<uint8_t*>(&client_list_size)); }
+    m_client_list_idx__ = client_list_size;
+    if (!buffPtrIncrementSafe(sizeof(char) * (client_list_size))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (client_list_size) << ") Failed!";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CLIENT_SET_CLIENT_REQUEST::cACTION_BML_CLIENT_SET_CLIENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CLIENT_SET_CLIENT_REQUEST::cACTION_BML_CLIENT_SET_CLIENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CLIENT_SET_CLIENT_REQUEST::~cACTION_BML_CLIENT_SET_CLIENT_REQUEST() {
+}
+sMacAddr& cACTION_BML_CLIENT_SET_CLIENT_REQUEST::sta_mac() {
+    return (sMacAddr&)(*m_sta_mac);
+}
+
+sClientConfig& cACTION_BML_CLIENT_SET_CLIENT_REQUEST::client_config() {
+    return (sClientConfig&)(*m_client_config);
+}
+
+void cACTION_BML_CLIENT_SET_CLIENT_REQUEST::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+    m_sta_mac->struct_swap();
+    m_client_config->struct_swap();
+}
+
+bool cACTION_BML_CLIENT_SET_CLIENT_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CLIENT_SET_CLIENT_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // sta_mac
+    class_size += sizeof(sClientConfig); // client_config
+    return class_size;
+}
+
+bool cACTION_BML_CLIENT_SET_CLIENT_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_sta_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_sta_mac->struct_init(); }
+    m_client_config = reinterpret_cast<sClientConfig*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(sClientConfig))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sClientConfig) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_client_config->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CLIENT_SET_CLIENT_RESPONSE::cACTION_BML_CLIENT_SET_CLIENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CLIENT_SET_CLIENT_RESPONSE::cACTION_BML_CLIENT_SET_CLIENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CLIENT_SET_CLIENT_RESPONSE::~cACTION_BML_CLIENT_SET_CLIENT_RESPONSE() {
+}
+uint8_t& cACTION_BML_CLIENT_SET_CLIENT_RESPONSE::result() {
+    return (uint8_t&)(*m_result);
+}
+
+void cACTION_BML_CLIENT_SET_CLIENT_RESPONSE::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+}
+
+bool cACTION_BML_CLIENT_SET_CLIENT_RESPONSE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CLIENT_SET_CLIENT_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // result
+    return class_size;
+}
+
+bool cACTION_BML_CLIENT_SET_CLIENT_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_result = reinterpret_cast<uint8_t*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CLIENT_GET_CLIENT_REQUEST::cACTION_BML_CLIENT_GET_CLIENT_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CLIENT_GET_CLIENT_REQUEST::cACTION_BML_CLIENT_GET_CLIENT_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CLIENT_GET_CLIENT_REQUEST::~cACTION_BML_CLIENT_GET_CLIENT_REQUEST() {
+}
+sMacAddr& cACTION_BML_CLIENT_GET_CLIENT_REQUEST::sta_mac() {
+    return (sMacAddr&)(*m_sta_mac);
+}
+
+void cACTION_BML_CLIENT_GET_CLIENT_REQUEST::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+    m_sta_mac->struct_swap();
+}
+
+bool cACTION_BML_CLIENT_GET_CLIENT_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CLIENT_GET_CLIENT_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // sta_mac
+    return class_size;
+}
+
+bool cACTION_BML_CLIENT_GET_CLIENT_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_sta_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_sta_mac->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_BML_CLIENT_GET_CLIENT_RESPONSE::cACTION_BML_CLIENT_GET_CLIENT_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_BML_CLIENT_GET_CLIENT_RESPONSE::cACTION_BML_CLIENT_GET_CLIENT_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_BML_CLIENT_GET_CLIENT_RESPONSE::~cACTION_BML_CLIENT_GET_CLIENT_RESPONSE() {
+}
+uint8_t& cACTION_BML_CLIENT_GET_CLIENT_RESPONSE::result() {
+    return (uint8_t&)(*m_result);
+}
+
+sClient& cACTION_BML_CLIENT_GET_CLIENT_RESPONSE::client() {
+    return (sClient&)(*m_client);
+}
+
+void cACTION_BML_CLIENT_GET_CLIENT_RESPONSE::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
+    m_client->struct_swap();
+}
+
+bool cACTION_BML_CLIENT_GET_CLIENT_RESPONSE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_BML_CLIENT_GET_CLIENT_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(uint8_t); // result
+    class_size += sizeof(sClient); // client
+    return class_size;
+}
+
+bool cACTION_BML_CLIENT_GET_CLIENT_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_result = reinterpret_cast<uint8_t*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    m_client = reinterpret_cast<sClient*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(sClient))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sClient) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_client->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
 
