@@ -34,7 +34,7 @@ enum eMediaType: uint16_t {
     IEEE_1901_WAVELET = 0x200,
     IEEE_1901_FFT = 0x201,
     MOCA_V1_1 = 0x300,
-    UNKNONWN_MEDIA = 0xffff,
+    UNKNOWN_MEDIA = 0xffff,
 };
 
 enum eMediaTypeGroup: uint8_t {
