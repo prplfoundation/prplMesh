@@ -21,5 +21,6 @@ RUN apt-get update \
 RUN curl -L "https://github.com/docker/compose/releases/download/1.26.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
 RUN chmod 755 /usr/local/bin/docker-compose
 
+RUN DEBIAN_FRONTEND=noninteractive apt-get install wireshark-common -y
 # VOLUME "/home/pablo/assia/prpl/git"
 # ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]

@@ -58,12 +58,15 @@ class PrplMeshCompose(PrplMeshBase):
             self.controller_entity = ALEntityDocker("controller", is_controller=True,
                                                     compose=True)
         else:
-            args = ["up", "-d", "agent"]
+            args = ["-f",
+                    os.path.join(rootdir,
+                            "tools/docker/boardfarm-ci/docker-compose.yml"),
+                    "up", "-d", "agent"]
             print('args {}'.format(args))
             self._run_shell_cmd("/usr/local/bin/docker-compose", args)
 
             time.sleep(self.delay)
-            self.agent_entity = ALEntityDocker(self.name, is_controller=False, compose=True)
+            self.agent_entity = ALEntityDocker("agent", is_controller=False, compose=True)
 
         self.wired_sniffer = Sniffer(_get_bridge_interface(self.docker_network),
                                      boardfarm.config.output_dir)
@@ -79,8 +82,8 @@ class PrplMeshCompose(PrplMeshBase):
         It is used by boardfarm to indicate that spawned device instance is ready for test
         and also after test - to insure that device still operational.
         """
-        self._run_shell_cmd(os.path.join(rootdir, "tools", "docker", "test.sh"),
-                             ["-v", "-n", self.name])
+        # self._run_shell_cmd(os.path.join(rootdir, "tools", "docker", "test.sh"),
+        #                      ["-v", "-n", "controller"])
         pass
 
     def isalive(self):

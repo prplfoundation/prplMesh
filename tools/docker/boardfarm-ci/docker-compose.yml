@@ -32,6 +32,7 @@ services:
 
     boardfarm:
         build: .
+        privileged: true
         container_name: boardfarm
         environment:
             - USER=$USER
