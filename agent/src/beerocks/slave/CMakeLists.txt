@@ -10,6 +10,7 @@ file(GLOB beerocks_agent_sources
     # [TASK] Move link metric related classes to BPL #910
     ${MODULE_PATH}/link_metrics/*.c*
     ${MODULE_PATH}/platform_manager/*.c*
+    ${MODULE_PATH}/tasks/*.c*
     ${MODULE_PATH}/gate/*.c*
     ${MODULE_PATH}/*.c*
 )
