@@ -536,6 +536,9 @@ void backhaul_manager::after_select(bool timeout)
         }
         send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
     }
+
+    // Run Tasks
+    m_task_pool.run_tasks();
 }
 
 bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
@@ -2170,9 +2173,13 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
         break;
     }
     default: {
-        LOG(ERROR) << "Unhandled message received from master: "
-                   << int(beerocks_header->action_op());
-        return false;
+        bool handled = m_task_pool.handle_cmdu(cmdu_rx, sMacAddr(), beerocks_header);
+        if (!handled) {
+            LOG(ERROR) << "Unhandled message received from the Controller: "
+                       << int(beerocks_header->action_op());
+            return false;
+        }
+        return true;
     }
     }
 
@@ -2241,10 +2248,11 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     default: {
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
         // flows, since we won't expect a 1905 message not handled in this function
-        return false;
+        return m_task_pool.handle_cmdu(cmdu_rx, tlvf::mac_from_string(src_mac));
     }
     }
 }
+
 bool backhaul_manager::handle_slave_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                    const std::string &src_mac)
 {
@@ -2256,8 +2264,12 @@ bool backhaul_manager::handle_slave_1905_1_message(ieee1905_1::CmduMessageRx &cm
         return handle_slave_channel_selection_response(cmdu_rx, src_mac);
     }
     default: {
-        LOG(DEBUG) << "Unexpected 1905 message " << int(cmdu_rx.getMessageType());
-        return false;
+        bool handled = m_task_pool.handle_cmdu(cmdu_rx, tlvf::mac_from_string(src_mac));
+        if (!handled) {
+            LOG(DEBUG) << "Unexpected 1905 message " << int(cmdu_rx.getMessageType());
+            return false;
+        }
+        return true;
     }
     }
 }
