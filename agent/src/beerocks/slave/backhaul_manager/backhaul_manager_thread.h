@@ -9,6 +9,7 @@
 #ifndef _BACKHAUL_MANAGER_THREAD_H
 #define _BACKHAUL_MANAGER_THREAD_H
 
+#include "../tasks/task_pool.h"
 #include "wan_monitor.h"
 
 #include <bcl/beerocks_backport.h>
@@ -272,6 +273,8 @@ private:
     std::string bssid_bridge_mac;
 
     std::unique_ptr<beerocks::agent_ucc_listener> m_agent_ucc_listener;
+
+    TaskPool m_task_pool;
 
     /**
      * AP Metrics Reporting configuration and status information type.
