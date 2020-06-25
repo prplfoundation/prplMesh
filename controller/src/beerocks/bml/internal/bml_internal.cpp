@@ -1128,6 +1128,79 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                              << " response, but no one is waiting...";
             }
         } break;
+        case beerocks_message::ACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE: {
+            LOG(DEBUG) << "ACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE received";
+            auto response =
+                beerocks_header
+                    ->addClass<beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE>();
+            if (!response) {
+                LOG(ERROR) << "addClass cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE failed";
+                return BML_RET_OP_FAILED;
+            }
+
+            //Signal any waiting threads
+            if (m_prmClientListGet) {
+                bool promise_result = false;
+                if (m_client_list && m_client_list_size) {
+                    *m_client_list_size = *m_client_list_size <= response->client_list_size()
+                                              ? response->client_list_size()
+                                              : *m_client_list_size;
+                    *m_client_list = response->client_list_str();
+                    promise_result = true;
+                }
+                m_prmClientListGet->set_value(promise_result);
+            } else {
+                LOG(WARNING) << "Received ACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE response, "
+                             << "but no one is waiting...";
+            }
+        } break;
+        case beerocks_message::ACTION_BML_CLIENT_SET_CLIENT_RESPONSE: {
+            LOG(DEBUG) << "ACTION_BML_CLIENT_SET_CLIENT_RESPONSE received";
+            auto response =
+                beerocks_header
+                    ->addClass<beerocks_message::cACTION_BML_CLIENT_SET_CLIENT_RESPONSE>();
+            if (!response) {
+                LOG(ERROR) << "addClass cACTION_BML_CLIENT_SET_CLIENT_RESPONSE failed";
+                return BML_RET_OP_FAILED;
+            }
+
+            ///Signal any waiting threads
+            if (!wake_up(beerocks_message::ACTION_BML_CLIENT_SET_CLIENT_REQUEST,
+                         response->result())) {
+                LOG(WARNING) << "Received ACTION_BML_CLIENT_SET_CLIENT_RESPONSE"
+                             << " response, but no one is waiting...";
+            }
+        } break;
+        case beerocks_message::ACTION_BML_CLIENT_GET_CLIENT_RESPONSE: {
+            LOG(DEBUG) << "ACTION_BML_CLIENT_GET_CLIENT_RESPONSE received";
+            auto response =
+                beerocks_header
+                    ->addClass<beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_RESPONSE>();
+            if (!response) {
+                LOG(ERROR) << "addClass cACTION_BML_CLIENT_GET_CLIENT_RESPONSE failed";
+                return BML_RET_OP_FAILED;
+            }
+
+            //Signal any waiting threads
+            if (m_prmClientGet) {
+                bool promise_result = false;
+                if (m_client) {
+                    std::copy_n(response->client().sta_mac.oct, BML_MAC_ADDR_LEN,
+                                m_client->sta_mac);
+                    m_client->timestamp_sec           = response->client().timestamp_sec;
+                    m_client->stay_on_initial_radio   = response->client().stay_on_initial_radio;
+                    m_client->stay_on_selected_device = response->client().stay_on_selected_device;
+                    m_client->selected_bands          = response->client().selected_bands;
+                    m_client->time_life_delay_days    = response->client().time_life_delay_days;
+                    //Resolve promise to "true"
+                    promise_result = true;
+                }
+                m_prmClientGet->set_value(promise_result);
+            } else {
+                LOG(WARNING) << "Received ACTION_BML_CLIENT_GET_CLIENT_RESPONSE response, "
+                             << "but no one is waiting...";
+            }
+        } break;
         default: {
             LOG(WARNING) << "unhandled header BML action type 0x" << std::hex
                          << int(beerocks_header->action_op());
@@ -1763,6 +1836,157 @@ int bml_internal::start_dcs_single_scan(const sMacAddr &mac, int dwell_time_ms,
         LOG(ERROR) << "cACTION_BML_CHANNEL_SCAN_START_SCAN_REQUEST returned error code:" << result;
         return result;
     }
+
+    return BML_RET_OK;
+}
+
+int bml_internal::client_get_client_list(std::string &client_list, unsigned int *client_list_size)
+{
+    LOG(DEBUG) << "client_get_client_list";
+
+    if (!client_list_size) {
+        LOG(ERROR) << "Size param must be initialized";
+        return (-BML_RET_INVALID_DATA);
+    }
+
+    // If the socket is not valid, attempt to re-establish the connection
+    if (!m_sockMaster) {
+        int iRet = connect_to_master();
+        if (iRet != BML_RET_OK) {
+            LOG(ERROR) << " Unable to create context, connect_to_master failed!";
+            return iRet;
+        }
+    }
+
+    // Initialize the promise for receiving the response
+    beerocks::promise<bool> prmClientListGet;
+    m_prmClientListGet = &prmClientListGet;
+    int iOpTimeout     = RESPONSE_TIMEOUT; // Default timeout
+    m_client_list      = &client_list;
+    m_client_list_size = client_list_size;
+
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST>(cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR) << "Failed building cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    // Build and send the message
+    if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
+        LOG(ERROR) << "Failed sending param get message!";
+        m_prmClientListGet = nullptr;
+        m_client_list      = nullptr;
+        m_client_list_size = nullptr;
+        return (-BML_RET_OP_FAILED);
+    }
+    LOG(DEBUG) << "cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST sent";
+
+    int iRet = BML_RET_OK;
+
+    if (!m_prmClientListGet->wait_for(iOpTimeout)) {
+        LOG(WARNING) << "Timeout while waiting for client list get response...";
+        iRet = -BML_RET_TIMEOUT;
+    }
+
+    // Clear the get client list members
+    m_client_list      = nullptr;
+    m_client_list_size = nullptr;
+
+    // Clear the promise holder
+    m_prmClientListGet = nullptr;
+
+    LOG_IF(iRet != BML_RET_OK, ERROR)
+        << "Get client list request returned with error code:" << iRet;
+
+    return BML_RET_OK;
+}
+
+int bml_internal::client_set_client(const sMacAddr &sta_mac, const BML_CLIENT_CONFIG &client_config)
+{
+    LOG(DEBUG) << "client_set_client";
+
+    auto request =
+        message_com::create_vs_message<beerocks_message::cACTION_BML_CLIENT_SET_CLIENT_REQUEST>(
+            cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR) << "Failed building cACTION_BML_CLIENT_SET_CLIENT_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->sta_mac()                               = sta_mac;
+    request->client_config().stay_on_initial_radio   = client_config.stay_on_initial_radio;
+    request->client_config().stay_on_selected_device = client_config.stay_on_selected_device;
+    request->client_config().selected_bands          = client_config.selected_bands;
+
+    int result = 0;
+    if (send_bml_cmdu(result, request->get_action_op()) != BML_RET_OK) {
+        LOG(ERROR) << "Send cACTION_BML_CLIENT_SET_CLIENT_REQUEST failed";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    if (result != 0) {
+        LOG(ERROR) << "Set client request returned error code:" << result;
+        return result;
+    }
+
+    return BML_RET_OK;
+}
+
+int bml_internal::client_get_client(const sMacAddr &sta_mac, BML_CLIENT *client)
+{
+    LOG(DEBUG) << "client_get_client";
+
+    // If the socket is not valid, attempt to re-establish the connection
+    if (!m_sockMaster) {
+        int iRet = connect_to_master();
+        if (iRet != BML_RET_OK) {
+            LOG(ERROR) << " Unable to create context, connect_to_master failed!";
+            return iRet;
+        }
+    }
+
+    // Initialize the promise for receiving the response
+    beerocks::promise<bool> prmClientGet;
+    m_prmClientGet = &prmClientGet;
+    int iOpTimeout = RESPONSE_TIMEOUT; // Default timeout
+    m_client       = client;
+
+    auto request =
+        message_com::create_vs_message<beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_REQUEST>(
+            cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR) << "Failed building cACTION_BML_CLIENT_GET_CLIENT_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->sta_mac() = sta_mac;
+    // Build and send the message
+    if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
+        LOG(ERROR) << "Failed sending param get message!";
+        m_prmClientGet = nullptr;
+        m_client       = nullptr;
+        return (-BML_RET_OP_FAILED);
+    }
+    LOG(DEBUG) << "cACTION_BML_CLIENT_GET_CLIENT_REQUEST sent";
+
+    int iRet = BML_RET_OK;
+
+    if (!m_prmClientGet->wait_for(iOpTimeout)) {
+        LOG(WARNING) << "Timeout while waiting for client get response...";
+        iRet = -BML_RET_TIMEOUT;
+    }
+
+    // Clear the get client members
+    m_client = nullptr;
+
+    // Clear the promise holder
+    m_prmClientGet = nullptr;
+
+    LOG_IF(iRet != BML_RET_OK, ERROR) << "Get client request returned with error code:" << iRet;
 
     return BML_RET_OK;
 }
