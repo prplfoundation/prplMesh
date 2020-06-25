@@ -263,6 +263,34 @@ public:
     */
     int start_dcs_single_scan(const sMacAddr &mac, int dwell_time_ms, unsigned int *channel_pool,
                               int channel_pool_size);
+
+    /**
+     * Get client list.
+     *
+     * @param [in,out] client_list List of MAC addresses sepereted by a comma.
+     * @param [in,out] client_list_size Size of client list.
+     * @return BML_RET_OK on success.
+     */
+    int client_get_client_list(std::string &client_list, unsigned int *client_list_size);
+
+    /**
+     * Set client configuration.
+     *
+     * @param [in] sta_mac MAC address of a station.
+     * @param [in] client_config Client configuration to be set.
+     * @return BML_RET_OK on success.
+     */
+    int client_set_client(const sMacAddr &sta_mac, const BML_CLIENT_CONFIG &client_config);
+
+    /**
+     * Get client info.
+     *
+     * @param [in] sta_mac MAC address of a station.
+     * @param [in,out] client Client information.
+     * @return BML_RET_OK on success.
+     */
+    int client_get_client(const sMacAddr &sta_mac, BML_CLIENT *client);
+
     /*
  * Public static methods:
  */
@@ -334,6 +362,8 @@ private:
     beerocks::promise<bool> *m_prmChannelScanParamsGet = nullptr;
     //Promise used to indicate the GetResults response was received
     beerocks::promise<int> *m_prmChannelScanResultsGet = nullptr;
+    beerocks::promise<bool> *m_prmClientListGet        = nullptr;
+    beerocks::promise<bool> *m_prmClientGet            = nullptr;
 
     std::map<uint8_t, beerocks::promise<int> *> m_prmCliResponses;
 
@@ -357,6 +387,9 @@ private:
     uint8_t *m_scan_results_status = nullptr;
     //m_scan_results_maxsize is used to indicate the maximum capacity of the requested results
     uint32_t *m_scan_results_maxsize = nullptr;
+    std::string *m_client_list       = nullptr;
+    uint32_t *m_client_list_size     = nullptr;
+    BML_CLIENT *m_client             = nullptr;
     BML_VAP_INFO *m_vaps             = nullptr;
     uint8_t *m_pvaps_list_size       = nullptr;
     uint16_t id                      = 0;

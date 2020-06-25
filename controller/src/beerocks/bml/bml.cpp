@@ -709,3 +709,48 @@ int bml_start_dcs_single_scan(BML_CTX ctx, const char *radio_mac, int dwell_time
     return pBML->start_dcs_single_scan(tlvf::mac_from_string(std::string(radio_mac)), dwell_time,
                                        channel_pool, channel_pool_size);
 }
+
+int bml_client_get_client_list(BML_CTX ctx, char *client_list, unsigned int *client_list_size)
+{
+    // Validate input parameters
+    if (!ctx || !client_list || !client_list_size) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    if (*client_list_size == 0) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    auto pBML = static_cast<bml_internal *>(ctx);
+    std::string temp_client_list;
+    int ret = pBML->client_get_client_list(temp_client_list, client_list_size);
+    if (ret == BML_RET_OK) {
+        beerocks::string_utils::copy_string(client_list, temp_client_list.c_str(),
+                                            *client_list_size);
+    }
+
+    return ret;
+}
+
+int bml_client_set_client(BML_CTX ctx, const char *sta_mac,
+                          const struct BML_CLIENT_CONFIG *client_config)
+{
+    // Validate input parameters
+    if (!ctx || !sta_mac || !client_config) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    auto pBML = static_cast<bml_internal *>(ctx);
+    return pBML->client_set_client(tlvf::mac_from_string(std::string(sta_mac)), *client_config);
+}
+
+int bml_client_get_client(BML_CTX ctx, const char *sta_mac, struct BML_CLIENT *client)
+{
+    // Validate input parameters
+    if (!ctx || !sta_mac || !client) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    auto pBML = static_cast<bml_internal *>(ctx);
+    return pBML->client_get_client(tlvf::mac_from_string(std::string(sta_mac)), client);
+}
