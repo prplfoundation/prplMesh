@@ -10,35 +10,36 @@ class InitialApConfig(PrplMeshBaseTest):
     """Check initial configuration on device."""
 
     def runTest(self):
-        for dev in self.dev:
-            if dev.agent_entity:
-                dev.wired_sniffer.start(self.__class__.__name__ + "-" + dev.name)
+        # Locate test participants
+        agent = self.dev.DUT.agent_entity
 
-                self.prplmesh_status_check(dev.agent_entity)
-                self.check_log(dev.agent_entity.radios[0],
-                               r"\(WSC M2 Encrypted Settings\)")
-                self.check_log(dev.agent_entity.radios[1],
-                               r"\(WSC M2 Encrypted Settings\)")
-                self.check_log(dev.agent_entity.radios[0],
-                               r"WSC Global authentication success")
-                self.check_log(dev.agent_entity.radios[1],
-                               r"WSC Global authentication success")
-                self.check_log(dev.agent_entity.radios[0],
-                               r"KWA \(Key Wrap Auth\) success")
-                self.check_log(dev.agent_entity.radios[1],
-                               r"KWA \(Key Wrap Auth\) success")
+        self.dev.DUT.wired_sniffer.start(self.__class__.__name__ + "-" + self.dev.DUT.name)
+
+        self.prplmesh_status_check(agent)
+        self.check_log(agent.radios[0],
+                       r"\(WSC M2 Encrypted Settings\)")
+        self.check_log(agent.radios[1],
+                       r"\(WSC M2 Encrypted Settings\)")
+        self.check_log(agent.radios[0],
+                       r"WSC Global authentication success")
+        self.check_log(agent.radios[1],
+                       r"WSC Global authentication success")
+        self.check_log(agent.radios[0],
+                       r"KWA \(Key Wrap Auth\) success")
+        self.check_log(agent.radios[1],
+                       r"KWA \(Key Wrap Auth\) success")
 
     @classmethod
     def teardown_class(cls):
         """Teardown method, optional for boardfarm tests."""
         test = cls.test_obj
-        for dev in test.dev:
-            if dev.agent_entity:
-                print("Sniffer - stop")
-                # Send Ctrl+C to the device to terminate "tail -f"
-                # Which is used to read log from device. Required only for tests on HW
-                try:
-                    dev.agent_entity.device.send('\003')
-                except AttributeError:
-                    pass
-                dev.wired_sniffer.stop()
+        print("Sniffer - stop")
+        test.dev.DUT.wired_sniffer.stop()
+        # Send additional Ctrl+C to the device to terminate "tail -f"
+        # Which is used to read log from device. Required only for tests on HW
+        try:
+            test.dev.DUT.agent_entity.device.send('\003')
+        except AttributeError:
+            # If AttributeError was raised - we are dealing with dummy devices.
+            # We don't have to additionaly send Ctrl+C for dummy devices.
+            pass
