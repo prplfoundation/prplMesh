@@ -711,17 +711,32 @@ class TestFlows:
         self.check_log(env.controller, "AP_CAPABILITY_REPORT_MESSAGE")
 
     def test_link_metric_query(self):
-        env.controller.dev_send_1905(env.agents[0].mac, 0x0005,
-                                     tlv(0x08, 0x0002, "0x00 0x02"))
+        mid = env.controller.dev_send_1905(env.agents[0].mac, 0x0005,
+                                           tlv(0x08, 0x0002, "0x00 0x02"))
         time.sleep(1)
 
-        debug("Confirming link metric query has been received on agent")
-        self.check_log(env.agents[0], "Received LINK_METRIC_QUERY_MESSAGE")
+        query = self.check_cmdu_type_single("link metric query", 0x0005,
+                                            env.controller.mac, env.agents[0].mac,
+                                            mid)
+        query_tlv = self.check_cmdu_has_tlv_single(query, 0x08)
 
-        debug("Confirming link metric response has been received on controller")
-        self.check_log(env.controller, "Received LINK_METRIC_RESPONSE_MESSAGE")
-        self.check_log(env.controller, "Received TLV_TRANSMITTER_LINK_METRIC")
-        self.check_log(env.controller, "Received TLV_RECEIVER_LINK_METRIC")
+        debug("Checking query type and queried metrics are correct")
+        self.safe_check_obj_attribute(query_tlv, 'link_metric_query_type', str(0x00),
+                                      "Query type is not 'All neighbors'")
+        self.safe_check_obj_attribute(query_tlv, 'link_metrics_requested', str(0x02),
+                                      "Metrics for both Tx and Rx is not requested")
+
+        resp = self.check_cmdu_type_single("link metric response", 0x0006,
+                                           env.agents[0].mac, env.controller.mac,
+                                           mid)
+
+        debug("Checking response contains both Tx and Rx metrics")
+        assert self.check_cmdu_has_tlvs(resp, 0x09)
+        assert self.check_cmdu_has_tlvs(resp, 0x0a)
+
+        # TODO: we can't verify each reported link because
+        # TODO: tshark reports all tlv types using same key
+        # TODO: postponing test implementation until this is solved
 
     def test_combined_infra_metrics(self):
 
