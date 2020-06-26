@@ -76,7 +76,7 @@ std::ostream &operator<<(std::ostream &out, const dwpal_fsm_event &value)
 //////////////////////////////////////////////////////////////////////////////
 
 base_wlan_hal_dwpal::base_wlan_hal_dwpal(HALType type, const std::string &iface_name,
-                                         hal_event_cb_t callback, hal_conf_t hal_conf)
+                                         hal_event_cb_t callback, const hal_conf_t &hal_conf)
     : base_wlan_hal(type, iface_name, IfaceType::Intel, callback, hal_conf),
       beerocks::beerocks_fsm<dwpal_fsm_state, dwpal_fsm_event>(dwpal_fsm_state::Delay),
       m_nl80211_client(nl80211_client_factory::create_instance())

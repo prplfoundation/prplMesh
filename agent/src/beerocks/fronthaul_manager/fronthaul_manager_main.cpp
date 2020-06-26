@@ -12,6 +12,7 @@
 #include <bcl/beerocks_logging.h>
 #include <bcl/beerocks_os_utils.h>
 #include <bcl/beerocks_version.h>
+#include <bpl/bpl_cfg.h>
 #include <easylogging++.h>
 
 // Do not use this macro anywhere else in ire process
@@ -204,8 +205,24 @@ int main(int argc, char *argv[])
     std::string agent_uds =
         beerocks_slave_conf.temp_path + std::string(BEEROCKS_SLAVE_UDS) + "_" + fronthaul_iface;
 
+    // Find correct interface number for get correct path for hostap_ctrl
+    beerocks::bpl::BPL_WLAN_IFACE interfaces[beerocks::IRE_MAX_SLAVES] = {0};
+    int num_of_interfaces                                              = beerocks::IRE_MAX_SLAVES;
+    if (beerocks::bpl::cfg_get_all_prplmesh_wifi_interfaces(interfaces, &num_of_interfaces)) {
+        std::cout << "failed to read interfaces map" << std::endl;
+        return 1;
+    }
+
+    uint8_t iface_num = 0;
+    for (iface_num = 0; iface_num < beerocks::IRE_MAX_SLAVES; iface_num++) {
+        if (interfaces[iface_num].ifname == fronthaul_iface) {
+            break;
+        }
+    }
+
     // Create ap_manager
-    son::ap_manager_thread ap_manager(agent_uds, fronthaul_iface, *g_logger_ap_mananger);
+    son::ap_manager_thread ap_manager(agent_uds, fronthaul_iface, *g_logger_ap_mananger,
+                                      beerocks_slave_conf.hostap_ctrl_iface[iface_num]);
 
     if (!ap_manager.init()) {
         CLOG(ERROR, g_logger_ap_mananger->get_logger_id()) << "ap manager init() has failed!";

@@ -103,7 +103,7 @@ static ap_wlan_hal::Event dummy_to_bwl_event(const std::string &opcode)
 // NOTE: Since *base_wlan_hal_dummy* inherits *base_wlan_hal* virtually, we
 //       need to explicitly call it's from any deriving class
 ap_wlan_hal_dummy::ap_wlan_hal_dummy(const std::string &iface_name, hal_event_cb_t callback,
-                                     hal_conf_t hal_conf)
+                                     const hal_conf_t &hal_conf)
     : base_wlan_hal(bwl::HALType::AccessPoint, iface_name, IfaceType::Intel, callback, hal_conf),
       base_wlan_hal_dummy(bwl::HALType::AccessPoint, iface_name, callback, hal_conf)
 {

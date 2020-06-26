@@ -93,13 +93,15 @@ using namespace beerocks;
 using namespace son;
 
 ap_manager_thread::ap_manager_thread(const std::string &slave_uds_, const std::string &iface,
-                                     beerocks::logging &logger)
+                                     beerocks::logging &logger,
+                                     const std::string &hostap_iface_ctrl)
     : socket_thread(), m_logger(logger)
 {
     thread_name = "ap_manager";
     logger.set_thread_name(thread_name);
-    slave_uds = slave_uds_;
-    m_iface   = iface;
+    slave_uds           = slave_uds_;
+    m_iface             = iface;
+    m_hostap_iface_ctrl = hostap_iface_ctrl;
     set_select_timeout(SELECT_TIMEOUT_MSC);
 }
 
@@ -113,6 +115,7 @@ bool ap_manager_thread::create_ap_wlan_hal()
 
     bwl::hal_conf_t hal_conf;
     hal_conf.ap_acs_enabled = acs_enabled;
+    hal_conf.wpa_ctrl_path  = m_hostap_iface_ctrl;
 
     // Create a new AP HAL instance
     ap_wlan_hal = bwl::ap_wlan_hal_create(

@@ -709,7 +709,7 @@ update_vap_credentials_configure_wpa(const std::string &vap_if,
 // NOTE: Since *base_wlan_hal_dwpal* inherits *base_wlan_hal* virtually, we
 //       need to explicitly call it's from any deriving class
 ap_wlan_hal_dwpal::ap_wlan_hal_dwpal(const std::string &iface_name, hal_event_cb_t callback,
-                                     hal_conf_t hal_conf)
+                                     const hal_conf_t &hal_conf)
     : base_wlan_hal(bwl::HALType::AccessPoint, iface_name, IfaceType::Intel, callback, hal_conf),
       base_wlan_hal_dwpal(bwl::HALType::AccessPoint, iface_name, callback, hal_conf)
 {

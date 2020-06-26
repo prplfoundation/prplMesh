@@ -25,7 +25,7 @@ class ap_manager_thread : public beerocks::socket_thread {
 
 public:
     ap_manager_thread(const std::string &slave_uds_, const std::string &iface,
-                      beerocks::logging &logger);
+                      beerocks::logging &logger, const std::string &hostap_iface_ctrl);
     virtual ~ap_manager_thread();
 
     virtual bool init() override;
@@ -118,6 +118,7 @@ private:
     const uint8_t HEARTBEAT_NOTIFICATION_DELAY_SEC = 1;
 
     bool acs_completed_vap_update = false;
+    std::string m_hostap_iface_ctrl;
 };
 
 } // namespace son
