@@ -9,6 +9,6 @@ else
     if [ $1 == "-h" ]; then
         print "Usage ./dctest.sh | ./dctest.sh --clean"
     elif [ $1 == "--clean" ]; then
-        dc down --remove-orphans --rmi all --help
+        dc down --remove-orphans --rmi all
     fi
 fi
