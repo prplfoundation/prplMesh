@@ -15,4 +15,4 @@ else
 fi
 export PYTHONPATH
 
-exec python3 "${bf_dir}"/bft -c "${bf_plugins_dir}"/boardfarm_prplmesh/prplmesh_config.json -n prplmesh_docker -x test_flows
+exec bft -c "${bf_plugins_dir}"/boardfarm_prplmesh/prplmesh_config.json -n prplmesh_docker -x test_flows
