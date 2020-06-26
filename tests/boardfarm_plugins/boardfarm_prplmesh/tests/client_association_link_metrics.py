@@ -21,8 +21,8 @@ class ClientAssociationLinkMetrics(PrplMeshBaseTest):
 
     def runTest(self):
         # Locate test participants
-        controller = self.dev.DUT.controller_entity
-        agent = self.dev.lan.agent_entity
+        agent = self.dev.DUT.agent_entity
+        controller = self.dev.wan.controller_entity
         sta = self.dev.wifi
 
         # This test doesn't work for real HW.
@@ -33,7 +33,7 @@ class ClientAssociationLinkMetrics(PrplMeshBaseTest):
 
         # Regression check
         # Don't connect nonexistent Station
-        self.dev.lan.wired_sniffer.start(self.__class__.__name__ + "-" + self.dev.lan.name)
+        self.dev.DUT.wired_sniffer.start(self.__class__.__name__ + "-" + self.dev.DUT.name)
         sta_mac = "11:11:33:44:55:66"
         debug("Send link metrics query for unconnected STA")
         controller.ucc_socket.dev_send_1905(agent.mac, 0x800D,
@@ -61,4 +61,13 @@ class ClientAssociationLinkMetrics(PrplMeshBaseTest):
     def teardown_class(cls):
         """Teardown method, optional for boardfarm tests."""
         test = cls.test_obj
-        test.dev.lan.wired_sniffer.stop()
+        print("Sniffer - stop")
+        test.dev.DUT.wired_sniffer.stop()
+        # Send additional Ctrl+C to the device to terminate "tail -f"
+        # Which is used to read log from device. Required only for tests on HW
+        try:
+            test.dev.DUT.agent_entity.device.send('\003')
+        except AttributeError:
+            # If AttributeError was raised - we are dealing with dummy devices.
+            # We don't have to additionaly send Ctrl+C for dummy devices.
+            pass
