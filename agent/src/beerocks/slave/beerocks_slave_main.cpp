@@ -168,6 +168,10 @@ static void fill_son_slave_config(const beerocks::config_file::sConfigSlave &bee
         beerocks::string_utils::stoi(beerocks_slave_conf.sta_iface_filter_low[slave_num]);
     son_slave_conf.backhaul_wireless_iface_type = son_slave_conf.hostap_iface_type;
 
+    son_slave_conf.hostap_ctrl_iface = beerocks_slave_conf.hostap_ctrl_iface[slave_num];
+    son_slave_conf.wpa_supplicant_ctrl_iface =
+        beerocks_slave_conf.wpa_supplicant_ctrl_iface[slave_num];
+
     // disable stopping on failure initially. Later on, it will be read from BPL as part of
     // cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE
     son_slave_conf.stop_on_failure_attempts = 0;
