@@ -109,6 +109,8 @@ public:
         std::string sta_iface[IRE_MAX_SLAVES];
         std::string sta_iface_filter_low[IRE_MAX_SLAVES];
         std::string hostap_ant_gain[IRE_MAX_SLAVES];
+        std::string hostap_ctrl_iface[IRE_MAX_SLAVES];
+        std::string wpa_supplicant_ctrl_iface[IRE_MAX_SLAVES];
         //[log]
         SConfigLog sLog;
     } sConfigSlave;

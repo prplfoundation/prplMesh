@@ -193,6 +193,9 @@ bool config_file::read_slave_config_file(const std::string &config_file_path, sC
                             mandatory_slave),
             std::make_tuple("hostap_ant_gain=", &conf.hostap_ant_gain[slave_num], mandatory_slave),
             std::make_tuple("sta_iface_filter_low=", &conf.sta_iface_filter_low[slave_num], 0),
+            std::make_tuple("hostap_ctrl_iface=", &conf.hostap_ctrl_iface[slave_num], 0),
+            std::make_tuple(
+                "wpa_supplicant_ctrl_iface=", &conf.wpa_supplicant_ctrl_iface[slave_num], 0),
         };
         std::string config_type = "agent" + std::to_string(slave_num);
         if (!read_config_file(config_file_path, slave_conf_args, config_type)) {
