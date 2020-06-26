@@ -216,6 +216,21 @@ run-tests:
     - job: image-build-tests-runner
     - job: image-build-runner
 
+boardfarm-tests:
+  stage: test
+  image: $CI_REGISTRY_IMAGE/prplmesh-boardfarm-ci:$CI_PIPELINE_ID
+  script:
+    - export USER=''
+    - tests/run_bf.sh
+  artifacts:
+    paths:
+      - logs
+      - results
+  needs:
+    - job: build-in-docker
+  tags:
+    - boardfarm
+
 .build-for-openwrt:
   stage: build
   script:
