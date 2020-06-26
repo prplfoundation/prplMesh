@@ -35,6 +35,9 @@ image-build-builder/ubuntu/bionic:
 image-build-tests-runner:
   extends: .image-build
 
+image-build-boardfarm-ci:
+  extends: .image-build
+
 .in-prplmesh-builder:
   image:
     name: $CI_REGISTRY_IMAGE/prplmesh-builder-ubuntu-bionic:$CI_PIPELINE_ID
