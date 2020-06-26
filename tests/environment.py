@@ -191,6 +191,9 @@ def _docker_wait_for_log(container: str, programs: [str], regex: str, start_line
                          timeout: float) -> bool:
     def logfilename(program):
         logfilename = os.path.join(rootdir, 'logs', container, 'beerocks_{}.log'.format(program))
+
+        print(' --- logfilename: {}'.format(logfilename))
+
         # WSL doesn't support symlinks on NTFS, so resolve the symlink manually
         if on_wsl:
             logfilename = os.path.join(
