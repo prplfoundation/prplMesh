@@ -28,18 +28,24 @@ radio_identifier=00:00:00:00:00:00
 hostap_iface_type=WIFI_INTEL
 hostap_ant_gain=0
 enable_repeater_mode=@BEEROCKS_REPEATER_MODE@
+hostap_ctrl_iface=@BEEROCKS_HOSTAP_WLAN1_CTRL_IFACE@
+wpa_supplicant_ctrl_iface=@BEEROCKS_WPA_SUPPLICANT_WLAN1_CTRL_IFACE@
 
 [agent1]
 radio_identifier=00:00:00:00:00:02
 hostap_iface_type=WIFI_INTEL
 hostap_ant_gain=0
 enable_repeater_mode=0
+hostap_ctrl_iface=@BEEROCKS_HOSTAP_WLAN2_CTRL_IFACE@
+wpa_supplicant_ctrl_iface=@BEEROCKS_WPA_SUPPLICANT_WLAN2_CTRL_IFACE@
 
 [agent2]
 radio_identifier=00:00:00:00:00:02
 hostap_iface_type=WIFI_INTEL
 hostap_ant_gain=0
 enable_repeater_mode=0
+hostap_ctrl_iface=@BEEROCKS_HOSTAP_WLAN3_CTRL_IFACE@
+wpa_supplicant_ctrl_iface=@BEEROCKS_WPA_SUPPLICANT_WLAN3_CTRL_IFACE@
 
 [log]
 log_global_levels=error,info,warning,fatal,trace,debug

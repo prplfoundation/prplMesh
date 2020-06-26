@@ -117,6 +117,14 @@ set(BEEROCKS_LOG_FILES_AUTO_ROLL "true" CACHE STRING "Auto rollback prplMesh log
 set(BEEROCKS_LOG_STDOUT_ENABLED  "false" CACHE STRING "Print logs to stdout")
 set(BEEROCKS_LOG_SYSLOG_ENABLED  "false" CACHE STRING "Send logs to syslog")
 
+set(BEEROCKS_HOSTAP_WLAN1_CTRL_IFACE "/var/run/hostapd/${BEEROCKS_WLAN1_IFACE}" CACHE PATH "hostapd ctrl iface path for 1st WLAN")
+set(BEEROCKS_HOSTAP_WLAN2_CTRL_IFACE "/var/run/hostapd/${BEEROCKS_WLAN2_IFACE}" CACHE PATH "hostapd ctrl iface path for 2nd WLAN")
+set(BEEROCKS_HOSTAP_WLAN3_CTRL_IFACE "/var/run/hostapd/${BEEROCKS_WLAN3_IFACE}" CACHE PATH "hostapd ctrl iface path for 3rd WLAN")
+
+set(BEEROCKS_WPA_SUPPLICANT_WLAN1_CTRL_IFACE "/var/run/wpa_supplicant/${BEEROCKS_WLAN1_IFACE}" CACHE PATH "wpa_supplicant ctrl iface path for 1st WLAN")
+set(BEEROCKS_WPA_SUPPLICANT_WLAN2_CTRL_IFACE "/var/run/wpa_supplicant/${BEEROCKS_WLAN2_IFACE}" CACHE PATH "wpa_supplicant ctrl iface path for 2nd WLAN")
+set(BEEROCKS_WPA_SUPPLICANT_WLAN3_CTRL_IFACE "/var/run/wpa_supplicant/${BEEROCKS_WLAN3_IFACE}" CACHE PATH "wpa_supplicant ctrl iface path for 3rd WLAN")
+
 # Platform specific flags
 if (TARGET_PLATFORM STREQUAL "openwrt")
     if (TARGET_PLATFORM_TYPE STREQUAL "ugw")
@@ -125,6 +133,8 @@ if (TARGET_PLATFORM STREQUAL "openwrt")
     else()
         set(BEEROCKS_WLAN2_IFACE "wlan1")
         set(BEEROCKS_WLAN2_STEERING_VAPS "wlan1.0")
+        set(BEEROCKS_HOSTAP_WLAN2_CTRL_IFACE "/var/run/hostapd/${BEEROCKS_WLAN2_IFACE}")
+        set(BEEROCKS_WPA_SUPPLICANT_WLAN2_CTRL_IFACE "/var/run/wpa_supplicant/${BEEROCKS_WLAN2_IFACE}")
     endif()
 elseif (TARGET_PLATFORM STREQUAL "rdkb")
     add_definitions(-DBEEROCKS_RDKB)
