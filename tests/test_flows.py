@@ -11,7 +11,7 @@ import os
 import sys
 import time
 import traceback
-from typing import Callable, Union
+from typing import Callable, Union, NoReturn
 
 import connmap
 import environment as env
@@ -78,8 +78,7 @@ class TestFlows:
         """
         debug("Checking for CMDU {}".format(msg))
         result = env.wired_sniffer.get_cmdu_capture(match_function)
-        if not result:
-            self.fail("No CMDU {} found".format(msg))
+        assert result, "No CMDU {} found".format(msg)
         return result
 
     def check_cmdu_type(
@@ -115,20 +114,19 @@ class TestFlows:
         """
         debug("Checking for CMDU {} (0x{:04x}) from {}".format(msg, msg_type, eth_src))
         result = env.wired_sniffer.get_cmdu_capture_type(msg_type, eth_src, eth_dst, mid)
-        if not result:
-            self.fail("No CMDU {} found".format(msg))
+        assert result, "No CMDU {} found".format(msg)
         return result
 
     def check_cmdu_type_single(
         self, msg: str, msg_type: int, eth_src: str, eth_dst: str = None, mid: int = None
-    ) -> Union[sniffer.Packet, None]:
+    ) -> sniffer.Packet:
         '''Like check_cmdu_type, but also check that only a single CMDU is found.'''
         cmdus = self.check_cmdu_type(msg, msg_type, eth_src, eth_dst, mid)
         if not cmdus:
-            return None  # Failure already reported by check_cmdu
+            assert False  # Failure already reported by check_cmdu
         if len(cmdus) > 1:
             self.fail("Multiple CMDUs {} found".format(msg))
-            return None
+            assert False
         return cmdus[0]
 
     def check_no_cmdu_type(
@@ -141,10 +139,11 @@ class TestFlows:
             self.fail("Unexpected CMDU {}".format(msg))
             for packet in result:
                 debug("  {}".format(packet))
+            assert False
         return result
 
     def check_cmdu_has_tlvs(
-        self, packet: Union[sniffer.Packet, None], tlv_type: int
+        self, packet: sniffer.Packet, tlv_type: int
     ) -> [sniffer.Tlv]:
         '''Check that the packet has at least one TLV of the given type.
 
@@ -174,42 +173,38 @@ class TestFlows:
         if not tlvs:
             self.fail("No TLV of type 0x{:02x} found in packet".format(tlv_type))
             debug("  {}".format(packet))
+            assert False
         return tlvs
 
     def check_cmdu_has_tlv_single(
         self, packet: Union[sniffer.Packet, None], tlv_type: int
-    ) -> Union[sniffer.Tlv, None]:
+    ) -> sniffer.Tlv:
         '''Like check_cmdu_has_tlvs, but also check that only one TLV of that type is found.'''
         tlvs = self.check_cmdu_has_tlvs(packet, tlv_type)
         if not tlvs:
-            return None
+            assert False
         if len(tlvs) > 1:
             self.fail("More than one ({}) TLVs of type 0x{:02x} found".format(len(tlvs), tlv_type))
             debug("  {}".format(packet))
-            return None
+            assert False
         return tlvs[0]
 
     def check_cmdu_has_tlvs_exact(
         self, packet: Union[sniffer.Packet, None], tlvs: [sniffer.Tlv]
-    ) -> None:
+    ) -> NoReturn:
         '''Check that the CMDU has exactly the TLVs given.'''
-        if not packet:
-            return False
-        if not packet.ieee1905:
-            self.fail("Packet is not IEEE1905: {}".format(packet))
-            return False
+        assert packet, "Packet not found"
+        assert packet.ieee1905, "Packet is not IEEE1905: {}".format(packet)
+
         packet_tlvs = list(packet.ieee1905_tlvs)
-        result = True
         for t in tlvs:
             if t in packet_tlvs:
                 packet_tlvs.remove(t)
             else:
-                self.fail("Packet misses tlv:\n {}".format(str(t)))
-                result = False
-        if packet_tlvs:
-            self.fail("Packet has unexpected tlvs:\n {}".format("\n ".join(map(str, packet_tlvs))))
-            result = False
-        return result
+                assert False, "Packet misses tlv:\n {}".format(str(t))
+
+        assert not packet_tlvs, "Packet has unexpected tlvs:\n {}".format(
+            "\n ".join(map(str, packet_tlvs)))
 
     def check_topology_notification(self, eth_src: str, neighbors: list,
                                     sta: env.Station, event: env.StationEvent, bssid: str) -> bool:
