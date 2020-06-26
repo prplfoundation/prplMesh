@@ -2,17 +2,13 @@
     "prplmesh_docker": {
         "name": "controller",
         "board_type": "prplmesh_docker",
-        "role": "controller",
+        "role": "agent",
         "conn_cmd": "",
         "devices": [
             {
-                "name": "lan",
+                "name": "wan",
                 "type": "prplmesh_docker",
-                "conn_cmd": ""
-            },
-            {
-                "name": "lan2",
-                "type": "prplmesh_docker",
+                "role": "controller",
                 "conn_cmd": ""
             },
             {
@@ -31,7 +27,7 @@
         "conn_cmd": "cu -s 115200 -l /dev/ttyUSB0",
         "devices": [
             {
-            "name": "controller",
+            "name": "wan",
             "type": "prplmesh_docker",
             "role": "controller",
             "docker_network": "prplMesh-net-rax40-1",
