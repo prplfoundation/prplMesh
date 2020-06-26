@@ -14,14 +14,11 @@ class ApConfigRenew(PrplMeshBaseTest):
     """Check initial configuration on device."""
 
     def runTest(self):
-        # Locate agents and controller
-        for dev in self.dev:
-            if dev.controller_entity:
-                controller = dev.controller_entity
-            if dev.agent_entity:
-                agent = dev.agent_entity
+        # Locate test participants
+        agent = self.dev.DUT.agent_entity
+        controller = self.dev.wan.controller_entity
 
-        dev.wired_sniffer.start(self.__class__.__name__ + "-" + dev.name)
+        self.dev.DUT.wired_sniffer.start(self.__class__.__name__ + "-" + self.dev.DUT.name)
         # Regression test: MAC address should be case insensitive
         mac_repeater1_upper = agent.mac.upper()
         controller.ucc_socket.cmd_reply("DEV_RESET_DEFAULT")
@@ -35,7 +32,7 @@ class ApConfigRenew(PrplMeshBaseTest):
                                             tlv(0x0F, 0x0001, "{0x00}"),
                                             tlv(0x10, 0x0001, "{0x00}"))
 
-        time.sleep(30)
+        time.sleep(5)
         self.check_log(agent.radios[0],
                        r"ssid: Multi-AP-24G-1 .*"
                        r"fronthaul: true backhaul: false",
@@ -61,7 +58,13 @@ class ApConfigRenew(PrplMeshBaseTest):
     def teardown_class(cls):
         """Teardown method, optional for boardfarm tests."""
         test = cls.test_obj
-        for dev in test.dev:
-            if dev.agent_entity:
-                print("Sniffer - stop")
-                dev.wired_sniffer.stop()
+        print("Sniffer - stop")
+        test.dev.DUT.wired_sniffer.stop()
+        # Send additional Ctrl+C to the device to terminate "tail -f"
+        # Which is used to read log from device. Required only for tests on HW
+        try:
+            test.dev.DUT.agent_entity.device.send('\003')
+        except AttributeError:
+            # If AttributeError was raised - we are dealing with dummy devices.
+            # We don't have to additionaly send Ctrl+C for dummy devices.
+            pass
