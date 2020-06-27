@@ -88,9 +88,10 @@ static void calc_curr_traffic(std::string buff, uint64_t &total, uint32_t &curr)
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-mon_wlan_hal_nl80211::mon_wlan_hal_nl80211(const std::string &iface_name, hal_event_cb_t callback)
-    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, callback),
-      base_wlan_hal_nl80211(bwl::HALType::Monitor, iface_name, callback, BUFFER_SIZE)
+mon_wlan_hal_nl80211::mon_wlan_hal_nl80211(const std::string &iface_name, hal_event_cb_t callback,
+                                           const bwl::hal_conf_t &hal_conf)
+    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, callback, hal_conf),
+      base_wlan_hal_nl80211(bwl::HALType::Monitor, iface_name, callback, BUFFER_SIZE, hal_conf)
 {
 }
 
@@ -583,10 +584,11 @@ bool mon_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
 
 } // namespace nl80211
 
-std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(std::string iface_name,
-                                                  base_wlan_hal::hal_event_cb_t callback)
+std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(const std::string &iface_name,
+                                                  base_wlan_hal::hal_event_cb_t callback,
+                                                  const bwl::hal_conf_t &hal_conf)
 {
-    return std::make_shared<nl80211::mon_wlan_hal_nl80211>(iface_name, callback);
+    return std::make_shared<nl80211::mon_wlan_hal_nl80211>(iface_name, callback, hal_conf);
 }
 
 } // namespace bwl
