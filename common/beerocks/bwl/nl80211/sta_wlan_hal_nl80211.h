@@ -12,6 +12,8 @@
 #include "base_wlan_hal_nl80211.h"
 #include <bwl/sta_wlan_hal.h>
 
+#define BUFFER_SIZE 4096
+
 namespace bwl {
 namespace nl80211 {
 
@@ -28,7 +30,8 @@ public:
      * @param [in] iface_name STA/Client interface name.
      * @param [in] callback Callback for handling internal events.
      */
-    sta_wlan_hal_nl80211(const std::string &iface_name, hal_event_cb_t callback);
+    sta_wlan_hal_nl80211(const std::string &iface_name, hal_event_cb_t callback,
+                         const bwl::hal_conf_t &hal_conf);
     virtual ~sta_wlan_hal_nl80211();
 
     virtual bool detach() override;
