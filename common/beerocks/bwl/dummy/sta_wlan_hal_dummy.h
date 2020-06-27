@@ -28,7 +28,8 @@ public:
      * @param [in] iface_name STA/Client interface name.
      * @param [in] callback Callback for handling internal events.
      */
-    sta_wlan_hal_dummy(const std::string &iface_name, hal_event_cb_t callback);
+    sta_wlan_hal_dummy(const std::string &iface_name, hal_event_cb_t callback,
+                       const bwl::hal_conf_t &hal_conf);
     virtual ~sta_wlan_hal_dummy();
 
     virtual bool start_wps_pbc() override;
