@@ -66,9 +66,10 @@ static mon_wlan_hal_dummy::Data dummy_to_bwl_data(const std::string &opcode)
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-mon_wlan_hal_dummy::mon_wlan_hal_dummy(const std::string &iface_name, hal_event_cb_t callback)
-    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, callback),
-      base_wlan_hal_dummy(bwl::HALType::Monitor, iface_name, callback)
+mon_wlan_hal_dummy::mon_wlan_hal_dummy(const std::string &iface_name, hal_event_cb_t callback,
+                                       const bwl::hal_conf_t &hal_conf)
+    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, callback, hal_conf),
+      base_wlan_hal_dummy(bwl::HALType::Monitor, iface_name, callback, hal_conf)
 {
 }
 
@@ -421,10 +422,11 @@ bool mon_wlan_hal_dummy::set(const std::string &param, const std::string &value,
 
 } // namespace dummy
 
-std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(std::string iface_name,
-                                                  base_wlan_hal::hal_event_cb_t callback)
+std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(const std::string &iface_name,
+                                                  base_wlan_hal::hal_event_cb_t callback,
+                                                  const bwl::hal_conf_t &hal_conf)
 {
-    return std::make_shared<dummy::mon_wlan_hal_dummy>(iface_name, callback);
+    return std::make_shared<dummy::mon_wlan_hal_dummy>(iface_name, callback, hal_conf);
 }
 
 } // namespace bwl
