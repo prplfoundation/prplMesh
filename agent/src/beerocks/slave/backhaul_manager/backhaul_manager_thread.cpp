@@ -1347,9 +1347,46 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
 
             // Create a HAL instance if doesn't exists
             if (!soc->sta_wlan_hal) {
+
+                // read slave config file
+                std::string slave_config_file_path = "./" + std::string(BEEROCKS_AGENT) +
+                                                     ".conf"; //search first in current directory
+                beerocks::config_file::sConfigSlave beerocks_slave_conf;
+                if (!beerocks::config_file::read_slave_config_file(slave_config_file_path,
+                                                                   beerocks_slave_conf)) {
+                    slave_config_file_path = BEEROCKS_CONF_PATH + std::string(BEEROCKS_AGENT) +
+                                             ".conf"; // if not found, search in beerocks path
+                    if (!beerocks::config_file::read_slave_config_file(slave_config_file_path,
+                                                                       beerocks_slave_conf)) {
+                        std::cout << "config file '" << slave_config_file_path << "' args error."
+                                  << std::endl;
+                        return 1;
+                    }
+                }
+
+                // Find correct interface number for get correct path for hostap_ctrl
+                beerocks::bpl::BPL_WLAN_IFACE interfaces[beerocks::IRE_MAX_SLAVES] = {0};
+                int num_of_interfaces = beerocks::IRE_MAX_SLAVES;
+                if (beerocks::bpl::cfg_get_all_prplmesh_wifi_interfaces(interfaces,
+                                                                        &num_of_interfaces)) {
+                    std::cout << "failed to read interfaces map" << std::endl;
+                    return 1;
+                }
+
+                uint8_t iface_num = 0;
+                for (iface_num = 0; iface_num < beerocks::IRE_MAX_SLAVES; iface_num++) {
+                    if (interfaces[iface_num].ifname == iface) {
+                        break;
+                    }
+                }
+
+                bwl::hal_conf_t hal_conf;
+                hal_conf.wpa_ctrl_path = beerocks_slave_conf.hostap_ctrl_iface[iface_num];
+
                 using namespace std::placeholders; // for `_1`
                 soc->sta_wlan_hal = bwl::sta_wlan_hal_create(
-                    iface, std::bind(&backhaul_manager::hal_event_handler, this, _1, iface));
+                    iface, std::bind(&backhaul_manager::hal_event_handler, this, _1, iface),
+                    hal_conf);
                 LOG_IF(!soc->sta_wlan_hal, FATAL) << "Failed creating HAL instance!";
             } else {
                 LOG(DEBUG) << "STA HAL exists...";
