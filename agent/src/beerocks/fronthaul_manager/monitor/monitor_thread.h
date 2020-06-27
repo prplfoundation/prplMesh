@@ -31,7 +31,7 @@ class monitor_thread : public beerocks::socket_thread {
 public:
     monitor_thread(const std::string &slave_uds_, const std::string &monitor_iface_,
                    beerocks::config_file::sConfigSlave &beerocks_slave_conf_,
-                   beerocks::logging &logger_);
+                   beerocks::logging &logger_, const std::string &hostap_ctrl_iface);
     virtual ~monitor_thread();
 
     virtual bool init() override;

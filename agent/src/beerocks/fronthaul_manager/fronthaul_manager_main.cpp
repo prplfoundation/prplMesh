@@ -230,7 +230,8 @@ int main(int argc, char *argv[])
     }
 
     // Create Monitor
-    son::monitor_thread monitor(agent_uds, fronthaul_iface, beerocks_slave_conf, *g_logger_monitor);
+    son::monitor_thread monitor(agent_uds, fronthaul_iface, beerocks_slave_conf, *g_logger_monitor,
+                                beerocks_slave_conf.hostap_ctrl_iface[iface_num]);
 
     auto touch_time_stamp_timeout = std::chrono::steady_clock::now();
     while (g_running) {
