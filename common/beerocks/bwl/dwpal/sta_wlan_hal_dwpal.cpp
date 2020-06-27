@@ -91,9 +91,10 @@ static std::string dwpal_security_val(WiFiSec sec)
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-sta_wlan_hal_dwpal::sta_wlan_hal_dwpal(const std::string &iface_name, hal_event_cb_t callback)
-    : base_wlan_hal(bwl::HALType::Station, iface_name, IfaceType::Intel, callback),
-      base_wlan_hal_dwpal(bwl::HALType::Station, iface_name, callback)
+sta_wlan_hal_dwpal::sta_wlan_hal_dwpal(const std::string &iface_name, hal_event_cb_t callback,
+                                       const bwl::hal_conf_t &hal_conf)
+    : base_wlan_hal(bwl::HALType::Station, iface_name, IfaceType::Intel, callback, hal_conf),
+      base_wlan_hal_dwpal(bwl::HALType::Station, iface_name, callback, hal_conf)
 {
 }
 
@@ -845,9 +846,10 @@ bool sta_wlan_hal_dwpal::parse_fapi_event(const std::string& opcode, std::shared
 } // namespace dwpal
 
 std::shared_ptr<sta_wlan_hal> sta_wlan_hal_create(const std::string &iface_name,
-                                                  base_wlan_hal::hal_event_cb_t callback)
+                                                  base_wlan_hal::hal_event_cb_t callback,
+                                                  const bwl::hal_conf_t &hal_conf)
 {
-    return std::make_shared<dwpal::sta_wlan_hal_dwpal>(iface_name, callback);
+    return std::make_shared<dwpal::sta_wlan_hal_dwpal>(iface_name, callback, hal_conf);
 }
 
 } // namespace bwl
