@@ -218,17 +218,7 @@ base_wlan_hal_nl80211::base_wlan_hal_nl80211(HALType type, const std::string &if
         });
     }
 
-    m_wpa_ctrl_path = BASE_CTRL_PATH;
-    if (get_type() == HALType::AccessPoint || get_type() == HALType::Monitor) {
-        m_wpa_ctrl_path += "hostapd/";
-    } else if (get_type() == HALType::Station) {
-        m_wpa_ctrl_path += "wpa_supplicant/";
-    } else {
-        LOG(ERROR) << "Unsupported HAL Type: " << int(get_type());
-        return; // HACK TODO what should we do in that case?
-    }
-
-    m_wpa_ctrl_path += m_radio_info.iface_name;
+    m_wpa_ctrl_path = hal_conf.wpa_ctrl_path;
 
     // Initialize the FSM
     fsm_setup();
