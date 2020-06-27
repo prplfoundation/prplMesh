@@ -541,9 +541,10 @@ static std::shared_ptr<char> generate_client_assoc_event(const std::string &even
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-mon_wlan_hal_dwpal::mon_wlan_hal_dwpal(const std::string &iface_name, hal_event_cb_t callback)
+mon_wlan_hal_dwpal::mon_wlan_hal_dwpal(const std::string &iface_name, hal_event_cb_t callback,
+                                       const bwl::hal_conf_t &hal_conf)
     : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, callback),
-      base_wlan_hal_dwpal(bwl::HALType::Monitor, iface_name, callback)
+      base_wlan_hal_dwpal(bwl::HALType::Monitor, iface_name, callback, hal_conf)
 {
 }
 
@@ -1439,9 +1440,10 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
 } // namespace dwpal
 
 std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(std::string iface_name,
-                                                  base_wlan_hal::hal_event_cb_t callback)
+                                                  base_wlan_hal::hal_event_cb_t callback,
+                                                  const bwl::hal_conf_t &hal_conf)
 {
-    return std::make_shared<dwpal::mon_wlan_hal_dwpal>(iface_name, callback);
+    return std::make_shared<dwpal::mon_wlan_hal_dwpal>(iface_name, callback, hal_conf);
 }
 
 } // namespace bwl
