@@ -65,7 +65,8 @@ public:
 
 // mon HAL factory types
 std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(std::string iface_name,
-                                                  base_wlan_hal::hal_event_cb_t cb);
+                                                  base_wlan_hal::hal_event_cb_t cb,
+                                                  const bwl::hal_conf_t &hal_conf);
 
 } // namespace bwl
 
