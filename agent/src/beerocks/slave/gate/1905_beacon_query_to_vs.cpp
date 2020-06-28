@@ -1,7 +1,7 @@
 
 #include "1905_beacon_query_to_vs.h"
 #include <bcl/beerocks_defines.h>
-#include <mapf/common/utils.h>
+#include <bcl/beerocks_string_utils.h>
 
 namespace beerocks {
 namespace gate {
@@ -49,8 +49,8 @@ bool load(std::shared_ptr<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RE
     lhs_params.mandatory_duration = 0;
     lhs_params.use_optional_ssid  = 0;
 
-    mapf::utils::copy_string(lhs_params.ssid, beacon_metrics_query->ssid_str().c_str(),
-                             beerocks::message::WIFI_SSID_MAX_LENGTH);
+    string_utils::copy_string(lhs_params.ssid, beacon_metrics_query->ssid_str().c_str(),
+                              beerocks::message::WIFI_SSID_MAX_LENGTH);
 
     // how many elements in the list of channels, we support only 1 at the moment
     auto ap_ch_report_length = beacon_metrics_query->ap_channel_reports_list_length();

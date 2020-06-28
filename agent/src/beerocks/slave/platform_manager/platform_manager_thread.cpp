@@ -430,7 +430,7 @@ void main_thread::send_dhcp_notification(const std::string &op, const std::strin
 
     dhcp_notif->mac()  = tlvf::mac_from_string(mac);
     dhcp_notif->ipv4() = network_utils::ipv4_from_string(ip);
-    mapf::utils::copy_string(dhcp_notif->hostname(0), hostname.c_str(), message::NODE_NAME_LENGTH);
+    string_utils::copy_string(dhcp_notif->hostname(0), hostname.c_str(), message::NODE_NAME_LENGTH);
 
     // Get a slave socket
     Socket *sd = get_backhaul_socket();
@@ -745,7 +745,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             response->result() = 1;
         }
 
-        mapf::utils::copy_string(response->params().user_password, pass, message::USER_PASS_LEN);
+        string_utils::copy_string(response->params().user_password, pass, message::USER_PASS_LEN);
 
         // Sent with unsafe because BML is reachable only on platform thread
         message_com::send_cmdu(sd, cmdu_tx);
@@ -764,10 +764,10 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             return false;
         }
         if (!master_version.empty() && !slave_version.empty()) {
-            mapf::utils::copy_string(response->versions().master_version, master_version.c_str(),
-                                     message::VERSION_LENGTH);
-            mapf::utils::copy_string(response->versions().slave_version, slave_version.c_str(),
-                                     message::VERSION_LENGTH);
+            string_utils::copy_string(response->versions().master_version, master_version.c_str(),
+                                      message::VERSION_LENGTH);
+            string_utils::copy_string(response->versions().slave_version, slave_version.c_str(),
+                                      message::VERSION_LENGTH);
             response->result() = 1;
         } else {
             response->result() = 0;
@@ -928,8 +928,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                 }
             }
 
-            mapf::utils::copy_string(msg_ssid, ssid, message::WIFI_SSID_MAX_LENGTH);
-            mapf::utils::copy_string(msg_pass, pass, message::WIFI_PASS_MAX_LENGTH);
+            string_utils::copy_string(msg_ssid, ssid, message::WIFI_SSID_MAX_LENGTH);
+            string_utils::copy_string(msg_pass, pass, message::WIFI_PASS_MAX_LENGTH);
 
             //clear the pwd in the memory
             memset(&pass, 0, sizeof(pass));
@@ -1020,22 +1020,22 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             response->result() = 1;
         }
 
-        mapf::utils::copy_string(params.manufacturer, bpl_device_info.manufacturer,
-                                 message::DEV_INFO_STR_MAX_LEN);
-        mapf::utils::copy_string(params.model_name, bpl_device_info.model_name,
-                                 message::DEV_INFO_STR_MAX_LEN);
-        mapf::utils::copy_string(params.serial_number, bpl_device_info.serial_number,
-                                 message::DEV_INFO_STR_MAX_LEN);
+        string_utils::copy_string(params.manufacturer, bpl_device_info.manufacturer,
+                                  message::DEV_INFO_STR_MAX_LEN);
+        string_utils::copy_string(params.model_name, bpl_device_info.model_name,
+                                  message::DEV_INFO_STR_MAX_LEN);
+        string_utils::copy_string(params.serial_number, bpl_device_info.serial_number,
+                                  message::DEV_INFO_STR_MAX_LEN);
 
         // LAN
-        mapf::utils::copy_string(params.lan_iface_name, bpl_device_info.lan_iface_name,
-                                 message::IFACE_NAME_LENGTH);
+        string_utils::copy_string(params.lan_iface_name, bpl_device_info.lan_iface_name,
+                                  message::IFACE_NAME_LENGTH);
         params.lan_ip_address   = bpl_device_info.lan_ip_address;
         params.lan_network_mask = bpl_device_info.lan_network_mask;
 
         // WAN
-        mapf::utils::copy_string(params.wan_iface_name, bpl_device_info.wan_iface_name,
-                                 message::IFACE_NAME_LENGTH);
+        string_utils::copy_string(params.wan_iface_name, bpl_device_info.wan_iface_name,
+                                  message::IFACE_NAME_LENGTH);
         params.wan_ip_address   = bpl_device_info.wan_ip_address;
         params.wan_network_mask = bpl_device_info.wan_network_mask;
 
