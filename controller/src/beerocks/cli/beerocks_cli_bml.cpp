@@ -557,6 +557,20 @@ void cli_bml::setFunctionsMapAndArray()
         " is-single-scan - 0 for continuous-scan results (default), 1 for single scan.",
         static_cast<pFunction>(&cli_bml::get_dcs_scan_results_caller), 2, 3, STRING_ARG, INT_ARG,
         INT_ARG);
+    insertCommandToMap("bml_client_get_client_list", "", "Get client list.",
+                       static_cast<pFunction>(&cli_bml::client_get_client_list_caller), 0, 0);
+    insertCommandToMap(
+        "bml_client_set_client",
+        "<sta_mac> <selected_bands> [<stay_on_initial_radio>] [<stay_on_selected_device>]",
+        "Set client with the given STA MAC:"
+        " selected_bands - Bitwise parameter, 1 for 2.4G, 2 for 5G, 3 for both, 0 for Disabled"
+        " stay_on_initial_radio - 1 for true, 0 for false or (default) -1 for not configured,"
+        " stay_on_selected_device - 1 for true, 0 for false or (default) -1 for not configured",
+        static_cast<pFunction>(&cli_bml::client_set_client_caller), 2, 4, STRING_ARG, INT_ARG,
+        INT_ARG, INT_ARG);
+    insertCommandToMap("bml_client_get_client", "<sta_mac>", "Get client with the given STA MAC.",
+                       static_cast<pFunction>(&cli_bml::client_get_client_caller), 1, 1,
+                       STRING_ARG);
     //bool insertCommandToMap(std::string command, std::string help_args, std::string help,  pFunction funcPtr, uint8_t minNumOfArgs, uint8_t maxNumOfArgs,
 }
 
@@ -1303,6 +1317,53 @@ int cli_bml::get_dcs_scan_results_caller(int numOfArgs)
     } else if (numOfArgs == 3) {
         bool single_scan = (args.intArgs[2] == 1);
         return get_dcs_scan_results(args.stringArgs[0], args.intArgs[1], single_scan);
+    }
+    return -1;
+}
+
+/**
+ * Caller function for client_get_client_list_caller.
+ *
+ * @param [in] numOfArgs Number of received arguments
+ * @return 0 on success.
+ */
+int cli_bml::client_get_client_list_caller(int numOfArgs)
+{
+    if (numOfArgs == 0) {
+        return client_get_client_list();
+    }
+    return -1;
+}
+
+/**
+ * Caller function for client_set_client_caller.
+ *
+ * @param [in] numOfArgs Number of received arguments
+ * @return 0 on success.
+ */
+int cli_bml::client_set_client_caller(int numOfArgs)
+{
+    if (numOfArgs == 2) {
+        return client_set_client(args.stringArgs[0], args.intArgs[1]);
+    } else if (numOfArgs == 3) {
+        return client_set_client(args.stringArgs[0], args.intArgs[1], args.intArgs[2]);
+    } else if (numOfArgs == 4) {
+        return client_set_client(args.stringArgs[0], args.intArgs[1], args.intArgs[2],
+                                 args.intArgs[3]);
+    }
+    return -1;
+}
+
+/**
+ * Caller function for client_get_client_caller.
+ *
+ * @param [in] numOfArgs Number of received arguments
+ * @return 0 on success.
+ */
+int cli_bml::client_get_client_caller(int numOfArgs)
+{
+    if (numOfArgs == 1) {
+        return client_get_client(args.stringArgs[0]);
     }
     return -1;
 }
@@ -2140,6 +2201,104 @@ int cli_bml::get_dcs_scan_results(const std::string &radio_mac, uint32_t max_res
         }
     }
     printBmlReturnVals("bml_get_dcs_scan_results", ret);
+
+    return 0;
+}
+
+/**
+ * get all client list.
+ * 
+ * @return 0 on success.
+ */
+int cli_bml::client_get_client_list()
+{
+    char client_list[256];
+    unsigned int client_list_size;
+
+    int ret = bml_client_get_client_list(ctx, client_list, &client_list_size);
+    auto client_list_vec =
+        beerocks::string_utils::str_split(std::string(client_list, client_list_size), ',');
+
+    std::cout << "client list:" << std::endl;
+    for (const auto &client : client_list_vec) {
+        std::cout << "- " << client << std::endl;
+    }
+
+    printBmlReturnVals("bml_client_get_client_list", ret);
+
+    return 0;
+}
+
+/**
+ * Set specific client according to MAC.
+ * 
+ * @param [in] sta_mac MAC address of requested client.
+ * @param [in] selected_bands comma-seperated selected bands.
+ * @param [in] stay_on_initial_radio Whather to stay on initial radio or not.
+ * @param [in] stay_on_selected_device Whather to stay on selected device or not.
+ * @return 0 on success.
+ */
+int cli_bml::client_set_client(const std::string &sta_mac, int8_t selected_bands,
+                               int8_t stay_on_initial_radio, int8_t stay_on_selected_device)
+{
+    BML_CLIENT_CONFIG cfg;
+
+    cfg.selected_bands          = selected_bands;
+    cfg.stay_on_initial_radio   = stay_on_initial_radio;
+    cfg.stay_on_selected_device = stay_on_selected_device;
+
+    int ret = bml_client_set_client(ctx, sta_mac.c_str(), &cfg);
+
+    printBmlReturnVals("bml_client_set_client", ret);
+
+    return 0;
+}
+
+/**
+ * get specific client according to MAC.
+ * 
+ * @param [in] sta_mac MAC address of requested client
+ * 
+ * @return 0 on success.
+ */
+int cli_bml::client_get_client(const std::string &sta_mac)
+{
+    BML_CLIENT client;
+    int ret = bml_client_get_client(ctx, sta_mac.c_str(), &client);
+
+    if (ret == BML_RET_OK) {
+        auto client_bool_print = [](int8_t val) -> std::string {
+            if (val == BML_PARAMETER_NOT_CONFIGURED)
+                return "Not configured";
+            return val ? "True" : "False";
+        };
+        auto client_selected_bands_print = [](int8_t val) -> std::string {
+            std::string ret = "";
+            if (val == BML_CLIENT_SELECTED_BANDS_DISABLED)
+                return "Disabled";
+            if (val & BML_CLIENT_SELECTED_BANDS_24G)
+                ret += "2.4 Ghz,";
+            if (val & BML_CLIENT_SELECTED_BANDS_5G)
+                ret += "5 Ghz,";
+            if (val & BML_CLIENT_SELECTED_BANDS_6G)
+                ret += "6 Ghz,";
+            if (val & BML_CLIENT_SELECTED_BANDS_60G)
+                ret += "60 Ghz,";
+            return ret;
+        };
+        std::cout << "client: " << client.sta_mac << std::endl
+                  << " timestamp_sec: " << client.timestamp_sec << std::endl
+                  << " stay_on_initial_radio: " << client_bool_print(client.stay_on_initial_radio)
+                  << std::endl
+                  << " stay_on_selected_device: "
+                  << client_bool_print(client.stay_on_selected_device) << std::endl
+                  << " selected_bands: " << client_selected_bands_print(client.selected_bands)
+                  << std::endl
+                  << " single_band: " << client_bool_print(client.single_band) << std::endl
+                  << " time_life_delay_days:" << client.time_life_delay_days << std::endl;
+    }
+
+    printBmlReturnVals("bml_client_get_client", ret);
 
     return 0;
 }
