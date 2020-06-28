@@ -25,7 +25,7 @@ target_include_directories(${PROJECT_NAME}
         $<INSTALL_INTERFACE:include>
 )
 
-target_link_libraries(${PROJECT_NAME} PUBLIC nl-3 nl-route-3 tlvf elpp mapfcommon)
+target_link_libraries(${PROJECT_NAME} PUBLIC nl-3 nl-route-3 tlvf elpp)
 
 install(TARGETS ${PROJECT_NAME} EXPORT bclConfig
     ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
@@ -61,7 +61,7 @@ if (BUILD_TESTS)
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     )
-    target_link_libraries(${TEST_PROJECT_NAME} nl-3 nl-route-3 tlvf elpp mapfcommon)
+    target_link_libraries(${TEST_PROJECT_NAME} nl-3 nl-route-3 tlvf elpp)
     target_link_libraries(${TEST_PROJECT_NAME} gtest_main gmock)
     install(TARGETS ${TEST_PROJECT_NAME} DESTINATION bin/tests)
     add_test(NAME ${TEST_PROJECT_NAME} COMMAND $<TARGET_FILE:${TEST_PROJECT_NAME}>)
