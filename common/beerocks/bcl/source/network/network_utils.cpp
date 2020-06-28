@@ -9,7 +9,6 @@
 #include <bcl/beerocks_string_utils.h>
 #include <bcl/network/network_utils.h>
 #include <bcl/network/swap.h>
-#include <mapf/common/utils.h>
 
 #include <arpa/inet.h>
 #include <dirent.h>
@@ -60,7 +59,7 @@ static int read_iface_flags(const std::string &strIface, struct ifreq &if_req)
         return errno;
 
     // Read the interface flags
-    mapf::utils::copy_string(if_req.ifr_name, strIface.c_str(), sizeof(if_req.ifr_name));
+    beerocks::string_utils::copy_string(if_req.ifr_name, strIface.c_str(), sizeof(if_req.ifr_name));
     int rv = ioctl(socId, SIOCGIFFLAGS, &if_req);
     close(socId);
 
@@ -225,7 +224,7 @@ bool network_utils::get_raw_iface_info(const std::string &iface_name, raw_iface_
 
     // MAC Address
     ifr = {};
-    mapf::utils::copy_string(ifr.ifr_name, iface_name.c_str(), IF_NAMESIZE);
+    string_utils::copy_string(ifr.ifr_name, iface_name.c_str(), IF_NAMESIZE);
     if ((ioctl(fd, SIOCGIFHWADDR, &ifr)) == -1) {
         LOG(ERROR) << "ioctl failed: " << strerror(errno);
         close(fd);
@@ -235,7 +234,7 @@ bool network_utils::get_raw_iface_info(const std::string &iface_name, raw_iface_
 
     // IP Address
     ifr = {};
-    mapf::utils::copy_string(ifr.ifr_name, iface_name.c_str(), IF_NAMESIZE);
+    string_utils::copy_string(ifr.ifr_name, iface_name.c_str(), IF_NAMESIZE);
     if ((ioctl(fd, SIOCGIFADDR, &ifr)) == -1) {
         LOG(ERROR) << "ioctl failed: " << strerror(errno);
         close(fd);
@@ -245,7 +244,7 @@ bool network_utils::get_raw_iface_info(const std::string &iface_name, raw_iface_
 
     // Network Mask
     ifr = {};
-    mapf::utils::copy_string(ifr.ifr_name, iface_name.c_str(), IF_NAMESIZE);
+    string_utils::copy_string(ifr.ifr_name, iface_name.c_str(), IF_NAMESIZE);
     if ((ioctl(fd, SIOCGIFNETMASK, &ifr)) == -1) {
         LOG(ERROR) << "ioctl failed: " << strerror(errno);
         close(fd);
@@ -255,7 +254,7 @@ bool network_utils::get_raw_iface_info(const std::string &iface_name, raw_iface_
 
     // Broadcast Address
     ifr = {};
-    mapf::utils::copy_string(ifr.ifr_name, iface_name.c_str(), IF_NAMESIZE);
+    string_utils::copy_string(ifr.ifr_name, iface_name.c_str(), IF_NAMESIZE);
     if ((ioctl(fd, SIOCGIFBRDADDR, &ifr)) == -1) {
         LOG(ERROR) << "ioctl failed: " << strerror(errno);
         close(fd);
@@ -563,7 +562,7 @@ bool network_utils::linux_add_iface_to_bridge(const std::string &bridge, const s
         return false;
     }
 
-    mapf::utils::copy_string(ifr.ifr_name, bridge.c_str(), IFNAMSIZ);
+    string_utils::copy_string(ifr.ifr_name, bridge.c_str(), IFNAMSIZ);
 #ifdef SIOCBRADDIF
     ifr.ifr_ifindex = ifindex;
     err             = ioctl(br_socket_fd, SIOCBRADDIF, &ifr);
@@ -607,7 +606,7 @@ bool network_utils::linux_remove_iface_from_bridge(const std::string &bridge,
         return false;
     }
 
-    mapf::utils::copy_string(ifr.ifr_name, bridge.c_str(), IFNAMSIZ);
+    string_utils::copy_string(ifr.ifr_name, bridge.c_str(), IFNAMSIZ);
 #ifdef SIOCBRDELIF
     ifr.ifr_ifindex = ifindex;
     err             = ioctl(br_socket_fd, SIOCBRDELIF, &ifr);
@@ -654,7 +653,7 @@ bool network_utils::linux_iface_ctrl(const std::string &iface, bool up, std::str
         return false;
     }
 
-    mapf::utils::copy_string(ifr.ifr_name, iface.c_str(), IFNAMSIZ);
+    string_utils::copy_string(ifr.ifr_name, iface.c_str(), IFNAMSIZ);
     while (up) {
         ifr.ifr_addr.sa_family = AF_INET;
         if (!ip.empty()) {
@@ -722,7 +721,7 @@ bool network_utils::linux_iface_get_mac(const std::string &iface, std::string &m
     }
 
     ifr.ifr_addr.sa_family = AF_INET;
-    mapf::utils::copy_string(ifr.ifr_name, iface.c_str(), IFNAMSIZ);
+    string_utils::copy_string(ifr.ifr_name, iface.c_str(), IFNAMSIZ);
     if (ioctl(fd, SIOCGIFHWADDR, &ifr) == -1) {
         LOG(ERROR) << "SIOCGIFHWADDR";
         close(fd);
@@ -769,7 +768,7 @@ bool network_utils::linux_iface_get_ip(const std::string &iface, std::string &ip
     }
 
     ifr.ifr_addr.sa_family = AF_INET;
-    mapf::utils::copy_string(ifr.ifr_name, iface.c_str(), IFNAMSIZ);
+    string_utils::copy_string(ifr.ifr_name, iface.c_str(), IFNAMSIZ);
 
     if (ioctl(fd, SIOCGIFADDR, &ifr) == -1) {
         LOG(ERROR) << "SIOCGIFADDR";
@@ -871,7 +870,7 @@ bool network_utils::linux_iface_get_speed(const std::string &iface, uint32_t &sp
         } ecmd;
         int rc;
 
-        mapf::utils::copy_string(ifr.ifr_name, iface.c_str(), sizeof(ifr.ifr_name));
+        string_utils::copy_string(ifr.ifr_name, iface.c_str(), sizeof(ifr.ifr_name));
         ifr.ifr_data = reinterpret_cast<char *>(&ecmd);
 
         /* Handshake with kernel to determine number of words for link
@@ -1010,7 +1009,7 @@ std::vector<network_utils::ip_info> network_utils::get_ip_list()
             ip_info.iface = std::string(rtInfo->ifName);
 
             ifr.ifr_addr.sa_family = AF_INET;
-            mapf::utils::copy_string(ifr.ifr_name, rtInfo->ifName, IFNAMSIZ);
+            string_utils::copy_string(ifr.ifr_name, rtInfo->ifName, IFNAMSIZ);
 
             if (ioctl(fd, SIOCGIFADDR, &ifr) == -1) {
                 continue; // skip, if can't read ip

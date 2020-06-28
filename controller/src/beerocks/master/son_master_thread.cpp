@@ -2035,8 +2035,8 @@ bool master_thread::handle_intel_slave_join(
     auto slave_version_s  = version::version_from_string(slave_version);
     auto master_version_s = version::version_from_string(BEEROCKS_VERSION);
 
-    mapf::utils::copy_string(join_response->master_version(), BEEROCKS_VERSION,
-                             message::VERSION_LENGTH);
+    string_utils::copy_string(join_response->master_version(), BEEROCKS_VERSION,
+                              message::VERSION_LENGTH);
 
     // check if fatal mismatch
     if (slave_version_s.major != master_version_s.major ||
@@ -2047,8 +2047,8 @@ bool master_thread::handle_intel_slave_join(
         LOG(INFO) << " bridge_mac=" << bridge_mac << " bridge_ipv4=" << bridge_ipv4;
 
         join_response->err_code() = beerocks::JOIN_RESP_VERSION_MISMATCH;
-        mapf::utils::copy_string(join_response->master_version(message::VERSION_LENGTH),
-                                 BEEROCKS_VERSION, message::VERSION_LENGTH);
+        string_utils::copy_string(join_response->master_version(message::VERSION_LENGTH),
+                                  BEEROCKS_VERSION, message::VERSION_LENGTH);
         return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
     }
 
@@ -2172,8 +2172,8 @@ bool master_thread::handle_intel_slave_join(
     // send JOINED_RESPONSE with son config
     {
 
-        mapf::utils::copy_string(join_response->master_version(message::VERSION_LENGTH),
-                                 BEEROCKS_VERSION, message::VERSION_LENGTH);
+        string_utils::copy_string(join_response->master_version(message::VERSION_LENGTH),
+                                  BEEROCKS_VERSION, message::VERSION_LENGTH);
         join_response->config().monitor_total_ch_load_notification_hi_th_percent =
             database.config.monitor_total_ch_load_notification_hi_th_percent;
         join_response->config().monitor_total_ch_load_notification_lo_th_percent =

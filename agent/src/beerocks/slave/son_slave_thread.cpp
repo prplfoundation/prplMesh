@@ -186,7 +186,8 @@ void slave_thread::platform_notify_error(beerocks::bpl::eErrorCode code,
     }
 
     error->code() = uint32_t(code);
-    mapf::utils::copy_string(error->data(0), error_data.c_str(), message::PLATFORM_ERROR_DATA_SIZE);
+    string_utils::copy_string(error->data(0), error_data.c_str(),
+                              message::PLATFORM_ERROR_DATA_SIZE);
 
     // Send the message
     message_com::send_cmdu(platform_manager_socket, cmdu_tx);
@@ -867,8 +868,8 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         if (request_in->params().use_optional_ssid &&
             std::string((char *)request_in->params().ssid).empty()) {
             //LOG(DEBUG) << "ssid field is empty! using slave ssid -> " << config.ssid;
-            mapf::utils::copy_string(request_in->params().ssid, platform_settings.front_ssid,
-                                     message::WIFI_SSID_MAX_LENGTH);
+            string_utils::copy_string(request_in->params().ssid, platform_settings.front_ssid,
+                                      message::WIFI_SSID_MAX_LENGTH);
         }
 
         auto request_out = message_com::create_vs_message<
@@ -1544,9 +1545,9 @@ bool slave_thread::handle_cmdu_platform_manager_message(
 
                 master_notification->mac()  = notification->mac();
                 master_notification->ipv4() = notification->ipv4();
-                mapf::utils::copy_string(master_notification->name(message::NODE_NAME_LENGTH),
-                                         notification->hostname(message::NODE_NAME_LENGTH),
-                                         message::NODE_NAME_LENGTH);
+                string_utils::copy_string(master_notification->name(message::NODE_NAME_LENGTH),
+                                          notification->hostname(message::NODE_NAME_LENGTH),
+                                          message::NODE_NAME_LENGTH);
                 send_cmdu_to_controller(cmdu_tx);
             }
 
@@ -3134,8 +3135,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 return false;
             }
 
-            mapf::utils::copy_string(request->iface_name(message::IFACE_NAME_LENGTH),
-                                     config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
+            string_utils::copy_string(request->iface_name(message::IFACE_NAME_LENGTH),
+                                      config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
             message_com::send_cmdu(platform_manager_socket, cmdu_tx);
 
             LOG(TRACE) << "send ACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST";
@@ -3193,12 +3194,12 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         if (platform_settings.local_gw || config.backhaul_wireless_iface.empty()) {
             memset(request->sta_iface(message::IFACE_NAME_LENGTH), 0, message::IFACE_NAME_LENGTH);
         } else {
-            mapf::utils::copy_string(request->sta_iface(message::IFACE_NAME_LENGTH),
-                                     config.backhaul_wireless_iface.c_str(),
-                                     message::IFACE_NAME_LENGTH);
+            string_utils::copy_string(request->sta_iface(message::IFACE_NAME_LENGTH),
+                                      config.backhaul_wireless_iface.c_str(),
+                                      message::IFACE_NAME_LENGTH);
         }
-        mapf::utils::copy_string(request->hostap_iface(message::IFACE_NAME_LENGTH),
-                                 config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
+        string_utils::copy_string(request->hostap_iface(message::IFACE_NAME_LENGTH),
+                                  config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
 
         request->local_master()         = platform_settings.local_master;
         request->local_gw()             = platform_settings.local_gw;
@@ -3315,19 +3316,19 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             // TODO: On passive mode, mem_only_psk is always be set, so supplying the credentials
             // to the backhaul manager will no longer be necessary, and therefore should be be
             // removed completely from beerocks including the BPL.
-            mapf::utils::copy_string(bh_enable->ssid(message::WIFI_SSID_MAX_LENGTH),
-                                     platform_settings.back_ssid, message::WIFI_SSID_MAX_LENGTH);
-            mapf::utils::copy_string(bh_enable->pass(message::WIFI_PASS_MAX_LENGTH),
-                                     platform_settings.back_pass, message::WIFI_PASS_MAX_LENGTH);
+            string_utils::copy_string(bh_enable->ssid(message::WIFI_SSID_MAX_LENGTH),
+                                      platform_settings.back_ssid, message::WIFI_SSID_MAX_LENGTH);
+            string_utils::copy_string(bh_enable->pass(message::WIFI_PASS_MAX_LENGTH),
+                                      platform_settings.back_pass, message::WIFI_PASS_MAX_LENGTH);
             bh_enable->security_type() = static_cast<uint32_t>(
                 platform_to_bwl_security(platform_settings.back_security_type));
             bh_enable->mem_only_psk() = platform_settings.mem_only_psk;
             bh_enable->backhaul_preferred_radio_band() =
                 platform_settings.backhaul_preferred_radio_band;
 
-            mapf::utils::copy_string(bh_enable->wire_iface(message::IFACE_NAME_LENGTH),
-                                     config.backhaul_wire_iface.c_str(),
-                                     message::IFACE_NAME_LENGTH);
+            string_utils::copy_string(bh_enable->wire_iface(message::IFACE_NAME_LENGTH),
+                                      config.backhaul_wire_iface.c_str(),
+                                      message::IFACE_NAME_LENGTH);
 
             bh_enable->wire_iface_type()     = config.backhaul_wire_iface_type;
             bh_enable->wireless_iface_type() = config.backhaul_wireless_iface_type;
@@ -3336,9 +3337,9 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         bh_enable->iface_mac()       = hostap_params.iface_mac;
         bh_enable->preferred_bssid() = tlvf::mac_from_string(config.backhaul_preferred_bssid);
 
-        mapf::utils::copy_string(bh_enable->sta_iface(message::IFACE_NAME_LENGTH),
-                                 config.backhaul_wireless_iface.c_str(),
-                                 message::IFACE_NAME_LENGTH);
+        string_utils::copy_string(bh_enable->sta_iface(message::IFACE_NAME_LENGTH),
+                                  config.backhaul_wireless_iface.c_str(),
+                                  message::IFACE_NAME_LENGTH);
 
         bh_enable->frequency_band() = hostap_params.frequency_band;
         bh_enable->max_bandwidth()  = hostap_params.max_bandwidth;
@@ -3517,8 +3518,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             is_backhual_reconf              = false;
 
             // Version
-            mapf::utils::copy_string(notification->slave_version(message::VERSION_LENGTH),
-                                     BEEROCKS_VERSION, message::VERSION_LENGTH);
+            string_utils::copy_string(notification->slave_version(message::VERSION_LENGTH),
+                                      BEEROCKS_VERSION, message::VERSION_LENGTH);
 
             // Platform Configuration
             notification->low_pass_filter_on()   = config.backhaul_wireless_iface_filter_low;
@@ -4237,10 +4238,10 @@ bool slave_thread::parse_intel_join_response(Socket *sd, beerocks::beerocks_head
             return false;
         }
 
-        mapf::utils::copy_string(notification->versions().master_version, master_version.c_str(),
-                                 sizeof(beerocks_message::sVersions::master_version));
-        mapf::utils::copy_string(notification->versions().slave_version, BEEROCKS_VERSION,
-                                 sizeof(beerocks_message::sVersions::slave_version));
+        string_utils::copy_string(notification->versions().master_version, master_version.c_str(),
+                                  sizeof(beerocks_message::sVersions::master_version));
+        string_utils::copy_string(notification->versions().slave_version, BEEROCKS_VERSION,
+                                  sizeof(beerocks_message::sVersions::slave_version));
         message_com::send_cmdu(platform_manager_socket, cmdu_tx);
     }
 
@@ -4262,10 +4263,10 @@ bool slave_thread::parse_intel_join_response(Socket *sd, beerocks::beerocks_head
             LOG(ERROR) << "Failed building message!";
             return false;
         }
-        mapf::utils::copy_string(notification->versions().master_version, master_version.c_str(),
-                                 sizeof(beerocks_message::sVersions::master_version));
-        mapf::utils::copy_string(notification->versions().slave_version, BEEROCKS_VERSION,
-                                 sizeof(beerocks_message::sVersions::slave_version));
+        string_utils::copy_string(notification->versions().master_version, master_version.c_str(),
+                                  sizeof(beerocks_message::sVersions::master_version));
+        string_utils::copy_string(notification->versions().slave_version, BEEROCKS_VERSION,
+                                  sizeof(beerocks_message::sVersions::slave_version));
         message_com::send_cmdu(platform_manager_socket, cmdu_tx);
         LOG(DEBUG) << "send ACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION";
 
@@ -4298,9 +4299,9 @@ bool slave_thread::parse_non_intel_join_response(Socket *sd)
     //            LOG(ERROR) << "Failed building message!";
     //            return false;
     //        }
-    //        mapf::utils::copy_string(notification->versions().master_version, master_version.c_str(),
+    //        string_utils::copy_string(notification->versions().master_version, master_version.c_str(),
     //                                  sizeof(beerocks_message::sVersions::master_version));
-    //        mapf::utils::copy_string(notification->versions().slave_version, BEEROCKS_VERSION,
+    //        string_utils::copy_string(notification->versions().slave_version, BEEROCKS_VERSION,
     //                                  sizeof(beerocks_message::sVersions::slave_version));
     //        message_com::send_cmdu(platform_manager_socket, cmdu_tx);
     //        LOG(DEBUG) << "send ACTION_PLATFORM_MASTER_SLAVE_VERSIONS_NOTIFICATION";

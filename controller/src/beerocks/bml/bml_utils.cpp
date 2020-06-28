@@ -8,6 +8,7 @@
 
 #include "bml_utils.h"
 
+#include <bcl/beerocks_string_utils.h>
 #include <bcl/beerocks_utils.h>
 #include <bcl/network/network_utils.h>
 
@@ -154,7 +155,7 @@ int bml_utils_node_to_string(const struct BML_NODE *node, char *buffer, int buff
         std::cout << "ERROR: bml_node length > given buffer length" << std::endl;
         return 0;
     } else {
-        mapf::utils::copy_string(buffer, ss.str().c_str(), buffer_len);
+        beerocks::string_utils::copy_string(buffer, ss.str().c_str(), buffer_len);
         return offset;
     }
 }
@@ -257,7 +258,7 @@ int bml_utils_stats_to_string(const struct BML_STATS *stats, char *buffer, int b
         std::cout << "ERROR: bml_stats length > given buffer length" << std::endl;
         return 0;
     } else {
-        mapf::utils::copy_string(buffer, ss.str().c_str(), buffer_len);
+        beerocks::string_utils::copy_string(buffer, ss.str().c_str(), buffer_len);
         return offset;
     }
 }
@@ -318,7 +319,7 @@ int bml_utils_stats_to_string_raw(const struct BML_STATS *stats, char *buffer, i
         std::cout << "ERROR: bml_stats length > given buffer length" << std::endl;
         return 0;
     } else {
-        mapf::utils::copy_string(buffer, ss.str().c_str(), buffer_len);
+        beerocks::string_utils::copy_string(buffer, ss.str().c_str(), buffer_len);
         return offset;
     }
 }
@@ -434,7 +435,7 @@ int bml_utils_event_to_string(const struct BML_EVENT *event, char *buffer, int b
         std::cout << "ERROR: bml_stats length > given buffer length" << std::endl;
         return 0;
     } else {
-        mapf::utils::copy_string(buffer, ss.str().c_str(), buffer_len);
+        beerocks::string_utils::copy_string(buffer, ss.str().c_str(), buffer_len);
         return offset;
     }
 }
