@@ -456,7 +456,8 @@ void backhaul_manager::platform_notify_error(bpl::eErrorCode code, const std::st
 
     error->code() = uint32_t(code);
 
-    mapf::utils::copy_string(error->data(0), error_data.c_str(), message::PLATFORM_ERROR_DATA_SIZE);
+    string_utils::copy_string(error->data(0), error_data.c_str(),
+                              message::PLATFORM_ERROR_DATA_SIZE);
 
     LOG(ERROR) << "platform_notify_error: " << error_data;
 
