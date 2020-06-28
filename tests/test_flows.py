@@ -11,7 +11,7 @@ import os
 import sys
 import time
 import traceback
-from typing import Callable, Union, NoReturn
+from typing import Callable, Union, Any, NoReturn
 
 import connmap
 import environment as env
@@ -261,6 +261,15 @@ class TestFlows:
             return False
 
         return True
+
+    def safe_check_obj_attribute(self, obj: object, attrib_name: str,
+                                 expected_val: Any, fail_str: str) -> NoReturn:
+        """Check if expected attrib exists first, fail test if it does not exist"""
+        try:
+            if getattr(obj, attrib_name) != expected_val:
+                self.fail(fail_str)
+        except AttributeError:
+            self.fail("{} has no attribute {}".format(type(obj).__name__, attrib_name))
 
     def run_tests(self, tests):
         '''Run all tests as specified on the command line.'''
