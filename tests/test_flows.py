@@ -841,58 +841,83 @@ class TestFlows:
         vap1.disassociate(sta1)
         vap2.disassociate(sta2)
 
-    def test_client_capability_query(self):
-        sta1 = env.Station.create()
-        sta2 = env.Station.create()
+    def base_test_client_capability_query(self, sta: env.Station):
+        mid = env.controller.dev_send_1905(env.agents[0].mac, 0x8009, tlv(
+            0x90, 0x000C, '{} {}'.format(env.agents[0].radios[0].mac, sta.mac)))
+        time.sleep(1)
 
-        association_frame = """00 0e 4d 75 6c 74 69 2d 41 50 2d 32 34 47 2d 31
-01 08 02 04 0b 0c 12 16 18 24 21 02 00 14 30 14
-01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f
-ac 02 00 00 32 04 30 48 60 6c 3b 10 51 51 53 54
-73 74 75 76 77 78 7c 7d 7e 7f 80 82 3b 16 0c 01
-02 03 04 05 0c 16 17 18 19 1a 1b 1c 1d 1e 1f 20
-21 80 81 82 46 05 70 00 00 00 00 46 05 71 50 50
-00 04 7f 0a 04 00 0a 82 21 40 00 40 80 00 dd 07
-00 50 f2 02 00 01 00 2d 1a 2d 11 03 ff ff 00 00
-00 00 00 00 00 00 00 00 00 00 00 00 00 00 18 e6
-e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
-03 c7 01 10 """
+        query = self.check_cmdu_type_single("client capability query", 0x8009,
+                                            env.controller.mac, env.agents[0].mac, mid)
+
+        query_tlv = self.check_cmdu_has_tlv_single(query, 0x90)
+        self.safe_check_obj_attribute(query_tlv, 'client_info_mac_addr', sta.mac,
+                                      "Wrong mac address in query")
+        self.safe_check_obj_attribute(query_tlv, 'client_info_bssid',
+                                      env.agents[0].radios[0].mac,
+                                      "Wrong bssid in query")
+
+        report = self.check_cmdu_type_single("client capability report", 0x800a,
+                                             env.agents[0].mac, env.controller.mac, mid)
+
+        client_info_tlv = self.check_cmdu_has_tlv_single(report, 0x90)
+        self.safe_check_obj_attribute(client_info_tlv, 'client_info_mac_addr', sta.mac,
+                                      "Wrong mac address in report")
+        self.safe_check_obj_attribute(client_info_tlv, 'client_info_bssid',
+                                      env.agents[0].radios[0].mac,
+                                      "Wrong bssid in report")
+        return report
+
+    def test_client_capability_query_fails_with_no_sta(self):
+        sta = env.Station.create()
 
         debug("Send client capability query for unconnected STA")
-        env.controller.dev_send_1905(env.agents[0].mac, 0x8009,
-                                     tlv(0x90, 0x000C,
-                                         '{} {}'.format(env.agents[0].radios[0].mac, sta1.mac)))
-        time.sleep(1)
-        debug("Confirming client capability query has been received on agent")
-        # check that both radio agents received it, in the future we'll add a check to verify which
-        # radio the query was intended for.
-        self.check_log(env.agents[0], r"CLIENT_CAPABILITY_QUERY_MESSAGE")
+        report = self.base_test_client_capability_query(sta)
 
-        debug("Confirming client capability report message has been received on controller")
-        self.check_log(env.controller, r"Received CLIENT_CAPABILITY_REPORT_MESSAGE")
-        self.check_log(env.controller,
-                       r"Result Code= FAILURE, client MAC= {}, BSSID= {}"
-                       .format(sta1.mac, env.agents[0].radios[0].mac))
+        cap_report_tlv = self.check_cmdu_has_tlv_single(report, 0x91)
+        self.safe_check_obj_attribute(cap_report_tlv, 'client_capability_result', '0x00000001',
+                                      "Capability query was successful for disconnected STA")
 
+        error_tlv = self.check_cmdu_has_tlv_single(report, 0xa3)
+        self.safe_check_obj_attribute(error_tlv, 'error_code_reason', '0x00000002',
+                                      "Wrong error reason code")
+        self.safe_check_obj_attribute(error_tlv, 'error_code_mac_addr', sta.mac,
+                                      "Wrong mac address in error code")
+
+    def test_client_capability_query_successful(self):
+        sta = env.Station.create()
+
+        expected_association_frame = "00:0e:4d:75:6c:74:69:2d:41:50:2d:32:34:47:2d:31:"\
+                                     "01:08:02:04:0b:0c:12:16:18:24:21:02:00:14:30:14:"\
+                                     "01:00:00:0f:ac:04:01:00:00:0f:ac:04:01:00:00:0f:"\
+                                     "ac:02:00:00:32:04:30:48:60:6c:3b:10:51:51:53:54:"\
+                                     "73:74:75:76:77:78:7c:7d:7e:7f:80:82:3b:16:0c:01:"\
+                                     "02:03:04:05:0c:16:17:18:19:1a:1b:1c:1d:1e:1f:20:"\
+                                     "21:80:81:82:46:05:70:00:00:00:00:46:05:71:50:50:"\
+                                     "00:04:7f:0a:04:00:0a:82:21:40:00:40:80:00:dd:07:"\
+                                     "00:50:f2:02:00:01:00:2d:1a:2d:11:03:ff:ff:00:00:"\
+                                     "00:00:00:00:00:00:00:00:00:00:00:00:00:00:18:e6:"\
+                                     "e1:09:00:bf:0c:b0:79:d1:33:fa:ff:0c:03:fa:ff:0c:"\
+                                     "03:c7:01:10"
+        # connect a station
         debug("Connect dummy STA to wlan0")
-        env.agents[0].radios[0].vaps[0].associate(sta2)
+        env.agents[0].radios[0].vaps[0].associate(sta)
 
-        debug("Send client capability query for connected STA")
-        env.controller.dev_send_1905(env.agents[0].mac, 0x8009,
-                                     tlv(0x90, 0x000C,
-                                         '{} {}'.format(env.agents[0].radios[0].mac, sta2.mac)))
-        time.sleep(1)
+        # then check capability query is successful with connected station
+        try:
+            report = self.base_test_client_capability_query(sta)
 
-        debug("Confirming client capability report message has been received on controller")
-        self.check_log(env.controller, r"Received CLIENT_CAPABILITY_REPORT_MESSAGE")
-        self.check_log(env.controller,
-                       r"Result Code= SUCCESS, client MAC= {}, BSSID= {}"
-                       .format(sta2.mac, env.agents[0].radios[0].mac))
-
-        for line in association_frame.splitlines():
-            self.check_log(env.controller, r"{}".format(line))
-
-        env.agents[0].radios[0].vaps[0].disassociate(sta2)
+            cap_report_tlv = self.check_cmdu_has_tlvs(report, 0x91)[0]
+            self.safe_check_obj_attribute(cap_report_tlv, 'client_capability_result', '0x00000000',
+                                          "Capability report result is not successful")
+            try:
+                if cap_report_tlv.client_capability_frame != expected_association_frame:
+                    self.fail("Capability report does not contain expected frame")
+                    debug(f"Frame received\n{cap_report_tlv.client_capability_frame}")
+                    debug(f"Frame expected\n{expected_association_frame}")
+            except AttributeError:
+                self.fail("Report does not contain capability frame")
+        finally:  # cleanup
+            env.agents[0].radios[0].vaps[0].disassociate(sta)
 
     def test_client_association_dummy(self):
         sta = env.Station.create()
