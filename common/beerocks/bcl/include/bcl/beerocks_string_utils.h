@@ -83,6 +83,8 @@ public:
 
     static std::string int_to_hex_string(const unsigned int integer,
                                          const uint8_t number_of_digits);
+
+    static void copy_string(char *dst, const char *src, size_t dst_len);
 };
 } // namespace beerocks
 
