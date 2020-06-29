@@ -31,6 +31,7 @@ public:
     sta_wlan_hal_nl80211(const std::string &iface_name, hal_event_cb_t callback);
     virtual ~sta_wlan_hal_nl80211();
 
+    virtual bool start_wps_pbc() override;
     virtual bool detach() override;
 
     virtual bool initiate_scan() override;

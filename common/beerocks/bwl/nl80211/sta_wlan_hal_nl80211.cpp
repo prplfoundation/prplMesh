@@ -25,6 +25,8 @@ sta_wlan_hal_nl80211::~sta_wlan_hal_nl80211() { sta_wlan_hal_nl80211::detach(); 
 
 bool sta_wlan_hal_nl80211::detach() { return true; }
 
+bool sta_wlan_hal_nl80211::start_wps_pbc() { return true; }
+
 bool sta_wlan_hal_nl80211::initiate_scan() { return true; }
 
 int sta_wlan_hal_nl80211::get_scan_results(const std::string &ssid, std::vector<SScanResult> &list,
