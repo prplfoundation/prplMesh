@@ -29,6 +29,18 @@ node::node(beerocks::eType type_, const std::string &mac_)
 }
 
 namespace son {
+std::ostream &operator<<(std::ostream &os, ePersistentParamBool value)
+{
+    if (value == ePersistentParamBool::DISABLE) {
+        os << "Disabled";
+    } else if (value == ePersistentParamBool::ENABLE) {
+        os << "Enabled";
+    } else {
+        os << "Not-Configured";
+    }
+    return os;
+}
+
 std::ostream &operator<<(std::ostream &os, const node &n)
 {
     std::chrono::steady_clock::time_point tCurrTime = std::chrono::steady_clock::now();
@@ -121,6 +133,26 @@ std::ostream &operator<<(std::ostream &os, const node &n)
                << "   Failed5ghzSteerAttemps: " << int(n.failed_5ghz_steer_attemps) << std::endl
                << "   Failed24ghzSteerAttemps: " << int(n.failed_24ghz_steer_attemps) << std::endl;
         }
+
+        // persistent db
+        if (node_type == beerocks::TYPE_CLIENT) {
+            auto client_parameters_last_edit_hours = std::chrono::duration_cast<std::chrono::hours>(
+                                                         tCurrTime - n.client_parameters_last_edit)
+                                                         .count();
+            auto client_time_life_delay_hours =
+                std::chrono::duration_cast<std::chrono::hours>(n.client_time_life_delay_sec)
+                    .count();
+            os << "Persistent configuration and data:" << std::endl
+               << "   ClientParametersLastEdit: " << (client_parameters_last_edit_hours / 24)
+               << " days, " << (client_parameters_last_edit_hours % 24) << " hours" << std::endl
+               << "   ClientTimeLifeDelay: " << (client_time_life_delay_hours / 24) << " days, "
+               << (client_time_life_delay_hours % 24) << " hours" << std::endl
+               << "   ClientStayOnInitialRadio: " << n.client_stay_on_initial_radio << std::endl
+               << "   ClientInitialRadio: " << n.client_initial_radio << std::endl
+               << "   ClientStayOnSelectedBand: " << n.client_stay_on_selected_band << std::endl
+               << "   ClientSelectedBands: " << n.client_selected_bands << std::endl;
+        }
+
     } else if (node_type == beerocks::TYPE_SLAVE) {
         os << " Type: HOSTAP" << std::endl
            << " IfaceType: " << utils::get_iface_type_string(n.hostap->iface_type) << std::endl
