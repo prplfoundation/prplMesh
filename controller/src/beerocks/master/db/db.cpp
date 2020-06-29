@@ -2419,6 +2419,85 @@ const std::list<sChannelScanResults> &db::get_channel_scan_results(const sMacAdd
 }
 
 //
+// Client Persistent Data
+//
+bool db::is_client_in_persistent_db(const sMacAddr &mac) { return false; }
+
+bool db::add_client_to_persistent_db(const sMacAddr &mac,
+                                     std::unordered_map<std::string, std::string> params)
+{
+    return true;
+}
+
+std::chrono::steady_clock::time_point db::get_client_parameters_last_edit(const sMacAddr &mac)
+{
+    return std::chrono::steady_clock::time_point::min();
+}
+
+bool db::set_client_time_life_delay(const sMacAddr &mac,
+                                    const std::chrono::seconds &time_life_delay_sec,
+                                    bool save_to_persistent_db)
+{
+    return true;
+}
+
+std::chrono::seconds db::get_client_time_life_delay(const sMacAddr &mac)
+{
+    return std::chrono::seconds::zero();
+}
+
+bool db::set_client_stay_on_initial_radio(const sMacAddr &mac, bool stay_on_initial_radio,
+                                          bool save_to_persistent_db)
+{
+    return true;
+}
+
+ePersistentParamBool db::get_client_stay_on_initial_radio(const sMacAddr &mac)
+{
+    return ePersistentParamBool::NOT_CONFIGURED;
+}
+
+bool db::set_client_initial_radio(const sMacAddr &mac, const sMacAddr &initial_radio_mac,
+                                  bool save_to_persistent_db)
+{
+    return true;
+}
+
+sMacAddr db::get_client_initial_radio(const sMacAddr &mac) { return network_utils::ZERO_MAC; }
+
+bool db::set_client_stay_on_selected_band(const sMacAddr &mac, bool stay_on_selected_band,
+                                          bool save_to_persistent_db)
+{
+    return true;
+}
+
+ePersistentParamBool db::get_client_stay_on_selected_band(const sMacAddr &mac)
+{
+    return ePersistentParamBool::NOT_CONFIGURED;
+}
+
+bool db::set_client_selected_bands(const sMacAddr &mac, beerocks::eFreqType selected_bands,
+                                   bool save_to_persistent_db)
+{
+    return true;
+}
+
+beerocks::eFreqType db::get_client_selected_bands(const sMacAddr &mac)
+{
+    return beerocks::eFreqType::FREQ_UNKNOWN;
+}
+
+bool db::clear_client_persistent_db(const sMacAddr &mac) { return true; }
+
+bool db::update_client_persistent_db(const sMacAddr &mac) { return true; }
+
+std::unordered_map<std::string, std::unordered_map<std::string, std::string>>
+db::load_persistent_db_clients()
+{
+    return {};
+}
+
+//
 // CLI
 //
 void db::add_cli_socket(Socket *sd)
@@ -3491,6 +3570,21 @@ std::shared_ptr<node> db::get_node(sMacAddr al_mac, sMacAddr ruid)
         key = tlvf::mac_to_string(al_mac) + tlvf::mac_to_string(ruid);
 
     return get_node(key);
+}
+
+std::shared_ptr<node> db::get_node_verify_type(const sMacAddr &mac, beerocks::eType type)
+{
+    auto node = get_node(mac);
+    if (!node) {
+        LOG(ERROR) << "node not found for mac " << mac;
+        return nullptr;
+    } else if (node->get_type() != type) {
+        LOG(ERROR) << __FUNCTION__ << "node " << mac << " type(" << node->get_type()
+                   << ") != requested-type(" << type << ")";
+        return nullptr;
+    }
+
+    return node;
 }
 
 std::shared_ptr<node::radio> db::get_hostap_by_mac(const sMacAddr &mac)
