@@ -8,14 +8,23 @@ import pexpect
 from boardfarm.devices import linux
 
 
+class CommandError(Exception):
+    """Raised on failed execution"""
+    pass
+
+
 class PrplMeshBase(linux.LinuxDevice):
     """PrplMesh abstract device."""
 
     def _run_shell_cmd(self, cmd: str = "", args: list = None, timeout: int = 30):
         """Wrapper that executes command with specified args on host machine and logs output."""
 
-        res = pexpect.run(cmd, args=args, timeout=timeout, encoding="utf-8")
+        res, exitstatus = pexpect.run(cmd, args=args, timeout=timeout, encoding="utf-8",
+                                      withexitstatus=1)
         entry = " ".join((cmd, " ".join(args)))
+        if exitstatus != 0:
+            raise CommandError("Error executing {}:\n{}".format(entry, res))
+
         self.log_calls += entry
         self.log += "$ " + entry + "\r\n" + res
 
