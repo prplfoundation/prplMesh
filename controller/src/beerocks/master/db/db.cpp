@@ -2431,63 +2431,204 @@ bool db::add_client_to_persistent_db(const sMacAddr &mac,
 
 std::chrono::steady_clock::time_point db::get_client_parameters_last_edit(const sMacAddr &mac)
 {
-    return std::chrono::steady_clock::time_point::min();
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return std::chrono::steady_clock::time_point::min();
+    }
+
+    return node->client_parameters_last_edit;
 }
 
 bool db::set_client_time_life_delay(const sMacAddr &mac,
                                     const std::chrono::seconds &time_life_delay_sec,
                                     bool save_to_persistent_db)
 {
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return false;
+    }
+
+    LOG(DEBUG) << "time_life_delay_sec = " << time_life_delay_sec.count();
+
+    auto timestamp = std::chrono::steady_clock::now();
+    if (save_to_persistent_db) {
+        LOG(DEBUG) << "configuring persistent-db, timelife = " << time_life_delay_sec.count();
+    }
+
+    node->client_time_life_delay_sec  = time_life_delay_sec;
+    node->client_parameters_last_edit = timestamp;
+
     return true;
 }
 
 std::chrono::seconds db::get_client_time_life_delay(const sMacAddr &mac)
 {
-    return std::chrono::seconds::zero();
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return std::chrono::seconds::zero();
+    }
+
+    return node->client_time_life_delay_sec;
 }
 
 bool db::set_client_stay_on_initial_radio(const sMacAddr &mac, bool stay_on_initial_radio,
                                           bool save_to_persistent_db)
 {
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return false;
+    }
+
+    LOG(DEBUG) << "stay_on_initial_radio = " << stay_on_initial_radio;
+
+    auto timestamp = std::chrono::steady_clock::now();
+    if (save_to_persistent_db) {
+        LOG(DEBUG) << "configuring persistent-db, initial_radio_enable = " << stay_on_initial_radio;
+    }
+
+    node->client_stay_on_initial_radio =
+        (stay_on_initial_radio) ? ePersistentParamBool::ENABLE : ePersistentParamBool::DISABLE;
+    node->client_parameters_last_edit = timestamp;
+
     return true;
 }
 
 ePersistentParamBool db::get_client_stay_on_initial_radio(const sMacAddr &mac)
 {
-    return ePersistentParamBool::NOT_CONFIGURED;
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return ePersistentParamBool::NOT_CONFIGURED;
+    }
+
+    return node->client_stay_on_initial_radio;
 }
 
 bool db::set_client_initial_radio(const sMacAddr &mac, const sMacAddr &initial_radio_mac,
                                   bool save_to_persistent_db)
 {
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return false;
+    }
+
+    LOG(DEBUG) << "initial_radio = " << initial_radio_mac;
+
+    auto timestamp = std::chrono::steady_clock::now();
+    if (save_to_persistent_db) {
+        LOG(DEBUG) << "configuring persistent-db, initial_radio = " << initial_radio_mac;
+    }
+
+    node->client_initial_radio        = initial_radio_mac;
+    node->client_parameters_last_edit = timestamp;
+
     return true;
 }
 
-sMacAddr db::get_client_initial_radio(const sMacAddr &mac) { return network_utils::ZERO_MAC; }
+sMacAddr db::get_client_initial_radio(const sMacAddr &mac)
+{
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return network_utils::ZERO_MAC;
+    }
+
+    return node->client_initial_radio;
+}
 
 bool db::set_client_stay_on_selected_band(const sMacAddr &mac, bool stay_on_selected_band,
                                           bool save_to_persistent_db)
 {
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return false;
+    }
+
+    LOG(DEBUG) << "stay_on_selected_band = " << stay_on_selected_band;
+
+    auto timestamp = std::chrono::steady_clock::now();
+    if (save_to_persistent_db) {
+        LOG(DEBUG) << "configuring persistent-db, selected_band_enable = " << stay_on_selected_band;
+    }
+
+    node->client_stay_on_selected_band =
+        (stay_on_selected_band) ? ePersistentParamBool::ENABLE : ePersistentParamBool::DISABLE;
+    node->client_parameters_last_edit = timestamp;
+
     return true;
 }
 
 ePersistentParamBool db::get_client_stay_on_selected_band(const sMacAddr &mac)
 {
-    return ePersistentParamBool::NOT_CONFIGURED;
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return ePersistentParamBool::NOT_CONFIGURED;
+    }
+
+    return node->client_stay_on_selected_band;
 }
 
 bool db::set_client_selected_bands(const sMacAddr &mac, beerocks::eFreqType selected_bands,
                                    bool save_to_persistent_db)
 {
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return false;
+    }
+
+    LOG(DEBUG) << "selected_band = " << int(selected_bands);
+
+    auto timestamp = std::chrono::steady_clock::now();
+    if (save_to_persistent_db) {
+        LOG(DEBUG) << ", configuring persistent-db, selected_bands = " << int(selected_bands);
+    }
+
+    node->client_selected_bands       = selected_bands;
+    node->client_parameters_last_edit = timestamp;
+
     return true;
 }
 
 beerocks::eFreqType db::get_client_selected_bands(const sMacAddr &mac)
 {
-    return beerocks::eFreqType::FREQ_UNKNOWN;
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return beerocks::eFreqType::FREQ_UNKNOWN;
+    }
+
+    return node->client_selected_bands;
 }
 
-bool db::clear_client_persistent_db(const sMacAddr &mac) { return true; }
+bool db::clear_client_persistent_db(const sMacAddr &mac)
+{
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return false;
+    }
+
+    LOG(DEBUG) << "setting client " << mac << " runtime info to default values";
+
+    node->client_parameters_last_edit  = std::chrono::steady_clock::time_point::min();
+    node->client_time_life_delay_sec   = std::chrono::seconds::zero();
+    node->client_stay_on_initial_radio = ePersistentParamBool::NOT_CONFIGURED;
+    node->client_initial_radio         = network_utils::ZERO_MAC;
+    node->client_stay_on_selected_band = ePersistentParamBool::NOT_CONFIGURED;
+    node->client_selected_bands        = beerocks::eFreqType::FREQ_UNKNOWN;
+
+    LOG(DEBUG) << "removing client " << mac << " from persistent db";
+
+    return true;
+}
 
 bool db::update_client_persistent_db(const sMacAddr &mac) { return true; }
 
