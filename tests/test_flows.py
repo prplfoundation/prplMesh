@@ -11,6 +11,7 @@ import os
 import sys
 import time
 import traceback
+from collections import Counter
 from typing import Callable, Union, Any, NoReturn
 
 import connmap
@@ -731,13 +732,46 @@ class TestFlows:
                                            env.agents[0].mac, env.controller.mac,
                                            mid)
 
-        debug("Checking response contains both Tx and Rx metrics")
-        assert self.check_cmdu_has_tlvs(resp, 0x09)
-        assert self.check_cmdu_has_tlvs(resp, 0x0a)
+        debug("Checking response contains expected links to/from agent and nothing else")
+        # neighbor macs are based on the setup in "launch_environment_docker" method
+        expected_tx_link_neighbors = [env.controller.mac, env.agents[1].mac]
+        expected_rx_link_neighbors = [env.controller.mac, env.agents[1].mac]
+        actual_tx_links = self.check_cmdu_has_tlvs(resp, 0x09)
+        actual_rx_links = self.check_cmdu_has_tlvs(resp, 0x0a)
 
-        # TODO: we can't verify each reported link because
-        # TODO: tshark reports all tlv types using same key
-        # TODO: postponing test implementation until this is solved
+        def verify_links(links, expected_neighbors, link_type):
+            verified_neighbors = []
+            unexpected_neighbors = []
+            for link in links:
+                self.safe_check_obj_attribute(link, 'responder_mac_addr', env.agents[0].mac,
+                                              "Responder MAC address is wrong")
+
+                try:
+                    # a tshark (v3.2.4) bug causes "neighbor_mac_addr" field to
+                    # show up as "responder_mac_addr_2"
+                    if link.responder_mac_addr_2 in expected_neighbors:
+                        verified_neighbors += [link.responder_mac_addr_2]
+                    else:
+                        unexpected_neighbors += [link.responder_mac_addr_2]
+                except AttributeError as e:
+                    self.fail(e)
+
+            # we expect each neighbor to appear only once
+            for neighbor, count in Counter(verified_neighbors).items():
+                if count != 1:
+                    self.fail("{} link to neighbor {} appears {} times."
+                              "It was expected to appear only once"
+                              .format(link_type, neighbor, count))
+
+            # report any extra neighbors that show up
+            for unexpected_neighbor in unexpected_neighbors:
+                self.fail("An unexpected {} link for neighbor with MAC address {} exists"
+                          "It was expected to appear only once"
+                          .format(link_type, unexpected_neighbor))
+
+        # check responder mac is our own mac, neighbor is one of the expected macs for each link
+        verify_links(actual_tx_links, expected_tx_link_neighbors, "tx")
+        verify_links(actual_rx_links, expected_rx_link_neighbors, "rx")
 
     def test_combined_infra_metrics(self):
 
