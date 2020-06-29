@@ -181,13 +181,6 @@ bool agent_ucc_listener::handle_start_wps_registration(const std::string &band,
         return false;
     }
 
-    auto it = vaps_map.find(radio_mac);
-    if (it == vaps_map.end()) {
-        LOG(ERROR) << "radio_mac " + radio_mac + " not found";
-        err_string = "Failed to get radio for " + band;
-        return false;
-    }
-
     LOG(DEBUG) << "Trigger WPS PBC on radio mac " << radio_mac;
     err_string = "Failed to start wps pbc";
     return m_backhaul_manager_ctx.start_wps_pbc(tlvf::mac_from_string(radio_mac));
