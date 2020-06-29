@@ -113,6 +113,13 @@ class Sniffer:
         os.makedirs(os.path.join(self.tcpdump_log_dir, 'logs'), exist_ok=True)
         self.current_outputfile = os.path.join(self.tcpdump_log_dir, outputfile_basename) + ".pcap"
         self.checkpoint_frame_number = 0
+
+        # In some cases dumpcap fails to create the pcap file at the requested location even
+        # if the path is valid and accessible. Creating an empty file at that location seems
+        # to solve this issue, so create an empty file before starting dumpcap \_(ツ)_/¯
+        with open(self.current_outputfile, 'w') as fp:
+            pass
+
         # '-q' avoids the output, which we don't need.
         command = ["dumpcap", "-i", self.interface, '-q', '-w', self.current_outputfile, "-f",
                    "ether proto 0x88CC or ether proto 0x893A"]
