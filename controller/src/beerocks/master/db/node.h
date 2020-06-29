@@ -35,6 +35,14 @@ typedef struct {
     bool backhaul_vap;
 } sVapElement;
 
+/**
+ * @brief Extended boolean parameter to support "not configured" value for persistent configuration.
+ * For persistent data, it is important to differ between configured enable/disable to uncofigured value.
+ */
+enum class ePersistentParamBool : int8_t { NOT_CONFIGURED = -1, DISABLE = 0, ENABLE = 1 };
+
+std::ostream &operator<<(std::ostream &os, ePersistentParamBool value);
+
 class node {
 public:
     node(beerocks::eType type_, const std::string &mac_);
@@ -266,6 +274,38 @@ public:
 
     friend std::ostream &operator<<(std::ostream &os, const node &node);
     friend std::ostream &operator<<(std::ostream &os, const node *node);
+
+    /*
+     * Persistent configurations - start
+     * Client persistent configuration aging is refreshed on persistent configurations set
+     * persistent configuration of aged clients removed from the persistent-db and cleared in the runtime-db
+     */
+
+    // Indicates when client parameters were last updated (even if not updated yet to persistent-db)
+    // minimal value is used as invalid value.
+    std::chrono::steady_clock::time_point client_parameters_last_edit =
+        std::chrono::steady_clock::time_point::min();
+
+    // Optional - if configured the client has its own configured timelife delay.
+    std::chrono::seconds client_time_life_delay_sec = std::chrono::seconds::zero();
+
+    // If enabled, the client will be steered to the initial radio it connected to - save at client_initial_radio.
+    ePersistentParamBool client_stay_on_initial_radio = ePersistentParamBool::NOT_CONFIGURED;
+
+    // The client_initial_radio bssid must be set.
+    sMacAddr client_initial_radio;
+
+    // If enabled, the client will be steered to pre-selected-bands defined by client_selected_bands.
+    // Not enforced if client_selected_bands is not set.
+    ePersistentParamBool client_stay_on_selected_band = ePersistentParamBool::NOT_CONFIGURED;
+
+    // The selected bands the client should be steered to if the client_stay_on_selected_band is set.
+    // Default value is FREQ_UNKNOWN (also indicates value is not configured)
+    beerocks::eFreqType client_selected_bands = beerocks::eFreqType::FREQ_UNKNOWN;
+
+    /*
+     * Persistent configurations - end
+     */
 
 private:
     class rssi_measurement {
