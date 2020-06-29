@@ -39,6 +39,8 @@ public:
 public:
     virtual ~sta_wlan_hal() = default;
 
+    virtual bool start_wps_pbc() = 0;
+
     virtual bool initiate_scan() = 0;
 
     virtual int get_scan_results(const std::string &ssid, std::vector<SScanResult> &list,
