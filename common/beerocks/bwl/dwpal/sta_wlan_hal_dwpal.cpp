@@ -99,6 +99,17 @@ sta_wlan_hal_dwpal::sta_wlan_hal_dwpal(const std::string &iface_name, hal_event_
 
 sta_wlan_hal_dwpal::~sta_wlan_hal_dwpal() {}
 
+bool sta_wlan_hal_dwpal::start_wps_pbc()
+{
+    LOG(DEBUG) << "Initiating wps_pbc multi_ap=1 on interface: " << get_iface_name();
+
+    if (!dwpal_send_cmd("WPS_PBC multi_ap=1")) {
+        LOG(ERROR) << "start_wps_pbc - wpa_ctrl_send_msg failed for " << get_iface_name();
+        return false;
+    }
+    return true;
+}
+
 bool sta_wlan_hal_dwpal::initiate_scan()
 {
     LOG(DEBUG) << "Initiating scan on interface: " << get_iface_name();
