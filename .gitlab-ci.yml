@@ -169,6 +169,7 @@ upload-artifacts:
   needs:
     - build-in-docker
     - build-for-netgear-rax40
+    - build-for-axepoint
     - build-for-glinet-b1300
     - build-for-turris-omnia
 
@@ -261,6 +262,11 @@ build-for-netgear-rax40:
   extends: .build-for-openwrt
   variables:
     TARGET_DEVICE: "netgear-rax40"
+
+build-for-axepoint:
+  extends: .build-for-openwrt
+  variables:
+    TARGET_DEVICE: "axepoint"
 
 test-on-turris-omnia:
   extends: .test-on-target
