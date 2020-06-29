@@ -289,7 +289,8 @@ class TestFlows:
                 if str(ae):
                     self.fail("{}".format(ae))
                 elif not self.check_error:
-                    self.fail("Assertion failed")
+                    self.fail("Assertion failed\n{}"
+                              .format(traceback.format_exc()))
 
             except Exception as e:
                 self.fail("Test failed unexpectedly: {}\n{}"

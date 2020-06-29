@@ -7,6 +7,7 @@
 
 import os
 import json
+from collections import OrderedDict
 import subprocess
 from opts import debug, err, status
 from typing import Callable
@@ -145,10 +146,33 @@ class Sniffer:
             debug("tshark failed: {}".format(tshark_result.returncode))
         # Regardless of the exit code, try to make something of the JSON that comes out, if any.
         try:
-            capture = json.loads(tshark_result.stdout)
+            # tlvs which have the same type are all recorded with the same key therefore we lose
+            # all but one of them if we use json.loads(tshark_result.stdout) directly.
+            # https://stackoverflow.com/questions/29321677/python-json-parser-allow-duplicate-keys
+            def rename_duplicate_key(key, dct):
+                counter = 0
+                unique_key = key
+
+                while unique_key in dct:
+                    counter += 1
+                    unique_key = '{} {}'.format(key, counter + 1)
+                return unique_key
+
+            def rename_duplicates(pairs):
+                dct = OrderedDict()
+                for key, value in pairs:
+                    if key in dct:
+                        key = rename_duplicate_key(key, dct)
+                    dct[key] = value
+
+                return dct
+
+            decoder = json.JSONDecoder(object_pairs_hook=rename_duplicates)
+            capture = decoder.decode(tshark_result.stdout.decode('utf8'))
+
             return [Packet(x) for x in capture]
         except json.JSONDecodeError as error:
-            err("capture JSON decoding failed: %s".format(error))
+            err("capture JSON decoding failed: {}".format(error))
             return []
 
     def get_cmdu_capture(self, match_function: Callable[[Packet], bool]) -> [Packet]:
