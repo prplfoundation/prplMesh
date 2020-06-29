@@ -219,6 +219,8 @@ framework/platform/bpl/common/utils/utils.cpp: performance: Function parameter '
 framework/platform/bpl/common/utils/utils.cpp: style: Unused variable: return_string [unusedVariable]    std::string return_string;
 framework/platform/bpl/linux/bpl_cfg.cpp: information: Skipping configuration 'PLATFORM_DB_PATH' since the value of 'PLATFORM_DB_PATH' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly. [ConfigurationNotChecked]            MAPF_ERR("Failed oppening file " << PLATFORM_DB_PATH);
 framework/platform/bpl/linux/bpl_cfg.cpp: information: Skipping configuration 'PLATFORM_DB_PATH' since the value of 'PLATFORM_DB_PATH' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly. [ConfigurationNotChecked]        in_conf_file.open(PLATFORM_DB_PATH);
+framework/platform/bpl/linux/bpl_db.cpp: style: Parameter 'nested_params' can be declared with const [constParameter]    std::unordered_map<std::string, std::unordered_map<std::string, std::string>> &nested_params)
+framework/platform/bpl/linux/bpl_db.cpp: style: Parameter 'params' can be declared with const [constParameter]                  std::unordered_map<std::string, std::string> &params)
 framework/platform/bpl/test/bpl_test.cpp: portability: fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems. [fflushOnInputStream]            fflush(stdin);
 framework/platform/bpl/test/bpl_test.cpp: portability: fflush() called on input stream 'stdin' may result in undefined behaviour on non-linux systems. [fflushOnInputStream]        fflush(stdin);
 framework/platform/bpl/uci/arp/bpl_arp.cpp: style: C-style pointer casting [cstyleCast]    arp_monitor *pArpMon = (arp_monitor *)ctx;
@@ -228,6 +230,8 @@ framework/platform/bpl/uci/arp/monitor/arp_monitor.cpp: style: Unused variable: 
 framework/platform/bpl/uci/cfg/bpl_cfg.cpp: style: The scope of the variable 'retVal' can be reduced. [variableScope]    int retVal = 0;
 framework/platform/bpl/uci/cfg/bpl_cfg.cpp: style: Variable 'retVal' is assigned a value that is never used. [unreadVariable]    int retVal = 0;
 framework/platform/bpl/uci/cfg/bpl_cfg_uci.cpp: style: The scope of the variable 'scanf_res' can be reduced. [variableScope]        int scanf_res;
+framework/platform/bpl/uci/db/bpl_db.cpp: style: Parameter 'nested_params' can be declared with const [constParameter]    std::unordered_map<std::string, std::unordered_map<std::string, std::string>> &nested_params)
+framework/platform/bpl/uci/db/bpl_db.cpp: style: Parameter 'params' can be declared with const [constParameter]                  std::unordered_map<std::string, std::string> &params)
 framework/platform/bpl/uci/dhcp/bpl_dhcp.cpp: style: struct member 'dhcp_event_request::data' is never used. [unusedStructMember]    char data[];
 framework/tlvf/src/src/ClassList.cpp: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]        msg_len += c->getLen();
 framework/tlvf/test/tlvf_test.cpp: style: Local variable 'cmplx' shadows outer variable [shadowVariable]            auto cmplx = std::get<1>(tlv4->complex_list(0));
