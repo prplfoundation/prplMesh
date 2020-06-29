@@ -12,8 +12,17 @@ mkdir -p files/etc
 printf '%s=%s\n' "OPENWRT_REPOSITORY" "$OPENWRT_REPOSITORY" >> files/etc/prplwrt-version
 printf '%s=%s\n' "OPENWRT_VERSION" "$OPENWRT_VERSION" >> files/etc/prplwrt-version
 if [ "$TARGET_PROFILE" = DEVICE_NETGEAR_RAX40 ] ; then
-    ./scripts/gen_config.py intel_mips
-    cat profiles/intel_mips.yml >> files/etc/prplwrt-version
+    # Add prplmesh to the list of packages of the profile:
+    sed -i 's/packages:/packages:\n  - prplmesh-dwpal/g' profiles/intel_mips.yml
+    yq write --inplace profiles/netgear_rax40.yml feeds -f profiles_feeds/netgear-rax40.yml
+    ./scripts/gen_config.py netgear_rax40 debug
+    cat profiles_feeds/netgear-rax40.yml >> files/etc/prplwrt-version
+elif [ "$TARGET_PROFILE" = DEVICE_AX6000_2000_ETH_11AXUCI ]; then
+    # Add prplmesh to the list of packages of the profile:
+    sed -i 's/packages:/packages:\n  - prplmesh-dwpal/g' profiles/axepoint.yml
+    yq write --inplace profiles/axepoint.yml feeds -f profiles_feeds/netgear-rax40.yml
+    ./scripts/gen_config.py axepoint debug
+    cat profiles_feeds/netgear-rax40.yml >> files/etc/prplwrt-version
 else
     cp feeds.conf.default feeds.conf
     echo "src-git prpl $PRPL_FEED" >> feeds.conf
