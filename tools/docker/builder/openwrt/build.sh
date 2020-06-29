@@ -117,6 +117,12 @@ main() {
             TARGET_PROFILE=DEVICE_NETGEAR_RAX40
             PRPLMESH_VARIANT="-dwpal"
             ;;
+        axepoint)
+            TARGET_SYSTEM=intel_mips
+            SUBTARGET=xrx500
+            TARGET_PROFILE=DEVICE_AX6000_2000_ETH_11AXUCI
+            PRPLMESH_VARIANT="-dwpal"
+            ;;
         *)
             err "Unknown target device: $TARGET_DEVICE"
             info "Currently supported targets are:"
@@ -172,9 +178,8 @@ main() {
 VERBOSE=false
 IMAGE_ONLY=false
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
-OPENWRT_VERSION='c9b7e11b9607b47e949c7ced508dafa844d27dd0'
-# TODO use hash instead of branch
-PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^590ba854951ec3a24594c3e030980edb9cbe18ed'
+OPENWRT_VERSION='f5f3a2cdba6102cffb10d442fae8a8fb67b61d81'
+PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^89e6602655713f8487c72d8d636daa610d76a468'
 PRPLMESH_VARIANT="-nl80211"
 DOCKER_TARGET_STAGE="prplmesh-builder"
 
