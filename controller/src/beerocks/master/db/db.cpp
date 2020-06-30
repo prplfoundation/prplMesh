@@ -19,6 +19,59 @@ using namespace beerocks_message;
 using namespace son;
 using namespace net;
 
+// static
+std::string db::type_to_string(beerocks::eType type)
+{
+    switch (type) {
+    case beerocks::eType::TYPE_GW:
+        return "gateway";
+    case beerocks::eType::TYPE_IRE:
+        return "ire";
+    case beerocks::eType::TYPE_IRE_BACKHAUL:
+        return "ire_bh";
+    case beerocks::eType::TYPE_SLAVE:
+        return "slave";
+    case beerocks::eType::TYPE_CLIENT:
+        return "client";
+    case beerocks::eType::TYPE_ETH_SWITCH:
+        return "eth_switch";
+    case beerocks::eType::TYPE_ANY:
+        return "any";
+    default:
+        return {};
+    }
+}
+
+std::string db::client_db_entry_from_mac(const sMacAddr &mac)
+{
+    std::string db_entry = tlvf::mac_to_string(mac);
+    std::replace(db_entry.begin(), db_entry.end(), ':', '_');
+
+    return db_entry;
+}
+
+sMacAddr db::client_db_entry_to_mac(const std::string &db_entry)
+{
+    std::string entry = db_entry;
+
+    std::replace(entry.begin(), entry.end(), '_', ':');
+
+    return tlvf::mac_from_string(entry);
+}
+
+std::string db::timestamp_to_string_seconds(const std::chrono::steady_clock::time_point timestamp)
+{
+    return std::to_string(
+        std::chrono::duration_cast<std::chrono::seconds>(timestamp.time_since_epoch()).count());
+}
+
+std::chrono::steady_clock::time_point db::timestamp_from_seconds(int timestamp_sec)
+{
+    return std::chrono::steady_clock::time_point(std::chrono::seconds(timestamp_sec));
+}
+
+// static - end
+
 void db::set_log_level_state(const beerocks::eLogLevel &log_level, const bool &new_state)
 {
     logger.set_log_level_state(log_level, new_state);
