@@ -10,6 +10,7 @@
 
 #include <bcl/beerocks_utils.h>
 #include <bcl/son/son_wireless_utils.h>
+#include <bpl/bpl_db.h>
 #include <easylogging++.h>
 
 #include <algorithm>
@@ -3991,4 +3992,23 @@ void db::set_prplmesh(const sMacAddr &mac)
         add_node(mac, beerocks::net::network_utils::ZERO_MAC, ire_type);
     }
     get_node(mac)->is_prplmesh = true;
+}
+
+bool db::update_client_entry_in_persistent_db(
+    const sMacAddr &mac, std::unordered_map<std::string, std::string> values_map)
+{
+    auto db_entry        = client_db_entry_from_mac(mac);
+    auto type_client_str = type_to_string(beerocks::eType::TYPE_CLIENT);
+
+    if (!bpl::db_has_entry(type_client_str, db_entry)) {
+        if (!add_client_to_persistent_db(mac, values_map)) {
+            LOG(ERROR) << "failed to add client entry in persistent-db for " << mac;
+            return false;
+        }
+    } else if (!bpl::db_set_entry(type_client_str, db_entry, values_map)) {
+        LOG(ERROR) << "failed to set client in persistent-db for " << mac;
+        return false;
+    }
+
+    return true;
 }
