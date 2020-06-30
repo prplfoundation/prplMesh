@@ -4558,10 +4558,27 @@ bool backhaul_manager::handle_backhaul_steering_request(ieee1905_1::CmduMessageR
     LOG(DEBUG) << "Sending ACK message to the originator, mid=" << std::hex << mid;
     send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
 
-    /*
-        TODO: Need to do channel validation. If channel invalid, send ACK and Backhaul STA Steering
-              Response with the error code without trigerring HAL.
-    */
+    auto channel    = bh_sta_steering_req->target_channel_number();
+    auto oper_class = bh_sta_steering_req->operating_class();
+
+    auto is_valid_channel = son::wireless_utils::is_channel_in_operating_class(oper_class, channel);
+
+    if (!is_valid_channel) {
+        LOG(WARNING) << "Invalid channel number";
+
+        auto response = create_backhaul_steering_response(
+            wfa_map::tlvErrorCode::eReasonCode::
+                BACKHAUL_STEERING_REQUEST_REJECTED_CANNOT_OPERATE_ON_CHANNEL_SPECIFIED);
+
+        if (!response) {
+            LOG(ERROR) << "Failed to build Backhaul STA Steering Response message.";
+            return false;
+        }
+
+        send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+
+        return false;
+    }
 
     /*
         TODO: BACKHAUL_STA_STEERING can be accepted in wired backhaul too.
@@ -4573,8 +4590,7 @@ bool backhaul_manager::handle_backhaul_steering_request(ieee1905_1::CmduMessageR
         return false;
     }
 
-    auto channel = bh_sta_steering_req->target_channel_number();
-    auto bssid   = bh_sta_steering_req->target_bssid();
+    auto bssid = bh_sta_steering_req->target_bssid();
 
     auto associate = active_hal->roam(bssid, channel);
     if (!associate) {
