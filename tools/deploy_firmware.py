@@ -178,7 +178,8 @@ class NetgearRax40(PrplwrtDevice):
             # firmware doesn't have working wireless interfaces it
             # will prevent it from rebooting:
             shell.sendline("pgrep -f 'S99prplmesh boot' | xargs kill")
-            # reboot:
+            # remove overlay and reboot
+            shell.sendline("rm -rf /overlay/upper/usr /overlay/upper/opt")
             shell.sendline("reboot -f")
             shell.expect(["Hit any key to stop autoboot:",
                           pexpect.EOF, pexpect.TIMEOUT], timeout=120)
