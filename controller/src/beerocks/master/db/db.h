@@ -1081,6 +1081,9 @@ private:
     void rewind();
     bool get_next_node(std::shared_ptr<node> &n, int &hierarchy);
     bool get_next_node(std::shared_ptr<node> &n);
+    bool
+    update_client_entry_in_persistent_db(const sMacAddr &mac,
+                                         std::unordered_map<std::string, std::string> values_map);
 
     int network_optimization_task_id = -1;
     int channel_selection_task_id    = -1;
