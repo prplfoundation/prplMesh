@@ -161,6 +161,48 @@ public:
     }
     ~db(){};
 
+    //static
+    /**
+     * @brief Get string representation of node type.
+     * 
+     * @param type Type of a node.
+     * @return std::string the string representation of the type.
+     */
+    static std::string type_to_string(beerocks::eType type);
+
+    /**
+     * @brief Get db entry from MAC address.
+     * 
+     * @param mac MAC address of a client.
+     * @return std::string the string representation of the MAC address with ':' replaced with '_' removed.
+     */
+    static std::string client_db_entry_from_mac(const sMacAddr &mac);
+
+    /**
+     * @brief Get client MAC address from db entry.
+     * 
+     * @param db_entry Client entry name in persistent db.
+     * @return sMacAddr MAC address of the client the db_entry is representing.
+     */
+    static sMacAddr client_db_entry_to_mac(const std::string &db_entry);
+
+    /**
+     * @brief Get string representation of number of seconds in timestamp.
+     * 
+     * @param timestamp A time-point.
+     * @return std::string the string representation of the integer number of seconds in the timestamp.
+     */
+    static std::string
+    timestamp_to_string_seconds(const std::chrono::steady_clock::time_point timestamp);
+
+    /**
+     * @brief Translate an integer number of seconds to a timepoint.
+     * 
+     * @param timestamp_sec Number of seconds in the timestamp.
+     * @return std::chrono::steady_clock::time_point a time-point representation of the number of seconds.
+     */
+    static std::chrono::steady_clock::time_point timestamp_from_seconds(int timestamp_sec);
+
     //logger
     void set_log_level_state(const beerocks::eLogLevel &log_level, const bool &new_state);
 
