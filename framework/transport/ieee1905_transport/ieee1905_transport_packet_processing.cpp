@@ -6,7 +6,7 @@
  * See LICENSE file for more details.
  */
 
-#include <mapf/transport/ieee1905_transport.h>
+#include "ieee1905_transport.h"
 #include <tlvf/ieee_1905_1/eMessageType.h>
 
 #include <arpa/inet.h>
@@ -18,7 +18,11 @@
 
 #define ETHER_IS_SAME(addr1, addr2) (memcmp((addr1), (addr2), ETH_ALEN) == 0)
 
-namespace mapf {
+namespace beerocks {
+namespace transport {
+
+// Use transport messaging classes
+using namespace beerocks::transport::messages;
 
 static const uint8_t ieee1905_max_message_version = 0x00;
 
@@ -210,7 +214,7 @@ bool Ieee1905Transport::de_duplicate_packet(Packet &packet)
     return !is_duplicate;
 }
 
-// De-fragmentation (reassembly) of received packets will be done before publishing a CMDU on the local bus (defragmentation is
+// De-fragmentation (reassembly) of received packets will be done before publishing a CMDU to the broker (defragmentation is
 // not required for tunneling and relayed packets).
 //
 // De-fragmentation could fail if one or more fragments are never received - thus the fragments of a CMDU should be
@@ -463,8 +467,8 @@ bool Ieee1905Transport::fragment_and_send_packet_to_network_interface(unsigned i
 bool Ieee1905Transport::forward_packet_single(Packet &packet)
 {
     if (packet.dst_if_type == CmduRxMessage::IF_TYPE_LOCAL_BUS) {
-        MAPF_DBG("forwarding packet to local bus.");
-        if (!send_packet_to_local_bus(packet)) {
+        MAPF_DBG("forwarding packet to broker.");
+        if (!send_packet_to_broker(packet)) {
             return false;
         }
     } else if (packet.dst_if_type == CmduRxMessage::IF_TYPE_NET && packet.dst_if_index != 0) {
@@ -482,7 +486,7 @@ bool Ieee1905Transport::forward_packet_single(Packet &packet)
             return false;
         }
     } else { // no dst interface is specified
-        bool forward_to_local_bus          = false;
+        bool forward_to_broker             = false;
         bool forward_to_bridge             = false;
         bool forward_to_network_interfaces = false;
 
@@ -490,7 +494,7 @@ bool Ieee1905Transport::forward_packet_single(Packet &packet)
         // Step 1: decide on forwarding sink(s)
         //
         if (ETHER_IS_MULTICAST(packet.dst.oct)) {
-            forward_to_local_bus = true;
+            forward_to_broker = true;
 
             // Note: IEEE1905 multicast packets have special treatment due to the conditional forwarding logic (based on the
             // relayIndicator field)
@@ -528,7 +532,7 @@ bool Ieee1905Transport::forward_packet_single(Packet &packet)
                 }
             }
             if (addressed_to_this_device) {
-                forward_to_local_bus = true;
+                forward_to_broker = true;
             } else if (packet.src_if_type == CmduRxMessage::IF_TYPE_LOCAL_BUS) {
                 forward_to_bridge = true;
             }
@@ -537,21 +541,21 @@ bool Ieee1905Transport::forward_packet_single(Packet &packet)
         //
         // Step 2: forward to sink(s) decided in Step 1
         //
-        if (forward_to_local_bus || forward_to_bridge || forward_to_network_interfaces) {
+        if (forward_to_broker || forward_to_bridge || forward_to_network_interfaces) {
             MAPF_DBG("forwarding packet to"
-                     << (forward_to_local_bus ? " local bus," : "")
+                     << (forward_to_broker ? " broker," : "")
                      << (forward_to_bridge ? " bridge," : "")
                      << (forward_to_network_interfaces ? " network interfaces" : ""));
         } else {
             MAPF_ERR("dropping packet: " << std::endl << packet);
             return false;
         }
-        if (forward_to_local_bus) {
+        if (forward_to_broker) {
             Packet defragmented_packet =
                 packet; // create a copy because de_fragment_packet may modify Packet.
             if (de_fragment_packet(defragmented_packet)) {
-                if (!send_packet_to_local_bus(defragmented_packet)) {
-                    MAPF_ERR("cannot forward packet to Local Bus.");
+                if (!send_packet_to_broker(defragmented_packet)) {
+                    MAPF_ERR("cannot forward packet to broker.");
                     return false;
                 }
             }
@@ -564,7 +568,7 @@ bool Ieee1905Transport::forward_packet_single(Packet &packet)
 
                 if (((forward_to_bridge && network_interface.is_bridge) ||
                      (forward_to_network_interfaces && !network_interface.is_bridge)) &&
-                    (network_interface.fd >= 0) &&
+                    (network_interface.fd) &&
                     !(packet.src_if_type == CmduRxMessage::IF_TYPE_NET &&
                       packet.src_if_index == if_index)) { /* avoid loop-back */
                     if (!fragment_and_send_packet_to_network_interface(if_index, packet)) {
@@ -686,4 +690,5 @@ std::ostream &Ieee1905Transport::Packet::print(std::ostream &os) const
     return os << ss.str();
 }
 
-} //namespace mapf
+} // namespace transport
+} // namespace beerocks
