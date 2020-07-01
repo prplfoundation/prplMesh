@@ -8,15 +8,17 @@
 
 #include <mapf/transport/ieee1905_transport_messages.h>
 
-namespace mapf {
+#include <sys/uio.h>
 
-const std::string CmduRxMessage::kTopicPrefix = "cmdu.rx.";
-const std::string CmduTxMessage::kTopicPrefix = "cmdu.tx.";
+#include <easylogging++.h>
 
-const std::string CmduTxConfirmationMessage::kTopicPrefix = "cmdu.conf.tx.";
+namespace beerocks {
+namespace transport {
+namespace messages {
 
-const std::string InterfaceConfigurationQueryMessage::kTopicPrefix      = "if_config.qry.";
-const std::string InterfaceConfigurationRequestMessage::kTopicPrefix    = "if_config.req.";
-const std::string InterfaceConfigurationIndicationMessage::kTopicPrefix = "if_config.ind.";
+// Declaration of static members
+constexpr int SubscribeMessage::MAX_SUBSCRIBE_TYPES;
 
-}; // namespace mapf
+} // namespace messages
+} // namespace transport
+} // namespace beerocks
