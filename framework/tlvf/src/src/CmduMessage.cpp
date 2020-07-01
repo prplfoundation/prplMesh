@@ -15,7 +15,7 @@ eMessageType CmduMessage::getMessageType()
     uint16_t msgValue = 0;
     auto cmduhdr      = getCmduHeader();
     msgValue          = (uint16_t)cmduhdr->message_type();
-    if (cmduhdr->is_finalized())
+    if (cmduhdr->is_finalized() || is_swapped())
         swap_16(msgValue);
 
     return (eMessageType)msgValue;
@@ -26,7 +26,7 @@ uint16_t CmduMessage::getMessageId()
     auto cmduhdr = getCmduHeader();
     uint16_t mid = cmduhdr->message_id();
 
-    if (cmduhdr->is_finalized())
+    if (cmduhdr->is_finalized() || is_swapped())
         swap_16(mid);
 
     return mid;
@@ -36,7 +36,7 @@ void CmduMessage::setMessageId(uint16_t mid)
 {
     auto cmduhdr = getCmduHeader();
 
-    if (cmduhdr->is_finalized())
+    if (cmduhdr->is_finalized() || is_swapped())
         swap_16(mid);
     cmduhdr->message_id() = mid;
 }
