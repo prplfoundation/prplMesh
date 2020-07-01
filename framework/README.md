@@ -7,25 +7,28 @@ The MultiAP controller and agent are external to this project.
 
 ### Table of Contents
 <a name="table-of-contents"></a>
-+ [Prerequisites](#prereq)
-+ [Build & Install](#build)
-+ [Tests](#test)
-+ [References](#ref)
-+ [Versioning](#ver)
-+ [Authors](#authors)
-+ [License](#license)
+- [MultiAP Framework](#multiap-framework)
+    - [Table of Contents](#table-of-contents)
+  - [Prerequisites](#prerequisites)
+  - [Build & Install](#build--install)
+  - [Tests](#tests)
+    - [Unit Tests](#unit-tests)
+  - [References](#references)
+  - [Versioning](#versioning)
+  - [Authors](#authors)
+  - [License](#license)
 
 ## Prerequisites
 <a name="prereq"></a>
 
 The following are needed for building the MultiAP framework on any Linux machine (local and cross compile):
 
-| Package      |  Version  |
-| --------- | -----:|
-| cmake  | >=2.8 |
-| c++11  |   |
-| json-c  |  0.12.1  |
-| ubus  |  any  |
+| Package | Version |
+| ------- | ------: |
+| cmake   |   >=2.8 |
+| c++11   |         |
+| json-c  |  0.12.1 |
+| ubus    |     any |
 
 Cross compiling - currently supporting UGW & RDKB cross compiling, see [feed_multiap](https://gts-chd.intel.com/projects/SW_UGW/repos/feed_multiap/browse).
 
@@ -53,7 +56,7 @@ Supported Unit Tests:
 - broker_test - test the broker functionality by running a broker, subscriber and publisher that sends a single message
 - socket_test - test socket class
 - poller_test - test poller class
-- transport_test - Sending 1905 CMDUs over 1905.1 Transport service over local bus + raw socket
+- transport_test - Sending 1905 CMDUs over 1905.1 Transport service over raw socket
 
 ## References
 <a name="ref"></a>
@@ -72,4 +75,3 @@ Supported Unit Tests:
 This project is licensed under the BSD+Pantet License - see the [LICENSE](LICENSE) file for details
 
 [__Table Of contents__](#table-of-contents)
-
