@@ -38,8 +38,8 @@ if [ "$PLATFORM_TYPE" = "rdkb" ]; then
             echo -e "echo starting kw from folder: \`pwd\`"
             echo -e "echo cleaning prplMesh build: ./maptools.sh build map -c clean"
             echo -e "./maptools.sh build map -c clean"
-            echo -e "echo building prplMesh: ./maptools.sh build map -f MSGLIB=None CMAKE_BUILD_TYPE=DEBUG"
-            echo -e "./maptools.sh build map -f MSGLIB=None CMAKE_BUILD_TYPE=DEBUG"
+            echo -e "echo building prplMesh: ./maptools.sh build map CMAKE_BUILD_TYPE=DEBUG"
+            echo -e "./maptools.sh build map CMAKE_BUILD_TYPE=DEBUG"
             echo -e "exit"
       } > _GO_KW
 
@@ -54,8 +54,8 @@ elif [ "$PLATFORM_TYPE" = "ugw" ]; then
             echo -e "echo starting kw from folder: \`pwd\`"
             echo -e "echo cleaning prplMesh build: ./maptools.sh build map  -c clean"
             echo -e "./maptools.sh build map -c clean"
-            echo -e "echo building prplMesh: ./maptools.sh build map -f MSGLIB=None CMAKE_BUILD_TYPE=DEBUG"
-            echo -e "./maptools.sh build map -f MSGLIB=None CMAKE_BUILD_TYPE=DEBUG"
+            echo -e "echo building prplMesh: ./maptools.sh build map CMAKE_BUILD_TYPE=DEBUG"
+            echo -e "./maptools.sh build map CMAKE_BUILD_TYPE=DEBUG"
             echo -e "exit"
       } > _GO_KW
 
@@ -68,8 +68,8 @@ else # Linux
             echo -e "echo starting kw from folder: \`pwd\`"
             echo -e "echo cleaning prplMesh build: ./maptools.sh build map  -c clean"
             echo -e "./maptools.sh build map -c clean"
-            echo -e "echo building prplMesh: ./maptools.sh build map -f MSGLIB=zmq CMAKE_BUILD_TYPE=DEBUG"
-            echo -e "./maptools.sh build map -f MSGLIB=zmq CMAKE_BUILD_TYPE=DEBUG"
+            echo -e "echo building prplMesh: ./maptools.sh build map CMAKE_BUILD_TYPE=DEBUG"
+            echo -e "./maptools.sh build map CMAKE_BUILD_TYPE=DEBUG"
             echo -e "exit"
       } > _GO_KW
 
