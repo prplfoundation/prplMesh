@@ -44,36 +44,21 @@ public:
     /**
      * @see EventPoll::add_event
      */
-    virtual bool add_event(SocketEventLoop::EventType socket,
-                           SocketEventLoop::EventHandlers handlers,
+    virtual bool add_event(EventType socket, EventHandlers handlers,
                            TimeoutType timeout = TimeoutType::min()) override;
 
     /**
      * @see EventPoll::del_event
      */
-    virtual bool del_event(SocketEventLoop::EventType socket) override;
+    virtual bool del_event(EventType socket) override;
 
-    /**
-     * @see EventPoll::run
-     */
-    virtual int run() override;
-
-    /**
-     * @see EventPoll::die
-     */
-    virtual void die() override;
-
-protected:
     /**
      * @brief Main event loop method.
+     * @see EventPoll::run
      * 
      * Executes the epoll_wait() function and processes ocurred events.
-     * 
-     * @return -1 on critical errors
-     * @return  0 on timeout without any socket events
-     * @return >0 number of socket events processed during the call to this method.
      */
-    virtual int event_loop();
+    virtual int run() override;
 
 private:
     /**
@@ -87,11 +72,6 @@ private:
     TimeoutType m_timeout = TimeoutType::min();
 
     /**
-     * Flag to mark whether the event loop is running.
-     */
-    bool m_running = false;
-
-    /**
      * @brief Data structure representing a socket added to the poll.
      * This structure groups all the information required for processing socket events.
      */
@@ -99,12 +79,12 @@ private:
         /**
          * Socket event handler functions structure.
          */
-        SocketEventLoop::EventHandlers handlers;
+        EventHandlers handlers;
 
         /**
          * Shared pointer to the socket object.
          */
-        SocketEventLoop::EventType socket = nullptr;
+        EventType socket = nullptr;
 
         /**
          * timer file descriptor.

@@ -208,28 +208,6 @@ bool SocketEventLoop::del_event(SocketEventLoop::EventType socket)
 
 int SocketEventLoop::run()
 {
-    if (m_running) {
-        return 0;
-    }
-
-    // Event loop is running
-    m_running = true;
-
-    // Run the event loop and exit on failures or timeouts (if defined)
-    while (m_running) {
-        auto ret = event_loop();
-        if (ret <= 0) {
-            return ret;
-        }
-    }
-
-    return 0;
-}
-
-void SocketEventLoop::die() { m_running = false; }
-
-int SocketEventLoop::event_loop()
-{
     // Poll events
     epoll_event events[MAX_POLL_EVENTS] = {0};
 
