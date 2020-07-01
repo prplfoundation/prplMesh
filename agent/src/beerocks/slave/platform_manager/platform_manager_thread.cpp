@@ -10,6 +10,8 @@
 
 #include "platform_manager_thread.h"
 
+#include "../agent_db.h"
+
 #include <bcl/network/network_utils.h>
 #include <easylogging++.h>
 
@@ -62,6 +64,8 @@ static bool fill_platform_settings(
         &iface_wlan_params_map,
     Socket *sd)
 {
+    auto db = AgentDB::get();
+
     if (bpl::cfg_get_beerocks_credentials(BPL_RADIO_FRONT, msg->platform_settings().front_ssid,
                                           msg->platform_settings().front_pass,
                                           msg->platform_settings().front_security_type) < 0) {
@@ -126,6 +130,8 @@ static bool fill_platform_settings(
         BPL_BACK_VAPS_GROUPS * BPL_BACK_VAPS_IN_GROUP * BPL_MAC_ADDR_OCTETS_LEN;
     char back_vaps[back_vaps_buff_len];
 
+    int temp_int;
+
     if ((platform_common_conf.onboarding = bpl::cfg_is_onboarding()) < 0) {
         LOG(ERROR) << "Failed reading 'onboarding'";
         return false;
@@ -142,10 +148,11 @@ static bool fill_platform_settings(
         LOG(ERROR) << "Failed reading 'client_roaming";
         return false;
     }
-    if ((platform_common_conf.local_master = bpl::cfg_is_master()) < 0) {
-        LOG(ERROR) << "Failed reading 'local_master'";
+    if ((temp_int = bpl::cfg_is_master()) < 0) {
+        LOG(ERROR) << "Failed reading 'local_controller'";
         return false;
     }
+    db->device_conf.local_controller = temp_int;
     if ((platform_common_conf.management_mode = bpl::cfg_get_management_mode()) < 0) {
         LOG(ERROR) << "Failed reading 'management_mode'";
         return false;
@@ -180,10 +187,9 @@ static bool fill_platform_settings(
         return false;
     }
 
-    // set local_gw flag
-    platform_common_conf.local_gw =
-        (platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY ||
-         platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY_WISP);
+    // Set local_gw flag
+    db->device_conf.local_gw = (platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY ||
+                                platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY_WISP);
 
     msg->platform_settings().onboarding          = uint8_t(platform_common_conf.onboarding);
     msg->platform_settings().dfs_reentry_enabled = uint8_t(platform_common_conf.dfs_reentry);
@@ -197,13 +203,13 @@ static bool fill_platform_settings(
         0; // TODO add platform DB flag
     msg->platform_settings().client_11k_roaming_enabled =
         uint8_t(platform_common_conf.client_roaming || platform_common_conf.band_steering);
-    msg->platform_settings().local_gw           = uint8_t(platform_common_conf.local_gw);
+    msg->platform_settings().local_gw           = uint8_t(db->device_conf.local_gw);
     msg->platform_settings().operating_mode     = uint8_t(platform_common_conf.operating_mode);
     msg->platform_settings().management_mode    = uint8_t(platform_common_conf.management_mode);
     msg->platform_settings().certification_mode = uint8_t(platform_common_conf.certification_mode);
     msg->platform_settings().stop_on_failure_attempts =
         uint8_t(platform_common_conf.stop_on_failure_attempts);
-    msg->platform_settings().local_master      = uint8_t(platform_common_conf.local_master);
+    msg->platform_settings().local_master      = uint8_t(db->device_conf.local_controller);
     msg->platform_settings().backhaul_max_vaps = uint8_t(platform_common_conf.backhaul_max_vaps);
     msg->platform_settings().backhaul_network_enabled =
         uint8_t(platform_common_conf.backhaul_network_enabled);
@@ -223,8 +229,8 @@ static bool fill_platform_settings(
                << (unsigned)msg->platform_settings()
                       .client_optimal_path_roaming_prefer_signal_strength_enabled;
     LOG(DEBUG) << "band_enabled: " << (unsigned)msg->wlan_settings().band_enabled;
-    LOG(DEBUG) << "local_gw: " << (unsigned)msg->platform_settings().local_gw;
-    LOG(DEBUG) << "local_master: " << (unsigned)msg->platform_settings().local_master;
+    LOG(DEBUG) << "local_gw: " << db->device_conf.local_gw;
+    LOG(DEBUG) << "local_controller: " << db->device_conf.local_controller;
     LOG(DEBUG) << "dfs_reentry_enabled: " << (unsigned)msg->platform_settings().dfs_reentry_enabled;
     LOG(DEBUG) << "backhaul_preferred_radio_band: "
                << (unsigned)msg->platform_settings().backhaul_preferred_radio_band;
@@ -832,7 +838,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             }
 
             // Start DHCP monitor
-            if (platform_common_conf.local_gw) {
+            if (AgentDB::get()->device_conf.local_gw) {
                 if (!init_dhcp_monitor()) {
                     LOG(ERROR) << "can't start DHCP monitor";
                     return false;
