@@ -6,6 +6,7 @@ _include: {
   tlvf/WSC/eWscVendorId.h,
   tlvf/WSC/eWscVendorExt.h,
   tlvf/WSC/eWscDev.h,
+  tlvf/WSC/eWscWfaVendorExtSubelement.h,
   tlvf/common/sMacAddr.h,
 }
 _namespace: WSC
@@ -112,6 +113,52 @@ sWscAttrBssid:
     _value: WSC_MAC_LENGTH
   data:
     _type: sMacAddr
+
+sWscWfaVendorExtSubelementVersion2:
+  _type: struct
+  id:
+    _type: uint8_t
+    _value: VERSION2
+  length:
+    _type: uint8_t
+    _value: 0x1
+  value:
+    _type: uint8_t
+    _value: WSC_VERSION2
+
+sWscWfaVendorExtSubelementMultiApIdentifier:
+  _type: struct
+  id:
+    _type: uint8_t
+    _value: MULTI_AP_IDENTIFIER
+  length:
+    _type: uint8_t
+    _value: 0x1
+  value:
+    _type: uint8_t
+    _value: TEARDOWN
+    
+cWscAttrVendorExtension:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_VENDOR_EXTENSION
+  length:
+    _type: uint16_t
+    _length_var: True
+  vendor_id_0:
+    _type: uint8_t
+    _value: WSC_VENDOR_ID_WFA_1
+  vendor_id_1:
+    _type: uint8_t
+    _value: WSC_VENDOR_ID_WFA_2
+  vendor_id_2:
+    _type: uint8_t
+    _value: WSC_VENDOR_ID_WFA_3
+  vendor_data:
+    _type: uint8_t
+    _length: []
 
 cConfigData:
   _type: class
