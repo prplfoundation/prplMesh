@@ -10,7 +10,7 @@ Some of the components are skipped / built as stubs in this mode.
 Running the agent on Linux allows easier development process without the need for real hardware.
 Instead, mac80211_hwsim can be used to simulate WLAN radios.
 A dummy bridge named br-lan must also exist since the agent uses the bridge MAC as the MultiAP AL-MAC.
-Last, the controller needs to run either on the same host or in another host with L2 connectivity (provided the BTL is using the local bus and not UDS mode).
+Last, the controller needs to run either on the same host or in another host with L2 connectivity.
 
 Currently, this mode was tested on an Ubuntu18.04 with hwsim, the agent was compiled to UDS mode.
 
