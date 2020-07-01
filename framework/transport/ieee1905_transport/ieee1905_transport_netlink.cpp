@@ -6,7 +6,7 @@
  * See LICENSE file for more details.
  */
 
-#include <mapf/transport/ieee1905_transport.h>
+#include "ieee1905_transport.h"
 
 #include <linux/netlink.h>
 #include <linux/rtnetlink.h>
@@ -21,7 +21,8 @@
 // and we should then re-open the interface's raw socket, and add it to the poll list. To do that we need an event
 // to tell us that the interface is up and running - This is what we use netlink for.
 
-namespace mapf {
+namespace beerocks {
+namespace transport {
 
 bool Ieee1905Transport::open_netlink_socket()
 {
@@ -117,4 +118,5 @@ void Ieee1905Transport::handle_netlink_pollin_event()
     return;
 }
 
-} // namespace mapf
+} // namespace transport
+} // namespace beerocks

@@ -9,9 +9,11 @@
 #ifndef MAP_TRANSPORT_IEEE1905_TRANSPORT_H_
 #define MAP_TRANSPORT_IEEE1905_TRANSPORT_H_
 
-#include "ieee1905_transport_messages.h"
-#include <mapf/common/poller.h>
-#include <mapf/local_bus.h>
+#include <mapf/common/logger.h>
+#include <mapf/transport/ieee1905_transport_messages.h>
+
+#include "ieee1905_transport_broker.h"
+
 #include <tlvf/tlvftypes.h>
 
 #include <arpa/inet.h>
@@ -46,7 +48,8 @@
 // TODO: this could be considered a platform bug that should be solved at the platform level - see https://jira-chd.intel.com/browse/UGW_SW-25961
 //
 
-namespace mapf {
+namespace beerocks {
+namespace transport {
 
 class Ieee1905Transport {
 public:
@@ -64,7 +67,7 @@ private:
 
     struct NetworkInterface {
         /// the file descriptor of the socket bound to this interface (or -1 if inactive)
-        int fd = -1;
+        std::shared_ptr<Socket> fd;
         /// mac address of the interface
         uint8_t addr[ETH_ALEN] = {0};
         /// interface name
@@ -84,8 +87,7 @@ private:
     // netlink socket file descriptor (used to track network interface status)
     int netlink_fd_ = -1;
 
-    mapf::LocalBusInterface *local_bus_;
-    mapf::Poller poller_;
+    std::unique_ptr<broker::BrokerServer> m_broker;
 
     uint16_t message_id_           = 0;
     uint8_t al_mac_addr_[ETH_ALEN] = {0};
@@ -140,9 +142,9 @@ private:
     // an internal data structure used for manipulating packets (CMDUs, LLDP, etc.)
     class Packet {
     public:
-        uint8_t dst_if_type       = CmduRxMessage::IF_TYPE_NONE;
+        uint8_t dst_if_type       = messages::CmduRxMessage::IF_TYPE_NONE;
         unsigned int dst_if_index = 0;
-        uint8_t src_if_type       = CmduRxMessage::IF_TYPE_NONE;
+        uint8_t src_if_type       = messages::CmduRxMessage::IF_TYPE_NONE;
         unsigned int src_if_index = 0;
         sMacAddr dst              = {.oct = {0}}; // destination mac address
         sMacAddr src              = {.oct = {0}}; // source mac address
@@ -280,13 +282,13 @@ private:
     void handle_netlink_pollin_event();
 
     //
-    // LOCAL BUS STUFF
+    // BROKER STUFF
     //
-    void handle_local_bus_pollin_event();
-    void handle_local_bus_cmdu_tx_message(CmduTxMessage &msg);
-    void handle_local_bus_interface_configuration_request_message(
-        InterfaceConfigurationRequestMessage &msg);
-    bool send_packet_to_local_bus(Packet &packet);
+    void handle_broker_pollin_event(std::unique_ptr<mapf::Message> &msg);
+    void handle_broker_cmdu_tx_message(messages::CmduTxMessage &msg);
+    void handle_broker_interface_configuration_request_message(
+        messages::InterfaceConfigurationRequestMessage &msg);
+    bool send_packet_to_broker(Packet &packet);
     void publish_interface_configuration_indication();
     uint16_t get_next_message_id();
 
@@ -309,6 +311,7 @@ inline std::ostream &operator<<(std::ostream &os, const Ieee1905Transport::Packe
     return m.print(os);
 }
 
-}; // namespace mapf
+} // namespace transport
+} // namespace beerocks
 
 #endif // MAP_TRANSPORT_IEEE1905_TRANSPORT_H_
