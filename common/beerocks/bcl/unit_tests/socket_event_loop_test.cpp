@@ -83,10 +83,7 @@ TEST(beerocks_socket_event_loop, simple_timeout)
 
         // Socket timeout handler
         EXPECT_CALL(timeout, handle_timeout(timeout_socket, &loop))
-            .WillOnce(Invoke([](EventType socket, LoopType *loop) -> bool {
-                loop->die();
-                return true;
-            }));
+            .WillOnce(Invoke([](EventType socket, LoopType *loop) -> bool { return true; }));
     };
 
     // Add the dummy socket into the event loop
@@ -123,9 +120,7 @@ TEST(beerocks_socket_event_loop, repeated_timeout)
 
         ON_CALL(timeout, handle_timeout(timeout_socket, &loop))
             .WillByDefault([&](EventType socket, LoopType *loop) -> bool {
-                if (++timeout_seq == 3) {
-                    loop->die();
-                }
+                ++timeout_seq;
                 return true;
             });
     };
@@ -134,7 +129,10 @@ TEST(beerocks_socket_event_loop, repeated_timeout)
     ASSERT_TRUE(loop.add_event(timeout_socket, timeout, std::chrono::milliseconds{1}));
 
     // Execute the event loop
-    ASSERT_GE(loop.run(), 0);
+    ASSERT_EQ(1, loop.run());
+    ASSERT_EQ(1, loop.run());
+    ASSERT_EQ(1, loop.run());
+    ASSERT_EQ(3, timeout_seq);
 
     // Remove the socket from the event loop
     ASSERT_TRUE(loop.del_event(timeout_socket));
@@ -176,7 +174,6 @@ TEST(beerocks_socket_event_loop, simple_read_write)
             .WillOnce(Invoke([](EventType socket, LoopType *loop) -> bool {
                 char dummy;
                 EXPECT_EQ(1, read(socket->getSocketFd(), &dummy, 1));
-                loop->die();
                 return true;
             }));
     };
@@ -186,7 +183,8 @@ TEST(beerocks_socket_event_loop, simple_read_write)
     ASSERT_TRUE(loop.add_event(reader_socket, reader));
 
     // Run the loop
-    ASSERT_GE(loop.run(), 0);
+    ASSERT_EQ(1, loop.run());
+    ASSERT_EQ(1, loop.run());
 
     // Delete the reader socket
     ASSERT_TRUE(loop.del_event(reader_socket));
