@@ -21,14 +21,16 @@ namespace mapf {
 
 class Message {
 public:
-    static const uint32_t kMessageHeaderVersion = 0x1;
-    static const uint32_t kMaxTopicSize         = 128;
-    static const uint32_t kMaxFrameLength       = 0x100000U; // 1MB max for now
+    static constexpr uint32_t kMessageMagic         = 0xB8C16F47;
+    static constexpr uint32_t kMessageHeaderVersion = 0x1;
+    static constexpr uint32_t kMaxTopicSize         = 128;
+    static constexpr uint32_t kMaxFrameLength       = 0x100000U; // 1MB max for now
 
     class Frame {
     public:
         explicit Frame(size_t len, const void *init_data = nullptr)
-            : data_(std::make_shared<std::vector<uint8_t>>(len))
+            : data_(std::make_shared<std::vector<uint8_t>>(len < kMaxFrameLength ? len
+                                                                                 : kMaxFrameLength))
         {
             if (init_data)
                 set_data(init_data, len);
@@ -60,15 +62,17 @@ public:
     }; // class Frame
 
     struct Header {
+        uint32_t magic   = kMessageMagic;         // magic value
         uint32_t version = kMessageHeaderVersion; // header version
+        uint32_t type    = 0;                     // message type
         uint32_t len     = 0; // total length of the message (excluding topic & header)
     };
 
     Message() {}
 
-    explicit Message(const std::string &topic) : topic_(topic) {}
+    explicit Message(uint32_t type) : m_type(type) {}
 
-    Message(const std::string &topic, std::initializer_list<Frame> frames) : Message(topic)
+    Message(uint32_t type, std::initializer_list<Frame> frames) : Message(type)
     {
         for (auto frame : frames)
             Add(frame);
@@ -76,47 +80,47 @@ public:
 
     virtual ~Message(){};
 
-    void Add(Frame &frame) { frames_.push_back(frame); }
+    void Add(Frame &frame) { m_frames.push_back(frame); }
 
     void Clear()
     {
-        frames_.clear();
-        topic_.clear();
+        m_frames.clear();
+        m_frames.clear();
     }
 
     // Get the first frame
-    Frame frame() const { return frames_.empty() ? Frame() : frames_.back(); }
+    Frame frame() const { return m_frames.empty() ? Frame() : m_frames.back(); }
 
     // Accessors & Mutators
     const Header header() const
     {
         Header hdr;
-        for (auto f : frames_)
+        hdr.type = m_type;
+        for (auto f : m_frames)
             hdr.len += f.len();
         return hdr;
     }
 
     uint32_t version() const { return header().version; }
     uint32_t len() const { return header().len; }
+    uint32_t type() const { return m_type; }
 
-    std::vector<Frame> &frames() const { return frames_; }
-    virtual const std::string topic() const { return topic_; }
-    virtual void set_topic(const std::string &topic) { topic_ = topic; }
+    std::vector<Frame> &frames() const { return m_frames; }
 
     virtual std::ostream &print(std::ostream &os) const
     {
         std::stringstream ss;
-        ss << " topic   : " << topic() << std::endl;
         ss << " version : " << version() << std::endl;
+        ss << " type    : " << type() << std::endl;
         ss << " len     : " << len() << std::endl;
-        ss << " frames  : " << frames_.size() << std::endl;
+        ss << " frames  : " << m_frames.size() << std::endl;
 
         return os << ss.str();
     }
 
 private:
-    std::string topic_;
-    mutable std::vector<Frame> frames_;
+    uint32_t m_type = 0;
+    mutable std::vector<Frame> m_frames;
 };
 
 inline std::ostream &operator<<(std::ostream &os, const Message::Frame &f) { return f.print(os); }
