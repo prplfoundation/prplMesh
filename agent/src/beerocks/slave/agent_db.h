@@ -5,6 +5,9 @@
  * This code is subject to the terms of the BSD+Patent license.
  * See LICENSE file for more details.
  */
+#include <bcl/beerocks_defines.h>
+#include <bcl/network/network_utils.h>
+#include <bwl/sta_wlan_hal.h>
 
 #include <iostream>
 #include <memory>
@@ -41,14 +44,14 @@ namespace beerocks {
  * std::string &get_foo() {             // Unsafe! Don't do it! Returning refernce to the database
  *     auto db = AgentDB::get();        // on a wrapper function is unsafe because the database will
  *     return db->foo;                  // be unlocked when the function ends, and the caller will
- * }                                    // hold a refernce to it.                                 // hold a refernce to it.
+ * }                                    // hold a refernce to it.
  * @endcode
  */
 class AgentDB {
 public:
     class SafeDB {
     public:
-        SafeDB(AgentDB &db) : m_db(db) { m_db.db_lock(); }
+        explicit SafeDB(AgentDB &db) : m_db(db) { m_db.db_lock(); }
         ~SafeDB() { m_db.db_unlock(); }
         AgentDB *operator->() { return &m_db; }
 
@@ -72,8 +75,170 @@ private:
     void db_lock() { m_db_mutex.lock(); }
     void db_unlock() { m_db_mutex.unlock(); }
 
+    /* Put down from here database members and functions used by the Agent modules */
+
 public:
-    /* Put here database members used by the Agent modules */
+    /* Agent Configuration */
+    struct sDeviceConf {
+        struct sFrontRadio {
+
+        } front_radio;
+
+        struct sBackRadio {
+
+        } back_radio;
+
+        bool local_gw;
+        bool local_controller;
+    } device_conf;
+
+    /** 
+     * Agent Sub Entities Data
+     */
+    struct sBridge {
+        sMacAddr mac;
+        std::string iface_name;
+    } bridge;
+
+    struct sBackhaul {
+        enum class eConnectionType { Invalid = 0, Wired, Wireless } connection_type;
+        std::string selected_iface_name;
+    } backhaul;
+
+    struct sEthernet {
+        sMacAddr mac;
+        std::string iface_name;
+    } ethernet;
+
+    struct sRadio {
+        sRadio(const std::string &front_iface_name, const std::string &back_iface_name)
+            : front(front_iface_name), back(back_iface_name)
+        {
+        }
+
+        struct sFront {
+            explicit sFront(const std::string &iface_name_)
+                : iface_name(iface_name_), max_supported_bw(eWiFiBandwidth::BANDWIDTH_UNKNOWN),
+                  freq_type(eFreqType::FREQ_UNKNOWN)
+            {
+            }
+            std::string iface_name;
+            sMacAddr iface_mac;
+            eWiFiBandwidth max_supported_bw;
+            eFreqType freq_type;
+
+            struct sBssid {
+                sMacAddr mac;
+                std::string ssid;
+                enum class eType { fAP, bAP } type;
+            };
+            std::array<sBssid, eBeeRocksIfaceIds::IFACE_TOTAL_VAPS> bssids;
+        } front;
+
+        struct sBack {
+            explicit sBack(const std::string &iface_name_) : iface_name(iface_name_) {}
+            std::string iface_name;
+            sMacAddr iface_mac;
+        } back;
+
+        struct sClient {
+            sClient(sMacAddr bssid_, size_t association_frame_length_, uint8_t *association_frame_)
+                : bssid(bssid_), association_time(std::chrono::steady_clock::now()),
+                  association_frame_length(association_frame_length_)
+            {
+                std::copy_n(association_frame_, association_frame_length_,
+                            association_frame.begin());
+            }
+            sMacAddr bssid;
+            std::chrono::steady_clock::time_point association_time;
+            size_t association_frame_length;
+            std::array<uint8_t, ASSOCIATION_FRAME_SIZE> association_frame;
+        };
+        // Associated clients grouped by Client MAC.
+        std::unordered_map<sMacAddr, sClient> associated_clients;
+    };
+
+    /**
+     * @brief Get pointer to of the radio data struct of a specific interface. The function can
+     * accept either front or back iface name.
+     * 
+     * @param iface_name Interface name of a radio, front or back.
+     * @return std::unique_ptr<sRadio> to the radio struct if exist. Otherwise, nullptr.
+     */
+    sRadio *radio(const std::string &iface_name);
+
+    /**
+     * @brief Add radio node to the database. At least one of the input argument must not be empty.
+     * This function should be called only once with valid arguments. If called once and then called
+     * again, the radio struct on the database will not be updated with new arguments, and the
+     * function will return false.
+     * 
+     * @param front_iface_name Front iface name.
+     * @param back_iface_name Back iface name.
+     * @return true if a radio struct has been added to the database, otherwise return false.
+     */
+    bool add_radio(const std::string &front_iface_name, const std::string &back_iface_name);
+
+    /**
+     * @brief Get list of all radio objects on the database.
+     * This function shall be used in order to iterate over all the radios. 
+     * 
+     * @return const std::vector<std::string &>& Intefaces names list.
+     */
+    const std::vector<sRadio *> &get_radios_list() { return m_radios_list; };
+
+    /* Helper enum for get_mac_parent_radio() function */
+    enum class eMacType : uint8_t { ALL, RADIO, BSSID, CLIENT };
+
+    /**
+     * @brief Get a pointer to the parent radio struct of given MAC address. 
+     * 
+     * @param mac MAC address of radio interface or bssid.
+     * @return sRadio* A pointer to the radio struct containing the given MAC address.
+     */
+    sRadio *get_mac_parent_radio(const sMacAddr &mac, eMacType mac_type_hint = eMacType::ALL);
+
+    /**
+     * @brief Erase client from associated_clients list.
+     * 
+     * @param client_mac The client MAC address.
+     */
+    void erase_client(const sMacAddr &client_mac);
+
+    /**
+     * @brief 1905.1 Neighbor device information
+     * Information gathered from a neighbor device upon reception of a Topology Discovery message.
+     */
+    struct sNeighborDevice {
+        explicit sNeighborDevice(sMacAddr transmitting_iface_mac_)
+            : transmitting_iface_mac(transmitting_iface_mac_),
+              timestamp(std::chrono::steady_clock::now())
+        {
+        }
+        // MAC address of the interface on which the Topology Discovery message is transmitted.
+        sMacAddr transmitting_iface_mac;
+
+        // Timestamp of the last Topology Discovery message received from this neighbor device.
+        std::chrono::steady_clock::time_point timestamp;
+    };
+
+    /*
+     * @brief List of known 1905 neighbor devices.
+     * 
+     * Upper key: Local interface MAC on which the Topology Discovery message was received from.
+     * Upper value: Map containing 1905.1 device information ordered by neighbor device al_mac -
+     *  Sub-key: 1905.1 AL MAC address of the Topology Discovery message transmitting device.
+     *  Sub-value: 1905.1 device information.
+     * 
+     * Devices are being added to the list when receiving a 1905.1 Topology Discovery message from
+     * an unknown 1905.1 device. Every 1905.1 device shall send this message every 60 seconds, and
+     * we update the time stamp in which the message is received.
+     */
+    std::unordered_map<sMacAddr, std::unordered_map<sMacAddr, sNeighborDevice>> neighbor_devices;
+
+private:
+    std::list<sRadio> m_radios;
+    std::vector<sRadio *> m_radios_list;
 };
 
 } // namespace beerocks
