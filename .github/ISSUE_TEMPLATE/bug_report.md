@@ -30,8 +30,8 @@ If applicable, add screenshots to help explain your problem.
 ## Target
 
 - Host: [e.g. Ubuntu 18.04]
-- Platform: [e.g. Linux DUMMY mode with ZMQ]
-- How you built prplMesh - full build command (for example `sudo ./build-image.sh && sudo ./build.sh -f MSGLIB=zmq CMAKE_BUILD_TYPE=Debug BUILD_TESTS=ON`
+- Platform: [e.g. Linux DUMMY mode]
+- How you built prplMesh - full build command (for example `sudo ./build-image.sh && sudo ./build.sh CMAKE_BUILD_TYPE=Debug BUILD_TESTS=ON`
 - How you ran prplMesh - for example `sudo build/install/scripts/prplmesh_utils.sh start`
 
 ## Additional context
