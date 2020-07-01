@@ -3943,7 +3943,7 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(WSC::m2 &m2, uint8
     config.bssid       = config_data->bssid();
     config.network_key = config_data->network_key();
     config.ssid        = config_data->ssid();
-    config.bss_type    = static_cast<WSC::eWscVendorExtSubelementBssType>(config_data->bss_type());
+    config.bss_type    = config_data->bss_type();
     // Swap to network byte order for KWA HMAC calculation
     // from this point config data is not readable!
     config_data->swap();
