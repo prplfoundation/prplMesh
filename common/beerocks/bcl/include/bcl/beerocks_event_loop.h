@@ -150,23 +150,14 @@ public:
     /**
      * @brief Runs message loop.
      *
-     * Method returns when loop is explicitly terminated, when an error or timeout occurs 
-     * or when there is no event to wait for (i.e.: no handler installed).
+     * Performs a single loop iteration and returns after processing IO events 
+     * or when an error or timeout occurs.
      *
      * @return -1 on critical errors
-     * @return 0 on timeout without any socket events
+     * @return  0 on timeout without any socket events
      * @return >0 number of socket events processed during the class to this method.
      */
     virtual int run() = 0;
-
-    /**
-     * @brief Terminates a running event loop.
-     *
-     * This method asks for loop termination and returns immediately. It is not thread-safe and
-     * should only be called from an event handler (which runs on the same thread as the event
-     * loop).
-     */
-    virtual void die() = 0;
 };
 
 } // namespace beerocks
