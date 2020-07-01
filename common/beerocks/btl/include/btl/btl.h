@@ -58,7 +58,6 @@ protected:
 
     bool bus_subscribe(const std::vector<ieee1905_1::eMessageType> &msg_types);
     bool bus_connect(const std::string &beerocks_temp_path, const bool local_master);
-    void bus_connected(Socket *sd);
 
     /**
      * @brief Sends CDMU to transport for dispatching.
@@ -83,16 +82,7 @@ private:
 
     int poll_timeout_ms = 500;
 
-#ifdef UDS_BUS
-    bool skip_filtered_message_type(Socket *sd, ieee1905_1::eMessageType msg_type) override;
-
-    Socket *bus = nullptr;
-    std::unique_ptr<SocketServer> bus_server_socket;
-    std::unordered_set<ieee1905_1::eMessageType> m_subscribed_messages;
-#else
-    std::shared_ptr<mapf::LocalBusInterface> bus = nullptr;
-    std::shared_ptr<mapf::Poller> poller         = nullptr;
-#endif
+    std::unique_ptr<SocketClient> bus;
 };
 } // namespace btl
 
