@@ -284,14 +284,8 @@ SocketServer::SocketServer(int port, int connections, SocketMode mode)
     addr.sin_addr.s_addr = INADDR_ANY;
     addr.sin_port        = htons(port);
 
-#ifdef IS_WINDOWS
-    BOOL enable_b = TRUE;
-    char *enable  = (char *)&enable_b;
-#else
-    int enable_b = 1;
-    int *enable  = &enable_b;
-#endif
-    if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, enable, sizeof(enable)) < 0) {
+    int enable = 1;
+    if (setsockopt(m_socket, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(enable)) < 0) {
         closesocket(m_socket);
         m_socket = INVALID_SOCKET;
         return;
