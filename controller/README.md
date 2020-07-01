@@ -9,7 +9,7 @@ Building natively (Linux only) is partially supported only for development proce
 
 # Run Controller on Linux
 
-The agent needs to run either on the same host as the controller or in another host with L2 connectivity (provided the BTL is using the local bus and not UDS mode).
+The agent needs to run either on the same host as the controller or in another host with L2 connectivity.
 
 Currently, this mode was tested on an Ubuntu18.04 with hwsim, the agent was compiled to UDS mode.
 

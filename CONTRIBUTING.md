@@ -306,7 +306,7 @@ That means the following conditions must hold.
 
 * All commits have a Signed-off-by. Automatic with the DCO check.
 * At least one maintainer has reviewed and approvied.
-* Code builds on Ubuntu, with `MSGLIB=zmq` and `BWL_TYPE=DUMMY`. Automatic with gitlab CI.
+* Code builds on Ubuntu, with `BWL_TYPE=DUMMY`. Automatic with gitlab CI.
 * Unit tests run successfully. Automatic with gitlab CI.
 * For each new flow being added, `tests/test_flows.py` must be updated accordingly to test the new flow, and the corresponding certification test (if any) must be added to `tests/certification/passing_agent_tests.txt`.
 * Run clang-format.sh. If it fixes lines you did not change, commit that separately.
