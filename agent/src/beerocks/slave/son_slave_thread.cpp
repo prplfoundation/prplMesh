@@ -7,6 +7,8 @@
  */
 #include "son_slave_thread.h"
 
+#include "agent_db.h"
+
 #include "../fronthaul_manager/monitor/monitor_thread.h"
 #include "tlvf_utils.h"
 
@@ -1461,12 +1463,15 @@ bool slave_thread::handle_cmdu_platform_manager_message(
             platform_settings = response->platform_settings();
             wlan_settings     = response->wlan_settings();
 
+            auto db = AgentDB::get();
+
+            // Local copy on cuurent process database instance, to be removed on PPM-83 phase 5
+            db->device_conf.local_gw         = response->platform_settings().local_gw;
+            db->device_conf.local_controller = response->platform_settings().local_master;
+
             configuration_stop_on_failure_attempts =
                 response->platform_settings().stop_on_failure_attempts;
             stop_on_failure_attempts = configuration_stop_on_failure_attempts;
-
-            LOG(INFO) << "local_master=" << (int)platform_settings.local_master;
-            LOG(INFO) << "local_gw=" << (int)platform_settings.local_gw;
 
             LOG(TRACE) << "goto STATE_CONNECT_TO_BACKHAUL_MANAGER";
             slave_state = STATE_CONNECT_TO_BACKHAUL_MANAGER;
@@ -3191,7 +3196,9 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             break;
         }
 
-        if (platform_settings.local_gw || config.backhaul_wireless_iface.empty()) {
+        auto db = AgentDB::get();
+
+        if (db->device_conf.local_gw || config.backhaul_wireless_iface.empty()) {
             memset(request->sta_iface(message::IFACE_NAME_LENGTH), 0, message::IFACE_NAME_LENGTH);
         } else {
             string_utils::copy_string(request->sta_iface(message::IFACE_NAME_LENGTH),
@@ -3201,15 +3208,11 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         string_utils::copy_string(request->hostap_iface(message::IFACE_NAME_LENGTH),
                                   config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
 
-        request->local_master()         = platform_settings.local_master;
-        request->local_gw()             = platform_settings.local_gw;
         request->sta_iface_filter_low() = config.backhaul_wireless_iface_filter_low;
         request->onboarding()           = platform_settings.onboarding;
         request->certification_mode()   = platform_settings.certification_mode;
 
-        LOG(INFO) << "ACTION_BACKHAUL_REGISTER_REQUEST local_master="
-                  << int(platform_settings.local_master)
-                  << " local_gw=" << int(platform_settings.local_gw)
+        LOG(INFO) << "ACTION_BACKHAUL_REGISTER_REQUEST "
                   << " hostap_iface=" << request->hostap_iface(message::IFACE_NAME_LENGTH)
                   << " sta_iface=" << request->sta_iface(message::IFACE_NAME_LENGTH)
                   << " onboarding=" << int(request->onboarding());
@@ -3234,6 +3237,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
     }
     case STATE_JOIN_INIT: {
 
+        auto db = AgentDB::get();
         LOG(DEBUG) << "onboarding: " << int(platform_settings.onboarding);
         if (platform_settings.onboarding) {
             LOG(TRACE) << "goto STATE_ONBOARDING";
@@ -3246,7 +3250,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             break;
         }
 
-        if (!platform_settings.local_gw) {
+        if (!db->device_conf.local_gw) {
             is_backhaul_manager = false;
         }
 
@@ -3310,7 +3314,9 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             break;
         }
 
-        if (!platform_settings.local_gw) {
+        auto db = AgentDB::get();
+
+        if (!db->device_conf.local_gw) {
             // Wireless config
 
             // TODO: On passive mode, mem_only_psk is always be set, so supplying the credentials
@@ -3392,13 +3398,14 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         master_socket = backhaul_manager_socket;
         master_socket->setPeerMac(backhaul_params.controller_bridge_mac);
 
+        auto db = AgentDB::get();
         if (!wlan_settings.band_enabled) {
             LOG(TRACE) << "goto STATE_OPERATIONAL";
             slave_state = STATE_OPERATIONAL;
             break;
         }
 
-        if (platform_settings.local_gw) {
+        if (db->device_conf.local_gw) {
             //TODO get bridge_iface from platform manager
             network_utils::iface_info bridge_info;
             network_utils::get_iface_info(bridge_info, config.bridge_iface);
@@ -3486,6 +3493,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             LOG(ERROR) << "Failed creating AP_AUTOCONFIGURATION_WSC_MESSAGE";
             return false;
         }
+
+        auto db = AgentDB::get();
 
         std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
             supported_channels_arr{{}};
@@ -3575,7 +3584,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 }
 
                 //Platform Settings
-                notification->platform_settings() = platform_settings;
+                notification->platform_settings()              = platform_settings;
+                notification->platform_settings().local_master = db->device_conf.local_controller;
 
                 //Wlan Settings
                 notification->wlan_settings() = wlan_settings;
