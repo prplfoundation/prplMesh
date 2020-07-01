@@ -29,6 +29,7 @@
  */
 
 #include "backhaul_manager_thread.h"
+#include "../agent_db.h"
 
 #include "../link_metrics/ieee802_11_link_metrics_collector.h"
 #include "../link_metrics/ieee802_3_link_metrics_collector.h"
@@ -562,6 +563,8 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
             return false;
         }
 
+        auto db = AgentDB::get();
+
         std::string strIface;
         network_utils::iface_info iface_info;
         bool backhaul_manager_exist = false;
@@ -569,7 +572,7 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
         notification->params().is_prplmesh_controller = is_prplmesh_controller;
         notification->params().controller_bridge_mac = tlvf::mac_from_string(controller_bridge_mac);
 
-        if (!local_gw) {
+        if (!db->device_conf.local_gw) {
 
             if (m_sConfig.eType == SBackhaulConfig::EType::Wired) {
                 strIface = m_sConfig.wire_iface;
@@ -710,7 +713,7 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
             // note: On wired connections ore GW, the first connected slave is selected as the backhaul manager
             notification->params().is_backhaul_manager = sc->slave_is_backhaul_manager;
 
-            if (local_gw) {
+            if (db->device_conf.local_gw) {
                 LOG(DEBUG) << "Sending GW_MASTER CONNECTED notification to slave of '"
                            << sc->hostap_iface << "'";
             } else {
@@ -791,7 +794,8 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
     }
     // Wait for Enable command
     case EState::WAIT_ENABLE: {
-        if (!onboarding && !local_gw &&
+        auto db = AgentDB::get();
+        if (!onboarding && !db->device_conf.local_gw &&
             std::chrono::steady_clock::now() > state_time_stamp_timeout) {
             LOG(ERROR) << STATE_WAIT_ENABLE_TIMEOUT_SECONDS
                        << " seconds has passed on state WAIT_ENABLE, stopping thread!";
@@ -829,9 +833,11 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
                        << intptr_t(m_scPlatform.get());
         }
 
+        auto db = AgentDB::get();
+
         // Ignore 'selected_backhaul' since this case is not covered by certification flows
-        if (local_master && local_gw) {
-            LOG(DEBUG) << "local master && local gw";
+        if (db->device_conf.local_controller && db->device_conf.local_gw) {
+            LOG(DEBUG) << "local controller && local gw";
             FSM_MOVE_STATE(MASTER_DISCOVERY);
         } else { // link establish
 
@@ -895,6 +901,8 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
         break;
     }
     case EState::MASTER_DISCOVERY: {
+
+        auto db = AgentDB ::get();
         if (network_utils::get_iface_info(bridge_info, m_sConfig.bridge_iface) != 0) {
             LOG(ERROR) << "Failed reading addresses from the bridge!";
             platform_notify_error(bpl::eErrorCode::BH_READING_DATA_FROM_THE_BRIDGE, "");
@@ -910,7 +918,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
             break;
         }
 
-        if (!broker_connect(beerocks_temp_path, local_master)) {
+        if (!broker_connect(beerocks_temp_path, db->device_conf.local_controller)) {
             platform_notify_error(bpl::eErrorCode::BH_CONNECTING_TO_MASTER, "");
             FSM_MOVE_STATE(RESTART);
             break;
@@ -1817,18 +1825,18 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             return false;
         }
 
+        auto db = AgentDB::get();
+
         soc->sta_iface.assign(request->sta_iface(message::IFACE_NAME_LENGTH));
         soc->hostap_iface.assign(request->hostap_iface(message::IFACE_NAME_LENGTH));
         soc->sta_iface_filter_low = request->sta_iface_filter_low();
-        local_master              = request->local_master();
-        local_gw                  = request->local_gw();
         onboarding                = request->onboarding();
 
         // Add the slave socket to the backhaul configuration
         m_sConfig.slave_iface_socket[soc->sta_iface] = soc;
 
         if (!m_agent_ucc_listener && request->certification_mode() &&
-            m_sConfig.ucc_listener_port != 0 && !bpl::cfg_is_master()) {
+            m_sConfig.ucc_listener_port != 0 && !db->device_conf.local_controller) {
             m_agent_ucc_listener = std::make_unique<agent_ucc_listener>(
                 *this, m_sConfig.ucc_listener_port, m_sConfig.vendor, m_sConfig.model,
                 m_sConfig.bridge_iface, cert_cmdu_tx);
@@ -1839,7 +1847,6 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
         }
 
         LOG(DEBUG) << "ACTION_BACKHAUL_REGISTER_REQUEST sta_iface=" << soc->sta_iface
-                   << " local_master=" << int(local_master) << " local_gw=" << int(local_gw)
                    << " hostap_iface=" << soc->hostap_iface;
 
         auto register_response =
@@ -1922,7 +1929,9 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
                      */
                 pending_enable = true;
 
-                if (local_gw) {
+                auto db = AgentDB::get();
+
+                if (db->device_conf.local_gw) {
                     LOG(DEBUG) << "All slaves ready, proceeding, local GW, Bridge: "
                                << m_sConfig.bridge_iface;
                 } else {
@@ -2807,6 +2816,8 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         return false;
     }
 
+    auto db = AgentDB::get();
+
     auto tlvDeviceInformation = cmdu_tx.addClass<ieee1905_1::tlvDeviceInformation>();
     if (!tlvDeviceInformation) {
         LOG(ERROR) << "addClass ieee1905_1::tlvDeviceInformation failed, mid=" << std::hex
@@ -2883,7 +2894,8 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
             // BSSID field is not defined well for interface. The common definition is in simple
             // words "the AP/ETH mac that we are connected to".
             // For fronthaul radio interface or unused backhaul interface put zero mac.
-            if (local_gw || m_sConfig.eType == SBackhaulConfig::EType::Wired || front_iface ||
+            if (db->device_conf.local_gw || m_sConfig.eType == SBackhaulConfig::EType::Wired ||
+                front_iface ||
                 (m_sConfig.eType == SBackhaulConfig::EType::Wireless &&
                  soc->sta_iface != m_sConfig.wireless_iface)) {
                 media_info.network_membership = network_utils::ZERO_MAC;
@@ -3005,7 +3017,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
     }
 
     size_t number_of_supported_services = 1;
-    if (local_master) {
+    if (db->device_conf.local_controller) {
         number_of_supported_services++;
     }
 
@@ -3023,7 +3035,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
     std::get<1>(supportedServiceTuple) =
         wfa_map::tlvSupportedService::eSupportedService::MULTI_AP_AGENT;
 
-    if (local_master) {
+    if (db->device_conf.local_controller) {
         auto supportedServiceTuple = tlvSupportedService->supported_service_list(1);
         if (!std::get<0>(supportedServiceTuple)) {
             LOG(ERROR) << "Failed accessing supported_service_list(1)";
@@ -3651,6 +3663,8 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
         LOG(DEBUG) << "successfully connected to bssid=" << (iface_hal->get_bssid())
                    << " on channel=" << (iface_hal->get_channel()) << " on iface=" << iface;
 
+        auto db = AgentDB::get();
+
         if (iface == m_sConfig.wireless_iface && !hidden_ssid) {
             //this is generally not supposed to happen
             LOG(WARNING) << "event iface != wireless iface!";
@@ -3711,7 +3725,9 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
             FSM_MOVE_STATE(MASTER_DISCOVERY);
         } else if (FSM_IS_IN_STATE(WIRELESS_WAIT_FOR_RECONNECT)) {
             LOG(DEBUG) << "reconnected successfully, continuing";
-            if (local_master && !local_gw) { // ire_master
+
+            // IRE running controller
+            if (db->device_conf.local_controller && !db->device_conf.local_gw) {
                 FSM_MOVE_STATE(CONNECT_TO_MASTER);
             } else {
                 FSM_MOVE_STATE(OPERATIONAL);
