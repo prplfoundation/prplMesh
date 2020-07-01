@@ -15,7 +15,6 @@ RUN apk add --update --no-cache \
     libtool \
     musl-dev \
     zeromq-dev \
-    libzmq \
     linux-headers \
     make \
     ncurses-dev \
