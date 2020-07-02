@@ -13,6 +13,8 @@ This project is part of a wider collaboration between Prpl Foundation and Broadb
 
 Architecture documentation can be found in the [documentation](documentation/) folder.
 
+The latest build artifacts are [always accessible](https://ftp.essensium.com/owncloud/index.php/s/xidrhY3JKEYS9dK?path=%2Fartifacts%2Flatest%2Fbuild).
+
 ## Requirements
 
 To build prplMesh, you need (on Ubuntu) the following packages:
