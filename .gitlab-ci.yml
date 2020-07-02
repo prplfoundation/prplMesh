@@ -8,6 +8,7 @@ stages:
   - certification-dummy
   - certification-netgear-rax40
   - certification-netgear-rax40-bhwifi
+  - certification-turris-omnia
   - upload
 
 .image-build:
@@ -346,3 +347,4 @@ include:
   - local: "/ci/certification/dummy.yml"
   - local: "/ci/certification/netgear-rax40.yml"
   - local: "/ci/certification/netgear-rax40-bhwifi.yml"
+  - local: "/ci/certification/turris-omnia.yml"
