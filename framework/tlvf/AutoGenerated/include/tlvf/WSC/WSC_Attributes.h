@@ -42,7 +42,6 @@ namespace WSC {
 
 class cConfigData;
 class cWscAttrEncryptedSettings;
-class cWscVendorExtWfa;
 class cWscAttrVersion;
 class cWscAttrMessageType;
 class cWscAttrEnrolleeNonce;
@@ -68,61 +67,10 @@ class cWscAttrWscState;
 class cWscAttrUuidR;
 class cWscAttrAuthenticator;
 class cWscAttrRegistrarNonce;
-class cWscAttrVersion2;
 class cWscAttrSsid;
 class cWscAttrAuthenticationType;
 class cWscAttrEncryptionType;
 class cWscAttrNetworkKey;
-typedef struct sWscAttrVersion2 {
-    eWscAttributes attribute_type;
-    uint16_t data_length;
-    uint8_t vendor_id_0;
-    uint8_t vendor_id_1;
-    uint8_t vendor_id_2;
-    uint8_t subelement_id;
-    uint8_t subelement_length;
-    uint8_t subelement_value;
-    void struct_swap(){
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
-    }
-    void struct_init(){
-        attribute_type = ATTR_VENDOR_EXTENSION;
-        data_length = WSC_VENDOR_EXTENSIONS_LENGTH;
-        vendor_id_0 = WSC_VENDOR_ID_WFA_1;
-        vendor_id_1 = WSC_VENDOR_ID_WFA_2;
-        vendor_id_2 = WSC_VENDOR_ID_WFA_3;
-        subelement_id = 0x0;
-        subelement_length = 0x1;
-        subelement_value = WSC_VERSION2;
-    }
-} __attribute__((packed)) sWscAttrVersion2;
-
-typedef struct sWscAttrVendorExtMultiAp {
-    eWscAttributes attribute_type;
-    uint16_t data_length;
-    uint8_t vendor_id_0;
-    uint8_t vendor_id_1;
-    uint8_t vendor_id_2;
-    uint8_t subelement_id;
-    uint8_t subelement_length;
-    uint8_t subelement_value;
-    void struct_swap(){
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&attribute_type));
-        tlvf_swap(16, reinterpret_cast<uint8_t*>(&data_length));
-    }
-    void struct_init(){
-        attribute_type = ATTR_VENDOR_EXTENSION;
-        data_length = WSC_VENDOR_EXTENSIONS_LENGTH;
-        vendor_id_0 = WSC_VENDOR_ID_WFA_1;
-        vendor_id_1 = WSC_VENDOR_ID_WFA_2;
-        vendor_id_2 = WSC_VENDOR_ID_WFA_3;
-        subelement_id = 0x6;
-        subelement_length = 0x1;
-        subelement_value = TEARDOWN;
-    }
-} __attribute__((packed)) sWscAttrVendorExtMultiAp;
-
 typedef struct sWscAttrKeyWrapAuthenticator {
     eWscAttributes attribute_type;
     uint16_t data_length;
@@ -267,7 +215,6 @@ class cConfigData : public BaseClass
         bool set_network_key(const char buffer[], size_t size);
         bool alloc_network_key(size_t count = 1);
         sWscAttrBssid& bssid_attr();
-        sWscAttrVendorExtMultiAp& multiap_attr();
         uint8_t& bss_type();
         void class_swap() override;
         bool finalize() override;
@@ -287,7 +234,6 @@ class cConfigData : public BaseClass
         char* m_network_key = nullptr;
         size_t m_network_key_idx__ = 0;
         sWscAttrBssid* m_bssid_attr = nullptr;
-        sWscAttrVendorExtMultiAp* m_multiap_attr = nullptr;
         uint8_t* m_bss_type = nullptr;
 };
 
@@ -323,44 +269,6 @@ class cWscAttrEncryptedSettings : public BaseClass
         int m_lock_order_counter__ = 0;
         char* m_encrypted_settings = nullptr;
         size_t m_encrypted_settings_idx__ = 0;
-};
-
-class cWscVendorExtWfa : public BaseClass
-{
-    public:
-        cWscVendorExtWfa(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cWscVendorExtWfa(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cWscVendorExtWfa();
-
-        eWscAttributes& type();
-        const uint16_t& length();
-        uint8_t& vendor_id_0();
-        uint8_t& vendor_id_1();
-        uint8_t& vendor_id_2();
-        uint8_t& subelement_id();
-        uint8_t& subelement_length();
-        uint8_t& subelement_value();
-        size_t vs_data_length() { return m_vs_data_idx__ * sizeof(uint8_t); }
-        uint8_t* vs_data(size_t idx = 0);
-        bool set_vs_data(const void* buffer, size_t size);
-        bool alloc_vs_data(size_t count = 1);
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eWscAttributes* m_type = nullptr;
-        uint16_t* m_length = nullptr;
-        uint8_t* m_vendor_id_0 = nullptr;
-        uint8_t* m_vendor_id_1 = nullptr;
-        uint8_t* m_vendor_id_2 = nullptr;
-        uint8_t* m_subelement_id = nullptr;
-        uint8_t* m_subelement_length = nullptr;
-        uint8_t* m_subelement_value = nullptr;
-        uint8_t* m_vs_data = nullptr;
-        size_t m_vs_data_idx__ = 0;
-        int m_lock_order_counter__ = 0;
 };
 
 class cWscAttrVersion : public BaseClass
@@ -943,37 +851,6 @@ class cWscAttrRegistrarNonce : public BaseClass
         uint8_t* m_nonce = nullptr;
         size_t m_nonce_idx__ = 0;
         int m_lock_order_counter__ = 0;
-};
-
-class cWscAttrVersion2 : public BaseClass
-{
-    public:
-        cWscAttrVersion2(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cWscAttrVersion2(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cWscAttrVersion2();
-
-        eWscAttributes& type();
-        const uint16_t& length();
-        uint8_t& vendor_id_0();
-        uint8_t& vendor_id_1();
-        uint8_t& vendor_id_2();
-        uint8_t& subelement_id();
-        uint8_t& subelement_length();
-        uint8_t& subelement_value();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eWscAttributes* m_type = nullptr;
-        uint16_t* m_length = nullptr;
-        uint8_t* m_vendor_id_0 = nullptr;
-        uint8_t* m_vendor_id_1 = nullptr;
-        uint8_t* m_vendor_id_2 = nullptr;
-        uint8_t* m_subelement_id = nullptr;
-        uint8_t* m_subelement_length = nullptr;
-        uint8_t* m_subelement_value = nullptr;
 };
 
 class cWscAttrSsid : public BaseClass
