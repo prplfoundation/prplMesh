@@ -101,6 +101,10 @@ constexpr int DEFAULT_CLIENTS_PERSISTENT_DB_MAX_SIZE = 256;
 // the persistent data of clients has aging limit
 // by default, the limit is 365 days, but it is configurable via the UCI
 constexpr int DEFAULT_MAX_TIMELIFE_DELAY_DAYS = 365;
+// the timelife of unfriendly-devices is set separately and can be shorter than the timelife
+// TODO: add description of "unfriendly-device" and how it is determined
+// by default, the limit is 1 day, but it is configurable via the UCI
+constexpr int DEFAULT_UNFRIENDLY_DEVICE_MAX_TIMELIFE_DELAY_DAYS = 1;
 
 /****************************************************************************/
 /******************************* Structures *********************************/
@@ -523,6 +527,15 @@ bool cfg_get_clients_persistent_db_max_size(int &max_size);
  * @return true on success, otherwise false.
  */
 bool cfg_get_max_timelife_delay_days(int &max_timelife_delay_days);
+
+/**
+ * @brief Returns the max time-life delay for unfriendly clients.
+ * 
+ * @param [out] unfriendly_device_max_timelife_delay_days Max unfriendly clients' timelife delay.
+ * @return true on success, otherwise false.
+ */
+bool cfg_get_unfriendly_device_max_timelife_delay_days(
+    int &unfriendly_device_max_timelife_delay_days);
 
 } // namespace bpl
 } // namespace beerocks
