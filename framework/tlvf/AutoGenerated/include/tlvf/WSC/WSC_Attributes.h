@@ -35,10 +35,12 @@
 #include "tlvf/WSC/eWscVendorId.h"
 #include "tlvf/WSC/eWscVendorExt.h"
 #include "tlvf/WSC/eWscDev.h"
+#include "tlvf/WSC/eWscWfaVendorExtSubelement.h"
 #include "tlvf/common/sMacAddr.h"
 
 namespace WSC {
 
+class cConfigData;
 class cWscAttrEncryptedSettings;
 class cWscVendorExtWfa;
 class cWscAttrVersion;
@@ -182,6 +184,64 @@ typedef struct sWscAttrBssid {
     }
 } __attribute__((packed)) sWscAttrBssid;
 
+typedef struct sWscWfaVendorExtSubelementVersion2 {
+    uint8_t id;
+    uint8_t length;
+    uint8_t value;
+    void struct_swap(){
+    }
+    void struct_init(){
+        id = VERSION2;
+        length = 0x1;
+        value = WSC_VERSION2;
+    }
+} __attribute__((packed)) sWscWfaVendorExtSubelementVersion2;
+
+typedef struct sWscWfaVendorExtSubelementMultiApIdentifier {
+    uint8_t id;
+    uint8_t length;
+    uint8_t value;
+    void struct_swap(){
+    }
+    void struct_init(){
+        id = MULTI_AP_IDENTIFIER;
+        length = 0x1;
+        value = TEARDOWN;
+    }
+} __attribute__((packed)) sWscWfaVendorExtSubelementMultiApIdentifier;
+
+
+class cWscAttrVendorExtension : public BaseClass
+{
+    public:
+        cWscAttrVendorExtension(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cWscAttrVendorExtension(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cWscAttrVendorExtension();
+
+        eWscAttributes& type();
+        const uint16_t& length();
+        uint8_t& vendor_id_0();
+        uint8_t& vendor_id_1();
+        uint8_t& vendor_id_2();
+        size_t vendor_data_length() { return m_vendor_data_idx__ * sizeof(uint8_t); }
+        uint8_t* vendor_data(size_t idx = 0);
+        bool set_vendor_data(const void* buffer, size_t size);
+        bool alloc_vendor_data(size_t count = 1);
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eWscAttributes* m_type = nullptr;
+        uint16_t* m_length = nullptr;
+        uint8_t* m_vendor_id_0 = nullptr;
+        uint8_t* m_vendor_id_1 = nullptr;
+        uint8_t* m_vendor_id_2 = nullptr;
+        uint8_t* m_vendor_data = nullptr;
+        size_t m_vendor_data_idx__ = 0;
+        int m_lock_order_counter__ = 0;
+};
 
 class cConfigData : public BaseClass
 {

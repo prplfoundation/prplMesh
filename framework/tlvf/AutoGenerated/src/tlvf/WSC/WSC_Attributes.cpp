@@ -15,6 +15,178 @@
 
 using namespace WSC;
 
+cWscAttrVendorExtension::cWscAttrVendorExtension(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cWscAttrVendorExtension::cWscAttrVendorExtension(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cWscAttrVendorExtension::~cWscAttrVendorExtension() {
+}
+eWscAttributes& cWscAttrVendorExtension::type() {
+    return (eWscAttributes&)(*m_type);
+}
+
+const uint16_t& cWscAttrVendorExtension::length() {
+    return (const uint16_t&)(*m_length);
+}
+
+uint8_t& cWscAttrVendorExtension::vendor_id_0() {
+    return (uint8_t&)(*m_vendor_id_0);
+}
+
+uint8_t& cWscAttrVendorExtension::vendor_id_1() {
+    return (uint8_t&)(*m_vendor_id_1);
+}
+
+uint8_t& cWscAttrVendorExtension::vendor_id_2() {
+    return (uint8_t&)(*m_vendor_id_2);
+}
+
+uint8_t* cWscAttrVendorExtension::vendor_data(size_t idx) {
+    if ( (m_vendor_data_idx__ == 0) || (m_vendor_data_idx__ <= idx) ) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+        return nullptr;
+    }
+    return &(m_vendor_data[idx]);
+}
+
+bool cWscAttrVendorExtension::set_vendor_data(const void* buffer, size_t size) {
+    if (buffer == nullptr) {
+        TLVF_LOG(WARNING) << "set_vendor_data received a null pointer.";
+        return false;
+    }
+    if (!alloc_vendor_data(size)) { return false; }
+    std::copy_n(reinterpret_cast<const uint8_t *>(buffer), size, m_vendor_data);
+    return true;
+}
+bool cWscAttrVendorExtension::alloc_vendor_data(size_t count) {
+    if (m_lock_order_counter__ > 0) {;
+        TLVF_LOG(ERROR) << "Out of order allocation for variable length list vendor_data, abort!";
+        return false;
+    }
+    size_t len = sizeof(uint8_t) * count;
+    if(getBuffRemainingBytes() < len )  {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
+        return false;
+    }
+    m_lock_order_counter__ = 0;
+    uint8_t *src = (uint8_t *)m_vendor_data;
+    uint8_t *dst = src + len;
+    if (!m_parse__) {
+        size_t move_length = getBuffRemainingBytes(src) - len;
+        std::copy_n(src, move_length, dst);
+    }
+    m_vendor_data_idx__ += count;
+    if (!buffPtrIncrementSafe(len)) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+        return false;
+    }
+    if(m_length){ (*m_length) += len; }
+    return true;
+}
+
+void cWscAttrVendorExtension::class_swap()
+{
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_type));
+    tlvf_swap(16, reinterpret_cast<uint8_t*>(m_length));
+}
+
+bool cWscAttrVendorExtension::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+        *m_length -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cWscAttrVendorExtension::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(eWscAttributes); // type
+    class_size += sizeof(uint16_t); // length
+    class_size += sizeof(uint8_t); // vendor_id_0
+    class_size += sizeof(uint8_t); // vendor_id_1
+    class_size += sizeof(uint8_t); // vendor_id_2
+    return class_size;
+}
+
+bool cWscAttrVendorExtension::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_type = reinterpret_cast<eWscAttributes*>(m_buff_ptr__);
+    if (!m_parse__) *m_type = ATTR_VENDOR_EXTENSION;
+    if (!buffPtrIncrementSafe(sizeof(eWscAttributes))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(eWscAttributes) << ") Failed!";
+        return false;
+    }
+    m_length = reinterpret_cast<uint16_t*>(m_buff_ptr__);
+    if (!m_parse__) *m_length = 0;
+    if (!buffPtrIncrementSafe(sizeof(uint16_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint16_t) << ") Failed!";
+        return false;
+    }
+    m_vendor_id_0 = reinterpret_cast<uint8_t*>(m_buff_ptr__);
+    if (!m_parse__) *m_vendor_id_0 = WSC_VENDOR_ID_WFA_1;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
+    m_vendor_id_1 = reinterpret_cast<uint8_t*>(m_buff_ptr__);
+    if (!m_parse__) *m_vendor_id_1 = WSC_VENDOR_ID_WFA_2;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
+    m_vendor_id_2 = reinterpret_cast<uint8_t*>(m_buff_ptr__);
+    if (!m_parse__) *m_vendor_id_2 = WSC_VENDOR_ID_WFA_3;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
+    m_vendor_data = (uint8_t*)m_buff_ptr__;
+    if (m_length && m_parse__) {
+        size_t len = *m_length;
+        tlvf_swap(16, reinterpret_cast<uint8_t*>(&len));
+        len -= (m_buff_ptr__ - sizeof(*m_type) - sizeof(*m_length) - m_buff__);
+        m_vendor_data_idx__ = len/sizeof(uint8_t);
+        if (!buffPtrIncrementSafe(len)) {
+            LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
+            return false;
+        }
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
 cConfigData::cConfigData(uint8_t* buff, size_t buff_len, bool parse) :
     BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();
