@@ -10,6 +10,9 @@
 #define _TLVF_WSC_CONFIGDATA_H_
 
 #include <tlvf/WSC/AttrList.h>
+#include <tlvf/tlvflogging.h>
+
+#include <iomanip>
 
 namespace WSC {
 
@@ -60,7 +63,39 @@ public:
         auto attr = getAttr<cWscAttrMac>();
         return attr ? attr->data() : sMacAddr();
     };
-    uint8_t bss_type() const { return getAttr<cWscVendorExtWfa>()->subelement_value(); };
+    eWscVendorExtSubelementBssType bss_type() const
+    {
+        constexpr eWscVendorExtSubelementBssType default_value =
+            eWscVendorExtSubelementBssType::TEARDOWN;
+
+        // Iterate over all Vendor Extension attributes until we find one that matches the WFA ID.
+        for (auto &vendor_ext_attr : getAttrList<cWscAttrVendorExtension>()) {
+
+            // Skip Vendor Extension attribute if it is not a WFA Vendor Extension attribute
+            if ((eWscVendorId::WSC_VENDOR_ID_WFA_1 != vendor_ext_attr->vendor_id_0()) ||
+                (eWscVendorId::WSC_VENDOR_ID_WFA_2 != vendor_ext_attr->vendor_id_1()) ||
+                (eWscVendorId::WSC_VENDOR_ID_WFA_3 != vendor_ext_attr->vendor_id_2())) {
+                continue;
+            }
+
+            size_t index     = 0;
+            auto vendor_data = vendor_ext_attr->vendor_data();
+            while ((index + sizeof(sWscWfaVendorExtSubelementMultiApIdentifier)) <=
+                   vendor_ext_attr->vendor_data_length()) {
+                auto subelement_type = static_cast<eWscWfaVendorExtSubelement>(vendor_data[index]);
+                auto subelement_length = vendor_data[index + 1];
+                if ((eWscWfaVendorExtSubelement::MULTI_AP_IDENTIFIER == subelement_type) &&
+                    (1 == subelement_length)) {
+                    return static_cast<WSC::eWscVendorExtSubelementBssType>(vendor_data[index + 2]);
+                }
+
+                // Skip this subelement
+                index += 2 + subelement_length;
+            }
+        }
+
+        return default_value;
+    };
 };
 
 } // namespace WSC
