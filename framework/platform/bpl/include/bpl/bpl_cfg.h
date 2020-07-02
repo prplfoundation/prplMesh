@@ -91,6 +91,9 @@ namespace bpl {
 #define DEFAULT_BAND_STEERING 1
 #define DEFAULT_DFS_REENTRY 1
 #define DEFAULT_CLIENT_ROAMING 1
+// by-default the persistent DB is disabled to allow backwards compatability
+// if the parameter is not configured in the prplmesh config and set to 1, DB is disabled
+constexpr int DEFAULT_PERSISTENT_DB = 0;
 
 /****************************************************************************/
 /******************************* Structures *********************************/
@@ -489,6 +492,14 @@ int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN]);
  * @return -1 Error, or no hostap_iface is configured.
  */
 int cfg_get_all_prplmesh_wifi_interfaces(BPL_WLAN_IFACE *interfaces, int *num_of_interfaces);
+
+/**
+ * @brief Returns whether the persistent DB is enabled.
+ * 
+ * @param [out] enable true if the DB is enabled and false otherwise.
+ * @return true on success, otherwise false.
+ */
+bool cfg_get_persistent_db_enable(bool &enable);
 
 } // namespace bpl
 } // namespace beerocks
