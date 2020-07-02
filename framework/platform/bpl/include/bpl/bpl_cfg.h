@@ -94,6 +94,10 @@ namespace bpl {
 // by-default the persistent DB is disabled to allow backwards compatability
 // if the parameter is not configured in the prplmesh config and set to 1, DB is disabled
 constexpr int DEFAULT_PERSISTENT_DB = 0;
+// the DB of clients is limited in size to prevent high memory consumption
+// this is configurable to enable flexibility and support for low-memory platforms
+// by default, the number of clients's configuration to be cached is limited to 256
+constexpr int DEFAULT_CLIENTS_PERSISTENT_DB_MAX_SIZE = 256;
 
 /****************************************************************************/
 /******************************* Structures *********************************/
@@ -500,6 +504,14 @@ int cfg_get_all_prplmesh_wifi_interfaces(BPL_WLAN_IFACE *interfaces, int *num_of
  * @return true on success, otherwise false.
  */
 bool cfg_get_persistent_db_enable(bool &enable);
+
+/**
+ * @brief Returns the max number of clients in the persistent DB.
+ * 
+ * @param [out] max_size Max number of clients the persistent-db supports.
+ * @return true on success, otherwise false.
+ */
+bool cfg_get_clients_persistent_db_max_size(int &max_size);
 
 } // namespace bpl
 } // namespace beerocks
