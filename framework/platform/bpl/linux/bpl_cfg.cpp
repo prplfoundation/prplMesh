@@ -335,5 +335,20 @@ int cfg_get_all_prplmesh_wifi_interfaces(BPL_WLAN_IFACE *interfaces, int *num_of
     return RETURN_OK;
 }
 
+bool cfg_get_persistent_db_enable(bool &enable)
+{
+    int persistent_db_enable = DEFAULT_PERSISTENT_DB;
+
+    // persistent db value is optional
+    if (cfg_get_param_int("persistent_db=", persistent_db_enable) < 0) {
+        MAPF_DBG("Failed to read persistent-db-enable parameter - setting default value");
+        persistent_db_enable = DEFAULT_PERSISTENT_DB;
+    }
+
+    enable = (persistent_db_enable == 1);
+
+    return true;
+}
+
 } // namespace bpl
 } // namespace beerocks
