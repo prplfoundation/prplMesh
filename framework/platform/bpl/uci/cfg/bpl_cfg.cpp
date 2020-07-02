@@ -401,5 +401,19 @@ int cfg_get_all_prplmesh_wifi_interfaces(BPL_WLAN_IFACE *interfaces, int *num_of
     return RETURN_OK;
 }
 
+bool cfg_get_persistent_db_enable(bool &enable)
+{
+    int retVal = -1;
+    if (cfg_get_prplmesh_param_int_default("persistent_db", &retVal, DEFAULT_PERSISTENT_DB) ==
+        RETURN_ERR) {
+        MAPF_ERR("Failed to read persistent-db-enable parameter");
+        return false;
+    }
+
+    enable = (retVal == 1);
+
+    return true;
+}
+
 } // namespace bpl
 } // namespace beerocks
