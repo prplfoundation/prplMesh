@@ -429,5 +429,19 @@ bool cfg_get_clients_persistent_db_max_size(int &max_size)
     return true;
 }
 
+bool cfg_get_max_timelife_delay_days(int &max_timelife_delay_days)
+{
+    int retVal = -1;
+    if (cfg_get_prplmesh_param_int_default("max_timelife_delay_days", &retVal,
+                                           DEFAULT_MAX_TIMELIFE_DELAY_DAYS) == RETURN_ERR) {
+        MAPF_ERR("Failed to read max-timelife-delay-days parameter");
+        return false;
+    }
+
+    max_timelife_delay_days = retVal;
+
+    return true;
+}
+
 } // namespace bpl
 } // namespace beerocks
