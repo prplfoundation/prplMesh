@@ -139,6 +139,9 @@ cConfigData:
     _length_max: WSC_MAX_NETWORK_KEY_LENGTH
   bssid_attr: sWscAttrBssid
   multiap_attr: sWscAttrVendorExtMultiAp
+  bss_type:
+    _type: uint8_t
+    _value: TEARDOWN
 
 cWscAttrEncryptedSettings:
   _type: class
