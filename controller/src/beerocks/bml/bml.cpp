@@ -686,7 +686,7 @@ int bml_get_dcs_scan_results(BML_CTX ctx, const char *radio_mac,
                              unsigned int *output_results_size, unsigned char *output_result_status,
                              bool is_single_scan)
 {
-    // Validate intput params;
+    // Validate input parameters
     if (!ctx) {
         return (-BML_RET_INVALID_ARGS);
     }
@@ -700,7 +700,7 @@ int bml_get_dcs_scan_results(BML_CTX ctx, const char *radio_mac,
 int bml_start_dcs_single_scan(BML_CTX ctx, const char *radio_mac, int dwell_time,
                               int channel_pool_size, unsigned int *channel_pool)
 {
-    // Validate intput params;
+    // Validate input parameters
     if (!ctx) {
         return (-BML_RET_INVALID_ARGS);
     }
