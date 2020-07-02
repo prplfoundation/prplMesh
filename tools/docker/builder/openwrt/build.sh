@@ -83,7 +83,7 @@ main() {
 
     eval set -- "$OPTS"
 
-    SUPPORTED_TARGETS="turris-omnia glinet-b1300 netgear-rax40"
+    SUPPORTED_TARGETS="turris-omnia glinet-b1300 netgear-rax40 axepoint intel_mips"
 
     while true; do
         case "$1" in
@@ -121,6 +121,12 @@ main() {
             TARGET_SYSTEM=intel_mips
             SUBTARGET=xrx500
             TARGET_PROFILE=DEVICE_AX6000_2000_ETH_11AXUCI
+            PRPLMESH_VARIANT="-dwpal"
+            ;;
+        intel_mips)
+            TARGET_SYSTEM=intel_mips
+            SUBTARGET=xrx500
+            TARGET_PROFILE=INTEL_MIPS
             PRPLMESH_VARIANT="-dwpal"
             ;;
         *)
