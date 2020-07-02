@@ -443,5 +443,21 @@ bool cfg_get_max_timelife_delay_days(int &max_timelife_delay_days)
     return true;
 }
 
+bool cfg_get_unfriendly_device_max_timelife_delay_days(
+    int &unfriendly_device_max_timelife_delay_days)
+{
+    int retVal = -1;
+    if (cfg_get_prplmesh_param_int_default("unfriendly_device_max_timelife_delay_days", &retVal,
+                                           DEFAULT_UNFRIENDLY_DEVICE_MAX_TIMELIFE_DELAY_DAYS) ==
+        RETURN_ERR) {
+        MAPF_ERR("Failed to read unfriendly-device-max-timelife-delay-days parameter");
+        return false;
+    }
+
+    unfriendly_device_max_timelife_delay_days = retVal;
+
+    return true;
+}
+
 } // namespace bpl
 } // namespace beerocks
