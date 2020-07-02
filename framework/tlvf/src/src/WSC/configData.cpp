@@ -8,7 +8,6 @@
 
 #include <tlvf/WSC/configData.h>
 #include <tlvf/tlvfdefines.h>
-#include <tlvf/tlvflogging.h>
 
 using namespace WSC;
 
@@ -81,12 +80,33 @@ bool configData::init(const config &cfg)
     }
     bssid_attr->data() = cfg.bssid;
 
-    auto vendor_ext_attr = addAttr<cWscVendorExtWfa>();
+    auto vendor_ext_attr = addAttr<cWscAttrVendorExtension>();
     if (!vendor_ext_attr) {
-        TLVF_LOG(ERROR) << "addAttr<cWscVendorExtWfa> failed";
+        TLVF_LOG(ERROR) << "addAttr<cWscAttrVendorExtension> failed";
         return false;
     }
-    vendor_ext_attr->subelement_value() = cfg.bss_type;
+
+    // WFA Vendor Data
+    const size_t vendor_data_size = sizeof(sWscWfaVendorExtSubelementVersion2) +
+                                    sizeof(sWscWfaVendorExtSubelementMultiApIdentifier);
+    if (!vendor_ext_attr->alloc_vendor_data(vendor_data_size)) {
+        LOG(ERROR) << "Failed to allocate vendor data [" << vendor_data_size << "]!";
+        return false;
+    }
+    auto vendor_data = vendor_ext_attr->vendor_data();
+
+    // WFA Vendor Extension Subelement at #0: Version2
+    size_t index = 0;
+    sWscWfaVendorExtSubelementVersion2 version2{eWscWfaVendorExtSubelement::VERSION2, 0x01,
+                                                eWscVendorExtVersionIE::WSC_VERSION2};
+    std::copy_n(reinterpret_cast<uint8_t *>(&version2), sizeof(version2), &vendor_data[index]);
+
+    // WFA Vendor Extension Subelement at #1: Multi-AP Identifier
+    index += sizeof(version2);
+    sWscWfaVendorExtSubelementMultiApIdentifier multi_ap_identifier{
+        eWscWfaVendorExtSubelement::MULTI_AP_IDENTIFIER, 0x01, cfg.bss_type};
+    std::copy_n(reinterpret_cast<uint8_t *>(&multi_ap_identifier), sizeof(multi_ap_identifier),
+                &vendor_data[index]);
 
     return true;
 }
@@ -94,8 +114,8 @@ bool configData::init(const config &cfg)
 bool configData::valid() const
 {
     bool valid = true;
-    if (!getAttr<cWscVendorExtWfa>()) {
-        TLVF_LOG(ERROR) << "getAttr<cWscVendorExtWfa> failed";
+    if (!getAttr<cWscAttrVendorExtension>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrVendorExtension> failed";
         valid = false;
     }
     if (!getAttr<cWscAttrSsid>()) {

@@ -193,11 +193,24 @@ bool m2::init(const config &cfg)
         return false;
     }
 
-    auto version2_attr = addAttr<cWscAttrVersion2>();
-    if (!version2_attr) {
-        TLVF_LOG(ERROR) << "addAttr<cWscAttrVersion2> failed";
+    auto vendor_ext_attr = addAttr<cWscAttrVendorExtension>();
+    if (!vendor_ext_attr) {
+        TLVF_LOG(ERROR) << "addAttr<cWscAttrVendorExtension> failed";
         return false;
     }
+
+    // WFA Vendor Data
+    const size_t vendor_data_size = sizeof(sWscWfaVendorExtSubelementVersion2);
+    if (!vendor_ext_attr->alloc_vendor_data(vendor_data_size)) {
+        LOG(ERROR) << "Failed to allocate vendor data [" << vendor_data_size << "]!";
+        return false;
+    }
+    auto vendor_data = vendor_ext_attr->vendor_data();
+
+    // WFA Vendor Extension Subelement at #0: Version2
+    sWscWfaVendorExtSubelementVersion2 version2{eWscWfaVendorExtSubelement::VERSION2, 0x01,
+                                                eWscVendorExtVersionIE::WSC_VERSION2};
+    std::copy_n(reinterpret_cast<uint8_t *>(&version2), sizeof(version2), vendor_data);
 
     auto encrypted_settings = addAttr<cWscAttrEncryptedSettings>();
     if (!encrypted_settings) {
