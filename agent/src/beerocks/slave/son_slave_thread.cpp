@@ -4124,7 +4124,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         c->bssid_attr().data               = config.bssid;
         c->authentication_type_attr().data = config.auth_type;
         c->encryption_type_attr().data     = config.encr_type;
-        c->multiap_attr().subelement_value = config.bss_type;
+        c->bss_type()                      = config.bss_type;
         request->add_wifi_credentials(c);
     }
 

@@ -887,8 +887,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             // value set to one (see Table 4), it shall tear down all currently operating BSS(s)
             // on the radio indicated by the Radio Unique Identifier, and shall ignore the other
             // attributes in the M2.
-            auto bss_type = static_cast<WSC::eWscVendorExtSubelementBssType>(
-                config_data.multiap_attr().subelement_value);
+            auto bss_type =
+                static_cast<WSC::eWscVendorExtSubelementBssType>(config_data.bss_type());
             if ((bss_type & WSC::eWscVendorExtSubelementBssType::TEARDOWN) != 0) {
                 LOG(DEBUG) << "received teardown";
                 bss_info_conf_list.clear();
