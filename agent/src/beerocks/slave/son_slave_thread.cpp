@@ -103,6 +103,11 @@ slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
     configuration_stop_on_failure_attempts = conf.stop_on_failure_attempts;
     stop_on_failure_attempts               = configuration_stop_on_failure_attempts;
 
+    // Set configuration on Agent database.
+    auto db = AgentDB::get();
+
+    db->bridge.iface_name = conf.bridge_iface;
+
     slave_state = STATE_INIT;
     set_select_timeout(SELECT_TIMEOUT_MSEC);
 }
@@ -1214,13 +1219,17 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
             is_backhaul_manager = (bool)notification->params().is_backhaul_manager;
             LOG_IF(is_backhaul_manager, DEBUG) << "Selected as backhaul manager";
 
+            auto db = AgentDB::get();
+
+            // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
+            db->bridge.mac = notification->params().bridge_mac;
+
             backhaul_params.gw_ipv4 = network_utils::ipv4_to_string(notification->params().gw_ipv4);
             backhaul_params.gw_bridge_mac =
                 tlvf::mac_to_string(notification->params().gw_bridge_mac);
             backhaul_params.controller_bridge_mac =
                 tlvf::mac_to_string(notification->params().controller_bridge_mac);
             backhaul_params.is_prplmesh_controller = notification->params().is_prplmesh_controller;
-            backhaul_params.bridge_mac = tlvf::mac_to_string(notification->params().bridge_mac);
             backhaul_params.bridge_ipv4 =
                 network_utils::ipv4_to_string(notification->params().bridge_ipv4);
             backhaul_params.backhaul_mac = tlvf::mac_to_string(notification->params().backhaul_mac);
@@ -2448,8 +2457,10 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
             LOG(ERROR) << "Failed building message!";
             return false;
         }
+        auto db = AgentDB::get();
+
         notification_out->operational() = agent_operational;
-        notification_out->bridge_mac()  = tlvf::mac_from_string(backhaul_params.bridge_mac);
+        notification_out->bridge_mac()  = db->bridge.mac;
         send_cmdu_to_controller(cmdu_tx);
 
         break;
@@ -3408,15 +3419,15 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         if (db->device_conf.local_gw) {
             //TODO get bridge_iface from platform manager
             network_utils::iface_info bridge_info;
-            network_utils::get_iface_info(bridge_info, config.bridge_iface);
-            backhaul_params.bridge_iface = config.bridge_iface;
-            //
+            network_utils::get_iface_info(bridge_info, db->bridge.iface_name);
+
+            // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
+            db->bridge.mac = tlvf::mac_from_string(bridge_info.mac);
 
             backhaul_params.gw_ipv4        = bridge_info.ip;
             backhaul_params.gw_bridge_mac  = bridge_info.mac;
-            backhaul_params.bridge_mac     = bridge_info.mac;
             backhaul_params.bridge_ipv4    = bridge_info.ip;
-            backhaul_params.backhaul_iface = backhaul_params.bridge_iface;
+            backhaul_params.backhaul_iface = db->bridge.iface_name;
             backhaul_params.backhaul_mac   = bridge_info.mac;
             backhaul_params.backhaul_ipv4  = bridge_info.ip;
             backhaul_params.backhaul_bssid = network_utils::ZERO_MAC_STRING;
@@ -3434,7 +3445,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         LOG(INFO) << "gw_bridge_mac=" << backhaul_params.gw_bridge_mac;
         LOG(INFO) << "controller_bridge_mac=" << backhaul_params.controller_bridge_mac;
         LOG(INFO) << "is_prplmesh_controller=" << backhaul_params.is_prplmesh_controller;
-        LOG(INFO) << "bridge_mac=" << backhaul_params.bridge_mac;
+        LOG(INFO) << "bridge_mac=" << db->bridge.mac;
         LOG(INFO) << "bridge_ipv4=" << backhaul_params.bridge_ipv4;
         LOG(INFO) << "backhaul_iface=" << backhaul_params.backhaul_iface;
         LOG(INFO) << "backhaul_mac=" << backhaul_params.backhaul_mac;
@@ -3552,9 +3563,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             notification->backhaul_params().backhaul_is_wireless =
                 backhaul_params.backhaul_is_wireless;
 
-            if (!config.bridge_iface.empty()) {
-                notification->backhaul_params().bridge_mac =
-                    tlvf::mac_from_string(backhaul_params.bridge_mac);
+            if (!db->bridge.iface_name.empty()) {
+                notification->backhaul_params().bridge_mac = db->bridge.mac;
                 notification->backhaul_params().bridge_ipv4 =
                     network_utils::ipv4_from_string(backhaul_params.bridge_ipv4);
                 notification->backhaul_params().backhaul_ipv4 =
@@ -3831,7 +3841,10 @@ bool slave_thread::send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx)
         cmdu_tx.getMessageType() == ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE
             ? network_utils::MULTICAST_1905_MAC_ADDR
             : backhaul_params.controller_bridge_mac;
-    return message_com::send_cmdu(master_socket, cmdu_tx, dst_addr, backhaul_params.bridge_mac);
+
+    auto db = AgentDB::get();
+    return message_com::send_cmdu(master_socket, cmdu_tx, dst_addr,
+                                  tlvf::mac_to_string(db->bridge.mac));
 }
 
 /**
@@ -3852,10 +3865,11 @@ bool slave_thread::autoconfig_wsc_calculate_keys(WSC::m2 &m2, uint8_t authkey[32
         LOG(ERROR) << "diffie hellman member not initialized";
         return false;
     }
-    auto mac = tlvf::mac_from_string(backhaul_params.bridge_mac);
-    mapf::encryption::wps_calculate_keys(*dh, m2.public_key(),
-                                         WSC::eWscLengths::WSC_PUBLIC_KEY_LENGTH, dh->nonce(),
-                                         mac.oct, m2.registrar_nonce(), authkey, keywrapkey);
+
+    auto db = AgentDB::get();
+    mapf::encryption::wps_calculate_keys(
+        *dh, m2.public_key(), WSC::eWscLengths::WSC_PUBLIC_KEY_LENGTH, dh->nonce(),
+        db->bridge.mac.oct, m2.registrar_nonce(), authkey, keywrapkey);
 
     return true;
 }
@@ -4932,8 +4946,10 @@ bool slave_thread::autoconfig_wsc_add_m1()
     tlv->alloc_payload(payload_length);
 
     WSC::m1::config cfg;
+    auto db = AgentDB::get();
+
     cfg.msg_type = WSC::eWscMessageType::WSC_MSG_TYPE_M1;
-    cfg.mac      = tlvf::mac_from_string(backhaul_params.bridge_mac);
+    cfg.mac      = db->bridge.mac;
     dh           = std::make_unique<mapf::encryption::diffie_hellman>();
     std::copy(dh->nonce(), dh->nonce() + dh->nonce_length(), cfg.enrollee_nonce);
     copy_pubkey(*dh, cfg.pub_key);
