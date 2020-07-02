@@ -89,6 +89,7 @@ bool cConfigData::alloc_ssid(size_t count) {
     m_network_key = (char *)((uint8_t *)(m_network_key) + len);
     m_bssid_attr = (sWscAttrBssid *)((uint8_t *)(m_bssid_attr) + len);
     m_multiap_attr = (sWscAttrVendorExtMultiAp *)((uint8_t *)(m_multiap_attr) + len);
+    m_bss_type = (uint8_t *)((uint8_t *)(m_bss_type) + len);
     m_ssid_idx__ += count;
     *m_ssid_length += count;
     if (!buffPtrIncrementSafe(len)) {
@@ -165,6 +166,7 @@ bool cConfigData::alloc_network_key(size_t count) {
     }
     m_bssid_attr = (sWscAttrBssid *)((uint8_t *)(m_bssid_attr) + len);
     m_multiap_attr = (sWscAttrVendorExtMultiAp *)((uint8_t *)(m_multiap_attr) + len);
+    m_bss_type = (uint8_t *)((uint8_t *)(m_bss_type) + len);
     m_network_key_idx__ += count;
     *m_network_key_length += count;
     if (!buffPtrIncrementSafe(len)) {
@@ -180,6 +182,10 @@ sWscAttrBssid& cConfigData::bssid_attr() {
 
 sWscAttrVendorExtMultiAp& cConfigData::multiap_attr() {
     return (sWscAttrVendorExtMultiAp&)(*m_multiap_attr);
+}
+
+uint8_t& cConfigData::bss_type() {
+    return (uint8_t&)(*m_bss_type);
 }
 
 void cConfigData::class_swap()
@@ -232,6 +238,7 @@ size_t cConfigData::get_initial_size()
     class_size += sizeof(uint16_t); // network_key_length
     class_size += sizeof(sWscAttrBssid); // bssid_attr
     class_size += sizeof(sWscAttrVendorExtMultiAp); // multiap_attr
+    class_size += sizeof(uint8_t); // bss_type
     return class_size;
 }
 
@@ -305,6 +312,12 @@ bool cConfigData::init()
         return false;
     }
     if (!m_parse__) { m_multiap_attr->struct_init(); }
+    m_bss_type = reinterpret_cast<uint8_t*>(m_buff_ptr__);
+    if (!m_parse__) *m_bss_type = TEARDOWN;
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     if (m_parse__) { class_swap(); }
     return true;
 }
