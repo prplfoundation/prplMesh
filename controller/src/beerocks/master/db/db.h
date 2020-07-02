@@ -75,6 +75,7 @@ public:
         bool load_health_check;
         bool load_monitor_on_vaps;
         bool certification_mode;
+        bool persistent_db;
         int roaming_5ghz_failed_attemps_threshold;
         int roaming_24ghz_failed_attemps_threshold;
         int roaming_11v_failed_attemps_threshold;
@@ -107,6 +108,9 @@ public:
         int blacklist_channel_remove_timeout;
         int failed_roaming_counter_threshold;
         int roaming_sticky_client_rssi_threshold;
+        int clients_persistent_db_max_size;
+        int max_timelife_delay_days;
+        int unfriendly_device_max_timelife_delay_days;
 
     } sDbMasterConfig;
 
