@@ -350,5 +350,18 @@ bool cfg_get_persistent_db_enable(bool &enable)
     return true;
 }
 
+bool cfg_get_clients_persistent_db_max_size(int &max_size)
+{
+    int max_size_val = -1;
+    if (cfg_get_param_int("clients_persistent_db_max_size=", max_size_val) == RETURN_ERR) {
+        MAPF_ERR("Failed to read clients-persistent-db-max-size parameter - setting default value");
+        max_size_val = DEFAULT_CLIENTS_PERSISTENT_DB_MAX_SIZE;
+    }
+
+    max_size = max_size_val;
+
+    return true;
+}
+
 } // namespace bpl
 } // namespace beerocks
