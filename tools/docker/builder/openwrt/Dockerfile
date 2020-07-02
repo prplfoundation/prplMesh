@@ -73,6 +73,11 @@ ENV SUBTARGET=$SUBTARGET
 ARG TARGET_PROFILE
 ENV TARGET_PROFILE=$TARGET_PROFILE
 
+# Target device used for prplwrt gen_config.py script (intel_mips/axepoint/netgear-rax40).
+# Example: TARGET_DEVICE=axepoint
+ARG TARGET_DEVICE
+ENV TARGET_DEVICE=$TARGET_DEVICE
+
 WORKDIR /home/openwrt
 
 RUN printf '\033[1;35m%s Cloning prplWrt\n\033[0m' "$(date --iso-8601=seconds --universal)" \

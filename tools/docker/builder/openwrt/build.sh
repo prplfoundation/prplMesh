@@ -38,6 +38,7 @@ build_image() {
            --build-arg OPENWRT_VERSION="$OPENWRT_VERSION" \
            --build-arg TARGET_SYSTEM="$TARGET_SYSTEM" \
            --build-arg SUBTARGET="$SUBTARGET" \
+           --build-arg TARGET_DEVICE="$TARGET_DEVICE" \
            --build-arg TARGET_PROFILE="$TARGET_PROFILE" \
            --build-arg PRPL_FEED="$PRPL_FEED" \
            --build-arg PRPLMESH_VARIANT="$PRPLMESH_VARIANT" \
@@ -54,6 +55,7 @@ build_prplmesh() {
            --name "$container_name" \
            -e TARGET_SYSTEM \
            -e SUBTARGET \
+           -e TARGET_DEVICE \
            -e TARGET_PROFILE \
            -e OPENWRT_VERSION \
            -e PRPLMESH_VERSION \
@@ -111,23 +113,10 @@ main() {
             SUBTARGET=generic
             TARGET_PROFILE=DEVICE_glinet_gl-b1300
             ;;
-        netgear-rax40)
+        netgear-rax40|axepoint|intel_mips)
             TARGET_SYSTEM=intel_mips
             SUBTARGET=xrx500
-            TARGET_PROFILE=DEVICE_NETGEAR_RAX40
-            PRPLMESH_VARIANT="-dwpal"
-            ;;
-        axepoint)
-            TARGET_SYSTEM=intel_mips
-            SUBTARGET=xrx500
-            TARGET_PROFILE=DEVICE_AX6000_2000_ETH_11AXUCI
-            PRPLMESH_VARIANT="-dwpal"
-            ;;
-        intel_mips)
-            TARGET_SYSTEM=intel_mips
-            SUBTARGET=xrx500
-            TARGET_PROFILE=INTEL_MIPS
-            PRPLMESH_VARIANT="-dwpal"
+            TARGET_PROFILE=
             ;;
         *)
             err "Unknown target device: $TARGET_DEVICE"
@@ -184,7 +173,7 @@ main() {
 VERBOSE=false
 IMAGE_ONLY=false
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
-OPENWRT_VERSION='f5f3a2cdba6102cffb10d442fae8a8fb67b61d81'
+OPENWRT_VERSION='3d511d477e72bd1845c75101a7f3d4e00780991d'
 PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^89e6602655713f8487c72d8d636daa610d76a468'
 PRPLMESH_VARIANT="-nl80211"
 DOCKER_TARGET_STAGE="prplmesh-builder"
