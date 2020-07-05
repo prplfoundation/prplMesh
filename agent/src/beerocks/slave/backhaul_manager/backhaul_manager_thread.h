@@ -184,7 +184,6 @@ private:
 
         std::string ssid;
         std::string pass;
-        std::string wire_iface;
         std::string wireless_iface;
         std::string preferred_bssid;
         std::string vendor;
