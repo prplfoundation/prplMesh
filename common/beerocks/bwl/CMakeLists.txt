@@ -76,6 +76,9 @@ if(BWL_TYPE STREQUAL "DWPAL")
 
 elseif(BWL_TYPE STREQUAL "NL80211")
 
+    find_package(nl-genl-3 REQUIRED)
+    list(APPEND BWL_LIBS nl-genl-3)
+
     file(GLOB bwl_platform_sources
         ${MODULE_PATH}/shared/*.c*
         ${MODULE_PATH}/nl80211/*.c*
@@ -96,15 +99,12 @@ elseif(BWL_TYPE STREQUAL "NL80211")
         ${HOSTAPD_DIR}/src/utils
         ${HOSTAPD_DIR}/src/common
         ${HOSTAPD_DIR}/src/drivers
-        ${PLATFORM_INCLUDE_DIR}/libnl-tiny
     )
 
     # Platform libraries
     link_directories(
         ${PLATFORM_STAGING_DIR}/usr/lib
     )
-
-    list(APPEND BWL_LIBS nl-tiny)
 
 elseif(BWL_TYPE STREQUAL "DUMMY")
 
