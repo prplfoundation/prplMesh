@@ -106,7 +106,8 @@ slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
     // Set configuration on Agent database.
     auto db = AgentDB::get();
 
-    db->bridge.iface_name = conf.bridge_iface;
+    db->bridge.iface_name   = conf.bridge_iface;
+    db->ethernet.iface_name = conf.backhaul_wire_iface;
 
     slave_state = STATE_INIT;
     set_select_timeout(SELECT_TIMEOUT_MSEC);
@@ -1259,7 +1260,7 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
             if (notification->params().backhaul_is_wireless) {
                 backhaul_params.backhaul_iface = config.backhaul_wireless_iface;
             } else {
-                backhaul_params.backhaul_iface = config.backhaul_wire_iface;
+                backhaul_params.backhaul_iface = db->ethernet.iface_name;
             }
 
             LOG(DEBUG) << "goto STATE_BACKHAUL_MANAGER_CONNECTED";
@@ -3282,7 +3283,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
     }
     case STATE_BACKHAUL_ENABLE: {
         bool error = false;
-        if (!config.backhaul_wire_iface.empty()) {
+        auto db    = AgentDB::get();
+        if (!db->ethernet.iface_name.empty()) {
             if (config.backhaul_wire_iface_type == beerocks::IFACE_TYPE_UNSUPPORTED) {
                 LOG(DEBUG) << "backhaul_wire_iface_type is UNSUPPORTED";
                 platform_notify_error(
@@ -3298,7 +3300,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 error = true;
             }
         }
-        if (config.backhaul_wire_iface.empty() && config.backhaul_wireless_iface.empty()) {
+        if (db->ethernet.iface_name.empty() && config.backhaul_wireless_iface.empty()) {
             LOG(DEBUG) << "No valid backhaul iface!";
             platform_notify_error(bpl::eErrorCode::CONFIG_NO_VALID_BACKHAUL_INTERFACE, "");
             error = true;
@@ -3344,8 +3346,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 platform_settings.backhaul_preferred_radio_band;
 
             string_utils::copy_string(bh_enable->wire_iface(message::IFACE_NAME_LENGTH),
-                                      config.backhaul_wire_iface.c_str(),
-                                      message::IFACE_NAME_LENGTH);
+                                      db->ethernet.iface_name.c_str(), message::IFACE_NAME_LENGTH);
 
             bh_enable->wire_iface_type()     = config.backhaul_wire_iface_type;
             bh_enable->wireless_iface_type() = config.backhaul_wireless_iface_type;
@@ -3436,7 +3437,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             backhaul_params.backhaul_is_wireless = 0;
             backhaul_params.backhaul_iface_type  = beerocks::IFACE_TYPE_GW_BRIDGE;
             if (is_backhaul_manager) {
-                backhaul_params.backhaul_iface = config.backhaul_wire_iface;
+                backhaul_params.backhaul_iface = db->ethernet.iface_name;
             }
         }
 

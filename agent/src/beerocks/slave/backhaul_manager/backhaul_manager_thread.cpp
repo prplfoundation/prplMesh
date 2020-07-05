@@ -581,7 +581,7 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
         if (!db->device_conf.local_gw) {
 
             if (m_sConfig.eType == SBackhaulConfig::EType::Wired) {
-                strIface = m_sConfig.wire_iface;
+                strIface = db->ethernet.iface_name;
             } else {
                 strIface = m_sConfig.wireless_iface;
             }
@@ -851,8 +851,8 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
 
             // If a wired (WAN) interface was provided, try it first, check if the interface is UP
             wan_monitor::ELinkState wired_link_state = wan_monitor::ELinkState::eInvalid;
-            if (!m_sConfig.wire_iface.empty()) {
-                wired_link_state = wan_mon.initialize(m_sConfig.wire_iface);
+            if (!db->ethernet.iface_name.empty()) {
+                wired_link_state = wan_mon.initialize(db->ethernet.iface_name);
                 // Failure might be due to insufficient permissions, datailed error message is being
                 // printed inside.
                 if (wired_link_state == wan_monitor::ELinkState::eInvalid) {
@@ -862,9 +862,10 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
             if ((wired_link_state == wan_monitor::ELinkState::eUp) &&
                 (selected_backhaul.empty() || selected_backhaul == DEV_SET_ETH)) {
 
-                auto it = std::find(ifaces.begin(), ifaces.end(), m_sConfig.wire_iface);
+                auto it = std::find(ifaces.begin(), ifaces.end(), db->ethernet.iface_name);
                 if (it == ifaces.end()) {
-                    LOG(ERROR) << "wire iface " << m_sConfig.wire_iface << " is not on the bridge";
+                    LOG(ERROR) << "wire iface " << db->ethernet.iface_name
+                               << " is not on the bridge";
                     FSM_MOVE_STATE(RESTART);
                     break;
                 }
@@ -988,8 +989,10 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
         LOG(DEBUG) << "clearing blacklist";
         ap_blacklist.clear();
 
+        auto db = AgentDB::get();
+
         eth_link_poll_timer = std::chrono::steady_clock::now();
-        m_eth_link_up       = network_utils::linux_iface_is_up_and_running(m_sConfig.wire_iface);
+        m_eth_link_up       = network_utils::linux_iface_is_up_and_running(db->ethernet.iface_name);
         FSM_MOVE_STATE(OPERATIONAL);
 
         // This event may come as a result of enabling the backhaul, but also as a result
@@ -1026,7 +1029,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
         * [TASK] Dynamic switching between wired and wireless
         * https://github.com/prplfoundation/prplMesh/issues/866
         */
-
+        // auto db = AgentDB::get();
         // int time_elapsed_ms =
         //     std::chrono::duration_cast<std::chrono::milliseconds>(now - eth_link_poll_timer)
         //         .count();
@@ -1034,9 +1037,9 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
         // if (time_elapsed_ms > POLL_TIMER_TIMEOUT_MS) {
 
         //     eth_link_poll_timer = now;
-        //     bool eth_link_up = network_utils::linux_iface_is_up_and_running(m_sConfig.wire_iface);
+        //     bool eth_link_up = network_utils::linux_iface_is_up_and_running(db->ethernet.iface_name);
         //     if (eth_link_up != m_eth_link_up) {
-        //         m_eth_link_up = network_utils::linux_iface_is_up_and_running(m_sConfig.wire_iface);
+        //         m_eth_link_up = network_utils::linux_iface_is_up_and_running(db->ethernet.iface_name);
         //         FSM_MOVE_STATE(RESTART);
         //     }
         // } else {
@@ -1974,14 +1977,14 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
                     if (m_sConfig.security_type == bwl::WiFiSec::WPA_WPA2_PSK) {
                         m_sConfig.security_type = bwl::WiFiSec::WPA2_PSK;
                     }
-                    m_sConfig.wire_iface.assign(request->wire_iface(message::IFACE_NAME_LENGTH));
+                    db->ethernet.iface_name.assign(request->wire_iface(message::IFACE_NAME_LENGTH));
                     m_sConfig.wire_iface_type = (beerocks::eIfaceType)request->wire_iface_type();
 
                     LOG(DEBUG) << "All slaves ready, proceeding" << std::endl
                                << "SSID: " << m_sConfig.ssid << ", Pass: ****"
                                << ", Security: " << int(m_sConfig.security_type)
                                << ", Bridge: " << db->bridge.iface_name
-                               << ", Wired: " << m_sConfig.wire_iface;
+                               << ", Wired: " << db->ethernet.iface_name;
                 }
             }
         }
@@ -2871,7 +2874,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
     /**
      * Add a LocalInterfaceInfo field for the wired interface, if any.
      */
-    std::string local_interface_name = m_sConfig.wire_iface;
+    std::string local_interface_name = db->ethernet.iface_name;
     if (!local_interface_name.empty() &&
         network_utils::linux_iface_is_up_and_running(local_interface_name)) {
         ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::UNKNOWN_MEDIA;
@@ -4279,7 +4282,9 @@ bool backhaul_manager::get_neighbor_links(
     // address of the transmitting device together with the interface that such message is
     // received through.
     sLinkInterface wired_interface;
-    wired_interface.iface_name = m_sConfig.wire_iface;
+    auto db = AgentDB::get();
+
+    wired_interface.iface_name = db->ethernet.iface_name;
 
     if (!get_media_type(wired_interface.iface_name, ieee1905_1::eMediaTypeGroup::IEEE_802_3,
                         wired_interface.media_type)) {
