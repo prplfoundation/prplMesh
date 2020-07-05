@@ -76,6 +76,8 @@ private:
     // Forward declaration
     struct sRadioInfo;
 
+    std::shared_ptr<bwl::sta_wlan_hal> get_selected_backhaul_sta_wlan_hal();
+
     virtual bool handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx) override;
     virtual void before_select() override;
     virtual void after_select(bool timeout) override;
@@ -253,6 +255,7 @@ private:
     const int WIRELESS_WAIT_FOR_RECONNECT_TIMEOUT     = 2;
     const int RSSI_POLL_INTERVAL_MS                   = 1000;
     const int STATE_WAIT_ENABLE_TIMEOUT_SECONDS       = 600;
+    const int STATE_WAIT_WPS_TIMEOUT_SECONDS          = 600;
     const int AP_BLACK_LIST_TIMEOUT_SECONDS           = 120;
     const int AP_BLACK_LIST_FAILED_ATTEMPTS_THRESHOLD = 2;
     const int INTERFACE_BRING_UP_TIMEOUT_SECONDS      = 600;
@@ -630,6 +633,7 @@ private:
     STATE(INIT_HAL)                                                                                \
     STATE(WPA_ATTACH)                                                                              \
     STATE(INITIATE_SCAN)                                                                           \
+    STATE(WAIT_WPS)                                                                                \
     STATE(WAIT_FOR_SCAN_RESULTS)                                                                   \
     STATE(WIRELESS_CONFIG_4ADDR_MODE)                                                              \
     STATE(WIRELESS_ASSOCIATE_4ADDR)                                                                \

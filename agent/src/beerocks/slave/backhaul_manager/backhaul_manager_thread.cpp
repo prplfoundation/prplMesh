@@ -1335,8 +1335,7 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
     }
     case EState::WPA_ATTACH: {
 
-        bool success   = true;
-        bool connected = false;
+        bool success = true;
 
         for (auto soc : slaves_sockets) {
             std::string iface = soc->sta_iface;
@@ -1376,22 +1375,6 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
                     success = false;
                     break;
                 }
-
-                if (!roam_flag && soc->sta_wlan_hal->is_connected()) {
-                    if (!soc->sta_wlan_hal->update_status()) {
-                        LOG(ERROR) << "failed to update sta status";
-                        success = false;
-                        break;
-                    }
-                    connected                      = true;
-                    m_sConfig.wireless_iface       = iface;
-                    m_sConfig.eType                = SBackhaulConfig::EType::Wireless;
-                    selected_bssid                 = soc->sta_wlan_hal->get_bssid();
-                    selected_bssid_channel         = soc->sta_wlan_hal->get_channel();
-                    soc->slave_is_backhaul_manager = true;
-                    break;
-                }
-
             } else if (attach_state == bwl::HALState::Failed) {
                 // Delete the HAL instance
                 soc->sta_wlan_hal.reset();
@@ -1414,12 +1397,19 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
 
         state_attempts = 0; // for next state
 
-        if (connected) {
-            FSM_MOVE_STATE(MASTER_DISCOVERY);
-        } else {
-            FSM_MOVE_STATE(INITIATE_SCAN);
+        state_time_stamp_timeout =
+            std::chrono::steady_clock::now() + std::chrono::seconds(STATE_WAIT_WPS_TIMEOUT_SECONDS);
+        FSM_MOVE_STATE(WAIT_WPS);
+        break;
+    }
+    // Wait for WPS command
+    case EState::WAIT_WPS: {
+        if (!onboarding && !local_gw &&
+            std::chrono::steady_clock::now() > state_time_stamp_timeout) {
+            LOG(ERROR) << STATE_WAIT_WPS_TIMEOUT_SECONDS
+                       << " seconds has passed on state WAIT_WPS, stopping thread!";
+            return false;
         }
-
         break;
     }
     case EState::INITIATE_SCAN: {
@@ -3657,6 +3647,10 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
             //this is generally not supposed to happen
             LOG(WARNING) << "event iface != wireless iface!";
         }
+        if (FSM_IS_IN_STATE(WAIT_WPS)) {
+            m_sConfig.wireless_iface = iface;
+            FSM_MOVE_STATE(MASTER_DISCOVERY);
+        }
         if (FSM_IS_IN_STATE(WIRELESS_ASSOCIATE_4ADDR_WAIT)) {
             LOG(DEBUG) << "successful connect on iface=" << iface;
             if (hidden_ssid) {
@@ -3715,11 +3709,12 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
                 FSM_MOVE_STATE(OPERATIONAL);
             }
         }
-
     } break;
 
     case Event::Disconnected: {
-
+        if (FSM_IS_IN_STATE(WAIT_WPS)) {
+            return true;
+        }
         if (iface == m_sConfig.wireless_iface) {
             if (FSM_IS_IN_STATE(OPERATIONAL) || FSM_IS_IN_STATE(CONNECTED)) {
                 platform_notify_error(bpl::eErrorCode::BH_DISCONNECTED,
@@ -3775,7 +3770,9 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
     } break;
 
     case Event::ScanResults: {
-
+        if (FSM_IS_IN_STATE(WAIT_WPS)) {
+            return true;
+        }
         if (!FSM_IS_IN_STATE(WAIT_FOR_SCAN_RESULTS)) {
             LOG(DEBUG) << "not waiting for scan results, ignoring event";
             return true;
@@ -3856,7 +3853,7 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
     }
 
     return true;
-}
+} // namespace beerocks
 
 bool backhaul_manager::select_bssid()
 {
@@ -4685,25 +4682,50 @@ const std::string backhaul_manager::freq_to_radio_mac(eFreqType freq) const
 
 bool backhaul_manager::start_wps_pbc(const sMacAddr &radio_mac)
 {
-    auto msg =
-        message_com::create_vs_message<beerocks_message::cACTION_BACKHAUL_START_WPS_PBC_REQUEST>(
-            cmdu_tx);
-    if (!msg) {
-        LOG(ERROR) << "Failed building message!";
-        return false;
-    }
+    if ((m_eFSMState == EState::OPERATIONAL)) {
+        // WPS PBC registration on AP interface
+        auto msg = message_com::create_vs_message<
+            beerocks_message::cACTION_BACKHAUL_START_WPS_PBC_REQUEST>(cmdu_tx);
+        if (!msg) {
+            LOG(ERROR) << "Failed building message!";
+            return false;
+        }
 
-    auto it = std::find_if(
-        slaves_sockets.begin(), slaves_sockets.end(),
-        [&](std::shared_ptr<sRadioInfo> slave) { return slave->radio_mac == radio_mac; });
-    if (it == slaves_sockets.end()) {
-        LOG(ERROR) << "couldn't find slave for radio mac " << radio_mac;
-        return false;
-    }
+        auto it = std::find_if(
+            slaves_sockets.begin(), slaves_sockets.end(),
+            [&](std::shared_ptr<sRadioInfo> slave) { return slave->radio_mac == radio_mac; });
+        if (it == slaves_sockets.end()) {
+            LOG(ERROR) << "couldn't find slave for radio mac " << radio_mac;
+            return false;
+        }
 
-    auto soc = *it;
-    LOG(DEBUG) << "Start WPS PBC registration on interface " << soc->hostap_iface;
-    return message_com::send_cmdu(soc->slave, cmdu_tx);
+        auto soc = *it;
+        LOG(DEBUG) << "Start WPS PBC registration on interface " << soc->hostap_iface;
+        return message_com::send_cmdu(soc->slave, cmdu_tx);
+    } else {
+        // WPS PBC registration on STA interface
+        auto sta_wlan_hal = get_selected_backhaul_sta_wlan_hal();
+        if (!sta_wlan_hal) {
+            LOG(ERROR) << "Failed to get backhaul STA hal";
+            return false;
+        }
+        return sta_wlan_hal->start_wps_pbc();
+    }
+}
+
+std::shared_ptr<bwl::sta_wlan_hal> backhaul_manager::get_selected_backhaul_sta_wlan_hal()
+{
+    std::string selected_backhaul = m_agent_ucc_listener->get_selected_backhaul();
+    auto selected_backhaul_it =
+        std::find_if(slaves_sockets.begin(), slaves_sockets.end(),
+                     [&selected_backhaul](std::shared_ptr<sRadioInfo> soc) {
+                         return tlvf::mac_from_string(selected_backhaul) == soc->radio_mac;
+                     });
+    if (selected_backhaul_it == slaves_sockets.end()) {
+        LOG(ERROR) << "Invalid backhaul";
+        return nullptr;
+    }
+    return (*selected_backhaul_it)->sta_wlan_hal;
 }
 
 } // namespace beerocks
