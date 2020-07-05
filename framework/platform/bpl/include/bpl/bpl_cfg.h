@@ -86,11 +86,11 @@ namespace bpl {
 #define BPL_GW_DB_OPER_MODE_LEN (127 + 1)   /* Maximal length of OPERATING MODE string */
 
 /* Default values */
-#define DEFAULT_STOP_ON_FAILURE_ATTEMPTS 1
-#define DEFAULT_RDKB_EXTENSIONS 0
-#define DEFAULT_BAND_STEERING 1
-#define DEFAULT_DFS_REENTRY 1
-#define DEFAULT_CLIENT_ROAMING 1
+constexpr int DEFAULT_STOP_ON_FAILURE_ATTEMPTS = 1;
+constexpr int DEFAULT_RDKB_EXTENSIONS          = 0;
+constexpr int DEFAULT_BAND_STEERING            = 1;
+constexpr int DEFAULT_DFS_REENTRY              = 1;
+constexpr int DEFAULT_CLIENT_ROAMING           = 1;
 // by-default the persistent DB is disabled to allow backwards compatability
 // if the parameter is not configured in the prplmesh config and set to 1, DB is disabled
 constexpr int DEFAULT_PERSISTENT_DB = 0;
