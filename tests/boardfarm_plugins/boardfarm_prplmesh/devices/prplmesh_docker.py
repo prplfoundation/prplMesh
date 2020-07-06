@@ -77,8 +77,8 @@ class PrplMeshDocker(PrplMeshBase):
         It is used by boardfarm to indicate that spawned device instance is ready for test
         and also after test - to insure that device still operational.
         """
-        self._run_shell_cmd(os.path.join(rootdir, "tools", "docker", "test.sh"),
-                            ["-v", "-n", self.docker_name])
+        self._run_shell_cmd("printf",
+                            ["device_get_info", "|", "nc", "-w", "1", "controller-rme", "8002"])
 
     def isalive(self):
         """Method required by boardfarm.
