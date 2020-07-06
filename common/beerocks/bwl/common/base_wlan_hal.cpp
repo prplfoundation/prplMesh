@@ -90,4 +90,14 @@ bool base_wlan_hal::process_int_events()
     return m_int_event_cb(event);
 }
 
+void base_wlan_hal::calc_curr_traffic(uint64_t val, uint64_t &total, uint32_t &curr)
+{
+    if (val >= total) {
+        curr = val - total;
+    } else {
+        curr = val;
+    }
+    total = val;
+}
+
 } // namespace bwl

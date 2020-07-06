@@ -101,16 +101,6 @@ static mon_wlan_hal::Event dwpal_nl_to_bwl_event(uint8_t cmd)
     }
 }
 
-static void calc_curr_traffic(const uint64_t val, uint64_t &total, uint32_t &curr)
-{
-    if (val >= total) {
-        curr = val - total;
-    } else {
-        curr = val;
-    }
-    total = val;
-}
-
 /**
  * @brief get channel pool frquencies for channel scan parameters.
  *
@@ -598,11 +588,10 @@ bool mon_wlan_hal_dwpal::update_radio_stats(SRadioStats &radio_stats)
         }
     }
 
-    calc_curr_traffic((uint64_t)BytesSent, radio_stats.tx_bytes_cnt, radio_stats.tx_bytes);
-    calc_curr_traffic((uint64_t)BytesReceived, radio_stats.rx_bytes_cnt, radio_stats.rx_bytes);
-    calc_curr_traffic((uint64_t)PacketsSent, radio_stats.tx_packets_cnt, radio_stats.tx_packets);
-    calc_curr_traffic((uint64_t)PacketsReceived, radio_stats.rx_packets_cnt,
-                      radio_stats.rx_packets);
+    calc_curr_traffic(BytesSent, radio_stats.tx_bytes_cnt, radio_stats.tx_bytes);
+    calc_curr_traffic(BytesReceived, radio_stats.rx_bytes_cnt, radio_stats.rx_bytes);
+    calc_curr_traffic(PacketsSent, radio_stats.tx_packets_cnt, radio_stats.tx_packets);
+    calc_curr_traffic(PacketsReceived, radio_stats.rx_packets_cnt, radio_stats.rx_packets);
 
     return true;
 }

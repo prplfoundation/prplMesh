@@ -231,6 +231,8 @@ protected:
 
     hal_conf_t m_hal_conf;
 
+    void calc_curr_traffic(uint64_t val, uint64_t &total, uint32_t &curr);
+
     // Private data-members:
 private:
     HALType m_type = HALType::Invalid;
