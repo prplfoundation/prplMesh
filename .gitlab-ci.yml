@@ -9,6 +9,7 @@ stages:
   - certification-netgear-rax40
   - certification-netgear-rax40-bhwifi
   - certification-turris-omnia
+  - certification-axepoint
   - upload
 
 .image-build:
@@ -348,3 +349,4 @@ include:
   - local: "/ci/certification/netgear-rax40.yml"
   - local: "/ci/certification/netgear-rax40-bhwifi.yml"
   - local: "/ci/certification/turris-omnia.yml"
+  - local: "/ci/certification/axepoint.yml"
