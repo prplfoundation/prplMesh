@@ -14,9 +14,43 @@
 #
 # Also, when calling a function look for 'New in version 3.X' where X > 5
 #
+from __future__ import print_function  # To check for python2 or < 3.5 execution
 import argparse
 import os
+import sys
 from subprocess import Popen, PIPE
+
+
+if not (sys.version_info.major == 3 and sys.version_info.minor >= 5):
+    print("This script requires Python 3.5 or higher!")
+    print("You are using Python {}.{}.".format(sys.version_info.major, sys.version_info.minor))
+    sys.exit(1)
+
+
+def check_docker_versions():
+    DOCKER_MAJOR = 19
+    DC_MAJOR = 1
+    DC_MINOR = 25
+    docker_version  = os.popen('docker --version').read().split(' ')[2]
+    docker_major = int(docker_version.split('.')[0])
+    if docker_major < DOCKER_MAJOR:
+        fmt = "This script requires docker {}.0 or higher"
+        print(fmt.format(DOCKER_MAJOR))
+        print("You are usng version {}".format(docker_version))
+        sys.exit(1)
+    dc_version = os.popen('docker-compose --version').read().split(' ')[2]
+    dc_major = int(dc_version.split('.')[0])
+    dc_minor = int(dc_version.split('.')[1])
+    if dc_major < DC_MAJOR:
+        fmt = "This script requires docker-compose {}.{} or higher"
+        print(fmt.format(DC_MAJOR, DC_MINOR))
+        print("You are usng version {}".format(dc_version))
+        sys.exit(1)
+    if dc_minor < DC_MINOR:
+        fmt = "This script requires docker-compose {}.{} or higher"
+        print(fmt.format(DC_MAJOR, DC_MINOR))
+        print("You are usng version {}".format(dc_version))
+        sys.exit(1)
 
 
 class Services:
@@ -41,6 +75,7 @@ class Services:
 
 
 if __name__ == '__main__':
+    check_docker_versions()
     parser = argparse.ArgumentParser(description='Dockerized test launcher')
     parser.add_argument('--test', dest='test', type=str, help='Test to be run')
     parser.add_argument('--clean', dest='clean', help='Test to be run')
