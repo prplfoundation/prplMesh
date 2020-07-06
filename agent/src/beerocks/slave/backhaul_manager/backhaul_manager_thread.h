@@ -177,7 +177,6 @@ private:
     struct SBackhaulConfig {
         std::string ssid;
         std::string pass;
-        std::string wireless_iface;
         std::string preferred_bssid;
         std::string vendor;
         std::string model;
