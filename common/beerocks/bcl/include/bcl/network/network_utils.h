@@ -161,6 +161,16 @@ public:
      */
     static bool linux_iface_get_speed(const std::string &iface, uint32_t &speed);
 
+    /**
+     * @brief Gets interface statistics for the given network interface.
+     *
+     * @param[in] iface Name of the local network interface.
+     * @param[out] iface_stats Interface statistics.
+     *
+     * @return True on success and false otherwise.
+     */
+    static bool get_iface_stats(const std::string &iface, sInterfaceStats &iface_stats);
+
     static bool arp_send(const std::string &iface, const std::string &dst_ip,
                          const std::string &src_ip, sMacAddr dst_mac, sMacAddr src_mac, int count,
                          int arp_socket = -1);
