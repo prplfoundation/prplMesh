@@ -476,8 +476,18 @@ class RadioHostapd(Radio):
         self.log_folder = agent.log_folder
         super().__init__(agent, mac)
 
-        VirtualAPHostapd(self, mac)
-        VirtualAPHostapd(self, mac)
+        # Find out amount of VAPs avalaible on device.
+        # If 0 - spawn one VAP to represent AP.
+        self.agent.device.sendline("ip link list | grep -c \"{}\\.\"".format(self.iface_name))
+        # Look for number of 1 or 2 digits surrounded by CRLF.
+        self.agent.device.expect("\r\n(?P<vaps>[0-9]{1,2})\r\n")
+        vap_amount = int(self.agent.device.match.group('vaps'))
+        if vap_amount == 0:
+            VirtualAPHostapd(self, mac)
+        else:
+            for vap_number in range(0, vap_amount):
+                vap_mac = self.get_mac("{}.{}".format(self.iface_name, vap_number))
+                VirtualAPHostapd(self, vap_mac)
 
     def wait_for_log(self, regex: str, start_line: int, timeout: float):
         ''' Poll the Radio's logfile until it match regular expression '''
@@ -485,17 +495,25 @@ class RadioHostapd(Radio):
         return _device_wait_for_log(self.agent.device, "{}/beerocks_agent_{}.log".format(
             self.log_folder, self.iface_name), regex, timeout, start_line)
 
+    def get_mac(self, iface: str) -> str:
+        """Return mac of specified iface"""
+        device = self.agent.device
+        device.sendline("ip link show {}".format(iface))
+        device.expect("link/ether (?P<mac>([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})")
+        return device.match.group('mac')
+
 
 class VirtualAPHostapd(VirtualAP):
     """Docker implementation of a VAP."""
 
     def __init__(self, radio: RadioHostapd, bssid: str):
         super().__init__(radio, bssid)
+        self.iface = self.get_iface(self.bssid)
 
     def get_ssid(self) -> str:
         """Get current SSID of attached radio. Return string."""
         device = self.radio.agent.device
-        device.sendline("iw {}.0 info".format(self.radio.iface_name))
+        device.sendline("iw {} info".format(self.iface))
         # We are looking for SSID definition
         # ssid Multi-AP-24G-1
         # type AP
@@ -505,13 +523,20 @@ class VirtualAPHostapd(VirtualAP):
     def get_psk(self) -> str:
         """Get SSIDs personal key set during last autoconfiguration. Return string"""
         device = self.radio.agent.device
-        device.sendline("grep \"network_key\" \"{}/beerocks_agent_{}.log\" | tail -n 1".format(
-            self.radio.log_folder, self.radio.iface_name))
+        ssid = self.get_ssid()
+        device.sendline(("grep \"Autoconfiguration for ssid: " +
+                        "{}\" \"{}/beerocks_agent_{}.log\" | tail -n 1")
+                        .format(ssid, self.radio.log_folder, self.radio.iface_name))
         # We looking for key, which was set during last autoconfiguration. E.g of such string:
         # network_key: maprocks2 fronthaul:
         device.expect("network_key: (?P<psk>.*) fronthaul")
         return device.match.group('psk')
 
+    def get_iface(self, bssid: str) -> str:
+        device = self.radio.agent.device
+        device.sendline("ip link list | grep -B1 \"{}\"".format(bssid))
+        device.expect("[0-9]{1,4}: (?P<iface_name>wlan[0-9.]{1,4}): <")
+        return device.match.group('iface_name')
 
     def associate(self, sta: Station) -> bool:
         ''' Associate "sta" with this VAP '''
