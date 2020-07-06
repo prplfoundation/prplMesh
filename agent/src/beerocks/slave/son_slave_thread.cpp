@@ -108,6 +108,7 @@ slave_thread::slave_thread(sSlaveConfig conf, beerocks::logging &logger_)
 
     db->bridge.iface_name   = conf.bridge_iface;
     db->ethernet.iface_name = conf.backhaul_wire_iface;
+    db->add_radio(conf.hostap_iface, conf.backhaul_wireless_iface);
 
     slave_state = STATE_INIT;
     set_select_timeout(SELECT_TIMEOUT_MSEC);
@@ -418,8 +419,15 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
     // LOG(DEBUG) << "handle_cmdu_control_message(), INTEL_VS: action=" + std::to_string(beerocks_header->action()) + ", action_op=" + std::to_string(beerocks_header->action_op());
     // LOG(DEBUG) << "received radio_mac=" << beerocks_header->radio_mac() << ", local radio_mac=" << hostap_params.iface_mac;
 
+    auto db    = AgentDB::get();
+    auto radio = db->radio(m_fronthaul_iface);
+    if (!radio) {
+        LOG(DEBUG) << "Radio of interface " << m_fronthaul_iface << " does not exist on the db";
+        return false;
+    }
+
     // to me or not to me, this is the question...
-    if (beerocks_header->actionhdr()->radio_mac() != hostap_params.iface_mac) {
+    if (beerocks_header->actionhdr()->radio_mac() != radio->front.iface_mac) {
         return true;
     }
 
@@ -1661,8 +1669,19 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             LOG(ERROR) << "addClass cACTION_APMANAGER_JOINED_NOTIFICATION failed";
             return false;
         }
-        hostap_params    = notification->params();
-        hostap_cs_params = notification->cs_params();
+        auto db = AgentDB::get();
+
+        hostap_params = notification->params();
+
+        m_fronthaul_iface = notification->params().iface_name;
+        auto radio        = db->radio(m_fronthaul_iface);
+        if (!radio) {
+            LOG(DEBUG) << "Radio of interface " << m_fronthaul_iface << " does not exist on the db";
+            return false;
+        }
+
+        radio->front.iface_mac = hostap_params.iface_mac;
+        hostap_cs_params       = notification->cs_params();
 
         auto tuple_preferred_channels = notification->preferred_channels(0);
         if (!std::get<0>(tuple_preferred_channels)) {
@@ -2302,6 +2321,13 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return false;
         }
 
+        auto db    = AgentDB::get();
+        auto radio = db->radio(m_fronthaul_iface);
+        if (!radio) {
+            LOG(DEBUG) << "Radio of interface " << m_fronthaul_iface << " does not exist on the db";
+            return false;
+        }
+
         auto preferences =
             wireless_utils::get_channel_preferences(&std::get<1>(tuple_preferred_channels));
 
@@ -2311,7 +2337,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return false;
         }
 
-        channel_preference_tlv->radio_uid() = hostap_params.iface_mac;
+        channel_preference_tlv->radio_uid() = radio->front.iface_mac;
 
         for (auto preference : preferences) {
             // Create operating class object
@@ -2349,7 +2375,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             }
         }
 
-        LOG(DEBUG) << "sending channel preference report for ruid=" << hostap_params.iface_mac;
+        LOG(DEBUG) << "sending channel preference report for ruid=" << radio->front.iface_mac;
 
         send_cmdu_to_controller(cmdu_tx);
 
@@ -3327,7 +3353,12 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             break;
         }
 
-        auto db = AgentDB::get();
+        auto db    = AgentDB::get();
+        auto radio = db->radio(m_fronthaul_iface);
+        if (!radio) {
+            LOG(DEBUG) << "Radio of interface " << m_fronthaul_iface << " does not exist on the db";
+            return false;
+        }
 
         if (!db->device_conf.local_gw) {
             // Wireless config
@@ -3352,7 +3383,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             bh_enable->wireless_iface_type() = config.backhaul_wireless_iface_type;
         }
 
-        bh_enable->iface_mac()       = hostap_params.iface_mac;
+        bh_enable->iface_mac()       = radio->front.iface_mac;
         bh_enable->preferred_bssid() = tlvf::mac_from_string(config.backhaul_preferred_bssid);
 
         string_utils::copy_string(bh_enable->sta_iface(message::IFACE_NAME_LENGTH),
@@ -3506,14 +3537,19 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
 
-        auto db = AgentDB::get();
+        auto db    = AgentDB::get();
+        auto radio = db->radio(m_fronthaul_iface);
+        if (!radio) {
+            LOG(DEBUG) << "Radio of interface " << m_fronthaul_iface << " does not exist on the db";
+            return false;
+        }
 
         std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
             supported_channels_arr{{}};
         std::copy_n(supported_channels.begin(), supported_channels.size(),
                     supported_channels_arr.begin());
 
-        if (!tlvf_utils::add_ap_radio_basic_capabilities(cmdu_tx, hostap_params.iface_mac,
+        if (!tlvf_utils::add_ap_radio_basic_capabilities(cmdu_tx, radio->front.iface_mac,
                                                          supported_channels_arr)) {
             LOG(ERROR) << "Failed adding AP Radio Basic Capabilities TLV";
             return false;
@@ -3545,7 +3581,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             // Platform Configuration
             notification->low_pass_filter_on()   = config.backhaul_wireless_iface_filter_low;
             notification->enable_repeater_mode() = config.enable_repeater_mode;
-            notification->radio_identifier()     = hostap_params.iface_mac;
+            notification->radio_identifier()     = radio->front.iface_mac;
             tlvf::mac_from_string(config.radio_identifier);
 
             // Backhaul Params
@@ -3824,6 +3860,13 @@ bool slave_thread::send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx)
         return false;
     }
 
+    auto db    = AgentDB::get();
+    auto radio = db->radio(m_fronthaul_iface);
+    if (!radio) {
+        LOG(DEBUG) << "Radio of interface " << m_fronthaul_iface << " does not exist on the db";
+        return false;
+    }
+
     if (cmdu_tx.getMessageType() == ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE) {
         if (!backhaul_params.is_prplmesh_controller) {
             return true; // don't send VS messages to non prplmesh controllers
@@ -3834,7 +3877,7 @@ bool slave_thread::send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx)
             return false;
         }
 
-        beerocks_header->actionhdr()->radio_mac() = hostap_params.iface_mac;
+        beerocks_header->actionhdr()->radio_mac() = radio->front.iface_mac;
         beerocks_header->actionhdr()->direction() = beerocks::BEEROCKS_DIRECTION_CONTROLLER;
     }
 
@@ -3843,7 +3886,6 @@ bool slave_thread::send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx)
             ? network_utils::MULTICAST_1905_MAC_ADDR
             : backhaul_params.controller_bridge_mac;
 
-    auto db = AgentDB::get();
     return message_com::send_cmdu(master_socket, cmdu_tx, dst_addr,
                                   tlvf::mac_to_string(db->bridge.mac));
 }
@@ -4082,9 +4124,17 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         LOG(ERROR) << "getClass<wfa_map::tlvApRadioIdentifier> failed";
         return false;
     }
+
+    auto db    = AgentDB::get();
+    auto radio = db->radio(m_fronthaul_iface);
+    if (!radio) {
+        LOG(DEBUG) << "Radio of interface " << m_fronthaul_iface << " does not exist on the db";
+        return false;
+    }
     // Check if the message is for this radio agent by comparing the ruid
-    if (hostap_params.iface_mac != ruid->radio_uid()) {
-        LOG(DEBUG) << "not to me - ruid " << hostap_params.iface_mac << " != " << ruid->radio_uid();
+    if (radio->front.iface_mac != ruid->radio_uid()) {
+        LOG(DEBUG) << "Message should be handled by another son_slave - ruid "
+                   << radio->front.iface_mac << " != " << ruid->radio_uid();
         return true;
     }
 
@@ -4696,12 +4746,18 @@ bool slave_thread::channel_selection_current_channel_restricted()
 bool slave_thread::channel_selection_get_channel_preference(ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     channel_preferences.clear();
+    auto db    = AgentDB::get();
+    auto radio = db->radio(m_fronthaul_iface);
+    if (!radio) {
+        LOG(DEBUG) << "Radio of interface " << m_fronthaul_iface << " does not exist on the db";
+        return false;
+    }
 
     for (auto channel_preference_tlv : cmdu_rx.getClassList<wfa_map::tlvChannelPreference>()) {
 
         const auto &ruid = channel_preference_tlv->radio_uid();
-        if (ruid != hostap_params.iface_mac) {
-            LOG(DEBUG) << "ruid_rx=" << ruid << ", son_slave_ruid=" << hostap_params.iface_mac;
+        if (ruid != radio->front.iface_mac) {
+            LOG(DEBUG) << "ruid_rx=" << ruid << ", son_slave_ruid=" << radio->front.iface_mac;
             continue;
         }
 
@@ -4772,11 +4828,17 @@ bool slave_thread::channel_selection_get_channel_preference(ieee1905_1::CmduMess
 bool slave_thread::channel_selection_get_transmit_power_limit(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                               int &power_limit)
 {
+    auto db    = AgentDB::get();
+    auto radio = db->radio(m_fronthaul_iface);
+    if (!radio) {
+        LOG(DEBUG) << "Radio of interface " << m_fronthaul_iface << " does not exist on the db";
+        return false;
+    }
     for (const auto &tx_power_limit_tlv : cmdu_rx.getClassList<wfa_map::tlvTransmitPowerLimit>()) {
 
         const auto &ruid = tx_power_limit_tlv->radio_uid();
-        if (ruid != hostap_params.iface_mac) {
-            LOG(DEBUG) << "ruid_rx=" << ruid << ", son_slave_ruid=" << hostap_params.iface_mac;
+        if (ruid != radio->front.iface_mac) {
+            LOG(DEBUG) << "ruid_rx=" << ruid << ", son_slave_ruid=" << radio->front.iface_mac;
             continue;
         }
 
@@ -4793,6 +4855,13 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
     const auto mid = cmdu_rx.getMessageId();
     LOG(DEBUG) << "Received CHANNEL_SELECTION_REQUEST_MESSAGE, mid=" << std::dec << int(mid);
 
+    auto db    = AgentDB::get();
+    auto radio = db->radio(m_fronthaul_iface);
+    if (!radio) {
+        LOG(DEBUG) << "Radio of interface " << m_fronthaul_iface << " does not exist on the db";
+        return false;
+    }
+
     int power_limit           = 0;
     bool power_limit_received = channel_selection_get_transmit_power_limit(cmdu_rx, power_limit);
 
@@ -4808,7 +4877,7 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
                 LOG(INFO) << "Switch to channel " << +channel_to_switch.channel << " bw "
                           << +channel_to_switch.channel_bandwidth;
             } else {
-                LOG(INFO) << "Decline channel selection request " << hostap_params.iface_mac;
+                LOG(INFO) << "Decline channel selection request " << radio->front.iface_mac;
                 response_code = wfa_map::tlvChannelSelectionResponse::eResponseCode::
                     DECLINE_VIOLATES_MOST_RECENTLY_REPORTED_PREFERENCES;
             }
@@ -4831,7 +4900,7 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
         return false;
     }
 
-    channel_selection_response_tlv->radio_uid()     = hostap_params.iface_mac;
+    channel_selection_response_tlv->radio_uid()     = radio->front.iface_mac;
     channel_selection_response_tlv->response_code() = response_code;
     if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
         LOG(ERROR) << "failed to send CHANNEL_SELECTION_RESPONSE_MESSAGE";
@@ -4893,13 +4962,19 @@ bool slave_thread::send_operating_channel_report()
         return false;
     }
 
+    auto db    = AgentDB::get();
+    auto radio = db->radio(m_fronthaul_iface);
+    if (!radio) {
+        LOG(DEBUG) << "Radio of interface " << m_fronthaul_iface << " does not exist on the db";
+        return false;
+    }
+
     auto operating_channel_report_tlv = cmdu_tx.addClass<wfa_map::tlvOperatingChannelReport>();
     if (!operating_channel_report_tlv) {
         LOG(ERROR) << "addClass ieee1905_1::operating_channel_report_tlv has failed";
         return false;
     }
-
-    operating_channel_report_tlv->radio_uid() = hostap_params.iface_mac;
+    operating_channel_report_tlv->radio_uid() = radio->front.iface_mac;
 
     auto op_classes_list = operating_channel_report_tlv->alloc_operating_classes_list();
     if (!op_classes_list) {
