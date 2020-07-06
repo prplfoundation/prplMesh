@@ -567,11 +567,10 @@ bool mon_wlan_hal_dwpal::update_radio_stats(SRadioStats &radio_stats)
         {(void *)&PacketsSent, &numOfValidArgs[2], DWPAL_LONG_LONG_INT_PARAM, "PacketsSent=", 0},
         {(void *)&PacketsReceived, &numOfValidArgs[3], DWPAL_LONG_LONG_INT_PARAM,
          "PacketsReceived=", 0},
-        {(void *)&radio_stats.bss_load, &numOfValidArgs[4], DWPAL_CHAR_PARAM, "BSS load=", 0},
-        {(void *)&radio_stats.errors_sent, &numOfValidArgs[5], DWPAL_INT_PARAM, "ErrorsSent=", 0},
-        {(void *)&radio_stats.errors_received, &numOfValidArgs[6], DWPAL_INT_PARAM,
+        {(void *)&radio_stats.errors_sent, &numOfValidArgs[4], DWPAL_INT_PARAM, "ErrorsSent=", 0},
+        {(void *)&radio_stats.errors_received, &numOfValidArgs[5], DWPAL_INT_PARAM,
          "ErrorsReceived=", 0},
-        {(void *)&radio_stats.noise, &numOfValidArgs[7], DWPAL_CHAR_PARAM, "Noise=", 0},
+        {(void *)&radio_stats.noise, &numOfValidArgs[6], DWPAL_CHAR_PARAM, "Noise=", 0},
         /* Must be at the end */
         {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
@@ -587,10 +586,9 @@ bool mon_wlan_hal_dwpal::update_radio_stats(SRadioStats &radio_stats)
     // LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " BytesReceived= " << BytesReceived;
     // LOG(DEBUG) << "numOfValidArgs[2]= " << numOfValidArgs[2] << " PacketsSent= " << PacketsSent;
     // LOG(DEBUG) << "numOfValidArgs[3]= " << numOfValidArgs[3] << " PacketsReceived= " << PacketsReceived;
-    // LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4] << " BSS load= " << (int)radio_stats.bss_load;
-    // LOG(DEBUG) << "numOfValidArgs[5]= " << numOfValidArgs[5] << " ErrorsSent= " << radio_stats.errors_sent;
-    // LOG(DEBUG) << "numOfValidArgs[6]= " << numOfValidArgs[6] << " ErrorsReceived= " << radio_stats.errors_received;
-    // LOG(DEBUG) << "numOfValidArgs[7]= " << numOfValidArgs[7] << " Noise= " << (int)radio_stats.noise;
+    // LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4] << " ErrorsSent= " << radio_stats.errors_sent;
+    // LOG(DEBUG) << "numOfValidArgs[5]= " << numOfValidArgs[5] << " ErrorsReceived= " << radio_stats.errors_received;
+    // LOG(DEBUG) << "numOfValidArgs[6]= " << numOfValidArgs[6] << " Noise= " << (int)radio_stats.noise;
     /* End of TEMP: Traces... */
 
     for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {

@@ -33,7 +33,6 @@ struct SRadioStats {
     uint32_t rx_bytes;
     uint32_t errors_sent;
     uint32_t errors_received;
-    uint8_t bss_load;
     int8_t noise;
     // uint8_t  channel_load_tot_prev;
     // uint8_t  channel_load_tot_curr;
