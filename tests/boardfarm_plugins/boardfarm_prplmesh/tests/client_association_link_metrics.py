@@ -8,8 +8,6 @@
 import time
 
 from .prplmesh_base_test import PrplMeshBaseTest
-# TODO: Remove as soon, as test works for prplWRT device
-from ..devices.prplmesh_prplwrt import PrplMeshPrplWRT
 from capi import tlv
 from opts import debug
 
@@ -25,12 +23,6 @@ class ClientAssociationLinkMetrics(PrplMeshBaseTest):
         controller = self.dev.wan.controller_entity
         sta = self.dev.wifi
 
-        # This test doesn't work for real HW.
-        # Skip it for prplWRT device.
-        # TODO: Remove as soon, as test works for prplWRT device
-        if self.dev.DUT is PrplMeshPrplWRT:
-            self.skipTest("This test isn't ready for prplWRT devices")
-
         # Regression check
         # Don't connect nonexistent Station
         self.dev.DUT.wired_sniffer.start(self.__class__.__name__ + "-" + self.dev.DUT.name)
@@ -39,12 +31,11 @@ class ClientAssociationLinkMetrics(PrplMeshBaseTest):
         controller.ucc_socket.dev_send_1905(agent.mac, 0x800D,
                                             tlv(0x95, 0x0006, '{sta_mac}'.format(sta_mac=sta_mac)))
         self.check_log(agent,
-                       "client with mac address {sta_mac} not found".format(sta_mac=sta_mac),
-                       timeout=30)
+                       "client with mac address {sta_mac} not found".format(sta_mac=sta_mac))
         time.sleep(1)
 
         debug('sta: {}'.format(sta.mac))
-        sta.wifi_connect(agent.radios[0].vaps[0])
+        sta.wifi_connect_check(agent.radios[0].vaps[0])
 
         time.sleep(1)
 
@@ -54,8 +45,7 @@ class ClientAssociationLinkMetrics(PrplMeshBaseTest):
         time.sleep(1)
         self.check_log(agent,
                        "Send AssociatedStaLinkMetrics to controller, mid = {}".format(mid),
-                       timeout=30)
-        sta.wifi_disconnect(agent.radios[0].vaps[0])
+                       timeout=20)
 
     @classmethod
     def teardown_class(cls):
@@ -71,3 +61,4 @@ class ClientAssociationLinkMetrics(PrplMeshBaseTest):
             # If AttributeError was raised - we are dealing with dummy devices.
             # We don't have to additionaly send Ctrl+C for dummy devices.
             pass
+        test.dev.wifi.disable_wifi()
