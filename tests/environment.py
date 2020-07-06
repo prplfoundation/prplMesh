@@ -458,7 +458,7 @@ class ALEntityPrplWrt(ALEntity):
         # Multiply timeout by 100, as test sets it in float.
         return _device_wait_for_log(self.device,
                                     "{}/beerocks_{}.log".format(self.log_folder, program),
-                                    regex, start_line, timeout)
+                                    regex, timeout, start_line)
 
     def prprlmesh_status_check(self):
         return self.device.prprlmesh_status_check()
