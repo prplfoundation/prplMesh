@@ -368,6 +368,8 @@ bool backhaul_manager::socket_disconnected(Socket *sd)
         return true;
     }
 
+    auto db = AgentDB::get();
+
     for (auto it = slaves_sockets.begin(); it != slaves_sockets.end();) {
         auto soc          = *it;
         std::string iface = soc->hostap_iface;
@@ -408,7 +410,7 @@ bool backhaul_manager::socket_disconnected(Socket *sd)
             it = slaves_sockets.erase(it);
             if ((m_eFSMState > EState::_WIRELESS_START_ && m_eFSMState < EState::_WIRELESS_END_) ||
                 (soc->slave_is_backhaul_manager &&
-                 m_sConfig.eType == SBackhaulConfig::EType::Wireless)) {
+                 db->backhaul.connection_type == AgentDB::sBackhaul::eConnectionType::Wireless)) {
                 LOG(INFO) << "Not in operational state OR backhaul manager slave disconnected, "
                              "restarting backhaul manager. Backhaul connection is probably lost";
                 FSM_MOVE_STATE(RESTART);
@@ -428,7 +430,6 @@ bool backhaul_manager::socket_disconnected(Socket *sd)
                     LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
                     return false;
                 }
-                auto db = AgentDB::get();
                 send_cmdu_to_broker(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR,
                                     tlvf::mac_to_string(db->bridge.mac));
             }
@@ -580,7 +581,7 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
 
         if (!db->device_conf.local_gw) {
 
-            if (m_sConfig.eType == SBackhaulConfig::EType::Wired) {
+            if (db->backhaul.connection_type == AgentDB::sBackhaul::eConnectionType::Wired) {
                 strIface = db->ethernet.iface_name;
             } else {
                 strIface = m_sConfig.wireless_iface;
@@ -598,7 +599,7 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
             notification->params().backhaul_mac  = tlvf::mac_from_string(iface_info.mac);
             notification->params().backhaul_ipv4 = network_utils::ipv4_from_string(iface_info.ip);
 
-            if (m_sConfig.eType == SBackhaulConfig::EType::Wired) {
+            if (db->backhaul.connection_type == AgentDB::sBackhaul::eConnectionType::Wired) {
                 notification->params().backhaul_bssid =
                     tlvf::mac_from_string(network_utils::ZERO_MAC_STRING);
                 notification->params().backhaul_iface_type  = IFACE_TYPE_ETHERNET;
@@ -871,7 +872,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
                 }
 
                 // Mark the connection as WIRED
-                m_sConfig.eType = SBackhaulConfig::EType::Wired;
+                db->backhaul.connection_type = AgentDB::sBackhaul::eConnectionType::Wired;
 
             } else {
                 auto selected_ruid_it = std::find_if(
@@ -893,11 +894,11 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
                 }
 
                 // Mark the connection as WIRELESS
-                m_sConfig.eType = SBackhaulConfig::EType::Wireless;
+                db->backhaul.connection_type = AgentDB::sBackhaul::eConnectionType::Wireless;
             }
 
             // Move to the next state immediately
-            if (m_sConfig.eType == SBackhaulConfig::EType::Wireless) {
+            if (db->backhaul.connection_type == AgentDB::sBackhaul::eConnectionType::Wireless) {
                 FSM_MOVE_STATE(INIT_HAL);
             } else { // EType::Wired
                 FSM_MOVE_STATE(MASTER_DISCOVERY);
@@ -1043,7 +1044,9 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
         //         FSM_MOVE_STATE(RESTART);
         //     }
         // } else {
-        if (pending_enable && m_sConfig.eType != SBackhaulConfig::EType::Invalid) {
+        auto db = AgentDB::get();
+        if (pending_enable &&
+            db->backhaul.connection_type != AgentDB::sBackhaul::eConnectionType::Invalid) {
             pending_enable = false;
         }
 
@@ -1090,6 +1093,8 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
 
         LOG(DEBUG) << "Restarting ...";
 
+        auto db = AgentDB::get();
+
         for (auto soc : slaves_sockets) {
             std::string iface = soc->sta_iface;
 
@@ -1120,7 +1125,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
         pending_slave_ifaces = slave_ap_ifaces;
         pending_enable       = false;
 
-        m_sConfig.eType = SBackhaulConfig::EType::Invalid;
+        db->backhaul.connection_type = AgentDB::sBackhaul::eConnectionType::Invalid;
 
         controller_bridge_mac.clear();
 
@@ -1364,6 +1369,8 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
 
         bool success = true;
 
+        auto db = AgentDB::get();
+
         for (auto soc : slaves_sockets) {
             std::string iface = soc->sta_iface;
             if (iface.empty())
@@ -1412,6 +1419,29 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
                     success = false;
                     break;
                 }
+
+                /**
+                 * This code was disabled as part of the effort to pass certification flow 
+                 * (PR #1469), and broke wirless backhual flow.
+                 * If a connected backhual interface has been discovered, the backhaul fsm was set
+                 * to MASTER_DISCOVERY state, otherwise, to INITIATE_SCAN.
+                 */
+
+                // if (!roam_flag && soc->sta_wlan_hal->is_connected()) {
+                //     if (!soc->sta_wlan_hal->update_status()) {
+                //         LOG(ERROR) << "failed to update sta status";
+                //         success = false;
+                //         break;
+                //     }
+                //     connected                        = true;
+                //     db->backhaul.selected_iface_name = iface;
+                //     db->backhaul.connection_type   = AgentDB::sBackhaul::eConnectionType::Wireless;
+                //     selected_bssid                 = soc->sta_wlan_hal->get_bssid();
+                //     selected_bssid_channel         = soc->sta_wlan_hal->get_channel();
+                //     soc->slave_is_backhaul_manager = true;
+                //     break;
+                // }
+
             } else if (attach_state == bwl::HALState::Failed) {
                 // Delete the HAL instance
                 soc->sta_wlan_hal.reset();
@@ -2940,9 +2970,10 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
             // BSSID field is not defined well for interface. The common definition is in simple
             // words "the AP/ETH mac that we are connected to".
             // For fronthaul radio interface or unused backhaul interface put zero mac.
-            if (db->device_conf.local_gw || m_sConfig.eType == SBackhaulConfig::EType::Wired ||
+            if (db->device_conf.local_gw ||
+                db->backhaul.connection_type == AgentDB::sBackhaul::eConnectionType::Wired ||
                 front_iface ||
-                (m_sConfig.eType == SBackhaulConfig::EType::Wireless &&
+                (db->backhaul.connection_type == AgentDB::sBackhaul::eConnectionType::Wireless &&
                  soc->sta_iface != m_sConfig.wireless_iface)) {
                 media_info.network_membership = network_utils::ZERO_MAC;
             } else {
