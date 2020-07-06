@@ -10,6 +10,7 @@ RUN apt-get update \
     gnupg \
     gnupg-agent \
     libsnmp-dev \
+    netcat \
     software-properties-common \
     wireshark-common \
     && rm -rf /var/lib/apt/lists/*
