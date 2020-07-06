@@ -198,6 +198,7 @@ private:
 
     Socket *monitor_socket    = nullptr;
     Socket *ap_manager_socket = nullptr;
+    std::string m_fronthaul_iface;
 
     std::chrono::steady_clock::time_point master_last_seen;
     std::chrono::steady_clock::time_point monitor_last_seen;
