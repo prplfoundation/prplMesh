@@ -572,7 +572,6 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
 
         auto db = AgentDB::get();
 
-        std::string strIface;
         network_utils::iface_info iface_info;
         bool backhaul_manager_exist = false;
 
@@ -580,15 +579,9 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
         notification->params().controller_bridge_mac = tlvf::mac_from_string(controller_bridge_mac);
 
         if (!db->device_conf.local_gw) {
-
-            if (db->backhaul.connection_type == AgentDB::sBackhaul::eConnectionType::Wired) {
-                strIface = db->ethernet.iface_name;
-            } else {
-                strIface = m_sConfig.wireless_iface;
-            }
             // Read the IP addresses of the bridge interface
-            if (network_utils::get_iface_info(iface_info, strIface) != 0) {
-                LOG(ERROR) << "Failed reading addresses for: " << strIface;
+            if (network_utils::get_iface_info(iface_info, db->backhaul.selected_iface_name) != 0) {
+                LOG(ERROR) << "Failed reading addresses for: " << db->backhaul.selected_iface_name;
                 return false;
             }
 
@@ -625,7 +618,7 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
 
                 // Find the slave handling the wireless interface
                 for (auto soc : slaves_sockets) {
-                    if (soc->sta_iface == m_sConfig.wireless_iface) {
+                    if (soc->sta_iface == db->backhaul.selected_iface_name) {
 
                         // Mark the slave as the backhaul manager
                         soc->slave_is_backhaul_manager = true;
@@ -846,6 +839,8 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
         if (db->device_conf.local_controller && db->device_conf.local_gw) {
             LOG(DEBUG) << "local controller && local gw";
             FSM_MOVE_STATE(MASTER_DISCOVERY);
+            db->backhaul.connection_type = AgentDB::sBackhaul::eConnectionType::Invalid;
+            db->backhaul.selected_iface_name.clear();
         } else { // link establish
 
             auto ifaces = network_utils::linux_get_iface_list_from_bridge(db->bridge.iface_name);
@@ -872,7 +867,8 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
                 }
 
                 // Mark the connection as WIRED
-                db->backhaul.connection_type = AgentDB::sBackhaul::eConnectionType::Wired;
+                db->backhaul.connection_type     = AgentDB::sBackhaul::eConnectionType::Wired;
+                db->backhaul.selected_iface_name = db->ethernet.iface_name;
 
             } else {
                 auto selected_ruid_it = std::find_if(
@@ -1417,8 +1413,8 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
                         success = false;
                         break;
                     }
-                    connected                      = true;
-                    m_sConfig.wireless_iface       = iface;
+                    connected                        = true;
+                    db->backhaul.selected_iface_name = iface;
                     db->backhaul.connection_type   = AgentDB::sBackhaul::eConnectionType::Wireless;
                     selected_bssid                 = soc->sta_wlan_hal->get_bssid();
                     selected_bssid_channel         = soc->sta_wlan_hal->get_channel();
@@ -1599,6 +1595,8 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
             }
         }
 
+        auto db = AgentDB::get();
+
         if (hidden_ssid) {
             std::string iface;
 
@@ -1628,8 +1626,8 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
                 break;
             }
 
-            m_sConfig.wireless_iface = iface;
-            active_hal               = get_wireless_hal();
+            db->backhaul.selected_iface_name = iface;
+            active_hal                       = get_wireless_hal();
         }
 
         if (active_hal->connect(m_sConfig.ssid, m_sConfig.pass, m_sConfig.security_type,
@@ -1637,9 +1635,9 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
                                 hidden_ssid)) {
             LOG(DEBUG) << "successful call to active_hal->connect(), bssid=" << selected_bssid
                        << ", channel=" << selected_bssid_channel
-                       << ", iface=" << m_sConfig.wireless_iface;
+                       << ", iface=" << db->backhaul.selected_iface_name;
         } else {
-            LOG(ERROR) << "connect command failed for iface " << m_sConfig.wireless_iface;
+            LOG(ERROR) << "connect command failed for iface " << db->backhaul.selected_iface_name;
             FSM_MOVE_STATE(INITIATE_SCAN);
             break;
         }
@@ -1653,6 +1651,7 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
     }
     case EState::WIRELESS_ASSOCIATE_4ADDR_WAIT: {
 
+        auto db  = AgentDB::get();
         auto now = std::chrono::steady_clock::now();
         if (now > state_time_stamp_timeout) {
             LOG(ERROR) << "associate wait timeout";
@@ -1678,7 +1677,7 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
                 stop_on_failure_attempts--;
                 platform_notify_error(bpl::eErrorCode::BH_ASSOCIATE_4ADDR_TIMEOUT,
                                       "SSID='" + m_sConfig.ssid + "', iface='" +
-                                          m_sConfig.wireless_iface + "'");
+                                          db->backhaul.selected_iface_name + "'");
 
                 if (!selected_bssid.empty()) {
                     ap_blacklist_entry &entry = ap_blacklist[selected_bssid];
@@ -2953,7 +2952,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
                 db->backhaul.connection_type == AgentDB::sBackhaul::eConnectionType::Wired ||
                 front_iface ||
                 (db->backhaul.connection_type == AgentDB::sBackhaul::eConnectionType::Wireless &&
-                 soc->sta_iface != m_sConfig.wireless_iface)) {
+                 soc->sta_iface != db->backhaul.selected_iface_name)) {
                 media_info.network_membership = network_utils::ZERO_MAC;
             } else {
                 media_info.network_membership =
@@ -3665,6 +3664,7 @@ bool backhaul_manager::send_slaves_enable()
 {
     auto iface_hal = get_wireless_hal();
 
+    auto db = AgentDB::get();
     for (auto soc : slaves_sockets) {
         auto notification =
             message_com::create_vs_message<beerocks_message::cACTION_BACKHAUL_ENABLE_APS_REQUEST>(
@@ -3675,7 +3675,7 @@ bool backhaul_manager::send_slaves_enable()
             return false;
         }
 
-        if (soc->sta_iface == m_sConfig.wireless_iface) {
+        if (soc->sta_iface == db->backhaul.selected_iface_name) {
             notification->channel() = iface_hal->get_channel();
         }
         LOG(DEBUG) << "Sending enable to slave " << soc->hostap_iface
@@ -3730,7 +3730,7 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
 
         auto db = AgentDB::get();
 
-        if (iface == m_sConfig.wireless_iface && !hidden_ssid) {
+        if (iface == db->backhaul.selected_iface_name && !hidden_ssid) {
             //this is generally not supposed to happen
             LOG(WARNING) << "event iface != wireless iface!";
         }
@@ -3799,7 +3799,8 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
 
     case Event::Disconnected: {
 
-        if (iface == m_sConfig.wireless_iface) {
+        auto db = AgentDB::get();
+        if (iface == db->backhaul.selected_iface_name) {
             if (FSM_IS_IN_STATE(OPERATIONAL) || FSM_IS_IN_STATE(CONNECTED)) {
                 platform_notify_error(bpl::eErrorCode::BH_DISCONNECTED,
                                       "Backhaul disconnected on operational state");
@@ -3951,6 +3952,8 @@ bool backhaul_manager::select_bssid()
     // Support up to 256 scan results
     std::vector<bwl::SScanResult> scan_results;
 
+    auto db = AgentDB::get();
+
     LOG(DEBUG) << "select_bssid: SSID = " << m_sConfig.ssid;
 
     for (auto soc : slaves_sockets) {
@@ -3992,14 +3995,14 @@ bool backhaul_manager::select_bssid()
                     LOG(DEBUG) << "roaming flag on  - found bssid match = " << roam_selected_bssid
                                << " roam_selected_bssid_channel = "
                                << int(roam_selected_bssid_channel);
-                    m_sConfig.wireless_iface = iface;
+                    db->backhaul.selected_iface_name = iface;
                     return true;
                 }
             } else if (!m_sConfig.preferred_bssid.empty() && bssid == m_sConfig.preferred_bssid) {
                 LOG(DEBUG) << "preferred bssid - found bssid match = " << bssid;
-                selected_bssid_channel   = scan_result.channel;
-                selected_bssid           = bssid;
-                m_sConfig.wireless_iface = iface;
+                selected_bssid_channel           = scan_result.channel;
+                selected_bssid                   = bssid;
+                db->backhaul.selected_iface_name = iface;
                 return true;
             } else if (son::wireless_utils::which_freq(scan_result.channel) == eFreqType::FREQ_5G) {
                 if (soc->sta_iface_filter_low &&
@@ -4112,29 +4115,29 @@ bool backhaul_manager::select_bssid()
         // TODO: ???
         return false;
     } else if (max_rssi_24 == beerocks::RSSI_INVALID) {
-        selected_bssid           = best_bssid_5;
-        selected_bssid_channel   = best_bssid_channel_5;
-        m_sConfig.wireless_iface = best_5_sta_iface;
+        selected_bssid                   = best_bssid_5;
+        selected_bssid_channel           = best_bssid_channel_5;
+        db->backhaul.selected_iface_name = best_5_sta_iface;
     } else if (max_rssi_5_best == beerocks::RSSI_INVALID) {
-        selected_bssid           = best_bssid_24;
-        selected_bssid_channel   = best_bssid_channel_24;
-        m_sConfig.wireless_iface = best_24_sta_iface;
+        selected_bssid                   = best_bssid_24;
+        selected_bssid_channel           = best_bssid_channel_24;
+        db->backhaul.selected_iface_name = best_24_sta_iface;
     } else if ((max_rssi_5_best > RSSI_THRESHOLD_5GHZ)) {
-        selected_bssid           = best_bssid_5;
-        selected_bssid_channel   = best_bssid_channel_5;
-        m_sConfig.wireless_iface = best_5_sta_iface;
+        selected_bssid                   = best_bssid_5;
+        selected_bssid_channel           = best_bssid_channel_5;
+        db->backhaul.selected_iface_name = best_5_sta_iface;
     } else if (max_rssi_24 < max_rssi_5_best + RSSI_BAND_DELTA_THRESHOLD) {
-        selected_bssid           = best_bssid_5;
-        selected_bssid_channel   = best_bssid_channel_5;
-        m_sConfig.wireless_iface = best_5_sta_iface;
+        selected_bssid                   = best_bssid_5;
+        selected_bssid_channel           = best_bssid_channel_5;
+        db->backhaul.selected_iface_name = best_5_sta_iface;
     } else {
-        selected_bssid           = best_bssid_24;
-        selected_bssid_channel   = best_bssid_channel_24;
-        m_sConfig.wireless_iface = best_24_sta_iface;
+        selected_bssid                   = best_bssid_24;
+        selected_bssid_channel           = best_bssid_channel_24;
+        db->backhaul.selected_iface_name = best_24_sta_iface;
     }
 
     if (!get_wireless_hal()) {
-        LOG(ERROR) << "Slave for interface " << m_sConfig.wireless_iface << " NOT found!";
+        LOG(ERROR) << "Slave for interface " << db->backhaul.selected_iface_name << " NOT found!";
         return false;
     }
 
@@ -4204,8 +4207,9 @@ void backhaul_manager::get_scan_measurement()
 std::shared_ptr<bwl::sta_wlan_hal> backhaul_manager::get_wireless_hal(std::string iface)
 {
     // If the iface argument is empty, use the default wireless interface
+    auto db = AgentDB::get();
     if (iface.empty()) {
-        iface = m_sConfig.wireless_iface;
+        iface = db->backhaul.selected_iface_name;
     }
 
     auto slave_sk = m_sConfig.slave_iface_socket.find(iface);
