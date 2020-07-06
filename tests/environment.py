@@ -492,6 +492,27 @@ class VirtualAPHostapd(VirtualAP):
     def __init__(self, radio: RadioHostapd, bssid: str):
         super().__init__(radio, bssid)
 
+    def get_ssid(self) -> str:
+        """Get current SSID of attached radio. Return string."""
+        device = self.radio.agent.device
+        device.sendline("iw {}.0 info".format(self.radio.iface_name))
+        # We are looking for SSID definition
+        # ssid Multi-AP-24G-1
+        # type AP
+        device.expect("ssid (?P<ssid>.*)\r\n\ttype AP\r\n\t")
+        return device.match.group('ssid')
+
+    def get_psk(self) -> str:
+        """Get SSIDs personal key set during last autoconfiguration. Return string"""
+        device = self.radio.agent.device
+        device.sendline("grep \"network_key\" \"{}/beerocks_agent_{}.log\" | tail -n 1".format(
+            self.radio.log_folder, self.radio.iface_name))
+        # We looking for key, which was set during last autoconfiguration. E.g of such string:
+        # network_key: maprocks2 fronthaul:
+        device.expect("network_key: (?P<psk>.*) fronthaul")
+        return device.match.group('psk')
+
+
     def associate(self, sta: Station) -> bool:
         ''' Associate "sta" with this VAP '''
         # TODO: complete this stub
