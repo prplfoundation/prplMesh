@@ -110,7 +110,6 @@ bool mon_wlan_hal_nl80211::update_radio_stats(SRadioStats &radio_stats)
     radio_stats.rx_packets_cnt = 0;
     radio_stats.rx_packets     = 0;
 
-    radio_stats.bss_load        = 0;
     radio_stats.errors_sent     = 0;
     radio_stats.errors_received = 0;
     radio_stats.noise           = 0;
