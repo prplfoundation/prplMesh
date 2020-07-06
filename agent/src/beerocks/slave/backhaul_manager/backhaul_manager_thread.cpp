@@ -1853,6 +1853,8 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
 
         soc->sta_iface.assign(request->sta_iface(message::IFACE_NAME_LENGTH));
         soc->hostap_iface.assign(request->hostap_iface(message::IFACE_NAME_LENGTH));
+        // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
+        db->add_radio(request->hostap_iface(), request->sta_iface());
         soc->sta_iface_filter_low = request->sta_iface_filter_low();
         onboarding                = request->onboarding();
 
@@ -1894,7 +1896,12 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             return false;
         }
 
-        auto db = AgentDB::get();
+        auto db    = AgentDB::get();
+        auto radio = db->radio(soc->hostap_iface);
+        if (!radio) {
+            LOG(DEBUG) << "Radio of iface " << soc->hostap_iface << " does not exist on the db";
+            return false;
+        }
 
         auto tuple_preferred_channels = request->preferred_channels(0);
         if (!std::get<0>(tuple_preferred_channels)) {
@@ -1906,7 +1913,10 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
 
         std::copy_n(channels, request->preferred_channels_size(), soc->preferred_channels.begin());
 
-        soc->radio_mac             = request->iface_mac();
+        soc->radio_mac = request->iface_mac();
+        // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
+        radio->front.iface_mac = soc->radio_mac;
+
         soc->freq_type             = request->frequency_band();
         soc->controller_discovered = false;
         soc->max_bandwidth         = request->max_bandwidth();
