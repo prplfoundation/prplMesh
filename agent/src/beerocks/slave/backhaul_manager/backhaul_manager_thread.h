@@ -173,15 +173,6 @@ private:
     SocketClient *master_discovery_socket = nullptr;
 
     struct SBackhaulConfig {
-
-        // Current connection type
-        enum class EType {
-            Invalid = 0, //!< Invalid connection
-            Wired,       //!< Wired connection
-            Wireless     //!< Wireless connection
-
-        } eType;
-
         std::string ssid;
         std::string pass;
         std::string wireless_iface;
