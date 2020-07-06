@@ -98,20 +98,19 @@ mon_wlan_hal_nl80211::~mon_wlan_hal_nl80211() {}
 
 bool mon_wlan_hal_nl80211::update_radio_stats(SRadioStats &radio_stats)
 {
-    radio_stats.tx_bytes_cnt = 0;
-    radio_stats.tx_bytes     = 0;
+    beerocks::net::sInterfaceStats iface_stats;
+    if (!beerocks::net::network_utils::get_iface_stats(get_iface_name(), iface_stats)) {
+        LOG(ERROR) << "Failed to get interface statistics for interface " << get_iface_name();
+        return false;
+    }
 
-    radio_stats.rx_bytes_cnt = 0;
-    radio_stats.rx_bytes     = 0;
+    calc_curr_traffic(iface_stats.tx_bytes, radio_stats.tx_bytes_cnt, radio_stats.tx_bytes);
+    calc_curr_traffic(iface_stats.rx_bytes, radio_stats.rx_bytes_cnt, radio_stats.rx_bytes);
+    calc_curr_traffic(iface_stats.tx_packets, radio_stats.tx_packets_cnt, radio_stats.tx_packets);
+    calc_curr_traffic(iface_stats.rx_packets, radio_stats.rx_packets_cnt, radio_stats.rx_packets);
 
-    radio_stats.tx_packets_cnt = 0;
-    radio_stats.tx_packets     = 0;
-
-    radio_stats.rx_packets_cnt = 0;
-    radio_stats.rx_packets     = 0;
-
-    radio_stats.errors_sent     = 0;
-    radio_stats.errors_received = 0;
+    radio_stats.errors_sent     = iface_stats.tx_errors;
+    radio_stats.errors_received = iface_stats.rx_errors;
     radio_stats.noise           = 0;
 
     return true;
@@ -119,27 +118,20 @@ bool mon_wlan_hal_nl80211::update_radio_stats(SRadioStats &radio_stats)
 
 bool mon_wlan_hal_nl80211::update_vap_stats(const std::string &vap_iface_name, SVapStats &vap_stats)
 {
-    vap_stats.tx_bytes_cnt = 0;
-    vap_stats.tx_bytes     = 0;
+    beerocks::net::sInterfaceStats iface_stats;
+    if (!beerocks::net::network_utils::get_iface_stats(vap_iface_name, iface_stats)) {
+        LOG(ERROR) << "Failed to get interface statistics for interface " << vap_iface_name;
+        return false;
+    }
 
-    vap_stats.rx_bytes_cnt = 0;
-    vap_stats.rx_bytes     = 0;
+    calc_curr_traffic(iface_stats.tx_bytes, vap_stats.tx_bytes_cnt, vap_stats.tx_bytes);
+    calc_curr_traffic(iface_stats.rx_bytes, vap_stats.rx_bytes_cnt, vap_stats.rx_bytes);
+    calc_curr_traffic(iface_stats.tx_packets, vap_stats.tx_packets_cnt, vap_stats.tx_packets);
+    calc_curr_traffic(iface_stats.rx_packets, vap_stats.rx_packets_cnt, vap_stats.rx_packets);
 
-    vap_stats.tx_packets_cnt = 0;
-    vap_stats.tx_packets     = 0;
-
-    vap_stats.rx_packets_cnt = 0;
-    vap_stats.rx_packets     = 0;
-
-    vap_stats.errors_sent     = 0;
-    vap_stats.errors_received = 0;
+    vap_stats.errors_sent     = iface_stats.tx_errors;
+    vap_stats.errors_received = iface_stats.rx_errors;
     vap_stats.retrans_count   = 0;
-
-    // TODO: Handle timeouts/deltas externally!
-    // auto now = std::chrono::steady_clock::now();
-    // auto time_span = std::chrono::duration_cast<std::chrono::milliseconds>(now - vap_stats->last_update_time);
-    // vap_stats->delta_ms = float(time_span.count());
-    // vap_stats->last_update_time = now;
 
     return true;
 }
