@@ -5,6 +5,8 @@
 # See LICENSE file for more details.
 ###############################################################
 
+import pexpect
+
 from boardfarm.devices.debian_wifi import DebianWifi
 from boardfarm.devices import connection_decider
 from environment import VirtualAPHostapd
@@ -35,8 +37,10 @@ class PrplMeshStation(DebianWifi):
         self.driver_name = config.get("driver", "nl80211,wext")
         self.mac = self.get_mac()
 
-        self.wifi_disconnect()
         # kill all wpa_supplicant relevant to active interface
+        self.wifi_disconnect()
+        # Turn on and off wlan iface just in case
+        self.disable_and_enable_wifi()
 
     def wifi_connect(self, vap: VirtualAPHostapd) -> bool:
         """Connect to the Access Point. Return True if successful."""
@@ -55,10 +59,31 @@ class PrplMeshStation(DebianWifi):
         self.expect(self.prompt)
         # Start wpa_supplicant with created configuration
         # Typical coommand on RPI: wpa_supplicant -B -c/tmp/temp.conf -iwlan0 -Dnl80211,wext
-        self.sudo_sendline("wpa_supplicant -B -D{} -i {} -c {}".format(
+        self.sudo_sendline("wpa_supplicant -B -D{} -i{} -c{}".format(
             self.driver_name, self.iface_wifi, config_file_path))
         self.expect("Successfully initialized wpa_supplicant")
         return bool(self.match)
+
+    def wifi_connect_check(self, vap: VirtualAPHostapd) -> bool:
+        """Connect to a SSID and verify WIFI connectivity"""
+        for _ in range(5):
+            self.wifi_connect(vap)
+            self.expect(pexpect.TIMEOUT, timeout=10)
+            verify_connect = self.wifi_connectivity_verify()
+            if verify_connect:
+                break
+            else:
+                self.wifi_disconnect()
+        return verify_connect
+
+    def wifi_connectivity_verify(self):
+        """Verify that wifi is connected. Return bool"""
+        self.sendline("iw %s link" % self.iface_wifi)
+        matched = self.expect(["Connected", "Not connected", pexpect.TIMEOUT])
+        if matched == 0:
+            return True
+        else:
+            return False
 
     def get_mac(self) -> str:
         """Get MAC of STA iface"""
@@ -67,5 +92,5 @@ class PrplMeshStation(DebianWifi):
         # wdev 0x1
         # addr 96:4e:c9:cc:7a:2c
         # type managed
-        self.expect("addr (?P<mac>..:..:..:..:..:..)\r\n\ttype")
+        self.expect("addr (?P<mac>..:..:..:..:..:..)\r\n\t(type|ssid)")
         return self.match.group('mac')

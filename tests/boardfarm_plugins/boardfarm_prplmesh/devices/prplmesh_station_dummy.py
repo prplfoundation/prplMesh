@@ -36,3 +36,11 @@ class PrplMeshStationDummy(PrplMeshBase):
         '''Disassociate "sta" from this VAP.'''
         vap.radio.send_bwl_event("EVENT AP-STA-DISCONNECTED {}".format(self.mac))
         return True
+
+    def wifi_connect_check(self, vap: VirtualAPDocker) -> bool:
+        """Connect and verify connection"""
+        return self.wifi_connect(vap)
+
+    def disable_wifi(self) -> bool:
+        """Disable wifi connection"""
+        return True
