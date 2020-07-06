@@ -78,7 +78,7 @@ class PrplMeshDocker(PrplMeshBase):
         and also after test - to insure that device still operational.
         """
         self._run_shell_cmd(os.path.join(rootdir, "tools", "docker", "test.sh"),
-                            ["-v", "-n", self.name])
+                            ["-v", "-n", self.docker_name])
 
     def isalive(self):
         """Method required by boardfarm.
