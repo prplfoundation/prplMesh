@@ -62,7 +62,7 @@ class PrplMeshPrplWRT(OpenWrtRouter, PrplMeshBase):
             self.wan_network = self.get_docker_subnet()
             self.wan_ip = self.wan_network[+245]
             self.set_iface_ip("br-lan", self.wan_ip, self.wan_network.prefixlen)
-            self.connection.close()
+            self.close()
             self.kill(signal.SIGTERM)
             # Removal of PID is required by pexpect in order to spawn a new process
             # serial connection should be terminated by 2 commands above
