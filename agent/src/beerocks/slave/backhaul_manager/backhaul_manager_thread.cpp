@@ -871,13 +871,10 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
                 db->backhaul.selected_iface_name = db->ethernet.iface_name;
 
             } else {
-                auto selected_ruid_it = std::find_if(
-                    slaves_sockets.begin(), slaves_sockets.end(),
-                    [&selected_backhaul](std::shared_ptr<sRadioInfo> soc) {
-                        return tlvf::mac_from_string(selected_backhaul) == soc->radio_mac;
-                    });
+                auto selected_ruid = db->get_radio_by_mac(tlvf::mac_from_string(selected_backhaul),
+                                                          AgentDB::eMacType::RADIO);
 
-                if (!selected_backhaul.empty() && selected_ruid_it == slaves_sockets.end()) {
+                if (!selected_backhaul.empty() && !selected_ruid) {
                     LOG(ERROR) << "UCC configured backhaul RUID which is not enabled";
                     // Restart state will update the onboarding status to failure.
                     FSM_MOVE_STATE(RESTART);
@@ -885,8 +882,8 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
                 }
 
                 // Override backhaul_preferred_radio_band if UCC set it
-                if (selected_ruid_it != slaves_sockets.end()) {
-                    m_sConfig.backhaul_preferred_radio_band = (*selected_ruid_it)->freq_type;
+                if (!selected_ruid) {
+                    m_sConfig.backhaul_preferred_radio_band = selected_ruid->front.freq_type;
                 }
 
                 // Mark the connection as WIRELESS
@@ -945,18 +942,23 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
 
         bool sent_for_2g = false;
         bool sent_for_5g = false;
+        auto db          = AgentDB::get();
 
-        for (auto soc : slaves_sockets) {
-            if (soc->freq_type == eFreqType::FREQ_24G) {
+        for (const auto &radio : db->get_radios_list()) {
+            if (!radio) {
+                continue;
+            }
+            //for (auto soc : slaves_sockets) {
+            if (radio->front.freq_type == eFreqType::FREQ_24G) {
                 if (sent_for_2g)
                     continue;
-                if (send_autoconfig_search_message(soc)) {
+                if (send_autoconfig_search_message(radio->front.iface_name)) {
                     sent_for_2g = true;
                 }
-            } else if (soc->freq_type == eFreqType::FREQ_5G) {
+            } else if (radio->front.freq_type == eFreqType::FREQ_5G) {
                 if (sent_for_5g)
                     continue;
-                if (send_autoconfig_search_message(soc)) {
+                if (send_autoconfig_search_message(radio->front.iface_name)) {
                     sent_for_5g = true;
                 }
             }
@@ -1209,7 +1211,7 @@ bool backhaul_manager::send_1905_topology_discovery_message(const std::string &i
                                tlvf::mac_to_string(db->bridge.mac), iface_name);
 }
 
-bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<sRadioInfo> soc)
+bool backhaul_manager::send_autoconfig_search_message(const std::string &front_radio_iface_name)
 {
     auto db = AgentDB::get();
 
@@ -1219,13 +1221,18 @@ bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<sRadioInfo
      * TODO
      * this is a workaround, need to find a better way to know each slave's band
      */
-    if (soc->freq_type == beerocks::eFreqType::FREQ_24G) {
+    auto radio = db->radio(front_radio_iface_name);
+    if (!radio) {
+        LOG(DEBUG) << "Radio of iface " << front_radio_iface_name << " does not exist on the db";
+        return false;
+    }
+    if (radio->front.freq_type == beerocks::eFreqType::FREQ_24G) {
         freq_band = ieee1905_1::tlvAutoconfigFreqBand::IEEE_802_11_2_4_GHZ;
-    } else if (soc->freq_type == beerocks::eFreqType::FREQ_5G) {
+    } else if (radio->front.freq_type == beerocks::eFreqType::FREQ_5G) {
         freq_band = ieee1905_1::tlvAutoconfigFreqBand::IEEE_802_11_5_GHZ;
     } else {
-        LOG(ERROR) << "unsupported freq_type=" << int(soc->freq_type)
-                   << ", iface=" << soc->hostap_iface;
+        LOG(ERROR) << "unsupported freq_type=" << int(radio->front.freq_type)
+                   << ", iface=" << front_radio_iface_name;
         return false;
     }
     auto p_cmdu_header =
@@ -1944,9 +1951,13 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
         // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
         radio->front.iface_mac = soc->radio_mac;
 
-        soc->freq_type             = request->frequency_band();
+        soc->freq_type = request->frequency_band();
+        // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
+        radio->front.freq_type     = request->frequency_band();
         soc->controller_discovered = false;
         soc->max_bandwidth         = request->max_bandwidth();
+        // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
+        radio->front.max_supported_bw = request->max_bandwidth();
 
         soc->ht_supported  = request->ht_supported();
         soc->ht_capability = request->ht_capability();
@@ -1972,7 +1983,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
 
         // If we're already connected, send a notification to the slave
         if (FSM_IS_IN_STATE(OPERATIONAL)) {
-            send_autoconfig_search_message(soc);
+            send_autoconfig_search_message(radio->front.iface_name);
         } else if (pending_enable) {
             auto notification = message_com::create_vs_message<
                 beerocks_message::cACTION_BACKHAUL_BUSY_NOTIFICATION>(cmdu_tx);
@@ -4269,14 +4280,12 @@ bool backhaul_manager::get_media_type(const std::string &interface_name,
         }
     } else if (ieee1905_1::eMediaTypeGroup::IEEE_802_11 == media_type_group) {
 
-        auto it = std::find_if(slaves_sockets.begin(), slaves_sockets.end(),
-                               [&](const std::shared_ptr<sRadioInfo> &radio_info) {
-                                   return interface_name == radio_info->hostap_iface;
-                               });
-        if (it != slaves_sockets.end()) {
-            auto radio_info = *it;
+        auto db = AgentDB::get();
+
+        auto radio = db->radio(interface_name);
+        if (radio) {
             media_type =
-                beerocks::get_802_11_media_type(radio_info->freq_type, radio_info->max_bandwidth);
+                get_802_11_media_type(radio->front.freq_type, radio->front.max_supported_bw);
             result = true;
         }
 
@@ -4785,17 +4794,18 @@ bool backhaul_manager::create_backhaul_steering_response(
 
 const std::string backhaul_manager::freq_to_radio_mac(eFreqType freq) const
 {
-    auto it =
-        std::find_if(slaves_sockets.begin(), slaves_sockets.end(),
-                     [&](std::shared_ptr<sRadioInfo> slave) { return slave->freq_type == freq; });
-
-    if (it == slaves_sockets.end()) {
-        LOG(ERROR) << "couldn't find slave for freq " << int(freq);
-        return std::string();
+    auto db = AgentDB::get();
+    for (const auto &radio : db->get_radios_list()) {
+        if (!radio) {
+            continue;
+        }
+        if (radio->front.freq_type == freq) {
+            return tlvf::mac_to_string(radio->front.iface_mac);
+        }
     }
 
-    auto slave = *it;
-    return tlvf::mac_to_string(slave->radio_mac);
+    LOG(ERROR) << "Radio not found for freq " << int(freq);
+    return std::string();
 }
 
 bool backhaul_manager::start_wps_pbc(const sMacAddr &radio_mac)

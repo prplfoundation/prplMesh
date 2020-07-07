@@ -3390,10 +3390,13 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                                   config.backhaul_wireless_iface.c_str(),
                                   message::IFACE_NAME_LENGTH);
 
-        bh_enable->frequency_band() = hostap_params.frequency_band;
-        bh_enable->max_bandwidth()  = hostap_params.max_bandwidth;
-        bh_enable->ht_supported()   = hostap_params.ht_supported;
-        bh_enable->ht_capability()  = hostap_params.ht_capability;
+        bh_enable->frequency_band()   = hostap_params.frequency_band;
+        radio->front.freq_type        = hostap_params.frequency_band;
+        bh_enable->max_bandwidth()    = hostap_params.max_bandwidth;
+        radio->front.max_supported_bw = hostap_params.max_bandwidth;
+
+        bh_enable->ht_supported()  = hostap_params.ht_supported;
+        bh_enable->ht_capability() = hostap_params.ht_capability;
         std::copy_n(hostap_params.ht_mcs_set, beerocks::message::HT_MCS_SET_SIZE,
                     bh_enable->ht_mcs_set());
         bh_enable->vht_supported()  = hostap_params.vht_supported;
