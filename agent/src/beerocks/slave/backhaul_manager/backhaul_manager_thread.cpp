@@ -1060,16 +1060,6 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
             if (elapsed_time_s >= ap_metrics_reporting_info.reporting_interval_s) {
                 ap_metrics_reporting_info.last_reporting_time_point = now;
 
-                std::vector<sMacAddr> bssid_list;
-                for (const auto &socket : slaves_sockets) {
-                    if (socket) {
-                        for (int i = 0; i < beerocks::IFACE_TOTAL_VAPS; ++i) {
-                            if (socket->vaps_list.vaps[i].mac != network_utils::ZERO_MAC) {
-                                bssid_list.push_back(socket->vaps_list.vaps[i].mac);
-                            }
-                        }
-                    }
-                }
                 // We must generate a new MID for the periodic AP Metrics Response messages that
                 // do not correspond to an AP Metrics Query message.
                 // We cannot set MID to 0 here because we must also differentiate periodic
@@ -1077,11 +1067,9 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
                 // due to channel utilization crossed configured threshold value.
                 // As a temporary solution, set MID to UINT16_MAX here.
                 // TODO: to be fixed as part of #1328
-                if (!bssid_list.empty()) {
-                    send_slave_ap_metric_query_message(UINT16_MAX, bssid_list);
-                } else {
-                    LOG(DEBUG) << "Skipping AP_METRICS_QUERY for slave, empty BSSID list";
-                }
+
+                // Send ap_metrics query on all bssids exists on the Agent.
+                send_slave_ap_metric_query_message(UINT16_MAX);
             }
         }
 
@@ -1149,7 +1137,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
     }
 
     return (true);
-}
+} // namespace beerocks
 
 bool backhaul_manager::send_1905_topology_discovery_message()
 {
@@ -1309,53 +1297,58 @@ bool backhaul_manager::send_autoconfig_search_message(const std::string &front_r
                             tlvf::mac_to_string(db->bridge.mac));
 }
 
-bool backhaul_manager::send_slave_ap_metric_query_message(uint16_t mid,
-                                                          const std::vector<sMacAddr> &bssid_list)
+bool backhaul_manager::send_slave_ap_metric_query_message(
+    uint16_t mid, const std::unordered_set<sMacAddr> &bssid_list)
 {
-    bool ret = false;
-    for (auto socket : slaves_sockets) {
-        for (const auto &mac : bssid_list) {
-            int i = 0;
-            if (mac == socket->vaps_list.vaps[i].mac) {
-                LOG(DEBUG) << "Forwarding AP_METRICS_QUERY_MESSAGE message to son_slave, bssid: "
-                           << std::hex << tlvf::mac_to_string(mac);
+    auto db = AgentDB::get();
 
-                auto forward =
-                    cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE);
-                if (!forward) {
-                    LOG(ERROR) << "Failed to create AP_METRICS_QUERY_MESSAGE";
-                    return false;
-                }
-
-                auto query = cmdu_tx.addClass<wfa_map::tlvApMetricQuery>();
-                if (!query) {
-                    LOG(ERROR) << "Failed addClass<wfa_map::tlvApMetricQuery>";
-                    return false;
-                }
-
-                if (!query->alloc_bssid_list(1)) {
-                    LOG(ERROR) << "Failed allocate memory for bssid_list";
-                    return false;
-                }
-
-                auto list         = query->bssid_list(0);
-                std::get<0>(list) = true;
-                std::get<1>(list) = mac;
-
-                if (!message_com::send_cmdu(socket->slave, cmdu_tx)) {
-                    LOG(ERROR) << "Failed forwarding AP_METRICS_QUERY_MESSAGE message to son_slave";
-                    ret = false;
-                    continue;
-                } else {
-                    ret = true;
-                    // Fill a query vector
-                    m_ap_metric_query.push_back({socket->slave, mac});
-                }
+    for (const auto &radio : db->get_radios_list()) {
+        if (!radio) {
+            continue;
+        }
+        for (const auto &bssid : radio->front.bssids) {
+            if (!bssid_list.empty() && bssid_list.find(bssid.mac) == bssid_list.end()) {
+                continue;
             }
-            i++;
+            LOG(DEBUG) << "Forwarding AP_METRICS_QUERY_MESSAGE message to son_slave, bssid: "
+                       << bssid.mac;
+
+            if (!cmdu_tx.create(mid, ieee1905_1::eMessageType::AP_METRICS_QUERY_MESSAGE)) {
+                LOG(ERROR) << "Failed to create AP_METRICS_QUERY_MESSAGE";
+                return false;
+            }
+
+            auto query = cmdu_tx.addClass<wfa_map::tlvApMetricQuery>();
+            if (!query) {
+                LOG(ERROR) << "Failed addClass<wfa_map::tlvApMetricQuery>";
+                return false;
+            }
+
+            if (!query->alloc_bssid_list(1)) {
+                LOG(ERROR) << "Failed allocate memory for bssid_list";
+                return false;
+            }
+
+            auto list = query->bssid_list(0);
+            if (!std::get<0>(list)) {
+                LOG(ERROR) << "Failed to get element of bssid_list";
+            }
+            std::get<1>(list) = bssid.mac;
+
+            auto radio_info = get_radio(radio->front.iface_mac);
+            if (!radio_info) {
+                LOG(ERROR) << "radio_info = nullptr";
+                return false;
+            }
+
+            if (!message_com::send_cmdu(radio_info->slave, cmdu_tx)) {
+                LOG(ERROR) << "Failed forwarding AP_METRICS_QUERY_MESSAGE message to son_slave";
+            }
+
+            m_ap_metric_query.push_back({radio_info->slave, bssid.mac});
         }
     }
-    return ret;
+    return true;
 }
 
 bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
@@ -2138,10 +2131,19 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             return false;
         }
 
-        soc->vaps_list = msg->params();
-        if (m_agent_ucc_listener) {
-            m_agent_ucc_listener->update_vaps_list(tlvf::mac_to_string(soc->radio_mac),
-                                                   msg->params());
+        // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
+        auto db    = AgentDB::get();
+        auto radio = db->radio(soc->hostap_iface);
+        if (!radio) {
+            LOG(DEBUG) << "Radio of iface " << soc->hostap_iface << " does not exist on the db";
+            return false;
+        }
+        for (uint8_t vap_idx = 0; vap_idx < eBeeRocksIfaceIds::IFACE_TOTAL_VAPS; vap_idx++) {
+            radio->front.bssids[vap_idx].mac  = msg->params().vaps[vap_idx].mac;
+            radio->front.bssids[vap_idx].ssid = msg->params().vaps[vap_idx].ssid;
+            radio->front.bssids[vap_idx].type = msg->params().vaps[vap_idx].backhaul_vap
+                                                    ? AgentDB::sRadio::sFront::sBssid::eType::bAP
+                                                    : AgentDB::sRadio::sFront::sBssid::eType::fAP;
         }
         break;
     }
@@ -2654,25 +2656,26 @@ bool backhaul_manager::handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmd
 bool backhaul_manager::handle_ap_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                const std::string &src_mac)
 {
-    std::vector<sMacAddr> bssid;
     const auto mid           = cmdu_rx.getMessageId();
     auto ap_metric_query_tlv = cmdu_rx.getClass<wfa_map::tlvApMetricQuery>();
     if (!ap_metric_query_tlv) {
         LOG(ERROR) << "AP Metrics Query CMDU mid=" << mid << " does not have AP Metric Query TLV";
         return false;
     }
+
+    std::unordered_set<sMacAddr> bssids;
     for (size_t bssid_idx = 0; bssid_idx < ap_metric_query_tlv->bssid_list_length(); bssid_idx++) {
         auto bssid_tuple = ap_metric_query_tlv->bssid_list(bssid_idx);
         if (!std::get<0>(bssid_tuple)) {
             LOG(ERROR) << "Failed to get bssid " << bssid_idx << " from AP_METRICS_QUERY";
             return false;
         }
-        bssid.push_back(std::get<1>(bssid_tuple));
+        bssids.insert(std::get<1>(bssid_tuple));
         LOG(DEBUG) << "Received AP_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid)
                    << "  bssid " << std::get<1>(bssid_tuple);
     }
 
-    if (!send_slave_ap_metric_query_message(mid, bssid)) {
+    if (!send_slave_ap_metric_query_message(mid, bssids)) {
         LOG(ERROR) << "Failed to forward AP_METRICS_RESPONSE to the son_slave_thread";
         return false;
     }
@@ -3118,22 +3121,24 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         return false;
     }
 
-    for (const auto &slave : slaves_sockets) {
-        // TODO skip slaves that are not operational
-        auto vaps_list = slave->vaps_list;
+    for (const auto &radio : db->get_radios_list()) {
+        if (!radio) {
+            continue;
+        }
 
         auto radio_list         = tlvApOperationalBSS->create_radio_list();
-        radio_list->radio_uid() = slave->radio_mac;
-        for (const auto &vap : vaps_list.vaps) {
-            if (vap.mac == network_utils::ZERO_MAC)
+        radio_list->radio_uid() = radio->front.iface_mac;
+        for (const auto &bssid : radio->front.bssids) {
+            if (bssid.mac == network_utils::ZERO_MAC) {
                 continue;
-            if (vap.ssid[0] == '\0')
+            }
+            if (bssid.ssid.empty()) {
                 continue;
+            }
             auto radio_bss_list           = radio_list->create_radio_bss_list();
-            radio_bss_list->radio_bssid() = vap.mac;
-            auto ssid =
-                std::string(vap.ssid, strnlen(vap.ssid, beerocks::message::WIFI_SSID_MAX_LENGTH));
-            radio_bss_list->set_ssid(ssid);
+            radio_bss_list->radio_bssid() = bssid.mac;
+            radio_bss_list->set_ssid(bssid.ssid);
+
             radio_list->add_radio_bss_list(radio_bss_list);
         }
         tlvApOperationalBSS->add_radio_list(radio_list);

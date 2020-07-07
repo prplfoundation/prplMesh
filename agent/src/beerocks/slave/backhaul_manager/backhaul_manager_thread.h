@@ -103,7 +103,17 @@ private:
      */
     bool send_1905_topology_discovery_message(const std::string &iface_name);
 
-    bool send_slave_ap_metric_query_message(uint16_t mid, std::vector<sMacAddr> const &bssid_list);
+    /**
+     * @brief Sends ap_metric_query for each bssid on 'bssid_list' to the son_slaves.
+     * If the 'bssid_list' is empty, sends a query on each bssid that exists on the Agent.
+     * 
+     * @param mid MID of the message to be sent.
+     * @param bssid_list List of bssids to send a query on.
+     * @return true on success, otherwise false.e 
+     */
+    bool send_slave_ap_metric_query_message(
+        uint16_t mid,
+        const std::unordered_set<sMacAddr> &bssid_list = std::unordered_set<sMacAddr>());
 
     /**
      * @brief Creates Backhaul STA Steering Response message with 2 tlvs Steering Response
@@ -366,8 +376,7 @@ private:
         uint32_t vht_capability = 0;     /**< VHT capabilities */
         std::array<uint8_t, beerocks::message::VHT_MCS_SET_SIZE>
             vht_mcs_set; /**< 32-byte attribute containing the MCS set as defined in 802.11ac */
-        bool he_supported = false;             /**< Is HE supported flag */
-        beerocks_message::sVapsList vaps_list; /**< List of VAPs in radio. */
+        bool he_supported = false; /**< Is HE supported flag */
         std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
             preferred_channels; /**< Array of supported channels in radio. */
         std::unordered_map<sMacAddr, associated_clients_t>
