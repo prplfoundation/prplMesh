@@ -104,7 +104,7 @@ class PrplwrtDevice:
             print(diff_str)
         return bool(diff_str)
 
-    def reach(self, attempts: int = 5, wait: int = 5):
+    def reach(self, attempts: int = 5, wait: int = 5) -> bool:
         """Check if the device is reachable via SSH (and optionally try multiple times).
 
         Parameters
@@ -124,7 +124,7 @@ class PrplwrtDevice:
                 with pexpect.pxssh.pxssh() as shell:
                     shell.login(self.name, self.username, login_timeout=5)
                     return True
-            except pexpect.pxssh.ExceptionPxssh:
+            except (pexpect.pxssh.ExceptionPxssh, pexpect.exceptions.EOF):
                 print("Waiting for the device to be reachable")
                 time.sleep(wait)
         return False
