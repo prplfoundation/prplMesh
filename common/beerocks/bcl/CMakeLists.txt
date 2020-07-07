@@ -45,6 +45,7 @@ if (BUILD_TESTS)
     set(TEST_PROJECT_NAME ${PROJECT_NAME}_unit_tests)
     set(unit_tests_sources
         ${bcl_sources}
+        ${MODULE_PATH}/unit_tests/network_utils_test.cpp
         ${MODULE_PATH}/unit_tests/socket_event_loop_test.cpp
         ${MODULE_PATH}/unit_tests/wireless_utils_test.cpp
     )
