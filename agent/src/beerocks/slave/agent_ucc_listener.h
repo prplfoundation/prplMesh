@@ -76,7 +76,6 @@ private:
     bool m_in_reset        = false;
     bool m_reset_completed = false;
     std::string m_selected_backhaul; // "ETH" or "<RUID of the selected radio>"
-    std::unordered_map<std::string, beerocks_message::sVapsList> vaps_map;
 
     std::mutex mutex;
 };

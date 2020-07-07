@@ -7,6 +7,7 @@
  */
 
 #include "agent_ucc_listener.h"
+#include "agent_db.h"
 
 #include <bcl/network/network_utils.h>
 #include <beerocks/tlvf/beerocks_message.h>
@@ -80,24 +81,6 @@ void agent_ucc_listener::clear_configuration()
 }
 
 /**
- * @brief Update list of VAPs for ruid.
- *
- * @return None.
- */
-
-typedef struct {
-    std::string mac;
-    std::string ssid;
-    bool backhaul_vap;
-} sVapElement;
-void agent_ucc_listener::update_vaps_list(std::string ruid, beerocks_message::sVapsList &vaps)
-{
-    LOG(INFO) << "Update VAP map for ruid " << ruid << " bssid " << vaps.vaps->mac << " ssid "
-              << std::string(vaps.vaps->ssid, 36);
-    vaps_map[ruid] = vaps;
-}
-
-/**
  * @brief get parameter command
  *
  * get agent parameter
@@ -136,14 +119,16 @@ bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, st
         auto ruid = tlvf::mac_to_string(std::strtoull(params["ruid"].c_str(), nullptr, 16));
         auto ssid = params["ssid"];
 
-        auto it = vaps_map.find(ruid);
-        if (it == vaps_map.end()) {
+        auto db    = AgentDB::get();
+        auto radio = db->get_radio_by_mac(tlvf::mac_from_string(ruid), AgentDB::eMacType::RADIO);
+        if (!radio) {
             value = "ruid " + ruid + " not found";
             return false;
         }
-        for (const auto &vap : it->second.vaps) {
-            if (std::string(vap.ssid) == ssid) {
-                value = tlvf::mac_to_string(vap.mac);
+
+        for (const auto &bssid : radio->front.bssids) {
+            if (bssid.ssid == ssid) {
+                value = tlvf::mac_to_string(bssid.mac);
                 return true;
             }
         }
@@ -183,16 +168,16 @@ static enum eFreqType band_to_freq(const std::string &band)
 bool agent_ucc_listener::handle_start_wps_registration(const std::string &band,
                                                        std::string &err_string)
 {
-    auto freq      = band_to_freq(band);
-    auto radio_mac = m_backhaul_manager_ctx.freq_to_radio_mac(freq);
-    if (radio_mac.empty()) {
+    auto freq          = band_to_freq(band);
+    auto radio_mac_str = m_backhaul_manager_ctx.freq_to_radio_mac(freq);
+    if (radio_mac_str.empty()) {
         err_string = "Failed to get radio for " + band;
         return false;
     }
 
-    LOG(DEBUG) << "Trigger WPS PBC on radio mac " << radio_mac;
+    LOG(DEBUG) << "Trigger WPS PBC on radio mac " << radio_mac_str;
     err_string = "Failed to start wps pbc";
-    return m_backhaul_manager_ctx.start_wps_pbc(tlvf::mac_from_string(radio_mac));
+    return m_backhaul_manager_ctx.start_wps_pbc(tlvf::mac_from_string(radio_mac_str));
 }
 
 /**
