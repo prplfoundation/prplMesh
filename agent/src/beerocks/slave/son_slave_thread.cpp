@@ -1815,6 +1815,20 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
 
         LOG(INFO) << "received ACTION_APMANAGER_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION";
 
+        auto db    = AgentDB::get();
+        auto radio = db->radio(m_fronthaul_iface);
+        if (!radio) {
+            LOG(DEBUG) << "Radio of iface " << m_fronthaul_iface << " does not exist on the db";
+            return false;
+        }
+        for (uint8_t vap_idx = 0; vap_idx < eBeeRocksIfaceIds::IFACE_TOTAL_VAPS; vap_idx++) {
+            radio->front.bssids[vap_idx].mac  = notification_in->params().vaps[vap_idx].mac;
+            radio->front.bssids[vap_idx].ssid = notification_in->params().vaps[vap_idx].ssid;
+            radio->front.bssids[vap_idx].type = notification_in->params().vaps[vap_idx].backhaul_vap
+                                                    ? AgentDB::sRadio::sFront::sBssid::eType::bAP
+                                                    : AgentDB::sRadio::sFront::sBssid::eType::fAP;
+        }
+
         auto notification_out = message_com::create_vs_message<
             beerocks_message::cACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>(cmdu_tx);
         if (notification_out == nullptr) {
