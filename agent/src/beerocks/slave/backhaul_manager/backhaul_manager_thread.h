@@ -94,7 +94,7 @@ private:
     finalize_slaves_connect_state(bool fConnected,
                                   std::shared_ptr<sRadioInfo> pSocket = nullptr); // cmdu_duplicate
 
-    bool send_autoconfig_search_message(std::shared_ptr<sRadioInfo> soc);
+    bool send_autoconfig_search_message(const std::string &front_radio_iface_name);
     bool send_1905_topology_discovery_message();
 
     /**
