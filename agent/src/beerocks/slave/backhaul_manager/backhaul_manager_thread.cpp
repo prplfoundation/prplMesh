@@ -524,17 +524,20 @@ void backhaul_manager::after_select(bool timeout)
     // 60 seconds a Topology Discovery message from it. If not, remove this neighbor from our list
     // and send a Topology Notification message.
     bool neighbors_list_changed = false;
-    for (auto it = m_1905_neighbor_devices.begin(); it != m_1905_neighbor_devices.end();) {
-        const auto &last_topology_discovery = it->second.timestamp;
-        if (last_topology_discovery + std::chrono::seconds(DISCOVERY_NEIGHBOUR_REMOVAL_TIMEOUT) <
-            std::chrono::steady_clock::now()) {
-            const auto &device_al_mac = it->first;
-            LOG(INFO) << "Removed 1905.1 device " << device_al_mac << " from neighbors list";
-            it                     = m_1905_neighbor_devices.erase(it);
-            neighbors_list_changed = true;
-            continue;
+    for (auto &neighbors_on_local_iface_entry : db->neighbor_devices) {
+        auto &neighbors_on_local_iface = neighbors_on_local_iface_entry.second;
+        for (auto it = neighbors_on_local_iface.begin(); it != neighbors_on_local_iface.end();) {
+            auto &last_topology_discovery = it->second.timestamp;
+            if (now - last_topology_discovery >
+                std::chrono::seconds(DISCOVERY_NEIGHBOUR_REMOVAL_TIMEOUT)) {
+                auto &device_al_mac = it->first;
+                LOG(INFO) << "Removed 1905.1 device " << device_al_mac << " from neighbors list";
+                it                     = neighbors_on_local_iface.erase(it);
+                neighbors_list_changed = true;
+                continue;
+            }
+            it++;
         }
-        it++;
     }
 
     if (neighbors_list_changed) {
@@ -3005,43 +3008,25 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
      * a map which key is the name of the local interface and the value is the list of neighbor
      * devices inferred from that interface.
      */
-    std::unordered_map<std::string, std::vector<sNeighborDevice>> neighbor_devices_by_local_iface;
-    for (const auto &entry : m_1905_neighbor_devices) {
-        const auto &neighbor_device = entry.second;
-        auto &neighbor_devices      = neighbor_devices_by_local_iface[neighbor_device.if_name];
-
-        neighbor_devices.emplace_back(neighbor_device);
-    }
-
-    /**
-     * Second, create a tlv1905NeighborDevice for every local interface on which a 1905 neighbor
-     * is visible, and then add the list of neighbors visible on that interface
-     */
-    for (const auto &entry : neighbor_devices_by_local_iface) {
-        const auto &iface_name       = entry.first;
-        const auto &neighbor_devices = entry.second;
-
-        sMacAddr iface_mac;
-        if (!get_iface_mac(iface_name, iface_mac)) {
-            return false;
-        }
-
+    for (auto &neighbors_on_local_iface_entry : db->neighbor_devices) {
         auto tlv1905NeighborDevice = cmdu_tx.addClass<ieee1905_1::tlv1905NeighborDevice>();
         if (!tlv1905NeighborDevice) {
             LOG(ERROR) << "addClass ieee1905_1::tlv1905NeighborDevice failed, mid=" << std::hex
                        << mid;
+            return true;
+        }
+        tlv1905NeighborDevice->mac_local_iface() = neighbors_on_local_iface_entry.first;
+        auto &neighbors_on_local_iface           = neighbors_on_local_iface_entry.second;
+
+        if (!tlv1905NeighborDevice->alloc_mac_al_1905_device(neighbors_on_local_iface.size())) {
+            LOG(ERROR) << "alloc_mac_al_1905_device() has failed";
             return false;
         }
 
-        tlv1905NeighborDevice->mac_local_iface() = iface_mac;
-
-        if (!tlv1905NeighborDevice->alloc_mac_al_1905_device(neighbor_devices.size())) {
-            LOG(ERROR) << "alloc_mac_al_1905_device() has failed";
-            return true;
-        }
-
         size_t index = 0;
-        for (const auto &neighbor_device : neighbor_devices) {
+        for (const auto &neighbor_on_local_iface_entry : neighbors_on_local_iface) {
+            auto &neighbor_al_mac = neighbor_on_local_iface_entry.first;
+
             auto mac_al_1905_device_tuple = tlv1905NeighborDevice->mac_al_1905_device(index);
             if (!std::get<0>(mac_al_1905_device_tuple)) {
                 LOG(ERROR) << "getting mac_al_1905_device element has failed";
@@ -3049,7 +3034,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
             }
 
             auto &mac_al_1905_device = std::get<1>(mac_al_1905_device_tuple);
-            mac_al_1905_device.mac   = neighbor_device.al_mac;
+            mac_al_1905_device.mac   = neighbor_al_mac;
             mac_al_1905_device.bridges_exist =
                 ieee1905_1::tlv1905NeighborDevice::eBridgesExist::AT_LEAST_ONE_BRIDGES_EXIST;
             index++;
@@ -3411,7 +3396,7 @@ bool backhaul_manager::handle_1905_topology_discovery(const std::string &src_mac
 
     auto mid = cmdu_rx.getMessageId();
     LOG(INFO) << "Received TOPOLOGY_DISCOVERY_MESSAGE from AL MAC=" << tlvAlMac->mac()
-              << ", mid=" << std::hex << int(mid);
+              << ", mid=" << std::hex << mid;
 
     auto tlvMac = cmdu_rx.getClass<ieee1905_1::tlvMacAddress>();
     if (!tlvMac) {
@@ -3419,24 +3404,33 @@ bool backhaul_manager::handle_1905_topology_discovery(const std::string &src_mac
         return false;
     }
 
-    uint32_t if_index   = message_com::get_uds_header(cmdu_rx)->if_index;
-    std::string if_name = network_utils::linux_get_iface_name(if_index);
-    if (if_name.empty()) {
+    uint32_t if_index      = message_com::get_uds_header(cmdu_rx)->if_index;
+    std::string iface_name = network_utils::linux_get_iface_name(if_index);
+    if (iface_name.empty()) {
         LOG(ERROR) << "Failed getting interface name for index: " << if_index;
         return false;
     }
 
-    auto new_device =
-        m_1905_neighbor_devices.find(tlvAlMac->mac()) == m_1905_neighbor_devices.end();
+    std::string local_receiving_iface_mac;
+    network_utils::linux_iface_get_mac(iface_name, local_receiving_iface_mac);
+
+    // Check it is a new device so if it does, we will send Topology Notification.
+    bool new_device = false;
+    for (auto &neighbors_on_local_iface_entry : db->neighbor_devices) {
+        auto &neighbors_on_local_iface = neighbors_on_local_iface_entry.second;
+        new_device =
+            neighbors_on_local_iface.find(tlvAlMac->mac()) == neighbors_on_local_iface.end();
+        if (new_device) {
+            break;
+        }
+    }
 
     // Add/Update the device on our list.
-    sNeighborDevice neighbor_device;
-    neighbor_device.al_mac    = tlvAlMac->mac();
-    neighbor_device.mac       = tlvMac->mac();
-    neighbor_device.if_name   = if_name;
-    neighbor_device.timestamp = std::chrono::steady_clock::now();
+    auto &neighbor_devices_by_al_mac =
+        db->neighbor_devices[tlvf::mac_from_string(local_receiving_iface_mac)];
 
-    m_1905_neighbor_devices[tlvAlMac->mac()] = neighbor_device;
+    // The timestamp being updated on the sNeighborDevice constructor.
+    neighbor_devices_by_al_mac.emplace(tlvAlMac->mac(), AgentDB::sNeighborDevice{tlvMac->mac()});
 
     // If it is a new device, then our 1905.1 neighbors list has changed and we are required to send
     // Topology Notification Message.
@@ -4281,13 +4275,16 @@ bool backhaul_manager::get_neighbor_links(
         return false;
     }
 
-    for (const auto &entry : m_1905_neighbor_devices) {
-        sLinkNeighbor neighbor;
-        neighbor.al_mac    = entry.first;
-        neighbor.iface_mac = neighbor.al_mac;
-        if ((neighbor_mac_filter == network_utils::ZERO_MAC) ||
-            (neighbor_mac_filter == neighbor.al_mac)) {
-            neighbor_links_map[wired_interface].push_back(neighbor);
+    for (const auto &neighbors_on_local_iface : db->neighbor_devices) {
+        auto &neighbors = neighbors_on_local_iface.second;
+        for (const auto &neighbor_entry : neighbors) {
+            sLinkNeighbor neighbor;
+            neighbor.al_mac    = neighbor_entry.first;
+            neighbor.iface_mac = neighbor_entry.second.transmitting_iface_mac;
+            if ((neighbor_mac_filter == network_utils::ZERO_MAC) ||
+                (neighbor_mac_filter == neighbor.al_mac)) {
+                neighbor_links_map[wired_interface].push_back(neighbor);
+            }
         }
     }
 
