@@ -429,33 +429,6 @@ private:
                        std::map<sLinkInterface, std::vector<sLinkNeighbor>> &neighbor_links_map);
 
     /**
-     * @brief 1905.1 Neighbor device information
-     *
-     * Information gathered from a neighbor device upon reception of a Topology Discovery message.
-     */
-    struct sNeighborDevice {
-        sMacAddr al_mac = beerocks::net::network_utils::
-            ZERO_MAC; /**< 1905.1 AL MAC address of the Topology Discovery message transmitting device. */
-        sMacAddr mac = beerocks::net::network_utils::
-            ZERO_MAC; /**< MAC address of the interface on which the Topology Discovery message is transmitted. */
-        std::string
-            if_name; /**< Name of the network interface the Topology Discovery message was received on */
-        std::chrono::steady_clock::time_point
-            timestamp; /**< Timestamp of the last Topology Discovery message received from this neighbor device. */
-    };
-
-    /*
-     * @brief List of known 1905 neighbor devices
-     * 
-     * key:     1905.1 device AL-MAC
-     * value:   1905.1 device information
-     * Devices are being added to the list when receiving a 1905.1 Topology Discovery message from
-     * an unknown 1905.1 device. Every 1905.1 device shall send this message every 60 seconds, and
-     * we update the time stamp in which the message is received.
-     */
-    std::unordered_map<sMacAddr, sNeighborDevice> m_1905_neighbor_devices;
-
-    /**
      * @brief Adds an AP HT Capabilities TLV to AP Capability Report message.
      *
      * TLV is added to message only if given radio supports HT capabilities.
