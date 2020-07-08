@@ -35,6 +35,10 @@ public:
     virtual ~AttrList() = default;
     bool init();
 
+    template <class T> std::list<std::shared_ptr<T>> getAttrList() const
+    {
+        return this->getClassList<T>();
+    };
     template <class T> std::shared_ptr<T> getAttr() const { return this->getClass<T>(); };
     template <class T> std::shared_ptr<T> addAttr() { return this->addClass<T>(); };
     bool finalize() { return ClassList::finalize(); };
