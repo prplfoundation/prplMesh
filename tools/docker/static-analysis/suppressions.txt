@@ -3,3 +3,6 @@ uninitMemberVar
 
 // Suppress performance: Variable 'X' is assigned in constructor body. Consider performing initialization in initialization list.
 useInitializationList
+
+// Suppress style: Consider using std::find_if algorithm instead of a raw loop.
+useStlAlgorithm
