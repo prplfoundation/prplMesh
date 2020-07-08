@@ -13,6 +13,7 @@ services:
             - "8002"
         volumes:
             - "$ROOT_DIR:$ROOT_DIR"
+        user: ${CURRENT_UID}
         entrypoint: ["/root/entrypoint.sh", "/usr/bin/start-controller-agent"]
 
     agent:
@@ -28,6 +29,7 @@ services:
             - "8002"
         volumes:
           - "$ROOT_DIR:$ROOT_DIR"
+        user: ${CURRENT_UID}
         entrypoint: ["/root/entrypoint.sh", "/usr/bin/start-agent"]
 
     boardfarm:
@@ -43,5 +45,6 @@ services:
             - "$ROOT_DIR:$ROOT_DIR"
             - "/var/run/docker:/var/run/docker"
             - "/var/run/docker.sock:/var/run/docker.sock"
+        user: ${CURRENT_UID}
         working_dir: $ROOT_DIR/prplMesh/tests
         entrypoint: ["bash", "run_bf_compose.sh"]

@@ -66,6 +66,7 @@ class Services:
         params += args
         local_env = os.environ
         local_env['ROOT_DIR'] = self.rootdir
+        local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(os.getgid())
         proc = Popen(params, stdout=PIPE, stderr=PIPE)
         for line in proc.stdout:
             print(line.decode(), end='')
@@ -78,7 +79,8 @@ if __name__ == '__main__':
     check_docker_versions()
     parser = argparse.ArgumentParser(description='Dockerized test launcher')
     parser.add_argument('--test', dest='test', type=str, help='Test to be run')
-    parser.add_argument('--clean', dest='clean', help='Test to be run')
+    parser.add_argument('--clean', dest='clean', help='Clean',
+                        action='store_true')
     args = parser.parse_args()
     services = Services()
     if args.clean:
