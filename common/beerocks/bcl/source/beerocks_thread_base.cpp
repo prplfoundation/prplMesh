@@ -43,7 +43,7 @@ void thread_base::join()
 void thread_base::stop(bool block)
 {
     should_stop = true;
-    thread_base::before_stop();
+    before_stop();
     if (block) {
         join();
     }
