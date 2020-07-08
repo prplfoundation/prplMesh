@@ -175,8 +175,6 @@ private:
     void platform_notify_error(bpl::eErrorCode code, const std::string &error_data);
     bool send_slaves_enable();
 
-    void remove_client_from_all_radios(sMacAddr &client_mac);
-
     std::shared_ptr<bwl::sta_wlan_hal> get_wireless_hal(std::string iface = "");
 
 private:
@@ -311,44 +309,6 @@ private:
      */
     sApMetricsReportingInfo ap_metrics_reporting_info;
 
-    struct sClientInfo {
-        sMacAddr client_mac;
-        sMacAddr bssid; // VAP mac
-        std::chrono::steady_clock::time_point time_stamp;
-        size_t asso_len;
-        uint8_t assoc_req[ASSOCIATION_FRAME_SIZE];
-    };
-
-    /**
-     * @brief Type definition for associated clients information.
-     *
-     * Associated client information consists of sClientInfo strucrt, which has the 
-     * following fields:
-     * - The MAC address of the 802.11 client that associates to a BSS.
-     * - Timestamp of the 802.11 client's last association to this Multi-AP device.
-     * - The length of the association frame.
-     * - the association frame itself.
-     *
-     * Associated client information is gathered from
-     * ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION events received from slave threads.
-     *
-     * Associated client information is later used to fill in the Associated Clients TLV
-     * in the Topology Response message and Client Capability Response message.
-     */
-
-    typedef std::unordered_map<sMacAddr, sClientInfo> associated_clients_t;
-
-    /**
-     * @brief Gets BSSID to which STA with given MAC is connected
-     *
-     * @param[in] clients_map Associated client map to seach
-     * @param[in] sta_mac MAC address of the STA
-     * @return BSSID in case of success or network_utils::ZERO_MAC otherwise
-     */
-    static sMacAddr
-    get_sta_bssid(const std::unordered_map<sMacAddr, associated_clients_t> &clients_map,
-                  const sMacAddr &sta_mac);
-
     /**
      * @brief Information gathered about a radio (= slave).
      *
@@ -382,8 +342,6 @@ private:
         bool he_supported = false; /**< Is HE supported flag */
         std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
             preferred_channels; /**< Array of supported channels in radio. */
-        std::unordered_map<sMacAddr, associated_clients_t>
-            associated_clients_map; /**< Associated clients grouped by BSSID. */
     };
 
     /**
@@ -393,14 +351,6 @@ private:
      * @return shared pointer to radio info in case of success or nullptr otherwise
      */
     std::shared_ptr<sRadioInfo> get_radio(const sMacAddr &radio_mac) const;
-
-    /**
-     * @brief Gets radio info for the STA with given MAC address
-     *
-     * @param[in] sta_mac MAC address of the STA
-     * @return shared pointer to radio info in case of success or nullptr otherwise
-     */
-    std::shared_ptr<sRadioInfo> get_sta_radio(const sMacAddr &sta_mac);
 
     /**
      * @brief Interface in this device which connects to an interface in one or more neighbors.

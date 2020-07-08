@@ -2169,35 +2169,35 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
         break;
     }
     case beerocks_message::ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION: {
-        LOG(DEBUG) << "ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION received from iface "
-                   << soc->hostap_iface;
+        LOG(DEBUG) << "ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION";
         auto msg =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION>();
         if (!msg) {
             LOG(ERROR) << "Failed building ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION message!";
-            return false;
+            break;
         }
 
+        // Remove this client from other radios.
+        auto db = AgentDB::get();
+        db->erase_client(msg->client_mac());
+
         // Set client association information for associated client
-        //remove this client from other radios
-        remove_client_from_all_radios(msg->client_mac());
+        auto radio = db->get_radio_by_mac(msg->bssid(), AgentDB::eMacType::BSSID);
+        if (!radio) {
+            LOG(DEBUG) << "Radio containing bssid " << msg->bssid() << " not found";
+            break;
+        }
 
-        auto &associated_clients = soc->associated_clients_map[msg->bssid()];
-
-        sClientInfo client_info;
-        client_info.client_mac = msg->client_mac();
-        client_info.bssid      = msg->bssid();
-        client_info.time_stamp = std::chrono::steady_clock::now();
-        client_info.asso_len   = msg->association_frame_length();
-        memcpy(client_info.assoc_req, msg->association_frame(), client_info.asso_len);
-        associated_clients[msg->client_mac()] = client_info;
+        radio->associated_clients.emplace(msg->client_mac(),
+                                          AgentDB::sRadio::sClient{msg->bssid(),
+                                                                   msg->association_frame_length(),
+                                                                   msg->association_frame()});
 
         break;
     }
     case beerocks_message::ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION: {
-        LOG(DEBUG) << "ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION received from iface "
-                   << soc->hostap_iface;
+        LOG(DEBUG) << "ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION";
         auto msg =
             beerocks_header
                 ->addClass<beerocks_message::cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION>();
@@ -2207,12 +2207,9 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             return false;
         }
 
-        // If exists, remove client association information for disconnected client
-        auto &associated_clients = soc->associated_clients_map[msg->bssid()];
-        auto it                  = associated_clients.find(msg->client_mac());
-        if (it != associated_clients.end()) {
-            it = associated_clients.erase(it);
-        }
+        // If exists, remove client association information for disconnected client.
+        auto db = AgentDB::get();
+        db->erase_client(msg->client_mac(), msg->bssid());
         break;
     }
     case beerocks_message::ACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_RESPONSE: {
@@ -2241,18 +2238,23 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
 
         response_out->sta_mac() = response_in->sta_mac();
 
+        auto db = AgentDB::get();
+
         for (size_t i = 0; i < response_out->bssid_info_list_length(); ++i) {
             auto &bss_in  = std::get<1>(response_in->bssid_info_list(i));
             auto &bss_out = std::get<1>(response_out->bssid_info_list(i));
 
-            auto mac   = response_out->sta_mac();
-            auto radio = get_sta_radio(mac);
+            auto &client_mac = response_out->sta_mac();
+
+            auto radio = db->get_radio_by_mac(client_mac, AgentDB::eMacType::CLIENT);
             if (!radio) {
-                LOG(ERROR) << "radio for mac " << mac << " is null";
+                LOG(ERROR) << "radio for client mac " << client_mac << " not found";
                 return false;
             }
 
-            bss_out.bssid = get_sta_bssid(radio->associated_clients_map, mac);
+            // If get_radio_by_mac() found the radio, it means that 'client_mac' is on the radio
+            // 'associated_clients' list.
+            bss_out.bssid = radio->associated_clients.at(client_mac).bssid;
             if (bss_out.bssid == network_utils::ZERO_MAC) {
                 LOG(ERROR) << "bssid is ZERO_MAC";
                 return false;
@@ -2266,7 +2268,6 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             bss_out.sta_measured_uplink_rssi_dbm_enc = bss_in.sta_measured_uplink_rssi_dbm_enc;
         }
 
-        auto db = AgentDB::get();
         LOG(DEBUG) << "Send AssociatedStaLinkMetrics to controller, mid = " << mid;
         send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, tlvf::mac_to_string(db->bridge.mac));
         break;
@@ -2376,19 +2377,6 @@ bool backhaul_manager::handle_slave_1905_1_message(ieee1905_1::CmduMessageRx &cm
     }
 }
 
-sMacAddr backhaul_manager::get_sta_bssid(
-    const std::unordered_map<sMacAddr, associated_clients_t> &clients_map, const sMacAddr &sta_mac)
-{
-    sMacAddr bssid = network_utils::ZERO_MAC;
-    std::for_each(clients_map.begin(), clients_map.end(),
-                  [&sta_mac, &bssid](std::pair<sMacAddr, associated_clients_t> vap) {
-                      if (vap.second.find(sta_mac) != vap.second.end()) {
-                          bssid = vap.first;
-                      }
-                  });
-    return bssid;
-}
-
 std::shared_ptr<backhaul_manager::sRadioInfo>
 backhaul_manager::get_radio(const sMacAddr &radio_mac) const
 {
@@ -2397,16 +2385,6 @@ backhaul_manager::get_radio(const sMacAddr &radio_mac) const
                                return radio_info->radio_mac == radio_mac;
                            });
     return it != slaves_sockets.end() ? *it : nullptr;
-}
-
-std::shared_ptr<backhaul_manager::sRadioInfo>
-backhaul_manager::get_sta_radio(const sMacAddr &sta_mac)
-{
-    auto radio = std::find_if(
-        slaves_sockets.begin(), slaves_sockets.end(), [&sta_mac](std::shared_ptr<sRadioInfo> r) {
-            return get_sta_bssid(r->associated_clients_map, sta_mac) != network_utils::ZERO_MAC;
-        });
-    return radio != slaves_sockets.end() ? *radio : nullptr;
 }
 
 bool backhaul_manager::handle_multi_ap_policy_config_request(ieee1905_1::CmduMessageRx &cmdu_rx,
@@ -2508,7 +2486,7 @@ bool backhaul_manager::handle_associated_sta_link_metrics_query(ieee1905_1::Cmdu
 
     // Check if it is an error scenario - if the STA specified in the STA link Query message is not associated
     // with any of the BSS operated by the Multi-AP Agent
-    std::shared_ptr<sRadioInfo> radio = get_sta_radio(mac->sta_mac());
+    auto radio = db->get_radio_by_mac(mac->sta_mac(), AgentDB::eMacType::CLIENT);
     if (!radio) {
         LOG(ERROR) << "client with mac address " << mac->sta_mac() << " not found";
         //Add an Error Code TLV
@@ -2523,27 +2501,36 @@ bool backhaul_manager::handle_associated_sta_link_metrics_query(ieee1905_1::Cmdu
 
         LOG(DEBUG) << "Send a ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE back to controller";
         return send_cmdu_to_broker(cmdu_tx, src_mac, tlvf::mac_to_string(db->bridge.mac));
-    } else {
-        sMacAddr bssid = get_sta_bssid(radio->associated_clients_map, mac->sta_mac());
-        if (bssid == network_utils::ZERO_MAC) {
-            LOG(ERROR) << "Cannot find sta bssid";
-            return false;
-        }
-        LOG(DEBUG) << "client with mac address " << mac->sta_mac() << " connected to " << bssid;
-
-        auto request_out = message_com::create_vs_message<
-            beerocks_message::cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST>(cmdu_tx, mid);
-
-        if (!request_out) {
-            LOG(ERROR) << "Failed to build ACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST";
-            return false;
-        }
-
-        request_out->sync()    = true;
-        request_out->sta_mac() = mac->sta_mac();
-
-        return message_com::send_cmdu(radio->slave, cmdu_tx);
     }
+    auto client_it = radio->associated_clients.find(mac->sta_mac());
+    if (client_it == radio->associated_clients.end()) {
+        LOG(ERROR) << "Cannot find sta sta " << mac->sta_mac();
+        return false;
+    }
+    if (client_it->second.bssid == network_utils::ZERO_MAC) {
+        LOG(ERROR) << "Cannot find sta bssid";
+        return false;
+    }
+    LOG(DEBUG) << "Client with mac address " << mac->sta_mac() << " connected to "
+               << client_it->second.bssid;
+
+    auto request_out = message_com::create_vs_message<
+        beerocks_message::cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST>(cmdu_tx, mid);
+
+    if (!request_out) {
+        LOG(ERROR) << "Failed to build ACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST";
+        return false;
+    }
+
+    request_out->sync()    = true;
+    request_out->sta_mac() = mac->sta_mac();
+
+    auto radio_info = get_radio(radio->front.iface_mac);
+    if (!radio_info) {
+        LOG(ERROR) << "Failed to get radio info for " << radio->front.iface_mac;
+        return false;
+    }
+    return message_com::send_cmdu(radio_info->slave, cmdu_tx);
 }
 
 bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
@@ -2556,25 +2543,6 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
     if (!client_info_tlv_r) {
         LOG(ERROR) << "getClass wfa_map::tlvClientInfo failed";
         return false;
-    }
-
-    auto db = AgentDB::get();
-
-    //Check if it is an error scenario - if the STA specified in the Client Capability Query message is not associated
-    //with any of the BSS operated by the Multi-AP Agent [ though the TLV does contain a BSSID, the specification
-    // says that we should answer if the client is associated with any BSS on this agent.]
-    bool associated_client_found = false;
-    sClientInfo client_info;
-    for (const auto &slave : slaves_sockets) {
-        auto associated_clients_map = slave->associated_clients_map;
-        for (const auto &vap : associated_clients_map) {
-            auto it = vap.second.find(client_info_tlv_r->client_mac());
-            if (it != vap.second.end()) {
-                associated_client_found = true;
-                client_info             = it->second;
-                break;
-            }
-        }
     }
 
     // send CLIENT_CAPABILITY_REPORT_MESSAGE back to the controller
@@ -2597,16 +2565,17 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         return false;
     }
 
-    // if it is an error scenario, set Success status to 0x01 = Failure and do nothing after it.
-    if (associated_client_found) {
-        client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::SUCCESS;
-        LOG(DEBUG) << "Result Code: SUCCESS";
-        // Add frame body of the most recently received (Re)Association Request frame from this client
+    auto db = AgentDB::get();
 
-        client_capability_report_tlv->set_association_frame(client_info.assoc_req,
-                                                            client_info.asso_len);
+    // Check if it is an error scenario - if the STA specified in the Client Capability Query
+    // message is not associated with any of the BSS operated by the Multi-AP Agent [ though the
+    // TLV does contain a BSSID, the specification says that we should answer if the client is
+    // associated with any BSS on this agent.]
+    auto radio = db->get_radio_by_mac(client_info_tlv_r->client_mac(), AgentDB::eMacType::CLIENT);
+    if (!radio) {
+        LOG(ERROR) << "radio for client mac " << client_info_tlv_r->client_mac() << " not found";
 
-    } else {
+        // If it is an error scenario, set Success status to 0x01 = Failure and do nothing after it.
         client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::FAILURE;
 
         LOG(DEBUG) << "Result Code: FAILURE";
@@ -2621,7 +2590,17 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         error_code_tlv->reason_code() =
             wfa_map::tlvErrorCode::STA_NOT_ASSOCIATED_WITH_ANY_BSS_OPERATED_BY_THE_AGENT;
         error_code_tlv->sta_mac() = client_info_tlv_r->client_mac();
+        return send_cmdu_to_broker(cmdu_tx, src_mac, tlvf::mac_to_string(db->bridge.mac));
     }
+
+    client_capability_report_tlv->result_code() = wfa_map::tlvClientCapabilityReport::SUCCESS;
+    LOG(DEBUG) << "Result Code: SUCCESS";
+
+    // Add frame body of the most recently received (Re)Association Request frame from this client.
+    auto &client_info = radio->associated_clients.at(client_info_tlv_r->client_mac());
+    client_capability_report_tlv->set_association_frame(client_info.association_frame.data(),
+                                                        client_info.association_frame_length);
+
     LOG(DEBUG) << "Send a CLIENT_CAPABILITY_REPORT_MESSAGE back to controller";
     return send_cmdu_to_broker(cmdu_tx, src_mac, tlvf::mac_to_string(db->bridge.mac));
 }
@@ -3168,26 +3147,21 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
     // The Multi-AP Agent shall include an Associated Clients TLV in the message if there is at
     // least one 802.11 client directly associated with any of the BSS(s) that is operated by the
     // Multi-AP Agent
-    bool shall_include_associated_clients_tlv = false;
-    for (auto slave : slaves_sockets) {
-        auto associated_clients_map = slave->associated_clients_map;
-        for (const auto &associated_clients_entry : associated_clients_map) {
-            auto associated_clients = associated_clients_entry.second;
-            if (associated_clients.size() > 0) {
-                shall_include_associated_clients_tlv = true;
-                break;
-            }
+    bool include_associated_clients_tlv = false;
+    for (const auto &radio : db->get_radios_list()) {
+        if (!radio) {
+            continue;
         }
-        if (shall_include_associated_clients_tlv) {
+        if (radio->associated_clients.size() > 0) {
+            include_associated_clients_tlv = true;
             break;
         }
     }
 
-    if (shall_include_associated_clients_tlv) {
+    if (include_associated_clients_tlv) {
         auto tlvAssociatedClients = cmdu_tx.addClass<wfa_map::tlvAssociatedClients>();
         if (!tlvAssociatedClients) {
-            LOG(ERROR) << "addClass wfa_map::tlvAssociatedClients failed, mid=" << std::hex
-                       << (int)mid;
+            LOG(ERROR) << "addClass wfa_map::tlvAssociatedClients failed, mid=" << std::hex << mid;
             return false;
         }
 
@@ -3195,42 +3169,36 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
         auto now = std::chrono::steady_clock::now();
 
         // Fill in Associated Clients TLV
-        for (auto slave : slaves_sockets) {
-            auto associated_clients_map = slave->associated_clients_map;
+        for (const auto &radio : db->get_radios_list()) {
+            if (!radio) {
+                continue;
+            }
 
-            // Associated clients map contains sets of associated clients grouped by BSSID
-            for (const auto &associated_clients_entry : associated_clients_map) {
-                auto bssid              = associated_clients_entry.first;
-                auto associated_clients = associated_clients_entry.second;
+            for (const auto &bssid : radio->front.bssids) {
+                auto bss_list     = tlvAssociatedClients->create_bss_list();
+                bss_list->bssid() = bssid.mac;
 
-                if (associated_clients.size() > 0) {
-                    auto bss_list = tlvAssociatedClients->create_bss_list();
-
-                    bss_list->bssid() = bssid;
-
-                    // Information for each associated client includes its MAC address and
-                    // the timestamp of its last association.
-                    for (const auto &associated_client : associated_clients) {
-                        auto client_mac       = associated_client.first;
-                        auto association_time = associated_client.second.time_stamp;
-
-                        auto elapsed =
-                            std::chrono::duration_cast<std::chrono::seconds>(now - association_time)
-                                .count();
-                        if ((elapsed < 0) || (elapsed > UINT16_MAX)) {
-                            elapsed = UINT16_MAX;
-                        }
-
-                        auto client = bss_list->create_clients_associated_list();
-
-                        client->mac()                             = client_mac;
-                        client->time_since_last_association_sec() = elapsed;
-
-                        bss_list->add_clients_associated_list(client);
+                for (const auto &associated_client_entry : radio->associated_clients) {
+                    if (associated_client_entry.second.bssid != bssid.mac) {
+                        continue;
                     }
 
-                    tlvAssociatedClients->add_bss_list(bss_list);
+                    auto client_info = bss_list->create_clients_associated_list();
+
+                    auto &association_time = associated_client_entry.second.association_time;
+                    auto elapsed =
+                        std::chrono::duration_cast<std::chrono::seconds>(now - association_time)
+                            .count();
+                    if ((elapsed < 0) || (elapsed > UINT16_MAX)) {
+                        elapsed = UINT16_MAX;
+                    }
+
+                    client_info->mac()                             = associated_client_entry.first;
+                    client_info->time_since_last_association_sec() = elapsed;
+
+                    bss_list->add_clients_associated_list(client_info);
                 }
+                tlvAssociatedClients->add_bss_list(bss_list);
             }
         }
     }
@@ -3639,8 +3607,6 @@ bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageR
     const sMacAddr &requested_sta_mac = tlvBeaconMetricsQuery->associated_sta_mac();
     LOG(DEBUG) << "the requested STA mac is: " << requested_sta_mac;
 
-    const auto radio = get_sta_radio(requested_sta_mac);
-
     // build ACK message CMDU
     const auto mid      = cmdu_rx.getMessageId();
     auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
@@ -3649,8 +3615,8 @@ bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageR
         return false;
     }
 
-    auto db = AgentDB::get();
-
+    auto db    = AgentDB::get();
+    auto radio = db->get_radio_by_mac(requested_sta_mac, AgentDB::eMacType::CLIENT);
     if (!radio) {
         LOG(DEBUG) << "STA with MAC [" << requested_sta_mac
                    << "] is not associated with any BSS operated by the agent";
@@ -3683,9 +3649,14 @@ bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageR
         return send_cmdu_to_broker(cmdu_tx, src_mac, tlvf::mac_to_string(db->bridge.mac));
     }
 
-    forward_to = radio->slave;
+    auto radio_info = get_radio(radio->front.iface_mac);
+    if (!radio_info) {
+        LOG(ERROR) << "Failed to get radio info for " << radio->front.iface_mac;
+        return false;
+    }
+    forward_to = radio_info->slave;
 
-    LOG(DEBUG) << "found the radio that has the sation. radio: " << radio->radio_mac
+    LOG(DEBUG) << "Found the radio that has the sation. radio: " << radio->front.iface_mac
                << "; station: " << requested_sta_mac;
 
     LOG(DEBUG) << "BEACON METRICS QUERY: sending ACK message to the originator mid: "
@@ -3722,21 +3693,6 @@ bool backhaul_manager::send_slaves_enable()
     }
 
     return true;
-}
-
-void backhaul_manager::remove_client_from_all_radios(sMacAddr &client_mac)
-{
-    for (const auto &slave : slaves_sockets) {
-        auto &associated_clients_map = slave->associated_clients_map;
-        for (auto &clientmap : associated_clients_map) {
-            auto it = clientmap.second.find(client_mac);
-            if (it != clientmap.second.end()) {
-                LOG(DEBUG) << "Removing client " << client_mac << " from radio "
-                           << slave->hostap_iface;
-                clientmap.second.erase(it);
-            }
-        }
-    }
 }
 
 bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr,
@@ -4366,11 +4322,13 @@ bool backhaul_manager::get_neighbor_links(
     }
 
     // Also include a link for each associated client
-    for (const auto &slave : slaves_sockets) {
+    for (const auto radio : db->get_radios_list()) {
+        if (!radio) {
+            continue;
+        }
 
-        for (const auto &associated_clients_entry : slave->associated_clients_map) {
-            auto bssid              = associated_clients_entry.first;
-            auto associated_clients = associated_clients_entry.second;
+        for (const auto &associated_client : radio->associated_clients) {
+            auto &bssid = associated_client.second.bssid;
 
             sLinkInterface interface;
             if (!get_iface_name(bssid, interface.iface_name)) {
@@ -4378,9 +4336,9 @@ bool backhaul_manager::get_neighbor_links(
                 return false;
             }
 
-            interface.iface_mac = bssid;
-            interface.media_type =
-                beerocks::get_802_11_media_type(slave->freq_type, slave->max_bandwidth);
+            interface.iface_mac  = bssid;
+            interface.media_type = beerocks::get_802_11_media_type(radio->front.freq_type,
+                                                                   radio->front.max_supported_bw);
 
             if (ieee1905_1::eMediaType::UNKNOWN_MEDIA == interface.media_type) {
                 LOG(ERROR) << "Unknown media type for interface " << interface.iface_name;
@@ -4390,17 +4348,15 @@ bool backhaul_manager::get_neighbor_links(
             LOG(TRACE) << "Getting neighbors connected to interface " << interface.iface_name
                        << " with BSSID " << bssid;
 
-            for (const auto &associated_client : associated_clients) {
-                // TODO: This is not correct... We actually have to get this from the topology
-                // discovery message, which will give us the neighbor interface and AL MAC addresses.
-                sLinkNeighbor neighbor;
-                neighbor.iface_mac = associated_client.first;
-                neighbor.al_mac    = neighbor.iface_mac;
+            // TODO: This is not correct... We actually have to get this from the topology
+            // discovery message, which will give us the neighbor interface and AL MAC addresses.
+            sLinkNeighbor neighbor;
+            neighbor.iface_mac = associated_client.first;
+            neighbor.al_mac    = neighbor.iface_mac;
 
-                if ((neighbor_mac_filter == network_utils::ZERO_MAC) ||
-                    (neighbor_mac_filter == neighbor.al_mac)) {
-                    neighbor_links_map[interface].push_back(neighbor);
-                }
+            if ((neighbor_mac_filter == network_utils::ZERO_MAC) ||
+                (neighbor_mac_filter == neighbor.al_mac)) {
+                neighbor_links_map[interface].push_back(neighbor);
             }
         }
     }
