@@ -48,3 +48,8 @@ services:
         user: ${CURRENT_UID}
         working_dir: $ROOT_DIR/prplMesh/tests
         entrypoint: ["bash", "run_bf_compose.sh"]
+
+networks:
+    default:
+        external:
+            name: prplbr
