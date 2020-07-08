@@ -16,6 +16,7 @@
 #
 from __future__ import print_function  # To check for python2 or < 3.5 execution
 import argparse
+import fcntl
 import os
 import sys
 from subprocess import Popen, PIPE
@@ -60,16 +61,27 @@ class Services:
         self.rootdir = os.path.dirname(scriptdir)
         print(self.rootdir)
 
-    def dc(self, args):
+    def _setNonBlocking(fd):
+        """
+        Set the file description of the given file descriptor to non-blocking.
+        """
+        flags = fcntl.fcntl(fd, fcntl.F_GETFL)
+        flags = flags | os.O_NONBLOCK
+        fcntl.fcntl(fd, fcntl.F_SETFL, flags)
+
+    def dc(self, args, interactive=False):
         params = ['docker-compose', '-f',
                   'tools/docker/boardfarm-ci/docker-compose.yml']
         params += args
         local_env = os.environ
         local_env['ROOT_DIR'] = self.rootdir
-        proc = Popen(params, stdout=PIPE, stderr=PIPE)
-        for line in proc.stdout:
-            print(line.decode(), end='')
-        proc.stdout.close()
+        if not interactive:
+            proc = Popen(params, stdout=PIPE, stderr=PIPE)
+            for line in proc.stdout:
+                print(line.decode(), end='')
+            proc.stdout.close()
+        else:
+            proc = Popen(params)
         return_code = proc.wait()
         return return_code
 
@@ -78,11 +90,19 @@ if __name__ == '__main__':
     check_docker_versions()
     parser = argparse.ArgumentParser(description='Dockerized test launcher')
     parser.add_argument('--test', dest='test', type=str, help='Test to be run')
-    parser.add_argument('--clean', dest='clean', help='Test to be run')
+    parser.add_argument('--clean', dest='clean', action='store_true',
+                        help='Clean containers images and networks')
+    parser.add_argument('--shell', dest='shell', action='store_true',
+                        help='Run a shell on the bf container')
     args = parser.parse_args()
     services = Services()
     if args.clean:
         services.dc(['down', '--remove-orphans', '--rmi', 'all'])
+    elif args.shell:
+        rc = services.dc(['run', '--service-ports', '--entrypoint',
+                          '/bin/bash', 'boardfarm'], interactive=True)
+        if rc != 0:
+            print('Return code !=0 -> {}'.format(rc))
     else:
         rc = services.dc(['up', 'boardfarm'])
         if rc != 0:
