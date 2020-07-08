@@ -349,6 +349,6 @@ bool socket_thread::work()
         }
         // The loop should go over all the sockets. In case something break the for loop before it ended,
         // start iterating over the sockets again.
-    } while (i < sockets_count);
+    } while ((i < sockets_count) && !should_stop);
     return true;
 }
