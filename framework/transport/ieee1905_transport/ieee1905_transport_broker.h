@@ -97,7 +97,7 @@ protected:
      * 
      * @return true on success of false otherwise.
      */
-    virtual bool handle_msg(std::shared_ptr<Socket> sd);
+    virtual bool handle_msg(std::shared_ptr<Socket> &sd);
 
     /**
      * @brief Handle broker subscribe/unsubscribe messages.
@@ -129,23 +129,10 @@ protected:
     virtual bool socket_disconnected(std::shared_ptr<Socket> sd);
 
 private:
-    // Union for storing the subscribed CMDU message type with additional VS metadata (if applicable)
-    // union uOpcode {
-    //     /// Opcode as separate fields
-    //     struct fields {
-    //         uint16_t cmdu_type;
-    //         uint8_t vs_action;
-    //         uint8_t vs_action_op;
-    //     } __attribute__((packed));
-
-    //     /// Opcode as 32bit unsigned integer
-    //     uint32_t data;
-    // };
-
     /**
      * Path and filename to the server's UDS file.
      */
-    std::string m_broker_uds_path;
+    const std::string m_broker_uds_path;
 
     /**
      * Shared pointer to the server's UDS socket.
