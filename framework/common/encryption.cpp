@@ -429,7 +429,8 @@ void wps_calculate_keys(const diffie_hellman &dh, const uint8_t *remote_pubkey,
         struct {
             uint8_t authkey[32];
             uint8_t keywrapkey[16];
-            uint8_t emsk[32];
+            // Currently unused, commented out to prevent cppcheck warnings
+            // uint8_t emsk[32];
         } keys;
         uint8_t buf[3][32];
     } keys;
@@ -440,23 +441,19 @@ void wps_calculate_keys(const diffie_hellman &dh, const uint8_t *remote_pubkey,
     // The output is stored in the memory buffer pointed by 'res', which must be
     // "SHA256_MAC_LEN" bytes long (ie. 're_len' must always be "SHA256_MAC_LEN",
     // even if it is an input argument)
-    //
-    union {
-        uint32_t i;
-        uint8_t buf[4];
-    } kdf_iter, kdf_key_length;
 
-    kdf_key_length.i = htonl(sizeof(keys.keys) * 8);
+    uint32_t kdf_key_length = htonl(sizeof(keys.keys) * 8);
 
     std::string personalization_string("Wi-Fi Easy and Secure Key Derivation");
     for (unsigned iter = 1; iter < sizeof(keys) / 32; iter++) {
-        kdf_iter.i = htonl(iter);
+        uint32_t kdf_iter = htonl(iter);
 
         hmac hmac_iter(kdk, sizeof(kdk));
-        hmac_iter.update(kdf_iter.buf, sizeof(kdf_iter.buf));
+        hmac_iter.update(reinterpret_cast<const uint8_t *>(&kdf_iter), sizeof(kdf_iter));
         hmac_iter.update(reinterpret_cast<const uint8_t *>(personalization_string.data()),
                          personalization_string.length());
-        hmac_iter.update(kdf_key_length.buf, sizeof(kdf_key_length.buf));
+        hmac_iter.update(reinterpret_cast<const uint8_t *>(&kdf_key_length),
+                         sizeof(kdf_key_length));
         static_assert(sizeof(keys.buf[1]) == 32, "Correct size");
         hmac_iter.digest(keys.buf[iter - 1]);
     }

@@ -190,7 +190,7 @@ public:
         }
     }
 
-    Metadata *metadata() const { return (Metadata *)frames().back().data(); };
+    Metadata *metadata() const { return reinterpret_cast<Metadata *>(frames().back().data()); };
 
     uint8_t *data() const
     {
@@ -309,7 +309,7 @@ public:
     {
         mapf_assert(!frames().empty());
 
-        return (Metadata *)frames().back().data();
+        return reinterpret_cast<Metadata *>(frames().back().data());
     };
 
     virtual std::ostream &print(std::ostream &os) const override
@@ -366,7 +366,7 @@ public:
     {
         mapf_assert(!frames().empty());
 
-        return (Metadata *)frames().back().data();
+        return reinterpret_cast<Metadata *>(frames().back().data());
     };
 
     virtual std::ostream &print(std::ostream &os) const override
@@ -437,7 +437,7 @@ public:
         }
     }
 
-    Metadata *metadata() const { return (Metadata *)frames().back().data(); };
+    Metadata *metadata() const { return reinterpret_cast<Metadata *>(frames().back().data()); };
 
     virtual std::ostream &print(std::ostream &os) const override
     {

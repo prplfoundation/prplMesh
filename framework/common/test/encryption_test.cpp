@@ -12,7 +12,7 @@
 
 #include <arpa/inet.h>
 
-static bool check(int &errors, bool check, std::string message)
+static bool check(int &errors, bool check, const std::string &message)
 {
     if (check) {
         MAPF_INFO(" OK  ") << message;
@@ -39,7 +39,6 @@ int main()
     std::fill(key1, key1 + key1_length, 1);
     std::fill(key2, key2 + key2_length, 2);
 
-    key1_length    = sizeof(key1);
     uint8_t mac[6] = {0x11, 0x22, 0x33, 0x44, 0x55, 0x66};
     uint8_t authkey1[32];
     uint8_t keywrapkey1[16];
