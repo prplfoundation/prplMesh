@@ -164,7 +164,7 @@ bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, st
 bool agent_ucc_listener::send_cmdu_to_destination(ieee1905_1::CmduMessageTx &cmdu_tx,
                                                   const std::string &dest_mac)
 {
-    return m_backhaul_manager_ctx.send_cmdu_to_bus(cmdu_tx, dest_mac, m_bridge_mac);
+    return m_backhaul_manager_ctx.send_cmdu_to_broker(cmdu_tx, dest_mac, m_bridge_mac);
 }
 
 static enum eFreqType band_to_freq(const std::string &band)
