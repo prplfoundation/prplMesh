@@ -17,7 +17,9 @@ namespace transport {
 namespace messages {
 
 // Declaration of static members
-constexpr int SubscribeMessage::MAX_SUBSCRIBE_TYPES;
+constexpr uint32_t Message::kMessageMagic;
+constexpr uint32_t Message::kMaxFrameLength;
+constexpr uint8_t SubscribeMessage::MAX_SUBSCRIBE_TYPES;
 
 //////////////////////////////////////////////////////////////////////////////
 ////////////////////////////// Helper Functions //////////////////////////////
@@ -47,7 +49,7 @@ create_transport_message(Type type, std::initializer_list<messages::Message::Fra
             new messages::InterfaceConfigurationIndicationMessage(frame)};
     default:
         LOG(WARNING) << "Received unknown message type: " << int(type);
-        return std::unique_ptr<messages::Message>{new messages::Message(0, frame)};
+        return std::unique_ptr<messages::Message>{new messages::Message(Type::Invalid, frame)};
     }
 }
 
