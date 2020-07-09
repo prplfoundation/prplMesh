@@ -49,10 +49,8 @@ static bool is_restricted_type(uint32_t type)
 //////////////////////////////////////////////////////////////////////////////
 
 BrokerServer::BrokerServer(const std::string &broker_uds_path, SocketEventLoop::TimeoutType timeout)
-    : SocketEventLoop(timeout)
+    : SocketEventLoop(timeout), m_broker_uds_path(broker_uds_path)
 {
-    m_broker_uds_path = broker_uds_path;
-
     // Server sockets event handlers
     EventHandlers server_socket_handlers{
         // Accept incoming connections
@@ -88,7 +86,7 @@ BrokerServer::BrokerServer(const std::string &broker_uds_path, SocketEventLoop::
             },
     };
 
-    // Connect to the message broker
+    // Start the broker server socket
     m_broker_socket_uds = std::make_shared<SocketServer>(m_broker_uds_path, listen_buffer_size);
     LOG_IF(!m_broker_socket_uds, FATAL) << "Failed allocating memory!";
 
@@ -164,7 +162,7 @@ void BrokerServer::register_external_message_handler(MessageHandler handler)
     m_external_message_handler = handler;
 }
 
-bool BrokerServer::handle_msg(std::shared_ptr<Socket> sd)
+bool BrokerServer::handle_msg(std::shared_ptr<Socket> &sd)
 {
     // Check if the socket contains enough bytes for the header
     if (sd->getBytesReady() < static_cast<ssize_t>(sizeof(messages::Message::Header))) {
@@ -227,7 +225,7 @@ bool BrokerServer::handle_subscribe(std::shared_ptr<Socket> &sd,
 
     // Iterate over the message types and subscribe/unsubscribe
     bool subscribe = msg.metadata()->type == messages::SubscribeMessage::ReqType::SUBSCRIBE;
-    std::stringstream types_stream;
+    std::stringstream log_types;
     for (auto i = 0; i < msg.metadata()->msg_types_num; ++i) {
         auto msg_type = msg.metadata()->msg_types[i];
 
@@ -240,7 +238,7 @@ bool BrokerServer::handle_subscribe(std::shared_ptr<Socket> &sd,
         }
 
         // Add to the list of requested types
-        types_stream << "0x" << std::hex << msg_type.value << std::string(" ");
+        log_types << "0x" << std::hex << msg_type.value << " ";
 
         // Subscribe
         if (subscribe) {
@@ -262,7 +260,7 @@ bool BrokerServer::handle_subscribe(std::shared_ptr<Socket> &sd,
 
     LOG(INFO) << "FD (" << sd->getSocketFd() << ") "
               << std::string(subscribe ? "subscribed to" : "unsubscribed from")
-              << " the following types: " << types_stream.str();
+              << " the following types: " << log_types.str();
 
     LOG(DEBUG) << "FD (" << sd->getSocketFd() << ") subscriptions: " << std::hex
                << m_soc_to_type[sd] << std::dec;
@@ -282,24 +280,15 @@ bool BrokerServer::socket_connected(std::shared_ptr<SocketServer> sd)
         return false;
     }
 
-    if (!sd->getUdsPath().empty()) {
-        LOG(DEBUG) << "New connection on " << sd->getUdsPath()
-                   << " fd = " << uintptr_t(new_socket->getSocketFd());
-    } else {
-        LOG(DEBUG) << "New connection from ip = " << new_socket->getPeerIP()
-                   << " port = " << new_socket->getPeerPort()
-                   << " fd = " << uint64_t(new_socket->getSocketFd());
-    }
+    LOG(DEBUG) << "Accepted new connection, fd = " << new_socket->getSocketFd();
 
     // Socket event handlers
     SocketEventLoop::EventHandlers socket_handlers{
         // Handle incoming data
         .on_read =
             [&](SocketEventLoop::EventType socket, SocketEventLoop::EventLoopType &loop) {
-                if (!handle_msg(socket)) {
-                    // NOTE: Do NOT stop the broker on parsing errors...
-                }
-
+                // NOTE: Do NOT stop the broker on parsing errors...
+                handle_msg(socket);
                 return true;
             },
 
@@ -310,18 +299,14 @@ bool BrokerServer::socket_connected(std::shared_ptr<SocketServer> sd)
         // Remove the socket on disconnections or errors
         .on_disconnect =
             [&](SocketEventLoop::EventType socket, SocketEventLoop::EventLoopType &loop) {
-                if (!socket_disconnected(socket)) {
-                    // NOTE: Do NOT stop the broker on errors...
-                }
-
+                // NOTE: Do NOT stop the broker on errors...
+                socket_disconnected(socket);
                 return true;
             },
         .on_error =
             [&](SocketEventLoop::EventType socket, SocketEventLoop::EventLoopType &loop) {
-                if (!socket_disconnected(socket)) {
-                    // NOTE: Do NOT stop the broker on errors...
-                }
-
+                // NOTE: Do NOT stop the broker on errors...
+                socket_disconnected(socket);
                 return true;
             },
     };

@@ -38,7 +38,7 @@ using namespace beerocks::transport::messages;
 //////////////////////////////////////////////////////////////////////////////
 
 // UDS file for the tests
-static constexpr char broker_uds_file[] = "beerocks_broker_test_uds";
+static const std::string broker_uds_file = "beerocks_broker_test_uds";
 
 // Invalid message magic value
 static constexpr uint32_t INVALID_MAGIC = 0x12345678;
@@ -60,7 +60,7 @@ public:
 protected:
     bool m_error_occurred = false;
 
-    virtual bool handle_msg(std::shared_ptr<Socket> sd) override
+    virtual bool handle_msg(std::shared_ptr<Socket> &sd) override
     {
         if (BrokerServer::handle_msg(sd) == false) {
             m_error_occurred = true;
