@@ -449,6 +449,29 @@ TEST(configuration_test, uncomment_vap)
     conf.store();
     EXPECT_TRUE(conf) << conf;
 
+    //// end prerequsite ////
+
+    //// start test ////
+
+    // replace existing value for existing key for existing vap
+    conf.set_create_vap_value("wlan0.2", "disassoc_low_ack", "734");
+    EXPECT_TRUE(conf) << conf;
+
+    // add a key/value to exising vap
+    conf.set_create_vap_value("wlan0.3", "unit_test_ok", "true");
+    EXPECT_TRUE(conf) << conf;
+
+    // remove key/value from existing vap
+    conf.set_create_vap_value("wlan0.0", "vendor_elements", "");
+    EXPECT_TRUE(conf) << conf;
+
+    // set key/value for NON existing vap
+    conf.set_create_vap_value("no_such", "how_do_you_do", "i_am_doing_fine");
+    EXPECT_FALSE(conf) << conf;
+
+    //// end test ////
+
+    // for humans
     std::cerr << conf;
 }
 
