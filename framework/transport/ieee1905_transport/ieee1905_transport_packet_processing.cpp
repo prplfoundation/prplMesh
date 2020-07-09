@@ -89,7 +89,7 @@ void Ieee1905Transport::handle_packet(Packet &packet)
 }
 
 // do some basic sanity checking on the packet
-bool Ieee1905Transport::verify_packet(Packet &packet)
+bool Ieee1905Transport::verify_packet(const Packet &packet)
 {
     if (packet.ether_type == ETH_P_1905_1) {
         // verify minimum packet length (should at least contain an IEEE1905 header + End of Message TLV)
@@ -99,7 +99,7 @@ bool Ieee1905Transport::verify_packet(Packet &packet)
             return false;
         }
 
-        Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
+        Ieee1905CmduHeader *ch = reinterpret_cast<Ieee1905CmduHeader *>(packet.payload.iov_base);
         if (ch->messageVersion > ieee1905_max_message_version) {
             MAPF_DBG("packet verification failed - unsupported IEEE1905 messageVersion "
                      << (unsigned)ch->messageVersion << ".");
@@ -231,7 +231,7 @@ bool Ieee1905Transport::de_fragment_packet(Packet &packet)
         return true;
     }
 
-    Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
+    Ieee1905CmduHeader *ch = reinterpret_cast<Ieee1905CmduHeader *>(packet.payload.iov_base);
     if (ch->fragmentId == 0 && ch->GetLastFragmentIndicator() == 1) {
         return true; // not a fragmented CMDU.
     }
@@ -505,7 +505,8 @@ bool Ieee1905Transport::forward_packet_single(Packet &packet)
                     forward_to_network_interfaces = true;
                 }
 
-                Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
+                Ieee1905CmduHeader *ch =
+                    reinterpret_cast<Ieee1905CmduHeader *>(packet.payload.iov_base);
                 if (ch->GetRelayIndicator()) {
                     forward_to_network_interfaces = true;
                 }
@@ -611,7 +612,7 @@ bool Ieee1905Transport::forward_packet(Packet &packet)
         return true;
     }
     // 2. Message is relayed multicast
-    Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
+    Ieee1905CmduHeader *ch = reinterpret_cast<Ieee1905CmduHeader *>(packet.payload.iov_base);
     if (!ch->GetRelayIndicator()) {
         return true;
     }

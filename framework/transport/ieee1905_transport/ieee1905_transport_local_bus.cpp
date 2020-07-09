@@ -145,7 +145,7 @@ bool Ieee1905Transport::send_packet_to_broker(Packet &packet)
     std::copy_n((uint8_t *)packet.payload.iov_base, packet.payload.iov_len, msg.data());
 
     if (packet.ether_type == ETH_P_1905_1) {
-        Ieee1905CmduHeader *ch   = (Ieee1905CmduHeader *)packet.payload.iov_base;
+        Ieee1905CmduHeader *ch   = reinterpret_cast<Ieee1905CmduHeader *>(packet.payload.iov_base);
         msg.metadata()->msg_type = ntohs(ch->messageType);
         msg.metadata()->relay    = ch->GetRelayIndicator() ? 1 : 0;
     } else {

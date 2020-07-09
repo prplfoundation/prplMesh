@@ -180,19 +180,6 @@ controller/src/beerocks/master/tasks/rdkb/rdkb_wlan_task_db.cpp: style: Paramete
 controller/src/beerocks/master/tasks/task.cpp: performance: Function parameter 'mac' should be passed by const reference. [passedByValue]void task::add_pending_mac(std::string mac, beerocks_message::eActionOp_CONTROL action_op)
 controller/src/beerocks/master/tasks/task.cpp: performance: Function parameter 'node_mac' should be passed by const reference. [passedByValue]task::task(std::string task_name_, std::string node_mac)
 controller/src/beerocks/master/tasks/task.cpp: performance: Function parameter 'task_name_' should be passed by const reference. [passedByValue]task::task(std::string task_name_, std::string node_mac)
-framework/common/encryption.cpp: style: Variable 'kdf_iter.i' is assigned a value that is never used. [unreadVariable]        kdf_iter.i = htonl(iter);
-framework/common/encryption.cpp: style: Variable 'kdf_key_length.i' is assigned a value that is never used. [unreadVariable]    kdf_key_length.i = htonl(sizeof(keys.keys) * 8);
-framework/common/encryption.cpp: style: struct member 'Anonymous1::emsk' is never used. [unusedStructMember]            uint8_t emsk[32];
-framework/common/include/mapf/common/logger.h: performance: Function parameter 'param' should be passed by const reference. [passedByValue]        void set_file_path(std::string param) { file_path_ = param; }
-framework/common/include/mapf/common/logger.h: performance: Function parameter 'param' should be passed by const reference. [passedByValue]        void set_level(std::string param) { level_ = param; }
-framework/common/include/mapf/common/message.h: style: Local variable 'frame' shadows outer function [shadowFunction]        for (auto frame : frames)
-framework/common/logger.cpp: performance: Function parameter 'logger_name' should be passed by const reference. [passedByValue]void Logger::Config::SetValuesFromJson(struct json_object *jlogger, std::string logger_name)
-framework/common/logger.cpp: style: Condition '!init_performed' is always true [knownConditionTrueFalse]    if (!init_performed) {
-framework/common/logger.cpp: style: The scope of the variable 'length' can be reduced. [variableScope]    int fd = -1, length = -1, i = 0, ret = 0;
-framework/common/logger.cpp: style: Variable 'length' is assigned a value that is never used. [unreadVariable]    int fd = -1, length = -1, i = 0, ret = 0;
-framework/common/test/encryption_test.cpp: performance: Function parameter 'message' should be passed by const reference. [passedByValue]static bool check(int &errors, bool check, std::string message)
-framework/common/test/encryption_test.cpp: style: Variable 'key1_length' is assigned a value that is never used. [unreadVariable]    key1_length    = sizeof(key1);
-framework/common/test/message_test.cpp: style: Local variable 'f1' shadows outer variable [shadowVariable]        mapf::Message::Frame f1;
 framework/external/easylogging/easylogging++.cc: information: This file is not analyzed. Cppcheck failed to extract a valid configuration. Use -v for more details. [noValidConfiguration]
 framework/platform/bpl/common/utils/utils.cpp: performance: Function parameter 'additional_chars' should be passed by const reference. [passedByValue]void ltrim(std::string &str, std::string additional_chars)
 framework/platform/bpl/common/utils/utils.cpp: performance: Function parameter 'additional_chars' should be passed by const reference. [passedByValue]void rtrim(std::string &str, std::string additional_chars)
@@ -222,10 +209,3 @@ framework/tlvf/test/tlvf_test.cpp: style: The scope of the variable 'expected' c
 framework/tlvf/test/tlvf_test.cpp: style: Variable 'tlv1' is assigned a value that is never used. [unreadVariable]    auto tlv1 = msg.addClass<tlvNon1905neighborDeviceList>();
 framework/tlvf/test/tlvf_test.cpp: style: Variable 'tlv2' is assigned a value that is never used. [unreadVariable]    auto tlv2 = msg.addClass<tlvLinkMetricQuery>();
 framework/tlvf/test/tlvf_test.cpp: style: Variable 'tlv3' is assigned a value that is never used. [unreadVariable]    auto tlv3 = msg.addClass<tlvWsc>();
-framework/transport/ieee1905_transport/ieee1905_transport_local_bus.cpp: style: C-style pointer casting [cstyleCast]        Ieee1905CmduHeader *ch   = (Ieee1905CmduHeader *)packet.payload.iov_base;
-framework/transport/ieee1905_transport/ieee1905_transport_packet_processing.cpp: style: C-style pointer casting [cstyleCast]                Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
-framework/transport/ieee1905_transport/ieee1905_transport_packet_processing.cpp: style: C-style pointer casting [cstyleCast]        Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
-framework/transport/ieee1905_transport/ieee1905_transport_packet_processing.cpp: style: C-style pointer casting [cstyleCast]    Ieee1905CmduHeader *ch = (Ieee1905CmduHeader *)packet.payload.iov_base;
-framework/transport/ieee1905_transport/ieee1905_transport_packet_processing.cpp: style: Parameter 'packet' can be declared with const [constParameter]bool Ieee1905Transport::verify_packet(Packet &packet)
-framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: C-style pointer casting [cstyleCast]        return (Metadata *)frames().back().data();
-framework/transport/ieee1905_transport/include/mapf/transport/ieee1905_transport_messages.h: style: C-style pointer casting [cstyleCast]    Metadata *metadata() const { return (Metadata *)frames().back().data(); };
