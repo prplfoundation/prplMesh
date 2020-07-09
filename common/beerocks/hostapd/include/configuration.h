@@ -39,14 +39,16 @@ public:
      * @brief load the configuration 
      * @details loads the file this object is constructed with
      * @return *this (as bool, see above)
-     * e.g.
-     * Configuratio conf("hostapd.conf");
-     * if (!conf.load()) { 
-     *  // handle error state
-     * }
-     *
      */
     bool load();
+
+    /**
+     * @brief stores the configuration 
+     * @details stores the internal representation of the configuration
+     * into the file it was loaded from, effectively changing the configuration
+     * @return *this (as bool, see above)
+     */
+    bool store();
 
     /**
      * @brief set key/value for the given vap
