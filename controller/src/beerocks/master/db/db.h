@@ -702,7 +702,7 @@ public:
      * @param mac MAC address of a client.
      * @return Enable client stay on the radio it initially connected to.
      */
-    ePersistentParamBool get_client_stay_on_initial_radio(const sMacAddr &mac);
+    eTriStateBool get_client_stay_on_initial_radio(const sMacAddr &mac);
 
     /**
      * @brief Set the client's initial-radio.
@@ -740,7 +740,7 @@ public:
      * @param mac MAC address of a client.
      * @return Enable client stay on the selected band/bands.
      */
-    ePersistentParamBool get_client_stay_on_selected_band(const sMacAddr &mac);
+    eTriStateBool get_client_stay_on_selected_band(const sMacAddr &mac);
 
     /**
      * @brief Set the client's selected-bands.

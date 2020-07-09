@@ -2599,18 +2599,18 @@ bool db::set_client_stay_on_initial_radio(const sMacAddr &mac, bool stay_on_init
     }
 
     node->client_stay_on_initial_radio =
-        (stay_on_initial_radio) ? ePersistentParamBool::ENABLE : ePersistentParamBool::DISABLE;
+        (stay_on_initial_radio) ? eTriStateBool::ENABLE : eTriStateBool::DISABLE;
     node->client_parameters_last_edit = timestamp;
 
     return true;
 }
 
-ePersistentParamBool db::get_client_stay_on_initial_radio(const sMacAddr &mac)
+eTriStateBool db::get_client_stay_on_initial_radio(const sMacAddr &mac)
 {
     auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
     if (!node) {
         LOG(ERROR) << "client node not found for mac " << mac;
-        return ePersistentParamBool::NOT_CONFIGURED;
+        return eTriStateBool::NOT_CONFIGURED;
     }
 
     return node->client_stay_on_initial_radio;
@@ -2686,18 +2686,18 @@ bool db::set_client_stay_on_selected_band(const sMacAddr &mac, bool stay_on_sele
     }
 
     node->client_stay_on_selected_band =
-        (stay_on_selected_band) ? ePersistentParamBool::ENABLE : ePersistentParamBool::DISABLE;
+        (stay_on_selected_band) ? eTriStateBool::ENABLE : eTriStateBool::DISABLE;
     node->client_parameters_last_edit = timestamp;
 
     return true;
 }
 
-ePersistentParamBool db::get_client_stay_on_selected_band(const sMacAddr &mac)
+eTriStateBool db::get_client_stay_on_selected_band(const sMacAddr &mac)
 {
     auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
     if (!node) {
         LOG(ERROR) << "client node not found for mac " << mac;
-        return ePersistentParamBool::NOT_CONFIGURED;
+        return eTriStateBool::NOT_CONFIGURED;
     }
 
     return node->client_stay_on_selected_band;
@@ -2758,9 +2758,9 @@ bool db::clear_client_persistent_db(const sMacAddr &mac)
 
     node->client_parameters_last_edit  = std::chrono::steady_clock::time_point::min();
     node->client_time_life_delay_sec   = std::chrono::seconds::zero();
-    node->client_stay_on_initial_radio = ePersistentParamBool::NOT_CONFIGURED;
+    node->client_stay_on_initial_radio = eTriStateBool::NOT_CONFIGURED;
     node->client_initial_radio         = network_utils::ZERO_MAC;
-    node->client_stay_on_selected_band = ePersistentParamBool::NOT_CONFIGURED;
+    node->client_stay_on_selected_band = eTriStateBool::NOT_CONFIGURED;
     node->client_selected_bands        = beerocks::eFreqType::FREQ_UNKNOWN;
 
     LOG(DEBUG) << "removing client " << mac << " from persistent db";
@@ -2807,8 +2807,8 @@ bool db::update_client_persistent_db(const sMacAddr &mac)
             std::to_string(node->client_time_life_delay_sec.count());
     }
 
-    if (node->client_stay_on_initial_radio != ePersistentParamBool::NOT_CONFIGURED) {
-        auto enable = (node->client_stay_on_initial_radio == ePersistentParamBool::ENABLE);
+    if (node->client_stay_on_initial_radio != eTriStateBool::NOT_CONFIGURED) {
+        auto enable = (node->client_stay_on_initial_radio == eTriStateBool::ENABLE);
         LOG(DEBUG) << "setting client stay-on-initial-radio in persistent-db to for " << mac
                    << " to " << enable;
         values_map.at(initial_radio_enable_str) = std::to_string(enable);
@@ -2820,8 +2820,8 @@ bool db::update_client_persistent_db(const sMacAddr &mac)
         values_map.at(initial_radio_str) = tlvf::mac_to_string(node->client_initial_radio);
     }
 
-    if (node->client_stay_on_selected_band != ePersistentParamBool::NOT_CONFIGURED) {
-        auto enable = (node->client_stay_on_selected_band == ePersistentParamBool::ENABLE);
+    if (node->client_stay_on_selected_band != eTriStateBool::NOT_CONFIGURED) {
+        auto enable = (node->client_stay_on_selected_band == eTriStateBool::ENABLE);
         LOG(DEBUG) << "setting client stay-on-selected-band in persistent-db to for " << mac
                    << " to " << enable;
         values_map.at(selected_band_enable_str) = std::to_string(enable);

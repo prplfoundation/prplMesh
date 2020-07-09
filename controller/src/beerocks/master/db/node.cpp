@@ -29,11 +29,11 @@ node::node(beerocks::eType type_, const std::string &mac_)
 }
 
 namespace son {
-std::ostream &operator<<(std::ostream &os, ePersistentParamBool value)
+std::ostream &operator<<(std::ostream &os, eTriStateBool value)
 {
-    if (value == ePersistentParamBool::DISABLE) {
+    if (value == eTriStateBool::DISABLE) {
         os << "Disabled";
-    } else if (value == ePersistentParamBool::ENABLE) {
+    } else if (value == eTriStateBool::ENABLE) {
         os << "Enabled";
     } else {
         os << "Not-Configured";
