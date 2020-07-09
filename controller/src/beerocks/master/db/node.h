@@ -36,12 +36,12 @@ typedef struct {
 } sVapElement;
 
 /**
- * @brief Extended boolean parameter to support "not configured" value for persistent configuration.
+ * @brief Extended boolean parameter to support "not configured" value for configuration.
  * For persistent data, it is important to differ between configured enable/disable to uncofigured value.
  */
-enum class ePersistentParamBool : int8_t { NOT_CONFIGURED = -1, DISABLE = 0, ENABLE = 1 };
+enum class eTriStateBool : int8_t { NOT_CONFIGURED = -1, DISABLE = 0, ENABLE = 1 };
 
-std::ostream &operator<<(std::ostream &os, ePersistentParamBool value);
+std::ostream &operator<<(std::ostream &os, eTriStateBool value);
 
 class node {
 public:
@@ -290,14 +290,14 @@ public:
     std::chrono::seconds client_time_life_delay_sec = std::chrono::seconds::zero();
 
     // If enabled, the client will be steered to the initial radio it connected to - save at client_initial_radio.
-    ePersistentParamBool client_stay_on_initial_radio = ePersistentParamBool::NOT_CONFIGURED;
+    eTriStateBool client_stay_on_initial_radio = eTriStateBool::NOT_CONFIGURED;
 
     // The client_initial_radio bssid must be set.
     sMacAddr client_initial_radio;
 
     // If enabled, the client will be steered to pre-selected-bands defined by client_selected_bands.
     // Not enforced if client_selected_bands is not set.
-    ePersistentParamBool client_stay_on_selected_band = ePersistentParamBool::NOT_CONFIGURED;
+    eTriStateBool client_stay_on_selected_band = eTriStateBool::NOT_CONFIGURED;
 
     // The selected bands the client should be steered to if the client_stay_on_selected_band is set.
     // Default value is FREQ_UNKNOWN (also indicates value is not configured)
