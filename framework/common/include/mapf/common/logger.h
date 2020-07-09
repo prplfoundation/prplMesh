@@ -38,8 +38,8 @@ public:
     class Config {
     public:
         Config() {}
-        void set_level(std::string param) { level_ = param; }
-        void set_file_path(std::string param) { file_path_ = param; }
+        void set_level(const std::string &param) { level_ = param; }
+        void set_file_path(const std::string &param) { file_path_ = param; }
         void set_write_to_syslog(bool param) { write_to_syslog_ = param; }
         void set_write_to_console(bool param) { write_to_console_ = param; }
         void set_write_to_file(bool param) { write_to_file_ = param; }
@@ -53,7 +53,7 @@ public:
         bool write_to_file() { return write_to_file_; }
         size_t max_file_size() { return max_file_size_; }
         size_t log_flush_threshold() { return log_flush_threshold_; }
-        int SetValuesFromJson(std::string file_path, std::string logger_name);
+        int SetValuesFromJson(const std::string &file_path, const std::string &logger_name);
         std::string ToEasyLoggingString();
 
     private:
@@ -61,7 +61,7 @@ public:
         bool write_to_syslog_ = false, write_to_console_ = true, write_to_file_ = false;
         size_t max_file_size_ = 1024, log_flush_threshold_ = 100;
         const char *kMessageFormat = "%datetime{%H:%m:%s} [%proc] [%level] %fbase[%line]: %msg";
-        void SetValuesFromJson(struct json_object *jlogger, std::string logger_name);
+        void SetValuesFromJson(struct json_object *jlogger, const std::string &logger_name);
     };
 
 public:
