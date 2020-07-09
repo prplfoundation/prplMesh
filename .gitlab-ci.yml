@@ -201,6 +201,9 @@ bcl_unit_tests:
 mapf_common_encryption_tests:
   extends: .run-test-in-docker
 
+ieee1905_transport_broker_tests:
+  extends: .run-test-in-docker
+
 beerocks_agent_unit_tests:
   extends: .run-test-in-docker
 
