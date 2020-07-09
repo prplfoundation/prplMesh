@@ -104,7 +104,7 @@ BrokerServer::BrokerServer(const std::string &broker_uds_path, SocketEventLoop::
     LOG(INFO) << "Listening on UDS: " << m_broker_uds_path;
 }
 
-bool BrokerServer::publish(const mapf::Message &msg)
+bool BrokerServer::publish(const messages::Message &msg)
 {
     messages::SubscribeMessage::MsgType msg_opcode;
 
@@ -122,7 +122,7 @@ bool BrokerServer::publish(const mapf::Message &msg)
         msg_opcode.bits = {.internal        = 1, // internal message
                            .vendor_specific = 0,
                            .reserved        = 0,
-                           .type            = msg.type()};
+                           .type            = uint16_t(msg.type())};
     }
     }
 

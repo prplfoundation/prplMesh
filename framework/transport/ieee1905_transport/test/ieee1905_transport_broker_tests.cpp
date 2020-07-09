@@ -96,13 +96,13 @@ TEST(broker_server, invalid_message_magic)
 
     // Register a dummy internal message handler
     broker_wrapper.register_internal_message_handler(
-        [](std::unique_ptr<mapf::Message> &msg, BrokerServer &broker) -> bool { return true; });
+        [](std::unique_ptr<messages::Message> &msg, BrokerServer &broker) -> bool { return true; });
 
     // Create a random message
-    mapf::Message dummy;
+    messages::Message dummy;
 
     // Invalid header
-    mapf::Message::Header header;
+    messages::Message::Header header;
     header.magic = INVALID_MAGIC;
 
     SocketClient sock1(broker_uds_file);
@@ -299,13 +299,13 @@ TEST(broker_server, publish_internal_message)
     ASSERT_TRUE(broker_wrapper.publish(iface_indication_msg_tx));
 
     // Verify the data is received on the subscribed socket
-    ASSERT_TRUE(size_t(sock1.getBytesReady()) > sizeof(mapf::Message::Header));
+    ASSERT_TRUE(size_t(sock1.getBytesReady()) > sizeof(messages::Message::Header));
 
     // Read, parse and validate the message
     auto iface_indication_msg_rx_ptr = messages::read_transport_message(sock1);
     ASSERT_TRUE(iface_indication_msg_rx_ptr);
     ASSERT_TRUE(iface_indication_msg_rx_ptr->type() ==
-                uint32_t(Type::InterfaceConfigurationIndicationMessage));
+                Type::InterfaceConfigurationIndicationMessage);
 
     auto &iface_indication_msg_rx =
         dynamic_cast<InterfaceConfigurationIndicationMessage &>(*iface_indication_msg_rx_ptr);

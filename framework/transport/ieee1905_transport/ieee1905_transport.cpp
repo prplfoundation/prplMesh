@@ -27,15 +27,15 @@ void Ieee1905Transport::run()
 
     // Register broker handlers for internal and external messages
     m_broker->register_external_message_handler(
-        [&](std::unique_ptr<mapf::Message> &msg, BrokerServer &broker) -> bool {
-            LOG(DEBUG) << "Processing external message: " << msg->type();
+        [&](std::unique_ptr<messages::Message> &msg, BrokerServer &broker) -> bool {
+            LOG(DEBUG) << "Processing external message: " << uint32_t(msg->type());
             handle_broker_pollin_event(msg);
             return true;
         });
 
     m_broker->register_internal_message_handler(
-        [&](std::unique_ptr<mapf::Message> &msg, BrokerServer &broker) -> bool {
-            LOG(DEBUG) << "Processing internal message: " << msg->type();
+        [&](std::unique_ptr<messages::Message> &msg, BrokerServer &broker) -> bool {
+            LOG(DEBUG) << "Processing internal message: " << uint32_t(msg->type());
             handle_broker_pollin_event(msg);
             return true;
         });
