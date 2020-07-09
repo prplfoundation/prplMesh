@@ -34,13 +34,13 @@ namespace broker {
 class BrokerServer : public SocketEventLoop {
 public:
     /**
-     * @brief Transport messages (@see mapf::Message) handler function definition.
+     * @brief Transport messages (@see Message) handler function definition.
      *
      * Parameters to the event handler function are:
      * @param[in] msg Pointer to the message to handle.
      * @param[in] broker Reference to the BrokerServer instance.
      * 
-     * @returns True on success or false otherwise
+     * @returns true on success or false otherwise
      */
     using MessageHandler =
         std::function<bool(std::unique_ptr<messages::Message> &msg, BrokerServer &broker)>;
@@ -67,7 +67,7 @@ public:
      * 
      * @returns true on success or false otherwise.
      */
-    virtual bool publish(const mapf::Message &msg);
+    virtual bool publish(const messages::Message &msg);
 
     /**
      * @brief Register a handler function for internal (non-CMDU) messages

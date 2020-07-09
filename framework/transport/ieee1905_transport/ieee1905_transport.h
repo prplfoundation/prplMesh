@@ -284,7 +284,7 @@ private:
     //
     // BROKER STUFF
     //
-    void handle_broker_pollin_event(std::unique_ptr<mapf::Message> &msg);
+    void handle_broker_pollin_event(std::unique_ptr<messages::Message> &msg);
     void handle_broker_cmdu_tx_message(messages::CmduTxMessage &msg);
     void handle_broker_interface_configuration_request_message(
         messages::InterfaceConfigurationRequestMessage &msg);

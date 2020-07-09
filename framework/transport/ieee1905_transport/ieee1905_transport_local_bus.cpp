@@ -19,7 +19,7 @@ namespace transport {
 // Use transport messaging classes
 using namespace beerocks::transport::messages;
 
-void Ieee1905Transport::handle_broker_pollin_event(std::unique_ptr<mapf::Message> &msg)
+void Ieee1905Transport::handle_broker_pollin_event(std::unique_ptr<messages::Message> &msg)
 {
     if (auto *cmdu_tx_msg = dynamic_cast<CmduTxMessage *>(msg.get())) {
         MAPF_DBG("received CmduTxMessage message:" << std::endl << *cmdu_tx_msg);
