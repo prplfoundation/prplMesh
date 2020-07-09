@@ -54,7 +54,7 @@ public:
      * @brief set key/value for the given vap
      * @details set the key/vale for the given vap, either replace or create.
      * @param 
-     * - the vap to set values for (string)
+     * - the vap to set the value for (string)
      * - the key to set its value (string)
      * - the value (string)
      * @return 
@@ -68,7 +68,7 @@ public:
      * @brief set key/value for the given vap
      * @details set the key/vale for the given vap, either replace or create.
      * @param 
-     * - the vap to set values for (string)
+     * - the vap to set the value for (string)
      * - the key to set its value (string)
      * - the value (int)
      * @return 
@@ -76,6 +76,16 @@ public:
      * false - the given vap was not found
      */
     bool set_create_vap_value(const std::string &vap, const std::string &key, const int value);
+
+    /**
+     * @brief get the value of the given key for the given vap
+     * @param 
+     * - the vap to get the value for (string)
+     * - the key to get its value (string)
+     * @return a string with the value or empty if not found
+     */
+    std::string get_vap_value(const std::string &vap, const std::string &key);
+
     /**
      * @brief for debug: return the last internal message
      * @details each action on this class changes its internal
