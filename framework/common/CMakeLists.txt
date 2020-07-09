@@ -7,7 +7,7 @@ install(FILES "${CMAKE_CURRENT_BINARY_DIR}/logging.conf" DESTINATION share)
 file(COPY "${CMAKE_CURRENT_BINARY_DIR}/logging.conf" DESTINATION "${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/share/")
 
 # mapfcommon sources
-set(sources message.cpp logger.cpp encryption.cpp utils.cpp)
+set(sources logger.cpp encryption.cpp utils.cpp)
 
 # We use OpenSSL 1.1.x for Encryption
 find_package(OpenSSL 1.1 QUIET)

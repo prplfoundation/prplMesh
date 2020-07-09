@@ -10,11 +10,14 @@
 #define MAP_IEEE1905_TRANSPORT_MESSAGES_H_
 
 #include <bcl/network/socket.h>
-#include <mapf/common/message.h>
+#include <mapf/common/err.h>
 
-#include <iomanip>
 #include <net/if.h>
 #include <netinet/ether.h>
+
+#include <algorithm>
+#include <iomanip>
+#include <memory>
 #include <sstream>
 
 #ifndef ETH_P_1905_1
@@ -27,10 +30,6 @@
 namespace beerocks {
 namespace transport {
 namespace messages {
-
-// NOTE: Use the base mapf::Message class
-// Remove this once mapf common namespace is merged with beerocks
-using mapf::Message;
 
 /**
  * Transport internal message types
@@ -45,6 +44,105 @@ enum class Type {
     InterfaceConfigurationRequestMessage    = 6,
     InterfaceConfigurationIndicationMessage = 7
 };
+
+class Message {
+public:
+    static constexpr uint32_t kMessageMagic   = 0xB8C16F47;
+    static constexpr uint32_t kMaxFrameLength = 0x100000; // 100kb max for now
+
+    class Frame {
+    public:
+        explicit Frame(size_t len, const void *init_data = nullptr)
+            : data_(std::make_shared<std::vector<uint8_t>>(
+                  (len < kMaxFrameLength) ? len : kMaxFrameLength))
+        {
+            if (init_data)
+                set_data(init_data, len);
+        }
+
+        Frame() : Frame(0) {}
+        virtual ~Frame() = default;
+
+        size_t len() const { return data_->size(); }
+
+        uint8_t *data() const { return data_->data(); }
+        std::string str() const { return std::string(reinterpret_cast<char *>(data()), len()); }
+
+        void set_size(size_t size) { data_->resize(size); }
+
+        void set_data(const void *data, size_t len)
+        {
+            set_size(len);
+            std::copy_n((uint8_t *)data, len, data_->data());
+        }
+
+        virtual std::ostream &print(std::ostream &os) const
+        {
+            return os << "size=" << len() << " use_count=" << data_.use_count();
+        }
+
+    private:
+        std::shared_ptr<std::vector<uint8_t>> data_ = nullptr;
+    }; // class Frame
+
+    struct Header {
+        uint32_t magic = kMessageMagic; // magic value
+        uint32_t type  = 0;             // message type
+        uint32_t len   = 0;             // total length of the message (excluding topic & header)
+    };
+
+    Message() {}
+
+    explicit Message(Type type) : m_type(type) {}
+
+    Message(Type type, std::initializer_list<Frame> frames) : Message(type)
+    {
+        for (auto f : frames)
+            Add(f);
+    }
+
+    virtual ~Message() = default;
+
+    void Add(Frame &frame) { m_frames.push_back(frame); }
+
+    void Clear() { m_frames.clear(); }
+
+    // Get the first frame
+    Frame frame() const { return m_frames.empty() ? Frame() : m_frames.back(); }
+
+    // Accessors & Mutators
+    const Header header() const
+    {
+        Header hdr;
+        hdr.type = uint32_t(m_type);
+        for (const auto &f : m_frames)
+            hdr.len += f.len();
+        return hdr;
+    }
+
+    uint32_t len() const { return header().len; }
+    Type type() const { return m_type; }
+
+    std::vector<Frame> &frames() const { return m_frames; }
+
+    virtual std::ostream &print(std::ostream &os) const
+    {
+        std::stringstream ss;
+        ss << " type    : " << uint32_t(type()) << std::endl;
+        ss << " len     : " << len() << std::endl;
+        ss << " frames  : " << m_frames.size() << std::endl;
+
+        return os << ss.str();
+    }
+
+private:
+    Type m_type = Type::Invalid;
+    mutable std::vector<Frame> m_frames;
+};
+
+inline std::ostream &operator<<(std::ostream &os, const Message::Frame &f) { return f.print(os); }
+
+inline std::ostream &operator<<(std::ostream &os, const Message &m) { return m.print(os); }
 
 // Notes:
 //
@@ -78,7 +176,7 @@ public:
             0; // payload length (including IEEE1905 header, excluding Ethernet header)
     };
 
-    explicit CmduXxMessage(uint32_t type, std::initializer_list<Frame> frames = {})
+    explicit CmduXxMessage(Type type, std::initializer_list<Frame> frames = {})
         : Message(type, frames)
     {
         // maximum one frame is allowed (if none are given we will allocate one below)
@@ -102,7 +200,7 @@ public:
         return frames().back().data() + sizeof(Metadata);
     };
 
-    virtual std::ostream &print(std::ostream &os) const
+    virtual std::ostream &print(std::ostream &os) const override
     {
         Message::print(os);
 
@@ -142,7 +240,7 @@ public:
 class CmduRxMessage : public CmduXxMessage {
 public:
     explicit CmduRxMessage(std::initializer_list<Frame> frame = {})
-        : CmduXxMessage(uint32_t(Type::CmduRxMessage), frame)
+        : CmduXxMessage(Type::CmduRxMessage, frame)
     {
     }
 };
@@ -150,7 +248,7 @@ public:
 class CmduTxMessage : public CmduXxMessage {
 public:
     explicit CmduTxMessage(std::initializer_list<Frame> frame = {})
-        : CmduXxMessage(uint32_t(Type::CmduTxMessage), frame)
+        : CmduXxMessage(Type::CmduTxMessage, frame)
     {
     }
 };
@@ -162,7 +260,7 @@ public:
     /**
      * Maximal number of types for a single subscribe/unsubscribe message
      */
-    static constexpr int MAX_SUBSCRIBE_TYPES = 64;
+    static constexpr uint8_t MAX_SUBSCRIBE_TYPES = 64;
 
     /**
      * The type of the request
@@ -194,7 +292,7 @@ public:
     };
 
     explicit SubscribeMessage(std::initializer_list<Frame> frames = {})
-        : Message(uint32_t(Type::SubscribeMessage), frames)
+        : Message(Type::SubscribeMessage, frames)
     {
         // maximum one frame is allowed (if none are given we will allocate one below)
         mapf_assert(this->frames().size() <= 1);
@@ -214,7 +312,7 @@ public:
         return (Metadata *)frames().back().data();
     };
 
-    virtual std::ostream &print(std::ostream &os) const
+    virtual std::ostream &print(std::ostream &os) const override
     {
         Message::print(os);
 
@@ -252,7 +350,7 @@ public:
     };
 
     explicit CmduTxConfirmationMessage(std::initializer_list<Frame> frames = {})
-        : Message(uint32_t(Type::CmduTxConfirmationMessage), frames)
+        : Message(Type::CmduTxConfirmationMessage, frames)
     {
         // maximum one frame is allowed (if none are given we will allocate one below)
         mapf_assert(this->frames().size() <= 1);
@@ -272,7 +370,7 @@ public:
         return (Metadata *)frames().back().data();
     };
 
-    virtual std::ostream &print(std::ostream &os) const
+    virtual std::ostream &print(std::ostream &os) const override
     {
         Message::print(os);
 
@@ -295,11 +393,11 @@ public:
 class InterfaceConfigurationQueryMessage : public Message {
 public:
     explicit InterfaceConfigurationQueryMessage(std::initializer_list<Frame> frames = {})
-        : Message(uint32_t(Type::InterfaceConfigurationQueryMessage), frames)
+        : Message(Type::InterfaceConfigurationQueryMessage, frames)
     {
     }
 
-    virtual ~InterfaceConfigurationQueryMessage() {}
+    virtual ~InterfaceConfigurationQueryMessage() = default;
 };
 
 class InterfaceConfigurationMessage : public Message {
@@ -326,7 +424,7 @@ public:
         Interface interfaces[kMaxInterfaces];
     };
 
-    explicit InterfaceConfigurationMessage(uint32_t type, std::initializer_list<Frame> frames)
+    explicit InterfaceConfigurationMessage(Type type, std::initializer_list<Frame> frames)
         : Message(type, frames)
     {
         // maximum one frame is allowed (if none are given we will allocate one below)
@@ -342,7 +440,7 @@ public:
 
     Metadata *metadata() const { return (Metadata *)frames().back().data(); };
 
-    virtual std::ostream &print(std::ostream &os) const
+    virtual std::ostream &print(std::ostream &os) const override
     {
         Message::print(os);
 
@@ -367,8 +465,7 @@ public:
 class InterfaceConfigurationRequestMessage : public InterfaceConfigurationMessage {
 public:
     explicit InterfaceConfigurationRequestMessage(std::initializer_list<Frame> frames = {})
-        : InterfaceConfigurationMessage(uint32_t(Type::InterfaceConfigurationRequestMessage),
-                                        frames)
+        : InterfaceConfigurationMessage(Type::InterfaceConfigurationRequestMessage, frames)
     {
     }
 };
@@ -377,8 +474,7 @@ public:
 class InterfaceConfigurationIndicationMessage : public InterfaceConfigurationMessage {
 public:
     explicit InterfaceConfigurationIndicationMessage(std::initializer_list<Frame> frames = {})
-        : InterfaceConfigurationMessage(uint32_t(Type::InterfaceConfigurationIndicationMessage),
-                                        frames)
+        : InterfaceConfigurationMessage(Type::InterfaceConfigurationIndicationMessage, frames)
     {
     }
 };
