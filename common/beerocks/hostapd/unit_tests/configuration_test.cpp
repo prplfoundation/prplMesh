@@ -210,15 +210,14 @@ TEST(configuration_test, store)
     //   // clean_start();
 
     // construct a configuration
-    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
     conf.load();
     ASSERT_TRUE(conf) << conf;
-
+    
     //// end prerequsite ////
-
+    
     // add a value to vap
     conf.set_create_vap_value("wlan0.3", "was_i_stroed", "yes_you_were");
     EXPECT_TRUE(conf) << conf;
@@ -449,10 +448,6 @@ TEST(configuration_test, uncomment_vap)
     conf.store();
     EXPECT_TRUE(conf) << conf;
 
-    //// end prerequsite ////
-
-    //// start test ////
-
     // replace existing value for existing key for existing vap
     conf.set_create_vap_value("wlan0.2", "disassoc_low_ack", "734");
     EXPECT_TRUE(conf) << conf;
@@ -478,11 +473,11 @@ TEST(configuration_test, set_int_vap_values)
 
     // construct a configuration
     prplmesh::hostapd::config::Configuration conf(configuration_file);
-    EXPECT_FALSE(conf) << conf;
+    ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
     conf.load();
-    EXPECT_TRUE(conf) << conf;
+    ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
 
