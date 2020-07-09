@@ -52,4 +52,4 @@ install(TARGETS mapfcommon EXPORT mapfCommon
     RUNTIME  DESTINATION ${CMAKE_INSTALL_BINDIR})
 
 install(EXPORT mapfCommon NAMESPACE mapf:: DESTINATION lib/cmake/mapfCommon)
-# add_subdirectory(test)
+add_subdirectory(test)
