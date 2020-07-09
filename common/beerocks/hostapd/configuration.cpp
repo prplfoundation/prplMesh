@@ -68,6 +68,36 @@ bool Configuration::load()
     return *this;
 }
 
+bool Configuration::store()
+{
+    std::ofstream out_file(m_configuration_file, std::ofstream::out | std::ofstream::trunc);
+
+    // store the head
+    for (const auto &line : m_hostapd_config_head) {
+        out_file << line << "\n";
+    }
+
+    // store the vaps
+    for (auto &vap : m_hostapd_config_vaps) {
+
+        // add empty line for readability
+        out_file << "\n";
+
+        for (auto &line : vap.second) {
+            out_file << line << "\n";
+        }
+    }
+
+    // close the file
+    out_file.close();
+    if (out_file.fail()) {
+        m_last_message = strerror(errno);
+        m_ok           = false;
+    }
+
+    return *this;
+}
+
 bool Configuration::set_create_vap_value(const std::string &vap, const std::string &key,
                                          const std::string &value)
 {
