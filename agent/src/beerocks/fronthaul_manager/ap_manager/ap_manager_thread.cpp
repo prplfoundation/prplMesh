@@ -210,7 +210,7 @@ void ap_manager_thread::ap_manager_fsm()
         // External events
         int ext_events_fd = ap_wlan_hal->get_ext_events_fd();
         if (ext_events_fd > 0) {
-            ap_hal_ext_events = new Socket(ext_events_fd);
+            ap_hal_ext_events = Socket::socketFactory(ext_events_fd);
             add_socket(ap_hal_ext_events);
             // No external event FD is available, we will trigger the process method periodically
         } else if (ext_events_fd == 0) {
@@ -229,7 +229,7 @@ void ap_manager_thread::ap_manager_fsm()
             // NOTE: Eventhough the internal events are not socket based, at this
             //       point we have to use the Socket class wrapper to add the
             //       file descriptor into the select()
-            ap_hal_int_events = new Socket(int_events_fd);
+            ap_hal_int_events = Socket::socketFactory(int_events_fd);
             add_socket(ap_hal_int_events);
         } else {
             LOG(ERROR) << "Invalid internal event file descriptor: " << int_events_fd;

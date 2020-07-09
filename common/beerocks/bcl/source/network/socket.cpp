@@ -29,9 +29,14 @@ typedef int socklen_t;
 
 #include <easylogging++.h>
 
-int Socket::m_ref = 0;
+int DefaultSocket::m_ref = 0;
 
-Socket::Socket(const std::string &uds_path, long readTimeout)
+Socket *Socket::socketFactory(SOCKET s, long readTimeout)
+{
+    return new DefaultSocket(s, readTimeout);
+}
+
+DefaultSocket::DefaultSocket(const std::string &uds_path, long readTimeout)
 {
 #ifdef IS_WINDOWS
     if (!uds_path.empty()) {
@@ -71,7 +76,7 @@ Socket::Socket(const std::string &uds_path, long readTimeout)
         setReadTimeout(readTimeout);
 }
 
-Socket::Socket(SOCKET s, long readTimeout)
+DefaultSocket::DefaultSocket(SOCKET s, long readTimeout)
 {
     m_socket           = s;
     m_external_handler = true;
@@ -80,7 +85,7 @@ Socket::Socket(SOCKET s, long readTimeout)
         setReadTimeout(readTimeout);
 }
 
-Socket::Socket(SOCKET s, const std::string &peer_ip, int port_port, long readTimeout)
+DefaultSocket::DefaultSocket(SOCKET s, const std::string &peer_ip, int port_port, long readTimeout)
 {
     m_socket    = s;
     m_peer_ip   = peer_ip;
@@ -92,9 +97,9 @@ Socket::Socket(SOCKET s, const std::string &peer_ip, int port_port, long readTim
 
 Socket::~Socket()
 {
+/*
     if (m_external_handler)
         return;
-    closeSocket();
     if (m_is_server && (!m_uds_path.empty())) {
         remove(m_uds_path.c_str());
     }
@@ -104,9 +109,19 @@ Socket::~Socket()
     if (m_ref == 0)
         WSACleanup();
 #endif
+*/
 }
 
-bool Socket::setWriteTimeout(long msec)
+DefaultSocket::~DefaultSocket()
+{
+/*
+    if (m_external_handler)
+        return;
+    closeSocket();
+*/
+}
+
+bool DefaultSocket::setWriteTimeout(long msec)
 {
     if (m_socket == INVALID_SOCKET) {
         return false;
@@ -120,7 +135,7 @@ bool Socket::setWriteTimeout(long msec)
     return true;
 }
 
-bool Socket::setReadTimeout(long msec)
+bool DefaultSocket::setReadTimeout(long msec)
 {
     if (m_socket == INVALID_SOCKET) {
         return false;
@@ -150,7 +165,7 @@ bool Socket::setReadTimeout(long msec)
     return true;
 }
 
-void Socket::closeSocket()
+void DefaultSocket::closeSocket()
 {
     if ((m_socket != INVALID_SOCKET) && ((!m_external_handler) || (m_accepted_socket))) {
         closesocket(m_socket);
@@ -158,9 +173,9 @@ void Socket::closeSocket()
     }
 }
 
-bool Socket::isOpen() { return (m_socket != INVALID_SOCKET); }
+bool DefaultSocket::isOpen() { return (m_socket != INVALID_SOCKET); }
 
-ssize_t Socket::getBytesReady()
+ssize_t DefaultSocket::getBytesReady()
 {
     u_long cnt = 0;
     if (m_socket != INVALID_SOCKET) {
@@ -169,7 +184,8 @@ ssize_t Socket::getBytesReady()
     return (ssize_t)cnt;
 }
 
-ssize_t Socket::readBytes(uint8_t *buf, size_t buf_size, bool blocking, size_t buf_len, bool isPeek)
+ssize_t DefaultSocket::readBytes(uint8_t *buf, size_t buf_size, bool blocking, size_t buf_len,
+                                 bool isPeek, bool waitAll)
 {
     if (m_socket == INVALID_SOCKET) {
         return 0;
@@ -196,6 +212,11 @@ ssize_t Socket::readBytes(uint8_t *buf, size_t buf_size, bool blocking, size_t b
         flags |= MSG_DONTWAIT;
     }
 
+    // Add the MSG_WAITALL flag to read all required bytes
+    if (waitAll) {
+        flags |= MSG_WAITALL;
+    }
+
     len = recv(m_socket, (char *)buf, (int)buf_len, flags);
 
     if (len < 0) {
@@ -205,7 +226,31 @@ ssize_t Socket::readBytes(uint8_t *buf, size_t buf_size, bool blocking, size_t b
     return len;
 }
 
-ssize_t Socket::writeBytes(const uint8_t *buf, size_t buf_len, int port, struct sockaddr_in addr_in)
+ssize_t Socket::discardBytes(size_t bytes_to_discard)
+{
+    constexpr size_t buf_size = 256;
+    uint8_t buf[buf_size];
+
+    size_t already_discarded = 0;
+
+    while (already_discarded < bytes_to_discard) {
+        size_t remaining_bytes = bytes_to_discard - already_discarded;
+        size_t request_size    = remaining_bytes > buf_size ? buf_size : remaining_bytes;
+
+        ssize_t len = readBytes(buf, request_size, true, request_size, false, true);
+        if (len < 0) {
+            return len;
+        } else if (len == 0) {
+            break;
+        } else {
+            already_discarded += len;
+        }
+    }
+    return already_discarded;
+}
+
+ssize_t DefaultSocket::writeBytes(const uint8_t *buf, size_t buf_len, int port,
+                                  struct sockaddr_in addr_in)
 {
     if (m_socket == INVALID_SOCKET) {
         return 0;
@@ -227,7 +272,7 @@ ssize_t Socket::writeBytes(const uint8_t *buf, size_t buf_len, int port, struct 
 }
 
 SocketServer::SocketServer(const std::string &uds_path, int connections, SocketMode mode)
-    : Socket(uds_path)
+    : DefaultSocket(uds_path)
 {
 #ifdef IS_WINDOWS
     if (!uds_path.empty()) {
@@ -325,17 +370,18 @@ Socket *SocketServer::acceptConnections()
         m_error = std::string("accept() failed: ") + strerror(errno);
 #endif
     } else {
-        socket_ret = new Socket(s, std::string(inet_ntoa(addr.sin_addr)), int(addr.sin_port));
-        socket_ret->m_accepted_socket = true;
+        socket_ret =
+            new DefaultSocket(s, std::string(inet_ntoa(addr.sin_addr)), int(addr.sin_port));
+        socket_ret->setAcceptedSocket(true);
 
         if (!m_uds_path.empty())
-            socket_ret->m_uds_path = m_uds_path;
+            socket_ret->setUdsPath(m_uds_path);
     }
     return socket_ret;
 }
 
 SocketClient::SocketClient(const std::string &uds_path, long readTimeout)
-    : Socket(uds_path, readTimeout)
+    : DefaultSocket(uds_path, readTimeout)
 {
 #ifdef IS_WINDOWS
     m_error = std::string("unix socket not supported");
@@ -360,7 +406,7 @@ SocketClient::SocketClient(const std::string &uds_path, long readTimeout)
 
 SocketClient::SocketClient(const std::string &host, int port, int connect_timeout_msec,
                            long readTimeout)
-    : Socket(std::string(), readTimeout)
+    : DefaultSocket(std::string(), readTimeout)
 {
     sockaddr_in addr;
 
@@ -525,7 +571,7 @@ void SocketSelect::removeSocket(Socket *s)
 void SocketSelect::clearReady(Socket *s)
 {
     if (s) {
-        FD_CLR(s->m_socket, &m_socketSet);
+        FD_CLR(s->getSocket(), &m_socketSet);
     }
 }
 
@@ -534,9 +580,9 @@ int SocketSelect::selectSocket()
     int max_s = 0;
     FD_ZERO(&m_socketSet);
     for (unsigned i = 0; i < m_socketVec.size(); i++) {
-        FD_SET(m_socketVec[i]->m_socket, &m_socketSet);
-        if (max_s < m_socketVec[i]->m_socket)
-            max_s = (int)m_socketVec[i]->m_socket;
+        FD_SET(m_socketVec[i]->getSocket(), &m_socketSet);
+        if (max_s < m_socketVec[i]->getSocket())
+            max_s = (int)m_socketVec[i]->getSocket();
     }
     // create a copy of m_socketTval for select() //
     timeval timeout;
@@ -561,8 +607,8 @@ Socket *SocketSelect::at(size_t idx)
 
 bool SocketSelect::readReady(const Socket *s)
 {
-    if ((s != nullptr) && (s->m_socket != INVALID_SOCKET)) {
-        return (FD_ISSET(s->m_socket, &m_socketSet)) ? true : false;
+    if ((s != nullptr) && (s->getSocket() != INVALID_SOCKET)) {
+        return (FD_ISSET(s->getSocket(), &m_socketSet)) ? true : false;
     } else {
         return false;
     }
@@ -578,7 +624,7 @@ bool SocketSelect::readReady(size_t idx)
 }
 
 #ifndef IS_WINDOWS
-size_t Socket::getBytesWritePending()
+size_t DefaultSocket::getBytesWritePending()
 {
     int pending = 0;
     if (m_socket != INVALID_SOCKET) {

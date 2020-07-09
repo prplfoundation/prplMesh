@@ -56,7 +56,7 @@ bool monitor_rssi::start(monitor_db *mon_db_, Socket *slave_socket_)
         LOG(ERROR) << "Opening ARP socket: " << strerror(errno);
         return false;
     }
-    arp_socket_class = new Socket(arp_socket);
+    arp_socket_class = Socket::socketFactory(arp_socket);
     std::string err  = arp_socket_class->getError();
     if (!err.empty()) {
         arp_socket = -1;

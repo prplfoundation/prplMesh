@@ -1363,10 +1363,10 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
                 int ext_events_fd = soc->sta_wlan_hal->get_ext_events_fd();
                 int int_events_fd = soc->sta_wlan_hal->get_int_events_fd();
                 if (ext_events_fd >= 0 && int_events_fd) {
-                    soc->sta_hal_ext_events = new Socket(ext_events_fd);
+                    soc->sta_hal_ext_events = Socket::socketFactory(ext_events_fd);
                     add_socket(soc->sta_hal_ext_events);
 
-                    soc->sta_hal_int_events = new Socket(int_events_fd);
+                    soc->sta_hal_int_events = Socket::socketFactory(int_events_fd);
                     add_socket(soc->sta_hal_int_events);
                 } else {
                     LOG(ERROR) << "Invalid event file descriptors - "

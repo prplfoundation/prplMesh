@@ -1400,12 +1400,12 @@ bool main_thread::init_arp_monitor()
 
         // Create wrapper socket classes
         if (!m_pArpRawSocket) {
-            m_pArpRawSocket = new Socket(bpl::arp_mon_get_raw_arp_fd(m_ctxArpMon));
+            m_pArpRawSocket = Socket::socketFactory(bpl::arp_mon_get_raw_arp_fd(m_ctxArpMon));
             add_socket(m_pArpRawSocket);
         }
 
         if (!m_pArpMonSocket) {
-            m_pArpMonSocket = new Socket(bpl::arp_mon_get_fd(m_ctxArpMon));
+            m_pArpMonSocket = Socket::socketFactory(bpl::arp_mon_get_fd(m_ctxArpMon));
             add_socket(m_pArpMonSocket);
         }
 
@@ -1475,7 +1475,7 @@ bool main_thread::init_dhcp_monitor()
             return (false);
         }
 
-        m_pDHCPMonSocket = new Socket(dhcp_mon_fd);
+        m_pDHCPMonSocket = Socket::socketFactory(dhcp_mon_fd);
         add_socket(m_pDHCPMonSocket);
         LOG(DEBUG) << "DHCP Monitor Started... sd=" << intptr_t(m_pDHCPMonSocket);
     }

@@ -151,7 +151,7 @@ bool socket_thread::handle_cmdu_message_uds(Socket *sd)
 
     // Check if UDS Header exists
     available_bytes = sd->readBytes(rx_buffer, sizeof(rx_buffer), true, sizeof(message::sUdsHeader),
-                                    true); // PEEK UDS Header, blocking
+                                    true, true); // PEEK UDS Header, blocking, peek the whole header
 
     if (available_bytes < sizeof(message::sUdsHeader)) {
         THREAD_LOG(ERROR) << "available bytes = " << available_bytes
@@ -164,12 +164,19 @@ bool socket_thread::handle_cmdu_message_uds(Socket *sd)
     size_t message_size             = uds_header->length + sizeof(message::sUdsHeader);
 
     // Try to read all message
-    available_bytes =
-        sd->readBytes(rx_buffer, sizeof(rx_buffer), true, message_size); // blocking read
+    available_bytes = sd->readBytes(rx_buffer, sizeof(rx_buffer), true, message_size, false,
+                                    true); // blocking read, whole message
 
     if (available_bytes != message_size) {
         THREAD_LOG(ERROR) << "available bytes = " << available_bytes
                           << " message_size = " << message_size;
+        // discard remaining bytes
+        ssize_t bytes_to_discard = message_size - available_bytes;
+        ssize_t bytes_discarded  = sd->discardBytes(bytes_to_discard);
+        if (bytes_discarded != bytes_to_discard) {
+            THREAD_LOG(ERROR) << "discardBytes expected to return " << bytes_to_discard
+                              << " but returned " << bytes_discarded;
+        }
         return false;
     }
 
