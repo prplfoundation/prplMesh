@@ -13,7 +13,7 @@ RUN apt-get update \
     # Install C++ tools
     && apt-get -y install build-essential cmake cppcheck valgrind \
     # Libraries
-    libjson-c-dev python-yaml python3-yaml libzmq3-dev libssl-dev \
+    libjson-c-dev python-yaml python3-yaml libssl-dev \
     libncurses-dev libreadline-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev \
     # Install Helper tools
     bash-completion locales ninja-build pkg-config shellcheck \
