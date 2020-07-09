@@ -278,7 +278,7 @@ void optimal_path_task::work()
                         measurement_request.duration =
                             beerocks::BEACON_MEASURE_DEFAULT_ACTIVE_DURATION;
                     }
-                    // ap_mac is a radio mac, but we need to request measurment on some vap since radio don't beacon
+                    // ap_mac is a radio mac, but we need to request measurement on some vap since radio don't beacon
                     const std::string vap_mac =
                         database.get_hostap_vap_with_ssid(ap_mac, current_hostap_ssid);
                     if (vap_mac.empty()) {
@@ -289,8 +289,10 @@ void optimal_path_task::work()
                         ++potential_ap_iter;
                         continue;
                     }
-                    measurement_request.bssid                  = tlvf::mac_from_string(vap_mac);
-                    measurement_request.channel                = database.get_node_channel(ap_mac);
+                    measurement_request.bssid   = tlvf::mac_from_string(vap_mac);
+                    measurement_request.channel = database.get_node_channel(ap_mac);
+                    measurement_request.op_class =
+                        database.get_hostap_operating_class(tlvf::mac_from_string(ap_mac));
                     measurement_request.expected_reports_count = 1;
 
                     /////////////// FOR DEBUG ONLY ////////////////

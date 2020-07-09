@@ -146,6 +146,8 @@ void association_handling_task::work()
         measurement_request->params().measurement_mode =
             beerocks::MEASURE_MODE_ACTIVE; // son::eMeasurementMode11K "passive"/"active"/"table"
         measurement_request->params().channel = database.get_node_channel(bssid);
+        measurement_request->params().op_class =
+            database.get_hostap_operating_class(tlvf::mac_from_string(bssid));
         measurement_request->params().rand_ival = beerocks::
             BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL; // random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
         measurement_request->params().duration = beerocks::
