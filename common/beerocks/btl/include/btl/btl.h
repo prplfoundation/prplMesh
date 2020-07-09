@@ -17,13 +17,6 @@
 
 #include <unordered_set>
 
-// Forward Declarations
-namespace mapf {
-class Poller;
-class LocalBusInterface;
-class SubSocket;
-} // namespace mapf
-
 namespace beerocks {
 namespace btl {
 class transport_socket_thread : public socket_thread {
@@ -45,19 +38,18 @@ public:
      * available interfaces).
      * @return True on success and false otherwise.
      */
-    bool send_cmdu_to_bus(ieee1905_1::CmduMessageTx &cmdu, const std::string &dst_mac,
-                          const std::string &src_mac, const std::string &iface_name = "");
+    bool send_cmdu_to_broker(ieee1905_1::CmduMessageTx &cmdu, const std::string &dst_mac,
+                             const std::string &src_mac, const std::string &iface_name = "");
 
 protected:
     void add_socket(Socket *s, bool add_to_vector = true) override;
-    void remove_socket(Socket *s) override;
-    bool read_ready(Socket *s) override;
     bool configure_ieee1905_transport_interfaces(const std::string &bridge_iface,
                                                  const std::vector<std::string> &ifaces);
-    bool from_bus(Socket *sd);
 
-    bool bus_subscribe(const std::vector<ieee1905_1::eMessageType> &msg_types);
-    bool bus_connect(const std::string &beerocks_temp_path, const bool local_master);
+    bool from_broker(Socket *sd);
+
+    bool broker_connect(const std::string &beerocks_temp_path, const bool local_master);
+    bool broker_subscribe(const std::vector<ieee1905_1::eMessageType> &msg_types);
 
     /**
      * @brief Sends CDMU to transport for dispatching.
@@ -70,19 +62,19 @@ protected:
      * available interfaces).
      * @return True on success and false otherwise.
      */
-    bool send_cmdu_to_bus(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
-                          const std::string &src_mac, uint16_t length,
-                          const std::string &iface_name = "");
+    bool send_cmdu_to_broker(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
+                             const std::string &src_mac, uint16_t length,
+                             const std::string &iface_name = "");
 
 private:
-    bool bus_init();
-    bool bus_send(ieee1905_1::CmduMessage &cmdu, const std::string &iface_name,
-                  const std::string &dst_mac, const std::string &src_mac, uint16_t length);
-    bool handle_cmdu_message_bus();
+    bool broker_init();
+    bool broker_send(ieee1905_1::CmduMessage &cmdu, const std::string &iface_name,
+                     const std::string &dst_mac, const std::string &src_mac, uint16_t length);
+    bool handle_cmdu_message_broker();
 
     int poll_timeout_ms = 500;
 
-    std::unique_ptr<SocketClient> bus;
+    std::unique_ptr<SocketClient> m_broker;
 };
 } // namespace btl
 
