@@ -218,7 +218,7 @@ bool BrokerServer::handle_subscribe(std::shared_ptr<Socket> &sd,
     }
 
     // Make sure there's at least one message type
-    if (msg.metadata()->msg_types_num == 0) {
+    if (msg.metadata()->msg_types_count == 0) {
         LOG(ERROR) << "Subscribe message does not contain any types!";
         return false;
     }
@@ -226,7 +226,7 @@ bool BrokerServer::handle_subscribe(std::shared_ptr<Socket> &sd,
     // Iterate over the message types and subscribe/unsubscribe
     bool subscribe = msg.metadata()->type == messages::SubscribeMessage::ReqType::SUBSCRIBE;
     std::stringstream log_types;
-    for (auto i = 0; i < msg.metadata()->msg_types_num; ++i) {
+    for (auto i = 0; i < msg.metadata()->msg_types_count; ++i) {
         auto msg_type = msg.metadata()->msg_types[i];
 
         // Skip restricted types
