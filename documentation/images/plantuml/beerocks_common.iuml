@@ -62,12 +62,12 @@ class transport_socket_thread {
     #remove_socket() override
     #read_ready() override
     #configure_ieee1905_transport_interfaces()
-    #bus_subscribe()
-    #bus_connect()
-    #send_cmdu_to_bus()
-    -bus_init()
-    -bus_send()
-    -handle_cmdu_message_bus()
+    #broker_subscribe()
+    #broker_connect()
+    #send_cmdu_to_broker()
+    -broker_init()
+    -broker_send()
+    -handle_cmdu_message_broker()
     -bus : LocalBusInterface 
     -poller : Poller
 }
