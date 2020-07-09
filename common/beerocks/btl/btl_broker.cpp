@@ -106,12 +106,12 @@ bool transport_socket_thread::bus_subscribe(const std::vector<ieee1905_1::eMessa
     SubscribeMessage subscribe;
     subscribe.metadata()->type = SubscribeMessage::ReqType::SUBSCRIBE;
 
-    subscribe.metadata()->msg_types_num = 0;
+    subscribe.metadata()->msg_types_count = 0;
     for (const auto &msg_type : msg_types) {
-        subscribe.metadata()->msg_types[subscribe.metadata()->msg_types_num].bits = {
+        subscribe.metadata()->msg_types[subscribe.metadata()->msg_types_count].bits = {
             .internal = 0, .vendor_specific = 0, .reserved = 0, .type = uint32_t(msg_type)};
 
-        ++subscribe.metadata()->msg_types_num;
+        ++subscribe.metadata()->msg_types_count;
     }
 
     return transport::messages::send_transport_message(*bus, subscribe);
