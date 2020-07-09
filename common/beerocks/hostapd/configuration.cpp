@@ -74,8 +74,9 @@ bool Configuration::set_create_vap_value(const std::string &vap, const std::stri
     auto existing_vap = m_hostapd_config_vaps.find(vap);
 
     if (existing_vap == m_hostapd_config_vaps.end()) {
-        m_last_message = std::string(__FUNCTION__) + " couldn't find requested vap: " + vap;
-        m_ok           = false;
+        m_last_message = std::string(__FUNCTION__) + " couldn't find requested vap: " + vap +
+                         " (requested to set: " + key + "/" + value + ")";
+        m_ok = false;
         return *this;
     }
 
@@ -113,6 +114,14 @@ bool Configuration::set_create_vap_value(const std::string &vap, const std::stri
     m_ok = true;
     return *this;
 }
+
+bool Configuration::set_create_vap_value(const std::string &vap, const std::string &key,
+                                         const int value)
+{
+    return set_create_vap_value(vap, key, std::to_string(value));
+}
+
+const std::string &Configuration::get_last_message() const { return m_last_message; }
 
 std::ostream &operator<<(std::ostream &o, const Configuration &conf)
 {
