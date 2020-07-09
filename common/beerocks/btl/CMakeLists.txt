@@ -1,7 +1,7 @@
 project(btl VERSION ${prplmesh_VERSION})
 message("${BoldWhite}Preparing ${BoldGreen}${PROJECT_NAME}${BoldWhite} for the ${BoldGreen}${TARGET_PLATFORM}${BoldWhite} platform${ColourReset}")
 
-message(STATUS "${BoldGreen}Using MultiAP Framework for BTL transport${ColourReset}")
+# BTL source files
 set(btl_sources btl.cpp btl_broker.cpp)
 
 # Set the base path for the current module

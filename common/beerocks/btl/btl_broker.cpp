@@ -22,34 +22,34 @@ using namespace beerocks::btl;
 using namespace beerocks::net;
 using namespace beerocks::transport::messages;
 
-bool transport_socket_thread::bus_init()
+bool transport_socket_thread::broker_init()
 {
-    if (bus) {
-        remove_socket(bus.get());
-        bus->closeSocket();
-        bus.reset(nullptr);
+    if (m_broker) {
+        remove_socket(m_broker.get());
+        m_broker->closeSocket();
+        m_broker.reset(nullptr);
     }
 
     auto unix_socket_path_broker = TMP_PATH "/" BEEROCKS_BROKER_UDS;
 
-    bus = std::make_unique<SocketClient>(unix_socket_path_broker);
-    if (!bus) {
-        LOG(ERROR) << "bus == nullptr";
+    m_broker = std::make_unique<SocketClient>(unix_socket_path_broker);
+    if (!m_broker) {
+        LOG(ERROR) << "m_broker == nullptr";
         return false;
-    } else if (!bus->getError().empty()) {
-        LOG(ERROR) << "Failed connecting to the broker, error:" << bus->getError();
+    } else if (!m_broker->getError().empty()) {
+        LOG(ERROR) << "Failed connecting to the broker, error:" << m_broker->getError();
         return false;
     }
 
     LOG(DEBUG) << "Broker socket connected on: " << unix_socket_path_broker;
-    add_socket(bus.get(), false);
+    add_socket(m_broker.get(), false);
     return true;
 }
 
 bool transport_socket_thread::configure_ieee1905_transport_interfaces(
     const std::string &bridge_iface, const std::vector<std::string> &ifaces)
 {
-    LOG_IF(!bus, FATAL) << "Broker socket is not connected!";
+    LOG_IF(!m_broker, FATAL) << "Broker socket is not connected!";
 
     InterfaceConfigurationRequestMessage interface_configuration_request_msg;
     using Flags = InterfaceConfigurationRequestMessage::Flags;
@@ -78,7 +78,8 @@ bool transport_socket_thread::configure_ieee1905_transport_interfaces(
     interface_configuration_request_msg.metadata()->numInterfaces = n;
     THREAD_LOG(DEBUG) << "numInterfaces=" << n;
 
-    return transport::messages::send_transport_message(*bus, interface_configuration_request_msg);
+    return transport::messages::send_transport_message(*m_broker,
+                                                       interface_configuration_request_msg);
 }
 
 void transport_socket_thread::add_socket(Socket *s, bool add_to_vector)
@@ -86,13 +87,10 @@ void transport_socket_thread::add_socket(Socket *s, bool add_to_vector)
     socket_thread::add_socket(s, add_to_vector);
 }
 
-void transport_socket_thread::remove_socket(Socket *s) { socket_thread::remove_socket(s); }
-
-bool transport_socket_thread::read_ready(Socket *s) { return socket_thread::read_ready(s); }
-
-bool transport_socket_thread::bus_subscribe(const std::vector<ieee1905_1::eMessageType> &msg_types)
+bool transport_socket_thread::broker_subscribe(
+    const std::vector<ieee1905_1::eMessageType> &msg_types)
 {
-    LOG_IF(!bus, FATAL) << "Broker socket not initialized!";
+    LOG_IF(!m_broker, FATAL) << "Broker socket not initialized!";
 
     if (msg_types.size() > SubscribeMessage::MAX_SUBSCRIBE_TYPES) {
         LOG(ERROR) << "Subscribing to " << msg_types.size()
@@ -114,20 +112,20 @@ bool transport_socket_thread::bus_subscribe(const std::vector<ieee1905_1::eMessa
         ++subscribe.metadata()->msg_types_count;
     }
 
-    return transport::messages::send_transport_message(*bus, subscribe);
+    return transport::messages::send_transport_message(*m_broker, subscribe);
 }
 
-bool transport_socket_thread::bus_connect(const std::string &beerocks_temp_path,
-                                          const bool local_master)
+bool transport_socket_thread::broker_connect(const std::string &beerocks_temp_path,
+                                             const bool local_master)
 {
     return true;
 }
 
-bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage &cmdu, const std::string &iface_name,
-                                       const std::string &dst_mac, const std::string &src_mac,
-                                       uint16_t length)
+bool transport_socket_thread::broker_send(ieee1905_1::CmduMessage &cmdu,
+                                          const std::string &iface_name, const std::string &dst_mac,
+                                          const std::string &src_mac, uint16_t length)
 {
-    LOG_IF(!bus, FATAL) << "Broker socket not initialized!";
+    LOG_IF(!m_broker, FATAL) << "Broker socket not initialized!";
 
     CmduTxMessage msg;
 
@@ -144,12 +142,12 @@ bool transport_socket_thread::bus_send(ieee1905_1::CmduMessage &cmdu, const std:
     msg.metadata()->if_index          = if_nametoindex(iface_name.c_str());
 
     std::copy_n((uint8_t *)cmdu.getMessageBuff(), msg.metadata()->length, (uint8_t *)msg.data());
-    return transport::messages::send_transport_message(*bus, msg);
+    return transport::messages::send_transport_message(*m_broker, msg);
 }
 
-bool transport_socket_thread::handle_cmdu_message_bus()
+bool transport_socket_thread::handle_cmdu_message_broker()
 {
-    auto msg = transport::messages::read_transport_message(*bus);
+    auto msg = transport::messages::read_transport_message(*m_broker);
     if (msg == nullptr) {
         THREAD_LOG(ERROR) << "Received msg is null";
         return false;
@@ -193,20 +191,20 @@ bool transport_socket_thread::handle_cmdu_message_bus()
         return false;
     }
 
-    if (!handle_cmdu(bus.get(), cmdu_rx)) {
+    if (!handle_cmdu(m_broker.get(), cmdu_rx)) {
         return false;
     }
 
     return true;
 }
 
-bool transport_socket_thread::from_bus(Socket *sd)
+bool transport_socket_thread::from_broker(Socket *sd)
 {
-    if (!sd || !bus) {
+    if (!sd || !m_broker) {
         return false;
     }
 
-    return sd->getSocketFd() == bus->getSocketFd();
+    return sd->getSocketFd() == m_broker->getSocketFd();
 }
 
 bool transport_socket_thread::work()
@@ -263,14 +261,14 @@ bool transport_socket_thread::work()
                     continue;
                 }
 
-                bool bus_socket_event = bus && (bus->getSocketFd() == sd->getSocketFd());
+                bool bus_socket_event = m_broker && (m_broker->getSocketFd() == sd->getSocketFd());
 
                 // '0' - socket not disconnected (bytes to read), '1' - socket disconnected, '-1' - error
                 auto ret = socket_disconnected_uds(sd);
                 if (ret == 1) {
                     if (bus_socket_event) {
-                        THREAD_LOG(FATAL) << "setting bus to nullptr";
-                        bus = nullptr;
+                        THREAD_LOG(FATAL) << "setting m_broker to nullptr";
+                        m_broker = nullptr;
                     }
                     // breaking instead of continue because socket_disconnected_uds() may erase element from Select Socket Vector while iterating it
                     break;
@@ -278,11 +276,8 @@ bool transport_socket_thread::work()
                     continue;
                 }
 
-                // LOG(DEBUG) << "Received message on FD: " << sd->getSocketFd()
-                //            << " (bus_socket_event = " << bus_socket_event << ")";
-
                 if (bus_socket_event) {
-                    if (!handle_cmdu_message_bus()) {
+                    if (!handle_cmdu_message_broker()) {
                         continue;
                     }
                 } else {

@@ -94,7 +94,7 @@ bool master_thread::init()
         return false;
     }
 
-    if (!bus_subscribe(std::vector<ieee1905_1::eMessageType>{
+    if (!broker_subscribe(std::vector<ieee1905_1::eMessageType>{
             ieee1905_1::eMessageType::ACK_MESSAGE,
             ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE,
             ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE,
@@ -219,10 +219,7 @@ bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     std::string src_mac = tlvf::mac_to_string(uds_header->src_bridge_mac);
     std::string dst_mac = tlvf::mac_to_string(uds_header->dst_bridge_mac);
 
-    // LOG(DEBUG) << "handle_cmdu() - received msg from " << std::string(from_bus(sd) ? "bus" : "uds") << ", src=" << src_mac
-    //            << ", dst=" << dst_mac << ", " << print_cmdu_types(uds_header); // floods the log
-
-    if (from_bus(sd)) {
+    if (from_broker(sd)) {
 
         if (src_mac == network_utils::ZERO_MAC_STRING) {
             LOG(ERROR) << "src_mac is zero!";

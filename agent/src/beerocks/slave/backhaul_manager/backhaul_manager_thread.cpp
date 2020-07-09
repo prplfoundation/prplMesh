@@ -260,7 +260,7 @@ bool backhaul_manager::init()
         return false;
     }
 
-    if (!bus_subscribe(std::vector<ieee1905_1::eMessageType>{
+    if (!broker_subscribe(std::vector<ieee1905_1::eMessageType>{
             ieee1905_1::eMessageType::ACK_MESSAGE,
             ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RENEW_MESSAGE,
             ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RESPONSE_MESSAGE,
@@ -349,8 +349,8 @@ void backhaul_manager::socket_connected(Socket *sd)
 
 bool backhaul_manager::socket_disconnected(Socket *sd)
 {
-    if (from_bus(sd)) {
-        LOG(ERROR) << "bus socket to the controller disconnected " << intptr_t(sd)
+    if (from_broker(sd)) {
+        LOG(ERROR) << "broker socket to the controller disconnected " << intptr_t(sd)
                    << " restarting backhaul manager";
         FSM_MOVE_STATE(RESTART);
         return true;
@@ -425,7 +425,8 @@ bool backhaul_manager::socket_disconnected(Socket *sd)
                     return false;
                 }
 
-                send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
+                send_cmdu_to_broker(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR,
+                                    bridge_info.mac);
             }
             return false;
         } else {
@@ -537,7 +538,7 @@ void backhaul_manager::after_select(bool timeout)
             LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
             return;
         }
-        send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
+        send_cmdu_to_broker(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
     }
 
     // Run Tasks
@@ -909,7 +910,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
             break;
         }
 
-        if (!bus_connect(beerocks_temp_path, local_master)) {
+        if (!broker_connect(beerocks_temp_path, local_master)) {
             platform_notify_error(bpl::eErrorCode::BH_CONNECTING_TO_MASTER, "");
             FSM_MOVE_STATE(RESTART);
             break;
@@ -983,7 +984,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
             create_backhaul_steering_response(wfa_map::tlvErrorCode::eReasonCode::RESERVED);
 
             LOG(DEBUG) << "Sending BACKHAUL_STA_STEERING_RESPONSE_MESSAGE";
-            send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+            send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, bridge_info.mac);
         }
         break;
     }
@@ -1180,8 +1181,8 @@ bool backhaul_manager::send_1905_topology_discovery_message(const std::string &i
 
     LOG(DEBUG) << "send_1905_topology_discovery_message, bridge_mac=" << bridge_info.mac
                << ", iface=" << iface_name;
-    return send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac,
-                            iface_name);
+    return send_cmdu_to_broker(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac,
+                               iface_name);
 }
 
 bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<sRadioInfo> soc)
@@ -1271,7 +1272,7 @@ bool backhaul_manager::send_autoconfig_search_message(std::shared_ptr<sRadioInfo
     auto beerocks_header                      = message_com::get_beerocks_header(cmdu_tx);
     beerocks_header->actionhdr()->direction() = beerocks::BEEROCKS_DIRECTION_CONTROLLER;
     LOG(DEBUG) << "sending autoconfig search message, bridge_mac=" << bridge_info.mac;
-    return send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
+    return send_cmdu_to_broker(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
 }
 
 bool backhaul_manager::send_slave_ap_metric_query_message(uint16_t mid,
@@ -1699,10 +1700,7 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
     std::string src_mac = tlvf::mac_to_string(uds_header->src_bridge_mac);
     std::string dst_mac = tlvf::mac_to_string(uds_header->dst_bridge_mac);
 
-    // LOG(DEBUG) << "handle_cmdu() - received msg from " << std::string(from_bus(sd) ? "bus" : "uds") << ", src=" << src_mac
-    //            << ", dst=" << dst_mac << ", " << int(cmdu_rx.getMessageType()); // floods the log
-
-    if (from_bus(sd)) {
+    if (from_broker(sd)) {
 
         // Filter messages which are not destined to this agent
         if (dst_mac != network_utils::MULTICAST_1905_MAC_ADDR && dst_mac != bridge_info.mac) {
@@ -1780,7 +1778,7 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
         } else { // Forward the data (cmdu) to bus
             // LOG(DEBUG) << "forwarding slave->master message, controller_bridge_mac=" << controller_bridge_mac;
             cmdu_rx.swap(); //swap back before forwarding
-            send_cmdu_to_bus(cmdu_rx, dst_mac, bridge_info.mac, length);
+            send_cmdu_to_broker(cmdu_rx, dst_mac, bridge_info.mac, length);
         }
     }
 
@@ -1898,7 +1896,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
                 LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
                 return false;
             }
-            send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
+            send_cmdu_to_broker(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
         }
 
         // If we're already connected, send a notification to the slave
@@ -2184,7 +2182,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             bss_out.sta_measured_uplink_rssi_dbm_enc = bss_in.sta_measured_uplink_rssi_dbm_enc;
         }
         LOG(DEBUG) << "Send AssociatedStaLinkMetrics to controller, mid = " << mid;
-        send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+        send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, bridge_info.mac);
         break;
     }
     default: {
@@ -2389,7 +2387,7 @@ bool backhaul_manager::handle_multi_ap_policy_config_request(ieee1905_1::CmduMes
         return false;
     }
 
-    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+    return send_cmdu_to_broker(cmdu_tx, src_mac, bridge_info.mac);
 }
 
 bool backhaul_manager::handle_associated_sta_link_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
@@ -2434,7 +2432,7 @@ bool backhaul_manager::handle_associated_sta_link_metrics_query(ieee1905_1::Cmdu
         error_code_tlv->sta_mac() = mac->sta_mac();
 
         LOG(DEBUG) << "Send a ASSOCIATED_STA_LINK_METRICS_RESPONSE_MESSAGE back to controller";
-        return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+        return send_cmdu_to_broker(cmdu_tx, src_mac, bridge_info.mac);
     } else {
         sMacAddr bssid = get_sta_bssid(radio->associated_clients_map, mac->sta_mac());
         if (bssid == network_utils::ZERO_MAC) {
@@ -2533,7 +2531,7 @@ bool backhaul_manager::handle_client_capability_query(ieee1905_1::CmduMessageRx 
         error_code_tlv->sta_mac() = client_info_tlv_r->client_mac();
     }
     LOG(DEBUG) << "Send a CLIENT_CAPABILITY_REPORT_MESSAGE back to controller";
-    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+    return send_cmdu_to_broker(cmdu_tx, src_mac, bridge_info.mac);
 }
 
 bool backhaul_manager::handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmdu_rx,
@@ -2579,7 +2577,7 @@ bool backhaul_manager::handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmd
     }
 
     LOG(DEBUG) << "Sending AP_CAPABILITY_REPORT_MESSAGE , mid: " << std::hex << (int)mid;
-    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+    return send_cmdu_to_broker(cmdu_tx, src_mac, bridge_info.mac);
 }
 
 bool backhaul_manager::handle_ap_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
@@ -2627,7 +2625,7 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
     if (0 == mid) {
         uint16_t length = message_com::get_uds_header(cmdu_rx)->length;
         cmdu_rx.swap(); //swap back before forwarding
-        return send_cmdu_to_bus(cmdu_rx, controller_bridge_mac, bridge_info.mac, length);
+        return send_cmdu_to_broker(cmdu_rx, controller_bridge_mac, bridge_info.mac, length);
     }
 
     /**
@@ -2788,7 +2786,7 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
     m_ap_metric_response.clear();
 
     LOG(DEBUG) << "Sending AP_METRICS_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
-    return send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+    return send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, bridge_info.mac);
 }
 
 /**
@@ -3134,7 +3132,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
     }
 
     LOG(DEBUG) << "Sending topology response message, mid: " << std::hex << (int)mid;
-    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+    return send_cmdu_to_broker(cmdu_tx, src_mac, bridge_info.mac);
 }
 
 bool backhaul_manager::handle_1905_higher_layer_data_message(ieee1905_1::CmduMessageRx &cmdu_rx,
@@ -3161,7 +3159,7 @@ bool backhaul_manager::handle_1905_higher_layer_data_message(ieee1905_1::CmduMes
         return false;
     }
     LOG(DEBUG) << "sending ACK message to the originator, mid=" << std::hex << int(mid);
-    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+    return send_cmdu_to_broker(cmdu_tx, src_mac, bridge_info.mac);
 }
 
 bool backhaul_manager::handle_1905_link_metric_query(ieee1905_1::CmduMessageRx &cmdu_rx,
@@ -3318,7 +3316,7 @@ bool backhaul_manager::handle_1905_link_metric_query(ieee1905_1::CmduMessageRx &
     }
 
     LOG(DEBUG) << "Sending LINK_METRIC_RESPONSE_MESSAGE, mid: " << std::hex << (int)mid;
-    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+    return send_cmdu_to_broker(cmdu_tx, src_mac, bridge_info.mac);
 }
 
 bool backhaul_manager::handle_1905_combined_infrastructure_metrics(
@@ -3339,7 +3337,7 @@ bool backhaul_manager::handle_1905_combined_infrastructure_metrics(
         return false;
     }
     LOG(DEBUG) << "sending ACK message to the originator, mid=" << std::hex << int(mid);
-    return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+    return send_cmdu_to_broker(cmdu_tx, src_mac, bridge_info.mac);
 }
 
 bool backhaul_manager::handle_1905_topology_discovery(const std::string &src_mac,
@@ -3395,7 +3393,7 @@ bool backhaul_manager::handle_1905_topology_discovery(const std::string &src_mac
             LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
             return false;
         }
-        send_cmdu_to_bus(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
+        send_cmdu_to_broker(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR, bridge_info.mac);
     }
     return true;
 }
@@ -3569,7 +3567,7 @@ bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageR
                    << int(mid) << " tlv error code: " << errorSS.str();
 
         // send the error
-        return send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+        return send_cmdu_to_broker(cmdu_tx, src_mac, bridge_info.mac);
     }
 
     forward_to = radio->slave;
@@ -3580,7 +3578,7 @@ bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageR
     LOG(DEBUG) << "BEACON METRICS QUERY: sending ACK message to the originator mid: "
                << int(mid); // USED IN TESTS
 
-    send_cmdu_to_bus(cmdu_tx, src_mac, bridge_info.mac);
+    send_cmdu_to_broker(cmdu_tx, src_mac, bridge_info.mac);
 
     // continue processing
     return false;
@@ -4539,7 +4537,7 @@ bool backhaul_manager::handle_slave_channel_selection_response(ieee1905_1::CmduM
     m_expected_channel_selection.responses.clear();
 
     LOG(DEBUG) << "Sending CHANNEL_SELECTION_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
-    return send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+    return send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, bridge_info.mac);
 }
 
 bool backhaul_manager::handle_backhaul_steering_request(ieee1905_1::CmduMessageRx &cmdu_rx,
@@ -4563,7 +4561,7 @@ bool backhaul_manager::handle_backhaul_steering_request(ieee1905_1::CmduMessageR
     }
 
     LOG(DEBUG) << "Sending ACK message to the originator, mid=" << std::hex << mid;
-    send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+    send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, bridge_info.mac);
 
     auto channel    = bh_sta_steering_req->target_channel_number();
     auto oper_class = bh_sta_steering_req->operating_class();
@@ -4582,7 +4580,7 @@ bool backhaul_manager::handle_backhaul_steering_request(ieee1905_1::CmduMessageR
             return false;
         }
 
-        send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+        send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, bridge_info.mac);
 
         return false;
     }
@@ -4604,7 +4602,7 @@ bool backhaul_manager::handle_backhaul_steering_request(ieee1905_1::CmduMessageR
         LOG(ERROR) << "Couldn't associate active HAL with bssid: " << bssid;
 
         LOG(DEBUG) << "Sending ACK message to the originator, mid=" << std::hex << mid;
-        send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+        send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, bridge_info.mac);
 
         auto response = create_backhaul_steering_response(
             wfa_map::tlvErrorCode::eReasonCode::
@@ -4615,7 +4613,7 @@ bool backhaul_manager::handle_backhaul_steering_request(ieee1905_1::CmduMessageR
             return false;
         }
 
-        send_cmdu_to_bus(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+        send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, bridge_info.mac);
 
         return false;
     }
