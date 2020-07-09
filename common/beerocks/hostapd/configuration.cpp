@@ -59,18 +59,66 @@ bool Configuration::load()
         }
     }
 
-    m_error_description = strerror(errno);
+    m_last_message = strerror(errno);
 
     // if we've got to parsing vaps and no read errors, assume all is good
     m_ok = parsing_vaps && !ifs.bad();
-    return m_ok;
+
+    // return this as bool
+    return *this;
+}
+
+bool Configuration::set_create_vap_value(const std::string &vap, const std::string &key,
+                                         const std::string &value)
+{
+    auto existing_vap = m_hostapd_config_vaps.find(vap);
+
+    if (existing_vap == m_hostapd_config_vaps.end()) {
+        m_last_message = std::string(__FUNCTION__) + " couldn't find requested vap: " + vap;
+        m_ok           = false;
+        return *this;
+    }
+
+    // array of values for the requested vap
+    auto &vaps_values = existing_vap->second;
+
+    // search for the key
+    std::string key_eq(key + "=");
+    auto it_str =
+        std::find_if(vaps_values.begin(), vaps_values.end(), [&key_eq](std::string str) -> bool {
+            return (str.compare(0, key_eq.length(), key_eq) == 0);
+        });
+
+    // we first delete the key, and if the requested value is non empty
+    // we push it to the end of the array
+
+    // delete the key-value if found
+    if (it_str != vaps_values.end()) {
+        it_str = vaps_values.erase(it_str);
+    } else {
+        m_last_message =
+            std::string(__FUNCTION__) + " the key '" + key + "' for vap " + vap + " was not found";
+    }
+
+    // when the new value is provided add the key back with that new value
+    if (value.length() != 0) {
+        vaps_values.push_back(key_eq + value);
+        m_last_message =
+            std::string(__FUNCTION__) + " the key '" + key + "' for vap " + vap + " was (re)added";
+    } else {
+        m_last_message =
+            std::string(__FUNCTION__) + " the key '" + key + "' for vap " + vap + " was deleted";
+    }
+
+    m_ok = true;
+    return *this;
 }
 
 std::ostream &operator<<(std::ostream &o, const Configuration &conf)
 {
     o << "== configuration details ==\n"
       << "= ok:           " << std::boolalpha << conf.m_ok << '\n'
-      << "= erorr text:   " << conf.m_error_description << '\n' 
+      << "= last message: " << conf.m_last_message << '\n'
       << "= file:         " << conf.m_configuration_file << '\n'
       << "= head:         " << '\n';
 
