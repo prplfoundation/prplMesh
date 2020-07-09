@@ -62,7 +62,7 @@ std::unique_ptr<Message> read_transport_message(Socket &sd)
         sd.readBytes(reinterpret_cast<uint8_t *>(&header), sizeof(header), false, sizeof(header));
 
     if (read_bytes != sizeof(header)) {
-        LOG(ERROR) << "Error peeking into the message header: " << read_bytes;
+        LOG(ERROR) << "Error reading the message header: " << read_bytes;
         return nullptr;
     }
 
@@ -79,8 +79,8 @@ std::unique_ptr<Message> read_transport_message(Socket &sd)
         // 2. Faster - Discard sizeof(Header) bytes and hope to find a valid header afterwads
         // 2. Fastest - Discard all the bytes and assume the sender will re-send the message
         // For now we'll use the "Faster" method.
-        auto discarded_bytes = sd.readBytes(reinterpret_cast<uint8_t *>(&header), sizeof(header),
-                                            false, sd.getBytesReady());
+        auto discarded_bytes =
+            sd.readBytes(reinterpret_cast<uint8_t *>(&header), sizeof(header), false);
 
         LOG(DEBUG) << "Discarded " << discarded_bytes << " bytes from fd = " << sd.getSocketFd();
     };

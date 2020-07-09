@@ -144,7 +144,7 @@ TEST(broker_server, subscribe_single_type)
     // Create a subscribe message
     SubscribeMessage subscribe;
     subscribe.metadata()->type               = SubscribeMessage::ReqType::SUBSCRIBE;
-    subscribe.metadata()->msg_types_num      = 1;
+    subscribe.metadata()->msg_types_count    = 1;
     subscribe.metadata()->msg_types[0].value = 5;
 
     // Connect to the broker and send the message
@@ -164,7 +164,7 @@ TEST(broker_server, subscribe_multiple_types)
     // Create a subscribe message
     SubscribeMessage subscribe;
     subscribe.metadata()->type               = SubscribeMessage::ReqType::SUBSCRIBE;
-    subscribe.metadata()->msg_types_num      = 3;
+    subscribe.metadata()->msg_types_count    = 3;
     subscribe.metadata()->msg_types[0].value = 1;
     subscribe.metadata()->msg_types[1].value = 2;
     subscribe.metadata()->msg_types[2].value = 3;
@@ -204,7 +204,7 @@ TEST(broker_server, unsubscribe_single_type)
     // Create a subscribe message
     SubscribeMessage subscribe;
     subscribe.metadata()->type               = SubscribeMessage::ReqType::UNSUBSCRIBE;
-    subscribe.metadata()->msg_types_num      = 1;
+    subscribe.metadata()->msg_types_count    = 1;
     subscribe.metadata()->msg_types[0].value = 5;
 
     // Connect to the broker and send the message
@@ -224,7 +224,7 @@ TEST(broker_server, unsubscribe_multiple_types)
     // Create a subscribe message
     SubscribeMessage subscribe;
     subscribe.metadata()->type               = SubscribeMessage::ReqType::UNSUBSCRIBE;
-    subscribe.metadata()->msg_types_num      = 3;
+    subscribe.metadata()->msg_types_count    = 3;
     subscribe.metadata()->msg_types[0].value = 1;
     subscribe.metadata()->msg_types[1].value = 2;
     subscribe.metadata()->msg_types[2].value = 3;
@@ -246,7 +246,7 @@ TEST(broker_server, subscribe_unsubscribe)
     // Create a subscribe message
     SubscribeMessage subscribe;
     subscribe.metadata()->type               = SubscribeMessage::ReqType::SUBSCRIBE;
-    subscribe.metadata()->msg_types_num      = 3;
+    subscribe.metadata()->msg_types_count    = 3;
     subscribe.metadata()->msg_types[0].value = 1;
     subscribe.metadata()->msg_types[1].value = 2;
     subscribe.metadata()->msg_types[2].value = 3;
@@ -279,7 +279,7 @@ TEST(broker_server, publish_internal_message)
     // Build a subscribe message
     SubscribeMessage subscribe;
     subscribe.metadata()->type              = SubscribeMessage::ReqType::SUBSCRIBE;
-    subscribe.metadata()->msg_types_num     = 1;
+    subscribe.metadata()->msg_types_count   = 1;
     subscribe.metadata()->msg_types[0].bits = {
         .internal        = 1,
         .vendor_specific = 0,

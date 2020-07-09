@@ -285,9 +285,9 @@ public:
     };
 
     struct Metadata {
-        uint8_t version       = kVersion;
-        ReqType type          = ReqType::INVALID;
-        uint8_t msg_types_num = 0;
+        uint8_t version         = kVersion;
+        ReqType type            = ReqType::INVALID;
+        uint8_t msg_types_count = 0;
         MsgType msg_types[MAX_SUBSCRIBE_TYPES];
     };
 
@@ -316,20 +316,19 @@ public:
     {
         Message::print(os);
 
-        std::stringstream ss;
         Metadata *m = metadata();
         os << " metadata:" << std::endl;
-        os << "  version       : " << static_cast<int>(m->version) << std::endl;
-        os << "  type          : " << static_cast<int>(m->type) << std::endl;
-        os << "  msg_types_num : " << std::dec << int(m->msg_types_num) << std::endl;
-        os << "  msg_types     : " << std::hex << std::setfill('0') << std::setw(4)
+        os << "  version         : " << static_cast<int>(m->version) << std::endl;
+        os << "  type            : " << static_cast<int>(m->type) << std::endl;
+        os << "  msg_types_count : " << std::dec << int(m->msg_types_count) << std::endl;
+        os << "  msg_types       : " << std::hex << std::setfill('0') << std::setw(4)
            << m->msg_types[0].value;
-        for (int i = 1; i < m->msg_types_num; i++) {
+        for (int i = 1; i < m->msg_types_count; i++) {
             os << ", " << m->msg_types[i].value;
         }
         os << std::endl;
 
-        return os << ss.str();
+        return os;
     }
 };
 
