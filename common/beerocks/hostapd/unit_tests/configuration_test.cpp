@@ -470,6 +470,39 @@ TEST(configuration_test, uncomment_vap)
     EXPECT_FALSE(conf) << conf;
 
     //// end test ////
+}
+
+TEST(configuration_test, set_int_vap_values)
+{
+    //// start prerequsite ////
+
+    // construct a configuration
+    prplmesh::hostapd::config::Configuration conf(configuration_file);
+    EXPECT_FALSE(conf) << conf;
+
+    // load the dummy configuration file
+    conf.load();
+    EXPECT_TRUE(conf) << conf;
+
+    //// end prerequsite ////
+
+    //// start test ////
+
+    // replace existing value for existing key for existing vap
+    conf.set_create_vap_value("wlan0.1", "ignore_broadcast_ssid", 42);
+    EXPECT_TRUE(conf) << conf;
+
+    // add a key/value to exising vap
+    conf.set_create_vap_value("wlan0.3", "i_am_negative", -24);
+    EXPECT_TRUE(conf) << conf;
+
+    // try to replace existing value for existing key for existing vap
+    // with NON-int value. we expect the value to be trancated here
+    // at the caller site
+    conf.set_create_vap_value("wlan0.2", "wmm_enabled", 333.444);
+    EXPECT_TRUE(conf) << conf;
+
+    //// end test ////
 
     // for humans
     std::cerr << conf;
