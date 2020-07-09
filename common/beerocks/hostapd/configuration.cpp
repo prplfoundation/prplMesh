@@ -151,6 +151,37 @@ bool Configuration::set_create_vap_value(const std::string &vap, const std::stri
     return set_create_vap_value(vap, key, std::to_string(value));
 }
 
+std::string Configuration::get_vap_value(const std::string &vap, const std::string &key)
+{
+    // search for the requested vap
+    auto existing_vap = m_hostapd_config_vaps.find(vap);
+
+    if (existing_vap == m_hostapd_config_vaps.end()) {
+        m_last_message = std::string(__FUNCTION__) + " couldn't find requested vap: " + vap +
+                         " (requested key: " + key + ")";
+        m_ok = false;
+        return "";
+    }
+
+    // search for the key
+    std::string key_eq(key + "=");
+    auto it_str = std::find_if(existing_vap->second.begin(), existing_vap->second.end(),
+                               [&key_eq](std::string str) -> bool {
+                                   return (str.compare(0, key_eq.length(), key_eq) == 0);
+                               });
+
+    if (it_str == existing_vap->second.end()) {
+        m_last_message = std::string(__FUNCTION__) +
+                         " couldn't find requested key for vap: " + vap + "; requested key: " + key;
+        m_ok = false;
+        return "";
+    }
+
+    m_ok = true;
+    // return from the just after the '=' sign to the end of the string
+    return it_str->substr(key_eq.length());
+}
+
 const std::string &Configuration::get_last_message() const { return m_last_message; }
 
 std::ostream &operator<<(std::ostream &o, const Configuration &conf)

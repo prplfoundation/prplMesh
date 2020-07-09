@@ -207,7 +207,7 @@ TEST(configuration_test, store)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    //   // clean_start();
+    // clean_start();
 
     // construct a configuration
     ASSERT_FALSE(conf) << conf;
@@ -215,9 +215,9 @@ TEST(configuration_test, store)
     // load the dummy configuration file
     conf.load();
     ASSERT_TRUE(conf) << conf;
-    
+
     //// end prerequsite ////
-    
+
     // add a value to vap
     conf.set_create_vap_value("wlan0.3", "was_i_stroed", "yes_you_were");
     EXPECT_TRUE(conf) << conf;
@@ -498,9 +498,45 @@ TEST(configuration_test, set_int_vap_values)
     EXPECT_TRUE(conf) << conf;
 
     //// end test ////
-
-    // for humans
-    std::cerr << conf;
 }
 
+TEST(configuration_test, get_vap_values)
+{
+    //// start prerequsite ////
+
+    // construct a configuration
+    prplmesh::hostapd::config::Configuration conf(configuration_file);
+    ASSERT_FALSE(conf) << conf;
+
+    // load the dummy configuration file
+    conf.load();
+    ASSERT_TRUE(conf) << conf;
+
+    //// end prerequsite ////
+
+    //// start test ////
+
+    std::string value;
+
+    // get existing value for existing vap
+    value = conf.get_vap_value("wlan0.1", "wpa_passphrase");
+    EXPECT_EQ(value, "maprocks2") << conf;
+
+    // another check - existing value for existing vap
+    value = conf.get_vap_value("wlan0.1", "bssid");
+    EXPECT_EQ(value, "02:9A:96:FB:59:12");
+
+    // get NON existing value for existing vap
+    value = conf.get_vap_value("wlan0.1", "does_not_exist");
+    EXPECT_EQ(value, "") << conf;
+
+    // try to get for NON existing vap
+    value = conf.get_vap_value("no_vap", "key");
+    EXPECT_EQ(value, "") << conf;
+
+    //// end test ////
+
+    // for humans
+    std::cerr << "received value: " << value << '\n';
+}
 } // namespace
