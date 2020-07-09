@@ -48,6 +48,24 @@ public:
      */
     bool load();
 
+    /**
+     * @brief set key/value for the given vap
+     * @details set the key/vale for the given vap, either replace or create.
+     * @return 
+     * true - the vap exists, values were set.
+     * false - the given vap was not found
+     */
+    bool set_create_vap_value(const std::string &vap, const std::string &key,
+                              const std::string &value);
+
+    /**
+     * @brief for debug: return the last internal message
+     * @details each action on this class changes its internal
+     * message (similar to errno) - for debug usage
+     * @return s string describing the last message
+     */
+    const std::string &get_last_message() const;
+
 private:
     std::string m_configuration_file;
     bool m_ok = false;
@@ -62,7 +80,7 @@ private:
     // configuration file with the original key=value
     // e.g. the following lines in the configuration file:
     // bss=wlan0.1 <------------------------------  the key in the map: "wlan0.1"
-    // ctrl_interface=/var/run/hostapd <----------  each line is an element in the array of the map's value   
+    // ctrl_interface=/var/run/hostapd <----------  each line is an element in the array of the map's value
     // ap_isolate=1
     // ap_max_inactivity=60
     // bss_transition=1
@@ -79,7 +97,7 @@ private:
     // { "wlan0.2" : ["ctrl_interface=/var/run/hosXXpd", "ap_isolate=1", "ap_max_inactivity=60", "bss_transition=0", "interworking=3"] }
     std::map<std::string, std::vector<std::string>> m_hostapd_config_vaps;
 
-    std::string m_error_description = "no error";
+    std::string m_last_message = "all good";
 
     // for logs
     friend std::ostream &operator<<(std::ostream &, const Configuration &);
