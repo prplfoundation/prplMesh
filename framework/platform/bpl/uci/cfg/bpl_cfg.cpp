@@ -461,6 +461,8 @@ bool cfg_get_unfriendly_device_max_timelife_delay_days(
 
 bool bpl_cfg_get_wpa_supplicant_ctrl_path(const std::string &iface, std::string &wpa_ctrl_path)
 {
+    const char *path{"/var/run/wpa_supplicant/"};
+    wpa_ctrl_path = path + iface;
     return true;
 }
 
