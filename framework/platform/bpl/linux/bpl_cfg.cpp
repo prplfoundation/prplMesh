@@ -393,6 +393,17 @@ bool cfg_get_unfriendly_device_max_timelife_delay_days(
 
 bool bpl_cfg_get_wpa_supplicant_ctrl_path(const std::string &iface, std::string &wpa_ctrl_path)
 {
+
+    std::string param = "wpa_supplicant_ctrl_path_";
+
+    param += iface;
+    param += '=';
+
+    if (cfg_get_param(param, wpa_ctrl_path) < 0) {
+        MAPF_ERR("Failed to read: " << param);
+        return false;
+    }
+
     return true;
 }
 
