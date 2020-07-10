@@ -8,12 +8,13 @@ services:
             - USER=$USER
             - INSTALL_DIR=$ROOT_DIR/build/install
             - ROOT_DIR=$ROOT_DIR
+            - CURRENT_ID=$CURRENT_ID
         expose:
             - "5000"
             - "8002"
         volumes:
             - "$ROOT_DIR:$ROOT_DIR"
-        user: ${CURRENT_UID}
+        # user: ${CURRENT_UID}
         entrypoint: ["/root/entrypoint.sh", "/usr/bin/start-controller-agent"]
 
     agent:
@@ -24,12 +25,13 @@ services:
             - USER=$USER
             - INSTALL_DIR=$ROOT_DIR/build/install
             - ROOT_DIR=$ROOT_DIR
+            - CURRENT_ID=$CURRENT_ID
         expose:
             - "5000"
             - "8002"
         volumes:
           - "$ROOT_DIR:$ROOT_DIR"
-        user: ${CURRENT_UID}
+        # user: ${CURRENT_UID}
         entrypoint: ["/root/entrypoint.sh", "/usr/bin/start-agent"]
 
     boardfarm:
@@ -39,6 +41,8 @@ services:
         environment:
             - USER=$USER
             - ROOT_DIR=$ROOT_DIR
+            - CURRENT_UID=$CURRENT_UID
+            - CURRENT_ID=$CURRENT_ID
         ports:
             - "5000:5000"
         volumes:
@@ -48,8 +52,3 @@ services:
         user: ${CURRENT_UID}
         working_dir: $ROOT_DIR/prplMesh/tests
         entrypoint: ["bash", "run_bf_compose.sh"]
-
-networks:
-    default:
-        external:
-            name: prplbr

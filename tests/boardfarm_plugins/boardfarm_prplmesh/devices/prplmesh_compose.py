@@ -74,6 +74,7 @@ class PrplMeshCompose(PrplMeshBase):
             full_args += args
 
         print('_docker_compose: {}'.format(' '.join(full_args)))
+        os.environ['CURRENT_UID'] = '1000:998'
         self._run_shell_cmd("/usr/local/bin/docker-compose", full_args)
 
     def __del__(self):
