@@ -81,6 +81,7 @@ class Services:
         # local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(docker_gid)
         local_env['CURRENT_ID']= str(os.getuid())
         # local_env['USER']= getpass.getuser() 
+        # local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(os.getgid())
         if not interactive:
             proc = Popen(params, stdout=PIPE, stderr=PIPE)
             for line in proc.stdout:
