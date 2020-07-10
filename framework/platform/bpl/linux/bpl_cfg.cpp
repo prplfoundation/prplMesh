@@ -409,6 +409,17 @@ bool bpl_cfg_get_wpa_supplicant_ctrl_path(const std::string &iface, std::string 
 
 bool bpl_cfg_get_hostapd_ctrl_path(const std::string &iface, std::string &hostapd_ctrl_path)
 {
+
+    std::string param = "hostapd_ctrl_path_";
+
+    param += iface;
+    param += '=';
+
+    if (cfg_get_param(param, hostapd_ctrl_path) < 0) {
+        MAPF_ERR("Failed to read: " << param);
+        return false;
+    }
+
     return true;
 }
 
