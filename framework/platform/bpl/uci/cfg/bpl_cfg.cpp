@@ -459,5 +459,15 @@ bool cfg_get_unfriendly_device_max_timelife_delay_days(
     return true;
 }
 
+bool bpl_cfg_get_wpa_supplicant_ctrl_path(const std::string &iface, std::string &wpa_ctrl_path)
+{
+    return true;
+}
+
+bool bpl_cfg_get_hostapd_ctrl_path(const std::string &iface, std::string &hostapd_ctrl_path)
+{
+    return true;
+}
+
 } // namespace bpl
 } // namespace beerocks

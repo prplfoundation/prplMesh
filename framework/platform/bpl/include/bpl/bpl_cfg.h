@@ -13,6 +13,7 @@
 #include "bpl_err.h"
 
 #include <stdint.h>
+#include <string>
 
 namespace beerocks {
 namespace bpl {
@@ -536,6 +537,24 @@ bool cfg_get_max_timelife_delay_days(int &max_timelife_delay_days);
  */
 bool cfg_get_unfriendly_device_max_timelife_delay_days(
     int &unfriendly_device_max_timelife_delay_days);
+
+/**
+ * @brief Returns configured WPA Control Path for the given interface.
+ *
+ * @param [in] Interface name
+ * @param [out] WPA Control Path
+ * @return true on success, otherwise false.
+ */
+bool bpl_cfg_get_wpa_supplicant_ctrl_path(const std::string &iface, std::string &wpa_ctrl_path);
+
+/**
+ * @brief Returns configured Hostapd Control Path for the given interface.
+ *
+ * @param [in] Interface name
+ * @param [out] Hostapd Control Path
+ * @return true on success, otherwise false.
+ */
+bool bpl_cfg_get_hostapd_ctrl_path(const std::string &iface, std::string &hostapd_ctrl_path);
 
 } // namespace bpl
 } // namespace beerocks
