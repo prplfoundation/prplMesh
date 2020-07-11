@@ -12,6 +12,7 @@
 #include <bcl/beerocks_utils.h>
 #include <bcl/network/network_utils.h>
 #include <bcl/son/son_wireless_utils.h>
+#include <bpl/bpl_cfg.h>
 #include <easylogging++.h>
 
 #include <beerocks/tlvf/beerocks_message.h>
@@ -113,6 +114,11 @@ bool ap_manager_thread::create_ap_wlan_hal()
 
     bwl::hal_conf_t hal_conf;
     hal_conf.ap_acs_enabled = acs_enabled;
+
+    if (!beerocks::bpl::bpl_cfg_get_hostapd_ctrl_path(m_iface, hal_conf.wpa_ctrl_path)) {
+        LOG(ERROR) << "Couldn't get hostapd control path for interface " << m_iface;
+        return false;
+    }
 
     // Create a new AP HAL instance
     ap_wlan_hal = bwl::ap_wlan_hal_create(
