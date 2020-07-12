@@ -202,7 +202,7 @@ static void parsed_obj_debug(base_wlan_hal_nl80211::parsed_obj_listed_map_t &obj
 
 base_wlan_hal_nl80211::base_wlan_hal_nl80211(HALType type, const std::string &iface_name,
                                              hal_event_cb_t callback, int wpa_ctrl_buffer_size,
-                                             hal_conf_t hal_conf)
+                                             const hal_conf_t &hal_conf)
     : base_wlan_hal(type, iface_name, IfaceType::Intel, callback, hal_conf),
       beerocks::beerocks_fsm<nl80211_fsm_state, nl80211_fsm_event>(nl80211_fsm_state::Delay),
       m_nl80211_client(nl80211_client_factory::create_instance()),
