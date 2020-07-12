@@ -70,7 +70,7 @@ public:
     // Protected methods
 protected:
     base_wlan_hal_dwpal(HALType type, const std::string &iface_name, hal_event_cb_t callback,
-                        hal_conf_t hal_conf = {});
+                        const hal_conf_t &hal_conf = {});
 
     // Process dwpal event
     virtual bool process_dwpal_event(char *buffer, int bufLen, const std::string &opcode) = 0;
