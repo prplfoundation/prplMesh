@@ -159,7 +159,7 @@ prplmesh_watchdog() {
 
     # Monitor the number of running processes
     while [ "$CURR_PIDS" -ge "$PREV_PIDS" ]; do
-        sleep 1
+        sleep 5
         CURR_PIDS="$(pgrep 'beerocks_(agent|controller)' | wc -l)"
         if [ "$CURR_PIDS" -gt "$PREV_PIDS" ]; then
             PREV_PIDS=$CURR_PIDS
