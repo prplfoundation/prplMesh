@@ -67,7 +67,7 @@ public:
     // Protected methods
 protected:
     base_wlan_hal_dummy(HALType type, const std::string &iface_name, hal_event_cb_t callback,
-                        hal_conf_t hal_conf = {});
+                        const hal_conf_t &hal_conf = {});
 
     void parsed_obj_debug(parsed_obj_map_t &obj);
     void parsed_obj_debug(parsed_obj_listed_map_t &obj);
