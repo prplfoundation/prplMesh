@@ -100,6 +100,7 @@ struct RadioInfo {
 
 struct hal_conf_t {
     bool ap_acs_enabled = false;
+    std::string wpa_ctrl_path;
 };
 
 //sta_wlan_hal
