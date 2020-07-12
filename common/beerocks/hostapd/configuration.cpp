@@ -184,15 +184,17 @@ std::string Configuration::get_vap_value(const std::string &vap, const std::stri
     return it_str->substr(it_str->find('=') + 1);
 }
 
-void Configuration::disable_all_ap_vaps() {
-    for_each(
-            m_hostapd_config_vaps.begin(),
-            m_hostapd_config_vaps.end(),
-            [this](const std::pair<std::string, std::vector<std::string>> &vap) {
-                if ( get_vap_value(vap.first, "mode") == "ap" ) {
-                    set_create_vap_value(vap.first, "start_disabled", "1");
-                }
-            });
+void Configuration::comment_vap(const std::string &vap)
+{
+    // search for the requested vap
+    auto find_vap = get_vap(std::string(__FUNCTION__), vap);
+    if (!std::get<0>(find_vap)) {
+        return;
+    }
+    const auto &existing_vap = std::get<1>(find_vap);
+
+    std::for_each(existing_vap->begin(), existing_vap->end(),
+                  [](std::string &line) { line.insert(0, 1, '#'); });
 }
 
 const std::string &Configuration::get_last_message() const { return m_last_message; }

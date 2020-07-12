@@ -87,11 +87,19 @@ public:
     std::string get_vap_value(const std::string &vap, const std::string &key);
 
     /**
-     * @brief disable all ap vaps
-     * @details disable all vaps that thier mode is "ap", 
-     * (leaving STAs vaps untouched for example)
+     * @brief disables vap by adding a comment to it
+     * e.g: 
+     * before:
+     * bss=wlan0_0 
+     * ssid=test2 
+     * bss=wlan0_1
+     * after:
+     * #bss=wlan0_0 
+     * #ssid=test2 
+     * bss=wlan0_1
+     *
      */
-    void disable_all_ap_vaps();
+    void comment_vap(const std::string &vap);
 
     /**
      * @brief for debug: return the last internal message

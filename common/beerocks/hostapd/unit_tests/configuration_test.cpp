@@ -537,8 +537,22 @@ TEST(configuration_test, get_vap_values)
     //// end test ////
 }
 
-
 TEST(configuration_test, diable_all_ap)
+{
+    //// start prerequsite ////
+
+    // construct a configuration
+    prplmesh::hostapd::config::Configuration conf(configuration_file);
+    ASSERT_FALSE(conf) << conf;
+
+    // load the dummy configuration file
+    conf.load();
+    ASSERT_TRUE(conf) << conf;
+
+    //// end prerequsite ////
+}
+
+TEST(configuration_test, disable_vap)
 {
     //// start prerequsite ////
 
@@ -553,8 +567,8 @@ TEST(configuration_test, diable_all_ap)
     //// end prerequsite ////
 
     //// start test ////
-    
-    conf.disable_all_ap_vaps();    
+
+    conf.comment_vap("wlan0.1");
     EXPECT_TRUE(conf) << conf;
 
     conf.store();
