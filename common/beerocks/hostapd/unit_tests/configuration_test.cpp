@@ -535,8 +535,31 @@ TEST(configuration_test, get_vap_values)
     EXPECT_EQ(value, "") << conf;
 
     //// end test ////
+}
 
-    // for humans
-    std::cerr << "received value: " << value << '\n';
+
+TEST(configuration_test, diable_all_ap)
+{
+    //// start prerequsite ////
+
+    // construct a configuration
+    prplmesh::hostapd::config::Configuration conf(configuration_file);
+    ASSERT_FALSE(conf) << conf;
+
+    // load the dummy configuration file
+    conf.load();
+    ASSERT_TRUE(conf) << conf;
+
+    //// end prerequsite ////
+
+    //// start test ////
+    
+    conf.disable_all_ap_vaps();    
+    EXPECT_TRUE(conf) << conf;
+
+    conf.store();
+    EXPECT_TRUE(conf) << conf;
+
+    //// end test ////
 }
 } // namespace

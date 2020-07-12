@@ -159,6 +159,7 @@ std::string Configuration::get_vap_value(const std::string &vap, const std::stri
     if (existing_vap == m_hostapd_config_vaps.end()) {
         m_last_message = std::string(__FUNCTION__) + " couldn't find requested vap: " + vap +
                          " (requested key: " + key + ")";
+        // it is an error to ask for non existing vap
         m_ok = false;
         return "";
     }
@@ -173,13 +174,26 @@ std::string Configuration::get_vap_value(const std::string &vap, const std::stri
     if (it_str == existing_vap->second.end()) {
         m_last_message = std::string(__FUNCTION__) +
                          " couldn't find requested key for vap: " + vap + "; requested key: " + key;
-        m_ok = false;
+
+        // it ok not to find the requested key
+        m_ok = true;
         return "";
     }
 
     m_ok = true;
     // return from the just after the '=' sign to the end of the string
     return it_str->substr(key_eq.length());
+}
+
+void Configuration::disable_all_ap_vaps() {
+    for_each(
+            m_hostapd_config_vaps.begin(),
+            m_hostapd_config_vaps.end(),
+            [this](const std::pair<std::string, std::vector<std::string>> &vap) {
+                if ( get_vap_value(vap.first, "mode") == "ap" ) {
+                    set_create_vap_value(vap.first, "start_disabled", "1");
+                }
+            });
 }
 
 const std::string &Configuration::get_last_message() const { return m_last_message; }
