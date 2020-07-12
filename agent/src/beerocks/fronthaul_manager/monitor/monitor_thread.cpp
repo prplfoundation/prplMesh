@@ -13,6 +13,7 @@
 
 #define BEEROCKS_CUSTOM_LOGGER_ID BEEROCKS_MONITOR
 #include <bcl/beerocks_logging_custom.h>
+#include <bpl/bpl_cfg.h>
 
 #include <beerocks/tlvf/beerocks_message.h>
 
@@ -64,9 +65,15 @@ monitor_thread::monitor_thread(const std::string &slave_uds_, const std::string 
 
     using namespace std::placeholders; // for `_1`
 
+    bwl::hal_conf_t hal_conf;
+
+    if (!beerocks::bpl::bpl_cfg_get_hostapd_ctrl_path(monitor_iface, hal_conf.wpa_ctrl_path)) {
+        LOG(ERROR) << "Couldn't get hostapd control path for interface " << monitor_iface;
+    }
+
     // Create new Monitor HAL instance
     mon_wlan_hal = bwl::mon_wlan_hal_create(
-        monitor_iface_, std::bind(&monitor_thread::hal_event_handler, this, _1));
+        monitor_iface_, std::bind(&monitor_thread::hal_event_handler, this, _1), hal_conf);
 
     LOG_IF(!mon_wlan_hal, FATAL) << "Failed creating HAL instance!";
 }
