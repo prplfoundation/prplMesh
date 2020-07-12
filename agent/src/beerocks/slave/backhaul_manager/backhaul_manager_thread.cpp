@@ -1346,9 +1346,19 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
 
             // Create a HAL instance if doesn't exists
             if (!soc->sta_wlan_hal) {
+
+                bwl::hal_conf_t hal_conf;
+
+                if (!beerocks::bpl::bpl_cfg_get_wpa_supplicant_ctrl_path(iface,
+                                                                         hal_conf.wpa_ctrl_path)) {
+                    LOG(ERROR) << "Couldn't get hostapd control path";
+                    return false;
+                }
+
                 using namespace std::placeholders; // for `_1`
                 soc->sta_wlan_hal = bwl::sta_wlan_hal_create(
-                    iface, std::bind(&backhaul_manager::hal_event_handler, this, _1, iface));
+                    iface, std::bind(&backhaul_manager::hal_event_handler, this, _1, iface),
+                    hal_conf);
                 LOG_IF(!soc->sta_wlan_hal, FATAL) << "Failed creating HAL instance!";
             } else {
                 LOG(DEBUG) << "STA HAL exists...";
