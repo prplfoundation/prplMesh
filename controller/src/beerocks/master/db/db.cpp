@@ -20,12 +20,12 @@ using namespace beerocks_message;
 using namespace son;
 using namespace net;
 
-static const std::string timestamp_str            = "timestamp";
-static const std::string timelife_delay_str       = "timelife";
-static const std::string initial_radio_enable_str = "initial_radio_enable";
-static const std::string initial_radio_str        = "initial_radio";
-static const std::string selected_band_enable_str = "selected_band_enable";
-static const std::string selected_bands_str       = "selected_bands";
+const std::string db::TIMESTAMP_STR            = "timestamp";
+const std::string db::TIMELIFE_DELAY_STR       = "timelife";
+const std::string db::INITIAL_RADIO_ENABLE_STR = "initial_radio_enable";
+const std::string db::INITIAL_RADIO_STR        = "initial_radio";
+const std::string db::SELECTED_BAND_ENABLE_STR = "selected_band_enable";
+const std::string db::SELECTED_BANDS_STR       = "selected_bands";
 
 // static
 std::string db::type_to_string(beerocks::eType type)
@@ -2545,8 +2545,8 @@ bool db::set_client_time_life_delay(const sMacAddr &mac,
         LOG(DEBUG) << "configuring persistent-db, timelife = " << time_life_delay_sec.count();
 
         std::unordered_map<std::string, std::string> values_map;
-        values_map.at(timestamp_str)      = timestamp_to_string_seconds(timestamp);
-        values_map.at(timelife_delay_str) = std::to_string(time_life_delay_sec.count());
+        values_map.at(TIMESTAMP_STR)      = timestamp_to_string_seconds(timestamp);
+        values_map.at(TIMELIFE_DELAY_STR) = std::to_string(time_life_delay_sec.count());
 
         // update the persistent db
         if (!update_client_entry_in_persistent_db(mac, values_map)) {
@@ -2588,8 +2588,8 @@ bool db::set_client_stay_on_initial_radio(const sMacAddr &mac, bool stay_on_init
         LOG(DEBUG) << "configuring persistent-db, initial_radio_enable = " << stay_on_initial_radio;
 
         std::unordered_map<std::string, std::string> values_map;
-        values_map.at(timestamp_str)            = timestamp_to_string_seconds(timestamp);
-        values_map.at(initial_radio_enable_str) = std::to_string(stay_on_initial_radio);
+        values_map.at(TIMESTAMP_STR)            = timestamp_to_string_seconds(timestamp);
+        values_map.at(INITIAL_RADIO_ENABLE_STR) = std::to_string(stay_on_initial_radio);
 
         // update the persistent db
         if (!update_client_entry_in_persistent_db(mac, values_map)) {
@@ -2632,8 +2632,8 @@ bool db::set_client_initial_radio(const sMacAddr &mac, const sMacAddr &initial_r
         LOG(DEBUG) << "configuring persistent-db, initial_radio = " << initial_radio_mac;
 
         std::unordered_map<std::string, std::string> values_map;
-        values_map.at(timestamp_str)     = timestamp_to_string_seconds(timestamp);
-        values_map.at(initial_radio_str) = tlvf::mac_to_string(initial_radio_mac);
+        values_map.at(TIMESTAMP_STR)     = timestamp_to_string_seconds(timestamp);
+        values_map.at(INITIAL_RADIO_STR) = tlvf::mac_to_string(initial_radio_mac);
 
         // update the persistent db
         if (!update_client_entry_in_persistent_db(mac, values_map)) {
@@ -2675,8 +2675,8 @@ bool db::set_client_stay_on_selected_band(const sMacAddr &mac, bool stay_on_sele
         LOG(DEBUG) << "configuring persistent-db, selected_band_enable = " << stay_on_selected_band;
 
         std::unordered_map<std::string, std::string> values_map;
-        values_map.at(timestamp_str)            = timestamp_to_string_seconds(timestamp);
-        values_map.at(selected_band_enable_str) = std::to_string(stay_on_selected_band);
+        values_map.at(TIMESTAMP_STR)            = timestamp_to_string_seconds(timestamp);
+        values_map.at(SELECTED_BAND_ENABLE_STR) = std::to_string(stay_on_selected_band);
 
         // update the persistent db
         if (!update_client_entry_in_persistent_db(mac, values_map)) {
@@ -2719,8 +2719,8 @@ bool db::set_client_selected_bands(const sMacAddr &mac, beerocks::eFreqType sele
         LOG(DEBUG) << ", configuring persistent-db, selected_bands = " << int(selected_bands);
 
         std::unordered_map<std::string, std::string> values_map;
-        values_map.at(timestamp_str)      = timestamp_to_string_seconds(timestamp);
-        values_map.at(selected_bands_str) = std::to_string(selected_bands);
+        values_map.at(TIMESTAMP_STR)      = timestamp_to_string_seconds(timestamp);
+        values_map.at(SELECTED_BANDS_STR) = std::to_string(selected_bands);
 
         // update the persistent db
         if (!update_client_entry_in_persistent_db(mac, values_map)) {
@@ -2798,12 +2798,12 @@ bool db::update_client_persistent_db(const sMacAddr &mac)
     std::unordered_map<std::string, std::string> values_map;
 
     //fill values map of client persistent params
-    values_map.at(timestamp_str) = timestamp_to_string_seconds(node->client_parameters_last_edit);
+    values_map.at(TIMESTAMP_STR) = timestamp_to_string_seconds(node->client_parameters_last_edit);
 
     if (node->client_time_life_delay_sec != std::chrono::seconds::zero()) {
         LOG(DEBUG) << "setting client time-life-delay in persistent-db to for " << mac << " to "
                    << node->client_time_life_delay_sec.count();
-        values_map.at(timelife_delay_str) =
+        values_map.at(TIMELIFE_DELAY_STR) =
             std::to_string(node->client_time_life_delay_sec.count());
     }
 
@@ -2811,26 +2811,26 @@ bool db::update_client_persistent_db(const sMacAddr &mac)
         auto enable = (node->client_stay_on_initial_radio == eTriStateBool::ENABLE);
         LOG(DEBUG) << "setting client stay-on-initial-radio in persistent-db to for " << mac
                    << " to " << enable;
-        values_map.at(initial_radio_enable_str) = std::to_string(enable);
+        values_map.at(INITIAL_RADIO_ENABLE_STR) = std::to_string(enable);
     }
 
     if (node->client_initial_radio != network_utils::ZERO_MAC) {
         LOG(DEBUG) << "setting client initial-radio in persistent-db to for " << mac << " to "
                    << node->client_initial_radio;
-        values_map.at(initial_radio_str) = tlvf::mac_to_string(node->client_initial_radio);
+        values_map.at(INITIAL_RADIO_STR) = tlvf::mac_to_string(node->client_initial_radio);
     }
 
     if (node->client_stay_on_selected_band != eTriStateBool::NOT_CONFIGURED) {
         auto enable = (node->client_stay_on_selected_band == eTriStateBool::ENABLE);
         LOG(DEBUG) << "setting client stay-on-selected-band in persistent-db to for " << mac
                    << " to " << enable;
-        values_map.at(selected_band_enable_str) = std::to_string(enable);
+        values_map.at(SELECTED_BAND_ENABLE_STR) = std::to_string(enable);
     }
 
     if (node->client_selected_bands != beerocks::eFreqType::FREQ_UNKNOWN) {
         LOG(DEBUG) << "setting client selected-bands in persistent-db to for " << mac << " to "
                    << node->client_selected_bands;
-        values_map.at(selected_bands_str) = std::to_string(node->client_selected_bands);
+        values_map.at(SELECTED_BANDS_STR) = std::to_string(node->client_selected_bands);
     }
 
     // update the persistent db

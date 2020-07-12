@@ -45,6 +45,18 @@ class db {
     } sBmlListener;
 
 public:
+    /**
+     * @brief Client parameter names.
+     * The parameter names can be used to set/get multiple parameters in one-shot.
+     * This is done using key-value map (where key is the param name and value is it value)
+     */
+    static const std::string TIMESTAMP_STR;
+    static const std::string TIMELIFE_DELAY_STR;
+    static const std::string INITIAL_RADIO_ENABLE_STR;
+    static const std::string INITIAL_RADIO_STR;
+    static const std::string SELECTED_BAND_ENABLE_STR;
+    static const std::string SELECTED_BANDS_STR;
+
     // VAPs info list type
     typedef std::list<std::shared_ptr<beerocks_message::sConfigVapInfo>> vaps_list_t;
 
