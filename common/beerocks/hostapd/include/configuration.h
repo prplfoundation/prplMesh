@@ -21,7 +21,7 @@ public:
      * @brief construct a Configurationn object
      * @param file_name the name of the configuration file.
      */
-    Configuration(const std::string& file_name);
+    Configuration(const std::string &file_name);
 
     ~Configuration()                     = default;
     Configuration(const Configuration &) = default;
@@ -97,9 +97,32 @@ public:
      * @brief for debug: return the last internal message
      * @details each action on this class changes its internal
      * message (similar to errno) - for debug usage
-     * @return s string describing the last message
+     * @return string describing the last message
      */
     const std::string &get_last_message() const;
+
+private:
+    /**
+     * @brief helper: get exiting vap
+     * @details any function that works on a specific vap does
+     * the same: search the vap, set a variable when found
+     * and set an error state when not found, this function
+     * does it instead of copy/paste the same code
+     * @param the calling function, string (to report error)
+     * @param the requested vap, string
+     * @return tuple<bool,std::vector<std::string>*> (found/not found, a 
+     * pointer to the vap's array)
+     */
+    std::tuple<bool, std::vector<std::string> *> get_vap(const std::string &calling_function,
+                                                         const std::string &vap);
+
+    /**
+     * @brief helper: check if the line contains the key
+     * @param line in the format key=value or commented ###key=value
+     * @param the requested key, string
+     * @return true/false if the line contains the key
+     */
+    bool is_key_in_line(const std::string &line, const std::string &key) const;
 
 private:
     std::string m_configuration_file;
