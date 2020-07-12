@@ -87,6 +87,13 @@ public:
     std::string get_vap_value(const std::string &vap, const std::string &key);
 
     /**
+     * @brief disable all ap vaps
+     * @details disable all vaps that thier mode is "ap", 
+     * (leaving STAs vaps untouched for example)
+     */
+    void disable_all_ap_vaps();
+
+    /**
      * @brief for debug: return the last internal message
      * @details each action on this class changes its internal
      * message (similar to errno) - for debug usage
