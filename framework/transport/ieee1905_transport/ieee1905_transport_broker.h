@@ -9,7 +9,7 @@
 #ifndef BROKER_SERVER_H
 #define BROKER_SERVER_H
 
-#include <bcl/beerocks_socket_event_loop.h>
+#include <bcl/beerocks_event_loop.h>
 
 #include <mapf/transport/ieee1905_transport_messages.h>
 
@@ -26,13 +26,18 @@ namespace broker {
  * Implements a broker server that is responsible for the internal communication
  * between the different prplMesh components (transport, controller, agent etc.)
  * 
- * The broker accepts connection over a UDS file.
- * Once connected to the server, a client can subscribe CMDU types.
+ * The broker accepts connection over a SocketServer.
+ * Once connected to the server, a client can subscribe to CMDU types.
  * Message filtering is implemented inside the server, so that clients receive only
  * the message types they subscribed to.
  */
-class BrokerServer : public SocketEventLoop {
+class BrokerServer {
 public:
+    /**
+     * The type of the supported EventLoop.
+     */
+    using BrokerEventLoop = EventLoop<std::shared_ptr<Socket>, std::chrono::milliseconds>;
+
     /**
      * @brief Transport messages (@see Message) handler function definition.
      *
@@ -50,14 +55,31 @@ public:
      * 
      * @param [in] broker_uds_path The path and file name to the server UDS file.
      */
-    explicit BrokerServer(
-        const std::string &broker_uds_path,
-        SocketEventLoop::TimeoutType timeout = SocketEventLoop::TimeoutType::min());
+    explicit BrokerServer(SocketServer &broker_server, BrokerEventLoop &event_loop);
 
     /**
      * Destructor.
      */
     virtual ~BrokerServer() = default;
+
+    /**
+     * @brief Add an event to the Broker's event loop.
+     * @see EventLoop::add_event
+     */
+    virtual bool add_event(BrokerEventLoop::EventType event,
+                           BrokerEventLoop::EventHandlers handlers);
+
+    /**
+     * @brief Delete an event from the Broker's event loop.
+     * @see EventLoop::del_event
+     */
+    virtual bool del_event(BrokerEventLoop::EventType event);
+
+    /**
+     * @brief Run the Broker's event loop.
+     * @see EventLoop::run
+     */
+    virtual int run();
 
     /**
      * @brief Publishes the message with the broker subscribers.
@@ -99,6 +121,7 @@ protected:
      */
     virtual bool handle_msg(std::shared_ptr<Socket> &sd);
 
+private:
     /**
      * @brief Handle broker subscribe/unsubscribe messages.
      * 
@@ -107,8 +130,7 @@ protected:
      * 
      * @return true on success of false otherwise.
      */
-    virtual bool handle_subscribe(std::shared_ptr<Socket> &sd,
-                                  const messages::SubscribeMessage &msg);
+    bool handle_subscribe(std::shared_ptr<Socket> &sd, const messages::SubscribeMessage &msg);
 
     /**
      * @brief Handler method for socket connections.
@@ -117,7 +139,7 @@ protected:
      * 
      * @return true on success of false otherwise.
      */
-    virtual bool socket_connected(std::shared_ptr<SocketServer> sd);
+    bool socket_connected(std::shared_ptr<SocketServer> sd);
 
     /**
      * @brief Handler method for socket disconnections.
@@ -126,18 +148,18 @@ protected:
      * 
      * @return true on success of false otherwise.
      */
-    virtual bool socket_disconnected(std::shared_ptr<Socket> sd);
+    bool socket_disconnected(std::shared_ptr<Socket> sd);
 
 private:
     /**
-     * Path and filename to the server's UDS file.
+     * Shared pointer to the broker server socket.
      */
-    const std::string m_broker_uds_path;
+    std::shared_ptr<SocketServer> m_broker_server = nullptr;
 
     /**
-     * Shared pointer to the server's UDS socket.
+     * Reference to the event loop that should be used by the broker.
      */
-    std::shared_ptr<SocketServer> m_broker_socket_uds = nullptr;
+    BrokerEventLoop &m_broker_event_loop;
 
     /**
      * Map for storing Socket->CMDU Type subscriptions.
