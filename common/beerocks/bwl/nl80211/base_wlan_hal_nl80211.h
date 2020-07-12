@@ -72,7 +72,7 @@ public:
     // Protected methods
 protected:
     base_wlan_hal_nl80211(HALType type, const std::string &iface_name, hal_event_cb_t callback,
-                          int wpa_ctrl_buffer_size, hal_conf_t hal_conf = {});
+                          int wpa_ctrl_buffer_size, const hal_conf_t &hal_conf = {});
 
     // Process hostapd/wpa_supplicant event
     virtual bool process_nl80211_event(parsed_obj_map_t &event) = 0;
