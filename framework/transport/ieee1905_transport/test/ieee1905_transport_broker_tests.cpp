@@ -13,6 +13,7 @@
 #include <sys/uio.h>
 
 #include <bcl/beerocks_os_utils.h>
+#include <bcl/beerocks_socket_event_loop.h>
 #include <bcl/beerocks_thread_base.h>
 
 #include <beerocks/tlvf/beerocks_message.h>
@@ -40,6 +41,12 @@ using namespace beerocks::transport::messages;
 // UDS file for the tests
 static const std::string broker_uds_file = "beerocks_broker_test_uds";
 
+// Broker SocketServer listen buffer depth
+static constexpr int broker_listen_buffer = 1;
+
+// Default broker server timeout
+static constexpr auto broker_timeout = std::chrono::milliseconds(100);
+
 // Invalid message magic value
 static constexpr uint32_t INVALID_MAGIC = 0x12345678;
 
@@ -50,10 +57,8 @@ static constexpr uint32_t INVALID_MAGIC = 0x12345678;
 // Wrapper class for the BrokerServer for capturing errors
 class BrokerServerWrapper : public BrokerServer {
 public:
-    BrokerServerWrapper(std::string broker_uds_path)
-        : BrokerServer(broker_uds_path, std::chrono::milliseconds(100))
-    {
-    }
+    // Inherit BrokerServer's constructor
+    using BrokerServer::BrokerServer;
 
     bool error() { return m_error_occurred; }
 
@@ -92,7 +97,9 @@ TEST(broker_server, setup)
 
 TEST(broker_server, invalid_message_magic)
 {
-    BrokerServerWrapper broker_wrapper(broker_uds_file);
+    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
+    SocketEventLoop broker_event_loop(broker_timeout);
+    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
 
     // Register a dummy internal message handler
     broker_wrapper.register_internal_message_handler(
@@ -121,7 +128,9 @@ TEST(broker_server, invalid_message_magic)
 
 TEST(broker_server, subscribe_empty_message)
 {
-    BrokerServerWrapper broker_wrapper(broker_uds_file);
+    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
+    SocketEventLoop broker_event_loop(broker_timeout);
+    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
 
     // Create a subscribe message
     SubscribeMessage subscribe;
@@ -139,7 +148,9 @@ TEST(broker_server, subscribe_empty_message)
 
 TEST(broker_server, subscribe_single_type)
 {
-    BrokerServerWrapper broker_wrapper(broker_uds_file);
+    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
+    SocketEventLoop broker_event_loop(broker_timeout);
+    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
 
     // Create a subscribe message
     SubscribeMessage subscribe;
@@ -159,7 +170,9 @@ TEST(broker_server, subscribe_single_type)
 
 TEST(broker_server, subscribe_multiple_types)
 {
-    BrokerServerWrapper broker_wrapper(broker_uds_file);
+    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
+    SocketEventLoop broker_event_loop(broker_timeout);
+    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
 
     // Create a subscribe message
     SubscribeMessage subscribe;
@@ -181,7 +194,9 @@ TEST(broker_server, subscribe_multiple_types)
 
 TEST(broker_server, unsubscribe_empty_message)
 {
-    BrokerServerWrapper broker_wrapper(broker_uds_file);
+    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
+    SocketEventLoop broker_event_loop(broker_timeout);
+    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
 
     // Create a subscribe message
     SubscribeMessage subscribe;
@@ -199,7 +214,9 @@ TEST(broker_server, unsubscribe_empty_message)
 
 TEST(broker_server, unsubscribe_single_type)
 {
-    BrokerServerWrapper broker_wrapper(broker_uds_file);
+    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
+    SocketEventLoop broker_event_loop(broker_timeout);
+    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
 
     // Create a subscribe message
     SubscribeMessage subscribe;
@@ -219,7 +236,9 @@ TEST(broker_server, unsubscribe_single_type)
 
 TEST(broker_server, unsubscribe_multiple_types)
 {
-    BrokerServerWrapper broker_wrapper(broker_uds_file);
+    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
+    SocketEventLoop broker_event_loop(broker_timeout);
+    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
 
     // Create a subscribe message
     SubscribeMessage subscribe;
@@ -241,7 +260,9 @@ TEST(broker_server, unsubscribe_multiple_types)
 
 TEST(broker_server, subscribe_unsubscribe)
 {
-    BrokerServerWrapper broker_wrapper(broker_uds_file);
+    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
+    SocketEventLoop broker_event_loop(broker_timeout);
+    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
 
     // Create a subscribe message
     SubscribeMessage subscribe;
@@ -269,7 +290,9 @@ TEST(broker_server, subscribe_unsubscribe)
 
 TEST(broker_server, publish_internal_message)
 {
-    BrokerServerWrapper broker_wrapper(broker_uds_file);
+    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
+    SocketEventLoop broker_event_loop(broker_timeout);
+    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
 
     // Connect to the broker
     SocketClient sock1(broker_uds_file);
