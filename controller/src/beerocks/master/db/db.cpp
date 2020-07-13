@@ -4231,6 +4231,54 @@ bool db::update_client_entry_in_persistent_db(
     return true;
 }
 
+bool db::set_node_params_from_map(const sMacAddr &mac,
+                                  const std::unordered_map<std::string, std::string> &values_map)
+{
+    auto node = get_node(mac);
+    if (!node) {
+        LOG(WARNING) << " - node " << mac << " does not exist!";
+        return false;
+    }
+
+    for (const auto &param : values_map) {
+        if (param.first == TIMESTAMP_STR) {
+            LOG(DEBUG) << "setting node client_parameters_last_edit to " << param.second << " for "
+                       << mac;
+            node->client_parameters_last_edit =
+                timestamp_from_seconds(string_utils::stoi(param.second));
+        } else if (param.first == TIMELIFE_DELAY_STR) {
+            LOG(DEBUG) << "setting node client_time_life_delay_sec to " << param.second << " for "
+                       << mac;
+            node->client_time_life_delay_sec =
+                std::chrono::seconds(string_utils::stoi(param.second));
+        } else if (param.first == INITIAL_RADIO_ENABLE_STR) {
+            LOG(DEBUG) << "setting node client_stay_on_initial_radio to " << param.second << " for "
+                       << mac;
+
+            node->client_stay_on_initial_radio =
+                (param.second == "1") ? eTriStateBool::ENABLE : eTriStateBool::DISABLE;
+        } else if (param.first == INITIAL_RADIO_STR) {
+            LOG(DEBUG) << "setting node client_initial_radio to " << param.second << " for " << mac;
+
+            node->client_initial_radio = tlvf::mac_from_string(param.second);
+        } else if (param.first == SELECTED_BAND_ENABLE_STR) {
+            LOG(DEBUG) << "setting node client_stay_on_selected_band to " << param.second << " for "
+                       << mac;
+
+            node->client_stay_on_selected_band =
+                (param.second == "1") ? eTriStateBool::ENABLE : eTriStateBool::DISABLE;
+        } else if (param.first == SELECTED_BANDS_STR) {
+            LOG(DEBUG) << "setting node client_selected_bands to " << param.second << " for "
+                       << mac;
+            node->client_selected_bands = beerocks::eFreqType(string_utils::stoi(param.second));
+        } else {
+            LOG(WARNING) << "Unknown parameter, skipping: " << param.first << " for " << mac;
+        }
+    }
+
+    return true;
+}
+
 bool db::add_client_entry_and_update_counter(
     const std::string &entry_name, const std::unordered_map<std::string, std::string> &values_map)
 {
