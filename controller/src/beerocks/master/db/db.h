@@ -666,7 +666,7 @@ public:
      * @return true on success, otherwise false.
      */
     bool add_client_to_persistent_db(const sMacAddr &mac,
-                                     std::unordered_map<std::string, std::string> params =
+                                     const std::unordered_map<std::string, std::string> &params =
                                          std::unordered_map<std::string, std::string>());
 
     /**
@@ -1101,9 +1101,8 @@ private:
      * @param values_map A map of client params and their values.
      * @return true on success, otherwise false.
      */
-    bool
-    update_client_entry_in_persistent_db(const sMacAddr &mac,
-                                         std::unordered_map<std::string, std::string> values_map);
+    bool update_client_entry_in_persistent_db(
+        const sMacAddr &mac, const std::unordered_map<std::string, std::string> &values_map);
 
     /**
      * @brief Adds a client entry to persistent_db with configured parameters and increments clients counter.
