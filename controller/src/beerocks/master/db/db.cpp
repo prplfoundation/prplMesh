@@ -4227,3 +4227,28 @@ bool db::update_client_entry_in_persistent_db(
 
     return true;
 }
+
+bool db::add_client_entry_and_update_counter(
+    const std::string &entry_name, const std::unordered_map<std::string, std::string> &values_map)
+{
+    if (!bpl::db_add_entry(type_to_string(beerocks::eType::TYPE_CLIENT), entry_name, values_map)) {
+        LOG(ERROR) << "failed to add client entry " << entry_name << " to persistent db";
+        return false;
+    }
+
+    ++m_persistent_db_clients_count;
+
+    return true;
+}
+
+bool db::remove_client_entry_and_update_counter(const std::string &entry_name)
+{
+    if (!bpl::db_remove_entry(type_to_string(beerocks::eType::TYPE_CLIENT), entry_name)) {
+        LOG(ERROR) << "failed to remove entry " << entry_name << "from persistent db";
+        return false;
+    }
+    --m_persistent_db_clients_count;
+
+    return false;
+}
+
