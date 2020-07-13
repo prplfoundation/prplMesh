@@ -4303,6 +4303,26 @@ bool db::remove_client_entry_and_update_counter(const std::string &entry_name)
     return false;
 }
 
+bool db::remove_candidate_client()
+{
+
+    // find cadidate client to be removed
+    sMacAddr client_to_remove = get_candidate_client_for_removal();
+    if (client_to_remove == network_utils::ZERO_MAC) {
+        LOG(ERROR) << "failed to find client to be removed, number of persistent db clients is "
+                   << m_persistent_db_clients_count;
+        return false;
+    }
+
+    // clear persistent data in runtime db and remove from persistent db
+    if (!clear_client_persistent_db(client_to_remove)) {
+        LOG(ERROR) << "failed to clear client persistent data and remove it from persistent db";
+        return false;
+    }
+
+    return true;
+}
+
 sMacAddr db::get_candidate_client_for_removal()
 {
     const auto max_timelife_delay_sec =
