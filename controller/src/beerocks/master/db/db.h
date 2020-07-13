@@ -1105,6 +1105,16 @@ private:
         const sMacAddr &mac, const std::unordered_map<std::string, std::string> &values_map);
 
     /**
+     * @brief Sets the node params (runtime db) from a param-value map.
+     * 
+     * @param mac MAC address of node to be updated.
+     * @param values_map A map of client params and their values.
+     * @return true on success, otherwise false.
+     */
+    bool set_node_params_from_map(const sMacAddr &mac,
+                                  const std::unordered_map<std::string, std::string> &values_map);
+
+    /**
      * @brief Adds a client entry to persistent_db with configured parameters and increments clients counter.
      * 
      * @param entry_name Client entry name in persistent db.
