@@ -2513,6 +2513,17 @@ bool db::add_client_to_persistent_db(const sMacAddr &mac,
                    << " already exists but with different type";
         return false;
     }
+
+    if (m_persistent_db_clients_count >= config.clients_persistent_db_max_size) {
+        LOG(DEBUG) << "reached max clients size in persistent db - removing a client before adding "
+                      "new client";
+        if (!remove_candidate_client()) {
+            LOG(ERROR) << "failed to remove next-to-be-aged client entry " << db_entry
+                       << "from persistent db (due to full persistent db)";
+            return false;
+        }
+    }
+
     // add entry to the persistent db
     if (!add_client_entry_and_update_counter(db_entry, params)) {
         LOG(ERROR) << "failed to add client entry " << db_entry << " to persistent db";
