@@ -187,6 +187,7 @@ public:
      * 
      * @param mac MAC address of a client.
      * @return std::string the string representation of the MAC address with ':' replaced with '_' removed.
+     * @return An empty string is returned on failure.
      */
     static std::string client_db_entry_from_mac(const sMacAddr &mac);
 
@@ -194,7 +195,7 @@ public:
      * @brief Get client MAC address from db entry.
      * 
      * @param db_entry Client entry name in persistent db.
-     * @return sMacAddr MAC address of the client the db_entry is representing.
+     * @return sMacAddr MAC address of the client the db_entry is representing. On failure ZERO_MAC is returned.
      */
     static sMacAddr client_db_entry_to_mac(const std::string &db_entry);
 
@@ -791,12 +792,12 @@ public:
 
     /**
      * @brief Load all clients from persistent db.
+     * Creates nodes for the clients in runtime-db and set persistent parameters values accordingly.
+     * Aged Clients and Clients with invalid data are filtered-out and removed from persistent-DB.
      * 
-     * @return An unordered map of clients, for each client unordered map of params as key-value.
-     * @return An empty map of clients is returned if the persistent db is empty.
+     * @return true on success, otherwise false.
      */
-    std::unordered_map<std::string, std::unordered_map<std::string, std::string>>
-    load_persistent_db_clients();
+    bool load_persistent_db_clients();
 
     //
     // CLI
