@@ -1134,6 +1134,13 @@ private:
     bool remove_client_entry_and_update_counter(const std::string &entry_name);
 
     /**
+     * @brief Removes client with least timelife remaining from persistent db (with preference to disconnected clients).
+     * 
+     * @return true on success, otherwise false.
+     */
+    bool remove_candidate_client();
+
+    /**
      * @brief Returns the preferred client to be removed.
      * Preference is determined as follows:
      * - Prefer disconnected clients over connected ones.
