@@ -549,6 +549,23 @@ TEST(configuration_test, diable_all_ap)
     conf.load();
     ASSERT_TRUE(conf) << conf;
 
+    auto disable_func = [&conf](const std::string vap) {
+        conf.set_create_vap_value(vap, "start_disabled", 1);
+    };
+
+    conf.for_all_ap_vaps(disable_func);
+    EXPECT_TRUE(conf) << conf;
+
+    auto comment_func = [&conf](const std::string vap) {
+        conf.comment_vap(vap);
+    };
+
+    conf.for_all_ap_vaps(comment_func);
+    EXPECT_TRUE(conf) << conf;
+
+    conf.store();
+    EXPECT_TRUE(conf) << conf;
+
     //// end prerequsite ////
 }
 
