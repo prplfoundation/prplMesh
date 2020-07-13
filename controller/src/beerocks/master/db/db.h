@@ -1105,6 +1105,25 @@ private:
     update_client_entry_in_persistent_db(const sMacAddr &mac,
                                          std::unordered_map<std::string, std::string> values_map);
 
+    /**
+     * @brief Adds a client entry to persistent_db with configured parameters and increments clients counter.
+     * 
+     * @param entry_name Client entry name in persistent db.
+     * @param values_map A map of client params and their values.
+     * @return true on success, otherwise false.
+     */
+    bool add_client_entry_and_update_counter(
+        const std::string &entry_name,
+        const std::unordered_map<std::string, std::string> &values_map);
+
+    /**
+     * @brief Removes a client entry from persistent_db and decrements clients counter.
+     * 
+     * @param entry_name Client entry name in persistent db.
+     * @return true on success, otherwise false.
+     */
+    bool remove_client_entry_and_update_counter(const std::string &entry_name);
+
     int network_optimization_task_id = -1;
     int channel_selection_task_id    = -1;
     int bml_task_id                  = -1;
@@ -1165,6 +1184,8 @@ private:
 
     master_thread *m_master_thread_ctx = nullptr;
     const std::string m_local_bridge_mac;
+
+    int m_persistent_db_clients_count = 0;
 };
 
 } // namespace son
