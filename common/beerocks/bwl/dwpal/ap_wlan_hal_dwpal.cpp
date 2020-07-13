@@ -2351,8 +2351,12 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         memset(msg_buff.get(), 0, sizeof(sACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION));
 
         if (!read_param("cac_status", parsed_obj, tmp_int)) {
-            LOG(ERROR) << "Failed reading success parameter!";
-            return false;
+            // older intel hostapd versions still use "success" parameter
+            // same as the original openWrt syntax , we should support it as well.
+            if (!read_param("success", parsed_obj, tmp_int)) {
+                LOG(ERROR) << "Failed reading cac finished success parameter!";
+                return false;
+            }
         }
         msg->params.success = tmp_int;
 
