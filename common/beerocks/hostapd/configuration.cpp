@@ -123,6 +123,10 @@ bool Configuration::set_create_vap_value(const std::string &vap, const std::stri
     auto existing_vap           = std::get<1>(find_vap);
     bool existing_vap_commented = existing_vap->front()[0] == '#';
 
+    // search for the key from the back of the string
+    // ignore comments this way
+    // e.g:
+    // ###bssid=11:22:ff:ee:aa
     std::string key_eq(key + "=");
     auto it_str = std::find_if(
         existing_vap->begin(), existing_vap->end(),
@@ -176,10 +180,8 @@ std::string Configuration::get_vap_value(const std::string &vap, const std::stri
     // (e.g. not finding the requested key)
     m_ok = true;
 
-    // search for the key from the back of the string
-    // ignore comments this way
-    // e.g:
-    // ###bssid=11:22:ff:ee:aa
+    const auto &existing_vap = std::get<1>(find_vap);
+
     std::string key_eq(key + "=");
     auto it_str = std::find_if(
         existing_vap->begin(), existing_vap->end(),
@@ -265,7 +267,6 @@ bool Configuration::is_key_in_line(const std::string &line, const std::string &k
     auto found_pos = line.rfind(key);
     bool ret = found_pos != std::string::npos && (found_pos == 0 || line.at(found_pos - 1) == '#');
 
-//    std::cerr << "line: " << line << "; key: " << key << "; ret: " << std::boolalpha << ret << '\n';
     return ret;
 }
 
