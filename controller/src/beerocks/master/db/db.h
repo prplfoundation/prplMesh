@@ -1133,6 +1133,16 @@ private:
      */
     bool remove_client_entry_and_update_counter(const std::string &entry_name);
 
+    /**
+     * @brief Returns the preferred client to be removed.
+     * Preference is determined as follows:
+     * - Prefer disconnected clients over connected ones.
+     * - According to above, the client with least time left before aging.
+     *
+     * @return sMacAddr mac of candidate client to be removed - if not found, string_utils::ZERO_MAC is returned.
+     */
+    sMacAddr get_candidate_client_for_removal();
+
     int network_optimization_task_id = -1;
     int channel_selection_task_id    = -1;
     int bml_task_id                  = -1;
