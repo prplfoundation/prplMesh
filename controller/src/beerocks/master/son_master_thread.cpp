@@ -88,6 +88,16 @@ bool master_thread::init()
     set_server_max_connections(SOCKET_MAX_CONNECTIONS);
     set_select_timeout(SOCKETS_SELECT_TIMEOUT_MSEC);
 
+    LOG(DEBUG) << "persistent db enable=" << database.config.persistent_db;
+    if (database.config.persistent_db) {
+        LOG(DEBUG) << "loading clients from persistent db";
+        if (!database.load_persistent_db_clients()) {
+            LOG(WARNING) << "failed to load clients from persistent db";
+        } else {
+            LOG(DEBUG) << "load clients from persistent db finished successfully";
+        }
+    }
+
     if (!transport_socket_thread::init()) {
         LOG(ERROR) << "Failed init of transport_socket_thread";
         stop();
