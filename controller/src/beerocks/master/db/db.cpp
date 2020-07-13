@@ -53,6 +53,7 @@ std::string db::type_to_string(beerocks::eType type)
 std::string db::client_db_entry_from_mac(const sMacAddr &mac)
 {
     std::string db_entry = tlvf::mac_to_string(mac);
+
     std::replace(db_entry.begin(), db_entry.end(), ':', '_');
 
     return db_entry;
@@ -63,6 +64,10 @@ sMacAddr db::client_db_entry_to_mac(const std::string &db_entry)
     std::string entry = db_entry;
 
     std::replace(entry.begin(), entry.end(), '_', ':');
+
+    if (!network_utils::is_valid_mac(entry)) {
+        return network_utils::ZERO_MAC;
+    }
 
     return tlvf::mac_from_string(entry);
 }
@@ -2898,27 +2903,133 @@ bool db::update_client_persistent_db(const sMacAddr &mac)
     return true;
 }
 
-std::unordered_map<std::string, std::unordered_map<std::string, std::string>>
-db::load_persistent_db_clients()
+bool db::load_persistent_db_clients()
 {
-    // if persistent db is disabled
+    // If persistent db is disabled function should not be called
     if (!config.persistent_db) {
-        LOG(ERROR) << "persistent db is disabled";
-        return {};
+        LOG(ERROR) << "Persistent db is disabled";
+        return false;
     }
 
     std::unordered_map<std::string, std::unordered_map<std::string, std::string>> clients;
     if (!bpl::db_get_entries_by_type(type_to_string(beerocks::eType::TYPE_CLIENT), clients)) {
-        LOG(ERROR) << "failed to get all clients from persistent DB";
-        return {};
+        LOG(ERROR) << "Failed to get all clients from persistent DB";
+        return false;
     }
 
     if (clients.empty()) {
-        LOG(DEBUG) << "persistent DB doesn't exist (or empty) or doesn't contain clients";
-        return {};
+        LOG(DEBUG) << "Persistent DB doesn't exist, is empty, or doesn't contain clients";
+        return false;
     }
 
-    return clients;
+    // Counters for client nodes-add success/fail (filtered-out client entries are not counted)
+    int add_node_error_count   = 0;
+    int set_node_error_count   = 0;
+    int clients_added_no_error = 0;
+
+    // Add clients to runtime db - invalid client (no timestamp or aged entries) are filtered out
+    for (const auto &client : clients) {
+        const auto &client_entry = client.first;
+        auto &client_data_map    = client.second;
+
+        // Add node for client and fill with persistent data.
+        auto add_new_client_with_persistent_data_to_nodes_list =
+            [&](const sMacAddr &client_mac,
+                const std::unordered_map<std::string, std::string> values_map) -> bool {
+            // Add client node with defaults and in default location
+            if (!add_node(client_mac)) {
+                LOG(ERROR) << "Failed to add client node for client_entry " << client_entry;
+                ++add_node_error_count;
+                return false;
+            }
+
+            // Set clients persistent information in the node
+            if (!set_node_params_from_map(client_mac, values_map)) {
+                LOG(ERROR) << "Failed to set client " << client_mac
+                           << " node in runtime db with values read from persistent db: "
+                           << values_map;
+                ++set_node_error_count;
+                return false;
+            }
+
+            LOG(DEBUG) << "Client " << client_mac
+                       << " added successfully to node-list with parameters: " << values_map;
+
+            ++clients_added_no_error;
+            return true;
+        };
+
+        static const auto type_client_str = db::type_to_string(beerocks::eType::TYPE_CLIENT);
+
+        // Clients with invalid mac are invalid.
+        // Invalid clients are removed from persistent db and not added to runtime db
+        auto client_mac = client_db_entry_to_mac(client_entry);
+        if (client_mac == network_utils::ZERO_MAC) {
+            LOG(ERROR) << "Invalid entry - not a valid mac as client entry " << client_entry;
+            // Calling BPL API directly as there's no need to increment/decrement counter at this point
+            if (!beerocks::bpl::db_remove_entry(type_client_str, client_entry)) {
+                // Failure to remove the client will not fail the adding rest of valid client
+                LOG(ERROR) << "Failed to remove client entry " << client_entry;
+            }
+            continue;
+        }
+
+        // Clients without timestamp are invalid.
+        // Invalid clients are removed from persistent db and not added to runtime db
+        auto timestamp_it = client_data_map.find(TIMESTAMP_STR);
+        if (timestamp_it == client_data_map.end()) {
+            LOG(ERROR) << "Invalid entry - no timestamp is configured for client entry "
+                       << client_entry;
+            // Calling BPL API directly as there's no need to increment/decrement counter at this point
+            if (!beerocks::bpl::db_remove_entry(type_client_str, client_entry)) {
+                // Failure to remove the client will not fail the adding rest of valid client
+                LOG(ERROR) << "Failed to remove client entry " << client_entry;
+            }
+            continue;
+        }
+
+        // Aged clients are removed from persistent db and not added to runtime db
+        auto timestamp_sec              = beerocks::string_utils::stoi(timestamp_it->second);
+        auto timestamp                  = db::timestamp_from_seconds(timestamp_sec);
+        auto client_timelife_passed_sec = std::chrono::duration_cast<std::chrono::seconds>(
+                                              std::chrono::steady_clock::now() - timestamp)
+                                              .count();
+
+        /* TODO: aging validation against specific client configuration and unfriendly-device-max-timelife-delay:
+         * 1. If client has timelife_delay_str param configured, it should be checked against it instead of global max-timelife-delay param.
+         * 2.a. If client is unfriendly - and timelife_delay_str is not configured - check against the global unfriendly-device-max-timelife-delay param.
+         * 2.b. Is "unfriendly" something we know at boot?
+         */
+        static const int max_timelife_delay_sec = config.max_timelife_delay_days * 24 * 3600;
+        if (client_timelife_passed_sec > max_timelife_delay_sec) {
+            LOG(ERROR) << "Invalid entry - configured data has aged for client entry "
+                       << client_entry;
+            // Calling BPL API directly as there's no need to increment/decrement counter at this point
+            if (!beerocks::bpl::db_remove_entry(type_client_str, client_entry)) {
+                // Failure to remove the client will not fail the adding rest of valid client
+                LOG(ERROR) << "Failed to remove client entry " << client_entry;
+            }
+            continue;
+        }
+
+        // Add client node
+        if (!add_new_client_with_persistent_data_to_nodes_list(client_mac, client_data_map)) {
+            LOG(ERROR) << "Failed to add client node with persistent data for client " << client_mac
+                       << ", client-params=" << client_data_map;
+        }
+    }
+
+    // Print counters
+    LOG_IF(add_node_error_count, ERROR)
+        << "Failed to add nodes for " << add_node_error_count << " clients";
+    LOG_IF(set_node_error_count, ERROR) << "Failed to set nodes with values from persistent db for "
+                                        << set_node_error_count << " clients";
+    LOG(DEBUG) << "Added " << clients_added_no_error << " clients successfully";
+
+    // Set clients count to number of clients added successfully to runtime db
+    m_persistent_db_clients_count = clients_added_no_error;
+
+    return true;
 }
 
 //
