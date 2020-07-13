@@ -2490,7 +2490,7 @@ bool db::is_client_in_persistent_db(const sMacAddr &mac)
 }
 
 bool db::add_client_to_persistent_db(const sMacAddr &mac,
-                                     std::unordered_map<std::string, std::string> params)
+                                     const std::unordered_map<std::string, std::string> &params)
 {
     // if persistent db is disabled
     if (!config.persistent_db) {
@@ -2500,25 +2500,28 @@ bool db::add_client_to_persistent_db(const sMacAddr &mac,
 
     auto db_entry = client_db_entry_from_mac(mac);
 
-    if (!bpl::db_has_entry(std::string("type"), db_entry)) {
+    if (bpl::db_has_entry(type_to_string(beerocks::eType::TYPE_CLIENT), db_entry)) {
         // if entry already exists in DB
-        if (!bpl::db_remove_entry(std::string("type"), db_entry)) {
+        if (!remove_client_entry_and_update_counter(db_entry)) {
             LOG(ERROR) << "failed to remove client entry " << db_entry
                        << "from persistent db (for re-adding)";
             return false;
         }
-    } else if (!bpl::db_has_entry(std::string(), db_entry)) {
+    } else if (bpl::db_has_entry(std::string(), db_entry)) {
         // if entry exists in db but with different type
         LOG(ERROR) << "client entry cannot be added to persistent db, " << db_entry
                    << " already exists but with different type";
         return false;
     }
     // add entry to the persistent db
-    if (!bpl::db_add_entry(type_to_string(beerocks::eType::TYPE_CLIENT), db_entry, params)) {
+    if (!add_client_entry_and_update_counter(db_entry, params)) {
         LOG(ERROR) << "failed to add client entry " << db_entry << " to persistent db";
         return false;
     }
-    LOG(DEBUG) << "added client entry " << db_entry << " to persistent db";
+
+    LOG(DEBUG) << "added client entry " << db_entry
+               << " to persistent db, total clients count in persisttent-db: "
+               << m_persistent_db_clients_count;
 
     return true;
 }
@@ -2798,14 +2801,14 @@ bool db::clear_client_persistent_db(const sMacAddr &mac)
 
     // if persistent db is enabled
     if (config.persistent_db) {
-        auto db_entry        = client_db_entry_from_mac(mac);
-        auto type_client_str = type_to_string(beerocks::eType::TYPE_CLIENT);
-        if (!bpl::db_has_entry(type_client_str, db_entry)) {
+        auto db_entry = client_db_entry_from_mac(mac);
+        if (!bpl::db_has_entry(type_to_string(beerocks::eType::TYPE_CLIENT), db_entry)) {
             LOG(DEBUG) << "client entry does not exist in persistent-db for " << db_entry;
             return true;
         }
 
-        if (!bpl::db_remove_entry(type_client_str, db_entry)) {
+        LOG(DEBUG) << "removing client entry " << db_entry << " from persistent db";
+        if (!remove_client_entry_and_update_counter(db_entry)) {
             LOG(ERROR) << "failed to remove client entry " << db_entry;
             return false;
         }
@@ -3989,8 +3992,8 @@ std::shared_ptr<node> db::get_node_verify_type(const sMacAddr &mac, beerocks::eT
         LOG(ERROR) << "node not found for mac " << mac;
         return nullptr;
     } else if (node->get_type() != type) {
-        LOG(ERROR) << __FUNCTION__ << "node " << mac << " type(" << node->get_type()
-                   << ") != requested-type(" << type << ")";
+        LOG(ERROR) << "node " << mac << " type(" << node->get_type() << ") != requested-type("
+                   << type << ")";
         return nullptr;
     }
 
@@ -4210,7 +4213,7 @@ void db::set_prplmesh(const sMacAddr &mac)
 }
 
 bool db::update_client_entry_in_persistent_db(
-    const sMacAddr &mac, std::unordered_map<std::string, std::string> values_map)
+    const sMacAddr &mac, const std::unordered_map<std::string, std::string> &values_map)
 {
     auto db_entry        = client_db_entry_from_mac(mac);
     auto type_client_str = type_to_string(beerocks::eType::TYPE_CLIENT);
@@ -4251,4 +4254,3 @@ bool db::remove_client_entry_and_update_counter(const std::string &entry_name)
 
     return false;
 }
-
