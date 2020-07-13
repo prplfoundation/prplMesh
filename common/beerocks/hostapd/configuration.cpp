@@ -25,18 +25,25 @@ bool Configuration::load()
     // the expected format of hostapd configuration file
     // loading the file relays on the expected format
     // otherwise the load fails
+    
+    // for cases when load is called more than once, we
+    // first clear internal data
+    m_hostapd_config_head.clear();
+    m_hostapd_config_vaps.clear();
 
     // for cases when load is called more than once, we
     // first clear internal data
     m_hostapd_config_head.clear();
     m_hostapd_config_vaps.clear();
 
+    // strat reading
     std::ifstream ifs(m_configuration_file);
     std::string line;
 
     bool parsing_vaps = false;
     std::string cur_vap;
 
+    // go over line by line in the file
     while (getline(ifs, line)) {
 
         // skip empty lines
@@ -45,14 +52,15 @@ bool Configuration::load()
         }
         // check if the string belongs to a vap config part and capture which one.
         const std::string bss_eq("bss=");
-        if (line.compare(0, bss_eq.length(), bss_eq) == 0) {
+        auto end_comment = line.find_first_not_of('#');
+        if (line.compare(end_comment, bss_eq.length(), bss_eq) == 0) {
 
             // from now on we are in the vaps area, all
             // key/value pairs belongs to vaps
             parsing_vaps = true;
 
             // copy the bss (vap) value
-            cur_vap.assign(line, bss_eq.length(), std::string::npos);
+            cur_vap.assign(line, end_comment + bss_eq.length(), std::string::npos);
         }
 
         // if not a vap line store it in the header part of the config,
@@ -168,7 +176,10 @@ std::string Configuration::get_vap_value(const std::string &vap, const std::stri
     // (e.g. not finding the requested key)
     m_ok = true;
 
-    // search for the key
+    // search for the key from the back of the string
+    // ignore comments this way
+    // e.g:
+    // ###bssid=11:22:ff:ee:aa
     std::string key_eq(key + "=");
     auto it_str = std::find_if(
         existing_vap->begin(), existing_vap->end(),
@@ -202,8 +213,13 @@ const std::string &Configuration::get_last_message() const { return m_last_messa
 std::tuple<bool, std::vector<std::string> *>
 Configuration::get_vap(const std::string &calling_function, const std::string &vap)
 {
-    // search for the requested vap
-    auto existing_vap = m_hostapd_config_vaps.find(vap);
+    // search for the requested vap - ignore comments
+    // by searching from the back of the saved vap (rfind)
+    auto existing_vap =
+        std::find_if(m_hostapd_config_vaps.begin(), m_hostapd_config_vaps.end(),
+                     [&vap](const std::pair<std::string, std::vector<std::string>> &current_vap) {
+                         return current_vap.first.rfind(vap) != std::string::npos;
+                     });
 
     if (existing_vap == m_hostapd_config_vaps.end()) {
         m_last_message = calling_function + " couldn't find requested vap: " + vap;
