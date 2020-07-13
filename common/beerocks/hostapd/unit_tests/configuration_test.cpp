@@ -367,12 +367,19 @@ TEST(configuration_test, disable_all_ap)
     conf.for_all_ap_vaps(disable_func);
     EXPECT_TRUE(conf) << conf;
 
-    auto comment_func = [&conf](const std::string vap) {
-        conf.comment_vap(vap);
-    };
+
+    // disable by commenting
+    auto comment_func = [&conf](const std::string vap) { conf.comment_vap(vap); };
 
     conf.for_all_ap_vaps(comment_func);
     EXPECT_TRUE(conf) << conf;
+
+    // store
+    conf.store();
+    EXPECT_TRUE(conf) << conf;
+
+    //// end prerequsite ////
+}
 
     conf.store();
     EXPECT_TRUE(conf) << conf;

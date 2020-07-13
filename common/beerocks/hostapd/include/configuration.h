@@ -6,6 +6,7 @@
  * See LICENSE file for more details.
  */
 
+#include <iostream>
 #include <map>
 #include <string>
 #include <vector>
@@ -124,6 +125,16 @@ public:
     template <class func> void for_all_ap_vaps(func);
 
     /**
+     * @brief apply func to all ap vaps, increment the given iterator 
+     * with each call to func: f(current_vap, ++user_itertor)
+     * func interface: template<class iter> f(const std::string& vap, iter user_iterator)
+     * @details apply func to all vaps that thier mode is "ap" while incrementing
+     * the user iterator. this functionality enables iterating over two containers
+     * in paralel: the ap-vaps and the user container.
+     */
+    template <class func, class iter> void for_all_ap_vaps(func, iter current, const iter end);
+
+    /**
      * @brief for debug: return the last internal message
      * @details each action on this class changes its internal
      * message (similar to errno) - for debug usage
@@ -193,10 +204,24 @@ private:
 
 template <class func> void Configuration::for_all_ap_vaps(func f)
 {
+    auto f_with_iter = [&f](const std::string &vap, int iter) { f(vap); };
+
+    int dummy(0);
+    for_all_ap_vaps(f_with_iter, dummy, 10);
+}
+
+template <class func, class iter>
+void Configuration::for_all_ap_vaps(func f, iter current_iter, const iter end)
+{
     for_each(m_hostapd_config_vaps.begin(), m_hostapd_config_vaps.end(),
-             [this, &f](const std::pair<std::string, std::vector<std::string>> &vap) mutable {
+             [this, &f, &current_iter,
+              &end](const std::pair<std::string, std::vector<std::string>> &vap) {
                  if (get_vap_value(vap.first, "mode") == "ap") {
-                     f(vap.first);
+                     if (end == current_iter) {
+                         f(vap.first, end);
+                     } else {
+                         f(vap.first, current_iter++);
+                     }
                  }
              });
 }
