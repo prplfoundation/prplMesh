@@ -1093,6 +1093,14 @@ private:
     void rewind();
     bool get_next_node(std::shared_ptr<node> &n, int &hierarchy);
     bool get_next_node(std::shared_ptr<node> &n);
+
+    /**
+     * @brief Updates the client values in the persistent db.
+     * 
+     * @param mac MAC address of a client.
+     * @param values_map A map of client params and their values.
+     * @return true on success, otherwise false.
+     */
     bool
     update_client_entry_in_persistent_db(const sMacAddr &mac,
                                          std::unordered_map<std::string, std::string> values_map);
