@@ -117,6 +117,13 @@ public:
     void uncomment_vap(const std::string &vap);
 
     /**
+     * @brief apply func to all ap vaps
+     * @details apply func to all vaps that thier mode is "ap"
+     * (leaving STAs vaps untouched for example).
+     */
+    template <class func> void for_all_ap_vaps(func);
+
+    /**
      * @brief for debug: return the last internal message
      * @details each action on this class changes its internal
      * message (similar to errno) - for debug usage
@@ -183,6 +190,16 @@ private:
     // for logs
     friend std::ostream &operator<<(std::ostream &, const Configuration &);
 };
+
+template <class func> void Configuration::for_all_ap_vaps(func f)
+{
+    for_each(m_hostapd_config_vaps.begin(), m_hostapd_config_vaps.end(),
+             [this, &f](const std::pair<std::string, std::vector<std::string>> &vap) mutable {
+                 if (get_vap_value(vap.first, "mode") == "ap") {
+                     f(vap.first);
+                 }
+             });
+}
 
 // for logs
 std::ostream &operator<<(std::ostream &, const Configuration &);
