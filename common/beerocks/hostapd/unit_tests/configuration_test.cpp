@@ -552,7 +552,7 @@ TEST(configuration_test, diable_all_ap)
     //// end prerequsite ////
 }
 
-TEST(configuration_test, disable_vap)
+TEST(configuration_test, comment_vap)
 {
     //// start prerequsite ////
 
@@ -576,4 +576,45 @@ TEST(configuration_test, disable_vap)
 
     //// end test ////
 }
+
+TEST(configuration_test, uncomment_vap)
+{
+    //// start prerequsite ////
+
+    // construct a configuration
+    prplmesh::hostapd::config::Configuration conf(configuration_file);
+    ASSERT_FALSE(conf) << conf;
+
+    // load the dummy configuration file
+    conf.load();
+    ASSERT_TRUE(conf) << conf;
+
+    // comment twice!
+    conf.comment_vap("wlan0.1");
+    conf.comment_vap("wlan0.1");
+    EXPECT_TRUE(conf) << conf;
+
+    conf.store();
+    EXPECT_TRUE(conf) << conf;
+
+    // load the dummy configuration file
+    conf.load();
+    ASSERT_TRUE(conf) << conf;
+
+    //// end prerequsite ////
+
+    //// start test ////
+
+    conf.uncomment_vap("wlan0.1");
+    EXPECT_TRUE(conf) << conf;
+
+    conf.uncomment_vap("wlan0.2");
+    EXPECT_TRUE(conf) << conf;
+
+    conf.store();
+    EXPECT_TRUE(conf) << conf;
+
+    //// end test ////
+}
+
 } // namespace

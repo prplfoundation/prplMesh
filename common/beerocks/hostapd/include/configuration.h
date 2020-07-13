@@ -102,6 +102,21 @@ public:
     void comment_vap(const std::string &vap);
 
     /**
+     * @brief enables vap by removing comments from it
+     * e.g: 
+     * before:
+     * #bss=wlan0_0 
+     * ##ssid=test2 
+     * bss=wlan0_1
+     * after:
+     * bss=wlan0_0 
+     * ssid=test2 
+     * bss=wlan0_1
+     *
+     */
+    void uncomment_vap(const std::string &vap);
+
+    /**
      * @brief for debug: return the last internal message
      * @details each action on this class changes its internal
      * message (similar to errno) - for debug usage

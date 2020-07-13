@@ -208,6 +208,23 @@ void Configuration::comment_vap(const std::string &vap)
                   [](std::string &line) { line.insert(0, 1, '#'); });
 }
 
+void Configuration::uncomment_vap(const std::string &vap)
+{
+    // search for the requested vap
+    auto find_vap = get_vap(std::string(__FUNCTION__), vap);
+    if (!std::get<0>(find_vap)) {
+        return;
+    }
+    const auto &existing_vap = std::get<1>(find_vap);
+
+    std::for_each(existing_vap->begin(), existing_vap->end(), [](std::string &line) {
+        auto end_comment = line.find_first_not_of('#');
+        if (std::string::npos != end_comment) {
+            line.erase(0, end_comment);
+        };
+    });
+}
+
 const std::string &Configuration::get_last_message() const { return m_last_message; }
 
 std::tuple<bool, std::vector<std::string> *>
