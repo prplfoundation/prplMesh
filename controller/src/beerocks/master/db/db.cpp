@@ -2492,6 +2492,12 @@ bool db::is_client_in_persistent_db(const sMacAddr &mac)
 bool db::add_client_to_persistent_db(const sMacAddr &mac,
                                      std::unordered_map<std::string, std::string> params)
 {
+    // if persistent db is disabled
+    if (!config.persistent_db) {
+        LOG(ERROR) << "persistent db is disabled";
+        return false;
+    }
+
     auto db_entry = client_db_entry_from_mac(mac);
 
     if (!bpl::db_has_entry(std::string("type"), db_entry)) {
@@ -2542,16 +2548,21 @@ bool db::set_client_time_life_delay(const sMacAddr &mac,
 
     auto timestamp = std::chrono::steady_clock::now();
     if (save_to_persistent_db) {
-        LOG(DEBUG) << "configuring persistent-db, timelife = " << time_life_delay_sec.count();
+        // if persistent db is disabled
+        if (!config.persistent_db) {
+            LOG(DEBUG) << "persistent db is disabled";
+        } else {
+            LOG(DEBUG) << "configuring persistent-db, timelife = " << time_life_delay_sec.count();
 
-        std::unordered_map<std::string, std::string> values_map;
-        values_map[TIMESTAMP_STR]      = timestamp_to_string_seconds(timestamp);
-        values_map[TIMELIFE_DELAY_STR] = std::to_string(time_life_delay_sec.count());
+            std::unordered_map<std::string, std::string> values_map;
+            values_map[TIMESTAMP_STR]      = timestamp_to_string_seconds(timestamp);
+            values_map[TIMELIFE_DELAY_STR] = std::to_string(time_life_delay_sec.count());
 
-        // update the persistent db
-        if (!update_client_entry_in_persistent_db(mac, values_map)) {
-            LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
-            return false;
+            // update the persistent db
+            if (!update_client_entry_in_persistent_db(mac, values_map)) {
+                LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
+                return false;
+            }
         }
     }
 
@@ -2585,16 +2596,22 @@ bool db::set_client_stay_on_initial_radio(const sMacAddr &mac, bool stay_on_init
 
     auto timestamp = std::chrono::steady_clock::now();
     if (save_to_persistent_db) {
-        LOG(DEBUG) << "configuring persistent-db, initial_radio_enable = " << stay_on_initial_radio;
+        // if persistent db is disabled
+        if (!config.persistent_db) {
+            LOG(DEBUG) << "persistent db is disabled";
+        } else {
+            LOG(DEBUG) << "configuring persistent-db, initial_radio_enable = "
+                       << stay_on_initial_radio;
 
-        std::unordered_map<std::string, std::string> values_map;
-        values_map[TIMESTAMP_STR]            = timestamp_to_string_seconds(timestamp);
-        values_map[INITIAL_RADIO_ENABLE_STR] = std::to_string(stay_on_initial_radio);
+            std::unordered_map<std::string, std::string> values_map;
+            values_map[TIMESTAMP_STR]            = timestamp_to_string_seconds(timestamp);
+            values_map[INITIAL_RADIO_ENABLE_STR] = std::to_string(stay_on_initial_radio);
 
-        // update the persistent db
-        if (!update_client_entry_in_persistent_db(mac, values_map)) {
-            LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
-            return false;
+            // update the persistent db
+            if (!update_client_entry_in_persistent_db(mac, values_map)) {
+                LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
+                return false;
+            }
         }
     }
 
@@ -2629,16 +2646,21 @@ bool db::set_client_initial_radio(const sMacAddr &mac, const sMacAddr &initial_r
 
     auto timestamp = std::chrono::steady_clock::now();
     if (save_to_persistent_db) {
-        LOG(DEBUG) << "configuring persistent-db, initial_radio = " << initial_radio_mac;
+        // if persistent db is disabled
+        if (!config.persistent_db) {
+            LOG(DEBUG) << "persistent db is disabled";
+        } else {
+            LOG(DEBUG) << "configuring persistent-db, initial_radio = " << initial_radio_mac;
 
-        std::unordered_map<std::string, std::string> values_map;
-        values_map[TIMESTAMP_STR]     = timestamp_to_string_seconds(timestamp);
-        values_map[INITIAL_RADIO_STR] = tlvf::mac_to_string(initial_radio_mac);
+            std::unordered_map<std::string, std::string> values_map;
+            values_map[TIMESTAMP_STR]     = timestamp_to_string_seconds(timestamp);
+            values_map[INITIAL_RADIO_STR] = tlvf::mac_to_string(initial_radio_mac);
 
-        // update the persistent db
-        if (!update_client_entry_in_persistent_db(mac, values_map)) {
-            LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
-            return false;
+            // update the persistent db
+            if (!update_client_entry_in_persistent_db(mac, values_map)) {
+                LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
+                return false;
+            }
         }
     }
 
@@ -2672,16 +2694,22 @@ bool db::set_client_stay_on_selected_band(const sMacAddr &mac, bool stay_on_sele
 
     auto timestamp = std::chrono::steady_clock::now();
     if (save_to_persistent_db) {
-        LOG(DEBUG) << "configuring persistent-db, selected_band_enable = " << stay_on_selected_band;
+        // if persistent db is disabled
+        if (!config.persistent_db) {
+            LOG(DEBUG) << "persistent db is disabled";
+        } else {
+            LOG(DEBUG) << "configuring persistent-db, selected_band_enable = "
+                       << stay_on_selected_band;
 
-        std::unordered_map<std::string, std::string> values_map;
-        values_map[TIMESTAMP_STR]            = timestamp_to_string_seconds(timestamp);
-        values_map[SELECTED_BAND_ENABLE_STR] = std::to_string(stay_on_selected_band);
+            std::unordered_map<std::string, std::string> values_map;
+            values_map[TIMESTAMP_STR]            = timestamp_to_string_seconds(timestamp);
+            values_map[SELECTED_BAND_ENABLE_STR] = std::to_string(stay_on_selected_band);
 
-        // update the persistent db
-        if (!update_client_entry_in_persistent_db(mac, values_map)) {
-            LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
-            return false;
+            // update the persistent db
+            if (!update_client_entry_in_persistent_db(mac, values_map)) {
+                LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
+                return false;
+            }
         }
     }
 
@@ -2716,16 +2744,21 @@ bool db::set_client_selected_bands(const sMacAddr &mac, beerocks::eFreqType sele
 
     auto timestamp = std::chrono::steady_clock::now();
     if (save_to_persistent_db) {
-        LOG(DEBUG) << ", configuring persistent-db, selected_bands = " << int(selected_bands);
+        // if persistent db is disabled
+        if (!config.persistent_db) {
+            LOG(DEBUG) << "persistent db is disabled";
+        } else {
+            LOG(DEBUG) << ", configuring persistent-db, selected_bands = " << int(selected_bands);
 
-        std::unordered_map<std::string, std::string> values_map;
-        values_map[TIMESTAMP_STR]      = timestamp_to_string_seconds(timestamp);
-        values_map[SELECTED_BANDS_STR] = std::to_string(selected_bands);
+            std::unordered_map<std::string, std::string> values_map;
+            values_map[TIMESTAMP_STR]      = timestamp_to_string_seconds(timestamp);
+            values_map[SELECTED_BANDS_STR] = std::to_string(selected_bands);
 
-        // update the persistent db
-        if (!update_client_entry_in_persistent_db(mac, values_map)) {
-            LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
-            return false;
+            // update the persistent db
+            if (!update_client_entry_in_persistent_db(mac, values_map)) {
+                LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
+                return false;
+            }
         }
     }
 
@@ -2763,17 +2796,19 @@ bool db::clear_client_persistent_db(const sMacAddr &mac)
     node->client_stay_on_selected_band = eTriStateBool::NOT_CONFIGURED;
     node->client_selected_bands        = beerocks::eFreqType::FREQ_UNKNOWN;
 
-    LOG(DEBUG) << "removing client " << mac << " from persistent db";
-    auto db_entry        = client_db_entry_from_mac(mac);
-    auto type_client_str = type_to_string(beerocks::eType::TYPE_CLIENT);
-    if (!bpl::db_has_entry(type_client_str, db_entry)) {
-        LOG(DEBUG) << "client entry does not exist in persistent-db for " << db_entry;
-        return true;
-    }
+    // if persistent db is enabled
+    if (config.persistent_db) {
+        auto db_entry        = client_db_entry_from_mac(mac);
+        auto type_client_str = type_to_string(beerocks::eType::TYPE_CLIENT);
+        if (!bpl::db_has_entry(type_client_str, db_entry)) {
+            LOG(DEBUG) << "client entry does not exist in persistent-db for " << db_entry;
+            return true;
+        }
 
-    if (!bpl::db_remove_entry(type_client_str, db_entry)) {
-        LOG(ERROR) << "failed to remove client entry " << db_entry;
-        return false;
+        if (!bpl::db_remove_entry(type_client_str, db_entry)) {
+            LOG(ERROR) << "failed to remove client entry " << db_entry;
+            return false;
+        }
     }
 
     return true;
@@ -2781,6 +2816,12 @@ bool db::clear_client_persistent_db(const sMacAddr &mac)
 
 bool db::update_client_persistent_db(const sMacAddr &mac)
 {
+    // if persistent db is disabled
+    if (!config.persistent_db) {
+        LOG(ERROR) << "persistent db is disabled";
+        return false;
+    }
+
     auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
     if (!node) {
         LOG(ERROR) << "client node not found for mac " << mac;
@@ -2846,6 +2887,12 @@ bool db::update_client_persistent_db(const sMacAddr &mac)
 std::unordered_map<std::string, std::unordered_map<std::string, std::string>>
 db::load_persistent_db_clients()
 {
+    // if persistent db is disabled
+    if (!config.persistent_db) {
+        LOG(ERROR) << "persistent db is disabled";
+        return {};
+    }
+
     std::unordered_map<std::string, std::unordered_map<std::string, std::string>> clients;
     if (!bpl::db_get_entries_by_type(type_to_string(beerocks::eType::TYPE_CLIENT), clients)) {
         LOG(ERROR) << "failed to get all clients from persistent DB";
