@@ -1311,21 +1311,23 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
 
 bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
 {
-    struct nlmsghdr *nlh     = nlmsg_hdr(msg);
-    struct genlmsghdr *gnlh  = (genlmsghdr *)nlmsg_data(nlh);
-    char ifname[IF_NAMESIZE] = "\0";
+    struct nlmsghdr *nlh    = nlmsg_hdr(msg);
+    struct genlmsghdr *gnlh = (genlmsghdr *)nlmsg_data(nlh);
+    std::string iface_name;
+
     struct nlattr *tb[NL80211_ATTR_MAX + 1];
     nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0), NULL);
 
     if (tb[NL80211_ATTR_IFINDEX]) {
-        if_indextoname(nla_get_u32(tb[NL80211_ATTR_IFINDEX]), ifname);
+        auto index = nla_get_u32(tb[NL80211_ATTR_IFINDEX]);
+        iface_name = beerocks::net::network_utils::linux_get_iface_name(index);
     }
 
     auto event = dwpal_nl_to_bwl_event(gnlh->cmd);
 
     switch (event) {
     case Event::Channel_Scan_Triggered: {
-        if (m_radio_info.iface_name.compare(ifname) != 0) {
+        if (m_radio_info.iface_name != iface_name) {
             // ifname doesn't match current interface
             // meaning the event was recevied for a diffrent channel
             return true;
@@ -1338,7 +1340,7 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
         break;
     }
     case Event::Channel_Scan_Dump_Result: {
-        if (m_radio_info.iface_name.compare(ifname) != 0) {
+        if (m_radio_info.iface_name != iface_name) {
             // ifname doesn't match current interface
             // meaning the event was received for a diffrent channel
             return true;
@@ -1380,7 +1382,7 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
     }
     case Event::Channel_Scan_Abort: {
 
-        if (m_radio_info.iface_name.compare(ifname) != 0) {
+        if (m_radio_info.iface_name != iface_name) {
             // ifname doesn't match current interface
             // meaning the event was recevied for a diffrent channel
             return true;
