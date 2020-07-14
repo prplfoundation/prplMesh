@@ -1122,15 +1122,14 @@ bool main_thread::handle_arp_monitor()
     Socket *sd       = nullptr;
     auto iIfaceIndex = arp_notif->params().iface_idx;
 
-    char if_name_buffer[IF_NAMESIZE];
-    if (!if_indextoname(iIfaceIndex, if_name_buffer)) {
+    auto iface_name = network_utils::linux_get_iface_name(iIfaceIndex);
+
+    if (iface_name.empty()) {
         LOG(ERROR) << "Failed to find iface of iface_index" << int(iIfaceIndex);
         return false;
     }
 
-    std::string strIfaceName(if_name_buffer);
-
-    sd = get_slave_socket_from_hostap_iface_name(strIfaceName);
+    sd = get_slave_socket_from_hostap_iface_name(iface_name);
 
     // Use the Backhaul Manager Slave as the default destination
     if ((sd == nullptr) && ((sd = get_backhaul_socket()) == nullptr)) {
@@ -1138,7 +1137,7 @@ bool main_thread::handle_arp_monitor()
         return false;
     }
 
-    auto it_iface = m_mapIfaces.find(strIfaceName);
+    auto it_iface = m_mapIfaces.find(iface_name);
     if (it_iface != m_mapIfaces.end()) {
         auto &pIfaceParams         = it_iface->second;
         arp_notif->params().source = pIfaceParams.eType;
@@ -1158,9 +1157,8 @@ bool main_thread::handle_arp_monitor()
                              : "FRONT";
 
     // Send the message to the Slave
-    LOG(INFO) << "ARP - Interface: " << strIfaceName
-              << ", State: " << int(arp_notif->params().state) << ", IP: " << client_ipv4 << " ("
-              << client_mac << ")"
+    LOG(INFO) << "ARP - Interface: " << iface_name << ", State: " << int(arp_notif->params().state)
+              << ", IP: " << client_ipv4 << " (" << client_mac << ")"
               << ", Source: " << source << ", Type: " << int(arp_notif->params().type);
 
     // Check if the master should be notified
