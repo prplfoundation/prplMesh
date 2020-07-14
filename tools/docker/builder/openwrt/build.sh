@@ -113,7 +113,7 @@ main() {
             SUBTARGET=generic
             TARGET_PROFILE=DEVICE_glinet_gl-b1300
             ;;
-        netgear-rax40|axepoint|intel_mips)
+        netgear-rax40|axepoint3000|axepoint6000|intel_mips)
             TARGET_SYSTEM=intel_mips
             SUBTARGET=xrx500
             TARGET_PROFILE=
@@ -173,7 +173,7 @@ main() {
 VERBOSE=false
 IMAGE_ONLY=false
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
-OPENWRT_VERSION='3d511d477e72bd1845c75101a7f3d4e00780991d'
+OPENWRT_VERSION='91fc9b3a39498b24a0a8bc43a0a5f210a1dff9e2'
 PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^89e6602655713f8487c72d8d636daa610d76a468'
 PRPLMESH_VARIANT="-nl80211"
 DOCKER_TARGET_STAGE="prplmesh-builder"

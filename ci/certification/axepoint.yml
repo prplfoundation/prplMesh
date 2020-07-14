@@ -4,7 +4,7 @@
   variables:
     DEVICE_UNDER_TEST: "axepoint"
   before_script:
-    - tools/deploy_firmware.py --device axepoint --target-name "$DEVICE_UNDER_TEST" --image AX6000_2000_ETH_11AXUCI-squashfs-fullimage.img
+    - tools/deploy_firmware.py --device axepoint --target-name "$DEVICE_UNDER_TEST" --image AX3000_1600_ETH_11AXUCI-squashfs-fullimage.img
     - tools/deploy_ipk.sh --certification-mode $DEVICE_UNDER_TEST build/$DEVICE_UNDER_TEST/prplmesh.ipk
   needs:
     - job: build-for-axepoint

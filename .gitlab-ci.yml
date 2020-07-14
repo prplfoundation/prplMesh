@@ -288,7 +288,7 @@ build-for-netgear-rax40:
 build-for-axepoint:
   extends: .build-for-openwrt
   variables:
-    TARGET_DEVICE: "axepoint"
+    TARGET_DEVICE: "axepoint3000"
 
 test-on-turris-omnia:
   extends: .test-on-target
