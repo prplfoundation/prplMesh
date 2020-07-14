@@ -20,6 +20,7 @@ This file lists all contributors.
 - Gal Wiener
 - Intel Corporation
 - Itay Elenzweig
+- Ivan Efimov
 - Juan Schroeder
 - KC Chen
 - Lior Amram
