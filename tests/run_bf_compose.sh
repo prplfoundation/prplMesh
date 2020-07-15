@@ -16,6 +16,4 @@ fi
 echo $PYTHONPATH
 export PYTHONPATH
 
-adduser --system --no-create-home --uid $CURRENT_ID --ingroup root $USER
-
 exec python3 "${bf_dir}"/bft -c "${bf_plugins_dir}"/boardfarm_prplmesh/prplmesh_config_compose.json -n prplmesh_docker -x test_flows
