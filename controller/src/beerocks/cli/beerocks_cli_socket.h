@@ -73,10 +73,6 @@ private:
 
     int ire_network_optimization_task_caller(int numOfArgs);
 
-    int ping_slave_caller(int numOfArgs);
-
-    int ping_all_slaves_caller(int numOfArgs);
-
     int rm_neighbor_11k_caller(int numOfArgs);
 
     int set_neighbor_11k_caller(int numOfArgs);
@@ -119,10 +115,6 @@ private:
     int client_disconnect(std::string client_mac, uint32_t type = 0, uint32_t reason = 0);
 
     int ire_network_optimization_task();
-
-    int ping_slave(std::string ire_mac, int num_of_req = 1, int ping_size = 0);
-
-    int ping_all_slaves(int num_of_req = 1, int ping_size = 0);
 
     int rm_neighbor_11k(std::string ap_mac, std::string bssid, int8_t vap_id);
 
