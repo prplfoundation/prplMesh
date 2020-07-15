@@ -175,12 +175,10 @@ std::string Configuration::get_vap_value(const std::string &vap, const std::stri
         return "";
     }
     const auto& existing_vap = std::get<1>(find_vap);
-    //
+
     // from now on this function is ok with all situations
     // (e.g. not finding the requested key)
     m_ok = true;
-
-    const auto &existing_vap = std::get<1>(find_vap);
 
     std::string key_eq(key + "=");
     auto it_str = std::find_if(
