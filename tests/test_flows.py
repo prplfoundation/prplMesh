@@ -332,14 +332,18 @@ class TestFlows:
         # Step 2: config
         env.checkpoint()
         agent.cmd_reply("dev_set_config,backhaul,0x{}".format(agent.radios[0].mac.replace(':', '')))
-        # TODO
+
         # At this point, the wired backhaul should be removed from the bridge so autoconfig search
         # should still not come through.
         time.sleep(2)
-        # self.check_no_cmdu_type("autoconfig search while awaiting onboarding", 0x0007, agent.mac)
+        self.check_no_cmdu_type("autoconfig search while awaiting onboarding", 0x0007, agent.mac)
 
         # Step 3: start WPS
-        # TODO do backhaul onboarding
+        agent.cmd_reply("start_wps_registration,band,24G,WpsConfigMethod,PBC")
+
+        # TODO start WPS on CTT agent as well to complete onboarding
+        # On dummy, it does nothing anyway
+        time.sleep(2)
 
         # Clean up: reset to ethernet backhaul
         self.test_dev_reset_default()
