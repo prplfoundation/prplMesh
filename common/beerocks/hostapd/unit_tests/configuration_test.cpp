@@ -671,4 +671,46 @@ TEST(configuration_test, uncomment_vap)
     //// end test ////
 }
 
+TEST(configuration_test, itererate_both_containers)
+{
+    //// start prerequsite ////
+
+    // save the content of the string (start clean)
+    //clean_start();
+
+    // construct a configuration
+    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    ASSERT_FALSE(conf) << conf;
+
+    // load the dummy configuration file
+    conf.load();
+    ASSERT_TRUE(conf) << conf;
+
+    //// end prerequsite ////
+
+    //// start test ////
+
+    std::vector<std::string> ssid = {"00:11:22:33:44:55", "ab:cd:ef:01:02:03"};
+
+    auto set_ssid = [&conf, &ssid](const std::string vap, std::vector<std::string>::iterator it) {
+        if (it != ssid.end()) {
+            // as long as we didn't finish our containr
+            // we set the given's vap ssid
+            conf.set_create_vap_value(vap, "ssid", *it);
+        } else {
+            // when we done with our container, we simply
+            // comment the rest of the vaps
+            conf.comment_vap(vap);
+        }
+    };
+
+    conf.for_all_ap_vaps(set_ssid, ssid.begin(), ssid.end());
+    EXPECT_TRUE(conf) << conf;
+
+    conf.store();
+    EXPECT_TRUE(conf) << conf;
+
+    //// end test ////
+}
+
 } // namespace
