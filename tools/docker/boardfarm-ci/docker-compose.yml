@@ -47,5 +47,5 @@ services:
             - "/var/run/docker:/var/run/docker"
             - "/var/run/docker.sock:/var/run/docker.sock"
         # user: ${CURRENT_UID}
-        working_dir: $ROOT_DIR/prplMesh/tests
+        working_dir: $ROOT_DIR/tests
         entrypoint: ["bash", "run_bf_compose.sh"]

@@ -61,7 +61,7 @@ class Services:
     def __init__(self):
         self.scriptdir = os.path.dirname(os.path.realpath(__file__))
         os.chdir(self.scriptdir)
-        self.rootdir = os.path.dirname(self.scriptdir)
+        self.rootdir = self.scriptdir
         print(self.rootdir)
         self.logdir = os.path.join(self.scriptdir, 'logs')
         device_name = 'dockerized_device-{}'.format(getpass.getuser())
