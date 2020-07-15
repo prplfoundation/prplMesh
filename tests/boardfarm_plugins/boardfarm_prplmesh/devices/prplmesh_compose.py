@@ -44,13 +44,13 @@ class PrplMeshCompose(PrplMeshBase):
 
         if self.role == "controller":
             self._docker_compose(["-d", "--name", self.name, "controller"],
-                                 "run")
+                                 "run", "start-controller")
             time.sleep(self.delay)
             self.controller_entity = \
                 ALEntityDocker(self.name, is_controller=True, compose=True)
         else:
             self._docker_compose(["-d", "--name", self.name, "agent"],
-                                 "run")
+                                 "run", "start-agent")
             time.sleep(self.delay)
             self.agent_entity = \
                     ALEntityDocker(self.name, is_controller=False,
@@ -60,21 +60,23 @@ class PrplMeshCompose(PrplMeshBase):
                                      boardfarm.config.output_dir)
         self.check_status()
 
-    def _docker_compose(self, args, parameter=None):
+    def _docker_compose(self, args, parameter=None, start=None):
         print('_docker_compose: args {}'.format(args))
         yml_path = "tools/docker/boardfarm-ci/docker-compose.yml"
         full_args = ["-f", os.path.join(rootdir, yml_path)]
-
+        entrypoint_path = "tools/docker/boardfarm-ci/runner-entrypoint.sh"
+        entrypoint = os.path.join(rootdir, entrypoint_path)
         if parameter == "run":
             log_path = os.path.join(rootdir, "logs/{}".format(self.name))
             if not os.path.exists(log_path):
                 os.mkdir(log_path)
             vol = '{}:/tmp/{}/beerocks/logs'.format(log_path, self.unique_id)
             full_args += ["run", "-v", vol]
+            # full_args += ["--entrypoint", entrypoint + ' ' + start]
             full_args += args
 
         print('_docker_compose: {}'.format(' '.join(full_args)))
-        os.environ['CURRENT_UID'] = '1000:998'
+        # os.environ['CURRENT_UID'] = '1000:998'
         self._run_shell_cmd("/usr/local/bin/docker-compose", full_args)
 
     def __del__(self):
