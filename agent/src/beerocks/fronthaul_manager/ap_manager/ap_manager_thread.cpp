@@ -1337,7 +1337,8 @@ bool ap_manager_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t ev
         auto msg =
             static_cast<bwl::sACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION *>(data);
         LOG(INFO) << "DFS_EVENT_CAC_COMPLETED succsess = " << int(msg->params.success);
-
+        LOG(INFO) << "Not sending anything this time" ;
+        return true;
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION>(cmdu_tx);
         if (response == nullptr) {
