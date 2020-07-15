@@ -381,6 +381,36 @@ TEST(configuration_test, disable_all_ap)
     //// end prerequsite ////
 }
 
+TEST(configuration_test, enable_all_ap)
+{
+    //// start prerequsite ////
+
+    // save the content of the string (start clean)
+   // clean_start();
+
+    // construct a configuration
+    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    ASSERT_FALSE(conf) << conf;
+
+    // load the dummy configuration file
+    conf.load();
+    ASSERT_TRUE(conf) << conf;
+
+    // enable by removing key/value
+    auto enable_func = [&conf](const std::string vap) {
+        conf.set_create_vap_value(vap, "start_disabled", "");
+    };
+
+    conf.for_all_ap_vaps(enable_func);
+    EXPECT_TRUE(conf) << conf;
+
+    // enable by uncommenting
+    auto uncomment_func = [&conf](const std::string vap) { conf.uncomment_vap(vap); };
+
+    conf.for_all_ap_vaps(uncomment_func);
+    EXPECT_TRUE(conf) << conf;
+
+    // store
     conf.store();
     EXPECT_TRUE(conf) << conf;
 
