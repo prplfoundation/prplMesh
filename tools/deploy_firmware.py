@@ -270,7 +270,7 @@ def main():
 
     args = parser.parse_args()
 
-    if args.device in ["netgear-rax40", "axepoint"]:
+    if args.device in ["netgear-rax40", "axepoint3000", "axepoint6000"]:
         dev = NetgearRax40(args.device, args.target_name, args.image)
     else:
         dev = Generic(args.device, args.target_name, args.image)
