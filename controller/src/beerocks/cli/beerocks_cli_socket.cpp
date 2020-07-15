@@ -178,16 +178,6 @@ void cli_socket::setFunctionsMapAndArray()
                        "remove 'bssid' from  11k neighbor list of 'hostap_mac' 'vap_id'",
                        static_cast<pFunction>(&cli_socket::rm_neighbor_11k_caller), 3, 3,
                        STRING_ARG, STRING_ARG);
-    insertCommandToMap("ping_slave", "<ire_mac> [<num_of_req>] [<packet_size>]",
-                       "send ping request to slave mac, num_of_req times (1 time by default), with "
-                       "size = 'packet_size' (0 by default) ",
-                       static_cast<pFunction>(&cli_socket::ping_slave_caller), 1, 3, STRING_ARG,
-                       INT_ARG, INT_ARG);
-    insertCommandToMap("ping_all_slaves", "[<num_of_req>] [<packet_size>]",
-                       "send ping request to all slaves, num_of_req times each (1 time by "
-                       "default), with size = 'packet_size' (0 by default) ",
-                       static_cast<pFunction>(&cli_socket::ping_all_slaves_caller), 0, 2, INT_ARG,
-                       INT_ARG);
 }
 
 bool cli_socket::waitResponseReady()
@@ -460,28 +450,6 @@ int cli_socket::rm_neighbor_11k_caller(int numOfArgs)
         return rm_neighbor_11k(args.stringArgs[0], args.stringArgs[1], args.intArgs[2]);
     }
     return -1;
-}
-
-int cli_socket::ping_slave_caller(int numOfArgs)
-{
-    if (numOfArgs < 0)
-        return -1;
-    else if (numOfArgs == 3)
-        return ping_slave(args.stringArgs[0], args.intArgs[1], args.intArgs[2]);
-    else if (numOfArgs == 2)
-        return ping_slave(args.stringArgs[0], args.intArgs[1]);
-    return ping_slave(args.stringArgs[0]);
-}
-
-int cli_socket::ping_all_slaves_caller(int numOfArgs)
-{
-    if (numOfArgs < 0)
-        return -1;
-    else if (numOfArgs == 2)
-        return ping_all_slaves(args.intArgs[0], args.intArgs[1]);
-    else if (numOfArgs == 1)
-        return ping_all_slaves(args.intArgs[0]);
-    return ping_all_slaves();
 }
 
 //
@@ -828,40 +796,6 @@ int cli_socket::rm_neighbor_11k(std::string ap_mac, std::string bssid, int8_t va
     wait_response     = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
     waitResponseReady();
-    return 0;
-}
-
-int cli_socket::ping_slave(std::string ire_mac, int num_of_req, int ping_size)
-{
-    auto request =
-        message_com::create_vs_message<beerocks_message::cACTION_CLI_PING_SLAVE_REQUEST>(cmdu_tx);
-    if (request == nullptr) {
-        LOG(ERROR) << "Failed building cACTION_CLI_PING_SLAVE_REQUEST message!";
-        return -1;
-    }
-    request->mac()        = tlvf::mac_from_string(ire_mac);
-    request->num_of_req() = (uint16_t)num_of_req;
-    request->size()       = (uint16_t)ping_size;
-
-    message_com::send_cmdu(master_socket, cmdu_tx);
-
-    return 0;
-}
-
-int cli_socket::ping_all_slaves(int num_of_req, int ping_size)
-{
-    auto request =
-        message_com::create_vs_message<beerocks_message::cACTION_CLI_PING_ALL_SLAVES_REQUEST>(
-            cmdu_tx);
-    if (request == nullptr) {
-        LOG(ERROR) << "Failed building cACTION_CLI_PING_ALL_SLAVES_REQUEST message!";
-        return -1;
-    }
-    request->num_of_req() = (uint16_t)num_of_req;
-    request->size()       = (uint16_t)ping_size;
-
-    message_com::send_cmdu(master_socket, cmdu_tx);
-
     return 0;
 }
 
