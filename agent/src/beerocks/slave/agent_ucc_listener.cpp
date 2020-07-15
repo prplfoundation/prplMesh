@@ -115,7 +115,16 @@ bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, st
     if (parameter == "alid") {
         value = m_bridge_mac;
         return true;
-    } else if (parameter == "macaddr" || parameter == "bssid") {
+    } else if (parameter == "macaddr") {
+        if (params.find("ruid") == params.end()) {
+            value = "missing ruid";
+            return false;
+        }
+        auto ruid = tlvf::mac_to_string(std::strtoull(params["ruid"].c_str(), nullptr, 16));
+        // We use MAC address as Radio UID, so we can just return it here.
+        value = ruid;
+        return true;
+    } else if (parameter == "bssid") {
         if (params.find("ruid") == params.end()) {
             value = "missing ruid";
             return false;
@@ -138,7 +147,7 @@ bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, st
                 return true;
             }
         }
-        value = "macaddr/bssid not found for ruid " + ruid + " ssid " + ssid;
+        value = "bssid not found for ruid " + ruid + " ssid " + ssid;
         return false;
     }
     value = "parameter " + parameter + " not supported";

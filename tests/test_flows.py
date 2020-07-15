@@ -345,6 +345,13 @@ class TestFlows:
         # On dummy, it does nothing anyway
         time.sleep(2)
 
+        backhaul_mac = agent.cmd_reply(
+            "dev_get_parameter,program,map,ruid,0x{},parameter,macaddr".format(
+                agent.radios[0].mac.replace(':', ''))).get('macaddr')
+
+        # prplMesh uses the radio MAC as the backhaul MAC
+        assert backhaul_mac == agent.radios[0].mac
+
         # Clean up: reset to ethernet backhaul
         self.test_dev_reset_default()
 
