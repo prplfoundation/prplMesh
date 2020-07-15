@@ -231,6 +231,64 @@ TEST(configuration_test, store)
     EXPECT_TRUE(conf) << conf;
 }
 
+TEST(configuration_test, set_string_head_values)
+{
+    //// start prerequsite ////
+
+    // save the content of the string (start clean)
+    // clean_start();
+
+    // construct a configuration
+    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    ASSERT_FALSE(conf) << conf;
+
+    // load the dummy configuration file
+    conf.load();
+    ASSERT_TRUE(conf) << conf;
+
+    //// end prerequsite ////
+
+    // replace existing key
+    conf.set_create_head_value("vht_capab", "this is shorter");
+    EXPECT_TRUE(conf) << conf;
+
+    // remove exiting key
+    conf.set_create_head_value("ht_capab", "");
+    EXPECT_TRUE(conf) << conf;
+
+    // add a new key/value
+    conf.set_create_head_value("new_head", "{pnew->next=phead; phead=pnew;}");
+    EXPECT_TRUE(conf) << conf;
+
+    conf.store();
+    EXPECT_TRUE(conf) << conf;
+}
+
+TEST(configuration_test, set_int_head_values)
+{
+    //// start prerequsite ////
+
+    // save the content of the string (start clean)
+    clean_start();
+
+    // construct a configuration
+    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    ASSERT_FALSE(conf) << conf;
+
+    // load the dummy configuration file
+    conf.load();
+    ASSERT_TRUE(conf) << conf;
+
+    //// end prerequsite ////
+
+    // replace existing key
+    conf.set_create_head_value("bss_transition", 451);
+    EXPECT_TRUE(conf) << conf;
+
+    conf.store();
+    EXPECT_TRUE(conf) << conf;
+}
+
 TEST(configuration_test, set_string_vap_values)
 {
     //// start prerequsite ////

@@ -112,6 +112,44 @@ bool Configuration::store()
     return *this;
 }
 
+bool Configuration::set_create_head_value(const std::string &key, const std::string &value)
+{
+    // search for the key
+    std::string key_eq(key + "=");
+    auto it_str = std::find_if(
+        m_hostapd_config_head.begin(), m_hostapd_config_head.end(),
+        [&key_eq, this](const std::string &line) -> bool { return is_key_in_line(line, key_eq); });
+
+    // we first delete the key, and if the requested value is non empty
+    // we push it to the end of the array
+
+    // delete the key-value if found
+    if (it_str != m_hostapd_config_head.end()) {
+        it_str = m_hostapd_config_head.erase(it_str);
+    } else {
+        m_last_message =
+            std::string(__FUNCTION__) + " the key '" + key + "' for head was not found";
+    }
+
+    // when the new value is provided add the key back with that new value
+    if (value.length() != 0) {
+        m_hostapd_config_head.push_back(key_eq + value);
+        m_last_message =
+            std::string(__FUNCTION__) + " the key '" + key + "' was (re)added to head";
+    } else {
+        m_last_message =
+            std::string(__FUNCTION__) + " the key '" + key + "' was deleted from head";
+    }
+
+    m_ok = true;
+    return *this;
+}
+
+bool Configuration::set_create_head_value(const std::string &key, const int value)
+{
+    return set_create_head_value(key, std::to_string(value));
+}
+
 bool Configuration::set_create_vap_value(const std::string &vap, const std::string &key,
                                          const std::string &value)
 {
@@ -123,10 +161,6 @@ bool Configuration::set_create_vap_value(const std::string &vap, const std::stri
     auto existing_vap           = std::get<1>(find_vap);
     bool existing_vap_commented = existing_vap->front()[0] == '#';
 
-    // search for the key from the back of the string
-    // ignore comments this way
-    // e.g:
-    // ###bssid=11:22:ff:ee:aa
     std::string key_eq(key + "=");
     auto it_str = std::find_if(
         existing_vap->begin(), existing_vap->end(),
