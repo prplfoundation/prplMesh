@@ -20,6 +20,7 @@ import fcntl
 import getpass
 import grp
 import os
+import shutil
 import sys
 from subprocess import Popen, PIPE
 
@@ -58,10 +59,24 @@ def check_docker_versions():
 
 class Services:
     def __init__(self):
-        scriptdir = os.path.dirname(os.path.realpath(__file__))
-        os.chdir(scriptdir)
-        self.rootdir = os.path.dirname(scriptdir)
+        self.scriptdir = os.path.dirname(os.path.realpath(__file__))
+        os.chdir(self.scriptdir)
+        self.rootdir = os.path.dirname(self.scriptdir)
         print(self.rootdir)
+        self.logdir = os.path.join(self.scriptdir, 'logs')
+        device_name = 'dockerized_device-{}'.format(getpass.getuser())
+        self.devicedir = os.path.join(self.logdir, device_name)
+        repeater_name = 'repeater1-{}'.format(getpass.getuser())
+        self.repeaterdir = os.path.join(self.logdir, repeater_name)
+        if not os.path.exists(self.logdir):
+            os.makedirs(self.logdir)
+            os.makedirs(self.devicedir)
+            os.makedirs(self.repeaterdir)
+
+        # Create log dir
+
+    def cleanlogs(self):
+        shutil.rmtree(os.path.join(self.scriptdir, 'logs'))
 
     def _setNonBlocking(fd):
         """
@@ -80,7 +95,6 @@ class Services:
         docker_gid = grp.getgrnam('docker')[2]
         # local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(docker_gid)
         local_env['CURRENT_ID']= str(os.getuid())
-        # local_env['USER']= getpass.getuser() 
         # local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(os.getgid())
         if not interactive:
             proc = Popen(params, stdout=PIPE, stderr=PIPE)
@@ -99,15 +113,22 @@ if __name__ == '__main__':
     parser.add_argument('--test', dest='test', type=str, help='Test to be run')
     parser.add_argument('--clean', dest='clean', action='store_true',
                         help='Clean containers images and networks')
+    parser.add_argument('--build', dest='build', action='store_true',
+                        help='Rebuild containers')
     parser.add_argument('--shell', dest='shell', action='store_true',
                         help='Run a shell on the bf container')
     args = parser.parse_args()
     services = Services()
     if args.clean:
         services.dc(['down', '--remove-orphans', '--rmi', 'all'])
+        # services.cleanlogs()
     elif args.shell:
         rc = services.dc(['run', '--service-ports', '--entrypoint',
                           '/bin/bash', 'boardfarm'], interactive=True)
+        if rc != 0:
+            print('Return code !=0 -> {}'.format(rc))
+    elif args.build:
+        rc = services.dc(['build'], interactive=True)
         if rc != 0:
             print('Return code !=0 -> {}'.format(rc))
     else:
