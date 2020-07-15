@@ -2948,69 +2948,6 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         }
         break;
     }
-    case beerocks_message::ACTION_CONTROL_CONTROLLER_PING_RESPONSE: {
-        if (hostap_mac.empty()) {
-            LOG(ERROR) << "PING_MSG_RESPONSE unknown peer mac!";
-        } else {
-            auto response =
-                beerocks_header
-                    ->addClass<beerocks_message::cACTION_CONTROL_CONTROLLER_PING_RESPONSE>();
-            if (response == nullptr) {
-                LOG(ERROR) << "addClass cACTION_CONTROL_CONTROLLER_PING_RESPONSE failed";
-                return false;
-            }
-            if (!database.update_node_last_ping_received(hostap_mac, response->seq())) {
-                LOG(DEBUG) << "PING_MSG_RESPONSE received from slave " << hostap_mac
-                           << " , can't update last seen time for ";
-            } else {
-                LOG_CLI(DEBUG,
-                        "PING_MSG_RESPONSE received from slave = "
-                            << hostap_mac << " , seq = " << (int)response->seq()
-                            << " , size = " << (int)response->size() << " , RTT = "
-                            << float((std::chrono::duration_cast<std::chrono::duration<double>>(
-                                          database.get_node_last_ping_received(hostap_mac) -
-                                          database.get_node_last_ping_sent(hostap_mac)))
-                                         .count())
-                            << "[sec]" << std::endl);
-            }
-            if (response->seq() < (response->total() - 1)) { //send next ping request
-                auto request = message_com::create_vs_message<
-                    beerocks_message::cACTION_CONTROL_CONTROLLER_PING_REQUEST>(cmdu_tx);
-                if (request == nullptr) {
-                    LOG(ERROR) << "Failed building message!";
-                    return false;
-                }
-                request->total() = response->total();
-                request->seq()   = response->seq() + 1;
-                request->size()  = response->size();
-                if (!request->alloc_data(response->size())) {
-                    LOG(ERROR) << "Failed buffer allocation to size=" << int(response->size());
-                    break;
-                }
-                memset(request->data(), 0, request->data_length());
-                if (!database.update_node_last_ping_sent(hostap_mac)) {
-                    LOG(DEBUG) << "sending PING_MSG_REQUEST for slave " << hostap_mac
-                               << " , can't update last ping sent time for ";
-                }
-                son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database, hostap_mac);
-            } else if (response->seq() == (response->total() - 1)) {
-                if (!database.update_node_last_ping_received_avg(hostap_mac, response->total())) {
-                    LOG(DEBUG) << "last PING_MSG_RESPONSE received from slave " << hostap_mac
-                               << " , can't update last ping received avg ";
-                } else {
-                    LOG_CLI(DEBUG, "last PING_MSG_RESPONSE received from slave = "
-                                       << hostap_mac << " RTT summary: " << std::endl
-                                       << "min = " << database.get_node_last_ping_min_ms(hostap_mac)
-                                       << " [ms], "
-                                       << "max = " << database.get_node_last_ping_max_ms(hostap_mac)
-                                       << " [ms], "
-                                       << "avg = " << database.get_node_last_ping_avg_ms(hostap_mac)
-                                       << " [ms]" << std::endl);
-                }
-            }
-        }
-        break;
-    }
     case beerocks_message::ACTION_CONTROL_CLIENT_NO_RESPONSE_NOTIFICATION: {
         auto notification =
             beerocks_header
