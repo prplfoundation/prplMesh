@@ -4,6 +4,7 @@ beautifulsoup4
 boto3
 cdrouter
 debtcollector
+distro
 dlipower
 dnspython
 docutils<0.16
@@ -13,6 +14,7 @@ Faker
 future
 ipaddress
 jira
+jsonschema
 marshmallow<3
 matplotlib
 nested_lookup==0.2.19

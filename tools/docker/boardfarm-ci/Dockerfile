@@ -24,3 +24,7 @@ RUN chmod 755 /usr/local/bin/docker-compose
 RUN DEBIAN_FRONTEND=noninteractive apt-get install wireshark-common -y
 # VOLUME "/home/pablo/assia/prpl/git"
 # ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+RUN git clone https://github.com/mattsm/boardfarm.git \
+    && cd boardfarm \
+    && git checkout 100521fde1fb67536682cafecc2f91a6e2e8a6f8 \
+    && python3 setup.py install
