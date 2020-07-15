@@ -541,6 +541,8 @@ std::string network_utils::linux_get_iface_name(uint32_t iface_index)
         return "";
     }
 
+    iface_name[IF_NAMESIZE - 1] = '\0';
+
     return iface_name;
 }
 
