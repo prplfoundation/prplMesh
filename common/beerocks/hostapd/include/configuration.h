@@ -52,6 +52,32 @@ public:
     bool store();
 
     /**
+     * @brief set key/value in the head section
+     * @details set the key/vale in the head section,
+     * either replace or create.
+     * @note comments in the head section are not supported
+     * for example, if the key/value line was commented before
+     * the call to this function, it would be uncommented afterwards
+     * @param 
+     * - the key to set its value (string)
+     * - the value (string)
+     */
+    bool set_create_head_value(const std::string &key, const std::string &value);
+
+    /**
+     * @brief set key/value in the head section
+     * @details set the key/vale in the head section,
+     * either replace or create.
+     * @note comments in the head section are not supported
+     * for example, if the key/value line was commented before
+     * the call to this function, it would be uncommented afterwards
+     * @param 
+     * - the key to set its value (string)
+     * - the value (int)
+     */
+    bool set_create_head_value(const std::string &key, const int value);
+
+    /**
      * @brief set key/value for the given vap
      * @details set the key/vale for the given vap, either replace or create.
      * @param 
@@ -170,7 +196,7 @@ private:
     bool m_ok = false;
 
     // each string is a line in the original configuration file
-    // that belongs to the "head" part. read the explnation at
+    // that belongs to the "head" part. read the explenation at
     // the end of the cpp file for more details
     std::vector<std::string> m_hostapd_config_head;
 
