@@ -138,35 +138,6 @@ class cACTION_CONTROL_SLAVE_JOINED_RESPONSE : public BaseClass
         sSonConfig* m_config = nullptr;
 };
 
-class cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION : public BaseClass
-{
-    public:
-        cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION();
-
-        static eActionOp_CONTROL get_action_op(){
-            return (eActionOp_CONTROL)(ACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION);
-        }
-        sMacAddr& backhaul_iface_mac();
-        beerocks::net::sIpv4Addr& backhaul_ipv4();
-        sMacAddr& bridge_iface_mac();
-        beerocks::net::sIpv4Addr& bridge_ipv4();
-        sNodeHostap& hostap();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_CONTROL* m_action_op = nullptr;
-        sMacAddr* m_backhaul_iface_mac = nullptr;
-        beerocks::net::sIpv4Addr* m_backhaul_ipv4 = nullptr;
-        sMacAddr* m_bridge_iface_mac = nullptr;
-        beerocks::net::sIpv4Addr* m_bridge_ipv4 = nullptr;
-        sNodeHostap* m_hostap = nullptr;
-};
-
 class cACTION_CONTROL_SON_CONFIG_UPDATE : public BaseClass
 {
     public:
