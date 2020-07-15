@@ -49,24 +49,6 @@ cACTION_CONTROL_SON_CONFIG_UPDATE:
   _type: class
   config: sSonConfig
 
-cACTION_CONTROL_CONTROLLER_PING_REQUEST:
-  _type: class
-  total: uint16_t
-  seq: uint16_t
-  size: uint16_t
-  data:
-    _type: uint8_t
-    _length: []
-
-cACTION_CONTROL_CONTROLLER_PING_RESPONSE:
-  _type: class
-  total: uint16_t
-  seq: uint16_t
-  size: uint16_t
-  data:
-    _type: uint8_t
-    _length: []
-
 cACTION_CONTROL_ARP_QUERY_REQUEST:
   _type: class
   params: sArpQuery
