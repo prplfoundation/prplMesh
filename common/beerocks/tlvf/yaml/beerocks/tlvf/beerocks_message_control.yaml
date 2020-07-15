@@ -45,14 +45,6 @@ cACTION_CONTROL_SLAVE_JOINED_RESPONSE:
   err_code: uint8_t #beerocks::eSlaveJoinResponseErrCode
   config: sSonConfig
 
-cACTION_CONTROL_SLAVE_JOINED_4ADDR_MODE_NOTIFICATION:
-  _type: class
-  backhaul_iface_mac: sMacAddr
-  backhaul_ipv4: beerocks::net::sIpv4Addr
-  bridge_iface_mac: sMacAddr
-  bridge_ipv4: beerocks::net::sIpv4Addr
-  hostap: sNodeHostap
-
 cACTION_CONTROL_SON_CONFIG_UPDATE:
   _type: class
   config: sSonConfig
