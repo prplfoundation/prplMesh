@@ -198,6 +198,9 @@ bwl_dummy_unit_tests:
 bcl_unit_tests:
   extends: .run-test-in-docker
 
+beerocks_agent_unit_tests:
+  extends: .run-test-in-docker
+
 run-tests:
   stage: test
   image: $CI_REGISTRY_IMAGE/prplmesh-tests-runner:$CI_PIPELINE_ID
