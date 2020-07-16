@@ -708,36 +708,6 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         send_cmdu_to_controller(cmdu_tx);
         break;
     }
-    case beerocks_message::ACTION_CONTROL_AGENT_PING_RESPONSE: {
-        LOG(DEBUG) << "received ACTION_CONTROL_AGENT_PING_RESPONSE";
-        auto response =
-            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_AGENT_PING_RESPONSE>();
-        if (response == nullptr) {
-            LOG(ERROR) << "addClass cACTION_CONTROL_AGENT_PING_RESPONSE failed";
-            return false;
-        }
-        if (response->seq() < (response->total() - 1)) { //send next ping request
-            auto request = message_com::create_vs_message<
-                beerocks_message::cACTION_CONTROL_AGENT_PING_REQUEST>(cmdu_tx);
-            if (request == nullptr) {
-                LOG(ERROR) << "Failed building message!";
-                return false;
-            }
-
-            request->total() = response->total();
-            request->seq()   = response->seq() + 1;
-            request->size()  = response->size();
-            if (request->size()) {
-                if (!request->alloc_data(request->size())) {
-                    LOG(ERROR) << "Failed buffer allocation to size=" << int(request->size());
-                    break;
-                }
-                memset(request->data(), 0, request->data_length());
-            }
-            send_cmdu_to_controller(cmdu_tx);
-        }
-        break;
-    }
     case beerocks_message::ACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL: {
         auto request_in =
             beerocks_header
