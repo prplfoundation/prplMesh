@@ -266,53 +266,6 @@ bool slave_thread::work()
     return true;
 }
 
-void slave_thread::process_keep_alive()
-{
-    if (!config.enable_keep_alive || !son_config.slave_keep_alive_retries ||
-        !backhaul_params.is_prplmesh_controller) {
-        return;
-    }
-
-    if (master_socket == nullptr) {
-        LOG(ERROR) << "process_keep_alive(): master_socket is nullptr!";
-        return;
-    }
-
-    auto now = std::chrono::steady_clock::now();
-    int keep_alive_time_elapsed_ms =
-        std::chrono::duration_cast<std::chrono::milliseconds>(now - master_last_seen).count();
-    if (keep_alive_time_elapsed_ms >= beerocks::KEEP_ALIVE_INTERVAL_MSC) {
-        if (keep_alive_retries >= son_config.slave_keep_alive_retries) {
-            LOG(DEBUG) << "exceeded keep_alive_retries " << keep_alive_retries
-                       << " - slave_reset()";
-
-            platform_notify_error(bpl::eErrorCode::SLAVE_MASTER_KEEP_ALIVE_TIMEOUT,
-                                  "Reached master keep-alive retries limit: " +
-                                      std::to_string(keep_alive_retries));
-
-            stop_on_failure_attempts--;
-            slave_reset();
-        } else {
-            LOG(DEBUG) << "time elapsed since last master message: " << keep_alive_time_elapsed_ms
-                       << "ms, sending PING_MSG_REQUEST, tries=" << keep_alive_retries;
-            auto request = message_com::create_vs_message<
-                beerocks_message::cACTION_CONTROL_AGENT_PING_REQUEST>(cmdu_tx);
-            if (request == nullptr) {
-                LOG(ERROR) << "Failed building message!";
-                return;
-            }
-
-            request->total() = 1;
-            request->seq()   = 0;
-            request->size()  = 0;
-
-            send_cmdu_to_controller(cmdu_tx);
-            keep_alive_retries++;
-            master_last_seen = now;
-        }
-    }
-}
-
 bool slave_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
     if (cmdu_rx.getMessageType() == ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE) {
@@ -3634,7 +3587,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
     }
     case STATE_OPERATIONAL: {
         stop_on_failure_attempts = configuration_stop_on_failure_attempts;
-        process_keep_alive();
         break;
     }
     case STATE_ONBOARDING: {
