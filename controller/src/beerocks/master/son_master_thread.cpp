@@ -2964,43 +2964,6 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         }
         break;
     }
-    case beerocks_message::ACTION_CONTROL_AGENT_PING_REQUEST: {
-        if (hostap_mac.empty()) {
-            LOG(WARNING) << "PING_MSG_REQUEST unknown peer mac!";
-        } else if (!database.update_node_last_seen(hostap_mac)) {
-            LOG(DEBUG) << "PING_MSG_REQUEST received from ire " << hostap_mac
-                       << " , can't update last seen time for ";
-        }
-
-        auto request =
-            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_AGENT_PING_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_CONTROL_AGENT_PING_REQUEST failed";
-            return false;
-        }
-
-        auto response =
-            message_com::create_vs_message<beerocks_message::cACTION_CONTROL_AGENT_PING_RESPONSE>(
-                cmdu_tx);
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-        response->total() = request->total();
-        response->seq()   = request->seq();
-        response->size()  = request->size();
-
-        if (response->size()) {
-            if (!request->alloc_data(response->size())) {
-                LOG(ERROR) << "Failed buffer allocation to size=" << int(response->size());
-                break;
-            }
-            memset(request->data(), 0, request->data_length());
-        }
-
-        son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database, hostap_mac);
-        break;
-    }
     case beerocks_message::ACTION_CONTROL_CONTROLLER_PING_RESPONSE: {
         if (hostap_mac.empty()) {
             LOG(ERROR) << "PING_MSG_RESPONSE unknown peer mac!";
