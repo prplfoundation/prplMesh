@@ -974,7 +974,7 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
         std::string sta_ipv4             = network_utils::ipv4_to_string(request->params().ipv4);
         std::string set_bridge_4addr_mac = tlvf::mac_to_string(request->params().bridge_4addr_mac);
         LOG(INFO) << "ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST=" << sta_mac
-                  << " ip=" << sta_ipv4;
+                  << " ip=" << sta_ipv4 << " set_bridge_4addr_mac=" << set_bridge_4addr_mac;
 
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE>(
@@ -982,12 +982,13 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
 
         if (!response) {
             LOG(ERROR)
-                << "Failed building ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE message!";
+                << "Failed building ACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE message!";
             return false;
         }
 
         auto sta_node = mon_db.sta_find(sta_mac);
         if (!sta_node) {
+            LOG(ERROR) << "Could not find sta_node " << sta_mac;
             response->success() = false;
             message_com::send_cmdu(slave_socket, cmdu_tx);
             return false;
