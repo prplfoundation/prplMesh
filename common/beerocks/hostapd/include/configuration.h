@@ -78,6 +78,14 @@ public:
     bool set_create_head_value(const std::string &key, const int value);
 
     /**
+     * @brief get the value of the given key from the head
+     * @param 
+     * - the key to get its value (string)
+     * @return a string with the value or empty if not found
+     */
+    std::string get_head_value(const std::string &key);
+
+    /**
      * @brief set key/value for the given vap
      * @details set the key/vale for the given vap, either replace or create.
      * @param 
@@ -193,7 +201,9 @@ private:
 
 private:
     std::string m_configuration_file;
-    bool m_ok = false;
+
+    // may be changed because of const functions, therefore mutable
+    mutable bool m_ok = false; 
 
     // each string is a line in the original configuration file
     // that belongs to the "head" part. read the explenation at
@@ -222,7 +232,8 @@ private:
     // { "wlan0.2" : ["ctrl_interface=/var/run/hosXXpd", "ap_isolate=1", "ap_max_inactivity=60", "bss_transition=0", "interworking=3"] }
     std::map<std::string, std::vector<std::string>> m_hostapd_config_vaps;
 
-    std::string m_last_message = "all good";
+    // see m_ok's comment 
+    mutable std::string m_last_message = "all good";
 
     // for logs
     friend std::ostream &operator<<(std::ostream &, const Configuration &);

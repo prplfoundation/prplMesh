@@ -289,6 +289,36 @@ TEST(configuration_test, set_int_head_values)
     EXPECT_TRUE(conf) << conf;
 }
 
+TEST(configuration_test, get_head_values)
+{
+    //// start prerequsite ////
+
+    // save the content of the string (start clean)
+    clean_start();
+
+    // construct a configuration
+    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    ASSERT_FALSE(conf) << conf;
+
+    // load the dummy configuration file
+    conf.load();
+    ASSERT_TRUE(conf) << conf;
+
+    //// end prerequsite ////
+
+    // get existing key
+    auto val = conf.get_head_value("ctrl_interface");
+    EXPECT_EQ(val, "/var/run/hostapd");
+
+    // get non existing key
+    val = conf.get_head_value("out_of_office");
+    EXPECT_EQ(val, "");
+    EXPECT_TRUE(conf) << conf;
+
+    conf.store();
+    EXPECT_TRUE(conf) << conf;
+}
+
 TEST(configuration_test, set_string_vap_values)
 {
     //// start prerequsite ////

@@ -116,7 +116,7 @@ bool Configuration::set_create_head_value(const std::string &key, const std::str
 {
     // search for the key
     std::string key_eq(key + "=");
-    auto it_str = std::find_if(
+    auto line_iter = std::find_if(
         m_hostapd_config_head.begin(), m_hostapd_config_head.end(),
         [&key_eq, this](const std::string &line) -> bool { return is_key_in_line(line, key_eq); });
 
@@ -124,8 +124,8 @@ bool Configuration::set_create_head_value(const std::string &key, const std::str
     // we push it to the end of the array
 
     // delete the key-value if found
-    if (it_str != m_hostapd_config_head.end()) {
-        it_str = m_hostapd_config_head.erase(it_str);
+    if (line_iter != m_hostapd_config_head.end()) {
+        line_iter = m_hostapd_config_head.erase(line_iter);
     } else {
         m_last_message =
             std::string(__FUNCTION__) + " the key '" + key + "' for head was not found";
@@ -150,6 +150,23 @@ bool Configuration::set_create_head_value(const std::string &key, const int valu
     return set_create_head_value(key, std::to_string(value));
 }
 
+std::string Configuration::get_head_value(const std::string &key)
+{
+    std::string key_eq(key + "=");
+    auto line_iter = std::find_if(
+        m_hostapd_config_head.begin(), m_hostapd_config_head.end(),
+        [&key_eq, this](const std::string &line) -> bool { return is_key_in_line(line, key_eq); });
+
+    if (line_iter == m_hostapd_config_head.end()) {
+        m_last_message = std::string(__FUNCTION__) +
+                         " couldn't find requested key in head: " + key;
+        return "";
+    }
+
+    // return from just after the '=' sign to the end of the string
+    return line_iter->substr(line_iter->find('=') + 1);
+}
+
 bool Configuration::set_create_vap_value(const std::string &vap, const std::string &key,
                                          const std::string &value)
 {
@@ -162,7 +179,7 @@ bool Configuration::set_create_vap_value(const std::string &vap, const std::stri
     bool existing_vap_commented = existing_vap->front()[0] == '#';
 
     std::string key_eq(key + "=");
-    auto it_str = std::find_if(
+    auto line_iter = std::find_if(
         existing_vap->begin(), existing_vap->end(),
         [&key_eq, this](const std::string &line) -> bool { return is_key_in_line(line, key_eq); });
 
@@ -170,8 +187,8 @@ bool Configuration::set_create_vap_value(const std::string &vap, const std::stri
     // we push it to the end of the array
 
     // delete the key-value if found
-    if (it_str != existing_vap->end()) {
-        it_str = existing_vap->erase(it_str);
+    if (line_iter != existing_vap->end()) {
+        line_iter = existing_vap->erase(line_iter);
     } else {
         m_last_message =
             std::string(__FUNCTION__) + " the key '" + key + "' for vap " + vap + " was not found";
@@ -215,18 +232,18 @@ std::string Configuration::get_vap_value(const std::string &vap, const std::stri
     m_ok = true;
 
     std::string key_eq(key + "=");
-    auto it_str = std::find_if(
+    auto line_iter = std::find_if(
         existing_vap->begin(), existing_vap->end(),
         [&key_eq, this](const std::string &line) -> bool { return is_key_in_line(line, key_eq); });
 
-    if (it_str == existing_vap->end()) {
+    if (line_iter == existing_vap->end()) {
         m_last_message = std::string(__FUNCTION__) +
                          " couldn't find requested key for vap: " + vap + "; requested key: " + key;
         return "";
     }
 
     // return from the just after the '=' sign to the end of the string
-    return it_str->substr(it_str->find('=') + 1);
+    return line_iter->substr(line_iter->find('=') + 1);
 }
 
 void Configuration::comment_vap(const std::string &vap)
