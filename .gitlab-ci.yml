@@ -10,6 +10,7 @@ stages:
   - certification-turris-omnia
   - certification-axepoint
   - certification-axepoint-bhwifi
+  - certification-axepoint-controller
   - upload
 
 .image-build:
@@ -353,3 +354,4 @@ include:
   - local: "/ci/certification/turris-omnia.yml"
   - local: "/ci/certification/axepoint.yml"
   - local: "/ci/certification/axepoint-bhwifi.yml"
+  - local: "/ci/certification/axepoint-controller.yml"
