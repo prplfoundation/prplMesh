@@ -125,7 +125,6 @@ private:
                                      std::shared_ptr<beerocks::beerocks_header> beerocks_header);
     bool handle_cmdu_control_ieee1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_monitor_ieee1905_1_message(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
-    void process_keep_alive();
 
     bool slave_fsm(bool &call_slave_select);
     void slave_reset();
