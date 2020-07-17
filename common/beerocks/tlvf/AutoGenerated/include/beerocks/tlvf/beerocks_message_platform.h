@@ -412,48 +412,6 @@ class cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE : public BaseClass
         uint32_t* m_result = nullptr;
 };
 
-class cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST : public BaseClass
-{
-    public:
-        cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST();
-
-        static eActionOp_PLATFORM get_action_op(){
-            return (eActionOp_PLATFORM)(ACTION_PLATFORM_DEVICE_INFO_GET_REQUEST);
-        }
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_PLATFORM* m_action_op = nullptr;
-};
-
-class cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE : public BaseClass
-{
-    public:
-        cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE();
-
-        static eActionOp_PLATFORM get_action_op(){
-            return (eActionOp_PLATFORM)(ACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE);
-        }
-        sDeviceInfo& params();
-        uint32_t& result();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_PLATFORM* m_action_op = nullptr;
-        sDeviceInfo* m_params = nullptr;
-        uint32_t* m_result = nullptr;
-};
-
 class cACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST : public BaseClass
 {
     public:
