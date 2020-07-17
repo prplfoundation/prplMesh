@@ -1297,29 +1297,6 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                     << "Received ADMIN_CREDENTIALS_GET_RESPONSE response, but no one is waiting...";
             }
         } break;
-        case beerocks_message::ACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE: {
-            auto response =
-                beerocks_header
-                    ->addClass<beerocks_message::cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE>();
-            if (response == nullptr) {
-                LOG(ERROR) << "addClass cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE failed";
-                return BML_RET_OP_FAILED;
-            }
-            // Signal any waiting threads
-            if (m_prmDeviceInfoGet) {
-                if (m_device_info != nullptr) {
-                    *m_device_info = response->params();
-                    m_prmDeviceInfoGet->set_value(response->result() == 0);
-                } else {
-                    m_prmDeviceInfoGet->set_value(0);
-                }
-                m_prmDeviceInfoGet = nullptr;
-            } else {
-                LOG(WARNING)
-                    << "Received SERIAL_NUMBER_GET_RESPONSE response, but no one is waiting...";
-            }
-            return BML_RET_OP_FAILED;
-        } break;
         case beerocks_message::ACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE: {
             auto response = beerocks_header->addClass<
                 beerocks_message::cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE>();
