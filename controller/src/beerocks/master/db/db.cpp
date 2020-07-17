@@ -581,17 +581,6 @@ bool db::update_node_last_seen(const std::string &mac)
     return true;
 }
 
-bool db::update_node_last_ping_sent(const std::string &mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return false;
-    }
-    n->last_ping_sent = std::chrono::steady_clock::now();
-    return true;
-}
-
 std::chrono::steady_clock::time_point db::get_node_last_seen(const std::string &mac)
 {
     auto n = get_node(mac);
@@ -601,107 +590,6 @@ std::chrono::steady_clock::time_point db::get_node_last_seen(const std::string &
     }
 
     return n->last_seen;
-}
-
-std::chrono::steady_clock::time_point db::get_node_last_ping_sent(const std::string &mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return std::chrono::steady_clock::now();
-    }
-    return n->last_ping_sent;
-}
-
-bool db::update_node_last_ping_received(const std::string &mac, int seq)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return false;
-    }
-    n->last_ping_received = std::chrono::steady_clock::now();
-    n->last_seen          = n->last_ping_received;
-
-    n->last_ping_delta_ms =
-        (double)((std::chrono::duration_cast<std::chrono::duration<double>>(
-                      get_node_last_ping_received(mac) - get_node_last_ping_sent(mac)))
-                     .count()) *
-        1000;
-    if (n->last_ping_delta_ms < n->last_ping_min_ms || (seq == 0)) {
-        n->last_ping_min_ms = n->last_ping_delta_ms;
-    }
-    if (n->last_ping_delta_ms > n->last_ping_max_ms || (seq == 0)) {
-        n->last_ping_max_ms = n->last_ping_delta_ms;
-    }
-    if (seq == 0) {
-        n->last_ping_avg_ms_acc = n->last_ping_delta_ms;
-    } else {
-        n->last_ping_avg_ms_acc += n->last_ping_delta_ms;
-    }
-
-    return true;
-}
-
-bool db::update_node_last_ping_received_avg(const std::string &mac, int total_seq)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return false;
-    }
-    n->last_ping_avg_ms = n->last_ping_avg_ms_acc / total_seq;
-    return true;
-}
-
-std::chrono::steady_clock::time_point db::get_node_last_ping_received(const std::string &mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return std::chrono::steady_clock::now();
-    }
-    return n->last_ping_received;
-}
-
-int db::get_node_last_ping_delta_ms(const std::string &mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return -1;
-    }
-    return n->last_ping_delta_ms;
-}
-
-int db::get_node_last_ping_min_ms(const std::string &mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return -1;
-    }
-    return n->last_ping_min_ms;
-}
-
-int db::get_node_last_ping_max_ms(const std::string &mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return -1;
-    }
-    return n->last_ping_max_ms;
-}
-
-int db::get_node_last_ping_avg_ms(const std::string &mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return -1;
-    }
-    return n->last_ping_avg_ms;
 }
 
 std::unordered_map<sMacAddr, std::unordered_map<sMacAddr, son::node::link_metrics_data>> &
