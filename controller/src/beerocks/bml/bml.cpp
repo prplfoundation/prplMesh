@@ -304,37 +304,6 @@ int bml_get_administrator_credentials(BML_CTX ctx, char *user_password)
     return (pBML->get_administrator_credentials(user_password));
 }
 
-int bml_get_serial_number(BML_CTX ctx, char *serial_number)
-{
-    // Validate input parameters
-    if (!ctx || !serial_number)
-        return (-BML_RET_INVALID_ARGS);
-
-    bml_internal *pBML = (bml_internal *)ctx;
-
-    BML_DEVICE_INFO device_info;
-    auto ret = pBML->get_device_info(device_info);
-    if (ret != 0) {
-        return ret;
-    }
-
-    // Copy only the serial number
-    beerocks::string_utils::copy_string(serial_number, device_info.serial_number, BML_DEV_INFO_LEN);
-
-    return 0;
-}
-
-int bml_get_device_info(BML_CTX ctx, BML_DEVICE_INFO *device_info)
-{
-    // Validate input parameters
-    if (!ctx || !device_info)
-        return (-BML_RET_INVALID_ARGS);
-
-    bml_internal *pBML = (bml_internal *)ctx;
-
-    return (pBML->get_device_info(*device_info));
-}
-
 int bml_set_client_roaming(BML_CTX ctx, int enable)
 {
     // Validate input parameters

@@ -229,28 +229,6 @@ int bml_wps_onboarding(BML_CTX ctx, const char *iface);
 int bml_get_administrator_credentials(BML_CTX ctx, char *user_password);
 
 /**
- * Get serial number of the device
- * NOTE: DEPRECATED - Use bml_get_device_info() instead.
- *
- * @param [in] ctx BML Context.
- * @param [out] serial_number[BML_NODE_SERIAL_NUMBER_LEN] The serial number of the device
- *
- * @return BML_RET_OK on success.
- */
-int __attribute__((deprecated)) bml_get_serial_number(BML_CTX ctx, char *serial_number);
-
-/**
- * Get generic device information.
- *
- * @param [in] ctx BML Context.
- * @param [out] device_info Device information structure.
- *
- * @return BML_RET_OK on success.
- */
-
-int bml_get_device_info(BML_CTX ctx, struct BML_DEVICE_INFO *device_info);
-
-/**
  * Enables or disables beerocks roaming.
  *
  * @param [in] ctx BML Context.
