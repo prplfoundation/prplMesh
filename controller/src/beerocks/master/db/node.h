@@ -263,14 +263,6 @@ public:
     beerocks::eBandType band_type   = beerocks::eBandType::INVALID_BAND;
     beerocks::eIfaceType iface_type = beerocks::IFACE_TYPE_ETHERNET;
     std::chrono::steady_clock::time_point last_seen;
-    std::chrono::steady_clock::time_point last_ping_sent;
-    std::chrono::steady_clock::time_point last_ping_received;
-
-    int last_ping_delta_ms   = 0;
-    int last_ping_min_ms     = 0;
-    int last_ping_max_ms     = 0;
-    int last_ping_avg_ms_acc = 0;
-    int last_ping_avg_ms     = 0;
 
     friend std::ostream &operator<<(std::ostream &os, const node &node);
     friend std::ostream &operator<<(std::ostream &os, const node *node);

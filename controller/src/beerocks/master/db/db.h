@@ -272,17 +272,7 @@ public:
 
     bool update_node_last_seen(const std::string &mac);
 
-    bool update_node_last_ping_sent(const std::string &mac);
     std::chrono::steady_clock::time_point get_node_last_seen(const std::string &mac);
-    std::chrono::steady_clock::time_point get_node_last_ping_sent(const std::string &mac);
-
-    bool update_node_last_ping_received(const std::string &mac, int seq);
-    bool update_node_last_ping_received_avg(const std::string &mac, int total_seq);
-    std::chrono::steady_clock::time_point get_node_last_ping_received(const std::string &mac);
-    int get_node_last_ping_delta_ms(const std::string &mac);
-    int get_node_last_ping_min_ms(const std::string &mac);
-    int get_node_last_ping_max_ms(const std::string &mac);
-    int get_node_last_ping_avg_ms(const std::string &mac);
 
     bool set_hostap_active(const std::string &mac, bool active);
     bool is_hostap_active(const std::string &mac);
