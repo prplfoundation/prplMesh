@@ -99,16 +99,6 @@ cACTION_PLATFORM_ADMIN_CREDENTIALS_GET_RESPONSE:
     _type: uint32_t
     _comment: # 0 - Failure, 1 - Success
 
-cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST:
-  _type: class
-
-cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE:
-  _type: class
-  params: sDeviceInfo
-  result:
-    _type: uint32_t
-    _comment: # 0 - Failure, 1 - Success
-
 cACTION_PLATFORM_LOCAL_MASTER_GET_REQUEST:
   _type: class
 
@@ -141,4 +131,3 @@ cACTION_PLATFORM_ERROR_NOTIFICATION:
     _type: char
     _length: [256]
     _comment: # Must match BPL_ERROR_STRING_LEN
-
