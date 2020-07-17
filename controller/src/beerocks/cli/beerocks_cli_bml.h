@@ -117,8 +117,6 @@ private:
     int get_onboarding_state_caller(int numOfArgs);
     int wps_onboarding_caller(int numOfArgs);
 
-    int get_device_info_caller(int numOfArgs);
-
     int get_bml_version_caller(int numOfArgs);
     int get_master_slave_versions_caller(int numOfArgs);
 
@@ -173,7 +171,6 @@ private:
     int get_onboarding_state();
     int wps_onboarding(const std::string iface = std::string());
 
-    int get_device_info();
     int get_bml_version();
     int get_master_slave_versions();
 

@@ -418,8 +418,6 @@ void cli_bml::setFunctionsMapAndArray()
     insertCommandToMap("bml_wps_onboarding", "[<iface>]",
                        "Start WPS onboarding process on 'iface' or all ifaces in case of empty.",
                        static_cast<pFunction>(&cli_bml::wps_onboarding_caller), 0, 1, STRING_ARG);
-    insertCommandToMap("bml_get_device_info", "", "Get device information",
-                       static_cast<pFunction>(&cli_bml::get_device_info_caller), 0, 0);
     insertCommandToMap("bml_get_bml_version", "", "prints bml version",
                        static_cast<pFunction>(&cli_bml::get_bml_version_caller), 0, 0);
     insertCommandToMap("bml_get_master_slave_versions", "",
@@ -1014,8 +1012,6 @@ int cli_bml::wps_onboarding_caller(int numOfArgs)
         return wps_onboarding(args.stringArgs[0]);
 }
 
-int cli_bml::get_device_info_caller(int numOfArgs) { return get_device_info(); }
-
 int cli_bml::get_bml_version_caller(int numOfArgs)
 {
     if (numOfArgs != 0)
@@ -1589,39 +1585,6 @@ int cli_bml::wps_onboarding(std::string iface)
 {
     int ret = bml_wps_onboarding(ctx, iface.c_str());
     printBmlReturnVals("bml_wps_onboarding", ret);
-    return 0;
-}
-
-int cli_bml::get_device_info()
-{
-    BML_DEVICE_INFO device_info;
-    int ret = bml_get_device_info(ctx, &device_info);
-
-    std::cout << "Manufacturer : " << device_info.manufacturer << std::endl;
-    std::cout << "Model Name   : " << device_info.model_name << std::endl;
-    std::cout << "Serial Number: " << device_info.serial_number << std::endl;
-
-    std::cout << "LAN          : ";
-    if (device_info.lan_iface_name[0]) {
-        std::cout << device_info.lan_iface_name << " ("
-                  << network_utils::ipv4_to_string(device_info.lan_ip_address) << "/"
-                  << network_utils::ipv4_to_string(device_info.lan_network_mask) << ")";
-    } else {
-        std::cout << "N/A";
-    }
-    std::cout << std::endl;
-
-    std::cout << "WAN          : ";
-    if (device_info.wan_iface_name[0]) {
-        std::cout << device_info.wan_iface_name << " ("
-                  << network_utils::ipv4_to_string(device_info.wan_ip_address) << "/"
-                  << network_utils::ipv4_to_string(device_info.wan_network_mask) << ")";
-    } else {
-        std::cout << "N/A";
-    }
-    std::cout << std::endl;
-
-    printBmlReturnVals("bml_get_device_info", ret);
     return 0;
 }
 
