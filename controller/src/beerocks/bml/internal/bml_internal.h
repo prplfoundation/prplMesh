@@ -106,9 +106,6 @@ public:
     // Get administrator user credentials
     int get_administrator_credentials(char *user_password);
 
-    // Get device information
-    int get_device_info(BML_DEVICE_INFO &device_info);
-
     // Enable/Disable client roaming
     int set_client_roaming(bool enable);
 
