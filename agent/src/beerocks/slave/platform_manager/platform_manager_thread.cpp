@@ -1002,54 +1002,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             iface);
     } break;
 
-    case beerocks_message::ACTION_PLATFORM_DEVICE_INFO_GET_REQUEST: {
-        // Request message
-        LOG(TRACE) << "ACTION_PLATFORM_DEVICE_INFO_GET_REQUEST";
-
-        auto response = message_com::create_vs_message<
-            beerocks_message::cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE>(cmdu_tx);
-
-        if (response == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            break;
-        }
-
-        auto &params = response->params();
-        memset(&params, 0, sizeof(params));
-
-        bpl::BPL_DEVICE_INFO bpl_device_info;
-
-        if (bpl::cfg_get_device_info(&bpl_device_info) < 0) {
-            LOG(ERROR) << "Failed reading device information!";
-            response->result() = 0;
-        } else {
-            response->result() = 1;
-        }
-
-        string_utils::copy_string(params.manufacturer, bpl_device_info.manufacturer,
-                                  message::DEV_INFO_STR_MAX_LEN);
-        string_utils::copy_string(params.model_name, bpl_device_info.model_name,
-                                  message::DEV_INFO_STR_MAX_LEN);
-        string_utils::copy_string(params.serial_number, bpl_device_info.serial_number,
-                                  message::DEV_INFO_STR_MAX_LEN);
-
-        // LAN
-        string_utils::copy_string(params.lan_iface_name, bpl_device_info.lan_iface_name,
-                                  message::IFACE_NAME_LENGTH);
-        params.lan_ip_address   = bpl_device_info.lan_ip_address;
-        params.lan_network_mask = bpl_device_info.lan_network_mask;
-
-        // WAN
-        string_utils::copy_string(params.wan_iface_name, bpl_device_info.wan_iface_name,
-                                  message::IFACE_NAME_LENGTH);
-        params.wan_ip_address   = bpl_device_info.wan_ip_address;
-        params.wan_network_mask = bpl_device_info.wan_network_mask;
-
-        // Sent with unsafe because BML is reachable only on platform thread
-        message_com::send_cmdu(sd, cmdu_tx);
-
-    } break;
-
     case beerocks_message::ACTION_PLATFORM_ERROR_NOTIFICATION: {
         auto error =
             beerocks_header->addClass<beerocks_message::cACTION_PLATFORM_ERROR_NOTIFICATION>();
