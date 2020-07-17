@@ -26,6 +26,8 @@
 #else
 #error "No safe C library defined, define either USE_LIBSAFEC or USE_SLIBC"
 #endif
+#include <chrono>
+#include <thread>
 
 //////////////////////////////////////////////////////////////////////////////
 ////////////////////////// Local Module Definitions //////////////////////////
@@ -1113,6 +1115,7 @@ bool ap_wlan_hal_dwpal::update_vap_credentials(
     size_t vap_ok_count    = 0;
     size_t vap_total_count = 0;
     for (const auto &it : hostapd_config_vaps) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(2000));
         // Skip STAs
         std::string entry_mode;
         if (hostapd_config_get_value(it.second, "mode", entry_mode) && entry_mode != "ap") {
@@ -1122,10 +1125,11 @@ bool ap_wlan_hal_dwpal::update_vap_credentials(
         ++vap_total_count;
         // Send the command
         std::string cmd("RECONF " + it.first);
-        if (!dwpal_send_cmd(cmd)) {
-            LOG(ERROR) << "Autoconfiguration: \"" << cmd << "\" command to hostapd has failed!";
-            // Keep going and try to complete what we can
-            continue;
+        unsigned tries = 0;
+        while(tries < 20 && !dwpal_send_cmd(cmd)) {
+            LOG(ERROR) << "Autoconfiguration: \"" << cmd << "\" command to hostapd has failed!\n" << "Rertying...";
+            std::this_thread::sleep_for(std::chrono::milliseconds(2000));
+            ++tries;
         }
         ++vap_ok_count;
     }
