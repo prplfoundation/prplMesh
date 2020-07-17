@@ -62,7 +62,6 @@ class Services:
         self.scriptdir = os.path.dirname(os.path.realpath(__file__))
         os.chdir(self.scriptdir)
         self.rootdir = self.scriptdir
-        print(self.rootdir)
         self.logdir = os.path.join(self.scriptdir, 'logs')
         device_name = 'dockerized_device-{}'.format(getpass.getuser())
         self.devicedir = os.path.join(self.logdir, device_name)
@@ -107,6 +106,30 @@ class Services:
         return return_code
 
 
+def vararg_callback(option, opt_str, value, parser):
+    assert value is None
+    value = []
+
+    def floatable(str):
+        try:
+            float(str)
+            return True
+        except ValueError:
+            return False
+
+    for arg in parser.rargs:
+        # stop on --foo like options
+        if arg[:2] == "--" and len(arg) > 2:
+            break
+        # stop on -a, but not on -3 or -3.0
+        if arg[:1] == "-" and len(arg) > 1 and not floatable(arg):
+            break
+        value.append(arg)
+
+    del parser.rargs[:len(value)]
+    setattr(parser.values, option.dest, value)
+
+
 if __name__ == '__main__':
     check_docker_versions()
     parser = argparse.ArgumentParser(description='Dockerized test launcher')
@@ -117,11 +140,22 @@ if __name__ == '__main__':
                         help='Rebuild containers')
     parser.add_argument('--shell', dest='shell', action='store_true',
                         help='Run a shell on the bf container')
-    args = parser.parse_args()
+    parser.add_argument('--comp', dest='comp', action='store_true',
+                        help='Pass the rest of arguments to docker-compose')
+    args, rest = parser.parse_known_args()
     services = Services()
+    if args.comp:
+        if len(rest) == 0:
+            print('Usage: dctest --comp <arguments to docker-compose>')
+            sys.exit(1)
+        sys.exit(services.dc(rest, interactive=True))
+    else:
+        if len(rest) > 0:
+            print('Unknown parameters: {}'.format(rest))
+            sys.exit(1)
+
     if args.clean:
         services.dc(['down', '--remove-orphans', '--rmi', 'all'])
-        # services.cleanlogs()
     elif args.shell:
         rc = services.dc(['run', '--service-ports', '--entrypoint',
                           '/bin/bash', 'boardfarm'], interactive=True)
