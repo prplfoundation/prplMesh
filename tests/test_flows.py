@@ -122,6 +122,7 @@ class TestFlows:
         self, msg: str, msg_type: int, eth_src: str, eth_dst: str = None, mid: int = None
     ) -> sniffer.Packet:
         '''Like check_cmdu_type, but also check that only a single CMDU is found.'''
+        debug("Checking for single CMDU {} (0x{:04x}) from {}".format(msg, msg_type, eth_src))
         cmdus = self.check_cmdu_type(msg, msg_type, eth_src, eth_dst, mid)
         if not cmdus:
             assert False  # Failure already reported by check_cmdu
