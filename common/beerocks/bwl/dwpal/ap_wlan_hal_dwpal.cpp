@@ -1105,6 +1105,11 @@ bool ap_wlan_hal_dwpal::update_vap_credentials(
         return false;
     }
 
+    // make sure main vap doesn't have start_disabled flag .
+    // so in case its a 5G interface we would have the ability to
+    // start "beaconing" on DFS channels after CAC ends.
+    hostapd_config_set_value(hostapd_config_head, "start_disabled", "1");
+
     // hostapd help says:
     // RECONF [BSS name] = reconfigure interface (add/remove BSS's while other BSS are unaffected)
     // if BSS name is given, that BSS will be reloaded (main BSS isn't supported)
