@@ -68,7 +68,6 @@ monitor_ap_idle_threshold_B=10000
 monitor_ap_active_threshold_B=20000
 monitor_ap_idle_stable_time_sec=70
 monitor_disable_initiative_arp=0
-slave_keep_alive_retries=10
 channel_selection_random_delay=30000
 channel_selection_long_delay=43200000
 credentials_change_timeout_sec=300
