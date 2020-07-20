@@ -108,7 +108,6 @@ public:
         int monitor_ap_active_threshold_B;
         int monitor_ap_idle_stable_time_sec;
         int monitor_disable_initiative_arp;
-        int slave_keep_alive_retries;
 
         int idle_steer_activity_check_timeout;
         int channel_selection_random_delay;
