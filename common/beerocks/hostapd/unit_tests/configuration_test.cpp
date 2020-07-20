@@ -476,9 +476,7 @@ TEST(configuration_test, disable_all_ap)
     */
 
     // all vaps are ap vaps
-    auto all_predicate = [&conf](const std::string &vap) {
-        return true;
-    };
+    auto all_predicate = [&conf](const std::string &vap) { return true; };
 
     // disable by adding a key/value
     auto disable_func = [&conf](const std::string vap) {
