@@ -8,12 +8,12 @@
 
 #include <iostream>
 #include <map>
+#include <set>
 #include <string>
 #include <vector>
 
 namespace prplmesh {
 namespace hostapd {
-namespace config {
 
 class Configuration {
 
@@ -39,9 +39,18 @@ public:
     /**
      * @brief load the configuration 
      * @details loads the file this object is constructed with
+     * @param vap_indications - set the indications that a vap
+     * configuration section begins. e.g. "bss=" and/or "interface="
+     * note that the equal sign is expected to be part of vap_indication
+     * std::string vap_indication("interface=");
+     * vap indication can be any of the parameters supplied
      * @return *this (as bool, see above)
      */
-    bool load();
+    template<class... StringIndications>
+    bool load(const StringIndications... vap_indications)
+    {
+        return load(std::set<std::string>{vap_indications...});
+    }
 
     /**
      * @brief stores the configuration 
@@ -178,6 +187,14 @@ public:
 
 private:
     /**
+     * @brief helper: load configuration based on array of strings
+     * indicating vap separation.
+     * @param array of separations
+     * @return *this as bool
+     */
+    bool load(const std::set<std::string> &vap_indicators);
+
+    /**
      * @brief helper: get exiting vap
      * @details any function that works on a specific vap does
      * the same: search the vap, set a variable when found
@@ -203,7 +220,7 @@ private:
     std::string m_configuration_file;
 
     // may be changed because of const functions, therefore mutable
-    mutable bool m_ok = false; 
+    mutable bool m_ok = false;
 
     // each string is a line in the original configuration file
     // that belongs to the "head" part. read the explenation at
@@ -232,8 +249,8 @@ private:
     // { "wlan0.2" : ["ctrl_interface=/var/run/hosXXpd", "ap_isolate=1", "ap_max_inactivity=60", "bss_transition=0", "interworking=3"] }
     std::map<std::string, std::vector<std::string>> m_hostapd_config_vaps;
 
-    // see m_ok's comment 
-    mutable std::string m_last_message = "all good";
+    // see m_ok's comment
+    mutable std::string m_last_message = "initial state, yet nothing was done";
 
     // for logs
     friend std::ostream &operator<<(std::ostream &, const Configuration &);
@@ -266,6 +283,5 @@ void Configuration::for_all_ap_vaps(func f, iter current_iter, const iter end)
 // for logs
 std::ostream &operator<<(std::ostream &, const Configuration &);
 
-} // namespace config
 } // namespace hostapd
 } // namespace prplmesh
