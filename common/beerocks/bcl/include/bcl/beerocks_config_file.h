@@ -74,7 +74,6 @@ public:
         std::string monitor_ap_active_threshold_B;
         std::string monitor_ap_idle_stable_time_sec;
         std::string monitor_disable_initiative_arp;
-        std::string slave_keep_alive_retries;
         std::string channel_selection_random_delay;
         std::string fail_safe_5G_frequency;
         std::string fail_safe_5G_bw;

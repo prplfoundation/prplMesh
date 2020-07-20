@@ -179,8 +179,6 @@ static void fill_master_config(son::db::sDbMasterConfig &master_conf,
         beerocks::string_utils::stoi(main_master_conf.monitor_rx_rssi_notification_delta_db);
     master_conf.monitor_disable_initiative_arp =
         beerocks::string_utils::stoi(main_master_conf.monitor_disable_initiative_arp);
-    master_conf.slave_keep_alive_retries =
-        beerocks::string_utils::stoi(main_master_conf.slave_keep_alive_retries);
     master_conf.channel_selection_random_delay =
         beerocks::string_utils::stoi(main_master_conf.channel_selection_random_delay);
     master_conf.fail_safe_5G_frequency =
@@ -342,7 +340,6 @@ int main(int argc, char *argv[])
     }
 
     son::db master_db(master_conf, logger, bridge_info.mac);
-    LOG(DEBUG) << "slave_keep_alive_retries=" << master_db.config.slave_keep_alive_retries;
     // diagnostics_thread diagnostics(master_db);
     son::master_thread son_master(master_uds, master_db);
 
