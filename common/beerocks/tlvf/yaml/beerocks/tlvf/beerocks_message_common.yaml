@@ -46,7 +46,6 @@ sSonConfig:
   monitor_ap_idle_stable_time_sec: uint16_t
   monitor_disable_initiative_arp: uint8_t
 
-  slave_keep_alive_retries: uint8_t
   ire_rssi_report_rate_sec: uint8_t
 
 sPlatformSettings:
