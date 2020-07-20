@@ -12,6 +12,12 @@
                 "conn_cmd": ""
             },
             {
+                "name": "lan2",
+                "type": "prplmesh_docker",
+                "role": "agent",
+                "conn_cmd": ""
+            },
+            {
                 "name": "wifi",
                 "type": "STA_dummy",
                 "mac": "51:a1:10:20:00:01",
