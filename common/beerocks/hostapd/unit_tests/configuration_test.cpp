@@ -178,6 +178,7 @@ const std::string configuration_content(
     "start_disabled=1\n"
     "mode=ap\n");
 
+
 /*
 void clean_start()
 {
@@ -220,13 +221,14 @@ TEST(configuration_test, store)
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);;
+    conf.load(vap_indication);
+    ;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
 
     // add a value to vap
-    conf.set_create_vap_value("wlan0.3", "was_i_stroed", "yes_you_were");
+    conf.set_create_vap_value("wlan1", "was_i_stroed", "yes_you_were");
     EXPECT_TRUE(conf) << conf;
 
     // store
@@ -246,7 +248,8 @@ TEST(configuration_test, set_string_head_values)
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);;
+    conf.load(vap_indication);
+    ;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -279,7 +282,8 @@ TEST(configuration_test, set_int_head_values)
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);;
+    conf.load(vap_indication);
+    ;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -304,7 +308,8 @@ TEST(configuration_test, get_head_values)
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);;
+    conf.load(vap_indication);
+    ;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -334,7 +339,8 @@ TEST(configuration_test, set_string_vap_values)
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);;
+    conf.load(vap_indication);
+    ;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -375,7 +381,8 @@ TEST(configuration_test, set_int_vap_values)
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);;
+    conf.load(vap_indication);
+    ;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -411,7 +418,8 @@ TEST(configuration_test, get_vap_values)
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);;
+    conf.load(vap_indication);
+    ;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -451,21 +459,34 @@ TEST(configuration_test, disable_all_ap)
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);;
+    conf.load(vap_indication);
+    ;
     ASSERT_TRUE(conf) << conf;
+
+    // identify vap by  mode=ap
+    /*
+    auto mode_predicate = [&conf](const std::string &vap) {
+        return conf.get_vap_value(vap, "mode") == "ap";
+    };
+    */
+
+    // all vaps are ap vaps
+    auto all_predicate = [&conf](const std::string &vap) {
+        return true;
+    };
 
     // disable by adding a key/value
     auto disable_func = [&conf](const std::string vap) {
         conf.set_create_vap_value(vap, "start_disabled", 1);
     };
 
-    conf.for_all_ap_vaps(disable_func);
+    conf.for_all_ap_vaps(disable_func, all_predicate);
     EXPECT_TRUE(conf) << conf;
 
     // disable by commenting
     auto comment_func = [&conf](const std::string vap) { conf.comment_vap(vap); };
 
-    conf.for_all_ap_vaps(comment_func);
+    conf.for_all_ap_vaps(comment_func, all_predicate);
     EXPECT_TRUE(conf) << conf;
 
     // store
@@ -487,7 +508,8 @@ TEST(configuration_test, enable_all_ap)
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);;
+    conf.load(vap_indication);
+    ;
     ASSERT_TRUE(conf) << conf;
 
     // enable by removing key/value
@@ -495,13 +517,17 @@ TEST(configuration_test, enable_all_ap)
         conf.set_create_vap_value(vap, "start_disabled", "");
     };
 
-    conf.for_all_ap_vaps(enable_func);
+    auto ap_predicate = [&conf](const std::string &vap) {
+        return conf.get_vap_value(vap, "mode") == "ap";
+    };
+
+    conf.for_all_ap_vaps(enable_func, ap_predicate);
     EXPECT_TRUE(conf) << conf;
 
     // enable by uncommenting
-    auto uncomment_func = [&conf](const std::string vap) { conf.uncomment_vap(vap); };
+    auto uncomment_func = [&conf](const std::string &vap) { conf.uncomment_vap(vap); };
 
-    conf.for_all_ap_vaps(uncomment_func);
+    conf.for_all_ap_vaps(uncomment_func, ap_predicate);
     EXPECT_TRUE(conf) << conf;
 
     // store
@@ -523,7 +549,8 @@ TEST(configuration_test, comment_vap)
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);;
+    conf.load(vap_indication);
+    ;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -551,7 +578,8 @@ TEST(configuration_test, uncomment_vap)
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);;
+    conf.load(vap_indication);
+    ;
     ASSERT_TRUE(conf) << conf;
 
     // comment twice!
@@ -563,7 +591,8 @@ TEST(configuration_test, uncomment_vap)
     EXPECT_TRUE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);;
+    conf.load(vap_indication);
+    ;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -610,7 +639,8 @@ TEST(configuration_test, itererate_both_containers)
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);;
+    conf.load(vap_indication);
+    ;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -631,7 +661,11 @@ TEST(configuration_test, itererate_both_containers)
         }
     };
 
-    conf.for_all_ap_vaps(set_ssid, ssid.begin(), ssid.end());
+    auto ap_predicate = [&conf](const std::string &vap) {
+        return conf.get_vap_value(vap, "mode") == "ap";
+    };
+
+    conf.for_all_ap_vaps(set_ssid, ssid.begin(), ssid.end(), ap_predicate);
     EXPECT_TRUE(conf) << conf;
 
     conf.store();
