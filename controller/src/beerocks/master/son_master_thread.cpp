@@ -2247,7 +2247,6 @@ bool master_thread::handle_intel_slave_join(
             database.config.monitor_ap_idle_stable_time_sec;
         join_response->config().monitor_disable_initiative_arp =
             database.config.monitor_disable_initiative_arp;
-        join_response->config().slave_keep_alive_retries = database.config.slave_keep_alive_retries;
         join_response->config().ire_rssi_report_rate_sec = database.config.ire_rssi_report_rate_sec;
 
         LOG(DEBUG) << "send SLAVE_JOINED_RESPONSE";

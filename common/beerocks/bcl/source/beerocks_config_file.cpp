@@ -117,7 +117,6 @@ bool config_file::read_master_config_file(const std::string &config_file_path, s
         std::make_tuple("monitor_rx_rssi_notification_delta_db=",
                         &conf.monitor_rx_rssi_notification_delta_db, mandatory_master),
         std::make_tuple("monitor_disable_initiative_arp=", &conf.monitor_disable_initiative_arp, 0),
-        std::make_tuple("slave_keep_alive_retries=", &conf.slave_keep_alive_retries, 0),
         std::make_tuple("channel_selection_random_delay=", &conf.channel_selection_random_delay,
                         mandatory_master),
         std::make_tuple("fail_safe_5G_frequency=", &conf.fail_safe_5G_frequency, mandatory_master),

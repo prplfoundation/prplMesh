@@ -3704,8 +3704,7 @@ void slave_thread::log_son_config()
                << "monitor_ap_idle_stable_time_sec="
                << int(son_config.monitor_ap_idle_stable_time_sec) << std::endl
                << "monitor_disable_initiative_arp="
-               << int(son_config.monitor_disable_initiative_arp) << std::endl
-               << "slave_keep_alive_retries=" << int(son_config.slave_keep_alive_retries);
+               << int(son_config.monitor_disable_initiative_arp) << std::endl;
 }
 
 bool slave_thread::monitor_heartbeat_check()
