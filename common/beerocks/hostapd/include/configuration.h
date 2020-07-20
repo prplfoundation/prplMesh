@@ -156,20 +156,26 @@ public:
 
     /**
      * @brief apply func to all ap vaps
-     * @details apply func to all vaps that thier mode is "ap"
-     * (leaving STAs vaps untouched for example).
+     * @details apply func to all vaps that ap_predicate returns
+     * true for them. this enables leaving STAs vaps untouched for example.
+     * @param func has the following interface:         void f(const std::string &vap);
+     * @param ap_predicate has the following interface: bool f(const std::string &vap);
      */
-    template <class func> void for_all_ap_vaps(func);
+    template <class func, class ap_predicate> void for_all_ap_vaps(func, ap_predicate);
 
     /**
      * @brief apply func to all ap vaps, increment the given iterator 
      * with each call to func: f(current_vap, ++user_itertor)
-     * func interface: template<class iter> f(const std::string& vap, iter user_iterator)
-     * @details apply func to all vaps that thier mode is "ap" while incrementing
-     * the user iterator. this functionality enables iterating over two containers
+     * @details apply func to all vaps that ap_predicate returns true for
+     * while incrementing the user iterator. 
+     * this functionality enables iterating over two containers
      * in paralel: the ap-vaps and the user container.
+     * @param func has the following interface:         template<class iter> f(const std::string& vap, iter user_iterator)
+     * @param iter - iterator to the begining of the user sequence
+     * @param ap_predicate has the following interface: bool f(const std::string &vap);
      */
-    template <class func, class iter> void for_all_ap_vaps(func, iter current, const iter end);
+    template <class func, class iter, class ap_predicate>
+    void for_all_ap_vaps(func, iter current, const iter end, ap_predicate);
 
     /**
      * @brief for debug: return the last internal message
@@ -242,21 +248,22 @@ private:
     friend std::ostream &operator<<(std::ostream &, const Configuration &);
 };
 
-template <class func> void Configuration::for_all_ap_vaps(func f)
+template <class func, class ap_predicate>
+void Configuration::for_all_ap_vaps(func f, ap_predicate pred)
 {
     auto f_with_iter = [&f](const std::string &vap, int iter) { f(vap); };
 
     int dummy(0);
-    for_all_ap_vaps(f_with_iter, dummy, 10);
+    for_all_ap_vaps(f_with_iter, dummy, 10, pred);
 }
 
-template <class func, class iter>
-void Configuration::for_all_ap_vaps(func f, iter current_iter, const iter end)
+template <class func, class iter, class ap_predicate>
+void Configuration::for_all_ap_vaps(func f, iter current_iter, const iter end, ap_predicate pred)
 {
     for_each(m_hostapd_config_vaps.begin(), m_hostapd_config_vaps.end(),
              [this, &f, &current_iter,
-              &end](const std::pair<std::string, std::vector<std::string>> &vap) {
-                 if (get_vap_value(vap.first, "mode") == "ap") {
+              &end, &pred](const std::pair<std::string, std::vector<std::string>> &vap) {
+                 if (pred(vap.first)) {
                      if (end == current_iter) {
                          f(vap.first, end);
                      } else {
