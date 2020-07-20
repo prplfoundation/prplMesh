@@ -16,7 +16,7 @@ class ApConfigRenew(PrplMeshBaseTest):
     def runTest(self):
         # Locate test participants
         agent = self.dev.DUT.agent_entity
-        controller = self.dev.wan.controller_entity
+        controller = self.dev.lan.controller_entity
 
         self.dev.DUT.wired_sniffer.start(self.__class__.__name__ + "-" + self.dev.DUT.name)
         # Regression test: MAC address should be case insensitive

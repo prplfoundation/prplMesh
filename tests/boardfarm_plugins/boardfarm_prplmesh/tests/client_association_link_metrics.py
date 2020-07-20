@@ -22,7 +22,7 @@ class ClientAssociationLinkMetrics(PrplMeshBaseTest):
     def runTest(self):
         # Locate test participants
         agent = self.dev.DUT.agent_entity
-        controller = self.dev.wan.controller_entity
+        controller = self.dev.lan.controller_entity
         sta = self.dev.wifi
 
         # This test doesn't work for real HW.
