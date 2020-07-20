@@ -13,19 +13,18 @@
 
 namespace prplmesh {
 namespace hostapd {
-namespace config {
 
 Configuration::Configuration(const std::string &file_name) : m_configuration_file(file_name) {}
 
 Configuration::operator bool() const { return m_ok; }
 
-bool Configuration::load()
+bool Configuration::load(const std::string &vap_indication)
 {
     // please take a look at the end of this file for
     // the expected format of hostapd configuration file
     // loading the file relays on the expected format
     // otherwise the load fails
-    
+
     // for cases when load is called more than once, we
     // first clear internal data
     m_hostapd_config_head.clear();
@@ -51,16 +50,15 @@ bool Configuration::load()
             continue;
         }
         // check if the string belongs to a vap config part and capture which one.
-        const std::string bss_eq("bss=");
         auto end_comment = line.find_first_not_of('#');
-        if (line.compare(end_comment, bss_eq.length(), bss_eq) == 0) {
+        if (line.compare(end_comment, vap_indication.length(), vap_indication) == 0) {
 
             // from now on we are in the vaps area, all
             // key/value pairs belongs to vaps
             parsing_vaps = true;
 
-            // copy the bss (vap) value
-            cur_vap.assign(line, end_comment + bss_eq.length(), std::string::npos);
+            // copy the vap value
+            cur_vap.assign(line, end_comment + vap_indication.length(), std::string::npos);
         }
 
         // if not a vap line store it in the header part of the config,
@@ -72,7 +70,10 @@ bool Configuration::load()
         }
     }
 
-    m_last_message = strerror(errno);
+    std::stringstream load_message;
+    load_message << "load() final message: os - " << strerror(errno) << "; existing vaps - "
+                 << std::boolalpha << parsing_vaps;
+    m_last_message = load_message.str();
 
     // if we've got to parsing vaps and no read errors, assume all is good
     m_ok = parsing_vaps && !ifs.bad();
@@ -134,11 +135,9 @@ bool Configuration::set_create_head_value(const std::string &key, const std::str
     // when the new value is provided add the key back with that new value
     if (value.length() != 0) {
         m_hostapd_config_head.push_back(key_eq + value);
-        m_last_message =
-            std::string(__FUNCTION__) + " the key '" + key + "' was (re)added to head";
+        m_last_message = std::string(__FUNCTION__) + " the key '" + key + "' was (re)added to head";
     } else {
-        m_last_message =
-            std::string(__FUNCTION__) + " the key '" + key + "' was deleted from head";
+        m_last_message = std::string(__FUNCTION__) + " the key '" + key + "' was deleted from head";
     }
 
     m_ok = true;
@@ -158,8 +157,7 @@ std::string Configuration::get_head_value(const std::string &key)
         [&key_eq, this](const std::string &line) -> bool { return is_key_in_line(line, key_eq); });
 
     if (line_iter == m_hostapd_config_head.end()) {
-        m_last_message = std::string(__FUNCTION__) +
-                         " couldn't find requested key in head: " + key;
+        m_last_message = std::string(__FUNCTION__) + " couldn't find requested key in head: " + key;
         return "";
     }
 
@@ -225,7 +223,7 @@ std::string Configuration::get_vap_value(const std::string &vap, const std::stri
     if (!std::get<0>(find_vap)) {
         return "";
     }
-    const auto& existing_vap = std::get<1>(find_vap);
+    const auto &existing_vap = std::get<1>(find_vap);
 
     // from now on this function is ok with all situations
     // (e.g. not finding the requested key)
@@ -331,10 +329,10 @@ std::ostream &operator<<(std::ostream &o, const Configuration &conf)
         o << line << '\n';
     }
 
-    o << "== vaps (" << conf.m_hostapd_config_vaps.size() << ") ==\n";
+    o << "== vaps (total of: " << conf.m_hostapd_config_vaps.size() << " vaps) ==\n";
 
     for (const auto &vap : conf.m_hostapd_config_vaps) {
-        o << "   = vap (" << vap.first << " ) =\n";
+        o << "   vap: " << vap.first << "\n";
         for (const auto &line : vap.second) {
             o << line << '\n';
         }
@@ -343,7 +341,6 @@ std::ostream &operator<<(std::ostream &o, const Configuration &conf)
     return o;
 }
 
-} // namespace config
 } // namespace hostapd
 } // namespace prplmesh
 
@@ -351,8 +348,10 @@ std::ostream &operator<<(std::ostream &o, const Configuration &conf)
 //////////////// hostapd configuration format ////////////////
 
 hostapd has a special format that does NOT have an ini like format.
-We expect the following format of the file:
-(between /// BEGIN hostapd.conf /// and /// END hostapd.conf ///)
+between /// BEGIN hostapd.conf /// and /// END hostapd.conf /// is the 
+format of the file.
+note: the string "bss=" may be replaced by the
+user in the call to load() with another vap-indicator (e.g. "interface=")
 
 /// BEGIN hostapd.conf ///  
 

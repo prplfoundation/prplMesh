@@ -13,8 +13,9 @@
 
 namespace {
 
+const std::string vap_indication("interface=");
 const std::string configuration_path("/tmp/");
-const std::string configuration_file_name("hostapd.conf");
+const std::string configuration_file_name("omnia.conf");
 const std::string configuration_content(
     "driver=nl80211\n"
     "logger_syslog=127\n"
@@ -177,6 +178,7 @@ const std::string configuration_content(
     "start_disabled=1\n"
     "mode=ap\n");
 
+/*
 void clean_start()
 {
     // save the content of the string (start clean)
@@ -184,21 +186,22 @@ void clean_start()
     tmp << configuration_content;
     tmp.flush();
 }
+*/
 
 TEST(configuration_test, load)
 {
     //// start prerequsite ////
 
-    clean_start();
+    ////clean_start();
 
     //// end prerequsite ////
 
     // construct a configuration
-    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     EXPECT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load();
+    conf.load(vap_indication);
     EXPECT_TRUE(conf) << conf;
 }
 
@@ -207,17 +210,17 @@ TEST(configuration_test, store)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    // clean_start();
+    // //clean_start();
 
     // load the dummy configuration file
-    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     EXPECT_FALSE(conf) << conf;
 
     // construct a configuration
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load();
+    conf.load(vap_indication);;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -236,14 +239,14 @@ TEST(configuration_test, set_string_head_values)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    // clean_start();
+    // //clean_start();
 
     // construct a configuration
-    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load();
+    conf.load(vap_indication);;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -269,14 +272,14 @@ TEST(configuration_test, set_int_head_values)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    clean_start();
+    //clean_start();
 
     // construct a configuration
-    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load();
+    conf.load(vap_indication);;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -294,14 +297,14 @@ TEST(configuration_test, get_head_values)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    clean_start();
+    //clean_start();
 
     // construct a configuration
-    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load();
+    conf.load(vap_indication);;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -324,14 +327,14 @@ TEST(configuration_test, set_string_vap_values)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    //   // clean_start();
+    //   // //clean_start();
 
     // construct a configuration
-    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load();
+    conf.load(vap_indication);;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -365,14 +368,14 @@ TEST(configuration_test, set_int_vap_values)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-   // clean_start();
+    // //clean_start();
 
     // construct a configuration
-    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load();
+    conf.load(vap_indication);;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -401,14 +404,14 @@ TEST(configuration_test, get_vap_values)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-   // clean_start();
+    // //clean_start();
 
     // construct a configuration
-    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load();
+    conf.load(vap_indication);;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -441,14 +444,14 @@ TEST(configuration_test, disable_all_ap)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-   // clean_start();
+    // //clean_start();
 
     // construct a configuration
-    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load();
+    conf.load(vap_indication);;
     ASSERT_TRUE(conf) << conf;
 
     // disable by adding a key/value
@@ -458,7 +461,6 @@ TEST(configuration_test, disable_all_ap)
 
     conf.for_all_ap_vaps(disable_func);
     EXPECT_TRUE(conf) << conf;
-
 
     // disable by commenting
     auto comment_func = [&conf](const std::string vap) { conf.comment_vap(vap); };
@@ -478,14 +480,14 @@ TEST(configuration_test, enable_all_ap)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-   // clean_start();
+    // //clean_start();
 
     // construct a configuration
-    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load();
+    conf.load(vap_indication);;
     ASSERT_TRUE(conf) << conf;
 
     // enable by removing key/value
@@ -514,14 +516,14 @@ TEST(configuration_test, comment_vap)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-   // clean_start();
+    // //clean_start();
 
     // construct a configuration
-    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load();
+    conf.load(vap_indication);;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -542,14 +544,14 @@ TEST(configuration_test, uncomment_vap)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-   // clean_start();
+    // //clean_start();
 
     // construct a configuration
-    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load();
+    conf.load(vap_indication);;
     ASSERT_TRUE(conf) << conf;
 
     // comment twice!
@@ -561,7 +563,7 @@ TEST(configuration_test, uncomment_vap)
     EXPECT_TRUE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load();
+    conf.load(vap_indication);;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -601,14 +603,14 @@ TEST(configuration_test, itererate_both_containers)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    //clean_start();
+    ////clean_start();
 
     // construct a configuration
-    prplmesh::hostapd::config::Configuration conf(configuration_path + configuration_file_name);
+    prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load();
+    conf.load(vap_indication);;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////

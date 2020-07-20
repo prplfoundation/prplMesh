@@ -13,7 +13,6 @@
 
 namespace prplmesh {
 namespace hostapd {
-namespace config {
 
 class Configuration {
 
@@ -39,9 +38,13 @@ public:
     /**
      * @brief load the configuration 
      * @details loads the file this object is constructed with
+     * @param vap_indication - set the indication that a vap
+     * configuration section begins. e.g. "bss=" or "interface="
+     * nothe that the equal sign is expected to be part of vap_indication
+     * std::string vap_indication("interface=");
      * @return *this (as bool, see above)
      */
-    bool load();
+    bool load(const std::string &vap_indication);
 
     /**
      * @brief stores the configuration 
@@ -203,7 +206,7 @@ private:
     std::string m_configuration_file;
 
     // may be changed because of const functions, therefore mutable
-    mutable bool m_ok = false; 
+    mutable bool m_ok = false;
 
     // each string is a line in the original configuration file
     // that belongs to the "head" part. read the explenation at
@@ -232,8 +235,8 @@ private:
     // { "wlan0.2" : ["ctrl_interface=/var/run/hosXXpd", "ap_isolate=1", "ap_max_inactivity=60", "bss_transition=0", "interworking=3"] }
     std::map<std::string, std::vector<std::string>> m_hostapd_config_vaps;
 
-    // see m_ok's comment 
-    mutable std::string m_last_message = "all good";
+    // see m_ok's comment
+    mutable std::string m_last_message = "initial state, yet nothing was done";
 
     // for logs
     friend std::ostream &operator<<(std::ostream &, const Configuration &);
@@ -266,6 +269,5 @@ void Configuration::for_all_ap_vaps(func f, iter current_iter, const iter end)
 // for logs
 std::ostream &operator<<(std::ostream &, const Configuration &);
 
-} // namespace config
 } // namespace hostapd
 } // namespace prplmesh
