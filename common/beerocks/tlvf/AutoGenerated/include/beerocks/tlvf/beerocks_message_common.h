@@ -61,7 +61,6 @@ typedef struct sSonConfig {
     uint32_t monitor_ap_active_threshold_B;
     uint16_t monitor_ap_idle_stable_time_sec;
     uint8_t monitor_disable_initiative_arp;
-    uint8_t slave_keep_alive_retries;
     uint8_t ire_rssi_report_rate_sec;
     void struct_swap(){
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&monitor_ap_idle_threshold_B));
