@@ -165,11 +165,6 @@ void cli_socket::setFunctionsMapAndArray()
                        STRING_ARG, STRING_ARG, STRING_ARG, STRING_ARG, STRING_ARG, STRING_ARG,
                        STRING_ARG, STRING_ARG, STRING_ARG);
     insertCommandToMap(
-        "client_statistics_11k_req", "<hostap_mac> <client_mac> <group_identity> <peer_mac>",
-        "sends statistics 11k request to 'client_mac', with 'group_identity', about 'peer_mac'",
-        static_cast<pFunction>(&cli_socket::client_statistics_11k_req_caller), 3, 4, STRING_ARG,
-        STRING_ARG, INT_ARG, STRING_ARG);
-    insertCommandToMap(
         "ap_neighbor_11k_set", "<hostap_mac> <bssid> <channel> <vap_id>",
         "add 'bssid' with 'channel' to 11k neighbor list of 'hostap_mac' with 'vap_id'",
         static_cast<pFunction>(&cli_socket::set_neighbor_11k_caller), 4, 4, STRING_ARG, STRING_ARG,
@@ -421,17 +416,6 @@ int cli_socket::client_beacon_11k_req_caller(int numOfArgs)
         return client_beacon_11k_req(args.stringArgs[0], bssid, ch, ssid, duration, rand_ival,
                                      repeats, op_class, mode);
     else
-        return -1;
-}
-
-int cli_socket::client_statistics_11k_req_caller(int numOfArgs)
-{
-    if (numOfArgs == 4) {
-        return client_statistics_11k_req(args.stringArgs[0], args.stringArgs[1], args.intArgs[2],
-                                         args.stringArgs[3]);
-    } else if (numOfArgs == 3) {
-        return client_statistics_11k_req(args.stringArgs[0], args.stringArgs[1], args.intArgs[2]);
-    } else
         return -1;
 }
 
@@ -738,26 +722,6 @@ int cli_socket::client_beacon_11k_req(std::string client_mac, std::string bssid,
                                   message::WIFI_SSID_MAX_LENGTH);
     }
     wait_response = true;
-    message_com::send_cmdu(master_socket, cmdu_tx);
-    waitResponseReady();
-    return 0;
-}
-
-int cli_socket::client_statistics_11k_req(std::string hostap_mac, std::string client_mac,
-                                          uint8_t group_identity, std::string peer_mac)
-{
-    auto request =
-        message_com::create_vs_message<beerocks_message::cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST>(
-            cmdu_tx);
-    if (request == nullptr) {
-        LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST message!";
-        return -1;
-    }
-    request->client_mac()     = tlvf::mac_from_string(client_mac);
-    request->hostap_mac()     = tlvf::mac_from_string(hostap_mac);
-    request->peer_mac()       = tlvf::mac_from_string(peer_mac);
-    request->group_identity() = group_identity;
-    wait_response             = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
     waitResponseReady();
     return 0;
