@@ -1225,48 +1225,6 @@ class cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE : public BaseClass
         sBeaconResponse11k* m_params = nullptr;
 };
 
-class cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST : public BaseClass
-{
-    public:
-        cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST();
-
-        static eActionOp_CONTROL get_action_op(){
-            return (eActionOp_CONTROL)(ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST);
-        }
-        sStaChannelLoadRequest11k& params();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_CONTROL* m_action_op = nullptr;
-        sStaChannelLoadRequest11k* m_params = nullptr;
-};
-
-class cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE : public BaseClass
-{
-    public:
-        cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE();
-
-        static eActionOp_CONTROL get_action_op(){
-            return (eActionOp_CONTROL)(ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE);
-        }
-        sStaChannelLoadResponse11k& params();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_CONTROL* m_action_op = nullptr;
-        sStaChannelLoadResponse11k* m_params = nullptr;
-};
-
 class cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST : public BaseClass
 {
     public:
