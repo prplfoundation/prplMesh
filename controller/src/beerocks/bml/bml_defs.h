@@ -38,7 +38,6 @@ extern "C" {
 #define BML_IP_ADDR_LEN 4           /* IP Address Length */
 #define BML_VERSION_LEN 16          /* Version Length */
 #define BML_IFACE_NAME_LEN (32 + 4) /* Maximal interface name length (32) + null termination */
-#define BML_DEV_INFO_LEN 32         /* Device information string length */
 
 /* BML Node Types */
 #define BML_NODE_TYPE_GW 1     /* GW Node */
@@ -173,39 +172,6 @@ struct BML_VAP_INFO {
     char ssid[BML_SSID_MAX_LENGTH];
     /* network encryption key */
     char key[BML_PASS_MAX_LENGTH];
-};
-
-/**
- * Device information.
- */
-struct BML_DEVICE_INFO {
-
-    /* Device manufacturer name (e.g. Intel Corporation) */
-    char manufacturer[BML_DEV_INFO_LEN];
-
-    /* Device model name */
-    char model_name[BML_DEV_INFO_LEN];
-
-    /* Device serial number */
-    char serial_number[BML_DEV_INFO_LEN];
-
-    /* LAN interface name */
-    char lan_iface_name[BML_IFACE_NAME_LEN];
-
-    /* LAN interface IP address */
-    uint32_t lan_ip_address;
-
-    /* LAN interface network mask */
-    uint32_t lan_network_mask;
-
-    /* WAN interface name */
-    char wan_iface_name[BML_IFACE_NAME_LEN];
-
-    /* WAN interface IP address */
-    uint32_t wan_ip_address;
-
-    /* WAN interface network mask */
-    uint32_t wan_network_mask;
 };
 
 /**

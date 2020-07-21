@@ -349,7 +349,6 @@ private:
     beerocks::promise<bool> *m_prmWiFiCredentialsClear  = nullptr;
     beerocks::promise<bool> *m_prmWiFiCredentialsGet    = nullptr;
     beerocks::promise<bool> *m_prmAdminCredentialsGet   = nullptr;
-    beerocks::promise<bool> *m_prmDeviceInfoGet         = nullptr;
     beerocks::promise<bool> *m_prmDeviceDataGet         = nullptr;
     beerocks::promise<bool> *m_prmMasterSlaveVersions   = nullptr;
     beerocks::promise<bool> *m_prmLocalMasterGet        = nullptr;
@@ -370,7 +369,6 @@ private:
     BML_STATS_UPDATE_CB m_cbStatsUpdate  = nullptr;
     BML_EVENT_CB m_cbEvent               = nullptr;
 
-    beerocks_message::sDeviceInfo *m_device_info                 = nullptr;
     beerocks_message::sDeviceData *m_device_data                 = nullptr;
     beerocks_message::sWifiCredentials *m_wifi_credentials       = nullptr;
     beerocks_message::sAdminCredentials *m_admin_credentials     = nullptr;
