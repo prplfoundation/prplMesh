@@ -326,8 +326,6 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         return true;
     }
 
-    master_last_seen = std::chrono::steady_clock::now();
-
     switch (cmdu_message_type) {
     case ieee1905_1::eMessageType::ACK_MESSAGE:
         return handle_ack_message(sd, cmdu_rx);
@@ -405,8 +403,6 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
     if (slave_state == STATE_STOPPED) {
         return true;
     }
-
-    master_last_seen = std::chrono::steady_clock::now();
 
     switch (beerocks_header->action_op()) {
     case beerocks_message::ACTION_CONTROL_ARP_QUERY_REQUEST: {
