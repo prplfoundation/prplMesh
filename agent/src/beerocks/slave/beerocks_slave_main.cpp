@@ -26,7 +26,7 @@ static int s_signal   = 0;
 static std::string g_son_slave_iface;
 
 // Pointer to logger instance
-static beerocks::logging *s_pLogger = nullptr;
+static std::vector<std::shared_ptr<beerocks::logging>> g_loggers;
 
 static void handle_signal()
 {
@@ -44,14 +44,12 @@ static void handle_signal()
 
     // Roll log file
     case SIGUSR1: {
-        LOG(INFO) << "LOG Roll Signal!";
-        if (!s_pLogger) {
-            LOG(ERROR) << "Invalid logger pointer!";
-            return;
-        }
 
-        s_pLogger->apply_settings();
-        LOG(INFO) << "--- Start of file after roll ---";
+        for (auto &logger : g_loggers) {
+            CLOG(INFO, logger->get_logger_id()) << "LOG Roll Signal!";
+            logger->apply_settings();
+            CLOG(INFO, logger->get_logger_id()) << "--- Start of file after roll ---";
+        }
         break;
     }
 
@@ -173,32 +171,47 @@ static void fill_son_slave_config(const beerocks::config_file::sConfigSlave &bee
     son_slave_conf.stop_on_failure_attempts = 0;
 }
 
+static std::shared_ptr<beerocks::logging>
+init_logger(const std::string &file_name, const beerocks::config_file::SConfigLog &log_config,
+            int argc, char **argv, const std::string &logger_id = std::string())
+{
+    auto logger = std::make_shared<beerocks::logging>(file_name, log_config, logger_id);
+    if (!logger) {
+        std::cout << "Failed to allocated logger to " << file_name;
+        return std::shared_ptr<beerocks::logging>();
+    }
+    logger->apply_settings();
+    CLOG(INFO, logger->get_logger_id())
+        << std::endl
+        << "Running " << file_name << " Version " << BEEROCKS_VERSION << " Build date "
+        << BEEROCKS_BUILD_DATE << std::endl
+        << std::endl;
+    beerocks::version::log_version(argc, argv, logger->get_logger_id());
+
+    // Redirect stdout / stderr to file
+    if (logger->get_log_files_enabled()) {
+        beerocks::os_utils::redirect_console_std(log_config.files_path + file_name + "_std.log");
+    }
+
+    return logger;
+}
+
 static int system_hang_test(const beerocks::config_file::sConfigSlave &beerocks_slave_conf,
                             int argc, char *argv[])
 {
     std::string name = std::string("system_hang_test");
 
-    //init logger
-    beerocks::logging logger(name, beerocks_slave_conf.sLog);
-    s_pLogger = &logger;
-    logger.apply_settings();
-    LOG(INFO) << std::endl
-              << "Running " << name << " Version " << BEEROCKS_VERSION << " Build date "
-              << BEEROCKS_BUILD_DATE << std::endl
-              << std::endl;
-    beerocks::version::log_version(argc, argv);
-
-    // Redirect stdout / stderr to file
-    if (logger.get_log_files_enabled()) {
-        beerocks::os_utils::redirect_console_std(beerocks_slave_conf.sLog.files_path + name +
-                                                 "_std.log");
+    // Init logger
+    auto logger = init_logger(name, beerocks_slave_conf.sLog, argc, argv);
+    if (!logger) {
+        return 1;
     }
 
-    //write pid file
+    // Write pid file
     beerocks::os_utils::write_pid_file(beerocks_slave_conf.temp_path, name);
     std::string pid_file_path = beerocks_slave_conf.temp_path + "pid/" + name; // for file touching
 
-    //initialize timers
+    // Initialize timers
     auto touch_time_stamp_timeout = std::chrono::steady_clock::now();
     auto error_time_stamp_timeout = std::chrono::steady_clock::now();
 
@@ -229,8 +242,6 @@ static int system_hang_test(const beerocks::config_file::sConfigSlave &beerocks_
         UTILS_SLEEP_MSEC(100);
     }
 
-    s_pLogger = nullptr;
-
     return 0;
 }
 
@@ -238,34 +249,19 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
                               const std::unordered_map<int, std::string> &interfaces_map, int argc,
                               char *argv[])
 {
-    std::string base_slave_name = std::string(BEEROCKS_AGENT);
-    std::ofstream versionfile;
+    std::string base_agent_name = std::string(BEEROCKS_AGENT);
 
-    //init logger
-    beerocks::logging slave_logger(base_slave_name, beerocks_slave_conf.sLog);
-    s_pLogger = &slave_logger;
-    slave_logger.apply_settings();
-    LOG(INFO) << std::endl
-              << "Running " << base_slave_name << " Version " << BEEROCKS_VERSION << " Build date "
-              << BEEROCKS_BUILD_DATE << std::endl
-              << std::endl;
-    beerocks::version::log_version(argc, argv);
-
-    versionfile.open(beerocks_slave_conf.temp_path + "beerocks_slave_version");
-    versionfile << BEEROCKS_VERSION << std::endl << BEEROCKS_REVISION;
-    versionfile.close();
-
-    //redirect stdout / stderr to file
-    // int fd_log_file_std = beerocks::os_utils::redirect_console_std("/dev/null");
-    if (slave_logger.get_log_files_enabled()) {
-        beerocks::os_utils::redirect_console_std(beerocks_slave_conf.sLog.files_path +
-                                                 base_slave_name + "_std.log");
+    // Init logger
+    auto agent_logger = init_logger(base_agent_name, beerocks_slave_conf.sLog, argc, argv);
+    if (!agent_logger) {
+        return 1;
     }
+    g_loggers.push_back(agent_logger);
 
-    //write pid file
-    beerocks::os_utils::write_pid_file(beerocks_slave_conf.temp_path, base_slave_name);
+    // Write pid file
+    beerocks::os_utils::write_pid_file(beerocks_slave_conf.temp_path, base_agent_name);
     std::string pid_file_path =
-        beerocks_slave_conf.temp_path + "pid/" + base_slave_name; // for file touching
+        beerocks_slave_conf.temp_path + "pid/" + base_agent_name; // for file touching
 
     std::set<std::string> slave_ap_ifaces;
     for (auto &elm : interfaces_map) {
@@ -275,11 +271,11 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
     }
 
     beerocks::platform_manager::main_thread platform_mgr(beerocks_slave_conf, interfaces_map,
-                                                         slave_logger);
+                                                         *agent_logger);
 
-    //start platform_manager
+    // Start platform_manager
     if (platform_mgr.init()) {
-        // read the number of failures allowed before stopping agent from platform configuration
+        // Read the number of failures allowed before stopping agent from platform configuration
         int stop_on_failure_attempts = beerocks::bpl::cfg_get_stop_on_failure_attempts();
 
         // The platform manager updates the beerocks_slave_conf.sta_iface in the init stage
@@ -334,47 +330,37 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
     }
 
     LOG(DEBUG) << "Bye Bye!";
-    s_pLogger = nullptr;
 
     return 0;
 }
 
 static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &beerocks_slave_conf,
-                         const std::string &hostap_iface, int argc, char *argv[])
+                         const std::string &fronthaul_iface, int argc, char *argv[])
 {
-    std::string base_slave_name = std::string(BEEROCKS_AGENT) + "_" + hostap_iface;
+    std::string base_slave_name = std::string(BEEROCKS_AGENT) + "_" + fronthaul_iface;
 
-    //init logger
-    beerocks::logging slave_logger(base_slave_name, beerocks_slave_conf.sLog);
-    s_pLogger = &slave_logger;
-    slave_logger.apply_settings();
-    LOG(INFO) << std::endl
-              << "Running SON " << base_slave_name << " Version " << BEEROCKS_VERSION
-              << " Build date " << BEEROCKS_BUILD_DATE << std::endl
-              << std::endl;
-    beerocks::version::log_version(argc, argv);
-
-    //redirect stdout / stderr to file
-    //int fd_log_file_std = beerocks::os_utils::redirect_console_std("/dev/null");
-    if (slave_logger.get_log_files_enabled()) {
-        beerocks::os_utils::redirect_console_std(beerocks_slave_conf.sLog.files_path +
-                                                 base_slave_name + "_std.log");
+    // Init logger
+    auto logger =
+        init_logger(base_slave_name, beerocks_slave_conf.sLog, argc, argv, base_slave_name);
+    if (!logger) {
+        return 1;
     }
+    g_loggers.push_back(logger);
 
-    //write pid file
+    // Write pid file
     beerocks::os_utils::write_pid_file(beerocks_slave_conf.temp_path, base_slave_name);
     std::string pid_file_path =
         beerocks_slave_conf.temp_path + "pid/" + base_slave_name; // for file touching
 
-    // fill configuration
+    // Fill configuration
     son::slave_thread::sSlaveConfig son_slave_conf;
-    fill_son_slave_config(beerocks_slave_conf, son_slave_conf, hostap_iface, slave_num);
+    fill_son_slave_config(beerocks_slave_conf, son_slave_conf, fronthaul_iface, slave_num);
 
-    // disable stopping on failure initially. Later on, it will be read from BPL as part of
+    // Disable stopping on failure initially. Later on, it will be read from BPL as part of
     // cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE
     son_slave_conf.stop_on_failure_attempts = 0;
 
-    son::slave_thread son_slave(son_slave_conf, slave_logger);
+    son::slave_thread son_slave(son_slave_conf, *logger);
     if (son_slave.init()) {
         auto touch_time_stamp_timeout = std::chrono::steady_clock::now();
         while (g_running) {
@@ -400,8 +386,6 @@ static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &bee
     } else {
         LOG(ERROR) << "son_slave.init(), slave_num=" << slave_num;
     }
-
-    s_pLogger = nullptr;
 
     return 0;
 }
