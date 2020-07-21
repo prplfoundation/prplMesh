@@ -3252,36 +3252,6 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         );
         break;
     }
-    case beerocks_message::ACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE: {
-        auto response =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE>();
-        if (response == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE failed";
-            return false;
-        }
-        std::string statistics_group_data;
-        for (uint8_t i = 0; i < response->params().statistics_group_data_size; i++) {
-            statistics_group_data +=
-                std::to_string(response->params().statistics_group_data[i]) + ",";
-        }
-        statistics_group_data.pop_back(); // deletes last comma
-        LOG_CLI(DEBUG,
-                "statistics response: "
-                    << std::endl
-                    << "sta_mac: " << response->params().sta_mac << std::endl
-                    << "measurement_rep_mode: " << (int)response->params().rep_mode << std::endl
-                    << "duration: " << (int)response->params().duration << std::endl
-                    << "group_identity: " << (int)response->params().group_identity << std::endl
-                    << "statistics_group_data: " << statistics_group_data
-
-                    << std::endl
-                    << "average_trigger: " << (int)response->params().average_trigger << std::endl
-                    << "consecutive_trigger: " << (int)response->params().consecutive_trigger
-                    << std::endl
-                    << "delay_trigger: " << (int)response->params().delay_trigger);
-        break;
-    }
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE: {
         auto response = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE>();
