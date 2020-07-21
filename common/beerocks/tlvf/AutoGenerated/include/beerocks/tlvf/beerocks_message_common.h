@@ -858,16 +858,6 @@ typedef struct sOnboarding {
 
 typedef struct sAdminCredentials {
     char user_password[beerocks::message::USER_PASS_LEN];
-    void struct_swap(){
-    }
-    void struct_init(){
-    }
-} __attribute__((packed)) sAdminCredentials;
-
-typedef struct sDeviceInfo {
-    char manufacturer[beerocks::message::DEV_INFO_STR_MAX_LEN];
-    char model_name[beerocks::message::DEV_INFO_STR_MAX_LEN];
-    char serial_number[beerocks::message::DEV_INFO_STR_MAX_LEN];
     char lan_iface_name[beerocks::message::IFACE_NAME_LENGTH];
     uint32_t lan_ip_address;
     uint32_t lan_network_mask;
@@ -882,7 +872,7 @@ typedef struct sDeviceInfo {
     }
     void struct_init(){
     }
-} __attribute__((packed)) sDeviceInfo;
+} __attribute__((packed)) sAdminCredentials;
 
 typedef struct sIfaceInfo {
     char iface_name[beerocks::message::IFACE_NAME_LENGTH];
