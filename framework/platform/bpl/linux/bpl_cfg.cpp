@@ -221,8 +221,6 @@ int cfg_get_dfs_reentry() { return 0; }
 
 int cfg_get_client_roaming() { return 1; }
 
-int cfg_get_device_info(BPL_DEVICE_INFO *device_info) { return RETURN_ERR; }
-
 int cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_params)
 {
     if (!iface || !wlan_params) {
