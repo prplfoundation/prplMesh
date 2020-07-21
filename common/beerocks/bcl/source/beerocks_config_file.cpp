@@ -150,7 +150,6 @@ bool config_file::read_slave_config_file(const std::string &config_file_path, sC
             std::make_tuple("model=", &conf.model, mandatory_slave),
             std::make_tuple("ucc_listener_port=", &conf.ucc_listener_port, mandatory_slave),
             std::make_tuple("enable_arp_monitor=", &conf.enable_arp_monitor, mandatory_slave),
-            std::make_tuple("enable_keep_alive=", &conf.enable_keep_alive, mandatory_slave),
             std::make_tuple("bridge_iface=", &conf.bridge_iface, 0),
             std::make_tuple("enable_system_hang_test=", &conf.enable_system_hang_test, 0),
             std::make_tuple("const_backhaul_slave=", &conf.const_backhaul_slave, 0),

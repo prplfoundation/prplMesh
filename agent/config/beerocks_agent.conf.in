@@ -13,7 +13,6 @@ vendor=Intel
 model=prplMesh
 ucc_listener_port=8002 # 0 - disabled
 enable_arp_monitor=0
-enable_keep_alive=1
 bridge_iface=@BEEROCKS_BRIDGE_IFACE@
 enable_system_hang_test=0 # 0 - disabled
 
