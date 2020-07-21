@@ -481,31 +481,6 @@ class cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST : public BaseClass
         sMacAddr* m_client_mac = nullptr;
 };
 
-class cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST : public BaseClass
-{
-    public:
-        cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST();
-
-        static eActionOp_CLI get_action_op(){
-            return (eActionOp_CLI)(ACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST);
-        }
-        sMacAddr& hostap_mac();
-        sMacAddr& client_mac();
-        uint8_t& channel();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_CLI* m_action_op = nullptr;
-        sMacAddr* m_hostap_mac = nullptr;
-        sMacAddr* m_client_mac = nullptr;
-        uint8_t* m_channel = nullptr;
-};
-
 class cACTION_CLI_CLIENT_BEACON_11K_REQUEST : public BaseClass
 {
     public:
