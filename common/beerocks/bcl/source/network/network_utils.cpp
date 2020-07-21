@@ -338,9 +338,12 @@ static int parseRoutes(struct nlmsghdr *nlHdr, std::shared_ptr<route_info> rtInf
     rtLen  = RTM_PAYLOAD(nlHdr);
     for (; RTA_OK(rtAttr, rtLen); rtAttr = RTA_NEXT(rtAttr, rtLen)) {
         switch (rtAttr->rta_type) {
-        case RTA_OIF:
-            if_indextoname(*(int *)RTA_DATA(rtAttr), rtInfo->ifName);
+        case RTA_OIF: {
+            auto index            = *(int *)RTA_DATA(rtAttr);
+            auto iface_index_name = network_utils::linux_get_iface_name(index);
+            std::copy_n(iface_index_name.begin(), iface_index_name.length(), rtInfo->ifName);
             break;
+        }
         case RTA_GATEWAY:
             rtInfo->gateWay.s_addr = *(u_int *)RTA_DATA(rtAttr);
             break;
@@ -540,6 +543,8 @@ std::string network_utils::linux_get_iface_name(uint32_t iface_index)
                    << strerror(errno);
         return "";
     }
+
+    iface_name[IF_NAMESIZE - 1] = '\0';
 
     return iface_name;
 }
