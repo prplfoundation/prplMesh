@@ -289,14 +289,6 @@ cACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE:
   _type: class
   params: sBeaconResponse11k
 
-cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST:
-  _type: class
-  params: sStaChannelLoadRequest11k
-
-cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE:
-  _type: class
-  params: sStaChannelLoadResponse11k
-
 cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST:
   _type: class
   params: sStatisticsRequest11k
