@@ -900,27 +900,6 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         message_com::send_cmdu(monitor_socket, cmdu_tx);
         break;
     }
-    case beerocks_message::ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST: {
-        auto request_in =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST>();
-        if (request_in == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST failed";
-            return false;
-        }
-
-        auto request_out = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST>(
-            cmdu_tx, beerocks_header->id());
-        if (request_out == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST message!";
-            return false;
-        }
-
-        request_out->params() = request_in->params();
-        message_com::send_cmdu(monitor_socket, cmdu_tx);
-        break;
-    }
     case beerocks_message::ACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST: {
         auto request_in =
             beerocks_header
@@ -2755,26 +2734,6 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
         send_cmdu_to_controller(cmdu_tx);
         // end new 1905 response
 
-        break;
-    }
-    case beerocks_message::ACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE: {
-        auto response_in =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE>();
-        if (response_in == nullptr) {
-            LOG(ERROR) << "addClass ACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE failed";
-            break;
-        }
-        auto response_out = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE>(
-            cmdu_tx, beerocks_header->id());
-        if (response_out == nullptr) {
-            LOG(ERROR)
-                << "Failed building ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE message!";
-            break;
-        }
-        response_out->params() = response_in->params();
-        send_cmdu_to_controller(cmdu_tx);
         break;
     }
     case beerocks_message::ACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE: {
