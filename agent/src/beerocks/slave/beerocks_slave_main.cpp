@@ -492,34 +492,6 @@ int main(int argc, char *argv[])
     // killall running slave
     beerocks::os_utils::kill_pid(beerocks_slave_conf.temp_path, std::string(BEEROCKS_AGENT));
 
-    // start all slave's
-    for (slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
-        auto hostap_iface_elm = interfaces_map.find(slave_num);
-        // if slave_num not mapped
-        if (hostap_iface_elm == interfaces_map.end()) {
-            continue;
-        }
-
-        std::string hostap_iface = hostap_iface_elm->second;
-        // if slave has no interface configured
-        if (hostap_iface.empty()) {
-            continue;
-        }
-        // killall running son slave's
-        std::string base_name = std::string(BEEROCKS_AGENT) + "_" + hostap_iface;
-        beerocks::os_utils::kill_pid(beerocks_slave_conf.temp_path, base_name);
-
-        //start new slave process
-        LOG(INFO) << "Starting slave for iface '" << hostap_iface << "'";
-
-        std::string file_name = "./" + std::string(BEEROCKS_AGENT);
-        if (access(file_name.c_str(), F_OK) == -1) { //file does not exist in current location
-            file_name = BEEROCKS_BIN_PATH + std::string(BEEROCKS_AGENT);
-        }
-        std::string cmd = file_name + " -i " + hostap_iface;
-        beerocks::SYSTEM_CALL(cmd, 0, true);
-    }
-
     // backhaul/platform manager slave
     return run_beerocks_slave(beerocks_slave_conf, interfaces_map, argc, argv);
 }
