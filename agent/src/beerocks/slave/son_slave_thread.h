@@ -175,6 +175,7 @@ private:
     bool is_backhual_reconf        = false;
     bool detach_on_conf_change     = false;
     bool configuration_in_progress = false;
+    bool m_logger_configured       = false;
 
     bool is_backhaul_manager = false;
 
