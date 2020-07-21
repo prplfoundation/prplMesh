@@ -100,7 +100,6 @@ public:
         std::string backhaul_wire_iface;
         std::string backhaul_wire_iface_type;
         std::string enable_system_hang_test;
-        std::string enable_son_slaves_watchdog;
         std::string const_backhaul_slave;
         //[slaveX]
         std::string radio_identifier[IRE_MAX_SLAVES]; // mAP RUID
