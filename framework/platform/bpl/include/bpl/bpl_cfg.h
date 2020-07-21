@@ -121,37 +121,6 @@ struct BPL_ERROR {
     char data[BPL_ERROR_STRING_LEN];
 };
 
-/* Generic device information */
-struct BPL_DEVICE_INFO {
-
-    /* Device manufacturer name (e.g. Intel Corporation) */
-    char manufacturer[BPL_DEV_INFO_LEN];
-
-    /* Device model name */
-    char model_name[BPL_DEV_INFO_LEN];
-
-    /* Device serial number */
-    char serial_number[BPL_DEV_INFO_LEN];
-
-    /* LAN interface name */
-    char lan_iface_name[BPL_IFNAME_LEN];
-
-    /* LAN interface IP address */
-    uint32_t lan_ip_address;
-
-    /* LAN interface network mask */
-    uint32_t lan_network_mask;
-
-    /* WAN interface name */
-    char wan_iface_name[BPL_IFNAME_LEN];
-
-    /* WAN interface IP address */
-    uint32_t wan_ip_address;
-
-    /* WAN interface network mask */
-    uint32_t wan_network_mask;
-};
-
 /* Wi-Fi Credentials */
 struct BPL_WIFI_CREDENTIALS {
 
@@ -347,16 +316,6 @@ int cfg_get_dfs_reentry();
  * @return -1 Error.
  */
 int cfg_get_client_roaming();
-
-/**
- * Returns generic device information.
- * 
- * @param [out] Device information structure.
- *
- * @return 0 Success.
- * @return -1 Error.
- */
-int cfg_get_device_info(struct BPL_DEVICE_INFO *device_info);
 
 /**
  * Returns miscellaneous Wi-Fi parameters. 
