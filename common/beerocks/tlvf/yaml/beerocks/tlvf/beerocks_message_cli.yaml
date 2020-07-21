@@ -120,12 +120,6 @@ cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST:
   hostap_mac: sMacAddr
   client_mac: sMacAddr
 
-cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST:
-  _type: class
-  hostap_mac: sMacAddr
-  client_mac: sMacAddr
-  channel: uint8_t
-
 cACTION_CLI_CLIENT_BEACON_11K_REQUEST:
   _type: class
   client_mac: sMacAddr
