@@ -79,8 +79,6 @@ private:
 
     int client_beacon_11k_req_caller(int numOfArgs);
 
-    int client_statistics_11k_req_caller(int numOfArgs);
-
     // Functions
 
     int enable_debug(int8_t isEnable = -1);
@@ -123,10 +121,6 @@ private:
     int client_beacon_11k_req(std::string client_mac, std::string bssid, uint8_t channel,
                               std::string ssid, uint16_t duration, uint16_t rand_ival,
                               uint16_t repeats, int16_t op_class, std::string mode);
-
-    int client_statistics_11k_req(std::string hostap_mac, std::string client_mac,
-                                  uint8_t group_identity,
-                                  std::string peer_mac = net::network_utils::WILD_MAC_STRING);
 
     // Variables
     std::string temp_path;
