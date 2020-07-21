@@ -794,27 +794,6 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         message_com::send_cmdu(monitor_socket, cmdu_tx);
         break;
     }
-    case beerocks_message::ACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST: {
-        auto request_in =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST>();
-        if (request_in == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST failed";
-            return false;
-        }
-
-        auto request_out = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST>(cmdu_tx,
-                                                                             beerocks_header->id());
-        if (request_out == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST message!";
-            return false;
-        }
-
-        request_out->params() = request_in->params();
-        message_com::send_cmdu(monitor_socket, cmdu_tx);
-        break;
-    }
     case beerocks_message::ACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST: {
         auto request_in = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_HOSTAP_UPDATE_STOP_ON_FAILURE_ATTEMPTS_REQUEST>();
