@@ -198,7 +198,6 @@ private:
     Socket *ap_manager_socket = nullptr;
     std::string m_fronthaul_iface;
 
-    std::chrono::steady_clock::time_point master_last_seen;
     std::chrono::steady_clock::time_point monitor_last_seen;
     std::chrono::steady_clock::time_point ap_manager_last_seen;
     int monitor_retries_counter    = 0;
