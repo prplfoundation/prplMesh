@@ -113,6 +113,17 @@ static bool parse_arguments(int argc, char *argv[])
     return true;
 }
 
+/**
+ * @brief Create and initialize logging object and print the version.
+ * 
+ * @param file_name File name of the log file.
+ * @param log_config Log file configuration.
+ * @param argc Argument counter of the process.
+ * @param argv Arguments values of the process.
+ * @param logger_id The id of the logger (optional).
+ * @return std::shared_ptr<beerocks::logging> shared_ptr to logging object on success, otherwise
+ * nullptr.
+ */
 static std::shared_ptr<beerocks::logging>
 init_logger(const std::string &file_name, const beerocks::config_file::SConfigLog &log_config,
             int argc, char **argv, const std::string &logger_id = std::string())
@@ -120,7 +131,7 @@ init_logger(const std::string &file_name, const beerocks::config_file::SConfigLo
     auto logger = std::make_shared<beerocks::logging>(file_name, log_config, logger_id);
     if (!logger) {
         std::cout << "Failed to allocated logger to " << file_name;
-        return std::shared_ptr<beerocks::logging>();
+        return nullptr;
     }
     logger->apply_settings();
     CLOG(INFO, logger->get_logger_id())

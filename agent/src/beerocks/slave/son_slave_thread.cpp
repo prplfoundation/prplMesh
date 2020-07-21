@@ -242,6 +242,12 @@ std::string slave_thread::print_cmdu_types(const message::sUdsHeader *cmdu_heade
 
 bool slave_thread::work()
 {
+    if (!m_logger_configured) {
+        logger.set_thread_name(logger.get_module_name());
+        logger.attach_current_thread_to_logger_id();
+        m_logger_configured = true;
+    }
+
     bool call_slave_select = true;
 
     if (!monitor_heartbeat_check() || !ap_manager_heartbeat_check()) {
