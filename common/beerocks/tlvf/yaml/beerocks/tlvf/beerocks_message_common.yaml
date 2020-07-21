@@ -631,18 +631,6 @@ sAdminCredentials:
     _type: char
     _length: ["beerocks::message::USER_PASS_LEN"]
 
-sDeviceInfo:
-  _type: struct
-  manufacturer:
-    _type: char
-    _length: ["beerocks::message::DEV_INFO_STR_MAX_LEN"]
-  model_name:
-    _type: char
-    _length: ["beerocks::message::DEV_INFO_STR_MAX_LEN"]
-  serial_number:
-    _type: char
-    _length: ["beerocks::message::DEV_INFO_STR_MAX_LEN"]
-
   lan_iface_name:
     _type: char
     _length: ["beerocks::message::IFACE_NAME_LENGTH"]
