@@ -235,8 +235,6 @@ int cfg_get_client_roaming()
     return retVal;
 }
 
-int cfg_get_device_info(BPL_DEVICE_INFO *device_info) { return 0; }
-
 int cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PARAMS *wlan_params)
 {
     if (!iface || !wlan_params) {
