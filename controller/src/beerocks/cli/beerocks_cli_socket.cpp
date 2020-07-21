@@ -158,11 +158,6 @@ void cli_socket::setFunctionsMapAndArray()
                        "starts an IRE network optimization task",
                        static_cast<pFunction>(&cli_socket::ire_network_optimization_task_caller), 0,
                        0, STRING_ARG, STRING_ARG);
-    insertCommandToMap(
-        "client_channel_load_11k_req", "<hostap_mac> <client_mac> <channel>",
-        "sends to 'hostap_mac' 11k channel load request for 'client_mac' on 'channel' number",
-        static_cast<pFunction>(&cli_socket::client_channel_load_11k_req_caller), 2, 3, STRING_ARG,
-        STRING_ARG, INT_ARG);
     insertCommandToMap("client_beacon_11k_req", "<sta_mac> <[params]>",
                        "sends beacon request to 'sta_mac' with 'params' = (bssid, ch, ssid, "
                        "duration, rand_ival, repeats, op_class, mode)=value",
@@ -401,16 +396,6 @@ int cli_socket::load_balancer_task_caller(int numOfArgs)
 int cli_socket::ire_network_optimization_task_caller(int numOfArgs)
 {
     return ire_network_optimization_task();
-}
-
-int cli_socket::client_channel_load_11k_req_caller(int numOfArgs)
-{
-    if (numOfArgs == 3) {
-        return client_channel_load_11k_req(args.stringArgs[0], args.stringArgs[1], args.intArgs[2]);
-    } else if (numOfArgs == 2) {
-        return client_channel_load_11k_req(args.stringArgs[0], args.stringArgs[1]);
-    } else
-        return -1;
 }
 
 int cli_socket::client_beacon_11k_req_caller(int numOfArgs)
@@ -760,24 +745,6 @@ int cli_socket::ire_network_optimization_task()
         return -1;
     }
     wait_response = true;
-    message_com::send_cmdu(master_socket, cmdu_tx);
-    waitResponseReady();
-    return 0;
-}
-
-int cli_socket::client_channel_load_11k_req(std::string hostap_mac, std::string client_mac,
-                                            int channel)
-{
-    auto request = message_com::create_vs_message<
-        beerocks_message::cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST>(cmdu_tx);
-    if (request == nullptr) {
-        LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST message!";
-        return -1;
-    }
-    request->client_mac() = tlvf::mac_from_string(client_mac);
-    request->hostap_mac() = tlvf::mac_from_string(hostap_mac);
-    request->channel()    = channel;
-    wait_response         = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
     waitResponseReady();
     return 0;
