@@ -173,38 +173,6 @@ static void fill_son_slave_config(const beerocks::config_file::sConfigSlave &bee
     son_slave_conf.stop_on_failure_attempts = 0;
 }
 
-static void son_slave_watchdog(const std::string &beerocks_slave_temp_path,
-                               const std::unordered_map<int, std::string> &interfaces_map)
-{
-    for (int slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
-        auto hostap_iface_elm = interfaces_map.find(slave_num);
-        // if slave_num not mapped
-        if (hostap_iface_elm == interfaces_map.end()) {
-            continue;
-        }
-
-        std::string hostap_iface = hostap_iface_elm->second;
-        // if slave has no interface configured
-        if (hostap_iface.empty()) {
-            continue;
-        }
-        // check if slave is still running
-        std::string base_name = std::string(BEEROCKS_AGENT) + "_" + hostap_iface;
-        std::string temp_path(beerocks_slave_temp_path);
-        if (!beerocks::os_utils::is_pid_running(temp_path, base_name)) {
-            //start new slave process
-            std::string file_name = "./" + std::string(BEEROCKS_AGENT);
-            if (access(file_name.c_str(), F_OK) == -1) { //file does not exist in current location
-                file_name = BEEROCKS_BIN_PATH + std::string(BEEROCKS_AGENT);
-            }
-            std::string cmd = file_name + " -i " + hostap_iface;
-            LOG(DEBUG) << "son_slave_watchdog(): sending SYSTEM_CALL with cmd = " << cmd
-                       << std::endl;
-            beerocks::SYSTEM_CALL(cmd, 2, true);
-        }
-    }
-}
-
 static int system_hang_test(const beerocks::config_file::sConfigSlave &beerocks_slave_conf,
                             int argc, char *argv[])
 {
@@ -329,10 +297,6 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
         if (!backhaul_mgr.start()) {
             LOG(ERROR) << "backhaul_mgr.start()";
         } else {
-            //initialize watchdog timers
-            int son_slave_watchdog_time_elapsed_ms = 0;
-            std::chrono::steady_clock::time_point son_slave_watchdog_time =
-                std::chrono::steady_clock::now();
 
             auto touch_time_stamp_timeout = std::chrono::steady_clock::now();
             while (g_running) {
@@ -348,20 +312,6 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
                     touch_time_stamp_timeout =
                         std::chrono::steady_clock::now() +
                         std::chrono::seconds(beerocks::TOUCH_PID_TIMEOUT_SECONDS);
-                }
-
-                if (stop_on_failure_attempts > 0 &&
-                    beerocks_slave_conf.enable_son_slaves_watchdog == "1") {
-                    //son_slave_watchdog periodic check son_slave pids are running
-                    son_slave_watchdog_time_elapsed_ms =
-                        std::chrono::duration_cast<std::chrono::milliseconds>(
-                            std::chrono::steady_clock::now() - son_slave_watchdog_time)
-                            .count();
-                    if (son_slave_watchdog_time_elapsed_ms >=
-                        beerocks::SON_SLAVE_WATCHDOG_INTERVAL_MSC) {
-                        son_slave_watchdog(beerocks_slave_conf.temp_path, interfaces_map);
-                        son_slave_watchdog_time = std::chrono::steady_clock::now();
-                    }
                 }
 
                 // Check if backhaul manager still running and break on error
