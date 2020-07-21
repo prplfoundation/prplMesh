@@ -40,7 +40,6 @@ public:
         uint16_t ucc_listener_port;
         std::string bridge_iface;
         int stop_on_failure_attempts;
-        bool enable_keep_alive;
         bool enable_repeater_mode;
         std::string backhaul_wire_iface;
         beerocks::eIfaceType backhaul_wire_iface_type;
@@ -181,7 +180,6 @@ private:
     //slave FSM //
     eSlaveState slave_state;
     std::chrono::steady_clock::time_point slave_state_timer;
-    int keep_alive_retries = 0;
     bool hostap_params_available;
     int slave_resets_counter = 0;
 
