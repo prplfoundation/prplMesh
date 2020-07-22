@@ -802,6 +802,13 @@ public:
      */
     bool load_persistent_db_clients();
 
+    /**
+     * @brief Get the clients with persistent data configured object
+     * 
+     * @return std::vector<sMacAddr> 
+     */
+    std::vector<sMacAddr> get_clients_with_persistent_data_configured();
+
     //
     // CLI
     //
