@@ -1,5 +1,6 @@
 version: '3'
 services:
+    # Controller and agent are run from inside the boardfarm container
     controller:
         image: registry.gitlab.com/prpl-foundation/prplmesh/prplmesh-runner
         privileged: true    # For the creation of the bridge to work
@@ -32,6 +33,8 @@ services:
           - "$ROOT_DIR:$ROOT_DIR"
         entrypoint: ["/root/entrypoint.sh", "/usr/bin/start-agent"]
 
+    # Boardfarm image is launched from dctest.py, TARGET_DIR refers to the
+    # path inside the controller, will be referred as $ROOT_DIR inside
     boardfarm:
         build: .
         privileged: true
@@ -40,6 +43,7 @@ services:
             - USER=$USER
             - ROOT_DIR=$ROOT_DIR
             - CURRENT_ID=$CURRENT_ID
+            - RUN_ID=$RUN_ID
         ports:
             - "5000:5000"
         volumes:

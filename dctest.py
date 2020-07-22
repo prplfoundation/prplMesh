@@ -62,17 +62,23 @@ class Services:
         self.scriptdir = os.path.dirname(os.path.realpath(__file__))
         os.chdir(self.scriptdir)
         self.rootdir = self.scriptdir
+
+        self.build_id = self.get_build_id()
+        print('build_id {}'.format(self.build_id))
+
         self.logdir = os.path.join(self.scriptdir, 'logs')
-        device_name = 'dockerized_device-{}'.format(getpass.getuser())
+        device_name = 'dockerized_device-{}'.format(self.build_id)
         self.devicedir = os.path.join(self.logdir, device_name)
-        repeater_name = 'repeater1-{}'.format(getpass.getuser())
+        repeater_name = 'repeater1-{}'.format(self.build_id)
         self.repeaterdir = os.path.join(self.logdir, repeater_name)
         if not os.path.exists(self.logdir):
             os.makedirs(self.logdir)
+        if not os.path.exists(self.devicedir):
+            print('Making {}'.format(self.devicedir))
             os.makedirs(self.devicedir)
+        if not os.path.exists(self.repeaterdir):
+            print('Making {}'.format(self.repeaterdir))
             os.makedirs(self.repeaterdir)
-
-        # Create log dir
 
     def cleanlogs(self):
         shutil.rmtree(os.path.join(self.scriptdir, 'logs'))
@@ -85,6 +91,35 @@ class Services:
         flags = flags | os.O_NONBLOCK
         fcntl.fcntl(fd, fcntl.F_SETFL, flags)
 
+    def get_build_id(self):
+        ci_pipeline_id = os.getenv('CI_PIPELINE_ID')
+        if ci_pipeline_id is not None:
+            return ci_pipeline_id
+
+        # Otherwise we are running on the local machine, just find last id
+        # created and add one
+        last_id = 0
+        if not os.path.exists('logs'):
+            return str(1)
+        for d in os.listdir('logs'):
+            if d.startswith('dockerized_device-'):
+                suffix = d[len('dockerized_device-'):]
+                isuffix = int(suffix)
+                if isuffix > last_id:
+                    last_id = isuffix
+        if last_id == 0:
+            new_id = 1
+        else:
+            new_id = last_id + 1
+        return str(new_id)
+
+
+    def copy_build_dir(self):
+        new_id = self.build_id
+        self.build_dir = 'build-{}'.format(new_id)
+        shutil.copytree('build', 'build-{}'.format(self.build_dir))
+        print('Copied build/ into {}'.format(self.build_dir))
+
     def dc(self, args, interactive=False):
         params = ['docker-compose', '-f',
                   'tools/docker/boardfarm-ci/docker-compose.yml']
@@ -94,6 +129,7 @@ class Services:
         docker_gid = grp.getgrnam('docker')[2]
         # local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(docker_gid)
         local_env['CURRENT_ID']= str(os.getuid())
+        local_env['RUN_ID'] = self.build_id
         # local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(os.getgid())
         if not interactive:
             proc = Popen(params, stdout=PIPE, stderr=PIPE)
