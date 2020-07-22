@@ -1997,58 +1997,6 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 //     ;
 // }
 
-// void monitor_thread::debug_statistics_11k_request(message::sACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST* request)
-// {
-//     LOG(DEBUG) << "ACTION_MONITOR_CLIENT_STATISTICS_REQUEST:" << std::endl
-//     << std::endl << "group_identity: "                               << (int)request->params.group_identity
-//     << std::endl << "repeats: "                                      << (int)request->params.repeats
-//     << std::endl << "rand_ival: "                                    << (int)request->params.rand_ival
-//     << std::endl << "duration: "                                     << (int)request->params.duration
-//     << std::endl << "sta_mac: "                                      << request->params.sta_mac
-//     << std::endl << "peer_mac_addr: "                                << request->params.peer_mac_addr
-//     << std::endl << "parallel: "                                     << (int)request->params.parallel
-//     << std::endl << "enable: "                                       << (int)request->params.enable
-//     << std::endl << "request: "                                      << (int)request->params.request
-//     << std::endl << "report: "                                       << (int)request->params.report
-//     << std::endl << "mandatory_duration: "                           << (int)request->params.mandatory_duration;
-//     //Optional:
-//     // << std::endl << "use_optional_trig_rep_sta_counters: "           << (int)request->params.use_optional_trig_rep_sta_counters
-//     // << std::endl << "measurement_count_1: "                          << (int)request->params.measurement_count_1
-//     // << std::endl << "trigger_timeout_1: "                            << (int)request->params.trigger_timeout_1
-//     // << std::endl << "sta_counter_trigger_condition: "                << (int)request->params.sta_counter_trigger_condition
-//     // << std::endl << "dot11FailedCountThreshold: "                    << (int)request->params.dot11FailedCountThreshold
-//     // << std::endl << "dot11FCSErrorCountThreshold: "                  << (int)request->params.dot11FCSErrorCountThreshold
-//     // << std::endl << "dot11MultipleRetryCountThreshold: "             << (int)request->params.dot11MultipleRetryCountThreshold
-//     // << std::endl << "dot11FrameDuplicateCountThreshold: "            << (int)request->params.dot11FrameDuplicateCountThreshold
-//     // << std::endl << "dot11RTSFailureCountThreshold: "                << (int)request->params.dot11RTSFailureCountThreshold
-//     // << std::endl << "dot11AckFailureCountThreshold: "                << (int)request->params.dot11AckFailureCountThreshold
-//     // << std::endl << "dot11RetryCountThreshold: "                     << (int)request->params.dot11RetryCountThreshold
-//     // << std::endl << "use_optional_trig_rep_qos_sta_counters: "       << (int)request->params.use_optional_trig_rep_qos_sta_counters
-//     // << std::endl << "measurement_count_2: "                          << (int)request->params.measurement_count_2
-//     // << std::endl << "trigger_timeout_2: "                            << (int)request->params.trigger_timeout_2
-//     // << std::endl << "qos_sta_counter_trigger_condition: "            << (int)request->params.qos_sta_counter_trigger_condition
-//     // << std::endl << "dot11QoSFailedCountThreshold: "                 << (int)request->params.dot11QoSFailedCountThreshold
-//     // << std::endl << "dot11QoSRetryCountThreshold: "                  << (int)request->params.dot11QoSRetryCountThreshold
-//     // << std::endl << "dot11QoSMultipleRetryCountThreshold: "          << (int)request->params.dot11QoSMultipleRetryCountThreshold
-//     // << std::endl << "dot11QoSFrameDuplicateCountThreshold: "         << (int)request->params.dot11QoSFrameDuplicateCountThreshold
-//     // << std::endl << "dot11QoSRTSCountFailureThreshold: "             << (int)request->params.dot11QoSRTSCountFailureThreshold
-//     // << std::endl << "dot11QoSAckFailureCountThreshold: "             << (int)request->params.dot11QoSAckFailureCountThreshold
-//     // << std::endl << "dot11QoSDiscardedCountThreshold: "              << (int)request->params.dot11QoSDiscardedCountThreshold
-//     // << std::endl << "use_optional_trig_rep_rsna_counters: "          << (int)request->params.use_optional_trig_rep_rsna_counters
-//     // << std::endl << "measurement_count_3: "                          << (int)request->params.measurement_count_3
-//     // << std::endl << "trigger_timeout_3: "                            << (int)request->params.trigger_timeout_3
-//     // << std::endl << "rsna_counter_trigger_condition: "               << (int)request->params.rsna_counter_trigger_condition
-//     // << std::endl << "dot11RSNAStatsCMACICVErrorsThreshold: "         << (int)request->params.dot11RSNAStatsCMACICVErrorsThreshold
-//     // << std::endl << "dot11RSNAStatsCMACReplaysThreshold: "           << (int)request->params.dot11RSNAStatsCMACReplaysThreshold
-//     // << std::endl << "dot11RSNAStatsRobustMgmtCCMPReplaysThreshold: " << (int)request->params.dot11RSNAStatsRobustMgmtCCMPReplaysThreshold
-//     // << std::endl << "dot11RSNAStatsTKIPICVErrorsThreshold: "         << (int)request->params.dot11RSNAStatsTKIPICVErrorsThreshold
-//     // << std::endl << "dot11RSNAStatsTKIPReplaysThreshold: "           << (int)request->params.dot11RSNAStatsTKIPReplaysThreshold
-//     // << std::endl << "dot11RSNAStatsCCMPDecryptErrorsThreshold: "     << (int)request->params.dot11RSNAStatsCCMPDecryptErrorsThreshold
-//     // << std::endl << "dot11RSNAStatsCCMPReplaysThreshold: "           << (int)request->params.dot11RSNAStatsCCMPReplaysThreshold
-//     // ;
-
-// }
-
 // void monitor_thread::debug_channel_load_11k_response(message::sACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE* event)
 // {
 //     LOG(DEBUG) << "DATA TEST:"
@@ -2086,27 +2034,6 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 //     << std::endl << "new_ch_width: "                         << (int)event->params.new_ch_width
 //     << std::endl << "new_ch_center_freq_seg_0: "             << (int)event->params.new_ch_center_freq_seg_0
 //     << std::endl << "new_ch_center_freq_seg_1: "             << (int)event->params.new_ch_center_freq_seg_1
-//     ;
-// }
-
-// void monitor_thread::debug_statistics_11k_response(message::sACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE* event)
-// {
-//     std::string statistics_group_data;
-//     for(uint8_t i=0;i<event->params.statistics_group_data_size;i++){
-//         statistics_group_data +=  string_utils::to_string(event->params.statistics_group_data[i]) + ",";
-//     }
-//     statistics_group_data.pop_back(); // deletes last comma
-
-//     LOG(DEBUG) << "DATA TEST:"
-//     << std::endl << "sta_mac: "              << event->params.sta_mac
-//     << std::endl << "measurement_rep_mode: " << (int)event->params.rep_mode
-//     << std::endl << "duration: "             << (int)event->params.duration
-//     << std::endl << "group_identity: "       << (int)event->params.group_identity
-//     << std::endl << "statistics_group_data: "<< statistics_group_data
-
-//     << std::endl << "average_trigger: "      << (int)event->params.average_trigger
-//     << std::endl << "consecutive_trigger: "  << (int)event->params.consecutive_trigger
-//     << std::endl << "delay_trigger: "        << (int)event->params.delay_trigger
 //     ;
 // }
 

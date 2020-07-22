@@ -89,8 +89,6 @@ private:
     void debug_channel_load_11k_response(beerocks_message::sStaChannelLoadResponse11k &event);
     void debug_beacon_11k_request(beerocks_message::sBeaconRequest11k &request);
     void debug_beacon_11k_response(beerocks_message::sBeaconResponse11k &event);
-    void debug_statistics_11k_request(beerocks_message::sStatisticsRequest11k &request);
-    void debug_statistics_11k_response(beerocks_message::sStatisticsResponse11k &event);
 
     void send_heartbeat();
     void update_vaps_in_db();
