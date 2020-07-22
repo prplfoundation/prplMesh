@@ -367,12 +367,6 @@ bool mon_wlan_hal_nl80211::sta_beacon_11k_request(const SBeaconRequest11k &req, 
     return true;
 }
 
-bool mon_wlan_hal_nl80211::sta_statistics_11k_request(const SStatisticsRequest11k &req)
-{
-    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
-    return true;
-}
-
 bool mon_wlan_hal_nl80211::sta_link_measurements_11k_request(const std::string &sta_mac)
 {
     LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
