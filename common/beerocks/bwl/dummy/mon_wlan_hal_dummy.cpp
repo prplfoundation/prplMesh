@@ -143,12 +143,6 @@ bool mon_wlan_hal_dummy::sta_beacon_11k_request(const SBeaconRequest11k &req, in
     return true;
 }
 
-bool mon_wlan_hal_dummy::sta_statistics_11k_request(const SStatisticsRequest11k &req)
-{
-    LOG(TRACE) << __func__;
-    return true;
-}
-
 bool mon_wlan_hal_dummy::sta_link_measurements_11k_request(const std::string &sta_mac)
 {
     LOG(TRACE) << __func__;
