@@ -31,7 +31,8 @@ class PrplMeshCompose(PrplMeshBase):
         self.consoles = [self]
 
         # Getting unic ID to distinguish devices and network they belong to
-        self.unique_id = os.getenv("SUDO_USER", os.getenv("USER", ""))
+        self.unique_id = os.getenv("RUN_ID")
+        self.user_id = os.getenv("SUDO_USER", os.getenv("USER", ""))
 
         self.name = "-".join((config.get("name", "prplmesh_compose"), self.unique_id))
         print('config.get("name") {}'.format(config.get("name")))
@@ -70,7 +71,7 @@ class PrplMeshCompose(PrplMeshBase):
             log_path = os.path.join(rootdir, "logs/{}".format(self.name))
             if not os.path.exists(log_path):
                 os.mkdir(log_path)
-            vol = '{}:/tmp/{}/beerocks/logs'.format(log_path, self.unique_id)
+            vol = '{}:/tmp/{}/beerocks/logs'.format(log_path, self.user_id)
             full_args += ["run", "-v", vol]
             # full_args += ["--entrypoint", entrypoint + ' ' + start]
             full_args += args
