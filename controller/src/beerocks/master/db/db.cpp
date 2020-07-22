@@ -2492,8 +2492,7 @@ bool db::is_client_in_persistent_db(const sMacAddr &mac)
     return bpl::db_has_entry(type_to_string(beerocks::eType::TYPE_CLIENT), client_db_entry);
 }
 
-bool db::add_client_to_persistent_db(const sMacAddr &mac,
-                                     const std::unordered_map<std::string, std::string> &params)
+bool db::add_client_to_persistent_db(const sMacAddr &mac, const ValuesMap &params)
 {
     // if persistent db is disabled
     if (!config.persistent_db) {
@@ -2571,7 +2570,7 @@ bool db::set_client_time_life_delay(const sMacAddr &mac,
         } else {
             LOG(DEBUG) << "configuring persistent-db, timelife = " << time_life_delay_sec.count();
 
-            std::unordered_map<std::string, std::string> values_map;
+            ValuesMap values_map;
             values_map[TIMESTAMP_STR]      = timestamp_to_string_seconds(timestamp);
             values_map[TIMELIFE_DELAY_STR] = std::to_string(time_life_delay_sec.count());
 
@@ -2620,7 +2619,7 @@ bool db::set_client_stay_on_initial_radio(const sMacAddr &mac, bool stay_on_init
             LOG(DEBUG) << "configuring persistent-db, initial_radio_enable = "
                        << stay_on_initial_radio;
 
-            std::unordered_map<std::string, std::string> values_map;
+            ValuesMap values_map;
             values_map[TIMESTAMP_STR]            = timestamp_to_string_seconds(timestamp);
             values_map[INITIAL_RADIO_ENABLE_STR] = std::to_string(stay_on_initial_radio);
 
@@ -2669,7 +2668,7 @@ bool db::set_client_initial_radio(const sMacAddr &mac, const sMacAddr &initial_r
         } else {
             LOG(DEBUG) << "configuring persistent-db, initial_radio = " << initial_radio_mac;
 
-            std::unordered_map<std::string, std::string> values_map;
+            ValuesMap values_map;
             values_map[TIMESTAMP_STR]     = timestamp_to_string_seconds(timestamp);
             values_map[INITIAL_RADIO_STR] = tlvf::mac_to_string(initial_radio_mac);
 
@@ -2718,7 +2717,7 @@ bool db::set_client_stay_on_selected_band(const sMacAddr &mac, bool stay_on_sele
             LOG(DEBUG) << "configuring persistent-db, selected_band_enable = "
                        << stay_on_selected_band;
 
-            std::unordered_map<std::string, std::string> values_map;
+            ValuesMap values_map;
             values_map[TIMESTAMP_STR]            = timestamp_to_string_seconds(timestamp);
             values_map[SELECTED_BAND_ENABLE_STR] = std::to_string(stay_on_selected_band);
 
@@ -2767,7 +2766,7 @@ bool db::set_client_selected_bands(const sMacAddr &mac, beerocks::eFreqType sele
         } else {
             LOG(DEBUG) << ", configuring persistent-db, selected_bands = " << int(selected_bands);
 
-            std::unordered_map<std::string, std::string> values_map;
+            ValuesMap values_map;
             values_map[TIMESTAMP_STR]      = timestamp_to_string_seconds(timestamp);
             values_map[SELECTED_BANDS_STR] = std::to_string(selected_bands);
 
@@ -2853,7 +2852,7 @@ bool db::update_client_persistent_db(const sMacAddr &mac)
         return true;
     }
 
-    std::unordered_map<std::string, std::string> values_map;
+    ValuesMap values_map;
 
     //fill values map of client persistent params
     values_map[TIMESTAMP_STR] = timestamp_to_string_seconds(node->client_parameters_last_edit);
@@ -2909,7 +2908,7 @@ bool db::load_persistent_db_clients()
         return false;
     }
 
-    std::unordered_map<std::string, std::unordered_map<std::string, std::string>> clients;
+    std::unordered_map<std::string, ValuesMap> clients;
     if (!bpl::db_get_entries_by_type(type_to_string(beerocks::eType::TYPE_CLIENT), clients)) {
         LOG(ERROR) << "Failed to get all clients from persistent DB";
         return false;
@@ -2932,8 +2931,7 @@ bool db::load_persistent_db_clients()
 
         // Add node for client and fill with persistent data.
         auto add_new_client_with_persistent_data_to_nodes_list =
-            [&](const sMacAddr &client_mac,
-                const std::unordered_map<std::string, std::string> values_map) -> bool {
+            [&](const sMacAddr &client_mac, const ValuesMap values_map) -> bool {
             // Add client node with defaults and in default location
             if (!add_node(client_mac)) {
                 LOG(ERROR) << "Failed to add client node for client_entry " << client_entry;
@@ -4333,8 +4331,7 @@ void db::set_prplmesh(const sMacAddr &mac)
     get_node(mac)->is_prplmesh = true;
 }
 
-bool db::update_client_entry_in_persistent_db(
-    const sMacAddr &mac, const std::unordered_map<std::string, std::string> &values_map)
+bool db::update_client_entry_in_persistent_db(const sMacAddr &mac, const ValuesMap &values_map)
 {
     auto db_entry        = client_db_entry_from_mac(mac);
     auto type_client_str = type_to_string(beerocks::eType::TYPE_CLIENT);
@@ -4352,8 +4349,7 @@ bool db::update_client_entry_in_persistent_db(
     return true;
 }
 
-bool db::set_node_params_from_map(const sMacAddr &mac,
-                                  const std::unordered_map<std::string, std::string> &values_map)
+bool db::set_node_params_from_map(const sMacAddr &mac, const ValuesMap &values_map)
 {
     auto node = get_node(mac);
     if (!node) {
@@ -4400,8 +4396,8 @@ bool db::set_node_params_from_map(const sMacAddr &mac,
     return true;
 }
 
-bool db::add_client_entry_and_update_counter(
-    const std::string &entry_name, const std::unordered_map<std::string, std::string> &values_map)
+bool db::add_client_entry_and_update_counter(const std::string &entry_name,
+                                             const ValuesMap &values_map)
 {
     if (!bpl::db_add_entry(type_to_string(beerocks::eType::TYPE_CLIENT), entry_name, values_map)) {
         LOG(ERROR) << "failed to add client entry " << entry_name << " to persistent db";

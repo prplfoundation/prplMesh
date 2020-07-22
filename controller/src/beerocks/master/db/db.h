@@ -46,6 +46,11 @@ class db {
 
 public:
     /**
+     * @brief An unordered map of parameters and their values.
+     */
+    using ValuesMap = std::unordered_map<std::string, std::string>;
+
+    /**
      * @brief Client parameter names.
      * The parameter names can be used to set/get multiple parameters in one-shot.
      * This is done using key-value map (where key is the param name and value is it value)
@@ -663,12 +668,10 @@ public:
      * @brief Adds a client to the persistent db, if already exists, remove old entry and add a new one.
      * 
      * @param mac MAC address of a client.
-     * @param params An unordered map of key-value of client parameters.
+     * @param params An unordered map of key-value of client parameters and their values.
      * @return true on success, otherwise false.
      */
-    bool add_client_to_persistent_db(const sMacAddr &mac,
-                                     const std::unordered_map<std::string, std::string> &params =
-                                         std::unordered_map<std::string, std::string>());
+    bool add_client_to_persistent_db(const sMacAddr &mac, const ValuesMap &params = {});
 
     /**
      * @brief Get the client's parameters last edit time.
@@ -1102,8 +1105,7 @@ private:
      * @param values_map A map of client params and their values.
      * @return true on success, otherwise false.
      */
-    bool update_client_entry_in_persistent_db(
-        const sMacAddr &mac, const std::unordered_map<std::string, std::string> &values_map);
+    bool update_client_entry_in_persistent_db(const sMacAddr &mac, const ValuesMap &values_map);
 
     /**
      * @brief Sets the node params (runtime db) from a param-value map.
@@ -1112,8 +1114,7 @@ private:
      * @param values_map A map of client params and their values.
      * @return true on success, otherwise false.
      */
-    bool set_node_params_from_map(const sMacAddr &mac,
-                                  const std::unordered_map<std::string, std::string> &values_map);
+    bool set_node_params_from_map(const sMacAddr &mac, const ValuesMap &values_map);
 
     /**
      * @brief Adds a client entry to persistent_db with configured parameters and increments clients counter.
@@ -1122,9 +1123,8 @@ private:
      * @param values_map A map of client params and their values.
      * @return true on success, otherwise false.
      */
-    bool add_client_entry_and_update_counter(
-        const std::string &entry_name,
-        const std::unordered_map<std::string, std::string> &values_map);
+    bool add_client_entry_and_update_counter(const std::string &entry_name,
+                                             const ValuesMap &values_map);
 
     /**
      * @brief Removes a client entry from persistent_db and decrements clients counter.
