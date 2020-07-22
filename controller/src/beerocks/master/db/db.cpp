@@ -2980,6 +2980,24 @@ bool db::load_persistent_db_clients()
     return true;
 }
 
+std::deque<sMacAddr> db::get_clients_with_persistent_data_configured()
+{
+    std::deque<sMacAddr> configured_clients;
+    for (auto node_map : nodes) {
+        for (auto kv : node_map) {
+            if ((kv.second->get_type() == eType::TYPE_CLIENT) && (kv.second->mac == kv.first) &&
+                (kv.second->client_parameters_last_edit !=
+                 std::chrono::steady_clock::time_point::min())) {
+                configured_clients.push_back(tlvf::mac_from_string(kv.first));
+            }
+        }
+    }
+
+    LOG_IF(configured_clients.empty(), DEBUG) << "No clients are found";
+
+    return configured_clients;
+}
+
 //
 // CLI
 //
