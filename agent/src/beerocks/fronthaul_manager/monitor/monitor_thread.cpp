@@ -1281,89 +1281,6 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
         mon_wlan_hal->sta_channel_load_11k_request(bwl_request);
         break;
     }
-    case beerocks_message::ACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST: {
-        auto request =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST failed";
-            return false;
-        }
-
-        // debug_statistics_11k_request(request);
-
-        // TODO: TEMPORARY CONVERSION!
-        bwl::SStatisticsRequest11k bwl_request;
-
-        bwl_request.group_identity     = request->params().group_identity;
-        bwl_request.parallel           = request->params().parallel;
-        bwl_request.enable             = request->params().enable;
-        bwl_request.request            = request->params().request;
-        bwl_request.report             = request->params().report;
-        bwl_request.mandatory_duration = request->params().mandatory_duration;
-        bwl_request.repeats            = request->params().repeats;
-        bwl_request.rand_ival          = request->params().rand_ival;
-        bwl_request.duration           = request->params().duration;
-        bwl_request.use_optional_trig_rep_sta_counters =
-            request->params().use_optional_trig_rep_sta_counters;
-        bwl_request.measurement_count_1           = request->params().measurement_count_1;
-        bwl_request.trigger_timeout_1             = request->params().trigger_timeout_1;
-        bwl_request.sta_counter_trigger_condition = request->params().sta_counter_trigger_condition;
-        bwl_request.dot11FailedCountThreshold     = request->params().dot11FailedCountThreshold;
-        bwl_request.dot11FCSErrorCountThreshold   = request->params().dot11FCSErrorCountThreshold;
-        bwl_request.dot11MultipleRetryCountThreshold =
-            request->params().dot11MultipleRetryCountThreshold;
-        bwl_request.dot11FrameDuplicateCountThreshold =
-            request->params().dot11FrameDuplicateCountThreshold;
-        bwl_request.dot11RTSFailureCountThreshold = request->params().dot11RTSFailureCountThreshold;
-        bwl_request.dot11AckFailureCountThreshold = request->params().dot11AckFailureCountThreshold;
-        bwl_request.dot11RetryCountThreshold      = request->params().dot11RetryCountThreshold;
-        bwl_request.use_optional_trig_rep_qos_sta_counters =
-            request->params().use_optional_trig_rep_qos_sta_counters;
-        bwl_request.measurement_count_2 = request->params().measurement_count_2;
-        bwl_request.trigger_timeout_2   = request->params().trigger_timeout_2;
-        bwl_request.qos_sta_counter_trigger_condition =
-            request->params().qos_sta_counter_trigger_condition;
-        bwl_request.dot11QoSFailedCountThreshold = request->params().dot11QoSFailedCountThreshold;
-        bwl_request.dot11QoSRetryCountThreshold  = request->params().dot11QoSRetryCountThreshold;
-        bwl_request.dot11QoSMultipleRetryCountThreshold =
-            request->params().dot11QoSMultipleRetryCountThreshold;
-        bwl_request.dot11QoSFrameDuplicateCountThreshold =
-            request->params().dot11QoSFrameDuplicateCountThreshold;
-        bwl_request.dot11QoSRTSCountFailureThreshold =
-            request->params().dot11QoSRTSCountFailureThreshold;
-        bwl_request.dot11QoSAckFailureCountThreshold =
-            request->params().dot11QoSAckFailureCountThreshold;
-        bwl_request.dot11QoSDiscardedCountThreshold =
-            request->params().dot11QoSDiscardedCountThreshold;
-        bwl_request.use_optional_trig_rep_rsna_counters =
-            request->params().use_optional_trig_rep_rsna_counters;
-        bwl_request.measurement_count_3 = request->params().measurement_count_3;
-        bwl_request.trigger_timeout_3   = request->params().trigger_timeout_3;
-        bwl_request.rsna_counter_trigger_condition =
-            request->params().rsna_counter_trigger_condition;
-        bwl_request.dot11RSNAStatsCMACICVErrorsThreshold =
-            request->params().dot11RSNAStatsCMACICVErrorsThreshold;
-        bwl_request.dot11RSNAStatsCMACReplaysThreshold =
-            request->params().dot11RSNAStatsCMACReplaysThreshold;
-        bwl_request.dot11RSNAStatsRobustMgmtCCMPReplaysThreshold =
-            request->params().dot11RSNAStatsRobustMgmtCCMPReplaysThreshold;
-        bwl_request.dot11RSNAStatsTKIPICVErrorsThreshold =
-            request->params().dot11RSNAStatsTKIPICVErrorsThreshold;
-        bwl_request.dot11RSNAStatsTKIPReplaysThreshold =
-            request->params().dot11RSNAStatsTKIPReplaysThreshold;
-        bwl_request.dot11RSNAStatsCCMPDecryptErrorsThreshold =
-            request->params().dot11RSNAStatsCCMPDecryptErrorsThreshold;
-        bwl_request.dot11RSNAStatsCCMPReplaysThreshold =
-            request->params().dot11RSNAStatsCCMPReplaysThreshold;
-        std::copy_n(request->params().sta_mac.oct, sizeof(bwl_request.sta_mac.oct),
-                    bwl_request.sta_mac.oct);
-        std::copy_n(request->params().peer_mac_addr.oct, sizeof(bwl_request.peer_mac_addr.oct),
-                    bwl_request.peer_mac_addr.oct);
-
-        mon_wlan_hal->sta_statistics_11k_request(bwl_request);
-        break;
-    }
     case beerocks_message::ACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST: {
         auto request =
             beerocks_header
@@ -1706,39 +1623,6 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
                 ++it;
             }
         }
-
-    } break;
-
-    case Event::RRM_STA_Statistics_Response: {
-
-        auto hal_data = static_cast<bwl::SStatisticsResponse11k *>(data);
-
-        auto response = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE>(cmdu_tx);
-        if (response == nullptr) {
-            LOG(ERROR) << "Failed building cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE message!";
-            break;
-        }
-
-        response->params().dialog_token               = hal_data->dialog_token;
-        response->params().measurement_token          = hal_data->measurement_token;
-        response->params().rep_mode                   = hal_data->rep_mode;
-        response->params().group_identity             = hal_data->group_identity;
-        response->params().statistics_group_data_size = hal_data->statistics_group_data_size;
-        response->params().duration                   = hal_data->duration;
-        response->params().use_optional_rep_reason    = hal_data->use_optional_rep_reason;
-        response->params().average_trigger            = hal_data->average_trigger;
-        response->params().consecutive_trigger        = hal_data->consecutive_trigger;
-        response->params().delay_trigger              = hal_data->delay_trigger;
-        std::copy_n(hal_data->statistics_group_data,
-                    sizeof(response->params().statistics_group_data),
-                    response->params().statistics_group_data);
-        std::copy_n(hal_data->sta_mac.oct, sizeof(response->params().sta_mac.oct),
-                    response->params().sta_mac.oct);
-
-        // debug_statistics_11k_response(msg);
-
-        message_com::send_cmdu(slave_socket, cmdu_tx);
 
     } break;
 
