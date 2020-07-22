@@ -2920,9 +2920,10 @@ bool db::load_persistent_db_clients()
     }
 
     // Counters for client nodes-add success/fail (filtered-out client entries are not counted)
-    int add_node_error_count   = 0;
-    int set_node_error_count   = 0;
-    int clients_added_no_error = 0;
+    int add_node_error_count                        = 0;
+    int set_node_error_count                        = 0;
+    int clients_added_no_error                      = 0;
+    int clients_not_added_or_removed_due_to_full_db = 0;
 
     // Add clients to runtime db - invalid client (no timestamp or aged entries) are filtered out
     for (const auto &client : clients) {
@@ -2984,12 +2985,15 @@ bool db::load_persistent_db_clients()
             continue;
         }
 
+        // Save current time as a separate variable for fair comparison of current client
+        // remaining-timelife-delay against a candidate for removal in case the DB is full.
+        auto now = std::chrono::steady_clock::now();
+
         // Aged clients are removed from persistent db and not added to runtime db
-        auto timestamp_sec              = beerocks::string_utils::stoi(timestamp_it->second);
-        auto timestamp                  = db::timestamp_from_seconds(timestamp_sec);
-        auto client_timelife_passed_sec = std::chrono::duration_cast<std::chrono::seconds>(
-                                              std::chrono::steady_clock::now() - timestamp)
-                                              .count();
+        auto timestamp_sec = beerocks::string_utils::stoi(timestamp_it->second);
+        auto timestamp     = db::timestamp_from_seconds(timestamp_sec);
+        auto client_timelife_passed_sec =
+            std::chrono::duration_cast<std::chrono::seconds>(now - timestamp).count();
 
         /* TODO: aging validation against specific client configuration and unfriendly-device-max-timelife-delay:
          * 1. If client has timelife_delay_str param configured, it should be checked against it instead of global max-timelife-delay param.
@@ -3009,6 +3013,61 @@ bool db::load_persistent_db_clients()
             continue;
         }
 
+        // If clients DB is full - find candidate for removal and compare against the current client.
+        // Note that this is a corner case and at the init stage where this functionality is performed we do
+        // not expect for this condition to be met.
+        // This is only for robustness against user misuse (adding manually more clients than clients_persistent_db_max_size).
+        if (clients_added_no_error >= config.clients_persistent_db_max_size) {
+            ++clients_not_added_or_removed_due_to_full_db;
+            // Find candidate client for removal
+            auto candidate_for_removal_mac = get_candidate_client_for_removal();
+            if (candidate_for_removal_mac == network_utils::ZERO_MAC) {
+                LOG(WARNING) << "Failed to find candidate client for removal, unable to check if "
+                                "possible to add "
+                             << client_mac;
+                continue;
+            }
+
+            // Get candidate node
+            auto candidate_node =
+                get_node_verify_type(candidate_for_removal_mac, eType::TYPE_CLIENT);
+            if (!candidate_node) {
+                LOG(WARNING) << "Failed to get node for client " << candidate_for_removal_mac;
+                continue;
+            }
+
+            // Calculate candidate client remaining timelife delay.
+            auto candidate_remaining_time_sec =
+                std::chrono::duration_cast<std::chrono::seconds>(
+                    now - candidate_node->client_parameters_last_edit)
+                    .count();
+
+            // If current client is has less remaining time, just remove it from persistent DB
+            if (client_remaining_timelife_sec <= candidate_remaining_time_sec) {
+                LOG(DEBUG) << "Clients DB is full, client has the least remaining timelife, it is "
+                              "not added to the runtime DB and removed from persistent DB: "
+                           << client_mac;
+                if (!bpl::db_remove_entry(type_client_str, client_entry)) {
+                    LOG(ERROR) << "Failed to remove entry " << client_entry
+                               << " from persistent db";
+                }
+                continue;
+            }
+
+            // Free-up space in the DB
+            // clear candidate client's persistent data in runtime db and remove from persistent db
+            if (!clear_client_persistent_db(candidate_for_removal_mac)) {
+                LOG(ERROR) << "failed to clear client persistent data and remove it from "
+                              "persistent db for client "
+                           << candidate_for_removal_mac << ", unable to add client " << client_mac;
+                continue;
+            }
+
+            // The candidate client which is removed was previously counted as added-no-error.
+            // Decrease the related counter (which will be increased back as part of the new client add).
+            --clients_added_no_error;
+        }
+
         // Add client node
         if (!add_new_client_with_persistent_data_to_nodes_list(client_mac, client_data_map)) {
             LOG(ERROR) << "Failed to add client node with persistent data for client " << client_mac
@@ -3021,6 +3080,10 @@ bool db::load_persistent_db_clients()
         << "Failed to add nodes for " << add_node_error_count << " clients";
     LOG_IF(set_node_error_count, ERROR) << "Failed to set nodes with values from persistent db for "
                                         << set_node_error_count << " clients";
+    LOG_IF(clients_not_added_or_removed_due_to_full_db, DEBUG)
+        << "Filtered clients due to max DB capacity reached: "
+        << clients_not_added_or_removed_due_to_full_db
+        << ", max-capacity: " << config.clients_persistent_db_max_size;
     LOG(DEBUG) << "Added " << clients_added_no_error << " clients successfully";
 
     // Set clients count to number of clients added successfully to runtime db
