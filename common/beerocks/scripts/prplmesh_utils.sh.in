@@ -296,10 +296,19 @@ status_function() {
     pgrep -l beerocks
     pgrep -l ieee1905_transport
 
-    bridge_mac="$(ip link show dev @BEEROCKS_BRIDGE_IFACE@ | awk '/^ *link\/ether / {print $2}')"
-    bml_cmd="bml_get_device_operational_radios $bridge_mac"
+    # Use the given argument as birdge mac if it filled with something, otherwise get the bridge mac
+    # of the local platform.
+    ARGUMENT_LEN=${#1}
+    if [ "$ARGUMENT_LEN" -ne "0" ]; then
+        BRIDGE_MAC=$1
+    else 
+        BRIDGE_MAC="$(ip link show dev @BEEROCKS_BRIDGE_IFACE@ | awk '/^ *link\/ether / {print $2}')"
+    fi
+
+    bml_cmd="bml_get_device_operational_radios $BRIDGE_MAC"
 
     if  pgrep -l beerocks_cont ; then
+        echo "executing operational test using bml"
         if execute_beerocks_command "$bml_cmd" ; then
             # Expecting
             # > OK Main radio agent operational
@@ -319,6 +328,7 @@ status_function() {
             exit 1
         fi
     else
+        echo "executing operational test using grep on log files"
         # check for operational status
         LOGS_PATH=@BEEROCKS_LOG_FILES_PATH@
 
@@ -387,7 +397,7 @@ main() {
             start_function
             ;;
         "status")
-            status_function
+            status_function "$2"
             ;;
         "roll_logs")
             roll_logs_function

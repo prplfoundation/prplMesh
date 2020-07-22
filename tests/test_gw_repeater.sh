@@ -55,6 +55,13 @@ check_wsl() {
     RP_EXTRA_OPT=(--expose "${RP_UCC_PORT}" --publish "127.0.0.1::${RP_UCC_PORT}")
 }
 
+get_repater_bridge_mac() {
+    if [ "$#" -eq 1 ]; then
+        REPEATER_BRIDGE_MAC=$(run docker container exec "$1" ifconfig br-lan | grep ether | tr -s ' ' | cut --delimiter=' ' -f 3)
+        echo "$REPEATER_BRIDGE_MAC"
+    fi
+}
+
 main() {
     if ! OPTS=$(getopt -o 'hvd:fg:r:t:u:' --long help,verbose,rm,gateway-only,repeater-only,delay:,force,gateway:,repeater:,tag:,unique-id: -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2 ; usage; exit 1 ;
@@ -128,8 +135,9 @@ main() {
     [ "$START_REPEATER" = "true" ] && {
         for repeater in $REPEATER_NAMES
         do
+            REPEATER_BRIDGE_MAC=$(get_repater_bridge_mac "${repeater}")
             report "Repeater $repeater operational" \
-            "${rootdir}"/tools/docker/test.sh ${VERBOSE_OPT} -n "${repeater}"
+            "${rootdir}"/tools/docker/test.sh ${VERBOSE_OPT} -n "${GW_NAME}" -b "${REPEATER_BRIDGE_MAC}"
         done
     }
 
