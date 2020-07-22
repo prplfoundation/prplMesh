@@ -2889,7 +2889,8 @@ bool db::load_persistent_db_clients()
          * 2.b. Is "unfriendly" something we know at boot?
          */
         static const int max_timelife_delay_sec = config.max_timelife_delay_days * 24 * 3600;
-        if (client_timelife_passed_sec > max_timelife_delay_sec) {
+        auto client_remaining_timelife_sec = max_timelife_delay_sec - client_timelife_passed_sec;
+        if (client_remaining_timelife_sec <= 0) {
             LOG(ERROR) << "Invalid entry - configured data has aged for client entry "
                        << client_entry;
             // Calling BPL API directly as there's no need to increment/decrement counter at this point
