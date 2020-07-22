@@ -245,6 +245,62 @@ static int system_hang_test(const beerocks::config_file::sConfigSlave &beerocks_
     return 0;
 }
 
+static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &beerocks_slave_conf,
+                         const std::string &fronthaul_iface, int argc, char *argv[])
+{
+    std::string base_slave_name = std::string(BEEROCKS_AGENT) + "_" + fronthaul_iface;
+
+    // Init logger
+    auto logger =
+        init_logger(base_slave_name, beerocks_slave_conf.sLog, argc, argv, base_slave_name);
+    if (!logger) {
+        return 1;
+    }
+    g_loggers.push_back(logger);
+
+    // Write pid file
+    beerocks::os_utils::write_pid_file(beerocks_slave_conf.temp_path, base_slave_name);
+    std::string pid_file_path =
+        beerocks_slave_conf.temp_path + "pid/" + base_slave_name; // for file touching
+
+    // Fill configuration
+    son::slave_thread::sSlaveConfig son_slave_conf;
+    fill_son_slave_config(beerocks_slave_conf, son_slave_conf, fronthaul_iface, slave_num);
+
+    // Disable stopping on failure initially. Later on, it will be read from BPL as part of
+    // cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE
+    son_slave_conf.stop_on_failure_attempts = 0;
+
+    son::slave_thread son_slave(son_slave_conf, *logger);
+    if (son_slave.init()) {
+        auto touch_time_stamp_timeout = std::chrono::steady_clock::now();
+        while (g_running) {
+
+            // Handle signals
+            if (s_signal) {
+                handle_signal();
+                continue;
+            }
+
+            if (std::chrono::steady_clock::now() > touch_time_stamp_timeout) {
+                beerocks::os_utils::touch_pid_file(pid_file_path);
+                touch_time_stamp_timeout =
+                    std::chrono::steady_clock::now() +
+                    std::chrono::seconds(beerocks::TOUCH_PID_TIMEOUT_SECONDS);
+            }
+
+            if (!son_slave.work()) {
+                break;
+            }
+        }
+        son_slave.stop();
+    } else {
+        LOG(ERROR) << "son_slave.init(), slave_num=" << slave_num;
+    }
+
+    return 0;
+}
+
 static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slave_conf,
                               const std::unordered_map<int, std::string> &interfaces_map, int argc,
                               char *argv[])
@@ -330,62 +386,6 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
     }
 
     LOG(DEBUG) << "Bye Bye!";
-
-    return 0;
-}
-
-static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &beerocks_slave_conf,
-                         const std::string &fronthaul_iface, int argc, char *argv[])
-{
-    std::string base_slave_name = std::string(BEEROCKS_AGENT) + "_" + fronthaul_iface;
-
-    // Init logger
-    auto logger =
-        init_logger(base_slave_name, beerocks_slave_conf.sLog, argc, argv, base_slave_name);
-    if (!logger) {
-        return 1;
-    }
-    g_loggers.push_back(logger);
-
-    // Write pid file
-    beerocks::os_utils::write_pid_file(beerocks_slave_conf.temp_path, base_slave_name);
-    std::string pid_file_path =
-        beerocks_slave_conf.temp_path + "pid/" + base_slave_name; // for file touching
-
-    // Fill configuration
-    son::slave_thread::sSlaveConfig son_slave_conf;
-    fill_son_slave_config(beerocks_slave_conf, son_slave_conf, fronthaul_iface, slave_num);
-
-    // Disable stopping on failure initially. Later on, it will be read from BPL as part of
-    // cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE
-    son_slave_conf.stop_on_failure_attempts = 0;
-
-    son::slave_thread son_slave(son_slave_conf, *logger);
-    if (son_slave.init()) {
-        auto touch_time_stamp_timeout = std::chrono::steady_clock::now();
-        while (g_running) {
-
-            // Handle signals
-            if (s_signal) {
-                handle_signal();
-                continue;
-            }
-
-            if (std::chrono::steady_clock::now() > touch_time_stamp_timeout) {
-                beerocks::os_utils::touch_pid_file(pid_file_path);
-                touch_time_stamp_timeout =
-                    std::chrono::steady_clock::now() +
-                    std::chrono::seconds(beerocks::TOUCH_PID_TIMEOUT_SECONDS);
-            }
-
-            if (!son_slave.work()) {
-                break;
-            }
-        }
-        son_slave.stop();
-    } else {
-        LOG(ERROR) << "son_slave.init(), slave_num=" << slave_num;
-    }
 
     return 0;
 }
