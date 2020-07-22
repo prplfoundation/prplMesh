@@ -59,17 +59,15 @@ std::string db::client_db_entry_from_mac(const sMacAddr &mac)
     return db_entry;
 }
 
-sMacAddr db::client_db_entry_to_mac(const std::string &db_entry)
+sMacAddr db::client_db_entry_to_mac(std::string db_entry)
 {
-    std::string entry = db_entry;
+    std::replace(db_entry.begin(), db_entry.end(), '_', ':');
 
-    std::replace(entry.begin(), entry.end(), '_', ':');
-
-    if (!network_utils::is_valid_mac(entry)) {
+    if (!network_utils::is_valid_mac(db_entry)) {
         return network_utils::ZERO_MAC;
     }
 
-    return tlvf::mac_from_string(entry);
+    return tlvf::mac_from_string(db_entry);
 }
 
 std::string db::timestamp_to_string_seconds(const std::chrono::steady_clock::time_point timestamp)
