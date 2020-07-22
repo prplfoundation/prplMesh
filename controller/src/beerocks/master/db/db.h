@@ -196,7 +196,7 @@ public:
      * @param db_entry Client entry name in persistent db.
      * @return sMacAddr MAC address of the client the db_entry is representing. On failure ZERO_MAC is returned.
      */
-    static sMacAddr client_db_entry_to_mac(const std::string &db_entry);
+    static sMacAddr client_db_entry_to_mac(std::string db_entry);
 
     /**
      * @brief Get string representation of number of seconds in timestamp.
