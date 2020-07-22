@@ -291,7 +291,7 @@ bool aes_encrypt(const uint8_t *key, const uint8_t *iv, uint8_t *plaintext, int 
     /* Verify that the ciphertext buffer has enough storage room
      * for block size alignment padding which will be added
      * during encryption, which is up to plen + cipher_block_size -1
-     * for the update, and another cipher_block_size for the final one. 
+     * for the update, and another cipher_block_size for the final one.
      */
     int padlen = 16 - (plen % 16);
     if (clen < plen + padlen) {
@@ -429,8 +429,8 @@ void wps_calculate_keys(const diffie_hellman &dh, const uint8_t *remote_pubkey,
         struct {
             uint8_t authkey[32];
             uint8_t keywrapkey[16];
-            // Currently unused, commented out to prevent cppcheck warnings
-            // uint8_t emsk[32];
+            // cppcheck-suppress unusedStructMember
+            uint8_t emsk[32];
         } keys;
         uint8_t buf[3][32];
     } keys;
