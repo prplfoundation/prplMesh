@@ -23,7 +23,6 @@ BEEROCKS_INIT_BEEROCKS_VERSION
 
 static bool g_running = true;
 static int s_signal   = 0;
-static std::string g_son_slave_iface;
 
 // Pointer to logger instance
 static std::vector<std::shared_ptr<beerocks::logging>> g_loggers;
@@ -88,13 +87,9 @@ static void init_signals()
 static bool parse_arguments(int argc, char *argv[])
 {
     int opt;
-    while ((opt = getopt(argc, argv, "i:q:")) != -1) {
+    while ((opt = getopt(argc, argv, "q:")) != -1) {
         switch (opt) {
-        case 'i': {
-            g_son_slave_iface.assign(optarg);
-            break;
-        }
-        case 'q': // quary platfrom: is_master, is_gateway, is_onboarding
+        case 'q': // query platfrom: is_master, is_gateway, is_onboarding
         {
             std::string request;
             request.assign(optarg);
@@ -404,8 +399,6 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
 
 int main(int argc, char *argv[])
 {
-    int slave_num;
-
     init_signals();
 
     // Check for version query first, handle and exit if requested.
@@ -436,7 +429,7 @@ int main(int argc, char *argv[])
     }
 
     // beerocks system hang tester
-    if (g_son_slave_iface.empty() && beerocks_slave_conf.enable_system_hang_test == "1") {
+    if (beerocks_slave_conf.enable_system_hang_test == "1") {
 
         pid_t pid = fork();
         if (pid == 0) {
@@ -466,24 +459,7 @@ int main(int argc, char *argv[])
     }
 
     if (interfaces_map.empty()) {
-        LOG(INFO) << "no hostap interface is available";
-        return 0;
-    }
-
-    //Handle -i option (start given son slave)
-    if (!g_son_slave_iface.empty()) {
-        //start given slave
-        for (slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
-            auto hostap_iface_elm = interfaces_map.find(slave_num);
-            if ((hostap_iface_elm != interfaces_map.end()) &&
-                (g_son_slave_iface == hostap_iface_elm->second)) {
-                // This line has been only changed so compilation would pass. It is not actually
-                // used, and on the nex commit will be removed.
-                start_son_slave_thread(slave_num, beerocks_slave_conf, hostap_iface_elm->second,
-                                       argc, argv);
-            }
-        }
-        LOG(ERROR) << "did not find g_son_slave_iface in hostap_iface array" << std::endl;
+        LOG(INFO) << "No radio interfaces are available";
         return 0;
     }
 
