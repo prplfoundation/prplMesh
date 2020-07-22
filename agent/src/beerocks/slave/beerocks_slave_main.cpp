@@ -245,8 +245,9 @@ static int system_hang_test(const beerocks::config_file::sConfigSlave &beerocks_
     return 0;
 }
 
-static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &beerocks_slave_conf,
-                         const std::string &fronthaul_iface, int argc, char *argv[])
+static std::shared_ptr<son::slave_thread>
+start_son_slave_thread(int slave_num, beerocks::config_file::sConfigSlave &beerocks_slave_conf,
+                       const std::string &fronthaul_iface, int argc, char *argv[])
 {
     std::string base_slave_name = std::string(BEEROCKS_AGENT) + "_" + fronthaul_iface;
 
@@ -254,14 +255,9 @@ static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &bee
     auto logger =
         init_logger(base_slave_name, beerocks_slave_conf.sLog, argc, argv, base_slave_name);
     if (!logger) {
-        return 1;
+        return nullptr;
     }
     g_loggers.push_back(logger);
-
-    // Write pid file
-    beerocks::os_utils::write_pid_file(beerocks_slave_conf.temp_path, base_slave_name);
-    std::string pid_file_path =
-        beerocks_slave_conf.temp_path + "pid/" + base_slave_name; // for file touching
 
     // Fill configuration
     son::slave_thread::sSlaveConfig son_slave_conf;
@@ -271,34 +267,18 @@ static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &bee
     // cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE
     son_slave_conf.stop_on_failure_attempts = 0;
 
-    son::slave_thread son_slave(son_slave_conf, *logger);
-    if (son_slave.init()) {
-        auto touch_time_stamp_timeout = std::chrono::steady_clock::now();
-        while (g_running) {
-
-            // Handle signals
-            if (s_signal) {
-                handle_signal();
-                continue;
-            }
-
-            if (std::chrono::steady_clock::now() > touch_time_stamp_timeout) {
-                beerocks::os_utils::touch_pid_file(pid_file_path);
-                touch_time_stamp_timeout =
-                    std::chrono::steady_clock::now() +
-                    std::chrono::seconds(beerocks::TOUCH_PID_TIMEOUT_SECONDS);
-            }
-
-            if (!son_slave.work()) {
-                break;
-            }
-        }
-        son_slave.stop();
-    } else {
-        LOG(ERROR) << "son_slave.init(), slave_num=" << slave_num;
+    auto son_slave = std::make_shared<son::slave_thread>(son_slave_conf, *logger);
+    if (!son_slave) {
+        CLOG(ERROR, logger->get_logger_id()) << "son::slave_thread allocating has failed!";
+        return nullptr;
     }
 
-    return 0;
+    if (!son_slave->start()) {
+        CLOG(ERROR, logger->get_logger_id()) << "son_slave.start() has failed";
+        return nullptr;
+    }
+
+    return son_slave;
 }
 
 static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slave_conf,
@@ -330,60 +310,92 @@ static int run_beerocks_slave(beerocks::config_file::sConfigSlave &beerocks_slav
                                                          *agent_logger);
 
     // Start platform_manager
-    if (platform_mgr.init()) {
-        // Read the number of failures allowed before stopping agent from platform configuration
-        int stop_on_failure_attempts = beerocks::bpl::cfg_get_stop_on_failure_attempts();
-
-        // The platform manager updates the beerocks_slave_conf.sta_iface in the init stage
-        std::set<std::string> slave_sta_ifaces;
-        for (int slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
-            if (!beerocks_slave_conf.sta_iface[slave_num].empty()) {
-                slave_sta_ifaces.insert(beerocks_slave_conf.sta_iface[slave_num]);
-            }
-        }
-
-        beerocks::backhaul_manager backhaul_mgr(beerocks_slave_conf, slave_ap_ifaces,
-                                                slave_sta_ifaces, stop_on_failure_attempts);
-
-        // Start backhaul manager
-        if (!backhaul_mgr.start()) {
-            LOG(ERROR) << "backhaul_mgr.start()";
-        } else {
-
-            auto touch_time_stamp_timeout = std::chrono::steady_clock::now();
-            while (g_running) {
-
-                // Handle signals
-                if (s_signal) {
-                    handle_signal();
-                    continue;
-                }
-
-                if (std::chrono::steady_clock::now() > touch_time_stamp_timeout) {
-                    beerocks::os_utils::touch_pid_file(pid_file_path);
-                    touch_time_stamp_timeout =
-                        std::chrono::steady_clock::now() +
-                        std::chrono::seconds(beerocks::TOUCH_PID_TIMEOUT_SECONDS);
-                }
-
-                // Check if backhaul manager still running and break on error
-                if (!backhaul_mgr.is_running()) {
-                    break;
-                }
-
-                //call platform manager work task and break on error
-                if (!platform_mgr.work()) {
-                    break;
-                }
-            }
-        }
-
-        LOG(DEBUG) << "backhaul_mgr.stop()";
-        backhaul_mgr.stop();
-
-        LOG(DEBUG) << "platform_mgr.stop()";
-        platform_mgr.stop();
+    if (!platform_mgr.init()) {
+        LOG(ERROR) << "platform_mgr init() has failed!";
+        return 1;
     }
+
+    // Read the number of failures allowed before stopping agent from platform configuration
+    int stop_on_failure_attempts = beerocks::bpl::cfg_get_stop_on_failure_attempts();
+
+    // The platform manager updates the beerocks_slave_conf.sta_iface in the init stage
+    std::set<std::string> slave_sta_ifaces;
+    for (int slave_num = 0; slave_num < beerocks::IRE_MAX_SLAVES; slave_num++) {
+        if (!beerocks_slave_conf.sta_iface[slave_num].empty()) {
+            slave_sta_ifaces.insert(beerocks_slave_conf.sta_iface[slave_num]);
+        }
+    }
+
+    beerocks::backhaul_manager backhaul_mgr(beerocks_slave_conf, slave_ap_ifaces, slave_sta_ifaces,
+                                            stop_on_failure_attempts);
+
+    // Start backhaul manager
+    if (!backhaul_mgr.start()) {
+        LOG(ERROR) << "backhaul_mgr init() has failed!";
+        return 1;
+    }
+
+    std::vector<std::shared_ptr<son::slave_thread>> son_slaves;
+    for (const auto &iface_element : interfaces_map) {
+        auto son_slave_num    = iface_element.first;
+        auto &fronthaul_iface = iface_element.second;
+        LOG(DEBUG) << "Running son_slave_" << fronthaul_iface;
+        auto son_slave =
+            start_son_slave_thread(son_slave_num, beerocks_slave_conf, fronthaul_iface, argc, argv);
+        if (!son_slave) {
+            LOG(ERROR) << "Failed to start son_slave_" << fronthaul_iface;
+            return 1;
+        }
+        son_slaves.push_back(son_slave);
+    }
+
+    auto touch_time_stamp_timeout = std::chrono::steady_clock::now();
+    while (g_running) {
+
+        // Handle signals
+        if (s_signal) {
+            handle_signal();
+            continue;
+        }
+
+        if (std::chrono::steady_clock::now() > touch_time_stamp_timeout) {
+            beerocks::os_utils::touch_pid_file(pid_file_path);
+            touch_time_stamp_timeout = std::chrono::steady_clock::now() +
+                                       std::chrono::seconds(beerocks::TOUCH_PID_TIMEOUT_SECONDS);
+        }
+
+        // Check if backhaul manager still running and break on error.
+        if (!backhaul_mgr.is_running()) {
+            break;
+        }
+
+        // Check if all son_slave are still running and break on error.
+        auto should_break = false;
+        for (const auto &son_slave : son_slaves) {
+            should_break = !son_slave->is_running();
+            if (should_break) {
+                break;
+            }
+        }
+        if (should_break) {
+            break;
+        }
+
+        // Call platform manager work task and break on error.
+        if (!platform_mgr.work()) {
+            break;
+        }
+    }
+
+    for (const auto &son_slave : son_slaves) {
+        son_slave->stop();
+    }
+
+    LOG(DEBUG) << "backhaul_mgr.stop()";
+    backhaul_mgr.stop();
+
+    LOG(DEBUG) << "platform_mgr.stop()";
+    platform_mgr.stop();
 
     LOG(DEBUG) << "Bye Bye!";
 
@@ -465,8 +477,10 @@ int main(int argc, char *argv[])
             auto hostap_iface_elm = interfaces_map.find(slave_num);
             if ((hostap_iface_elm != interfaces_map.end()) &&
                 (g_son_slave_iface == hostap_iface_elm->second)) {
-                return run_son_slave(slave_num, beerocks_slave_conf, hostap_iface_elm->second, argc,
-                                     argv);
+                // This line has been only changed so compilation would pass. It is not actually
+                // used, and on the nex commit will be removed.
+                start_son_slave_thread(slave_num, beerocks_slave_conf, hostap_iface_elm->second,
+                                       argc, argv);
             }
         }
         LOG(ERROR) << "did not find g_son_slave_iface in hostap_iface array" << std::endl;
