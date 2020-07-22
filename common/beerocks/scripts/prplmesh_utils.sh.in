@@ -277,7 +277,6 @@ main_agent_operational() {
 }
 
 radio_agent_operational() {
-    pgrep -fx "@INSTALL_PATH@/bin/beerocks_agent -i $2($|[[:blank:]])" > /dev/null 2>&1 || return 1
     grep -q 'goto STATE_OPERATIONAL' "$1/beerocks_agent_$2@BEEROCKS_LOG_FILES_SUFFIX@"
 }
 
