@@ -103,6 +103,51 @@ bool uci_add_section(const std::string &package_name, const std::string &section
     LOG(TRACE) << "uci_add_section() " << package_name << ".(" << section_type << ")"
                << section_name;
 
+    auto ctx = alloc_context();
+    if (!ctx) {
+        return false;
+    }
+
+    char sec_path[MAX_UCI_BUF_LEN] = {0};
+    // Generate a uci path to the section we wish to lookup
+    if (snprintf(sec_path, MAX_UCI_BUF_LEN, section_type_path, package_name.c_str(),
+                 section_name.c_str(), section_type.c_str()) <= 0) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+
+    uci_ptr sec_ptr;
+    // Initialize section pointer from path.
+    if (uci_lookup_ptr(ctx.get(), &sec_ptr, sec_path, true) != UCI_OK) {
+        LOG(ERROR) << "UCI failed to lookup ptr for path: " << sec_path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    // Check if section already exists
+    if (sec_ptr.s) {
+        LOG(ERROR) << "Section already exists!";
+        return false;
+    }
+
+    // Add a new named section.
+    if (uci_set(ctx.get(), &sec_ptr) != UCI_OK) {
+        LOG(ERROR) << "Failed to add new section";
+        return false;
+    }
+
+    // Create delta from changes, this does not change the persistent file.
+    if (uci_save(ctx.get(), sec_ptr.p) != UCI_OK) {
+        LOG(ERROR) << "Failed to save changes!" << std::endl << uci_get_error(ctx.get());
+        return false;
+    }
+
+    // Commit changes to file
+    if (uci_commit(ctx.get(), &sec_ptr.p, false) != UCI_OK) {
+        LOG(ERROR) << "Failed to commit changes!" << std::endl << uci_get_error(ctx.get());
+        return false;
+    }
+
     return true;
 }
 
