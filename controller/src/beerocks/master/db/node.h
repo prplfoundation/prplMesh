@@ -292,8 +292,9 @@ public:
     eTriStateBool client_stay_on_selected_band = eTriStateBool::NOT_CONFIGURED;
 
     // The selected bands the client should be steered to if the client_stay_on_selected_band is set.
-    // Default value is FREQ_UNKNOWN (also indicates value is not configured)
-    beerocks::eFreqType client_selected_bands = beerocks::eFreqType::FREQ_UNKNOWN;
+    // Default value is PARAMETER_NOT_CONFIGURED.
+    // Possible values are bitwise options of eClientSelectedBands.
+    int8_t client_selected_bands = beerocks::PARAMETER_NOT_CONFIGURED;
 
     /*
      * Persistent configurations - end
