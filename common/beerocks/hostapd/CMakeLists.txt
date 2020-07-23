@@ -1,47 +1,11 @@
+
 project(prplmesh_hostapd VERSION ${prplmesh_VERSION})
 
 # Set the base path for the current module
 set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 
-# Default defaults
-set(PRPLMESH_HOSTAPD_TYPE "DUMMY" CACHE STRING "PRPLMESH_HOSTAPD type")
-set_property(CACHE PRPLMESH_HOSTAPD_TYPE PROPERTY STRINGS "DUMMY" "NL80211" "DWPAL")
-add_definitions(-DBEEROCKS_TMP_PATH="${TMP_PATH}")
-
-if (TARGET_PLATFORM STREQUAL "rdkb")
-
-    set(PRPLMESH_HOSTAPD_TYPE "DWPAL")
-    # Extra libraries
-    list(APPEND PRPLMESH_HOSTAPD_LIBS rt dl)
-
-elseif(TARGET_PLATFORM STREQUAL "openwrt")
-
-    if (TARGET_PLATFORM_TYPE STREQUAL "ugw")
-        set(PRPLMESH_HOSTAPD_TYPE "DWPAL")
-    else()
-        set(PRPLMESH_HOSTAPD_TYPE "NL80211")
-    endif()
-
-    # hostapd directory
-    file(GLOB PRPLMESH_HOSTAPD_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/hostapd*/hostapd-*")
-    find_path(PRPLMESH_HOSTAPD_INCLUDE_DIR NAMES "src/common/wpa_ctrl.h" PATHS ${PRPLMESH_HOSTAPD_SEARCH_PATHS} NO_CMAKE_FIND_ROOT_PATH)
-    set(PRPLMESH_HOSTAPD_DIR "${PRPLMESH_HOSTAPD_INCLUDE_DIR}")
-
-endif()
-
-set(PRPLMESH_HOSTAPD_TYPE ${PRPLMESH_HOSTAPD_TYPE} CACHE STRING "Which PRPLMESH_HOSTAPD backend to use")
-
-##########################################################################
-##########################################################################
-##########################################################################
-
-set(
-    hostapd_sources
-    source/configuration.cpp
-)
-
-
 # Build the library
+set(hostapd_sources source/configuration.cpp)
 add_library(${PROJECT_NAME} ${hostapd_sources})
 set_target_properties(${PROJECT_NAME} PROPERTIES VERSION ${prplmesh_VERSION} SOVERSION ${prplmesh_VERSION_MAJOR})
 target_link_libraries(${PROJECT_NAME} elpp ${PRPLMESH_HOSTAPD_LIBS})
@@ -60,8 +24,7 @@ install(
 )
 
 if (BUILD_TESTS)
-    string(TOLOWER ${PRPLMESH_HOSTAPD_TYPE} PRPLMESH_HOSTAPD_TYPE_LOWERCASE)
-    set(TEST_PROJECT_NAME ${PROJECT_NAME}_${PRPLMESH_HOSTAPD_TYPE_LOWERCASE}_unit_tests)
+    set(TEST_PROJECT_NAME ${PROJECT_NAME}_unit_tests)
     set(unit_tests_sources
         ${MODULE_PATH}/unit_tests/configuration_test.cpp
     )

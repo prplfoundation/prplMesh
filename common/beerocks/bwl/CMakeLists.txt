@@ -109,6 +109,8 @@ elseif(BWL_TYPE STREQUAL "NL80211")
         ${PLATFORM_STAGING_DIR}/usr/lib
     )
 
+    list(APPEND BWL_LIBS prplmesh_hostapd)
+
 elseif(BWL_TYPE STREQUAL "DUMMY")
 
     set(bwl_platform_sources
@@ -179,7 +181,7 @@ if (BUILD_TESTS)
         PUBLIC
             $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     )
-    target_link_libraries(${TEST_PROJECT_NAME} bcl elpp ${BWL_LIBS})
+    target_link_libraries(${TEST_PROJECT_NAME} prplmesh_hostapd bcl elpp ${BWL_LIBS})
     target_link_libraries(${TEST_PROJECT_NAME} gtest_main)
     install(TARGETS ${TEST_PROJECT_NAME} DESTINATION bin/tests)
     add_test(NAME ${TEST_PROJECT_NAME} COMMAND $<TARGET_FILE:${TEST_PROJECT_NAME}>)
