@@ -426,6 +426,36 @@ bool uci_get_all_sections(const std::string &package_name, const std::string &se
     //package_name.(section_type)
     LOG(TRACE) << "uci_get_all_sections() " << package_name << ".(" << section_type << ")";
 
+    auto ctx = alloc_context();
+    if (!ctx) {
+        return false;
+    }
+
+    char pkg_path[MAX_UCI_BUF_LEN] = {0};
+    // Generate a uci path to the package we wish to lookup
+    if (snprintf(pkg_path, MAX_UCI_BUF_LEN, package_path, package_name.c_str()) <= 0) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+
+    uci_ptr pkg_ptr;
+    // Initialize package pointer from path & validate package existace
+    if (uci_lookup_ptr(ctx.get(), &pkg_ptr, pkg_path, true) != UCI_OK || !pkg_ptr.p) {
+        LOG(ERROR) << "UCI lookup failed for path: " << pkg_path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    // Loop through all sections
+    uci_element *elm = nullptr;
+    uci_foreach_element(&pkg_ptr.p->sections, elm)
+    {
+        uci_section *sec = uci_to_section(elm);
+        // If section type matches add to result
+        if (section_type.empty() || section_type.compare(sec->type) == 0) {
+            sections.emplace_back(sec->e.name);
+        }
+    }
     return true;
 }
 
