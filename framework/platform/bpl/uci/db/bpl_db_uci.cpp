@@ -425,6 +425,34 @@ bool uci_get_all_entries(const std::string &config_file, const std::string &entr
     LOG(TRACE) << "uci_get_all_entries() "
                << "entry: " << config_file << ": " << entry_type;
 
+    auto ctx = alloc_context();
+    if (!ctx) {
+        return false;
+    }
+
+    char path[MAX_UCI_BUF_LEN] = {0};
+    if (!compose_path(path, config_file)) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+
+    struct uci_ptr ptr;
+    if (uci_lookup_ptr(ctx.get(), &ptr, path, false) != UCI_OK) {
+        LOG(ERROR) << "UCI lookup failed for path: " << path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    // Loop through the sections with a matching section name (entry_name)
+    struct uci_element *elm = nullptr;
+    uci_foreach_element(&ptr.p->sections, elm)
+    {
+        struct uci_section *sec = uci_to_section(elm);
+        if (entry_type.empty() || entry_type.compare(sec->type) == 0) {
+            entries.emplace_back(sec->e.name);
+        }
+    }
+    LOG(DEBUG) << "Found " << entries.size() << " entries.";
     return true;
 }
 
