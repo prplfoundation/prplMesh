@@ -1130,6 +1130,12 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
         } break;
         case beerocks_message::ACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE: {
             LOG(DEBUG) << "ACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE received";
+
+            if (!m_prmClientListGet) {
+                LOG(WARNING) << "Received GET_CLIENT_LIST response, but no one is waiting...";
+                break;
+            }
+
             auto response =
                 beerocks_header
                     ->addClass<beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE>();
@@ -1138,21 +1144,49 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                 return BML_RET_OP_FAILED;
             }
 
-            //Signal any waiting threads
-            if (m_prmClientListGet) {
-                bool promise_result = false;
-                if (m_client_list && m_client_list_size) {
-                    *m_client_list_size = *m_client_list_size <= response->client_list_size()
-                                              ? response->client_list_size()
-                                              : *m_client_list_size;
-                    *m_client_list = response->client_list_str();
-                    promise_result = true;
-                }
-                m_prmClientListGet->set_value(promise_result);
-            } else {
-                LOG(WARNING) << "Received ACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE response, "
-                             << "but no one is waiting...";
+            if (!m_client_list || !m_client_list_size) {
+                LOG(ERROR) << "The pointer to the user data buffer is null!";
+                m_prmClientListGet->set_value(false);
+                break;
             }
+
+            if (response->result() != 0) {
+                LOG(ERROR) << "GET_CLIENT_LIST_REQUEST failed with error: " << response->result();
+                m_prmClientListGet->set_value(false);
+                break;
+            }
+
+            auto client_list_size = response->client_list_size();
+            LOG(INFO) << "Received " << client_list_size << " clients from the controller";
+            // Store the received data.
+            if (client_list_size == 0) {
+                LOG(DEBUG) << "Received an empty client list!";
+                m_prmClientListGet->set_value(true);
+                break;
+            }
+
+            LOG_IF((client_list_size > *m_client_list_size), WARNING)
+                << "Not enough space in input buffer, writing " << *m_client_list_size << "/"
+                << client_list_size << " clients";
+
+            uint8_t max_clients_size = std::min(client_list_size, *m_client_list_size);
+
+            bool failed_to_copy = false;
+            for (uint8_t index = 0; index < max_clients_size; ++index) {
+                auto client_list_tuple = response->client_list(index);
+                if (!std::get<0>(client_list_tuple)) {
+                    LOG(ERROR) << "client list access fail!";
+                    m_prmClientListGet->set_value(false);
+                    failed_to_copy = true;
+                    break;
+                }
+
+                auto &client_element = std::get<1>(client_list_tuple);
+                m_client_list->push_back(client_element);
+            }
+
+            *m_client_list_size = m_client_list->size();
+            m_prmClientListGet->set_value(!failed_to_copy);
         } break;
         case beerocks_message::ACTION_BML_CLIENT_SET_CLIENT_RESPONSE: {
             LOG(DEBUG) << "ACTION_BML_CLIENT_SET_CLIENT_RESPONSE received";
@@ -1821,8 +1855,16 @@ int bml_internal::client_get_client_list(char *client_list, unsigned int *client
 {
     LOG(DEBUG) << "client_get_client_list";
 
+    // Invalid input
     if (!client_list || !client_list_size) {
         LOG(ERROR) << "Invalid input: null pointers";
+        return (-BML_RET_INVALID_DATA);
+    }
+
+    // Not enough space for even one result
+    if (*client_list_size < (network_utils::ZERO_MAC_STRING.size() + 1)) {
+        LOG(ERROR) << "Invalid input: insufficient minimal space for results, client-list-max-size="
+                   << *client_list_size;
         return (-BML_RET_INVALID_DATA);
     }
 
@@ -1837,10 +1879,16 @@ int bml_internal::client_get_client_list(char *client_list, unsigned int *client
 
     // Initialize the promise for receiving the response
     beerocks::promise<bool> prmClientListGet;
-    m_prmClientListGet = &prmClientListGet;
-    int iOpTimeout     = RESPONSE_TIMEOUT; // Default timeout
-    m_client_list      = &client_list;
-    m_client_list_size = client_list_size;
+    m_prmClientListGet   = &prmClientListGet;
+    int iOpTimeout       = RESPONSE_TIMEOUT; // Default timeout
+    auto client_mac_list = std::list<sMacAddr>();
+    m_client_list        = &client_mac_list;
+    uint32_t client_mac_list_max_count =
+        *client_list_size / (network_utils::ZERO_MAC_STRING.size() + 1); // The 1 is for delimiters
+    m_client_list_size = &client_mac_list_max_count;
+
+    // Save client list max size to be used as copy-to-buffer max size when results are received
+    auto client_list_max_size = *client_list_size;
 
     auto request = message_com::create_vs_message<
         beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST>(cmdu_tx);
@@ -1874,8 +1922,30 @@ int bml_internal::client_get_client_list(char *client_list, unsigned int *client
     // Clear the promise holder
     m_prmClientListGet = nullptr;
 
-    LOG_IF(iRet != BML_RET_OK, ERROR)
-        << "Get client list request returned with error code:" << iRet;
+    if (iRet != BML_RET_OK) {
+        LOG(ERROR) << "Get client list request returned with error code:" << iRet;
+        return (iRet);
+    }
+
+    bool result = prmClientListGet.get_value();
+    LOG(DEBUG) << "Promise resolved, received " << client_mac_list.size() << " clients";
+    if (!result) {
+        LOG(ERROR) << "Get client list request failed";
+        return -BML_RET_OP_FAILED;
+    }
+
+    // Translate sMacAddr list to string
+    std::string client_list_str;
+    for (const auto &client : client_mac_list) {
+        auto mac_str = tlvf::mac_to_string(client);
+        client_list_str.append(mac_str);
+        client_list_str.append(",");
+    }
+
+    // Return results
+    *client_list_size      = client_list_str.size();
+    client_list_str.back() = '\0';
+    beerocks::string_utils::copy_string(client_list, client_list_str.c_str(), client_list_max_size);
 
     return BML_RET_OK;
 }
