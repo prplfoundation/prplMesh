@@ -2747,7 +2747,7 @@ eTriStateBool db::get_client_stay_on_selected_band(const sMacAddr &mac)
     return node->client_stay_on_selected_band;
 }
 
-bool db::set_client_selected_bands(const sMacAddr &mac, beerocks::eFreqType selected_bands,
+bool db::set_client_selected_bands(const sMacAddr &mac, int8_t selected_bands,
                                    bool save_to_persistent_db)
 {
     auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
@@ -2764,7 +2764,7 @@ bool db::set_client_selected_bands(const sMacAddr &mac, beerocks::eFreqType sele
         if (!config.persistent_db) {
             LOG(DEBUG) << "persistent db is disabled";
         } else {
-            LOG(DEBUG) << ", configuring persistent-db, selected_bands = " << int(selected_bands);
+            LOG(DEBUG) << ", configuring persistent-db, selected_bands = " << selected_bands;
 
             ValuesMap values_map;
             values_map[TIMESTAMP_STR]      = timestamp_to_string_seconds(timestamp);
@@ -2784,12 +2784,12 @@ bool db::set_client_selected_bands(const sMacAddr &mac, beerocks::eFreqType sele
     return true;
 }
 
-beerocks::eFreqType db::get_client_selected_bands(const sMacAddr &mac)
+int8_t db::get_client_selected_bands(const sMacAddr &mac)
 {
     auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
     if (!node) {
         LOG(ERROR) << "client node not found for mac " << mac;
-        return beerocks::eFreqType::FREQ_UNKNOWN;
+        return PARAMETER_NOT_CONFIGURED;
     }
 
     return node->client_selected_bands;
@@ -2810,7 +2810,7 @@ bool db::clear_client_persistent_db(const sMacAddr &mac)
     node->client_stay_on_initial_radio = eTriStateBool::NOT_CONFIGURED;
     node->client_initial_radio         = network_utils::ZERO_MAC;
     node->client_stay_on_selected_band = eTriStateBool::NOT_CONFIGURED;
-    node->client_selected_bands        = beerocks::eFreqType::FREQ_UNKNOWN;
+    node->client_selected_bands        = PARAMETER_NOT_CONFIGURED;
 
     // if persistent db is enabled
     if (config.persistent_db) {
@@ -2883,7 +2883,7 @@ bool db::update_client_persistent_db(const sMacAddr &mac)
         values_map[SELECTED_BAND_ENABLE_STR] = std::to_string(enable);
     }
 
-    if (node->client_selected_bands != beerocks::eFreqType::FREQ_UNKNOWN) {
+    if (node->client_selected_bands != PARAMETER_NOT_CONFIGURED) {
         LOG(DEBUG) << "setting client selected-bands in persistent-db to for " << mac << " to "
                    << node->client_selected_bands;
         values_map[SELECTED_BANDS_STR] = std::to_string(node->client_selected_bands);
@@ -4387,7 +4387,7 @@ bool db::set_node_params_from_map(const sMacAddr &mac, const ValuesMap &values_m
         } else if (param.first == SELECTED_BANDS_STR) {
             LOG(DEBUG) << "setting node client_selected_bands to " << param.second << " for "
                        << mac;
-            node->client_selected_bands = beerocks::eFreqType(string_utils::stoi(param.second));
+            node->client_selected_bands = string_utils::stoi(param.second);
         } else {
             LOG(WARNING) << "Unknown parameter, skipping: " << param.first << " for " << mac;
         }
