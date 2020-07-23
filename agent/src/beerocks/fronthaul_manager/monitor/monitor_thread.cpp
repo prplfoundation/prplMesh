@@ -1382,22 +1382,6 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
         mon_wlan_hal->sta_statistics_11k_request(bwl_request);
         break;
     }
-    case beerocks_message::ACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST: {
-        auto request =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST failed";
-            return false;
-        }
-        std::string mac_str = tlvf::mac_to_string(request->mac());
-
-        LOG(DEBUG) << "ACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST:" << std::endl
-                   << "mac=" << mac_str;
-
-        mon_wlan_hal->sta_link_measurements_11k_request(mac_str);
-        break;
-    }
     case beerocks_message::ACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST: {
         auto request =
             beerocks_header
