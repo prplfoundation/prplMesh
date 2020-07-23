@@ -144,6 +144,69 @@ bool uci_set_section(const std::string &package_name, const std::string &section
     LOG(TRACE) << "uci_set_section() " << package_name << ".(" << section_type << ")"
                << section_name;
 
+    auto ctx = alloc_context();
+    if (!ctx) {
+        return false;
+    }
+
+    for (auto &option : options) {
+        char opt_path[MAX_UCI_BUF_LEN] = {0};
+        if (snprintf(opt_path, MAX_UCI_BUF_LEN, option_path, package_name.c_str(),
+                     section_name.c_str(), option.first.c_str()) <= 0) {
+            LOG(ERROR) << "Failed to compose path";
+            return false;
+        }
+
+        LOG(TRACE) << "Trying to lookup: " << opt_path;
+
+        uci_ptr opt_ptr;
+        // Get pointer to value
+        if (uci_lookup_ptr(ctx.get(), &opt_ptr, opt_path, true) != UCI_OK) {
+            LOG(ERROR) << "UCI failed to lookup ptr for path: " << opt_path << std::endl
+                       << uci_get_error(ctx.get());
+            return false;
+        }
+
+        //Set the value to the pointer
+        LOG(TRACE) << "Setting " << option.first << "=" << option.second;
+        opt_ptr.value = strdup(option.second.c_str());
+
+        /*
+            If the value is set to empty the option will be removed
+            If the option does not exist it will be created
+            If the option does exist the value will be overridden
+        */
+        if (uci_set(ctx.get(), &opt_ptr) != UCI_OK) {
+            LOG(ERROR) << "Failed to set option " << option.first;
+            return false;
+        }
+
+        // Create delta from changes, this does not change the persistent file.
+        if (uci_save(ctx.get(), opt_ptr.p) != UCI_OK) {
+            LOG(ERROR) << "Failed to save changes!" << std::endl << uci_get_error(ctx.get());
+            return false;
+        }
+    }
+    LOG(TRACE) << "Finished setting parameters. about to commit changes";
+
+    char pkg_path[MAX_UCI_BUF_LEN] = {0};
+    if (snprintf(pkg_path, MAX_UCI_BUF_LEN, package_path, package_name.c_str()) <= 0) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+    uci_ptr pkg_ptr;
+    // Lookup package to save delta.
+    if (uci_lookup_ptr(ctx.get(), &pkg_ptr, pkg_path, true) != UCI_OK) {
+        LOG(ERROR) << "UCI failed to lookup ptr for path: " << pkg_path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    // Commit changes to file
+    if (uci_commit(ctx.get(), &pkg_ptr.p, false) != UCI_OK) {
+        LOG(ERROR) << "Failed to commit changes!" << std::endl << uci_get_error(ctx.get());
+        return false;
+    }
     return true;
 }
 
