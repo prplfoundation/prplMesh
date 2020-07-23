@@ -2830,21 +2830,6 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
 
         break;
     }
-    case beerocks_message::ACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION: {
-        auto notification =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION>();
-        if (notification == nullptr) {
-            LOG(ERROR) << "addClass cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION failed";
-            return false;
-        }
-        auto bridge_mac = tlvf::mac_to_string(notification->bridge_mac());
-
-        LOG(TRACE) << "ACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION: " << bridge_mac
-                   << ", new_operational_state=" << int(notification->operational());
-        database.set_node_operational_state(bridge_mac, notification->operational());
-        break;
-    }
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION: {
         auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION>();
