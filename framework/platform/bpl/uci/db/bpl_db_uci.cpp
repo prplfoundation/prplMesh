@@ -244,6 +244,38 @@ bool uci_get_section(const std::string &package_name, const std::string &section
     LOG(TRACE) << "uci_get_section() " << package_name << ".(" << section_type << ")"
                << section_name;
 
+    auto ctx = alloc_context();
+    if (!ctx) {
+        return false;
+    }
+
+    char sec_path[MAX_UCI_BUF_LEN] = {0};
+    // Generate a uci path to the section we wish to lookup
+    if (snprintf(sec_path, MAX_UCI_BUF_LEN, section_path, package_name.c_str(),
+                 section_name.c_str()) <= 0) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+
+    uci_ptr sec_ptr;
+    // Initialize section pointer from path & validate section existace
+    if (uci_lookup_ptr(ctx.get(), &sec_ptr, sec_path, true) != UCI_OK || !sec_ptr.s) {
+        LOG(ERROR) << "UCI failed to lookup ptr for path: " << sec_path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    // Loop through the option within the found section
+    uci_element *elm = nullptr;
+    uci_foreach_element(&sec_ptr.s->options, elm)
+    {
+        uci_option *opt = uci_to_option(elm);
+        // Only type UCI_TYPE_STRING is supported
+        if (opt->type == UCI_TYPE_STRING) {
+            options[std::string(opt->e.name)] = opt->v.string;
+        }
+    }
+
     return true;
 }
 
