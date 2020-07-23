@@ -2678,25 +2678,6 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
         send_cmdu_to_controller(cmdu_tx);
         break;
     }
-    case beerocks_message::ACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE: {
-        auto response_in = beerocks_header->addClass<
-            beerocks_message::cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE>();
-        if (response_in == nullptr) {
-            LOG(ERROR) << "addClass ACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE failed";
-            break;
-        }
-        auto response_out = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE>(
-            cmdu_tx, beerocks_header->id());
-        if (response_out == nullptr) {
-            LOG(ERROR)
-                << "Failed building ACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE message!";
-            break;
-        }
-        response_out->params() = response_in->params();
-        send_cmdu_to_controller(cmdu_tx);
-        break;
-    }
     case beerocks_message::ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE: {
         LOG(INFO) << "ACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE: action_op: "
                   << int(beerocks_header->action_op());
