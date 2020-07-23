@@ -381,13 +381,13 @@ private:
     //m_scan_results_status is used to store the results' latest status
     uint8_t *m_scan_results_status = nullptr;
     //m_scan_results_maxsize is used to indicate the maximum capacity of the requested results
-    uint32_t *m_scan_results_maxsize = nullptr;
-    std::string *m_client_list       = nullptr;
-    uint32_t *m_client_list_size     = nullptr;
-    BML_CLIENT *m_client             = nullptr;
-    BML_VAP_INFO *m_vaps             = nullptr;
-    uint8_t *m_pvaps_list_size       = nullptr;
-    uint16_t id                      = 0;
+    uint32_t *m_scan_results_maxsize   = nullptr;
+    std::list<sMacAddr> *m_client_list = nullptr;
+    uint32_t *m_client_list_size       = nullptr;
+    BML_CLIENT *m_client               = nullptr;
+    BML_VAP_INFO *m_vaps               = nullptr;
+    uint8_t *m_pvaps_list_size         = nullptr;
+    uint16_t id                        = 0;
     static bool s_fExtLogContext;
 };
 
