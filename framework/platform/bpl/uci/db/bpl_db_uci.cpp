@@ -258,6 +258,35 @@ bool uci_get_entry(const std::string &config_file, const std::string &entry_type
     LOG(TRACE) << "uci_get_entry() "
                << "entry: " << config_file << ": " << entry_type << "(" << entry_name << ")";
 
+    auto ctx = alloc_context();
+    if (!ctx) {
+        return false;
+    }
+
+    char path[MAX_UCI_BUF_LEN] = {0};
+    if (!compose_path(path, config_file, entry_name)) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+
+    struct uci_ptr ptr;
+    if (uci_lookup_ptr(ctx.get(), &ptr, path, true) != UCI_OK || !ptr.s) {
+        LOG(ERROR) << "UCI failed to lookup ptr for path: " << path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    // Loop through the option within the found section
+    struct uci_element *elm = nullptr;
+    uci_foreach_element(&ptr.s->options, elm)
+    {
+        struct uci_option *opt = uci_to_option(elm);
+        // Only UCI_TYPE_STRING is supported
+        if (opt->type == UCI_TYPE_STRING) {
+            params[std::string(opt->e.name)] = opt->v.string;
+        }
+    }
+
     return true;
 }
 
