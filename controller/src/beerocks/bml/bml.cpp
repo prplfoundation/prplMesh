@@ -691,14 +691,7 @@ int bml_client_get_client_list(BML_CTX ctx, char *client_list, unsigned int *cli
     }
 
     auto pBML = static_cast<bml_internal *>(ctx);
-    std::string temp_client_list;
-    int ret = pBML->client_get_client_list(temp_client_list, client_list_size);
-    if (ret == BML_RET_OK) {
-        beerocks::string_utils::copy_string(client_list, temp_client_list.c_str(),
-                                            *client_list_size);
-    }
-
-    return ret;
+    return pBML->client_get_client_list(client_list, client_list_size);
 }
 
 int bml_client_set_client(BML_CTX ctx, const char *sta_mac,

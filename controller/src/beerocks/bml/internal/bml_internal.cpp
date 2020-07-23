@@ -1817,12 +1817,12 @@ int bml_internal::start_dcs_single_scan(const sMacAddr &mac, int dwell_time_ms,
     return BML_RET_OK;
 }
 
-int bml_internal::client_get_client_list(std::string &client_list, unsigned int *client_list_size)
+int bml_internal::client_get_client_list(char *client_list, unsigned int *client_list_size)
 {
     LOG(DEBUG) << "client_get_client_list";
 
-    if (!client_list_size) {
-        LOG(ERROR) << "Size param must be initialized";
+    if (!client_list || !client_list_size) {
+        LOG(ERROR) << "Invalid input: null pointers";
         return (-BML_RET_INVALID_DATA);
     }
 
@@ -2304,8 +2304,8 @@ int bml_internal::register_event_cb(BML_EVENT_CB pCB)
     }
 
     if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
-        LOG(ERROR)
-            << "Failed sending ACTION_BML_REGISTER/UNREGISTER_TO_EVENTS_UPDATES_REQUEST message!";
+        LOG(ERROR) << "Failed sending ACTION_BML_REGISTER/UNREGISTER_TO_EVENTS_UPDATES_REQUEST "
+                      "message!";
         return (-BML_RET_OP_FAILED);
     }
 
