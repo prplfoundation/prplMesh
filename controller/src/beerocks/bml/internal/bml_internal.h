@@ -268,7 +268,7 @@ public:
      * @param [in,out] client_list_size Size of client list.
      * @return BML_RET_OK on success.
      */
-    int client_get_client_list(std::string &client_list, unsigned int *client_list_size);
+    int client_get_client_list(char *client_list, unsigned int *client_list_size);
 
     /**
      * Set client configuration.
