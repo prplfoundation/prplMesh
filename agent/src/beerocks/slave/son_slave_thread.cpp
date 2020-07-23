@@ -2345,46 +2345,6 @@ bool slave_thread::handle_cmdu_monitor_message(Socket *sd,
         }
         break;
     }
-    case beerocks_message::ACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION: {
-        auto notification_in =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION>();
-        if (notification_in == nullptr) {
-            LOG(ERROR) << "addClass cACTION_APMANAGER_HOSTAP_STATUS_CHANGED_NOTIFICATION failed";
-            return false;
-        }
-        std::stringstream print_str;
-        if (notification_in->new_tx_state() != -1) {
-            print_str << " new tx state: "
-                      << std::string(notification_in->new_tx_state() ? "on" : "off");
-        }
-        if (notification_in->new_hostap_enabled_state() != -1) {
-            print_str << " | new hostap_enabled state: "
-                      << std::string(notification_in->new_hostap_enabled_state() ? "on" : "off");
-        }
-        LOG(INFO) << "ACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION" << print_str.str();
-
-        bool agent_operational = false;
-        if (slave_state == STATE_OPERATIONAL && notification_in->new_tx_state() == 1 &&
-            notification_in->new_hostap_enabled_state() == 1) {
-            slave_resets_counter = 0;
-            agent_operational    = true;
-        }
-
-        auto notification_out = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION>(cmdu_tx);
-        if (notification_out == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-        auto db = AgentDB::get();
-
-        notification_out->operational() = agent_operational;
-        notification_out->bridge_mac()  = db->bridge.mac;
-        send_cmdu_to_controller(cmdu_tx);
-
-        break;
-    }
     case beerocks_message::ACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE: {
         auto response_in =
             beerocks_header
