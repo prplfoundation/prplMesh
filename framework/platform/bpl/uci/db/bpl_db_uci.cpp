@@ -327,6 +327,30 @@ bool uci_get_param(const std::string &config_file, const std::string &entry_type
                << "entry: " << config_file << ": " << entry_type << "(" << entry_name << ")"
                << ", " << param_name;
 
+    if (!uci_entry_exists(config_file, entry_type, entry_name)) {
+        LOG(ERROR) << "Entry " << entry_name << " of type " << entry_type << " was not found!";
+        return false;
+    }
+
+    auto ctx = alloc_context();
+    if (!ctx) {
+        return false;
+    }
+
+    char path[MAX_UCI_BUF_LEN] = {0};
+    if (!compose_path(path, config_file, entry_name, param_name)) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+
+    struct uci_ptr ptr;
+    if (uci_lookup_ptr(ctx.get(), &ptr, path, true) != UCI_OK || !ptr.o) {
+        LOG(ERROR) << "UCI failed to lookup ptr for path: " << path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    value = ptr.o->v.string;
     return true;
 }
 
