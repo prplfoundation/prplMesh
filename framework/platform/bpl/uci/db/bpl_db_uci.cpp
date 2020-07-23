@@ -297,6 +297,25 @@ bool uci_get_entry_type(const std::string &config_file, const std::string &entry
     LOG(TRACE) << "uci_get_entry_type() "
                << "entry: " << config_file << ": " << entry_name;
 
+    auto ctx = alloc_context();
+    if (!ctx) {
+        return false;
+    }
+
+    char path[MAX_UCI_BUF_LEN] = {0};
+    if (!compose_path(path, config_file, entry_name)) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+
+    struct uci_ptr ptr;
+    if (uci_lookup_ptr(ctx.get(), &ptr, path, true) != UCI_OK || !ptr.s) {
+        LOG(ERROR) << "UCI failed to lookup ptr for path: " << path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    entry_type = ptr.s->type;
     return true;
 }
 
