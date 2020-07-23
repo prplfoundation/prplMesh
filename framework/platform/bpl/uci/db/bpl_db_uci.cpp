@@ -1,9 +1,57 @@
 #include "bpl_db_uci.h"
 
+#include <mapf/common/logger.h>
+#include <mapf/common/utils.h>
+
+extern "C" {
+#include <uci.h>
+}
 
 namespace beerocks {
 namespace bpl {
 namespace db {
+
+constexpr ssize_t MAX_UCI_BUF_LEN = 64;
+
+std::string uci_get_error(struct uci_context *ctx)
+{
+    char *err_buf;
+    uci_get_errorstr(ctx, &err_buf, "");
+    return std::string(err_buf);
+}
+
+std::shared_ptr<uci_context> alloc_context()
+{
+    auto ctx = std::shared_ptr<uci_context>(uci_alloc_context(), [](uci_context *ctx) {
+        if (ctx) {
+            uci_free_context(ctx);
+        }
+    });
+
+    LOG_IF(!ctx, ERROR) << "Failed allocating UCI context!";
+    return ctx;
+}
+
+bool compose_path(char *path, const std::string &config_file)
+{
+    return sprintf(path, "%s", config_file.c_str()) > 0;
+}
+bool compose_path(char *path, const std::string &config_file, const std::string &entry_name)
+{
+    return sprintf(path, "%s.%s", config_file.c_str(), entry_name.c_str()) > 0;
+}
+bool compose_path(char *path, const std::string &config_file, const std::string &entry_name,
+                  const std::string &param_name)
+{
+    return sprintf(path, "%s.%s.%s", config_file.c_str(), entry_name.c_str(), param_name.c_str()) >
+           0;
+}
+bool compose_path(char *path, const std::string &config_file, const std::string &entry_name,
+                  const std::string &param_name, const std::string &param_value)
+{
+    return sprintf(path, "%s.%s.%s=%s", config_file.c_str(), entry_name.c_str(), param_name.c_str(),
+                   param_value.c_str()) > 0;
+}
 
 bool uci_entry_exists(const std::string &config_file, const std::string &entry_type,
                       const std::string &entry_name)
