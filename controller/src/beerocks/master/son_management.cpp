@@ -1710,7 +1710,7 @@ void son_management::handle_bml_message(Socket *sd,
 
         response->result() = result;
         if (!message_com::send_cmdu(sd, cmdu_tx)) {
-            LOG(ERROR) << "Error sending get vaps list responce  message";
+            LOG(ERROR) << "Error sending get vaps list response message";
         }
         break;
     }
@@ -2130,7 +2130,7 @@ void son_management::handle_bml_message(Socket *sd,
             break;
         }
 
-        //Results avaliablity check
+        //Results availability check
         if (scan_results_size == 0) {
             LOG(DEBUG) << "no scan results are available";
             auto response = gen_new_results_response();
@@ -2276,15 +2276,45 @@ void son_management::handle_bml_message(Socket *sd,
             break;
         }
 
-        std::string client_list = "";
-        // TODO: replace empty string with a list of configured clients read from controller-db
-        if (!response->alloc_client_list(client_list.size())) {
-            LOG(ERROR) << "Failed client_list allocation to size=" << client_list.size();
+        auto send_response = [&](bool result) {
+            //TODO: replace all BML_CLIENT requests to use boolean: (0=failure, 1-=success)
+            response->result() = (result) ? 0 : 1;
+            if (!message_com::send_cmdu(sd, cmdu_tx)) {
+                LOG(ERROR) << "Error sending get client list response message";
+            }
+        };
+
+        // TODO: replace with a list of configured clients read from controller-db
+        std::vector<sMacAddr> client_list;
+        if (!client_list.size()) {
+            LOG(DEBUG) << "client list is empty!";
+            // Send a valid response with an empty list
+            send_response(true);
             break;
         }
-        response->set_client_list(client_list);
 
-        message_com::send_cmdu(sd, cmdu_tx);
+        auto client_list_size = client_list.size();
+        LOG(INFO) << "Returning " << client_list_size << " clients to BML caller";
+
+        if (!response->alloc_client_list(client_list_size)) {
+            LOG(ERROR) << "Failed buffer allocation to size = " << int(client_list_size);
+            send_response(false);
+            break;
+        }
+
+        auto client_list_tuple = response->client_list(0);
+        if (!std::get<0>(client_list_tuple)) {
+            LOG(ERROR) << "client list access fail!";
+            send_response(false);
+            break;
+        }
+
+        auto clients = &std::get<1>(client_list_tuple);
+        for (size_t i = 0; i < client_list.size(); i++) {
+            clients[i] = client_list[i];
+        }
+
+        send_response(true);
         break;
     }
     case beerocks_message::ACTION_BML_CLIENT_SET_CLIENT_REQUEST: {
