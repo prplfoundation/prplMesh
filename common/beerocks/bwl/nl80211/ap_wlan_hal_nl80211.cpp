@@ -13,6 +13,7 @@
 #include <bcl/beerocks_version.h>
 #include <bcl/network/network_utils.h>
 #include <bcl/son/son_wireless_utils.h>
+#include <configuration.h>
 
 #include <easylogging++.h>
 
@@ -104,6 +105,46 @@ static uint8_t wpa_bw_to_beerocks_bw(const std::string &chan_width)
     // 160 MHz
 
     return (chan_width == "80+80") ? 160 : beerocks::string_utils::stoi(chan_width);
+}
+
+/// @brief figures out hostapd config file name by the
+//  interface name and loads its content
+static prplmesh::hostapd::Configuration load_hostapd_config(const std::string &radio_iface_name)
+{
+    std::vector<std::string> hostapd_cfg_names = {
+        "/tmp/run/hostapd-phy0.conf", "/tmp/run/hostapd-phy1.conf", "/var/run/hostapd-phy0.conf",
+        "/var/run/hostapd-phy1.conf", "/var/run/hostapd-phy2.conf", "/var/run/hostapd-phy3.conf"};
+
+    for (const auto &try_fname : hostapd_cfg_names) {
+        LOG(DEBUG) << "Trying to load " << try_fname << "...";
+
+        if (!beerocks::os_utils::file_exists(try_fname)) {
+            continue;
+        }
+
+        prplmesh::hostapd::Configuration hostapd_conf(try_fname);
+
+        // try loading
+        if (!hostapd_conf.load("interface=")) {
+            LOG(ERROR) << "Failed to load hostapd config file: " << hostapd_conf;
+            continue;
+        }
+
+        // check if it is the right one:
+        // we are looking for the line in the vap that declares this vap: interface=radio_iface_name
+        // we could equaly ask hostapd_conf if it has this vap, but there is no such interface
+        // to do this. it should be something like: hostapd_conf.is_vap_exists(radio_iface_name);
+        if (hostapd_conf.get_vap_value(radio_iface_name, "interface") != radio_iface_name) {
+            LOG(DEBUG) << radio_iface_name << " does not exists in " << try_fname;
+            continue;
+        }
+
+        // all is good, return the conf
+        return hostapd_conf;
+    }
+
+    // return an empty one since we couldn't find the
+    return prplmesh::hostapd::Configuration("file not found");
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -268,7 +309,261 @@ bool ap_wlan_hal_nl80211::update_vap_credentials(
     std::list<son::wireless_utils::sBssInfoConf> &bss_info_conf_list,
     const std::string &backhaul_wps_ssid, const std::string &backhaul_wps_passphrase)
 {
-    //TODO Implement #346
+    // The bss_info_conf_list contains list of all VAPs and STAs that have to be created
+    // on the radio. If the list is empty, there should be no VAPs left.
+    // At the moment we are taking a shortcut to make this work for certification setup.
+    // We are updating the hostapd.conf files with the info from the bss_info_conf_list
+    // and sending RELOAD command to hostapd making it update the VAPs.
+    // With that approach there are following limitations:
+    // - all the VAPs are expected to be always present in the config, but have
+    //   start_disabled=1 option if not active
+    // - any configuration change causing the hostapd config files to be re-generated
+    //   and the hostapd processes restarted will override the prplMesh configuration
+
+    // The hostapd config is stored here. The items order in the header and VAPs sections
+    // is mostly preserved (with the exception of the items prplMesh modifies). This helps
+    // to keep the configuration the same and easily see what prplMesh is changing.
+
+    // Load hostapd config for the radio
+
+    LOG(DEBUG) << std::string(__FUNCTION__) << " was called with list size: " << bss_info_conf_list.size();
+
+
+    prplmesh::hostapd::Configuration conf = load_hostapd_config(m_radio_info.iface_name);
+    if (!conf) {
+        LOG(ERROR) << "Autoconfiguration: no hostapd config to apply configuration!";
+        return false;
+    }
+
+    // If a Multi-AP Agent receives an AP-Autoconfiguration WSC message containing one or
+    // more M2, it shall validate each M2 (based on its 1905 AL MAC address) and configure
+    // a BSS on the corresponding radio for each of the M2. If the Multi-AP Agent is currently
+    // operating a BSS with operating parameters that do not completely match any of the M2 in
+    // the received AP-Autoconfiguration WSC message, it shall tear down that BSS.
+
+    // decalre a function for iterating over bss-conf and ap-vaps
+    bool abort          = false;
+    auto configure_func = [&abort, &conf, &bss_info_conf_list, &backhaul_wps_ssid,
+                           &backhaul_wps_passphrase](
+                              const std::string vap,
+                              std::list<son::wireless_utils::sBssInfoConf>::iterator bss_it) {
+        if (abort) {
+            return;
+        }
+
+        if (bss_it != bss_info_conf_list.end()) {
+
+            // we still have data on the input bss-conf list
+
+            // escape I
+            auto auth_type =
+                son::wireless_utils::wsc_to_bwl_authentication(bss_it->authentication_type);
+            if (auth_type == "INVALID") {
+                LOG(ERROR) << "Autoconfiguration: auth type is 'INVALID'; number: "
+                           << (uint16_t)bss_it->authentication_type;
+                abort = true;
+                return;
+            }
+
+            // escape II
+            auto enc_type = son::wireless_utils::wsc_to_bwl_encryption(bss_it->encryption_type);
+            if (enc_type == "INVALID") {
+                LOG(ERROR) << "Autoconfiguration: enc_type is 'INVALID'; number: "
+                           << int(bss_it->encryption_type);
+                abort = true;
+                return;
+            }
+
+            // escape III
+            if (conf.get_vap_value(vap, "bssid").empty()) {
+                LOG(ERROR) << "Failed to get BSSID for vap: " << vap;
+                abort = true;
+                return;
+            }
+
+            // escape IV
+            // BSS type (backhaul, fronthaul or both)
+            // Use Intel Mesh-Mode (upstream Multi-AP functionality not supported by Intel):
+            // Not supporting hybrid mode for in mesh mode (TODO - move to hybrid mode after
+            // https://github.com/prplfoundation/prplMesh/issues/889)
+            if (bss_it->fronthaul && bss_it->backhaul) {
+                LOG(ERROR) << "Not supporting hybrid VAP";
+                abort = true;
+                return;
+            }
+
+            // settings
+
+            // ssid
+            conf.set_create_vap_value(vap, "ssid", bss_it->ssid);
+
+            // Hostapd "wpa" field.
+            // This field is a bit field that can be used to enable WPA (IEEE 802.11i/D3.0)
+            // and/or WPA2 (full IEEE 802.11i/RSN):
+            // bit0 = WPA
+            // bit1 = IEEE 802.11i/RSN (WPA2) (dot11RSNAEnabled)
+            int wpa = 0;
+
+            // Set of accepted key management algorithms (WPA-PSK, WPA-EAP, or both). The
+            // entries are separated with a space. WPA-PSK-SHA256 and WPA-EAP-SHA256 can be
+            // added to enable SHA256-based stronger algorithms.
+            // WPA-PSK = WPA-Personal / WPA2-Personal
+            std::string wpa_key_mgmt; // default to empty -> delete from hostapd config
+
+            // (dot11RSNAConfigPairwiseCiphersTable)
+            // Pairwise cipher for WPA (v1) (default: TKIP)
+            //  wpa_pairwise=TKIP CCMP
+            // Pairwise cipher for RSN/WPA2 (default: use wpa_pairwise value)
+            //  rsn_pairwise=CCMP
+            std::string wpa_pairwise; // default to empty -> delete from hostapd config
+
+            // WPA pre-shared keys for WPA-PSK. This can be either entered as a 256-bit
+            // secret in hex format (64 hex digits), wpa_psk, or as an ASCII passphrase
+            // (8..63 characters), wpa_passphrase.
+            std::string wpa_passphrase;
+            std::string wpa_psk;
+
+            // ieee80211w: Whether management frame protection (MFP) is enabled
+            // 0 = disabled (default)
+            // 1 = optional
+            // 2 = required
+            std::string ieee80211w;
+
+            // This parameter can be used to disable caching of PMKSA created through EAP
+            // authentication. RSN preauthentication may still end up using PMKSA caching if
+            // it is enabled (rsn_preauth=1).
+            // 0 = PMKSA caching enabled (default)
+            // 1 = PMKSA caching disabled
+            std::string disable_pmksa_caching;
+
+            // Opportunistic Key Caching (aka Proactive Key Caching)
+            // Allow PMK cache to be shared opportunistically among configured interfaces
+            // and BSSes (i.e., all configurations within a single hostapd process).
+            // 0 = disabled (default)
+            // 1 = enabled
+            std::string okc;
+
+            // This parameter can be used to disable retransmission of EAPOL-Key frames that
+            // are used to install keys (EAPOL-Key message 3/4 and group message 1/2). This
+            // is similar to setting wpa_group_update_count=1 and
+            std::string wpa_disable_eapol_key_retries;
+
+            // EasyMesh R1 only allows Open and WPA2 PSK auth&encryption methods.
+            // Quote: A Multi-AP Controller shall set the Authentication Type attribute
+            //        in M2 to indicate WPA2-Personal or Open System Authentication.
+            // bss_it->authentication_type is a bitfield, but we are not going
+            // to accept any combinations due to the above limitation.
+            if (bss_it->authentication_type == WSC::eWscAuth::WSC_AUTH_OPEN) {
+                wpa = 0x0;
+                if (bss_it->encryption_type != WSC::eWscEncr::WSC_ENCR_NONE) {
+                    LOG(ERROR) << "Autoconfiguration: " << vap << " encryption set on open VAP";
+                    abort = true;
+                    return;
+                }
+                if (bss_it->network_key.length() > 0) {
+                    LOG(ERROR) << "Autoconfiguration: " << vap << " network key set for open VAP";
+                    abort = true;
+                    return;
+                }
+            } else if (bss_it->authentication_type == WSC::eWscAuth::WSC_AUTH_WPA2PSK) {
+                wpa = 0x2;
+                wpa_key_mgmt.assign("WPA-PSK");
+                // Cipher must include AES for WPA2, TKIP is optional
+                if ((static_cast<uint16_t>(bss_it->encryption_type) & static_cast<uint16_t>(WSC::eWscEncr::WSC_ENCR_AES)) ==
+                    0) {
+                    LOG(ERROR) << "Autoconfiguration:  " << vap
+                               << " CCMP(AES) is required for WPA2";
+                    abort = true;
+                    return;
+                }
+                if ((uint16_t(bss_it->encryption_type) & uint16_t(WSC::eWscEncr::WSC_ENCR_TKIP)) !=
+                    0) {
+                    wpa_pairwise.assign("TKIP CCMP");
+                } else {
+                    wpa_pairwise.assign("CCMP");
+                }
+                if (bss_it->network_key.length() < 8 || bss_it->network_key.length() > 64) {
+                    LOG(ERROR) << "Autoconfiguration: " << vap << " invalid network key length "
+                               << bss_it->network_key.length();
+                    abort = true;
+                    return;
+                }
+                if (bss_it->network_key.length() < 64) {
+                    wpa_passphrase.assign(bss_it->network_key);
+                } else {
+                    wpa_psk.assign(bss_it->network_key);
+                }
+                ieee80211w.assign("0");
+                disable_pmksa_caching.assign("1");
+                okc.assign("0");
+                wpa_disable_eapol_key_retries.assign("0");
+            } else {
+                LOG(ERROR) << "Autoconfiguration: " << vap << " invalid authentication type";
+                abort = true;
+                return;
+            }
+
+            LOG(DEBUG) << "Autoconfiguration for ssid: " << bss_it->ssid
+                       << " auth_type: " << auth_type << " encr_type: " << enc_type
+                       << " network_key: " << bss_it->network_key
+                       << " fronthaul=" << beerocks::string_utils::bool_str(bss_it->fronthaul)
+                       << " backhaul=" << beerocks::string_utils::bool_str(bss_it->backhaul);
+
+            conf.set_create_vap_value(vap, "wps_state", bss_it->fronthaul ? "2" : "");
+            conf.set_create_vap_value(vap, "wps_independent", "0");
+            conf.set_create_vap_value(vap, "sFourAddrMode", bss_it->backhaul ? "1" : "");
+            conf.set_create_vap_value(vap, "max_num_sta", bss_it->backhaul ? "1" : "");
+
+            // oddly enough, multi_ap_backhaul_wpa_passphrase has to be
+            // quoted, while wpa_passphrase does not...
+            if (bss_it->fronthaul && !backhaul_wps_ssid.empty()) {
+                conf.set_create_vap_value(vap, "multi_ap_backhaul_ssid",
+                                          "\"" + backhaul_wps_ssid + "\"");
+                conf.set_create_vap_value(vap, "multi_ap_backhaul_wpa_passphrase",
+                                          backhaul_wps_passphrase);
+            }
+
+            conf.set_create_vap_value(vap, "wpa", wpa);
+            conf.set_create_vap_value(vap, "okc", okc);
+            conf.set_create_vap_value(vap, "wpa_key_mgmt", wpa_key_mgmt);
+            conf.set_create_vap_value(vap, "wpa_pairwise", wpa_pairwise);
+            conf.set_create_vap_value(vap, "wpa_psk", wpa_psk);
+            conf.set_create_vap_value(vap, "ieee80211w", ieee80211w);
+            conf.set_create_vap_value(vap, "wpa_passphrase", wpa_passphrase);
+            conf.set_create_vap_value(vap, "disable_pmksa_caching", disable_pmksa_caching);
+            conf.set_create_vap_value(vap, "wpa_disable_eapol_key_retries",
+                                      wpa_disable_eapol_key_retries);
+
+            // finally enable the vap (remove any previously set start_disabled)
+            conf.set_create_vap_value(vap, "start_disabled", "");
+
+        } else {
+            // no more data in the input bss-conf list
+            // disable the rest of the vaps
+            conf.set_create_vap_value(vap, "start_disabled", 1);
+            conf.set_create_vap_value(vap, "ssid", "");
+        }
+    };
+
+    conf.for_all_ap_vaps(configure_func, bss_info_conf_list.begin(), bss_info_conf_list.end(),
+                         [](const std::string &) { return true; });
+
+    if (abort) {
+        return false;
+    }
+
+    if (!conf.store()) {
+        LOG(ERROR) << "Autoconfiguration: cannot save hostapd config!";
+        return false;
+    }
+
+    const std::string cmd("UPDATE ");
+    if (!wpa_ctrl_send_msg(cmd)) {
+        LOG(ERROR) << "Autoconfiguration: \"" << cmd << "\" command to hostapd has failed";
+        return false;
+    } 
+
+    LOG(DEBUG) << "Autoconfiguration: done:\n" << conf;
     return true;
 }
 
