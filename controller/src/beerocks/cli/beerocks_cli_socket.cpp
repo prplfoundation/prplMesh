@@ -169,10 +169,6 @@ void cli_socket::setFunctionsMapAndArray()
         "sends statistics 11k request to 'client_mac', with 'group_identity', about 'peer_mac'",
         static_cast<pFunction>(&cli_socket::client_statistics_11k_req_caller), 3, 4, STRING_ARG,
         STRING_ARG, INT_ARG, STRING_ARG);
-    insertCommandToMap("client_link_measurement_11k_req", "<hostap_mac> <client_mac>",
-                       "sends link measurement 11k request for 'client_mac'",
-                       static_cast<pFunction>(&cli_socket::client_link_measurement_11k_req_caller),
-                       2, 2, STRING_ARG, STRING_ARG);
     insertCommandToMap(
         "ap_neighbor_11k_set", "<hostap_mac> <bssid> <channel> <vap_id>",
         "add 'bssid' with 'channel' to 11k neighbor list of 'hostap_mac' with 'vap_id'",
@@ -447,13 +443,6 @@ int cli_socket::client_statistics_11k_req_caller(int numOfArgs)
         return client_statistics_11k_req(args.stringArgs[0], args.stringArgs[1], args.intArgs[2]);
     } else
         return -1;
-}
-
-int cli_socket::client_link_measurement_11k_req_caller(int numOfArgs)
-{
-    if (numOfArgs != 2)
-        return -1;
-    return client_link_measurement_11k_req(args.stringArgs[0], args.stringArgs[1]);
 }
 
 int cli_socket::set_neighbor_11k_caller(int numOfArgs)
@@ -801,23 +790,6 @@ int cli_socket::client_statistics_11k_req(std::string hostap_mac, std::string cl
     request->peer_mac()       = tlvf::mac_from_string(peer_mac);
     request->group_identity() = group_identity;
     wait_response             = true;
-    message_com::send_cmdu(master_socket, cmdu_tx);
-    waitResponseReady();
-    return 0;
-}
-
-int cli_socket::client_link_measurement_11k_req(std::string hostap_mac, std::string client_mac)
-{
-    auto request = message_com::create_vs_message<
-        beerocks_message::cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST>(cmdu_tx);
-    if (request == nullptr) {
-        LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST message!";
-        return -1;
-    }
-    request->client_mac() = tlvf::mac_from_string(client_mac);
-    request->hostap_mac() = tlvf::mac_from_string(hostap_mac);
-
-    wait_response = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
     waitResponseReady();
     return 0;

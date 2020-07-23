@@ -83,8 +83,6 @@ private:
 
     int client_beacon_11k_req_caller(int numOfArgs);
 
-    int client_link_measurement_11k_req_caller(int numOfArgs);
-
     int client_statistics_11k_req_caller(int numOfArgs);
 
     // Functions
@@ -133,8 +131,6 @@ private:
     int client_beacon_11k_req(std::string client_mac, std::string bssid, uint8_t channel,
                               std::string ssid, uint16_t duration, uint16_t rand_ival,
                               uint16_t repeats, int16_t op_class, std::string mode);
-
-    int client_link_measurement_11k_req(std::string hostap_mac, std::string client_mac);
 
     int client_statistics_11k_req(std::string hostap_mac, std::string client_mac,
                                   uint8_t group_identity,
