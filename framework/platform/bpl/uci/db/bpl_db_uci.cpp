@@ -389,6 +389,34 @@ bool uci_get_all_sections(const std::string &package_name, const std::string &se
     //package_name.(section_type)
     LOG(TRACE) << "uci_get_all_sections() " << package_name << ".(" << section_type << ")";
 
+    auto ctx = alloc_context();
+    if (!ctx) {
+        return false;
+    }
+
+    char path[MAX_UCI_BUF_LEN] = {0};
+    if (snprintf(path, MAX_UCI_BUF_LEN, package_path, package_name.c_str()) <= 0) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+
+    uci_ptr ptr;
+    if (uci_lookup_ptr(ctx.get(), &ptr, path, false) != UCI_OK) {
+        LOG(ERROR) << "UCI lookup failed for path: " << path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    // Loop through the sections with a matching section name (section_name)
+    uci_element *elm = nullptr;
+    uci_foreach_element(&ptr.p->sections, elm)
+    {
+        uci_section *sec = uci_to_section(elm);
+        if (section_type.empty() || section_type.compare(sec->type) == 0) {
+            sections.emplace_back(sec->e.name);
+        }
+    }
+    LOG(DEBUG) << "Found " << sections.size() << " sections.";
     return true;
 }
 
