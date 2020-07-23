@@ -3,9 +3,39 @@
 #include <mapf/common/logger.h>
 #include <mapf/common/utils.h>
 
+extern "C" {
+#include <uci.h>
+}
+
 namespace beerocks {
 namespace bpl {
 namespace db {
+
+constexpr ssize_t MAX_UCI_BUF_LEN  = 64;
+constexpr char package_path[]      = "%s";
+constexpr char section_path[]      = "%s.%s";
+constexpr char section_type_path[] = "%s.%s=%s";
+constexpr char option_path[]       = "%s.%s.%s";
+constexpr char option_value_path[] = "%s.%s.%s=%s";
+
+std::string uci_get_error(uci_context *ctx)
+{
+    char *err_buf = nullptr;
+    uci_get_errorstr(ctx, &err_buf, "");
+    return std::string(err_buf == nullptr ? "" : err_buf);
+}
+
+std::shared_ptr<uci_context> alloc_context()
+{
+    auto ctx = std::shared_ptr<uci_context>(uci_alloc_context(), [](uci_context *ctx) {
+        if (ctx) {
+            uci_free_context(ctx);
+        }
+    });
+
+    LOG_IF(!ctx, ERROR) << "Failed allocating UCI context!";
+    return ctx;
+}
 
 bool uci_section_exists(const std::string &package_name, const std::string &section_type,
                         const std::string &section_name)
