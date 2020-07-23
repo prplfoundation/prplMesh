@@ -265,29 +265,6 @@ class cACTION_CONTROL_ARP_QUERY_RESPONSE : public BaseClass
         sArpMonitorData* m_params = nullptr;
 };
 
-class cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION : public BaseClass
-{
-    public:
-        cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION();
-
-        static eActionOp_CONTROL get_action_op(){
-            return (eActionOp_CONTROL)(ACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION);
-        }
-        sMacAddr& bridge_mac();
-        uint8_t& operational();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_CONTROL* m_action_op = nullptr;
-        sMacAddr* m_bridge_mac = nullptr;
-        uint8_t* m_operational = nullptr;
-};
-
 class cACTION_CONTROL_BACKHAUL_DL_RSSI_REPORT_NOTIFICATION : public BaseClass
 {
     public:
