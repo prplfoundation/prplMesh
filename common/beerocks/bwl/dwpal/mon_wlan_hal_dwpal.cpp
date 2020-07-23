@@ -69,8 +69,6 @@ static mon_wlan_hal::Event dwpal_to_bwl_event(const std::string &opcode)
         return mon_wlan_hal::Event::RRM_Beacon_Response;
     } else if (opcode == "RRM-STA-STATISTICS-RECEIVED") {
         return mon_wlan_hal::Event::RRM_STA_Statistics_Response;
-    } else if (opcode == "RRM-LINK-MEASUREMENT-RECEIVED") {
-        return mon_wlan_hal::Event::RRM_Link_Measurement_Response;
     } else if (opcode == "AP-ENABLED") {
         return mon_wlan_hal::Event::AP_Enabled;
     } else if (opcode == "AP-DISABLED") {
@@ -1295,7 +1293,6 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
     }
 
     case Event::RRM_STA_Statistics_Response:
-    case Event::RRM_Link_Measurement_Response:
     case Event::RRM_Channel_Load_Response:
         break;
     // Gracefully ignore unhandled events
