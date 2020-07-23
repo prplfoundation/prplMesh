@@ -17,8 +17,6 @@
 from __future__ import print_function  # To check for python2 or < 3.5 execution
 import argparse
 import fcntl
-import getpass
-import grp
 import os
 import shutil
 import sys
@@ -35,7 +33,7 @@ def check_docker_versions():
     DOCKER_MAJOR = 19
     DC_MAJOR = 1
     DC_MINOR = 25
-    docker_version  = os.popen('docker --version').read().split(' ')[2]
+    docker_version = os.popen('docker --version').read().split(' ')[2]
     docker_major = int(docker_version.split('.')[0])
     if docker_major < DOCKER_MAJOR:
         fmt = "This script requires docker {}.0 or higher"
@@ -58,13 +56,17 @@ def check_docker_versions():
 
 
 class Services:
-    def __init__(self):
+    def __init__(self, bid=None):
         self.scriptdir = os.path.dirname(os.path.realpath(__file__))
         os.chdir(self.scriptdir)
         self.rootdir = self.scriptdir
 
-        self.build_id = self.get_build_id()
-        print('build_id {}'.format(self.build_id))
+        if bid is not None:
+            self.build_id = bid
+            print('Using ID {}'.format(self.build_id))
+            # return
+        else:
+            self.build_id = self.get_build_id()
 
         self.logdir = os.path.join(self.scriptdir, 'logs')
         device_name = 'dockerized_device-{}'.format(self.build_id)
@@ -113,7 +115,6 @@ class Services:
             new_id = last_id + 1
         return str(new_id)
 
-
     def copy_build_dir(self):
         new_id = self.build_id
         self.build_dir = 'build-{}'.format(new_id)
@@ -123,12 +124,13 @@ class Services:
     def dc(self, args, interactive=False):
         params = ['docker-compose', '-f',
                   'tools/docker/boardfarm-ci/docker-compose.yml']
+        # params += ['-p', 'boardfarm-ci-{}'.format(self.build_id)]
         params += args
         local_env = os.environ
         local_env['ROOT_DIR'] = self.rootdir
-        docker_gid = grp.getgrnam('docker')[2]
+        # docker_gid = grp.getgrnam('docker')[2]
         # local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(docker_gid)
-        local_env['CURRENT_ID']= str(os.getuid())
+        local_env['CURRENT_ID'] = str(os.getuid())
         local_env['RUN_ID'] = self.build_id
         # local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(os.getgid())
         if not interactive:
@@ -178,11 +180,16 @@ if __name__ == '__main__':
                         help='Run a shell on the bf container')
     parser.add_argument('--comp', dest='comp', action='store_true',
                         help='Pass the rest of arguments to docker-compose')
+    parser.add_argument('--id', dest='bid', type=str,
+                        help='Specify the id to use for build/shell/comp/clean')
     args, rest = parser.parse_known_args()
-    services = Services()
     if args.comp:
+        if args.bid is None:
+            print('Specify --id for the --comp parameter')
+            sys.exit(0)
+        services = Services(bid=args.bid)
         if len(rest) == 0:
-            print('Usage: dctest --comp <arguments to docker-compose>')
+            print('Usage: dctest --id <id> --comp <arguments to docker-compose>')
             sys.exit(1)
         sys.exit(services.dc(rest, interactive=True))
     else:
@@ -191,18 +198,37 @@ if __name__ == '__main__':
             sys.exit(1)
 
     if args.clean:
+        if args.bid is None:
+            print('Specify --id for the --clean parameter')
+            sys.exit(0)
+        services = Services(bid=args.bid)
         services.dc(['down', '--remove-orphans', '--rmi', 'all'])
     elif args.shell:
+        if not args.bid:
+            print('Specify --id for the shell parameter')
+            sys.exit(0)
+        services = Services(bid=args.bid)
         rc = services.dc(['run', '--service-ports', '--entrypoint',
                           '/bin/bash', 'boardfarm'], interactive=True)
         if rc != 0:
             print('Return code !=0 -> {}'.format(rc))
     elif args.build:
+        if not args.bid:
+            print('Specify --id for the build parameter')
+            sys.exit(0)
+        services = Services(bid=args.bid)
         rc = services.dc(['build'], interactive=True)
         if rc != 0:
             print('Return code !=0 -> {}'.format(rc))
     else:
-        rc = services.dc(['up', 'boardfarm'])
+        if args.bid:
+            services = Services(bid=args.bid)   # With new build id
+        else:
+            services = Services()   # With new build id
+        # rc = services.dc(['up', 'boardfarm'])
+        #rc = services.dc(['run', '--service-ports', '--entrypoint',
+        #                  '/bin/bash', 'boardfarm'], interactive=True)
+        rc = services.dc(['run', '--service-ports', '--use-aliases',
+                          'boardfarm'], interactive=True)
         if rc != 0:
             print('Return code !=0 -> {}'.format(rc))
-
