@@ -60,7 +60,47 @@ bool uci_entry_exists(const std::string &config_file, const std::string &entry_t
     LOG(TRACE) << "uci_entry_exists() "
                << "entry: " << config_file << ": " << entry_type << "(" << entry_name << ")";
 
-    return true;
+    auto ctx = alloc_context();
+    if (!ctx) {
+        return false;
+    }
+
+    char path[MAX_UCI_BUF_LEN] = {0};
+    if (!compose_path(path, config_file)) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+
+    struct uci_package *pkg = nullptr;
+    if (!(pkg = uci_lookup_package(ctx.get(), path))) {
+        // Try and load the package file, in case it wasn't loaded before
+        uci_load(ctx.get(), path, &pkg);
+        if (!pkg) {
+            LOG(ERROR) << "uci lookup package failed!" << std::endl << uci_get_error(ctx.get());
+            return false;
+        }
+    }
+
+    bool found = false;
+    // Loop through the sections with a matching section name (entry_name)
+    struct uci_element *elm = nullptr;
+    uci_foreach_element(&pkg->sections, elm)
+    {
+        found                   = true;
+        struct uci_section *sec = uci_to_section(elm);
+        // if the entry_type is empty all matching sections are a valid match
+        auto name_match = entry_name.compare(sec->e.name) == 0;
+        auto type_match = entry_type.empty() || entry_type.compare(sec->type) == 0;
+        if (name_match && type_match) {
+            LOG(TRACE) << "Found match: " << sec->type << "(" << sec->e.name << ")";
+            return true;
+        }
+    }
+
+    LOG(TRACE) << "No " << entry_name << " entry found"
+               << (entry_type.empty() || !found ? "!" : std::string(" with type: ") + entry_type);
+
+    return false;
 }
 
 bool uci_add_entry(const std::string &config_file, const std::string &entry_type,
