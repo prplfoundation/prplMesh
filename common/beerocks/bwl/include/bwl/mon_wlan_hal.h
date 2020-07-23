@@ -35,7 +35,6 @@ public:
         RRM_Beacon_Request_Status,
         RRM_Beacon_Response,
         RRM_STA_Statistics_Response,
-        RRM_Link_Measurement_Response,
         //CHANNEL_SCAN events
         Channel_Scan_Triggered,
         Channel_Scan_New_Results_Ready,
