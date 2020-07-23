@@ -110,6 +110,70 @@ bool uci_add_entry(const std::string &config_file, const std::string &entry_type
     LOG(TRACE) << "uci_add_entry() "
                << "entry: " << config_file << ": " << entry_type << "(" << entry_name << ")";
 
+    auto ctx = alloc_context();
+    if (!ctx) {
+        return false;
+    }
+
+    char pkg_path[MAX_UCI_BUF_LEN] = {0};
+    if (!compose_path(pkg_path, config_file)) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+
+    struct uci_package *pkg = nullptr;
+    if (!(pkg = uci_lookup_package(ctx.get(), pkg_path))) {
+        // Try and load the package file, in case it wasn't loaded before
+        uci_load(ctx.get(), pkg_path, &pkg);
+        if (!pkg) {
+            LOG(ERROR) << "uci lookup package failed!" << std::endl << uci_get_error(ctx.get());
+            return false;
+        }
+    }
+
+    //Create new unnamed section
+    struct uci_section *sec = nullptr;
+    if (uci_add_section(ctx.get(), pkg, entry_type.c_str(), &sec) != UCI_OK) {
+        LOG(ERROR) << "UCI failed to create new entry of type: " << entry_type << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    char sec_path[MAX_UCI_BUF_LEN] = {0};
+    LOG(TRACE) << "Testing: " << config_file.c_str() << "." << sec->e.name << "="
+               << entry_name.c_str();
+
+    if (sprintf(sec_path, "%s.%s=%s", config_file.c_str(), sec->e.name, entry_name.c_str()) <= 0) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+
+    struct uci_ptr sec_ptr;
+    // Lookup package to save delta.
+    if (uci_lookup_ptr(ctx.get(), &sec_ptr, sec_path, true) != UCI_OK) {
+        LOG(ERROR) << "UCI failed to lookup ptr for path: " << sec_path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    // Rename section
+    if (uci_rename(ctx.get(), &sec_ptr) != UCI_OK) {
+        LOG(ERROR) << "UCI failed to rename section!" << std::endl << uci_get_error(ctx.get());
+        return false;
+    }
+
+    // Create delta from changes, this does not change the persistent file.
+    if (uci_save(ctx.get(), pkg) != UCI_OK) {
+        LOG(ERROR) << "Failed to save changes!" << std::endl << uci_get_error(ctx.get());
+        return false;
+    }
+
+    // Commit changes to file
+    if (uci_commit(ctx.get(), &pkg, false) != UCI_OK) {
+        LOG(ERROR) << "Failed to commit changes!" << std::endl << uci_get_error(ctx.get());
+        return false;
+    }
+
     return true;
 }
 
