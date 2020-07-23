@@ -7602,40 +7602,29 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
 }
 cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::~cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE() {
 }
+uint8_t& cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::result() {
+    return (uint8_t&)(*m_result);
+}
+
 uint32_t& cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::client_list_size() {
     return (uint32_t&)(*m_client_list_size);
 }
 
-std::string cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::client_list_str() {
-    char *client_list_ = client_list();
-    if (!client_list_) { return std::string(); }
-    return std::string(client_list_, m_client_list_idx__);
+std::tuple<bool, sMacAddr&> cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::client_list(size_t idx) {
+    bool ret_success = ( (m_client_list_idx__ > 0) && (m_client_list_idx__ > idx) );
+    size_t ret_idx = ret_success ? idx : 0;
+    if (!ret_success) {
+        TLVF_LOG(ERROR) << "Requested index is greater than the number of available entries";
+    }
+    return std::forward_as_tuple(ret_success, m_client_list[ret_idx]);
 }
 
-char* cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::client_list(size_t length) {
-    if( (m_client_list_idx__ == 0) || (m_client_list_idx__ < length) ) {
-        TLVF_LOG(ERROR) << "client_list length is smaller than requested length";
-        return nullptr;
-    }
-    return ((char*)m_client_list);
-}
-
-bool cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::set_client_list(const std::string& str) { return set_client_list(str.c_str(), str.size()); }
-bool cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::set_client_list(const char str[], size_t size) {
-    if (str == nullptr) {
-        TLVF_LOG(WARNING) << "set_client_list received a null pointer.";
-        return false;
-    }
-    if (!alloc_client_list(size)) { return false; }
-    std::copy(str, str + size, m_client_list);
-    return true;
-}
 bool cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::alloc_client_list(size_t count) {
     if (m_lock_order_counter__ > 0) {;
         TLVF_LOG(ERROR) << "Out of order allocation for variable length list client_list, abort!";
         return false;
     }
-    size_t len = sizeof(char) * count;
+    size_t len = sizeof(sMacAddr) * count;
     if(getBuffRemainingBytes() < len )  {
         TLVF_LOG(ERROR) << "Not enough available space on buffer - can't allocate";
         return false;
@@ -7653,6 +7642,9 @@ bool cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::alloc_client_list(size_t count
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << len << ") Failed!";
         return false;
     }
+    if (!m_parse__) { 
+        for (size_t i = m_client_list_idx__ - count; i < m_client_list_idx__; i++) { m_client_list[i].struct_init(); }
+    }
     return true;
 }
 
@@ -7660,6 +7652,9 @@ void cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_BML), reinterpret_cast<uint8_t*>(m_action_op));
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_client_list_size));
+    for (size_t i = 0; i < m_client_list_idx__; i++){
+        m_client_list[i].struct_swap();
+    }
 }
 
 bool cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::finalize()
@@ -7692,6 +7687,7 @@ bool cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::finalize()
 size_t cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::get_initial_size()
 {
     size_t class_size = 0;
+    class_size += sizeof(uint8_t); // result
     class_size += sizeof(uint32_t); // client_list_size
     return class_size;
 }
@@ -7702,18 +7698,23 @@ bool cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
+    m_result = reinterpret_cast<uint8_t*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
     m_client_list_size = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!m_parse__) *m_client_list_size = 0;
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
         return false;
     }
-    m_client_list = (char*)m_buff_ptr__;
+    m_client_list = (sMacAddr*)m_buff_ptr__;
     uint32_t client_list_size = *m_client_list_size;
     if (m_parse__) {  tlvf_swap(32, reinterpret_cast<uint8_t*>(&client_list_size)); }
     m_client_list_idx__ = client_list_size;
-    if (!buffPtrIncrementSafe(sizeof(char) * (client_list_size))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (client_list_size) << ") Failed!";
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr) * (client_list_size))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) * (client_list_size) << ") Failed!";
         return false;
     }
     if (m_parse__) { class_swap(); }

@@ -498,11 +498,14 @@ cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST:
 
 cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE:
   _type: class
+  result:
+    _type: uint8_t
+    _comment: # 0 - Failure, 1 - Success
   client_list_size:
     _type: uint32_t
     _length_var: True
   client_list:
-    _type: char
+    _type: sMacAddr
     _length: [client_list_size]
 
 cACTION_BML_CLIENT_SET_CLIENT_REQUEST:

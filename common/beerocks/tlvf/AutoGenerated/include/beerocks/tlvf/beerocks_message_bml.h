@@ -2248,11 +2248,9 @@ class cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE : public BaseClass
         static eActionOp_BML get_action_op(){
             return (eActionOp_BML)(ACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE);
         }
+        uint8_t& result();
         uint32_t& client_list_size();
-        std::string client_list_str();
-        char* client_list(size_t length = 0);
-        bool set_client_list(const std::string& str);
-        bool set_client_list(const char buffer[], size_t size);
+        std::tuple<bool, sMacAddr&> client_list(size_t idx);
         bool alloc_client_list(size_t count = 1);
         void class_swap() override;
         bool finalize() override;
@@ -2261,8 +2259,9 @@ class cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE : public BaseClass
     private:
         bool init();
         eActionOp_BML* m_action_op = nullptr;
+        uint8_t* m_result = nullptr;
         uint32_t* m_client_list_size = nullptr;
-        char* m_client_list = nullptr;
+        sMacAddr* m_client_list = nullptr;
         size_t m_client_list_idx__ = 0;
         int m_lock_order_counter__ = 0;
 };
