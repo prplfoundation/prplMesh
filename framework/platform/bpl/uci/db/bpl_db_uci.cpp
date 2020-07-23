@@ -361,6 +361,60 @@ bool uci_delete_entry(const std::string &config_file, const std::string &entry_t
     LOG(TRACE) << "uci_delete_entry() "
                << "entry: " << config_file << ": " << entry_type << "(" << entry_name << ")";
 
+    if (!uci_entry_exists(config_file, entry_type, entry_name)) {
+        LOG(ERROR) << "Entry " << entry_name << " of type " << entry_type << " was not found!";
+        return false;
+    }
+
+    auto ctx = alloc_context();
+    if (!ctx) {
+        return false;
+    }
+
+    char sec_path[MAX_UCI_BUF_LEN] = {0};
+    if (!compose_path(sec_path, config_file, entry_name)) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+
+    struct uci_ptr sec_ptr;
+    if (uci_lookup_ptr(ctx.get(), &sec_ptr, sec_path, true) != UCI_OK || !sec_ptr.s) {
+        LOG(ERROR) << "UCI failed to lookup ptr for path: " << sec_path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    if (uci_delete(ctx.get(), &sec_ptr) != UCI_OK) {
+        LOG(ERROR) << "UCI failed to delete ptr: " << sec_path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    char pkg_path[MAX_UCI_BUF_LEN] = {0};
+    if (!compose_path(pkg_path, config_file, entry_name)) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+
+    struct uci_ptr pkg_ptr;
+    if (uci_lookup_ptr(ctx.get(), &pkg_ptr, pkg_path, true) != UCI_OK || !pkg_ptr.p) {
+        LOG(ERROR) << "UCI failed to lookup ptr for path: " << pkg_path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    // Create delta from changes, this does not change the persistent file.
+    if (uci_save(ctx.get(), pkg_ptr.p) != UCI_OK) {
+        LOG(ERROR) << "Failed to save changes!" << std::endl << uci_get_error(ctx.get());
+        return false;
+    }
+
+    // Commit changes to file
+    if (uci_commit(ctx.get(), &pkg_ptr.p, false) != UCI_OK) {
+        LOG(ERROR) << "Failed to commit changes!" << std::endl << uci_get_error(ctx.get());
+        return false;
+    }
+
     return true;
 }
 
