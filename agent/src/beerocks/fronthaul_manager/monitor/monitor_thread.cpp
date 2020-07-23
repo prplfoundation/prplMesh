@@ -2128,27 +2128,6 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 //     ;
 // }
 
-// void monitor_thread::debug_link_measurements_11k_response(message::sACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE* event)
-// {
-//     LOG(DEBUG) << "DATA TEST:"
-//     << std::endl << "sta_mac: "          << event->params.sta_mac
-//     << std::endl << "transmit_power: "   << (int)event->params.transmit_power
-//     << std::endl << "link_margin: "      << (int)event->params.link_margin
-//     << std::endl << "rx_ant_id: "        << (int)event->params.rx_ant_id
-//     << std::endl << "tx_ant_id: "        << (int)event->params.tx_ant_id
-//     << std::endl << "rcpi: "             << (int)event->params.rcpi
-//     << std::endl << "rsni: "             << (int)event->params.rsni
-
-//     << std::endl << "dmg_link_margin_activity: "                 << (int)event->params.dmg_link_margin_activity
-//     << std::endl << "dmg_link_margin_mcs: "                      << (int)event->params.dmg_link_margin_mcs
-//     << std::endl << "dmg_link_margin_link_margin: "              << (int)event->params.dmg_link_margin_link_margin
-//     << std::endl << "dmg_link_margin_snr: "                      << (int)event->params.dmg_link_margin_snr
-//     << std::endl << "dmg_link_margin_reference_timestamp: "      << (int)event->params.dmg_link_margin_reference_timestamp
-//     << std::endl << "dmg_link_adapt_ack_activity: "              << (int)event->params.dmg_link_adapt_ack_activity
-//     << std::endl << "dmg_link_adapt_ack_reference_timestamp: "   << (int)event->params.dmg_link_adapt_ack_reference_timestamp
-//     ;
-// }
-
 void monitor_thread::send_heartbeat()
 {
     if (slave_socket == nullptr) {
