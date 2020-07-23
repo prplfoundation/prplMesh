@@ -61,8 +61,6 @@ static mon_wlan_hal::Event wav_to_bwl_event(const std::string &opcode)
     // } else if (opcode == "RRM-STA-STATISTICS-RECEIVED") {
     //     return mon_wlan_hal::Event::RRM_STA_Statistics_Response;
     // } else if (opcode == "RRM-LINK-MEASUREMENT-RECEIVED") {
-    //     return mon_wlan_hal::Event::RRM_Link_Measurement_Response;
-    // }
 
     return mon_wlan_hal::Event::Invalid;
 }
