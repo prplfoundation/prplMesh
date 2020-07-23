@@ -324,6 +324,62 @@ bool uci_delete_section(const std::string &package_name, const std::string &sect
     LOG(TRACE) << "uci_delete_section() " << package_name << ".(" << section_type << ")"
                << section_name;
 
+    if (!uci_section_exists(package_name, section_type, section_name)) {
+        LOG(ERROR) << "section " << section_name << " of type " << section_type
+                   << " was not found!";
+        return false;
+    }
+
+    auto ctx = alloc_context();
+    if (!ctx) {
+        return false;
+    }
+
+    char sec_path[MAX_UCI_BUF_LEN] = {0};
+    if (snprintf(sec_path, MAX_UCI_BUF_LEN, section_path, package_name.c_str(),
+                 section_name.c_str()) <= 0) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+
+    uci_ptr sec_ptr;
+    if (uci_lookup_ptr(ctx.get(), &sec_ptr, sec_path, true) != UCI_OK || !sec_ptr.s) {
+        LOG(ERROR) << "UCI failed to lookup ptr for path: " << sec_path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    if (uci_delete(ctx.get(), &sec_ptr) != UCI_OK) {
+        LOG(ERROR) << "UCI failed to delete ptr: " << sec_path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    char pkg_path[MAX_UCI_BUF_LEN] = {0};
+    if (snprintf(pkg_path, MAX_UCI_BUF_LEN, package_path, package_name.c_str()) <= 0) {
+        LOG(ERROR) << "Failed to compose path";
+        return false;
+    }
+
+    uci_ptr pkg_ptr;
+    if (uci_lookup_ptr(ctx.get(), &pkg_ptr, pkg_path, true) != UCI_OK || !pkg_ptr.p) {
+        LOG(ERROR) << "UCI failed to lookup ptr for path: " << pkg_path << std::endl
+                   << uci_get_error(ctx.get());
+        return false;
+    }
+
+    // Create delta from changes, this does not change the persistent file.
+    if (uci_save(ctx.get(), pkg_ptr.p) != UCI_OK) {
+        LOG(ERROR) << "Failed to save changes!" << std::endl << uci_get_error(ctx.get());
+        return false;
+    }
+
+    // Commit changes to file
+    if (uci_commit(ctx.get(), &pkg_ptr.p, false) != UCI_OK) {
+        LOG(ERROR) << "Failed to commit changes!" << std::endl << uci_get_error(ctx.get());
+        return false;
+    }
+
     return true;
 }
 
