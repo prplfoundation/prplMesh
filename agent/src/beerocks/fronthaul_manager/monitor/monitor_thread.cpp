@@ -1760,46 +1760,6 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
     } break;
 
-    case Event::RRM_Link_Measurement_Response: {
-
-        auto hal_data = static_cast<bwl::SLinkMeasurementsResponse11k *>(data);
-        auto response = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE>(cmdu_tx);
-        if (response == nullptr) {
-            LOG(ERROR)
-                << "Failed building cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE message!";
-            break;
-        }
-
-        response->params().dialog_token                 = hal_data->dialog_token;
-        response->params().rep_mode                     = hal_data->rep_mode;
-        response->params().rx_ant_id                    = hal_data->rx_ant_id;
-        response->params().tx_ant_id                    = hal_data->tx_ant_id;
-        response->params().rcpi                         = hal_data->rcpi;
-        response->params().rsni                         = hal_data->rsni;
-        response->params().transmit_power               = hal_data->transmit_power;
-        response->params().link_margin                  = hal_data->link_margin;
-        response->params().use_optional_dmg_link_margin = hal_data->use_optional_dmg_link_margin;
-        response->params().dmg_link_margin_activity     = hal_data->dmg_link_margin_activity;
-        response->params().dmg_link_margin_mcs          = hal_data->dmg_link_margin_mcs;
-        response->params().dmg_link_margin_link_margin  = hal_data->dmg_link_margin_link_margin;
-        response->params().dmg_link_margin_snr          = hal_data->dmg_link_margin_snr;
-        response->params().use_optional_dmg_link_adapt_ack =
-            hal_data->use_optional_dmg_link_adapt_ack;
-        response->params().dmg_link_adapt_ack_activity = hal_data->dmg_link_adapt_ack_activity;
-        response->params().dmg_link_margin_reference_timestamp =
-            hal_data->dmg_link_margin_reference_timestamp;
-        response->params().dmg_link_adapt_ack_reference_timestamp =
-            hal_data->dmg_link_adapt_ack_reference_timestamp;
-        std::copy_n(hal_data->sta_mac.oct, sizeof(response->params().sta_mac.oct),
-                    response->params().sta_mac.oct);
-
-        // debug_link_measurements_11k_response(msg);
-
-        message_com::send_cmdu(slave_socket, cmdu_tx);
-
-    } break;
-
     case Event::AP_Enabled: {
         if (!data) {
             LOG(ERROR) << "AP_Enabled without data";
