@@ -3360,41 +3360,6 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
                     << "delay_trigger: " << (int)response->params().delay_trigger);
         break;
     }
-    case beerocks_message::ACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE: {
-        auto response = beerocks_header->addClass<
-            beerocks_message::cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE>();
-        if (response == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE failed";
-            return false;
-        }
-        LOG_CLI(DEBUG,
-                "link measurements response: "
-                    << std::endl
-                    << "sta_mac: " << response->params().sta_mac << std::endl
-                    << "transmit_power: " << (int)response->params().transmit_power << std::endl
-                    << "link_margin: " << (int)response->params().link_margin << std::endl
-                    << "rx_ant_id: " << (int)response->params().rx_ant_id << std::endl
-                    << "tx_ant_id: " << (int)response->params().tx_ant_id << std::endl
-                    << "rcpi: " << (int)response->params().rcpi << std::endl
-                    << "rsni: " << (int)response->params().rsni
-
-                    << std::endl
-                    << "dmg_link_margin_activity: "
-                    << (int)response->params().dmg_link_margin_activity << std::endl
-                    << "dmg_link_margin_mcs: " << (int)response->params().dmg_link_margin_mcs
-                    << std::endl
-                    << "dmg_link_margin_link_margin: "
-                    << (int)response->params().dmg_link_margin_link_margin << std::endl
-                    << "dmg_link_margin_snr: " << (int)response->params().dmg_link_margin_snr
-                    << std::endl
-                    << "dmg_link_margin_reference_timestamp: "
-                    << (int)response->params().dmg_link_margin_reference_timestamp << std::endl
-                    << "dmg_link_adapt_ack_activity: "
-                    << (int)response->params().dmg_link_adapt_ack_activity << std::endl
-                    << "dmg_link_adapt_ack_reference_timestamp: "
-                    << (int)response->params().dmg_link_adapt_ack_reference_timestamp);
-        break;
-    }
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE: {
         auto response = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE>();
