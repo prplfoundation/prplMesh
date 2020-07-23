@@ -159,14 +159,6 @@ cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE:
   _type: class
   params: sStatisticsResponse11k
 
-cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST:
-  _type: class
-  mac: sMacAddr
-
-cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE:
-  _type: class
-  params: sLinkMeasurementsResponse11k
-
 cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION:
   _type: class
   mac: sMacAddr
