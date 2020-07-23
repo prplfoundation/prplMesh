@@ -45,6 +45,18 @@ class db {
     } sBmlListener;
 
 public:
+    /**
+     * @brief Client parameter names.
+     * The parameter names can be used to set/get multiple parameters in one-shot.
+     * This is done using key-value map (where key is the param name and value is it value)
+     */
+    static const std::string TIMESTAMP_STR;
+    static const std::string TIMELIFE_DELAY_STR;
+    static const std::string INITIAL_RADIO_ENABLE_STR;
+    static const std::string INITIAL_RADIO_STR;
+    static const std::string SELECTED_BAND_ENABLE_STR;
+    static const std::string SELECTED_BANDS_STR;
+
     // VAPs info list type
     typedef std::list<std::shared_ptr<beerocks_message::sConfigVapInfo>> vaps_list_t;
 
@@ -175,6 +187,7 @@ public:
      * 
      * @param mac MAC address of a client.
      * @return std::string the string representation of the MAC address with ':' replaced with '_' removed.
+     * @return An empty string is returned on failure.
      */
     static std::string client_db_entry_from_mac(const sMacAddr &mac);
 
@@ -182,7 +195,7 @@ public:
      * @brief Get client MAC address from db entry.
      * 
      * @param db_entry Client entry name in persistent db.
-     * @return sMacAddr MAC address of the client the db_entry is representing.
+     * @return sMacAddr MAC address of the client the db_entry is representing. On failure ZERO_MAC is returned.
      */
     static sMacAddr client_db_entry_to_mac(const std::string &db_entry);
 
@@ -654,7 +667,7 @@ public:
      * @return true on success, otherwise false.
      */
     bool add_client_to_persistent_db(const sMacAddr &mac,
-                                     std::unordered_map<std::string, std::string> params =
+                                     const std::unordered_map<std::string, std::string> &params =
                                          std::unordered_map<std::string, std::string>());
 
     /**
@@ -779,12 +792,12 @@ public:
 
     /**
      * @brief Load all clients from persistent db.
+     * Creates nodes for the clients in runtime-db and set persistent parameters values accordingly.
+     * Aged Clients and Clients with invalid data are filtered-out and removed from persistent-DB.
      * 
-     * @return An unordered map of clients, for each client unordered map of params as key-value.
-     * @return An empty map of clients is returned if the persistent db is empty.
+     * @return true on success, otherwise false.
      */
-    std::unordered_map<std::string, std::unordered_map<std::string, std::string>>
-    load_persistent_db_clients();
+    bool load_persistent_db_clients();
 
     //
     // CLI
@@ -1081,9 +1094,62 @@ private:
     void rewind();
     bool get_next_node(std::shared_ptr<node> &n, int &hierarchy);
     bool get_next_node(std::shared_ptr<node> &n);
-    bool
-    update_client_entry_in_persistent_db(const sMacAddr &mac,
-                                         std::unordered_map<std::string, std::string> values_map);
+
+    /**
+     * @brief Updates the client values in the persistent db.
+     * 
+     * @param mac MAC address of a client.
+     * @param values_map A map of client params and their values.
+     * @return true on success, otherwise false.
+     */
+    bool update_client_entry_in_persistent_db(
+        const sMacAddr &mac, const std::unordered_map<std::string, std::string> &values_map);
+
+    /**
+     * @brief Sets the node params (runtime db) from a param-value map.
+     * 
+     * @param mac MAC address of node to be updated.
+     * @param values_map A map of client params and their values.
+     * @return true on success, otherwise false.
+     */
+    bool set_node_params_from_map(const sMacAddr &mac,
+                                  const std::unordered_map<std::string, std::string> &values_map);
+
+    /**
+     * @brief Adds a client entry to persistent_db with configured parameters and increments clients counter.
+     * 
+     * @param entry_name Client entry name in persistent db.
+     * @param values_map A map of client params and their values.
+     * @return true on success, otherwise false.
+     */
+    bool add_client_entry_and_update_counter(
+        const std::string &entry_name,
+        const std::unordered_map<std::string, std::string> &values_map);
+
+    /**
+     * @brief Removes a client entry from persistent_db and decrements clients counter.
+     * 
+     * @param entry_name Client entry name in persistent db.
+     * @return true on success, otherwise false.
+     */
+    bool remove_client_entry_and_update_counter(const std::string &entry_name);
+
+    /**
+     * @brief Removes client with least timelife remaining from persistent db (with preference to disconnected clients).
+     * 
+     * @return true on success, otherwise false.
+     */
+    bool remove_candidate_client();
+
+    /**
+     * @brief Returns the preferred client to be removed.
+     * Preference is determined as follows:
+     * - Prefer disconnected clients over connected ones.
+     * - According to above, the client with least time left before aging.
+     *
+     * @return sMacAddr mac of candidate client to be removed - if not found, string_utils::ZERO_MAC is returned.
+     */
+    sMacAddr get_candidate_client_for_removal();
 
     int network_optimization_task_id = -1;
     int channel_selection_task_id    = -1;
@@ -1145,6 +1211,8 @@ private:
 
     master_thread *m_master_thread_ctx = nullptr;
     const std::string m_local_bridge_mac;
+
+    int m_persistent_db_clients_count = 0;
 };
 
 } // namespace son

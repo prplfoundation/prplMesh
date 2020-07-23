@@ -88,6 +88,16 @@ bool master_thread::init()
     set_server_max_connections(SOCKET_MAX_CONNECTIONS);
     set_select_timeout(SOCKETS_SELECT_TIMEOUT_MSEC);
 
+    LOG(DEBUG) << "persistent db enable=" << database.config.persistent_db;
+    if (database.config.persistent_db) {
+        LOG(DEBUG) << "loading clients from persistent db";
+        if (!database.load_persistent_db_clients()) {
+            LOG(WARNING) << "failed to load clients from persistent db";
+        } else {
+            LOG(DEBUG) << "load clients from persistent db finished successfully";
+        }
+    }
+
     if (!transport_socket_thread::init()) {
         LOG(ERROR) << "Failed init of transport_socket_thread";
         stop();
@@ -3356,33 +3366,6 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             //<< std::endl << "new_ch_center_freq_seg_0: "             << (int)response->params.new_ch_center_freq_seg_0
             //<< std::endl << "new_ch_center_freq_seg_1: "             << (int)response->params.new_ch_center_freq_seg_1
         );
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE: {
-        auto response =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE>();
-        if (response == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE failed";
-            return false;
-        }
-        LOG_CLI(DEBUG, "sta channel load response:"
-                           << std::endl
-                           << "sta_mac: " << response->params().sta_mac << std::endl
-                           << "measurement_rep_mode: " << (int)response->params().rep_mode
-                           << std::endl
-                           << "op_class: " << (int)response->params().op_class << std::endl
-                           << "channel: " << (int)response->params().channel << std::endl
-                           << "start_time: " << (int)response->params().start_time << std::endl
-                           << "duration: " << (int)response->params().duration << std::endl
-                           << "channel_load: " << (int)response->params().channel_load
-
-                           << std::endl
-                           << "new_ch_width: " << (int)response->params().new_ch_width << std::endl
-                           << "new_ch_center_freq_seg_0: "
-                           << (int)response->params().new_ch_center_freq_seg_0 << std::endl
-                           << "new_ch_center_freq_seg_1: "
-                           << (int)response->params().new_ch_center_freq_seg_1);
         break;
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE: {

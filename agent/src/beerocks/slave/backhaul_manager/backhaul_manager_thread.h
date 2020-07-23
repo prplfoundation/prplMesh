@@ -94,7 +94,7 @@ private:
     finalize_slaves_connect_state(bool fConnected,
                                   std::shared_ptr<sRadioInfo> pSocket = nullptr); // cmdu_duplicate
 
-    bool send_autoconfig_search_message(std::shared_ptr<sRadioInfo> soc);
+    bool send_autoconfig_search_message(const std::string &front_radio_iface_name);
     bool send_1905_topology_discovery_message();
 
     /**
@@ -105,7 +105,17 @@ private:
      */
     bool send_1905_topology_discovery_message(const std::string &iface_name);
 
-    bool send_slave_ap_metric_query_message(uint16_t mid, std::vector<sMacAddr> const &bssid_list);
+    /**
+     * @brief Sends an AP Metrics Query message for each bssid on 'bssid_list' to the son_slaves.
+     * If the 'bssid_list' is empty, sends a query on each bssid that exists on the Agent.
+     * 
+     * @param mid MID of the message to be sent.
+     * @param bssid_list List of bssids to send a query on.
+     * @return true on success, otherwise false.
+     */
+    bool send_slave_ap_metric_query_message(
+        uint16_t mid,
+        const std::unordered_set<sMacAddr> &bssid_list = std::unordered_set<sMacAddr>());
 
     /**
      * @brief Creates Backhaul STA Steering Response message with 2 tlvs Steering Response
@@ -165,8 +175,6 @@ private:
     void platform_notify_error(bpl::eErrorCode code, const std::string &error_data);
     bool send_slaves_enable();
 
-    void remove_client_from_all_radios(sMacAddr &client_mac);
-
     std::shared_ptr<bwl::sta_wlan_hal> get_wireless_hal(std::string iface = "");
 
 private:
@@ -175,20 +183,8 @@ private:
     SocketClient *master_discovery_socket = nullptr;
 
     struct SBackhaulConfig {
-
-        // Current connection type
-        enum class EType {
-            Invalid = 0, //!< Invalid connection
-            Wired,       //!< Wired connection
-            Wireless     //!< Wireless connection
-
-        } eType;
-
         std::string ssid;
         std::string pass;
-        std::string bridge_iface;
-        std::string wire_iface;
-        std::string wireless_iface;
         std::string preferred_bssid;
         std::string vendor;
         std::string model;
@@ -224,9 +220,7 @@ private:
     const std::string config_const_bh_slave;
 
     int stop_on_failure_attempts;
-    bool local_master = false;
-    bool local_gw     = false;
-    bool onboarding   = true;
+    bool onboarding = true;
 
     //backlist bssid and timers (remove con(or wrong passphrase) ap from select bssid for limited time )
     struct ap_blacklist_entry {
@@ -315,44 +309,6 @@ private:
      */
     sApMetricsReportingInfo ap_metrics_reporting_info;
 
-    struct sClientInfo {
-        sMacAddr client_mac;
-        sMacAddr bssid; // VAP mac
-        std::chrono::steady_clock::time_point time_stamp;
-        size_t asso_len;
-        uint8_t assoc_req[ASSOCIATION_FRAME_SIZE];
-    };
-
-    /**
-     * @brief Type definition for associated clients information.
-     *
-     * Associated client information consists of sClientInfo strucrt, which has the 
-     * following fields:
-     * - The MAC address of the 802.11 client that associates to a BSS.
-     * - Timestamp of the 802.11 client's last association to this Multi-AP device.
-     * - The length of the association frame.
-     * - the association frame itself.
-     *
-     * Associated client information is gathered from
-     * ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION events received from slave threads.
-     *
-     * Associated client information is later used to fill in the Associated Clients TLV
-     * in the Topology Response message and Client Capability Response message.
-     */
-
-    typedef std::unordered_map<sMacAddr, sClientInfo> associated_clients_t;
-
-    /**
-     * @brief Gets BSSID to which STA with given MAC is connected
-     *
-     * @param[in] clients_map Associated client map to seach
-     * @param[in] sta_mac MAC address of the STA
-     * @return BSSID in case of success or network_utils::ZERO_MAC otherwise
-     */
-    static sMacAddr
-    get_sta_bssid(const std::unordered_map<sMacAddr, associated_clients_t> &clients_map,
-                  const sMacAddr &sta_mac);
-
     /**
      * @brief Information gathered about a radio (= slave).
      *
@@ -383,12 +339,9 @@ private:
         uint32_t vht_capability = 0;     /**< VHT capabilities */
         std::array<uint8_t, beerocks::message::VHT_MCS_SET_SIZE>
             vht_mcs_set; /**< 32-byte attribute containing the MCS set as defined in 802.11ac */
-        bool he_supported = false;             /**< Is HE supported flag */
-        beerocks_message::sVapsList vaps_list; /**< List of VAPs in radio. */
+        bool he_supported = false; /**< Is HE supported flag */
         std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
             preferred_channels; /**< Array of supported channels in radio. */
-        std::unordered_map<sMacAddr, associated_clients_t>
-            associated_clients_map; /**< Associated clients grouped by BSSID. */
     };
 
     /**
@@ -398,14 +351,6 @@ private:
      * @return shared pointer to radio info in case of success or nullptr otherwise
      */
     std::shared_ptr<sRadioInfo> get_radio(const sMacAddr &radio_mac) const;
-
-    /**
-     * @brief Gets radio info for the STA with given MAC address
-     *
-     * @param[in] sta_mac MAC address of the STA
-     * @return shared pointer to radio info in case of success or nullptr otherwise
-     */
-    std::shared_ptr<sRadioInfo> get_sta_radio(const sMacAddr &sta_mac);
 
     /**
      * @brief Interface in this device which connects to an interface in one or more neighbors.
@@ -482,33 +427,6 @@ private:
     bool
     get_neighbor_links(const sMacAddr &neighbor_mac_filter,
                        std::map<sLinkInterface, std::vector<sLinkNeighbor>> &neighbor_links_map);
-
-    /**
-     * @brief 1905.1 Neighbor device information
-     *
-     * Information gathered from a neighbor device upon reception of a Topology Discovery message.
-     */
-    struct sNeighborDevice {
-        sMacAddr al_mac = beerocks::net::network_utils::
-            ZERO_MAC; /**< 1905.1 AL MAC address of the Topology Discovery message transmitting device. */
-        sMacAddr mac = beerocks::net::network_utils::
-            ZERO_MAC; /**< MAC address of the interface on which the Topology Discovery message is transmitted. */
-        std::string
-            if_name; /**< Name of the network interface the Topology Discovery message was received on */
-        std::chrono::steady_clock::time_point
-            timestamp; /**< Timestamp of the last Topology Discovery message received from this neighbor device. */
-    };
-
-    /*
-     * @brief List of known 1905 neighbor devices
-     * 
-     * key:     1905.1 device AL-MAC
-     * value:   1905.1 device information
-     * Devices are being added to the list when receiving a 1905.1 Topology Discovery message from
-     * an unknown 1905.1 device. Every 1905.1 device shall send this message every 60 seconds, and
-     * we update the time stamp in which the message is received.
-     */
-    std::unordered_map<sMacAddr, sNeighborDevice> m_1905_neighbor_devices;
 
     /**
      * @brief Adds an AP HT Capabilities TLV to AP Capability Report message.

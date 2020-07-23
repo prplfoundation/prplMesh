@@ -534,57 +534,6 @@ void son_management::handle_cli_message(Socket *sd,
 
         break;
     }
-    case beerocks_message::ACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST: {
-        auto cli_request =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST>();
-        if (cli_request == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST failed";
-            isOK = false;
-            break;
-        }
-
-        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
-        auto agent_mac         = database.get_node_parent_ire(hostap_mac);
-        LOG(DEBUG) << "CLI channel load request for " << client_mac << " to " << hostap_mac;
-
-        auto request = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST>(cmdu_tx);
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST message!";
-            isOK = false;
-            break;
-        }
-
-        request->params().channel   = cli_request->channel();
-        request->params().op_class  = 0;
-        request->params().repeats   = 0;
-        request->params().rand_ival = 1000;
-        request->params().duration  = 50;
-        request->params().sta_mac   = cli_request->client_mac();
-
-        request->params().parallel           = 0;
-        request->params().enable             = 0;
-        request->params().request            = 0;
-        request->params().report             = 0;
-        request->params().mandatory_duration = 0;
-
-        // Optional:
-        request->params().use_optional_ch_load_rep = 0;
-        request->params().ch_load_rep_first        = 0;
-        request->params().ch_load_rep_second       = 0;
-
-        request->params().use_optional_wide_band_ch_switch = 0;
-        request->params().new_ch_width                     = 0;
-        request->params().new_ch_center_freq_seg_0         = 0;
-        request->params().new_ch_center_freq_seg_1         = 0;
-
-        const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
-
-        break;
-    }
     case beerocks_message::ACTION_CLI_CLIENT_STATISTICS_11K_REQUEST: {
         auto cli_request =
             beerocks_header

@@ -59,8 +59,6 @@ public:
         std::string gw_bridge_mac;
         std::string controller_bridge_mac;
         bool is_prplmesh_controller;
-        std::string bridge_iface;
-        std::string bridge_mac;
         std::string bridge_ipv4;
         std::string backhaul_iface;
         std::string backhaul_mac;
@@ -200,6 +198,7 @@ private:
 
     Socket *monitor_socket    = nullptr;
     Socket *ap_manager_socket = nullptr;
+    std::string m_fronthaul_iface;
 
     std::chrono::steady_clock::time_point master_last_seen;
     std::chrono::steady_clock::time_point monitor_last_seen;

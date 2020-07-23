@@ -6,33 +6,25 @@ agent/src/beerocks/fronthaul_manager/monitor/monitor_thread.cpp: style: The if c
 agent/src/beerocks/fronthaul_manager/monitor/monitor_thread.cpp: style: Variable 'id' is assigned a value that is never used. [unreadVariable]        int id        = 0;
 agent/src/beerocks/fronthaul_manager/monitor/monitor_thread.cpp: style: Variable 'iface' is assigned a value that is never used. [unreadVariable]        std::string iface = radio_node->get_iface();
 agent/src/beerocks/fronthaul_manager/monitor/rdkb/monitor_rdkb_hal.cpp: style: Consecutive return, break, continue, goto or throw statements are unnecessary. [duplicateBreak]        break;
-agent/src/beerocks/slave/agent_ucc_listener.cpp: style: struct member 'sVapElement::backhaul_vap' is never used. [unusedStructMember]    bool backhaul_vap;
-agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]                    if (soc->hostap_iface == config_const_bh_slave) {
-agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]                if (soc_iter->slave == sd) {
 agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Local variable 'iface_hal' shadows outer variable [shadowVariable]                            auto iface_hal = get_wireless_hal(sta_iface);
 agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Local variable 'local_interface_name' shadows outer variable [shadowVariable]        std::string local_interface_name = soc->hostap_iface;
 agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Local variable 'supportedServiceTuple' shadows outer variable [shadowVariable]        auto supportedServiceTuple = tlvSupportedService->supported_service_list(1);
 agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Variable 'p_cmdu_header' is assigned a value that is never used. [unreadVariable]    auto p_cmdu_header =
 agent/src/beerocks/slave/beerocks_slave_main.cpp: style: Parameter 'beerocks_slave_conf' can be declared with const [constParameter]static int run_son_slave(int slave_num, beerocks::config_file::sConfigSlave &beerocks_slave_conf,
+agent/src/beerocks/slave/gate/unit_tests/gate_test.cpp: error: syntax error [syntaxError]TEST(gate_beacon_query_test, loading_vs_from_1905_beacon_query)
 agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Comparison of a boolean expression with an integer. [compareBoolExpressionWithInt]    if (bpl::dhcp_mon_stop() == false) {
 agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Redundant assignment of '*(volatile char*)pass' to itself. [selfAssignment]            *(volatile char *)pass = *(volatile char *)pass;
 agent/src/beerocks/slave/platform_manager/platform_manager_thread.cpp: warning: Redundant assignment of '*(volatile char*)pass' to itself. [selfAssignment]        *(volatile char *)pass = *(volatile char *)pass;
-agent/src/beerocks/slave/son_slave_thread.cpp: style: Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm]        if (channel_to_check == ch.channel) {
 agent/src/beerocks/slave/son_slave_thread.cpp: style: Local variable 'notification' shadows outer variable [shadowVariable]        auto notification = message_com::create_vs_message<
 common/beerocks/bcl/include/bcl/beerocks_logging.h: style: Class 'logging' has a constructor with 1 argument that is not explicit. [noExplicitConstructor]    logging(const std::string &module_name, const std::string &config_path = std::string(),
-common/beerocks/bcl/source/beerocks_logging.cpp: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]        str += elt + ", ";
 common/beerocks/bcl/source/beerocks_logging.cpp: style: The class 'NetLogger' does not have a constructor although it has private member variables. [noConstructor]class NetLogger : public el::LogDispatchCallback {
-common/beerocks/bcl/source/beerocks_ucc_listener.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]                          validate_binary_notation(value) || validate_decimal_notation(value))) {
-common/beerocks/bcl/source/beerocks_ucc_listener.cpp: style: Consider using std::transform algorithm instead of a raw loop. [useStlAlgorithm]        mandatory_params.push_back(param_name.first);
 common/beerocks/bcl/source/beerocks_ucc_listener.cpp: style: Parameter 'tlv_hex_list' can be declared with const [constParameter]bool tlvPrefilledData::add_tlvs_from_list(std::list<beerocks_ucc_listener::tlv_hex_t> &tlv_hex_list,
 common/beerocks/bcl/source/beerocks_ucc_listener.cpp: style: Variable 'command_type_str' can be declared with const [constVariable]    auto &command_type_str = *cmd_tokens_vec.begin();
 common/beerocks/bcl/source/network/network_utils.cpp: information: Skipping configuration 'SIOCBRADDIF' since the value of 'SIOCBRADDIF' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly. [ConfigurationNotChecked]    err             = ioctl(br_socket_fd, SIOCBRADDIF, &ifr);
 common/beerocks/bcl/source/network/network_utils.cpp: information: Skipping configuration 'SIOCBRDELIF' since the value of 'SIOCBRDELIF' is unknown. Use -D if you want to check it. You can use -U to skip it explicitly. [ConfigurationNotChecked]    err             = ioctl(br_socket_fd, SIOCBRDELIF, &ifr);
 common/beerocks/bcl/source/network/network_utils.cpp: style: Condition '!up' is always true [knownConditionTrueFalse]    while (!up) {
-common/beerocks/bcl/source/network/network_utils.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]        if (ip_info.iface == iface_name) {
 common/beerocks/bcl/source/network/network_utils.cpp: style: Local variable 'ecmd' shadows outer variable [shadowVariable]            struct ethtool_cmd ecmd;
 common/beerocks/bcl/source/network/network_utils.cpp: style: The scope of the variable 'rtInfo_ret' can be reduced. [variableScope]    int rtInfo_ret;
-common/beerocks/bcl/source/network/socket.cpp: style: Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm]        if (soc == s) {
 common/beerocks/bcl/source/network/socket.cpp: style: The scope of the variable 'i' can be reduced. [variableScope]    unsigned i;
 common/beerocks/bcl/source/network/socket.cpp: style: Unused variable: it [unusedVariable]        std::vector<Socket *>::iterator it;
 common/beerocks/bcl/source/son/son_wireless_utils.cpp: style: Condition 'prev_bw<=bw' is always true [knownConditionTrueFalse]    } else if (prev_bw <= bw) {
@@ -44,7 +36,6 @@ common/beerocks/bwl/dummy/ap_wlan_hal_dummy.cpp: style: struct member 'DUMMY_acs
 common/beerocks/bwl/dummy/ap_wlan_hal_dummy.cpp: style: struct member 'DUMMY_acs_report_get::bss' is never used. [unusedStructMember]    int bss;
 common/beerocks/bwl/dummy/mon_wlan_hal_dummy.cpp: style: The scope of the variable 'tmp_int' can be reduced. [variableScope]    int64_t tmp_int;
 common/beerocks/bwl/dwpal/ap_wlan_hal_dwpal.cpp: information: This file is not analyzed. Cppcheck failed to extract a valid configuration. Use -v for more details. [noValidConfiguration]
-common/beerocks/bwl/dwpal/base_wlan_hal_dwpal.cpp: style: Consider using std::count_if algorithm instead of a raw loop. [useStlAlgorithm]                        attached++;
 common/beerocks/bwl/dwpal/mon_wlan_hal_dwpal.cpp: style: The scope of the variable 'rate_kbs' can be reduced. [variableScope]    uint32_t rate_kbs;
 common/beerocks/bwl/dwpal/mon_wlan_hal_dwpal.cpp: style: The scope of the variable 'rate_mbs_fp_8_1' can be reduced. [variableScope]    uint8_t rate_mbs_fp_8_1;
 common/beerocks/bwl/nl80211/base_wlan_hal_nl80211.cpp: style: A pointer can not be negative so it is either pointless or an error to check if it is. [pointerLessThanZero]    if (err < 0) {
@@ -70,7 +61,6 @@ controller/src/beerocks/cli/beerocks_cli_bml.cpp: performance: Function paramete
 controller/src/beerocks/cli/beerocks_cli_bml.cpp: performance: Function parameter 'ind' should be passed by const reference. [passedByValue]    const std::string &parent_bssid, const std::string ind, std::stringstream &ss)
 controller/src/beerocks/cli/beerocks_cli_bml.h: performance: Function parameter 'iface' should be passed by const reference. [passedByValue]    int wps_onboarding(const std::string iface = std::string());
 controller/src/beerocks/cli/beerocks_cli_main.cpp: performance: Function parameter 'temp_path' should be passed by const reference. [passedByValue]static void cli_tcp_proxy(std::string temp_path)
-controller/src/beerocks/cli/beerocks_cli_main.cpp: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]        cmd += token + " ";
 controller/src/beerocks/cli/beerocks_cli_main.cpp: style: Redundant initialization for 'cli_ptr'. The initialized value is overwritten before it is read. [redundantInitialization]    beerocks::cli *cli_ptr = &cli_soc;
 controller/src/beerocks/cli/beerocks_cli_main.cpp: style: Variable 'cli_ptr' is assigned a value that is never used. [unreadVariable]    beerocks::cli *cli_ptr = &cli_soc;
 controller/src/beerocks/cli/beerocks_cli_main.cpp: style: Variable 'pos' is assigned a value that is never used. [unreadVariable]        } else if ((pos = token->find("!")) != std::string::npos) {
@@ -87,9 +77,6 @@ controller/src/beerocks/master/db/db.cpp: performance: Function parameter 'iface
 controller/src/beerocks/master/db/db.cpp: performance: Function parameter 'name' should be passed by const reference. [passedByValue]bool db::set_node_name(const std::string &mac, std::string name)
 controller/src/beerocks/master/db/db.cpp: performance: Function parameter 'ssid' should be passed by const reference. [passedByValue]bool db::add_vap(const std::string &radio_mac, int vap_id, std::string bssid, std::string ssid,
 controller/src/beerocks/master/db/db.cpp: performance: Function parameter 'version' should be passed by const reference. [passedByValue]bool db::set_hostap_driver_version(const std::string &mac, std::string version)
-controller/src/beerocks/master/db/db.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]            get_node_state(hostap) == beerocks::STATE_CONNECTED) {
-controller/src/beerocks/master/db/db.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]        if (it.second.mac == mac) {
-controller/src/beerocks/master/db/db.cpp: style: Consider using std::transform algorithm instead of a raw loop. [useStlAlgorithm]        neighbors_al_macs.push_back(tlvf::mac_from_string(sibling));
 controller/src/beerocks/master/db/db.cpp: style: Non-boolean value returned from function returning bool [returnNonBoolInBooleanFunction]        return -1;
 controller/src/beerocks/master/db/db.cpp: style: Parameter 'n' can be declared with const [constParameter]int db::get_node_bw_int(std::shared_ptr<node> &n)
 controller/src/beerocks/master/db/db.cpp: style: The scope of the variable 'listener_exist' can be reduced. [variableScope]    bool listener_exist;
@@ -107,7 +94,6 @@ controller/src/beerocks/master/db/network_map.cpp: style: Variable 'size' is ass
 controller/src/beerocks/master/son_actions.cpp: performance: Function parameter 'bssid' should be passed by const reference. [passedByValue]                                                     std::string sta_mac, std::string bssid)
 controller/src/beerocks/master/son_actions.cpp: performance: Function parameter 'hostap_mac' should be passed by const reference. [passedByValue]void son_actions::handle_dead_node(std::string mac, std::string hostap_mac, db &database,
 controller/src/beerocks/master/son_actions.cpp: performance: Function parameter 'sta_mac' should be passed by const reference. [passedByValue]                                                     std::string sta_mac, std::string bssid)
-controller/src/beerocks/master/son_actions.cpp: style: Consider using std::any_of algorithm instead of a raw loop. [useStlAlgorithm]            if (operating_class == operating_class_info.operating_class()) {
 controller/src/beerocks/master/son_actions.cpp: style: Local variable 'prev_task_id' shadows outer variable [shadowVariable]        int prev_task_id = database.get_association_handling_task_id(mac);
 controller/src/beerocks/master/son_actions.cpp: style: The scope of the variable 'prev_task_id' can be reduced. [variableScope]    int prev_task_id;
 controller/src/beerocks/master/son_management.cpp: style: Variable 'op_error_code' is assigned a value that is never used. [unreadVariable]            op_error_code = eChannelScanOperationCode::SCAN_IN_PROGRESS;
@@ -145,8 +131,6 @@ controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style 
 controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]            auto new_event        = CHANNEL_SELECTION_ALLOCATE_EVENT(sDfsCacPendinghostap_event);
 controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]        auto new_event = CHANNEL_SELECTION_ALLOCATE_EVENT(sDfsReEntrySampleSteeredClients_event);
 controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: C-style pointer casting [cstyleCast]    auto new_event             = CHANNEL_SELECTION_ALLOCATE_EVENT(sDfsCacPendinghostap_event);
-controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]            if (database.is_hostap_backhaul_manager(sibling)) {
-controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: Consider using std::find_if algorithm instead of a raw loop. [useStlAlgorithm]        if (database.is_node_5ghz(gw_slave)) {
 controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: Redundant initialization for 'hostap_parent_type'. The initialized value is overwritten before it is read. [redundantInitialization]        auto hostap_parent_type = database.get_node_type(hostap_parent_mac);
 controller/src/beerocks/master/tasks/channel_selection_task.cpp: style: The scope of the variable 'channel_80Mhz_step' can be reduced. [variableScope]    auto channel_80Mhz_step = CHANNEL_80MHZ_STEP;
 controller/src/beerocks/master/tasks/client_locating_task.cpp: performance: Function parameter 'client_mac_' should be passed by const reference. [passedByValue]                                           task_pool &tasks_, std::string client_mac_,
@@ -201,7 +185,6 @@ framework/platform/bpl/uci/cfg/bpl_cfg_uci.cpp: style: The scope of the variable
 framework/platform/bpl/uci/db/bpl_db.cpp: style: Parameter 'nested_params' can be declared with const [constParameter]    std::unordered_map<std::string, std::unordered_map<std::string, std::string>> &nested_params)
 framework/platform/bpl/uci/db/bpl_db.cpp: style: Parameter 'params' can be declared with const [constParameter]                  std::unordered_map<std::string, std::string> &params)
 framework/platform/bpl/uci/dhcp/bpl_dhcp.cpp: style: struct member 'dhcp_event_request::data' is never used. [unusedStructMember]    char data[];
-framework/tlvf/src/src/ClassList.cpp: style: Consider using std::accumulate algorithm instead of a raw loop. [useStlAlgorithm]        msg_len += c->getLen();
 framework/tlvf/test/tlvf_test.cpp: style: Local variable 'cmplx' shadows outer variable [shadowVariable]            auto cmplx = std::get<1>(tlv4->complex_list(0));
 framework/tlvf/test/tlvf_test.cpp: style: Local variable 'cmplx' shadows outer variable [shadowVariable]            auto cmplx = std::get<1>(tlv4->complex_list(1));
 framework/tlvf/test/tlvf_test.cpp: style: Local variable 'cmplx' shadows outer variable [shadowVariable]        auto cmplx = std::get<1>(tlv4->complex_list(i));
