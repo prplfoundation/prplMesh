@@ -27,6 +27,13 @@ class PrplMeshDocker(PrplMeshBase):
 
         config = kwargs.get("config", kwargs)
 
+        skip_init = False
+        try:
+            if config["skip-init"] == "True":
+                skip_init = True
+        except (KeyError, ValueError):
+            pass
+
         # List of device's consoles test can interact with
         self.consoles = [self]
 
@@ -49,17 +56,23 @@ class PrplMeshDocker(PrplMeshBase):
         if self.role == "controller":
             # Spawn dockerized controller
             docker_args.append("start-controller-agent")
-            self._run_shell_cmd(docker_cmd, docker_args)
+            if not skip_init:
+                self._run_shell_cmd(docker_cmd, docker_args)
+                time.sleep(self.delay)
+            else:
+                print("Skipping init for {}".format(self.name))
 
-            time.sleep(self.delay)
             self.controller_entity = ALEntityDocker(self.docker_name,
                                                     device=self, is_controller=True)
         else:
             # Spawn dockerized agent
             docker_args.append("start-agent")
-            self._run_shell_cmd(docker_cmd, docker_args)
+            if not skip_init:
+                self._run_shell_cmd(docker_cmd, docker_args)
+                time.sleep(self.delay)
+            else:
+                print("Skipping init for {}".format(self.name))
 
-            time.sleep(self.delay)
             self.agent_entity = ALEntityDocker(self.docker_name,
                                                device=self, is_controller=False)
 
