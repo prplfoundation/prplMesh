@@ -330,7 +330,7 @@ bool sta_wlan_hal_dwpal::roam(const sMacAddr &bssid, uint8_t channel)
     m_active_bssid.assign(bssid_str);
     m_active_channel = channel;
 
-    return false;
+    return true;
 }
 
 bool sta_wlan_hal_dwpal::get_4addr_mode()
