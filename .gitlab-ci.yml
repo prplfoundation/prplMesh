@@ -241,6 +241,7 @@ boardfarm-tests:
       - results
   needs:
     - job: build-in-docker
+    - job: image-build-boardfarm-ci
   tags:
     - boardfarm
 
