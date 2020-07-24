@@ -111,11 +111,6 @@ cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST:
   _type: class
   sync: uint8_t
 
-cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION:
-  _type: class
-  new_tx_state: int8_t
-  new_hostap_enabled_state: int8_t
-
 cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE:
   _type: class
   ap_stats_size:
