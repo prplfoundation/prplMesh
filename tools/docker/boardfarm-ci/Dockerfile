@@ -9,6 +9,7 @@ RUN apt-get update \
     git \
     gnupg \
     gnupg-agent \
+    jq \
     libsnmp-dev \
     netcat \
     software-properties-common \
