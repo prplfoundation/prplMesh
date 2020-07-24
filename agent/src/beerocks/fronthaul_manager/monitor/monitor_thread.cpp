@@ -487,14 +487,11 @@ void monitor_thread::after_select(bool timeout)
                 }
             }
 
-            int8_t new_tx_state               = mon_wlan_hal->get_radio_info().tx_enabled;
-            int8_t new_hostap_enabled_state   = mon_wlan_hal->get_radio_info().wifi_ctrl_enabled;
-            bool tx_state_changed             = false;
-            bool hostap_enabled_state_changed = false;
+            int8_t new_tx_state             = mon_wlan_hal->get_radio_info().tx_enabled;
+            int8_t new_hostap_enabled_state = mon_wlan_hal->get_radio_info().wifi_ctrl_enabled;
 
             if (mon_db.get_ap_tx_enabled() != new_tx_state) { // tx was changed
                 mon_db.set_ap_tx_enabled(new_tx_state);
-                tx_state_changed = true;
             }
 
             if (mon_db.get_hostapd_enabled() !=
@@ -503,21 +500,6 @@ void monitor_thread::after_select(bool timeout)
                     LOG(DEBUG) << "wifi_ctrl_enabled=2 on already attached to Hostapd";
                 }
                 mon_db.set_hostapd_enabled(new_hostap_enabled_state);
-                hostap_enabled_state_changed = true;
-            }
-
-            if (tx_state_changed || hostap_enabled_state_changed) {
-                // LOG(DEBUG) << "wifi_ctrl_enabled=" << int(new_hostap_enabled_state) << ", tx_enabled=" << int(new_tx_state);
-
-                auto notification = message_com::create_vs_message<
-                    beerocks_message::cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION>(cmdu_tx);
-                if (notification == nullptr) {
-                    LOG(ERROR) << "Failed building message!";
-                    return;
-                }
-                notification->new_tx_state()             = new_tx_state;
-                notification->new_hostap_enabled_state() = new_hostap_enabled_state;
-                message_com::send_cmdu(slave_socket, cmdu_tx);
             }
         }
 
