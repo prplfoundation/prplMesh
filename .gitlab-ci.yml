@@ -195,8 +195,16 @@ tlvf_test:
 bwl_dummy_unit_tests:
   extends: .run-test-in-docker
 
+#bcl_unit_tests:
+#  extends: .run-test-in-docker
+
+# dctest_one_test:
+#  extends: .run-test-dctest
+
+# Replacing bcl_unit_tests to run dctest. XXX: This is a test; only for dev
+# branch
 bcl_unit_tests:
-  extends: .run-test-in-docker
+  extends: .run-test-dctest
 
 run-tests:
   stage: test
