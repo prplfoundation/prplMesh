@@ -476,29 +476,6 @@ class cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST : public BaseClass
         uint8_t* m_sync = nullptr;
 };
 
-class cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION : public BaseClass
-{
-    public:
-        cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION();
-
-        static eActionOp_MONITOR get_action_op(){
-            return (eActionOp_MONITOR)(ACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION);
-        }
-        int8_t& new_tx_state();
-        int8_t& new_hostap_enabled_state();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_MONITOR* m_action_op = nullptr;
-        int8_t* m_new_tx_state = nullptr;
-        int8_t* m_new_hostap_enabled_state = nullptr;
-};
-
 class cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE : public BaseClass
 {
     public:
