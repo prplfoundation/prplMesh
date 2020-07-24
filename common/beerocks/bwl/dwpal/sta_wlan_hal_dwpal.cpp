@@ -219,9 +219,8 @@ bool sta_wlan_hal_dwpal::connect(const std::string &ssid, const std::string &pas
 
     // Add a new network
     auto network_id = add_network();
-    if (network_id < 0) {
-        LOG(ERROR) << "Failed (" << network_id
-                   << ") adding new network to interface: " << get_iface_name();
+    if (invalid_network_id == network_id) {
+        LOG(ERROR) << "Failed adding new network to interface: " << get_iface_name();
         return false;
     }
 
@@ -558,7 +557,7 @@ int sta_wlan_hal_dwpal::add_network()
     // Send command
     if (!dwpal_send_cmd(cmd, &reply)) {
         LOG(ERROR) << "ADD_NETWORK failed!";
-        return false;
+        return invalid_network_id;
     }
 
     // Return the newly added network ID

@@ -24,6 +24,8 @@ struct SScanResult {
     int8_t rssi;
 };
 
+constexpr int invalid_network_id = -1;
+
 } // namespace bwl
 
 #endif // _BWL_STA_WLAN_HAL_TYPES_H_
