@@ -178,7 +178,7 @@ upload-artifacts:
   script:
     - ./dctest.py
   needs:
-    - job: build-in-dctest
+    - job: build-in-docker
 
 .run-test-in-docker:
   stage: test
