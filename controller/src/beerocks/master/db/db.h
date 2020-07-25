@@ -774,6 +774,9 @@ public:
      */
     beerocks::eFreqType get_client_selected_bands(const sMacAddr &mac);
 
+    //TODO
+    bool is_hostap_on_selected_bands(beerocks::eFreqType selected_bands, const sMacAddr &hostap);
+
     /**
      * @brief Clear client's persistent information.
      * 

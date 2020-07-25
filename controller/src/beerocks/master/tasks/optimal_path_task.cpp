@@ -207,6 +207,23 @@ void optimal_path_task::work()
             }
         }
 
+        auto client = tlvf::mac_from_string(sta_mac);
+        if (database.get_client_stay_on_initial_radio(client) == eTriStateBool::ENABLE) {
+            if (is_steer_to_client_initial_radio_needed(potential_11k_aps, client)) {
+                // initial client hostap is on the candidate list, lets steer the client there
+                chosen_bssid = tlvf::mac_to_string(database.get_client_initial_radio(client));
+                state        = SEND_STEER_ACTION;
+                break;
+            }
+            finish();
+            return;
+        }
+
+        if (database.get_client_stay_on_selected_band(client) == eTriStateBool::ENABLE) {
+            remove_all_non_selected_band_radios(potential_11k_aps,
+                                                database.get_client_selected_bands(client));
+        }
+
         // Check if hostap has suitable ssid
         auto it = potential_11k_aps.begin();
         while (it != potential_11k_aps.end()) {
@@ -1207,7 +1224,7 @@ void optimal_path_task::work()
 
         state                = WAIT_FOR_HANDOVER;
         int steering_task_id = 0;
-
+        //TODO need to add maybe force steer with iminent for cases client db suggest
         if (database.get_node_11v_capability(sta_mac)) {
             if (sticky_roaming_rssi <= database.config.roaming_sticky_client_rssi_threshold) {
                 TASK_LOG(DEBUG) << "optimal_path_task: steering with disassociate imminent, sta "
@@ -1756,4 +1773,61 @@ bool optimal_path_task::is_hostap_on_cs_process(const std::string &hostap_mac)
         return true;
     }
     return false;
+}
+
+bool optimal_path_task::is_steer_to_client_initial_radio_needed(
+    std::unordered_map<std::string, bool> &radios, sMacAddr client)
+{
+    auto client_initial_hostap = database.get_client_initial_radio(client);
+
+    TASK_LOG(INFO) << "stay on initial radio enabled, current hostap is " << current_hostap
+                   << " and inital hostap is " << client_initial_hostap;
+
+    if (client_initial_hostap == tlvf::mac_from_string(current_hostap)) {
+        TASK_LOG(INFO) << "stay on initial radio enabled, current hostap is already the "
+                          "same as the initial "
+                       << client_initial_hostap;
+        return false;
+    }
+    // current hostap is diffrent form the initial hostap, lets try
+    // to find it in the steering potential candidate list
+    if (radios.find(tlvf::mac_to_string(client_initial_hostap)) == radios.end()) {
+        TASK_LOG(WARNING) << "initial hostap " << client_initial_hostap
+                          << " is not on the candidate ap list ";
+        // print list
+        auto it = radios.begin();
+        while (it != radios.end()) {
+            TASK_LOG(INFO) << "candidate " << it->first;
+        }
+        return false;
+    }
+    return true;
+}
+
+void optimal_path_task::remove_all_non_selected_band_radios(
+    std::unordered_map<std::string, bool> &radios, beerocks::eFreqType selected_bands)
+{
+    TASK_LOG(INFO) << "stay on selected band enabled, current hostap " << current_hostap
+                   << " is on band "
+                   << wireless_utils::which_freq(database.get_node_channel(current_hostap));
+    if (!database.is_hostap_on_selected_bands(selected_bands,
+                                              tlvf::mac_from_string(current_hostap))) {
+        TASK_LOG(WARNING) << "Current hostap " << current_hostap
+                          << " is not on one of client's selected bands " << selected_bands;
+    }
+    // remove all non selected bands from potential steering target list and continue
+    // with optimal path task
+    auto it = radios.begin();
+    while (it != radios.end()) {
+        TASK_LOG(INFO) << "candidate hostap " << it->first << " is on channel "
+                       << database.get_node_channel(it->first) << " on band "
+                       << wireless_utils::which_freq(database.get_node_channel(it->first));
+        if (!database.is_hostap_on_selected_bands(selected_bands,
+                                                  tlvf::mac_from_string(it->first))) {
+            TASK_LOG(INFO) << "Remove candidate " << it->first
+                           << " since its one of client's selected bands " << selected_bands;
+            it = radios.erase(it);
+        }
+        ++it;
+    }
 }

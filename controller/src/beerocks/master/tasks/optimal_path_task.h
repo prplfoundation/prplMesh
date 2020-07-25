@@ -62,6 +62,10 @@ private:
                                        const std::string &hostap_mac);
     double calculate_weighted_phy_rate(const std::string &hostap_mac, int &hops);
     bool is_hostap_on_cs_process(const std::string &hostap_mac);
+    bool is_steer_to_client_initial_radio_needed(std::unordered_map<std::string, bool> &radios,
+                                                 sMacAddr client);
+    void remove_all_non_selected_band_radios(std::unordered_map<std::string, bool> &radios,
+                                             beerocks::eFreqType selected_bands);
 
     db &database;
     ieee1905_1::CmduMessageTx &cmdu_tx;
