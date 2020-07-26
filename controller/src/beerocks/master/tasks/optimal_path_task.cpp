@@ -768,6 +768,26 @@ void optimal_path_task::work()
             }
         }
 
+        // client persistant db configurations may require manual
+        // steer to a specific radio.
+        // validate client radio/band configurations.
+        auto client = tlvf::mac_from_string(sta_mac);
+        if (database.get_client_stay_on_initial_radio(client) == eTriStateBool::ENABLE) {
+            if (is_steer_to_client_initial_radio_needed(hostaps, client)) {
+                // initial client hostap is on the candidate list, lets steer the client there
+                chosen_bssid = tlvf::mac_to_string(database.get_client_initial_radio(client));
+                state        = SEND_STEER_ACTION;
+                break;
+            }
+            finish();
+            return;
+        }
+
+        if (database.get_client_stay_on_selected_band(client) == eTriStateBool::ENABLE) {
+            remove_all_non_selected_band_radios(hostaps,
+                                                database.get_client_selected_bands(client));
+        }
+
         // Check if hostap has suitable ssid
         auto it = hostaps.begin();
         while (it != hostaps.end()) {
