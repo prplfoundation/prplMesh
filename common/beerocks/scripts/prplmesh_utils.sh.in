@@ -310,17 +310,27 @@ status_function() {
     if  pgrep -l beerocks_cont ; then
         echo "executing operational test using bml"
         if execute_beerocks_command "$bml_cmd" ; then
+            OUTPUT=$output
             # Expecting
             # > OK Main radio agent operational
             # > OK wlan0 radio agent operational
             # > OK wlan2 radio agent operational
-            OK_Count=$(echo "$output" | grep -c -e "OK.*operational")
+            OK_Count=$(echo "$OUTPUT" | grep -c -e "OK.*operational")
             if [ "$OK_Count" -eq 3 ]; then
                 success "operational test success!"
+                OUTPUT=$(echo $OUTPUT | grep -oP '(FAIL| OK).*?operational' | sed -e "s/ OK/OK/")
+                success "$OUTPUT"
                 exit 0
             else
                 err "operational test failed!"
-                err "$output"
+                OUTPUT=$(echo $OUTPUT | grep -oP '(FAIL| OK).*?operational' | sed -e "s/ OK/OK/")
+                echo "$OUTPUT"
+                if [ "$(echo "$OUTPUT" | grep -c -e " @BEEROCKS_WLAN1_IFACE@ .*operational")" -eq 0 ]; then
+                    err "FAIL @BEEROCKS_WLAN1_IFACE@ radio agent operational"
+                fi
+                if [ "$(echo "$OUTPUT" | grep -c -e " @BEEROCKS_WLAN2_IFACE@ .*operational")" -eq 0 ]; then
+                    err "FAIL @BEEROCKS_WLAN2_IFACE@ radio agent operational"
+                fi
                 exit 1
             fi
         else
