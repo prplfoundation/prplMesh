@@ -96,7 +96,6 @@ controller/src/beerocks/master/son_actions.cpp: performance: Function parameter 
 controller/src/beerocks/master/son_actions.cpp: performance: Function parameter 'sta_mac' should be passed by const reference. [passedByValue]                                                     std::string sta_mac, std::string bssid)
 controller/src/beerocks/master/son_actions.cpp: style: Local variable 'prev_task_id' shadows outer variable [shadowVariable]        int prev_task_id = database.get_association_handling_task_id(mac);
 controller/src/beerocks/master/son_actions.cpp: style: The scope of the variable 'prev_task_id' can be reduced. [variableScope]    int prev_task_id;
-controller/src/beerocks/master/son_management.cpp: style: Condition '!client_list.size()' is always true [knownConditionTrueFalse]        if (!client_list.size()) {
 controller/src/beerocks/master/son_management.cpp: style: Variable 'op_error_code' is assigned a value that is never used. [unreadVariable]            op_error_code = eChannelScanOperationCode::SCAN_IN_PROGRESS;
 controller/src/beerocks/master/son_management.cpp: style: Variable 'op_error_code' is assigned a value that is never used. [unreadVariable]        auto op_error_code = eChannelScanOperationCode::SUCCESS;
 controller/src/beerocks/master/son_management.cpp: style: Variable 'result_status' is assigned a value that is never used. [unreadVariable]            result_status = last_scan_success;
