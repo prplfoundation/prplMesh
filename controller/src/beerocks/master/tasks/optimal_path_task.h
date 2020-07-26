@@ -44,16 +44,11 @@ private:
     void send_rssi_measurement_request(const std::string &agent_mac, const std::string &client_mac,
                                        int channel, const std::string &hostap, int id);
     bool assert_original_parent();
-    bool calculate_measurement_delay(const std::set<std::string> &temp_cross_hostaps,
-                                     const std::string &sta_ap, const std::string &sta_mac);
-    bool ready_to_pick_optimal_path(const std::set<std::string> &temp_cross_hostaps,
-                                    const std::string &sta_ap, const std::string &sta_mac);
-    bool is_measurement_valid(const std::set<std::string> &temp_cross_hostaps,
-                              const std::string &sta_ap, const std::string &sta_mac);
-    bool all_measurement_succeed(const std::set<std::string> &temp_cross_hostaps,
-                                 const std::string &sta_ap, const std::string &sta_mac);
-    bool is_delay_match_window(const std::set<std::string> &temp_cross_hostaps,
-                               const std::string &sta_ap);
+    bool calculate_measurement_delay(const std::string &sta_ap, const std::string &sta_mac);
+    bool ready_to_pick_optimal_path(const std::string &sta_ap, const std::string &sta_mac);
+    bool is_measurement_valid(const std::string &sta_ap, const std::string &sta_mac);
+    bool all_measurement_succeed(const std::string &sta_ap, const std::string &sta_mac);
+    bool is_delay_match_window(const std::string &sta_ap);
     void change_measurement_window_size(const std::string &sta_ap, bool inc);
     bool get_station_default_capabilities(bool is_bandtype_5ghz,
                                           beerocks::message::sRadioCapabilities &default_sta_cap);
@@ -116,7 +111,7 @@ private:
     beerocks_message::sBeaconRequest11k measurement_request = {};
 
     //CROSS
-    std::set<std::string> hostaps;
+    std::unordered_map<std::string, bool> hostaps;
     int calculate_measurement_delay_count = 0;
 };
 

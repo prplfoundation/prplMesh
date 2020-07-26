@@ -207,6 +207,9 @@ void optimal_path_task::work()
             }
         }
 
+        // client persistant db configurations may require manual
+        // steer to a specific radio.
+        // validate client radio/band configurations.
         auto client = tlvf::mac_from_string(sta_mac);
         if (database.get_client_stay_on_initial_radio(client) == eTriStateBool::ENABLE) {
             if (is_steer_to_client_initial_radio_needed(potential_11k_aps, client)) {
@@ -723,7 +726,7 @@ void optimal_path_task::work()
                                         (wireless_utils::which_subband(hostap_channel)));
                 if (hostap_meas) {
                     TASK_LOG(DEBUG) << "sub band match insert to list, hostap  = " << hostap;
-                    hostaps.insert(hostap);
+                    hostaps.insert({hostap, false});
                     found_band_match = true;
                     break;
                 }
@@ -741,7 +744,7 @@ void optimal_path_task::work()
                         TASK_LOG(DEBUG)
                             << "sub band match insert to list, hostap_backhaul_manager = "
                             << hostap_backhaul_manager;
-                        hostaps.insert(hostap_backhaul_manager);
+                        hostaps.insert({hostap_backhaul_manager, false});
                         found_band_match = true;
                         continue;
                     }
@@ -757,7 +760,7 @@ void optimal_path_task::work()
                     if (database.capability_check(hostap, channel)) {
                         TASK_LOG(DEBUG)
                             << "sub band support match insert to list, hostap = " << hostap;
-                        hostaps.insert(hostap);
+                        hostaps.insert({hostap, false});
                         found_band_match = true;
                         break;
                     }
@@ -770,10 +773,10 @@ void optimal_path_task::work()
         while (it != hostaps.end()) {
 
             std::string candidate_bssid =
-                database.get_hostap_vap_with_ssid(*it, current_hostap_ssid);
+                database.get_hostap_vap_with_ssid(it->first, current_hostap_ssid);
 
             if (candidate_bssid.empty()) {
-                LOG(INFO) << "Remove candidate " << *it
+                LOG(INFO) << "Remove candidate " << it->first
                           << ". Hostap doesn't have current_hostap_ssid " << current_hostap_ssid;
                 it = hostaps.erase(it);
                 continue;
@@ -782,7 +785,7 @@ void optimal_path_task::work()
             // Steering allowed on all vaps unless load_steer_on_vaps list is defined
             // on the platform , in that case verify that vap is on that list
             if (!database.is_vap_on_steer_list(candidate_bssid)) {
-                TASK_LOG(INFO) << "Remove candidate " << *it << " , vap " << candidate_bssid
+                TASK_LOG(INFO) << "Remove candidate " << it->first << " , vap " << candidate_bssid
                                << " is not in steer list: " << database.config.load_steer_on_vaps;
                 it = hostaps.erase(it);
             }
@@ -849,8 +852,7 @@ void optimal_path_task::work()
         if (!hostaps.empty()) //no cross measurement
         {
             TASK_LOG(DEBUG) << " **after all responses has been received calculating delays** ";
-            auto temp_cross_hostaps = hostaps;
-            if (!calculate_measurement_delay(temp_cross_hostaps, current_hostap, sta_mac)) {
+            if (!calculate_measurement_delay(current_hostap, sta_mac)) {
                 TASK_LOG(DEBUG)
                     << " **re-measure cross ire STATE = REQUEST_CROSS_RSSI_MEASUREMENTS:** ";
                 state = REQUEST_CROSS_RSSI_MEASUREMENTS;
@@ -886,12 +888,13 @@ void optimal_path_task::work()
 
         //add all other ap's
         for (auto &hostap : hostaps) {
-            if (hostap == current_hostap)
+            if (hostap.first == current_hostap)
                 continue;
             //when hostap is backhaul manager , the mathing candidate is his same band sibling
-            if (database.is_hostap_backhaul_manager(hostap) &&
-                database.get_node_type(database.get_node_parent(hostap)) != beerocks::TYPE_GW) {
-                auto sibling_backhaul_manager = database.get_node_siblings(hostap);
+            if (database.is_hostap_backhaul_manager(hostap.first) &&
+                database.get_node_type(database.get_node_parent(hostap.first)) !=
+                    beerocks::TYPE_GW) {
+                auto sibling_backhaul_manager = database.get_node_siblings(hostap.first);
                 for (auto &sibling : sibling_backhaul_manager) {
                     if (!database.is_ap_out_of_band(sibling, sta_mac)) {
                         //actual ap candidate (is case measured through backhaul)
@@ -910,9 +913,9 @@ void optimal_path_task::work()
                     }
                 }
             } else {
-                hostap_candidates.push_back({hostap, false});
+                hostap_candidates.push_back(hostap);
                 if (database.settings_client_band_steering()) {
-                    auto hostap_siblings = database.get_node_siblings(hostap);
+                    auto hostap_siblings = database.get_node_siblings(hostap.first);
                     for (auto &sibling : hostap_siblings) {
                         if (!database.is_hostap_active(sibling) ||
                             is_hostap_on_cs_process(sibling)) {
@@ -1367,8 +1370,8 @@ void optimal_path_task::handle_response(std::string mac,
                            << " channel=" << channel);
 
         for (auto &hostap : hostaps) {
-            auto agent_mac = database.get_node_parent_ire(hostap);
-            send_rssi_measurement_request(agent_mac, client_mac, channel, hostap, id);
+            auto agent_mac = database.get_node_parent_ire(hostap.first);
+            send_rssi_measurement_request(agent_mac, client_mac, channel, hostap.first, id);
         }
 
         break;
@@ -1427,8 +1430,7 @@ bool optimal_path_task::assert_original_parent()
 
 //TO DO - calculate if the delay are in the burst window. if not set appropriate delays and return false
 //else return true, and the measure will proceed.
-bool optimal_path_task::calculate_measurement_delay(const std::set<std::string> &temp_cross_hostaps,
-                                                    const std::string &current_hostap,
+bool optimal_path_task::calculate_measurement_delay(const std::string &current_hostap,
                                                     const std::string &sta_mac)
 {
     calculate_measurement_delay_count++;
@@ -1439,25 +1441,23 @@ bool optimal_path_task::calculate_measurement_delay(const std::set<std::string> 
         return true;
     }
 
-    return (ready_to_pick_optimal_path(temp_cross_hostaps, current_hostap, sta_mac));
+    return (ready_to_pick_optimal_path(current_hostap, sta_mac));
 }
 
-bool optimal_path_task::ready_to_pick_optimal_path(const std::set<std::string> &temp_cross_hostaps,
-                                                   const std::string &current_hostap,
+bool optimal_path_task::ready_to_pick_optimal_path(const std::string &current_hostap,
                                                    const std::string &sta_mac)
 {
-    if (!is_measurement_valid(temp_cross_hostaps, current_hostap, sta_mac)) {
+    if (!is_measurement_valid(current_hostap, sta_mac)) {
         return false;
-    } else if (all_measurement_succeed(temp_cross_hostaps, current_hostap, sta_mac)) {
+    } else if (all_measurement_succeed(current_hostap, sta_mac)) {
         return true;
-    } else if (is_delay_match_window(temp_cross_hostaps, current_hostap)) {
+    } else if (is_delay_match_window(current_hostap)) {
         return true;
     }
     return false;
 }
 
-bool optimal_path_task::is_measurement_valid(const std::set<std::string> &temp_cross_hostaps,
-                                             const std::string &current_hostap,
+bool optimal_path_task::is_measurement_valid(const std::string &current_hostap,
                                              const std::string &sta_mac)
 {
     int delta_burst = 0;
@@ -1470,10 +1470,10 @@ bool optimal_path_task::is_measurement_valid(const std::set<std::string> &temp_c
     }
     //iterating on cross hostap to check if all measurement succeed (all IRE captured at list 1)
     int8_t rx_rssi, rx_packets;
-    for (auto &hostap : temp_cross_hostaps) {
-        std::string hostap_tmp = hostap;
-        if (database.is_hostap_backhaul_manager(hostap) && database.is_node_5ghz(sta_mac)) {
-            hostap_tmp = database.get_5ghz_sibling_hostap(hostap);
+    for (auto &hostap : hostaps) {
+        std::string hostap_tmp = hostap.first;
+        if (database.is_hostap_backhaul_manager(hostap.first) && database.is_node_5ghz(sta_mac)) {
+            hostap_tmp = database.get_5ghz_sibling_hostap(hostap.first);
         }
         if (hostap_tmp.empty() ||
             !database.get_node_cross_rx_rssi(sta_mac, hostap_tmp, rx_rssi, rx_packets)) {
@@ -1487,21 +1487,21 @@ bool optimal_path_task::is_measurement_valid(const std::set<std::string> &temp_c
         }
         TASK_LOG(DEBUG) << "hostap =" << hostap_tmp << " rx_rssi = " << int(rx_rssi)
                         << " rx_packets = " << int(rx_packets);
+        hostap.second = true;
     }
     return true;
 }
 
-bool optimal_path_task::all_measurement_succeed(const std::set<std::string> &temp_cross_hostaps,
-                                                const std::string &current_hostap,
+bool optimal_path_task::all_measurement_succeed(const std::string &current_hostap,
                                                 const std::string &sta_mac)
 {
     //iterating on cross hostap to check if all measurement succeed (all IRE captured at list 1)
     int8_t rx_rssi, rx_packets;
     bool all_hostapd_got_packets = false;
-    for (auto &hostap : temp_cross_hostaps) {
-        std::string hostap_tmp = hostap;
-        if (database.is_hostap_backhaul_manager(hostap) && database.is_node_5ghz(sta_mac)) {
-            hostap_tmp = database.get_5ghz_sibling_hostap(hostap);
+    for (auto &hostap : hostaps) {
+        std::string hostap_tmp = hostap.first;
+        if (database.is_hostap_backhaul_manager(hostap.first) && database.is_node_5ghz(sta_mac)) {
+            hostap_tmp = database.get_5ghz_sibling_hostap(hostap.first);
         }
         if (hostap_tmp.empty() ||
             !database.get_node_cross_rx_rssi(sta_mac, hostap_tmp, rx_rssi, rx_packets)) {
@@ -1532,22 +1532,21 @@ bool optimal_path_task::all_measurement_succeed(const std::set<std::string> &tem
     return all_hostapd_got_packets;
 }
 
-bool optimal_path_task::is_delay_match_window(const std::set<std::string> &temp_cross_hostaps,
-                                              const std::string &current_hostap)
+bool optimal_path_task::is_delay_match_window(const std::string &current_hostap)
 {
     bool res        = false;
     int delta_burst = 0;
     int delta_max   = 0;
     std::string delta_max_mac;
-    auto local_hostaps = temp_cross_hostaps;
+    auto local_hostaps = hostaps;
 
     //find the max delay on cross ire
-    for (auto &hostap : temp_cross_hostaps) {
-        TASK_LOG(DEBUG) << "hostap =" << hostap;
-        auto measurement_delay = (database.get_measurement_recv_delta(hostap) / 2);
+    for (auto &hostap : hostaps) {
+        TASK_LOG(DEBUG) << "hostap =" << hostap.first;
+        auto measurement_delay = (database.get_measurement_recv_delta(hostap.first) / 2);
         if (delta_max <= measurement_delay) {
             delta_max     = measurement_delay;
-            delta_max_mac = hostap;
+            delta_max_mac = hostap.first;
         }
     }
 
@@ -1595,8 +1594,8 @@ bool optimal_path_task::is_delay_match_window(const std::set<std::string> &temp_
     TASK_LOG(DEBUG) << "actual_max_delay_percent =" << float(actual_max_delay_percent);
     //calculating the delay for the rest of the ire's
     for (auto &hostap : local_hostaps) {
-        int hostap_delta        = (database.get_measurement_recv_delta(hostap) / 2);
-        int cross_ap_priv_delay = database.get_measurement_delay(hostap);
+        int hostap_delta        = (database.get_measurement_recv_delta(hostap.first) / 2);
+        int cross_ap_priv_delay = database.get_measurement_delay(hostap.first);
         //adding privies delay to meas delay ( beacause do not take in to account in meas)
         int measurement_delay;
         if (delta_max_sum >
@@ -1625,7 +1624,7 @@ bool optimal_path_task::is_delay_match_window(const std::set<std::string> &temp_
                         << " = delta_max_sum_delay = "
                         << "__ " << delta_max_sum << " __";
         //all other ire's will align with max delay ire.
-        database.set_measurement_delay(hostap, measurement_delay);
+        database.set_measurement_delay(hostap.first, measurement_delay);
         TASK_LOG(DEBUG) << "hostap " << hostap << " hostap_measurement_delay = "
                         << "__ " << int(measurement_delay) << " __";
     }
