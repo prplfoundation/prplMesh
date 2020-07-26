@@ -563,8 +563,8 @@ void cli_bml::setFunctionsMapAndArray()
         " selected_bands - Bitwise parameter, 1 for 2.4G, 2 for 5G, 3 for both, 0 for Disabled"
         " stay_on_initial_radio - 1 for true, 0 for false or (default) -1 for not configured,"
         " stay_on_selected_device - 1 for true, 0 for false or (default) -1 for not configured",
-        static_cast<pFunction>(&cli_bml::client_set_client_caller), 2, 4, STRING_ARG, INT_ARG,
-        INT_ARG, INT_ARG);
+        static_cast<pFunction>(&cli_bml::client_set_client_caller), 2, 4, STRING_ARG, STRING_ARG,
+        STRING_ARG, STRING_ARG);
     insertCommandToMap("bml_client_get_client", "<sta_mac>", "Get client with the given STA MAC.",
                        static_cast<pFunction>(&cli_bml::client_get_client_caller), 1, 1,
                        STRING_ARG);
@@ -2230,9 +2230,9 @@ int cli_bml::client_set_client(const std::string &sta_mac, int8_t selected_bands
 {
     std::cout << "client_set_client: " << std::endl
               << "  sta_mac: " << sta_mac << std::endl
-              << "  selected_bands: " << selected_bands << std::endl
-              << "  stay_on_initial_radio: " << stay_on_initial_radio << std::endl
-              << "  stay_on_selected_device: " << stay_on_selected_device << std::endl;
+              << "  selected_bands: " << int(selected_bands) << std::endl
+              << "  stay_on_initial_radio: " << int(stay_on_initial_radio) << std::endl
+              << "  stay_on_selected_device: " << int(stay_on_selected_device) << std::endl;
 
     BML_CLIENT_CONFIG cfg{
         .stay_on_initial_radio   = stay_on_initial_radio,
@@ -2285,7 +2285,7 @@ int cli_bml::client_get_client(const std::string &sta_mac)
 
             return ret;
         };
-        std::cout << "client: " << client.sta_mac << std::endl
+        std::cout << "client: " << tlvf::mac_to_string(client.sta_mac) << std::endl
                   << " timestamp_sec: " << client.timestamp_sec << std::endl
                   << " stay_on_initial_radio: " << client_bool_print(client.stay_on_initial_radio)
                   << std::endl
