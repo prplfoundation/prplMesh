@@ -2060,9 +2060,8 @@ void son_management::handle_bml_message(Socket *sd,
             }
         };
 
-        // TODO: replace with a list of configured clients read from controller-db
-        std::vector<sMacAddr> client_list;
-        if (!client_list.size()) {
+        auto client_list = database.get_clients_with_persistent_data_configured();
+        if (client_list.empty()) {
             LOG(DEBUG) << "client list is empty!";
             // Send a valid response with an empty list
             send_response(true);
