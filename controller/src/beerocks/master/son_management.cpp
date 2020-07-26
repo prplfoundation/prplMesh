@@ -2358,16 +2358,52 @@ void son_management::handle_bml_message(Socket *sd,
             break;
         }
 
-        //TODO: fill client information from controller DB
-        response->client().sta_mac                 = request->sta_mac();
-        response->client().timestamp_sec           = 0;
-        response->client().stay_on_initial_radio   = PARAMETER_NOT_CONFIGURED;
-        response->client().stay_on_selected_device = PARAMETER_NOT_CONFIGURED;
-        response->client().selected_bands          = eClientSelectedBands::eSelectedBands_Disabled;
-        response->client().single_band             = PARAMETER_NOT_CONFIGURED;
-        response->client().time_life_delay_days    = PARAMETER_NOT_CONFIGURED;
-        response->result()                         = 0; //Success.
+        auto client_mac = request->sta_mac();
+        if (!database.has_node(client_mac)) {
+            LOG(DEBUG) << "Requested client " << client_mac << " is not listed in the DB";
+            response->result() = 1; //Fail.
+            message_com::send_cmdu(sd, cmdu_tx);
+            break;
+        }
 
+        // A configured client must have a valid timestamp configured
+        auto client_timestamp = database.get_client_parameters_last_edit(client_mac);
+        if (client_timestamp == std::chrono::steady_clock::time_point::min()) {
+            LOG(DEBUG) << "Requested client " << client_mac
+                       << " doesn't have a valid timestamp listed in the DB";
+            response->result() = 1; //Fail.
+            message_com::send_cmdu(sd, cmdu_tx);
+            break;
+        }
+
+        // Client mac
+        response->client().sta_mac = client_mac;
+        // Timestamp
+        response->client().timestamp_sec = client_timestamp.time_since_epoch().count();
+        // Stay on initial radio
+        response->client().stay_on_initial_radio =
+            int(database.get_client_stay_on_initial_radio(client_mac));
+        // Selected bands
+        auto selected_band_enable = database.get_client_stay_on_selected_band(client_mac);
+        if (selected_band_enable == eTriStateBool::NOT_CONFIGURED) {
+            response->client().selected_bands = PARAMETER_NOT_CONFIGURED;
+        } else {
+            response->client().selected_bands = database.get_client_selected_bands(client_mac);
+        }
+        // Timelife Delay - scaled from seconds to days
+        auto timelife_delay_sec = database.get_client_time_life_delay(client_mac);
+        response->client().time_life_delay_days =
+            (timelife_delay_sec == std::chrono::seconds::zero())
+                ? PARAMETER_NOT_CONFIGURED
+                : std::chrono::duration_cast<std::chrono::hours>(timelife_delay_sec).count() / 24;
+
+        // Currently not supported in DB
+        // Stay on selected device
+        response->client().stay_on_selected_device = PARAMETER_NOT_CONFIGURED;
+        // Does client support only single band
+        response->client().single_band = PARAMETER_NOT_CONFIGURED;
+
+        response->result() = 0; //Success.
         message_com::send_cmdu(sd, cmdu_tx);
         break;
     }
