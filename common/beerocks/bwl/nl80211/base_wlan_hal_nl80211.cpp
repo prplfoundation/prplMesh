@@ -764,6 +764,7 @@ bool base_wlan_hal_nl80211::refresh_vaps_info(int id)
             VAPElement vap_element;
 
             // Try reading the BSSID and SSID of the requested VAP
+            vap_element.bss  = reply["bss[" + std::to_string(vap_id) + "]"];
             vap_element.mac  = reply["bssid[" + std::to_string(vap_id) + "]"];
             vap_element.ssid = reply["ssid[" + std::to_string(vap_id) + "]"];
             // TODO https://github.com/prplfoundation/prplMesh/issues/1175
@@ -780,7 +781,7 @@ bool base_wlan_hal_nl80211::refresh_vaps_info(int id)
 
             // Store the VAP element
             LOG(DEBUG) << "Detected VAP ID (" << vap_id << ") - MAC: " << vap_element.mac
-                       << ", SSID: " << vap_element.ssid;
+                       << ", SSID: " << vap_element.ssid << ", BSS: " << vap_element.bss;
 
             m_radio_info.available_vaps[vap_id] = vap_element;
         }
@@ -789,6 +790,7 @@ bool base_wlan_hal_nl80211::refresh_vaps_info(int id)
         VAPElement vap_element;
 
         // Try reading the BSSID and SSID of the requested VAP
+        vap_element.bss  = reply["bss[" + std::to_string(id) + "]"];
         vap_element.mac  = reply["bssid[" + std::to_string(id) + "]"];
         vap_element.ssid = reply["ssid[" + std::to_string(id) + "]"];
         // TODO https://github.com/prplfoundation/prplMesh/issues/1175
