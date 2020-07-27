@@ -210,6 +210,16 @@ public:
     void erase_client(const sMacAddr &client_mac, sMacAddr bssid = net::network_utils::ZERO_MAC);
 
     /**
+     * @brief Get the MAC address (or bssid) of an AP based on the ruid and ssid.
+     *
+     * @param[in] ruid The Radio UID.
+     * @param[in] ssid The ssid of the AP.
+     * @param[out] value The mac address/bssid if found, else an invalid MAC (zero).
+     * @return true if the mac/bssid was found, false otherwise.
+     */
+    bool get_mac_by_ssid(const sMacAddr &ruid, const std::string &ssid, sMacAddr &value);
+
+    /**
      * @brief 1905.1 Neighbor device information
      * Information gathered from a neighbor device upon reception of a Topology Discovery message.
      */
