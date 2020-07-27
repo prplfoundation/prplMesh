@@ -172,13 +172,6 @@ upload-artifacts:
     - build-for-glinet-b1300
     - build-for-turris-omnia
 
-.run-test-dctest:
-  stage: test
-  extends: .in-prplmesh-builder
-  script:
-    - ./dctest.py
-  needs:
-    - job: build-in-docker
 
 .run-test-in-docker:
   stage: test
@@ -195,16 +188,17 @@ tlvf_test:
 bwl_dummy_unit_tests:
   extends: .run-test-in-docker
 
-#bcl_unit_tests:
-#  extends: .run-test-in-docker
-
-# dctest_one_test:
-#  extends: .run-test-dctest
-
-# Replacing bcl_unit_tests to run dctest. XXX: This is a test; only for dev
-# branch
 bcl_unit_tests:
-  extends: .run-test-dctest
+  extends: .run-test-in-docker
+
+dctest_one_test:
+  stage: test
+  script:
+    - ./dctest.py
+  tags:
+    - boardfarm-compose
+  needs:
+    - job: build-in-docker
 
 run-tests:
   stage: test
