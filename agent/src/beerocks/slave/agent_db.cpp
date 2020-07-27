@@ -96,4 +96,22 @@ void AgentDB::erase_client(const sMacAddr &client_mac, sMacAddr bssid)
     }
 }
 
+bool AgentDB::get_mac_by_ssid(const sMacAddr &ruid, const std::string &ssid, sMacAddr &value)
+{
+    value      = net::network_utils::ZERO_MAC;
+    auto radio = get_radio_by_mac(ruid, AgentDB::eMacType::RADIO);
+    if (!radio) {
+        LOG(ERROR) << "No radio with ruid '" << ruid << "' found!";
+        return false;
+    }
+
+    for (const auto &bssid : radio->front.bssids) {
+        if (bssid.ssid == ssid) {
+            value = bssid.mac;
+            return true;
+        }
+    }
+    return false;
+}
+
 } // namespace beerocks
