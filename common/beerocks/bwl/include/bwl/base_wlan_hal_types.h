@@ -46,17 +46,21 @@ enum class AntMode { Invalid = 0, ANT_1X1, ANT_2X2, ANT_3X3, ANT_4X4 };
 enum class WiFiChanBW { Invalid = 0, BW_20 = 20, BW_40 = 40, BW_80 = 80 };
 
 struct VAPElement {
+    /**
+     * Basic Service Set (i.e.: VAP name, e.g.: wlan0.0, wlan0.1, wlan0.2, ...).
+     */
+    std::string bss;
     std::string ssid;
     std::string mac;
     bool fronthaul;
     bool backhaul;
 
-    virtual bool operator==(const VAPElement &other) const
+    bool operator==(const VAPElement &other) const
     {
         return (ssid == other.ssid && mac == other.mac);
     }
 
-    virtual bool operator!=(const VAPElement &other) const
+    bool operator!=(const VAPElement &other) const
     {
         return (ssid != other.ssid || mac != other.mac);
     }
