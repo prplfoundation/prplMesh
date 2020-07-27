@@ -23,12 +23,10 @@ Select Prplmesh as the project, and "Bug" as the issue type (you can use "Task" 
 
 ## Improving documentation
 
-High-level developer documentation can be found on the [wiki](https://github.com/prplfoundation/prplMesh/wiki), which can be edited in-place.
+High-level developer documentation can be found on [Confluence](https://confluence.prplfoundation.org/display/PRPLMESH), which can be edited in-place.
 
 User documentation is still under development.
 It currently resides as pptx and docx documents in the [documentation](documentation/) directory.
-It is intended to be migrated to Jekyll markdown and to be published with github pages on https://prplfoundation.github.io/prplMesh.
-
 
 ## Contributing code
 
