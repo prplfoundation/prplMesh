@@ -113,6 +113,13 @@ cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL:
   _type: class
   params: sLoggingLevelChange
 
+cACTION_CONTROL_MESSAGE_TO_RADIO_REQUEST:
+  _type: class
+  radio_mac: sMacAddr
+
+cACTION_CONTROL_MESSAGE_TO_RADIO_RESPONSE:
+  _type: class
+
 #################################################
 # HOSTAP
 #################################################

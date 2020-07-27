@@ -131,3 +131,13 @@ cACTION_PLATFORM_ERROR_NOTIFICATION:
     _type: char
     _length: [256]
     _comment: # Must match BPL_ERROR_STRING_LEN
+
+cACTION_PLATFORM_MESSAGE_TO_RADIO_REQUEST:
+  _type: class
+  params: sMacAddr
+
+cACTION_PLATFORM_MESSAGE_TO_RADIO_RESPONSE:
+  _type: class
+  result:
+    _type: uint8_t
+    _comment: # 0 - Failure, 1 - Success

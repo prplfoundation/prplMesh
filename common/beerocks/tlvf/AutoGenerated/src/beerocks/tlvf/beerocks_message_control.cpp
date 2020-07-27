@@ -1537,6 +1537,134 @@ bool cACTION_CONTROL_CHANGE_MODULE_LOGGING_LEVEL::init()
     return true;
 }
 
+cACTION_CONTROL_MESSAGE_TO_RADIO_REQUEST::cACTION_CONTROL_MESSAGE_TO_RADIO_REQUEST(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_MESSAGE_TO_RADIO_REQUEST::cACTION_CONTROL_MESSAGE_TO_RADIO_REQUEST(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_MESSAGE_TO_RADIO_REQUEST::~cACTION_CONTROL_MESSAGE_TO_RADIO_REQUEST() {
+}
+sMacAddr& cACTION_CONTROL_MESSAGE_TO_RADIO_REQUEST::radio_mac() {
+    return (sMacAddr&)(*m_radio_mac);
+}
+
+void cACTION_CONTROL_MESSAGE_TO_RADIO_REQUEST::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
+    m_radio_mac->struct_swap();
+}
+
+bool cACTION_CONTROL_MESSAGE_TO_RADIO_REQUEST::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_CONTROL_MESSAGE_TO_RADIO_REQUEST::get_initial_size()
+{
+    size_t class_size = 0;
+    class_size += sizeof(sMacAddr); // radio_mac
+    return class_size;
+}
+
+bool cACTION_CONTROL_MESSAGE_TO_RADIO_REQUEST::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    m_radio_mac = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";
+        return false;
+    }
+    if (!m_parse__) { m_radio_mac->struct_init(); }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
+cACTION_CONTROL_MESSAGE_TO_RADIO_RESPONSE::cACTION_CONTROL_MESSAGE_TO_RADIO_RESPONSE(uint8_t* buff, size_t buff_len, bool parse) :
+    BaseClass(buff, buff_len, parse) {
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_MESSAGE_TO_RADIO_RESPONSE::cACTION_CONTROL_MESSAGE_TO_RADIO_RESPONSE(std::shared_ptr<BaseClass> base, bool parse) :
+BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
+    m_init_succeeded = init();
+}
+cACTION_CONTROL_MESSAGE_TO_RADIO_RESPONSE::~cACTION_CONTROL_MESSAGE_TO_RADIO_RESPONSE() {
+}
+void cACTION_CONTROL_MESSAGE_TO_RADIO_RESPONSE::class_swap()
+{
+    tlvf_swap(8*sizeof(eActionOp_CONTROL), reinterpret_cast<uint8_t*>(m_action_op));
+}
+
+bool cACTION_CONTROL_MESSAGE_TO_RADIO_RESPONSE::finalize()
+{
+    if (m_parse__) {
+        TLVF_LOG(DEBUG) << "finalize() called but m_parse__ is set";
+        return true;
+    }
+    if (m_finalized__) {
+        TLVF_LOG(DEBUG) << "finalize() called for already finalized class";
+        return true;
+    }
+    if (!isPostInitSucceeded()) {
+        TLVF_LOG(ERROR) << "post init check failed";
+        return false;
+    }
+    if (m_inner__) {
+        if (!m_inner__->finalize()) {
+            TLVF_LOG(ERROR) << "m_inner__->finalize() failed";
+            return false;
+        }
+        auto tailroom = m_inner__->getMessageBuffLength() - m_inner__->getMessageLength();
+        m_buff_ptr__ -= tailroom;
+    }
+    class_swap();
+    m_finalized__ = true;
+    return true;
+}
+
+size_t cACTION_CONTROL_MESSAGE_TO_RADIO_RESPONSE::get_initial_size()
+{
+    size_t class_size = 0;
+    return class_size;
+}
+
+bool cACTION_CONTROL_MESSAGE_TO_RADIO_RESPONSE::init()
+{
+    if (getBuffRemainingBytes() < get_initial_size()) {
+        TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
+        return false;
+    }
+    if (m_parse__) { class_swap(); }
+    return true;
+}
+
 cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION::cACTION_CONTROL_HOSTAP_CSA_ERROR_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse) :
     BaseClass(buff, buff_len, parse) {
     m_init_succeeded = init();

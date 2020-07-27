@@ -3480,6 +3480,30 @@ int bml_internal::channel_selection(const char *al_mac, const char *ruid)
     return BML_RET_OK;
 }
 
+int bml_internal::message_to_radio(const sMacAddr &radio_mac)
+{
+    auto request =
+        message_com::create_vs_message<beerocks_message::cACTION_BML_MESSAGE_TO_RADIO_REQUEST>(
+            cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR) << "Failed building ACTION_BML_MESSAGE_TO_RADIO_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->radio_mac() = radio_mac;
+
+    int iRet = BML_RET_OK;
+
+    int result = 0;
+    if (send_bml_cmdu(result, request->get_action_op()) != BML_RET_OK) {
+        LOG(ERROR) << "Send ACTION_BML_MESSAGE_TO_RADIO_REQUEST failed";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    return (iRet);
+}
+
 bool bml_internal::wake_up(uint8_t action_opcode, int value)
 {
     std::unique_lock<std::mutex> lock(m_mtxLock);

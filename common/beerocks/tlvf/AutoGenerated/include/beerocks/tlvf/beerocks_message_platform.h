@@ -564,6 +564,48 @@ class cACTION_PLATFORM_ERROR_NOTIFICATION : public BaseClass
         int m_lock_order_counter__ = 0;
 };
 
+class cACTION_PLATFORM_MESSAGE_TO_RADIO_REQUEST : public BaseClass
+{
+    public:
+        cACTION_PLATFORM_MESSAGE_TO_RADIO_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_PLATFORM_MESSAGE_TO_RADIO_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_PLATFORM_MESSAGE_TO_RADIO_REQUEST();
+
+        static eActionOp_PLATFORM get_action_op(){
+            return (eActionOp_PLATFORM)(ACTION_PLATFORM_MESSAGE_TO_RADIO_REQUEST);
+        }
+        sMacAddr& params();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_PLATFORM* m_action_op = nullptr;
+        sMacAddr* m_params = nullptr;
+};
+
+class cACTION_PLATFORM_MESSAGE_TO_RADIO_RESPONSE : public BaseClass
+{
+    public:
+        cACTION_PLATFORM_MESSAGE_TO_RADIO_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_PLATFORM_MESSAGE_TO_RADIO_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_PLATFORM_MESSAGE_TO_RADIO_RESPONSE();
+
+        static eActionOp_PLATFORM get_action_op(){
+            return (eActionOp_PLATFORM)(ACTION_PLATFORM_MESSAGE_TO_RADIO_RESPONSE);
+        }
+        uint8_t& result();
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_PLATFORM* m_action_op = nullptr;
+        uint8_t* m_result = nullptr;
+};
+
 }; // close namespace: beerocks_message
 
 #endif //_BEEROCKS/TLVF_BEEROCKS_MESSAGE_PLATFORM_H_

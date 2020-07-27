@@ -288,6 +288,14 @@ public:
      */
     int client_get_client(const sMacAddr &sta_mac, BML_CLIENT *client);
 
+    /**
+     * Send message to a radio.
+     *
+     * @param [in] radio_mac MAC address of a radio.
+     * @return BML_RET_OK on success.
+     */
+    int message_to_radio(const sMacAddr &radio_mac);
+
     /*
  * Public static methods:
  */
