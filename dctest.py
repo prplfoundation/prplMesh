@@ -212,6 +212,7 @@ if __name__ == '__main__':
                           '/bin/bash', 'boardfarm'], interactive=True)
         if rc != 0:
             print('Return code !=0 -> {}'.format(rc))
+        sys.exit(rc)
     elif args.build:
         if not args.bid:
             print('Specify --id for the build parameter')
@@ -220,6 +221,7 @@ if __name__ == '__main__':
         rc = services.dc(['build'], interactive=True)
         if rc != 0:
             print('Return code !=0 -> {}'.format(rc))
+        sys.exit(rc)
     else:
         if args.bid:
             services = Services(bid=args.bid)   # With new build id
@@ -232,3 +234,4 @@ if __name__ == '__main__':
                           'boardfarm'], interactive=True)
         if rc != 0:
             print('Return code !=0 -> {}'.format(rc))
+        sys.exit(rc)
