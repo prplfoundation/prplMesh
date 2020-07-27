@@ -568,6 +568,9 @@ void cli_bml::setFunctionsMapAndArray()
     insertCommandToMap("bml_client_get_client", "<sta_mac>", "Get client with the given STA MAC.",
                        static_cast<pFunction>(&cli_bml::client_get_client_caller), 1, 1,
                        STRING_ARG);
+    insertCommandToMap("bml_message_to_radio", "<radio_mac>", "Append to radio's log.",
+                       static_cast<pFunction>(&cli_bml::bml_message_to_radio_caller), 1, 1,
+                       STRING_ARG);
     //bool insertCommandToMap(std::string command, std::string help_args, std::string help,  pFunction funcPtr, uint8_t minNumOfArgs, uint8_t maxNumOfArgs,
 }
 
@@ -1165,6 +1168,13 @@ int cli_bml::bml_channel_selection_caller(int numOfArgs)
 {
     if (numOfArgs == 2) {
         return channel_selection(args.stringArgs[0], args.stringArgs[1]);
+    }
+    return -1;
+}
+int cli_bml::bml_message_to_radio_caller(int numOfArgs)
+{
+    if (numOfArgs == 2) {
+        return message_to_radio(args.stringArgs[0]);
     }
     return -1;
 }
@@ -1870,6 +1880,13 @@ int cli_bml::channel_selection(const std::string &al_mac, const std::string &rui
 {
     int ret = bml_channel_selection(ctx, al_mac.c_str(), ruid.c_str());
     printBmlReturnVals("channel_selection", ret);
+    return 0;
+}
+
+int cli_bml::message_to_radio(const std::string &radio_mac)
+{
+    int ret = bml_message_to_radio(ctx, radio_mac.c_str());
+    printBmlReturnVals("message_to_radio", ret);
     return 0;
 }
 

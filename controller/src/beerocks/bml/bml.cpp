@@ -584,6 +584,22 @@ int bml_trigger_topology_discovery(BML_CTX ctx, const char *al_mac)
     return (pBML->trigger_topology_discovery_query(al_mac));
 }
 
+int bml_message_to_radio(BML_CTX ctx, const char *radio_mac)
+{
+    sMacAddr radio_mac_addr;
+
+    // Validate input parameter
+    if (!ctx || !radio_mac) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    radio_mac_addr = tlvf::mac_from_string(std::string(radio_mac));
+
+    bml_internal *pBML = (bml_internal *)ctx;
+
+    return (pBML->message_to_radio(radio_mac_addr));
+}
+
 int bml_channel_selection(BML_CTX ctx, const char *al_mac, const char *ruid)
 {
     // Validate input parameters

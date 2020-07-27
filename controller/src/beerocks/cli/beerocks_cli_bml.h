@@ -151,6 +151,7 @@ private:
     int client_get_client_list_caller(int numOfArgs);
     int client_set_client_caller(int numOfArgs);
     int client_get_client_caller(int numOfArgs);
+    int bml_message_to_radio_caller(int numOfArgs);
     // Functions
     int onboard_status();
     int ping();
@@ -218,6 +219,7 @@ private:
     int client_set_client(const std::string &sta_mac, int8_t selected_bands,
                           int8_t stay_on_initial_radio, int8_t stay_on_selected_device);
     int client_get_client(const std::string &sta_mac);
+    int message_to_radio(const std::string &radio_mac);
     template <typename T> const std::string string_from_int_array(T *arr, size_t arr_max_size);
     // Variable
     std::string beerocks_conf_path;

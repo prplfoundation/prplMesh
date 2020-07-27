@@ -69,6 +69,14 @@ void *bml_get_user_data(BML_CTX ctx);
 int bml_ping(BML_CTX ctx);
 
 /**
+ * Insert log information for a specific radio component
+ *  
+ * @param [in] 
+ * @return BML_RET_OK on success.
+ */
+int bml_message_to_radio(BML_CTX ctx, const char *radio_mac);
+
+/**
  * Registers a callback functions for the network map query operation.
  * When calling the bml_nw_map_query() function, a request to send the entire
  * network map will be sent to the beerocks platform. On arrival of the response,
