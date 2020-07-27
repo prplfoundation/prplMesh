@@ -1,10 +1,10 @@
 # Logging
 configure_file(
-	"${CMAKE_CURRENT_SOURCE_DIR}/logging.conf.in"
-	"${CMAKE_CURRENT_BINARY_DIR}/logging.conf"
+	"${CMAKE_CURRENT_SOURCE_DIR}/framework_logging.conf.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/framework_logging.conf"
 )
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/logging.conf" DESTINATION config)
-file(COPY "${CMAKE_CURRENT_BINARY_DIR}/logging.conf" DESTINATION "${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/config/")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/framework_logging.conf" DESTINATION config)
+file(COPY "${CMAKE_CURRENT_BINARY_DIR}/framework_logging.conf" DESTINATION "${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/config/")
 
 # mapfcommon sources
 set(sources logger.cpp encryption.cpp utils.cpp)
