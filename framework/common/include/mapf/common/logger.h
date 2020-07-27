@@ -27,8 +27,8 @@
 #define MAPF_DBG_IF(cond, msg)                                                                     \
     LOG_IF(cond, DEBUG) << msg << resetiosflags((std::ios_base::fmtflags)0xFFFF)
 
-#define CONF_FILE_PATH std::string(MAPF_ROOT) + "/share/logging.conf"
-#define CONF_FILE_TMP_PATH std::string("/tmp/share/logging.conf")
+#define CONF_FILE_PATH std::string(MAPF_ROOT) + "/config/framework_logging.conf"
+#define CONF_FILE_TMP_PATH std::string("/tmp/share/framework_logging.conf")
 
 extern char *__progname;
 struct json_object;
