@@ -948,9 +948,12 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
                                    return element.second.mac == bssid;
                                });
 
-        auto vap_id   = it->first;
-        auto vap_name = utils::get_iface_string_from_iface_vap_ids(
-            ap_wlan_hal->get_radio_info().iface_name, vap_id);
+        if (vap_unordered_map.end() == it) {
+            LOG(ERROR) << "BSSID " << bssid << " not found";
+            return false;
+        }
+
+        auto vap_name = it->second.bss;
 
         if (!request->params().remove) {
             if (!ap_wlan_hal->sta_softblock_add(
