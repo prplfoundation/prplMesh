@@ -1141,13 +1141,13 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                     ->addClass<beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE failed";
-                return BML_RET_OP_FAILED;
+                return (-BML_RET_OP_FAILED);
             }
 
             if (!m_client_list || !m_client_list_size) {
                 LOG(ERROR) << "The pointer to the user data buffer is null!";
                 m_prmClientListGet->set_value(false);
-                break;
+                return (-BML_RET_INVALID_ARGS);
             }
 
             if (response->result() != 0) {
@@ -1195,7 +1195,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                     ->addClass<beerocks_message::cACTION_BML_CLIENT_SET_CLIENT_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_CLIENT_SET_CLIENT_RESPONSE failed";
-                return BML_RET_OP_FAILED;
+                return (-BML_RET_OP_FAILED);
             }
 
             ///Signal any waiting threads
@@ -1212,7 +1212,7 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                     ->addClass<beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_RESPONSE>();
             if (!response) {
                 LOG(ERROR) << "addClass cACTION_BML_CLIENT_GET_CLIENT_RESPONSE failed";
-                return BML_RET_OP_FAILED;
+                return (-BML_RET_OP_FAILED);
             }
 
             //Signal any waiting threads
@@ -1931,7 +1931,7 @@ int bml_internal::client_get_client_list(char *client_list, unsigned int *client
     LOG(DEBUG) << "Promise resolved, received " << client_mac_list.size() << " clients";
     if (!result) {
         LOG(ERROR) << "Get client list request failed";
-        return -BML_RET_OP_FAILED;
+        return (-BML_RET_OP_FAILED);
     }
 
     // Translate sMacAddr list to string
