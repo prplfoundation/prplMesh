@@ -92,15 +92,15 @@ struct BML_STEERING_RRM_CAPS {
 };
 
 typedef enum {
-    DISCONNECT_SOURCE_UNKNOWN = 0, /**< Unknown source             */
-    DISCONNECT_SOURCE_LOCAL,       /**< Initiated locally          */
-    DISCONNECT_SOURCE_REMOTE       /**< Initiated remotely         */
+    BML_DISCONNECT_SOURCE_UNKNOWN = 0, /**< Unknown source             */
+    BML_DISCONNECT_SOURCE_LOCAL,       /**< Initiated locally          */
+    BML_DISCONNECT_SOURCE_REMOTE       /**< Initiated remotely         */
 } BML_DISCONNECT_SOURCE;
 
 typedef enum {
-    DISCONNECT_TYPE_UNKNOWN = 0, /**< Unknown type               */
-    DISCONNECT_TYPE_DISASSOC,    /**< Disassociation             */
-    DISCONNECT_TYPE_DEAUTH       /**< Deauthentication           */
+    BML_DISCONNECT_TYPE_UNKNOWN = 0, /**< Unknown type               */
+    BML_DISCONNECT_TYPE_DISASSOC,    /**< Disassociation             */
+    BML_DISCONNECT_TYPE_DEAUTH       /**< Deauthentication           */
 } BML_DISCONNECT_TYPE;
 
 /**
