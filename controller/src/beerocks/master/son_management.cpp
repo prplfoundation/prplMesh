@@ -2334,10 +2334,99 @@ void son_management::handle_bml_message(Socket *sd,
             break;
         }
 
-        //TODO: add client to persistent DB if required and set client parameters
-        response->result() = 0; //Success.
+        auto send_response = [&](bool result) -> bool {
+            response->result() = (result) ? 0 : 1;
+            return message_com::send_cmdu(sd, cmdu_tx);
+        };
 
-        message_com::send_cmdu(sd, cmdu_tx);
+        // If none of the parameters is configured - return error.
+        // This flow should be blocked by the BML interface and should not be reached.
+        if ((request->client_config().stay_on_initial_radio == PARAMETER_NOT_CONFIGURED) &&
+            (request->client_config().stay_on_selected_device == PARAMETER_NOT_CONFIGURED) &&
+            (request->client_config().selected_bands == PARAMETER_NOT_CONFIGURED)) {
+            LOG(ERROR)
+                << "Received ACTION_BML_CLIENT_SET_CLIENT request without parameters to configure";
+            send_response(false);
+        }
+
+        // Get client mac.
+        auto client_mac = request->sta_mac();
+
+        // If client doesn't have node in runtime DB - add node to runtime DB.
+        if (!database.has_node(client_mac)) {
+            LOG(DEBUG) << "Setting a client which doesn't exist in DB, adding client to DB";
+            if (!database.add_node(client_mac)) {
+                LOG(ERROR) << "Failed to add client node for client " << client_mac;
+                send_response(false); //Fail.
+                break;
+            }
+        }
+
+        // Set stay_on_initial_radio if requested.
+        if (request->client_config().stay_on_initial_radio != PARAMETER_NOT_CONFIGURED) {
+            auto stay_on_initial_radio =
+                (eTriStateBool(request->client_config().stay_on_initial_radio) ==
+                 eTriStateBool::ENABLE);
+            if (!database.set_client_stay_on_initial_radio(client_mac, stay_on_initial_radio,
+                                                           false)) {
+                LOG(ERROR) << " Failed to set stay-on-initial-radio to " << stay_on_initial_radio
+                           << " for client " << client_mac;
+                send_response(false);
+                break;
+            }
+        }
+
+        // Set stay_on_selected_device if requested.
+        if (request->client_config().stay_on_selected_device != PARAMETER_NOT_CONFIGURED) {
+            LOG(DEBUG)
+                << "The stay-on-selected-device configuration is not yet supported in the DB";
+
+            // TODO: add stay_on_selected_device support in the persistent DB.
+            // auto stay_on_selected_device =
+            //     (eTriStateBool(request->client_config().stay_on_selected_device) ==
+            //      eTriStateBool::ENABLE);
+            // if (!database.set_client_stay_on_selected_device(client_mac, stay_on_selected_device,
+            //                                                  false)) {
+            //     LOG(ERROR) << " Failed to set stay-on-selected-device to "
+            //                << stay_on_selected_device << " for client " << client_mac;
+            //     send_response(false);
+            //     break;
+            // }
+        }
+
+        // Set stay_on_selected_bands and selected_bands if requested.
+        if (request->client_config().selected_bands != PARAMETER_NOT_CONFIGURED) {
+            auto selected_bands = eClientSelectedBands(request->client_config().selected_bands);
+            auto stay_on_selected_band =
+                (selected_bands != eClientSelectedBands::eSelectedBands_Disabled);
+            // Set stay_on_selected_bands.
+            if (!database.set_client_stay_on_selected_band(client_mac, stay_on_selected_band,
+                                                           false)) {
+                LOG(ERROR) << " Failed to stay_on_selected_band to " << stay_on_selected_band
+                           << " for client " << client_mac;
+                send_response(false);
+                break;
+            }
+            // Set selected_bands.
+            if (!database.set_client_selected_bands(client_mac, selected_bands, false)) {
+                LOG(ERROR) << " Failed to set selected-bands to " << selected_bands
+                           << " for client " << client_mac;
+                send_response(false);
+                break;
+            }
+        }
+
+        //if persistent_db is enabled, call the "update_client_persistent_db"
+        if (database.config.persistent_db) {
+            if (!database.update_client_persistent_db(client_mac)) {
+                LOG(ERROR)
+                    << "Information is saved to runtime-DB but failed to set to persistent DB";
+                send_response(false);
+                break;
+            }
+        }
+
+        send_response(true);
         break;
     }
     case beerocks_message::ACTION_BML_CLIENT_GET_CLIENT_REQUEST: {
