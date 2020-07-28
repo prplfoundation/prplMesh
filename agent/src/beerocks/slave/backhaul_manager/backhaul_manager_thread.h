@@ -320,7 +320,6 @@ private:
         sMacAddr radio_mac;       /**< Radio ID (= radio MAC address) */
         std::string hostap_iface; /**< Name of the radio interface */
         std::string sta_iface;    /**< Name of the bSTA interface on the radio (if any) */
-        eFreqType freq_type            = eFreqType::FREQ_UNKNOWN;
         bool sta_iface_filter_low      = false;
         bool slave_is_backhaul_manager = false;
         bool controller_discovered     = false;
@@ -329,10 +328,8 @@ private:
         Socket *sta_hal_ext_events = nullptr;
         Socket *sta_hal_int_events = nullptr;
 
-        eWiFiBandwidth max_bandwidth =
-            eWiFiBandwidth::BANDWIDTH_UNKNOWN; /**< Maximum supported bandwidth */
-        bool ht_supported      = false;        /**< Is HT supported flag */
-        uint16_t ht_capability = 0;            /**< HT capabilities */
+        bool ht_supported      = false; /**< Is HT supported flag */
+        uint16_t ht_capability = 0;     /**< HT capabilities */
         std::array<uint8_t, beerocks::message::HT_MCS_SET_SIZE>
             ht_mcs_set; /**< 16-byte attribute containing the MCS set as defined in 802.11n */
         bool vht_supported      = false; /**< Is VHT supported flag */

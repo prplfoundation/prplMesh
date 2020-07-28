@@ -245,10 +245,6 @@ backhaul_manager::backhaul_manager(const config_file::sConfigSlave &config,
     m_sConfig.vendor            = config.vendor;
     m_sConfig.model             = config.model;
 
-    // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
-    auto db               = AgentDB::get();
-    db->bridge.iface_name = config.bridge_iface;
-
     m_eFSMState = EState::INIT;
     set_select_timeout(SELECT_TIMEOUT_MSC);
 }
@@ -590,7 +586,6 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
 
             notification->params().gw_ipv4 = network_utils::ipv4_from_string(bridge_info.ip_gw);
             notification->params().gw_bridge_mac = tlvf::mac_from_string(bssid_bridge_mac);
-            notification->params().bridge_mac    = db->bridge.mac;
             notification->params().bridge_ipv4   = network_utils::ipv4_from_string(bridge_info.ip);
             notification->params().backhaul_mac  = tlvf::mac_from_string(iface_info.mac);
             notification->params().backhaul_ipv4 = network_utils::ipv4_from_string(iface_info.ip);
@@ -1504,6 +1499,7 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
             FSM_MOVE_STATE(RESTART);
             break;
         }
+        auto db = AgentDB::get();
 
         bool preferred_band_is_available = false;
 
@@ -1518,7 +1514,11 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
                     LOG(WARNING) << "Sta_hal of " << soc->sta_iface << " is null";
                     continue;
                 }
-                if (m_sConfig.backhaul_preferred_radio_band == soc->freq_type) {
+                auto radio = db->radio(soc->hostap_iface);
+                if (!radio) {
+                    continue;
+                }
+                if (m_sConfig.backhaul_preferred_radio_band == radio->front.freq_type) {
                     preferred_band_is_available = true;
                 }
             }
@@ -1538,9 +1538,14 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
                 continue;
             }
 
+            auto radio = db->radio(soc->hostap_iface);
+            if (!radio) {
+                continue;
+            }
+
             if (preferred_band_is_available &&
                 m_sConfig.backhaul_preferred_radio_band != beerocks::eFreqType::FREQ_AUTO &&
-                m_sConfig.backhaul_preferred_radio_band != soc->freq_type) {
+                m_sConfig.backhaul_preferred_radio_band != radio->front.freq_type) {
                 LOG(DEBUG) << "slave iface=" << soc->sta_iface
                            << " is not of the preferred backhaul band";
                 continue;
@@ -1883,8 +1888,6 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
 
         soc->sta_iface.assign(request->sta_iface(message::IFACE_NAME_LENGTH));
         soc->hostap_iface.assign(request->hostap_iface(message::IFACE_NAME_LENGTH));
-        // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
-        db->add_radio(request->hostap_iface(), request->sta_iface());
         soc->sta_iface_filter_low = request->sta_iface_filter_low();
         onboarding                = request->onboarding();
 
@@ -1943,20 +1946,10 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
 
         std::copy_n(channels, request->preferred_channels_size(), soc->preferred_channels.begin());
 
-        soc->radio_mac = request->iface_mac();
-        // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
-        radio->front.iface_mac = soc->radio_mac;
-
-        soc->freq_type = request->frequency_band();
-        // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
-        radio->front.freq_type     = request->frequency_band();
+        soc->radio_mac             = request->iface_mac();
         soc->controller_discovered = false;
-        soc->max_bandwidth         = request->max_bandwidth();
-        // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
-        radio->front.max_supported_bw = request->max_bandwidth();
-
-        soc->ht_supported  = request->ht_supported();
-        soc->ht_capability = request->ht_capability();
+        soc->ht_supported          = request->ht_supported();
+        soc->ht_capability         = request->ht_capability();
         std::copy_n(request->ht_mcs_set(), soc->ht_mcs_set.size(), soc->ht_mcs_set.begin());
         soc->vht_supported  = request->vht_supported();
         soc->vht_capability = request->vht_capability();
@@ -2023,7 +2016,6 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
                     if (m_sConfig.security_type == bwl::WiFiSec::WPA_WPA2_PSK) {
                         m_sConfig.security_type = bwl::WiFiSec::WPA2_PSK;
                     }
-                    db->ethernet.iface_name.assign(request->wire_iface(message::IFACE_NAME_LENGTH));
                     m_sConfig.wire_iface_type = (beerocks::eIfaceType)request->wire_iface_type();
 
                     LOG(DEBUG) << "All slaves ready, proceeding" << std::endl
@@ -2143,76 +2135,6 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
             response->params().rx_packets = -1;
             message_com::send_cmdu(soc->slave, cmdu_tx);
         }
-        break;
-    }
-    case beerocks_message::ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION: {
-        LOG(DEBUG) << "ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION received from iface "
-                   << soc->hostap_iface;
-        auto msg = beerocks_header->addClass<
-            beerocks_message::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>();
-        if (!msg) {
-            LOG(ERROR) << "Failed parsing BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION message!";
-            return false;
-        }
-
-        // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
-        auto db    = AgentDB::get();
-        auto radio = db->radio(soc->hostap_iface);
-        if (!radio) {
-            LOG(DEBUG) << "Radio of iface " << soc->hostap_iface << " does not exist on the db";
-            return false;
-        }
-        for (uint8_t vap_idx = 0; vap_idx < eBeeRocksIfaceIds::IFACE_TOTAL_VAPS; vap_idx++) {
-            radio->front.bssids[vap_idx].mac  = msg->params().vaps[vap_idx].mac;
-            radio->front.bssids[vap_idx].ssid = msg->params().vaps[vap_idx].ssid;
-            radio->front.bssids[vap_idx].type = msg->params().vaps[vap_idx].backhaul_vap
-                                                    ? AgentDB::sRadio::sFront::sBssid::eType::bAP
-                                                    : AgentDB::sRadio::sFront::sBssid::eType::fAP;
-        }
-        break;
-    }
-    case beerocks_message::ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION: {
-        LOG(DEBUG) << "ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION";
-        auto msg =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION>();
-        if (!msg) {
-            LOG(ERROR) << "Failed building ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION message!";
-            break;
-        }
-
-        // Remove this client from other radios.
-        auto db = AgentDB::get();
-        db->erase_client(msg->client_mac());
-
-        // Set client association information for associated client
-        auto radio = db->get_radio_by_mac(msg->bssid(), AgentDB::eMacType::BSSID);
-        if (!radio) {
-            LOG(DEBUG) << "Radio containing bssid " << msg->bssid() << " not found";
-            break;
-        }
-
-        radio->associated_clients.emplace(msg->client_mac(),
-                                          AgentDB::sRadio::sClient{msg->bssid(),
-                                                                   msg->association_frame_length(),
-                                                                   msg->association_frame()});
-
-        break;
-    }
-    case beerocks_message::ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION: {
-        LOG(DEBUG) << "ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION";
-        auto msg =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION>();
-        if (!msg) {
-            LOG(ERROR)
-                << "Failed building ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION message!";
-            return false;
-        }
-
-        // If exists, remove client association information for disconnected client.
-        auto db = AgentDB::get();
-        db->erase_client(msg->client_mac(), msg->bssid());
         break;
     }
     case beerocks_message::ACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_RESPONSE: {
@@ -3481,7 +3403,7 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
                                                               const std::string &src_mac)
 {
     LOG(DEBUG) << "received autoconfiguration response message";
-
+    auto db = AgentDB::get();
     if (!controller_bridge_mac.empty() && src_mac != controller_bridge_mac) {
         LOG(INFO) << "current controller_bridge_mac=" << controller_bridge_mac
                   << " but response came from src_mac=" << src_mac << ", ignoring";
@@ -3539,7 +3461,11 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
         }
         LOG(DEBUG) << "received autoconfiguration response for " << band_name << " band";
         for (auto soc : slaves_sockets) {
-            if (soc->freq_type == freq_type) {
+            auto radio = db->radio(soc->hostap_iface);
+            if (!radio) {
+                continue;
+            }
+            if (radio->front.freq_type == freq_type) {
                 LOG(DEBUG) << band_name << " band socket found, iface=" << soc->hostap_iface;
                 if (!soc->controller_discovered) {
                     LOG(DEBUG) << "set controller_discovered to true for " << band_name
