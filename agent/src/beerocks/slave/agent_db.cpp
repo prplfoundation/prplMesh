@@ -114,4 +114,17 @@ bool AgentDB::get_mac_by_ssid(const sMacAddr &ruid, const std::string &ssid, sMa
     return false;
 }
 
+bool AgentDB::get_bsta_mac_by_ruid(const sMacAddr &ruid, sMacAddr &value)
+{
+    value      = net::network_utils::ZERO_MAC;
+    auto radio = get_radio_by_mac(ruid, AgentDB::eMacType::RADIO);
+    if (!radio) {
+        LOG(ERROR) << "No radio with ruid '" << ruid << "' found!";
+        return false;
+    }
+
+    value = radio->back.iface_mac;
+    return true;
+}
+
 } // namespace beerocks
