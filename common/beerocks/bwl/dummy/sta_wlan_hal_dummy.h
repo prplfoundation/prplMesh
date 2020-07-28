@@ -43,7 +43,7 @@ public:
                          bool mem_only_psk, const std::string &bssid, uint8_t channel,
                          bool hidden_ssid) override;
 
-    virtual bool disconnect() override;
+    virtual bool disconnect(bool remove_all_networks = false) override;
 
     virtual bool roam(const sMacAddr &bssid, uint8_t channel) override;
 
