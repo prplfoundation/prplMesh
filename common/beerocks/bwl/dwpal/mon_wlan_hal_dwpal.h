@@ -113,7 +113,10 @@ private:
     }
 
     std::shared_ptr<char> m_temp_dwpal_value;
+    // Unique sequence number for the scan result dump sequence
     uint32_t m_nl_seq = 0;
+    // Flag indicating if we are currently in a dump sequence
+    bool m_scan_dump_in_progress = false;
 };
 
 } // namespace dwpal
