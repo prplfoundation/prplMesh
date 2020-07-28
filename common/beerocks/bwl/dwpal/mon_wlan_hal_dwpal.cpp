@@ -1346,38 +1346,59 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
             return true;
         }
 
-        // We need to distinguish 1st and rest of dump events (NL80211_CMD_NEW_SCAN_RESULTS)
-        // 1st event is an empty dump result that we should reply with scan dump request.
-        // nlh->nlmsg_seq = 0 only with the 1st dump result.
-        // rest of events are the actual scan dump results that need to be parsed.
-        // unique sequence number is chosen by the nl (nlh->nlmsg_seq != 0) for the rest of events.
+        /*
+            As part of the scan results dump sequence, we always receive at least two messages.
+            NL80211_CMD_NEW_SCAN_RESULTS (Channel_Scan_Dump_Result) & SCAN_FINISH_CB
+            (Channel_Scan_Finished).
+
+            We receive the Channel_Scan_Dump_Result once to alert us that we have pending results
+            waiting, so on the first occurrence of the message, we request the rest of the dump results.
+
+            On the 2nd->Nth Channel_Scan_Dump_Result we receive a sequence number which we can use
+            to indicate the current message is part of the active dump sequence.
+
+            The last message received as part of the dump sequence is Channel_Scan_Finished, which
+            indicates that there are no more pending scan dumps.
+
+            In case we have no neighboring beacons for a particular scan we would only receive
+            the initial Channel_Scan_Dump_Result followed right after by a Channel_Scan_Finished.
+            This can cause an issue since we would not have an initial sequence number to later
+            validate against.
+
+            To solve this issue we add a "scan dump in progress flag" to verify against later on.
+        */
         if (m_nl_seq == 0) {
             if (nlh->nlmsg_seq == 0) {
+                // First "empty" Channel_Scan_Dump_Result message
                 LOG(DEBUG) << "Results dump are ready";
                 event_queue_push(Event::Channel_Scan_New_Results_Ready);
+                m_scan_dump_in_progress = true;
                 channel_scan_dump_results();
                 return true;
             } else {
+                //2nd -> Nth Channel_Scan_Dump_Result
                 LOG(DEBUG) << "Results dump new sequence:" << int(nlh->nlmsg_seq);
                 m_nl_seq = nlh->nlmsg_seq;
             }
         }
 
-        if (m_nl_seq == nlh->nlmsg_seq) {
-            LOG(DEBUG) << "DWPAL NL event channel scan results dump, seq = " << int(nlh->nlmsg_seq);
-
-            auto results = std::make_shared<sCHANNEL_SCAN_RESULTS_NOTIFICATION>();
-
-            if (!get_scan_results_from_nl_msg(results->channel_scan_results, msg)) {
-                LOG(ERROR) << "read NL msg to monitor msg failed!";
-                return false;
-            }
-            LOG(DEBUG) << "Processing results for BSSID:" << results->channel_scan_results.bssid;
-            event_queue_push(event, results);
-        } else {
+        // Check if current Channel_Scan_Dump_Result is part of the dump sequence.
+        if (m_nl_seq != nlh->nlmsg_seq) {
             LOG(ERROR) << "channel scan results dump received with unexpected seq number";
             return false;
         }
+
+        LOG(DEBUG) << "DWPAL NL event channel scan results dump, seq = " << int(nlh->nlmsg_seq);
+
+        auto results = std::make_shared<sCHANNEL_SCAN_RESULTS_NOTIFICATION>();
+
+        if (!get_scan_results_from_nl_msg(results->channel_scan_results, msg)) {
+            LOG(ERROR) << "read NL msg to monitor msg failed!";
+            return false;
+        }
+
+        LOG(DEBUG) << "Processing results for BSSID:" << results->channel_scan_results.bssid;
+        event_queue_push(event, results);
         break;
     }
     case Event::Channel_Scan_Abort: {
@@ -1389,15 +1410,22 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
         }
         LOG(DEBUG) << "DWPAL NL event channel scan aborted";
 
-        //zero sequence number for next scan
-        m_nl_seq = 0;
-
+        //reset scan indicators for next scan
+        m_nl_seq                = 0;
+        m_scan_dump_in_progress = false;
         event_queue_push(event);
         break;
     }
     case Event::Channel_Scan_Finished: {
-        // ifname is corrupted for Channel_Scan_Finished event using nlh->nlmsg_seq instead.
-        if (nlh->nlmsg_seq != m_nl_seq) {
+
+        // We are not in a dump sequence, ignoring the message
+        if (!m_scan_dump_in_progress) {
+            return true;
+        }
+
+        // ifname is invalid  for Channel_Scan_Finished event using nlh->nlmsg_seq instead.
+        // In case there are no results first check if current sequence number was set.
+        if (m_nl_seq != 0 && nlh->nlmsg_seq != m_nl_seq) {
             // Current event has a sequence number not matching the current sequence number
             // meaning the event was recevied for a diffrent channel
             return true;
@@ -1406,9 +1434,9 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
         LOG(DEBUG) << "DWPAL NL event channel scan results finished for sequence: "
                    << (int)nlh->nlmsg_seq;
 
-        //zero sequence number for next scan
-        m_nl_seq = 0;
-
+        //reset scan indicators for next scan
+        m_nl_seq                = 0;
+        m_scan_dump_in_progress = false;
         event_queue_push(event);
         break;
     }
