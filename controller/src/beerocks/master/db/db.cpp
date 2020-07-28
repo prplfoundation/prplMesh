@@ -2498,6 +2498,8 @@ bool db::set_client_stay_on_initial_radio(const sMacAddr &mac, bool stay_on_init
 
     LOG(DEBUG) << "stay_on_initial_radio = " << stay_on_initial_radio;
 
+    auto is_client_connected = (node->state == STATE_CONNECTED);
+
     auto timestamp = std::chrono::steady_clock::now();
     if (save_to_persistent_db) {
         // if persistent db is disabled
@@ -2510,6 +2512,14 @@ bool db::set_client_stay_on_initial_radio(const sMacAddr &mac, bool stay_on_init
             ValuesMap values_map;
             values_map[TIMESTAMP_STR]            = timestamp_to_string_seconds(timestamp);
             values_map[INITIAL_RADIO_ENABLE_STR] = std::to_string(stay_on_initial_radio);
+            // clear initial-radio data on disabling of stay_on_initial_radio
+            if (!stay_on_initial_radio) {
+                values_map[INITIAL_RADIO_STR] = std::string();
+            } else if (is_client_connected) {
+                // if enabling stay-on-initial-radio and client is already connected, update the initial_radio as well
+                auto bssid                    = node->parent_mac;
+                values_map[INITIAL_RADIO_STR] = get_node_parent_radio(bssid);
+            }
 
             // update the persistent db
             if (!update_client_entry_in_persistent_db(mac, values_map)) {
@@ -2521,6 +2531,15 @@ bool db::set_client_stay_on_initial_radio(const sMacAddr &mac, bool stay_on_init
 
     node->client_stay_on_initial_radio =
         (stay_on_initial_radio) ? eTriStateBool::ENABLE : eTriStateBool::DISABLE;
+    // clear initial-radio data on disabling of stay_on_initial_radio
+    if (!stay_on_initial_radio) {
+        node->client_initial_radio = network_utils::ZERO_MAC;
+        // if enabling stay-on-initial-radio and client is already connected, update the initial_radio as well
+    } else if (is_client_connected) {
+        auto bssid                 = node->parent_mac;
+        auto parent_radio_mac      = get_node_parent_radio(bssid);
+        node->client_initial_radio = tlvf::mac_from_string(parent_radio_mac);
+    }
     node->client_parameters_last_edit = timestamp;
 
     return true;
@@ -4340,9 +4359,19 @@ bool db::set_node_params_from_map(const sMacAddr &mac, const ValuesMap &values_m
         } else if (param.first == INITIAL_RADIO_ENABLE_STR) {
             LOG(DEBUG) << "setting node client_stay_on_initial_radio to " << param.second << " for "
                        << mac;
-
+            auto stay_on_initial_radio = (param.second == "1");
             node->client_stay_on_initial_radio =
                 (param.second == "1") ? eTriStateBool::ENABLE : eTriStateBool::DISABLE;
+
+            // clear initial-radio data on disabling of stay_on_initial_radio
+            if (!stay_on_initial_radio) {
+                node->client_initial_radio = network_utils::ZERO_MAC;
+                // if enabling stay-on-initial-radio and client is already connected, update the initial_radio as well
+            } else if (node->state == STATE_CONNECTED) {
+                auto bssid                 = node->parent_mac;
+                auto parent_radio_mac      = get_node_parent_radio(bssid);
+                node->client_initial_radio = tlvf::mac_from_string(parent_radio_mac);
+            }
         } else if (param.first == INITIAL_RADIO_STR) {
             LOG(DEBUG) << "setting node client_initial_radio to " << param.second << " for " << mac;
 
