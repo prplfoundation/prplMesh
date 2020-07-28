@@ -1059,9 +1059,6 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
 
             auto db = AgentDB::get();
 
-            // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
-            db->bridge.mac = notification->params().bridge_mac;
-
             backhaul_params.gw_ipv4 = network_utils::ipv4_to_string(notification->params().gw_ipv4);
             backhaul_params.gw_bridge_mac =
                 tlvf::mac_to_string(notification->params().gw_bridge_mac);
@@ -1311,10 +1308,6 @@ bool slave_thread::handle_cmdu_platform_manager_message(
             wlan_settings     = response->wlan_settings();
 
             auto db = AgentDB::get();
-
-            // Local copy on cuurent process database instance, to be removed on PPM-83 phase 5
-            db->device_conf.local_gw         = response->platform_settings().local_gw;
-            db->device_conf.local_controller = response->platform_settings().local_master;
 
             configuration_stop_on_failure_attempts =
                 response->platform_settings().stop_on_failure_attempts;
@@ -1668,18 +1661,6 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         notification_out->params() = notification_in->params();
         LOG(TRACE) << "send ACTION_CONTROL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION";
         send_cmdu_to_controller(cmdu_tx);
-
-        auto notification_out2 = message_com::create_vs_message<
-            beerocks_message::cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION>(cmdu_tx);
-        if (notification_out2 == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-
-        notification_out2->params() = notification_in->params();
-        LOG(TRACE) << "send ACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION";
-        message_com::send_cmdu(backhaul_manager_socket, cmdu_tx);
-
         break;
     }
     case beerocks_message::ACTION_APMANAGER_HOSTAP_ACS_NOTIFICATION: {
@@ -1799,8 +1780,9 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return false;
         }
 
-        std::string client_mac = tlvf::mac_to_string(notification_in->params().mac);
-        LOG(INFO) << "client disconnected sta_mac=" << client_mac;
+        auto &client_mac = notification_in->params().mac;
+        auto &bssid      = notification_in->params().bssid;
+        LOG(INFO) << "client disconnected sta_mac=" << client_mac << " from bssid=" << bssid;
 
         //notify master
         if (!master_socket) {
@@ -1808,24 +1790,9 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return true;
         }
 
-        // Build VS CMDU message to send to backhaul manager
-        auto notification_out = message_com::create_vs_message<
-            beerocks_message::cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION>(cmdu_tx);
-        if (!notification_out) {
-            LOG(ERROR)
-                << "Failed building ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION message!";
-            break;
-        }
-
-        notification_out->client_mac() = notification_in->params().mac;
-        notification_out->bssid()      = notification_in->params().bssid;
-
-        // Send the message
-        LOG(DEBUG) << "send ACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION for client "
-                   << notification_out->client_mac();
-        if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
-            slave_reset();
-        }
+        // If exists, remove client association information for disconnected client.
+        auto db = AgentDB::get();
+        db->erase_client(client_mac, bssid);
 
         // build 1905.1 message CMDU to send to the controller
         if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE)) {
@@ -1986,37 +1953,29 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
             return false;
         }
         LOG(TRACE) << "received ACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION";
-        std::string client_mac = tlvf::mac_to_string(notification_in->mac());
-        LOG(INFO) << "client associated sta_mac=" << client_mac;
+        auto &client_mac = notification_in->mac();
+        auto &bssid      = notification_in->bssid();
+        LOG(INFO) << "Client associated sta_mac=" << client_mac << " to bssid=" << bssid;
 
         if (!master_socket) {
             LOG(DEBUG) << "Controller is not connected";
             return true;
         }
 
-        // Build VS CMDU message to send to backhaul manager
-        auto notification_out = message_com::create_vs_message<
-            beerocks_message::cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION>(cmdu_tx);
-        if (!notification_out) {
-            LOG(ERROR) << "Failed building ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION message!";
+        // Save information AgentDB
+        auto db = AgentDB::get();
+        db->erase_client(client_mac);
+
+        // Set client association information for associated client
+        auto radio = db->get_radio_by_mac(bssid, AgentDB::eMacType::BSSID);
+        if (!radio) {
+            LOG(DEBUG) << "Radio containing bssid " << bssid << " not found";
             break;
         }
 
-        notification_out->client_mac() = notification_in->mac();
-        notification_out->bssid()      = notification_in->bssid();
-        if (!notification_in->association_frame_length()) {
-            LOG(DEBUG) << "no association frame";
-        } else {
-            notification_out->set_association_frame(notification_in->association_frame(),
-                                                    notification_in->association_frame_length());
-        }
-
-        // Send the message
-        LOG(DEBUG) << "send ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION for client "
-                   << notification_out->client_mac();
-        if (!message_com::send_cmdu(backhaul_manager_socket, cmdu_tx)) {
-            slave_reset();
-        }
+        radio->associated_clients.emplace(
+            client_mac, AgentDB::sRadio::sClient{bssid, notification_in->association_frame_length(),
+                                                 notification_in->association_frame()});
 
         // build 1905.1 message CMDU to send to the controller
         if (!cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE)) {
@@ -3135,9 +3094,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                                   config.backhaul_wireless_iface.c_str(),
                                   message::IFACE_NAME_LENGTH);
 
-        bh_enable->frequency_band()   = hostap_params.frequency_band;
         radio->front.freq_type        = hostap_params.frequency_band;
-        bh_enable->max_bandwidth()    = hostap_params.max_bandwidth;
         radio->front.max_supported_bw = hostap_params.max_bandwidth;
 
         bh_enable->ht_supported()  = hostap_params.ht_supported;
@@ -3200,9 +3157,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             //TODO get bridge_iface from platform manager
             network_utils::iface_info bridge_info;
             network_utils::get_iface_info(bridge_info, db->bridge.iface_name);
-
-            // Create a local copy on this process database instance. Will be removed on PPM-83 phase 5
-            db->bridge.mac = tlvf::mac_from_string(bridge_info.mac);
 
             backhaul_params.gw_ipv4        = bridge_info.ip;
             backhaul_params.gw_bridge_mac  = bridge_info.mac;
