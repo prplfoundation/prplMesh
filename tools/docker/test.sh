@@ -13,16 +13,15 @@ rootdir="${scriptdir%/*/*}"
 . "${rootdir}/tools/functions.sh"
 
 usage() {
-    echo "usage: $(basename "$0") [-hv] [-n name [-b bridge_mac]]"
+    echo "usage: $(basename "$0") [-hv] [-n name]"
     echo "  options:"
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - verbosity on"
     echo "      -n|--name - container name for which to attach"
-    echo "      -b|--bridge_mac - bridge mac to get operational status on"
 }
 
 main() {
-    if ! OPTS=$(getopt -o 'hvn:b:' --long verbose,help,name,bridge_mac -n 'parse-options' -- "$@"); then
+    if ! OPTS=$(getopt -o 'hvn:' --long verbose,help,name -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2
         usage
         exit 1
@@ -32,26 +31,18 @@ main() {
 
     while true; do
         case "$1" in
-            -v | --verbose)    VERBOSE=true; OPT="-v"; shift ;;
-            -h | --help)       usage; exit 0; shift ;;
-            -n | --name)       NAME="$2"; shift; shift ;;
-            -b | --bridge_mac) BRIDGE_MAC="$2"; shift; shift ;;
+            -v | --verbose) VERBOSE=true; OPT="-v"; shift ;;
+            -h | --help)    usage; exit 0; shift ;;
+            -n | --name)    NAME="$2"; shift; shift ;;
             -- ) shift; break ;;
             * ) err "unsupported argument $1"; usage; exit 1 ;;
         esac
     done
 
-    if [ -z "$BRIDGE_MAC" ]; then 
-        run docker container exec "${NAME}" "${rootdir}/build/install/scripts/prplmesh_utils.sh" status $OPT
-    else
-        run docker container exec "${NAME}" "${rootdir}/build/install/scripts/prplmesh_utils.sh" status "$BRIDGE_MAC" $OPT
-    fi
-
-    
+    run docker container exec "${NAME}" "${rootdir}/build/install/scripts/prplmesh_utils.sh" status $OPT
 }
 
 VERBOSE=false
 NAME=prplMesh
-declare BRIDGE_MAC
 
 main "$@"
