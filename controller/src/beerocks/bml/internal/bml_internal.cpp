@@ -1207,6 +1207,13 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
         } break;
         case beerocks_message::ACTION_BML_CLIENT_GET_CLIENT_RESPONSE: {
             LOG(DEBUG) << "ACTION_BML_CLIENT_GET_CLIENT_RESPONSE received";
+
+            if (!m_prmClientGet) {
+                LOG(WARNING) << "Received ACTION_BML_CLIENT_GET_CLIENT_RESPONSE response, "
+                             << "but no one is waiting...";
+                break;
+            }
+
             auto response =
                 beerocks_header
                     ->addClass<beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_RESPONSE>();
@@ -1215,26 +1222,29 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                 return (-BML_RET_OP_FAILED);
             }
 
-            //Signal any waiting threads
-            if (m_prmClientGet) {
-                bool promise_result = false;
-                if (m_client) {
-                    std::copy_n(response->client().sta_mac.oct, BML_MAC_ADDR_LEN,
-                                m_client->sta_mac);
-                    m_client->timestamp_sec         = response->client().timestamp_sec;
-                    m_client->stay_on_initial_radio = response->client().stay_on_initial_radio;
-                    // TODO: add stay_on_selected_device to BML_CLIENT when support is added
-                    //m_client->stay_on_selected_device = response->client().stay_on_selected_device;
-                    m_client->selected_bands       = response->client().selected_bands;
-                    m_client->time_life_delay_days = response->client().time_life_delay_days;
-                    //Resolve promise to "true"
-                    promise_result = true;
-                }
-                m_prmClientGet->set_value(promise_result);
-            } else {
-                LOG(WARNING) << "Received ACTION_BML_CLIENT_GET_CLIENT_RESPONSE response, "
-                             << "but no one is waiting...";
+            if (response->result() != 0) {
+                LOG(ERROR) << "CLIENT_GET_CLIENT_REQUEST failed with error: " << response->result();
+                m_prmClientGet->set_value(false);
+                break;
             }
+
+            if (!m_client) {
+                LOG(ERROR) << "The pointer to the user client data is null!";
+                m_prmClientGet->set_value(false);
+                break;
+            }
+
+            std::copy_n(response->client().sta_mac.oct, BML_MAC_ADDR_LEN, m_client->sta_mac);
+            m_client->timestamp_sec         = response->client().timestamp_sec;
+            m_client->stay_on_initial_radio = response->client().stay_on_initial_radio;
+            // TODO: add stay_on_selected_device to BML_CLIENT when support is added
+            //m_client->stay_on_selected_device = response->client().stay_on_selected_device;
+            m_client->selected_bands       = response->client().selected_bands;
+            m_client->single_band          = response->client().single_band;
+            m_client->time_life_delay_days = response->client().time_life_delay_days;
+
+            //Resolve promise to "true"
+            m_prmClientGet->set_value(true);
         } break;
         default: {
             LOG(WARNING) << "unhandled header BML action type 0x" << std::hex
@@ -2036,7 +2046,15 @@ int bml_internal::client_get_client(const sMacAddr &sta_mac, BML_CLIENT *client)
     // Clear the promise holder
     m_prmClientGet = nullptr;
 
-    LOG_IF(iRet != BML_RET_OK, ERROR) << "Get client request returned with error code:" << iRet;
+    if (iRet != BML_RET_OK) {
+        LOG(ERROR) << "Get client request returned with error code:" << iRet;
+        return (iRet);
+    }
+
+    if (!prmClientGet.get_value()) {
+        LOG(ERROR) << "Get client request failed";
+        return (-BML_RET_OP_FAILED);
+    }
 
     return BML_RET_OK;
 }
