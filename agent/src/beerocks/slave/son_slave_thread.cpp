@@ -1309,6 +1309,17 @@ bool slave_thread::handle_cmdu_platform_manager_message(
 
             auto db = AgentDB::get();
 
+            /**
+             * On GW platform the ethernet interface which is used for backhaul connection must be
+             * empty since the GW doesn't need wired backhaul connection. Since it is being set on
+             * the constructor from the agent configuration file, clear it here when we know if the
+             * agent runs on a GW. 
+             */
+            if (db->device_conf.local_gw) {
+                db->ethernet.iface_name.clear();
+                db->ethernet.mac = network_utils::ZERO_MAC;
+            }
+
             configuration_stop_on_failure_attempts =
                 response->platform_settings().stop_on_failure_attempts;
             stop_on_failure_attempts = configuration_stop_on_failure_attempts;
@@ -3014,6 +3025,13 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
     case STATE_BACKHAUL_ENABLE: {
         bool error = false;
         auto db    = AgentDB::get();
+
+        if (db->device_conf.local_gw) {
+            LOG(TRACE) << "goto STATE_SEND_BACKHAUL_MANAGER_ENABLE";
+            slave_state = STATE_SEND_BACKHAUL_MANAGER_ENABLE;
+            break;
+        }
+
         if (!db->ethernet.iface_name.empty()) {
             if (config.backhaul_wire_iface_type == beerocks::IFACE_TYPE_UNSUPPORTED) {
                 LOG(DEBUG) << "backhaul_wire_iface_type is UNSUPPORTED";
