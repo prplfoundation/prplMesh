@@ -52,6 +52,18 @@ public:
      * again. This function allows the backhaul to signal that it has reached that state.
      */
     void reset_completed() { m_reset_completed = true; }
+
+    /**
+     * @brief check if `dev_set_config` has been received
+     *
+     * In certification mode the state machine of backhaul manager should stop
+     * before entering MASTER_DISCOVERY state until dev_set_config (wired backhaul)
+     * or start_wps_registration (wireless backhaul) is received.
+     * No code change needed for wireless flow, but for wired one
+     * we need to remember if `dev_set_config` has been received.
+     */
+    bool has_received_dev_set_config() { return m_received_dev_set_config; }
+
     std::string get_selected_backhaul();
     void update_vaps_list(std::string ruid, beerocks_message::sVapsList &vaps);
 
@@ -75,6 +87,17 @@ private:
 
     bool m_in_reset        = false;
     bool m_reset_completed = false;
+
+    /**
+     * @brief flag telling whether `dev_set_config` has been received
+     *
+     * In certification mode the state machine of backhaul manager should stop
+     * before entering MASTER_DISCOVERY state until dev_set_config (wired backhaul)
+     * or start_wps_registration (wireless backhaul) is received.
+     * No code change needed for wireless flow, but for wired one
+     * we need to remember if `dev_set_config` has been received.
+     */
+    bool m_received_dev_set_config = false;
     std::string m_selected_backhaul; // "ETH" or "<RUID of the selected radio>"
 
     std::mutex mutex;

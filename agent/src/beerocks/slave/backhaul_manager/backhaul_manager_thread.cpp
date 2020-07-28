@@ -792,8 +792,25 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
         break;
     }
     case EState::MASTER_DISCOVERY: {
-
         auto db = AgentDB::get();
+
+        bool wired_backhaul =
+            db->backhaul.connection_type == AgentDB::sBackhaul::eConnectionType::Wired;
+
+        // In certification mode we want to wait till dev_set_config is received (wired backhaul)
+        // or start_wps_registration (wireless backhaul).
+        if (db->device_conf.certification_mode && wired_backhaul &&
+            !db->device_conf.local_controller) {
+            if (!m_agent_ucc_listener) {
+                LOG(ERROR) << "m_agent_ucc_listener == nullptr";
+                return false;
+            }
+
+            if (!m_agent_ucc_listener->has_received_dev_set_config()) {
+                break;
+            }
+        }
+
         if (network_utils::get_iface_info(bridge_info, db->bridge.iface_name) != 0) {
             LOG(ERROR) << "Failed reading addresses from the bridge!";
             platform_notify_error(bpl::eErrorCode::BH_READING_DATA_FROM_THE_BRIDGE, "");
