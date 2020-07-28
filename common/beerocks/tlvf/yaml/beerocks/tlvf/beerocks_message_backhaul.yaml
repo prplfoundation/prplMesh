@@ -122,23 +122,6 @@ cACTION_BACKHAUL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE:
   _type: class
   mac: sMacAddr
 
-cACTION_BACKHAUL_HOSTAP_VAPS_LIST_UPDATE_NOTIFICATION:
-  _type: class
-  params: sVapsList
-
-cACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION:
-  _type: class
-  client_mac: sMacAddr
-  bssid: sMacAddr
-  association_frame:
-    _type: uint8_t
-    _length: []
-
-cACTION_BACKHAUL_CLIENT_DISCONNECTED_NOTIFICATION:
-  _type: class
-  client_mac: sMacAddr
-  bssid: sMacAddr
-
 cACTION_BACKHAUL_ASSOCIATED_STA_LINK_METRICS_REQUEST:
   _type: class
   sync: uint8_t
