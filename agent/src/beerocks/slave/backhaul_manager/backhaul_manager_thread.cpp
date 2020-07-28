@@ -31,6 +31,7 @@
 #include "backhaul_manager_thread.h"
 #include "../agent_db.h"
 
+#include "../helpers/media_type.h"
 #include "../link_metrics/ieee802_11_link_metrics_collector.h"
 #include "../link_metrics/ieee802_3_link_metrics_collector.h"
 #include "../tlvf_utils.h"
@@ -119,68 +120,6 @@ namespace beerocks {
 //////////////////////////////////////////////////////////////////////////////
 
 const char *backhaul_manager::s_arrStates[] = {FOREACH_STATE(GENERATE_STRING)};
-
-/**
- * IEEE Std 1905.1, Table 6-12—Media type (intfType) for IEEE 802.11 interfaces
- *
- * Value and Description         Frequency  MaxBandwith  Comments
- * 0 IEEE 802.11b (2.4 GHz)      2.4 GHz    22 MHz       Not supported
- * 1 IEEE 802.11g (2.4 GHz)      2.4 GHz    20 MHz
- * 2 IEEE 802.11a (5 GHz)        5 GHz      20 MHz
- * 3 IEEE 802.11n (2.4 GHz)      2.4 GHz    40 MHz
- * 4 IEEE 802.11n (5 GHz)        5 GHz      40 MHz
- * 5 IEEE 802.11ac (5 GHz)       5 GHz      80 MHz
- * 6 IEEE 802.11ad (60 GHz)      60 GHz     160 MHz      Not supported
- * 7 IEEE 802.11af (whitespace)                          Not supported
- * 8 IEEE 802.11ax (2.4 GHz)     2.4 GHz    160 MHz      Not included in Table 6-12—Media type (intfType), WiFi6 is specified to use 0x0108 in R2
- * 8 IEEE 802.11ax (5 GHz)       5 GHz      160 MHz      Not included in Table 6-12—Media type (intfType), WiFi6 is specified to use 0x0108 in R2
- */
-static const std::vector<std::tuple<eFreqType, eWiFiBandwidth, ieee1905_1::eMediaType>>
-    table_6_12_media_type_802_11{
-        std::make_tuple(eFreqType::FREQ_24G, eWiFiBandwidth::BANDWIDTH_20,
-                        ieee1905_1::eMediaType::IEEE_802_11G_2_4_GHZ),
-
-        std::make_tuple(eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_20,
-                        ieee1905_1::eMediaType::IEEE_802_11A_5_GHZ),
-
-        std::make_tuple(eFreqType::FREQ_24G, eWiFiBandwidth::BANDWIDTH_40,
-                        ieee1905_1::eMediaType::IEEE_802_11N_2_4_GHZ),
-
-        std::make_tuple(eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_40,
-                        ieee1905_1::eMediaType::IEEE_802_11N_5_GHZ),
-
-        std::make_tuple(eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_80,
-                        ieee1905_1::eMediaType::IEEE_802_11AC_5_GHZ),
-
-        std::make_tuple(eFreqType::FREQ_24G, eWiFiBandwidth::BANDWIDTH_160,
-                        ieee1905_1::eMediaType::IEEE_802_11AX),
-
-        std::make_tuple(eFreqType::FREQ_5G, eWiFiBandwidth::BANDWIDTH_160,
-                        ieee1905_1::eMediaType::IEEE_802_11AX),
-
-    };
-
-/**
- * @brief Gets media type from given frequency band and max bandwidth values.
- *
- * Media type value is obtained by looking up into table_6_12_media_type_802_11 table.
- * Returns UNKNOWN_MEDIA if frequency band and max bandwidth are not found in table.
- *
- * @param frequency_band Frequency band
- * @param max_bandwidth Maximum bandwidth
- * @return Media type value as per table_6_12_media_type_802_11 table.
- */
-static ieee1905_1::eMediaType get_802_11_media_type(eFreqType frequency_band,
-                                                    eWiFiBandwidth max_bandwidth)
-{
-    for (const auto &tuple : table_6_12_media_type_802_11) {
-        if ((std::get<0>(tuple) == frequency_band) && (std::get<1>(tuple) == max_bandwidth)) {
-            return std::get<2>(tuple);
-        }
-    }
-
-    return ieee1905_1::eMediaType::UNKNOWN_MEDIA;
-}
 
 /**
  * @brief Gets the MAC address of given interface.
@@ -2852,8 +2791,8 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
     if (!local_interface_name.empty() &&
         network_utils::linux_iface_is_up_and_running(local_interface_name)) {
         ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::UNKNOWN_MEDIA;
-        if (!get_media_type(local_interface_name, ieee1905_1::eMediaTypeGroup::IEEE_802_3,
-                            media_type)) {
+        if (!MediaType::get_media_type(local_interface_name,
+                                       ieee1905_1::eMediaTypeGroup::IEEE_802_3, media_type)) {
             LOG(ERROR) << "Unable to compute media type for interface " << local_interface_name;
             return false;
         }
@@ -2943,7 +2882,7 @@ bool backhaul_manager::handle_1905_topology_query(ieee1905_1::CmduMessageRx &cmd
 
         ieee1905_1::eMediaTypeGroup media_type_group = ieee1905_1::eMediaTypeGroup::IEEE_802_11;
         ieee1905_1::eMediaType media_type            = ieee1905_1::eMediaType::UNKNOWN_MEDIA;
-        if (!get_media_type(local_interface_name, media_type_group, media_type)) {
+        if (!MediaType::get_media_type(local_interface_name, media_type_group, media_type)) {
             LOG(ERROR) << "Unable to compute media type for interface " << local_interface_name;
             return false;
         }
@@ -4163,50 +4102,6 @@ std::shared_ptr<bwl::sta_wlan_hal> backhaul_manager::get_wireless_hal(std::strin
     return slave_sk->second->sta_wlan_hal;
 }
 
-bool backhaul_manager::get_media_type(const std::string &interface_name,
-                                      ieee1905_1::eMediaTypeGroup media_type_group,
-                                      ieee1905_1::eMediaType &media_type)
-{
-    bool result = false;
-
-    if (ieee1905_1::eMediaTypeGroup::IEEE_802_3 == media_type_group) {
-        uint32_t speed;
-        if (network_utils::linux_iface_get_speed(interface_name, speed)) {
-            if (SPEED_100 == speed) {
-                media_type = ieee1905_1::eMediaType::IEEE_802_3U_FAST_ETHERNET;
-            } else if (SPEED_1000 <= speed) {
-                media_type = ieee1905_1::eMediaType::IEEE_802_3AB_GIGABIT_ETHERNET;
-            } else {
-                media_type = ieee1905_1::eMediaType::UNKNOWN_MEDIA;
-            }
-
-            result = true;
-        }
-    } else if (ieee1905_1::eMediaTypeGroup::IEEE_802_11 == media_type_group) {
-
-        auto db = AgentDB::get();
-
-        auto radio = db->radio(interface_name);
-        if (radio) {
-            media_type =
-                get_802_11_media_type(radio->front.freq_type, radio->front.max_supported_bw);
-            result = true;
-        }
-
-    } else if (ieee1905_1::eMediaTypeGroup::IEEE_1901 == media_type_group) {
-        // TODO: Not supported yet
-        LOG(ERROR) << "IEEE_1901 media is not supported yet";
-    } else if (ieee1905_1::eMediaTypeGroup::MoCA == media_type_group) {
-        // TODO: Not supported yet
-        LOG(ERROR) << "MoCA media is not supported yet";
-    } else {
-        media_type = ieee1905_1::eMediaType::UNKNOWN_MEDIA;
-        result     = true;
-    }
-
-    return result;
-}
-
 std::unique_ptr<link_metrics_collector>
 backhaul_manager::create_link_metrics_collector(const sLinkInterface &link_interface) const
 {
@@ -4244,8 +4139,9 @@ bool backhaul_manager::get_neighbor_links(
 
     wired_interface.iface_name = db->ethernet.iface_name;
 
-    if (!get_media_type(wired_interface.iface_name, ieee1905_1::eMediaTypeGroup::IEEE_802_3,
-                        wired_interface.media_type)) {
+    if (!MediaType::get_media_type(wired_interface.iface_name,
+                                   ieee1905_1::eMediaTypeGroup::IEEE_802_3,
+                                   wired_interface.media_type)) {
         LOG(ERROR) << "Unable to compute media type for interface " << wired_interface.iface_name;
         return false;
     }
@@ -4283,8 +4179,8 @@ bool backhaul_manager::get_neighbor_links(
             }
 
             interface.iface_mac  = bssid;
-            interface.media_type = beerocks::get_802_11_media_type(radio->front.freq_type,
-                                                                   radio->front.max_supported_bw);
+            interface.media_type = MediaType::get_802_11_media_type(radio->front.freq_type,
+                                                                    radio->front.max_supported_bw);
 
             if (ieee1905_1::eMediaType::UNKNOWN_MEDIA == interface.media_type) {
                 LOG(ERROR) << "Unknown media type for interface " << interface.iface_name;

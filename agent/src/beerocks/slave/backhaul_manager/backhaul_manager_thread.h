@@ -378,22 +378,6 @@ private:
     };
 
     /**
-     * @brief Gets media type for given interface.
-     *
-     * The mechanism to use to obtain media type depends on the media type group:
-     * Ethernet, WiFi, MoCA, etc.
-     *
-     * @param[in] interface_name Name of the local interface.
-     * @param[in] media_type_group The media type group of the connecting interface.
-     * @param[in, out] media_type The underlying network technology of the connecting interface.
-     *
-     * @return True on success and false otherwise.
-     */
-    bool get_media_type(const std::string &interface_name,
-                        ieee1905_1::eMediaTypeGroup media_type_group,
-                        ieee1905_1::eMediaType &media_type);
-
-    /**
      * @brief Creates a new link metrics collector for given media type.
      *
      * Creates a new link metrics collector suitable for the underlying network technology of the
