@@ -599,7 +599,7 @@ struct BML_CLIENT_CONFIG {
 
 struct BML_CLIENT {
     // Client MAC.
-    char sta_mac[BML_MAC_ADDR_LEN];
+    uint8_t sta_mac[BML_MAC_ADDR_LEN];
 
     // Time of last client configuration edit (in Seconds)
     uint32_t timestamp_sec;
