@@ -1082,6 +1082,14 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
         for (auto soc : slaves_sockets) {
             std::string iface = soc->sta_iface;
 
+            auto radio = db->radio(soc->sta_iface);
+            if (!radio) {
+                LOG(DEBUG) << "Radio of iface " << soc->sta_iface << " does not exist on the db";
+                continue;
+            }
+            // Clear the backhaul interface mac.
+            radio->back.iface_mac = network_utils::ZERO_MAC;
+
             if (soc->sta_wlan_hal) {
                 soc->sta_wlan_hal.reset();
             }
@@ -1435,6 +1443,15 @@ bool backhaul_manager::backhaul_fsm_wireless(bool &skip_select)
                 //     soc->slave_is_backhaul_manager = true;
                 //     break;
                 // }
+
+                auto radio = db->radio(soc->sta_iface);
+                if (!radio) {
+                    LOG(DEBUG) << "Radio of iface " << soc->sta_iface
+                               << " does not exist on the db";
+                    continue;
+                }
+                // Update the backhaul interface mac.
+                radio->back.iface_mac = tlvf::mac_from_string(soc->sta_wlan_hal->get_radio_mac());
 
             } else if (attach_state == bwl::HALState::Failed) {
                 // Delete the HAL instance

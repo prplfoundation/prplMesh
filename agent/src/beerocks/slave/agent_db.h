@@ -118,7 +118,8 @@ public:
 
         struct sFront {
             explicit sFront(const std::string &iface_name_)
-                : iface_name(iface_name_), max_supported_bw(eWiFiBandwidth::BANDWIDTH_UNKNOWN),
+                : iface_name(iface_name_), iface_mac(net::network_utils::ZERO_MAC),
+                  max_supported_bw(eWiFiBandwidth::BANDWIDTH_UNKNOWN),
                   freq_type(eFreqType::FREQ_UNKNOWN)
             {
             }
@@ -136,7 +137,10 @@ public:
         } front;
 
         struct sBack {
-            explicit sBack(const std::string &iface_name_) : iface_name(iface_name_) {}
+            explicit sBack(const std::string &iface_name_)
+                : iface_name(iface_name_), iface_mac(net::network_utils::ZERO_MAC)
+            {
+            }
             std::string iface_name;
             sMacAddr iface_mac;
         } back;
