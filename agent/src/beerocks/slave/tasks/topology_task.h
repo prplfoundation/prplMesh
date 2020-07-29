@@ -89,6 +89,41 @@ private:
     void send_topology_discovery();
     void send_topology_notification();
 
+    /**
+     * @brief Add and fill device information tlv.
+     * 
+     * @return true on success, otherwise false.
+     */
+    bool add_device_information_tlv();
+
+    /**
+     * @brief Add and fill 1905_neighbor_device tlv for each know neighbor.
+     * 
+     * @return true on success, otherwise false.
+     */
+    bool add_1905_neighbor_device_tlv();
+
+    /**
+     * @brief Add and fill supported service tlv.
+     * 
+     * @return true on success, otherwise false.
+     */
+    bool add_supported_service_tlv();
+
+    /**
+     * @brief Add and fill AP operational BSS tlv.
+     * 
+     * @return true on success, otherwise false.
+     */
+    bool add_ap_operational_bss_tlv();
+
+    /**
+     * @brief Add and fill associated_clients tlv.
+     * 
+     * @return true on success, otherwise false.
+     */
+    bool add_associated_clients_tlv();
+
     backhaul_manager &m_btl_ctx;
     ieee1905_1::CmduMessageTx &m_cmdu_tx;
 };
