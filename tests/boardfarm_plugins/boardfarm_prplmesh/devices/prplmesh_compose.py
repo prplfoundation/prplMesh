@@ -71,7 +71,12 @@ class PrplMeshCompose(PrplMeshBase):
             log_path = os.path.join(rootdir, "logs/{}".format(self.name))
             if not os.path.exists(log_path):
                 os.mkdir(log_path)
-            vol = '{}:/tmp/{}/beerocks/logs'.format(log_path, self.user_id)
+
+            if os.getenv('CI_PIPELINE_ID') is None:
+                vol = '{}:/tmp/{}/beerocks/logs'.format(log_path, self.user_id)
+            else:
+                vol = '{}:/tmp/beerocks/logs'.format(log_path)
+
             full_args += ["run", "-v", vol]
             # full_args += ["--entrypoint", entrypoint + ' ' + start]
             full_args += args
