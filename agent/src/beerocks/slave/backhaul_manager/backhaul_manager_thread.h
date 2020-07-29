@@ -95,15 +95,6 @@ private:
                                   std::shared_ptr<sRadioInfo> pSocket = nullptr); // cmdu_duplicate
 
     bool send_autoconfig_search_message(const std::string &front_radio_iface_name);
-    bool send_1905_topology_discovery_message();
-
-    /**
-     * @brief Sends Topology Discovery message on given interface.
-     *
-     * @param iface_name Name of the network interface on which the message is transmitted.
-     * @return True on success and false otherwise
-     */
-    bool send_1905_topology_discovery_message(const std::string &iface_name);
 
     /**
      * @brief Sends an AP Metrics Query message for each bssid on 'bssid_list' to the son_slaves.
