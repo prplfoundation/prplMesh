@@ -170,6 +170,13 @@ def vararg_callback(option, opt_str, value, parser):
     setattr(parser.values, option.dest, value)
 
 
+def cleanup(rc):
+    if rc != 0:
+        print('Return code !=0 -> {}'.format(rc))
+    if getpass.getuser() == 'gitlab-runner':
+        os.system('chown -R gitlab-runner:gitlab-runner .')
+    sys.exit(rc)
+
 if __name__ == '__main__':
     check_docker_versions()
     parser = argparse.ArgumentParser(description='Dockerized test launcher')
@@ -204,7 +211,8 @@ if __name__ == '__main__':
             print('Specify --id for the --clean parameter')
             sys.exit(0)
         services = Services(bid=args.bid)
-        services.dc(['down', '--remove-orphans', '--rmi', 'all'])
+        rc = services.dc(['down', '--remove-orphans', '--rmi', 'all'])
+        cleanup(rc)
     elif args.shell:
         if not args.bid:
             print('Specify --id for the shell parameter')
@@ -212,18 +220,14 @@ if __name__ == '__main__':
         services = Services(bid=args.bid)
         rc = services.dc(['run', '--service-ports', '--entrypoint',
                           '/bin/bash', 'boardfarm'], interactive=True)
-        if rc != 0:
-            print('Return code !=0 -> {}'.format(rc))
-        sys.exit(rc)
+        cleanup(rc)
     elif args.build:
         if not args.bid:
             print('Specify --id for the build parameter')
             sys.exit(0)
         services = Services(bid=args.bid)
         rc = services.dc(['build'], interactive=True)
-        if rc != 0:
-            print('Return code !=0 -> {}'.format(rc))
-        sys.exit(rc)
+        cleanup(rc)
     else:
         if args.bid:
             services = Services(bid=args.bid)   # With new build id
@@ -234,6 +238,4 @@ if __name__ == '__main__':
         #                  '/bin/bash', 'boardfarm'], interactive=True)
         rc = services.dc(['run', '--service-ports', '--use-aliases',
                           'boardfarm'], interactive=True)
-        if rc != 0:
-            print('Return code !=0 -> {}'.format(rc))
-        sys.exit(rc)
+        cleanup(rc)
