@@ -83,6 +83,101 @@ void TopologyTask::work()
     }
 }
 
+bool TopologyTask::handle_cmdu(ieee1905_1::CmduMessageRx &cmdu_rx, const sMacAddr &src_mac,
+                               std::shared_ptr<beerocks_header> beerocks_header)
+{
+    switch (cmdu_rx.getMessageType()) {
+    case ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE: {
+        handle_topology_discovery(cmdu_rx, src_mac);
+        break;
+    }
+    default: {
+        // Message was not handled, therefore return false.
+        return false;
+    }
+    }
+    return true;
+}
+
+void TopologyTask::handle_topology_discovery(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                             const sMacAddr &src_mac)
+{
+    auto tlvAlMac = cmdu_rx.getClass<ieee1905_1::tlvAlMacAddress>();
+    if (!tlvAlMac) {
+        LOG(ERROR) << "getClass tlvAlMacAddress failed";
+        return;
+    }
+
+    auto db = AgentDB::get();
+
+    // Filter out the messages we have sent.
+    if (tlvAlMac->mac() == db->bridge.mac) {
+        return;
+    }
+
+    auto mid = cmdu_rx.getMessageId();
+    LOG(INFO) << "Received TOPOLOGY_DISCOVERY_MESSAGE from AL MAC=" << tlvAlMac->mac()
+              << ", mid=" << std::hex << mid;
+
+    auto tlvMac = cmdu_rx.getClass<ieee1905_1::tlvMacAddress>();
+    if (!tlvMac) {
+        LOG(ERROR) << "getClass tlvMacAddress failed";
+        return;
+    }
+
+    uint32_t if_index                      = message_com::get_uds_header(cmdu_rx)->if_index;
+    std::string local_receiving_iface_name = network_utils::linux_get_iface_name(if_index);
+    if (local_receiving_iface_name.empty()) {
+        LOG(ERROR) << "Failed getting interface name for index: " << if_index;
+        return;
+    }
+
+    std::string local_receiving_iface_mac_str;
+    if (!network_utils::linux_iface_get_mac(local_receiving_iface_name,
+                                            local_receiving_iface_mac_str)) {
+        LOG(ERROR) << "Failed getting MAC address for interface: " << local_receiving_iface_name;
+        return;
+    }
+
+    LOG(DEBUG) << "sender iface_mac=" << tlvMac->mac()
+               << ", local_receiving_iface=" << local_receiving_iface_name
+               << ", local_receiving_iface_mac=" << local_receiving_iface_mac_str;
+
+    // Check if it is a new device so if it does, we will send a Topology Notification.
+    bool new_device = false;
+    for (auto &neighbors_on_local_iface_entry : db->neighbor_devices) {
+        auto &neighbors_on_local_iface = neighbors_on_local_iface_entry.second;
+        new_device =
+            neighbors_on_local_iface.find(tlvAlMac->mac()) == neighbors_on_local_iface.end();
+        if (new_device) {
+            break;
+        }
+    }
+
+    // Add/Update the device on our list.
+    AgentDB::sNeighborDevice neighbor_device;
+    neighbor_device.transmitting_iface_mac = tlvMac->mac();
+    neighbor_device.timestamp              = std::chrono::steady_clock::now();
+
+    auto &neighbor_devices_by_al_mac =
+        db->neighbor_devices[tlvf::mac_from_string(local_receiving_iface_mac_str)];
+    neighbor_devices_by_al_mac[tlvAlMac->mac()] = neighbor_device;
+
+    // If it is a new device, then our 1905.1 neighbors list has changed and we are required to send
+    // Topology Notification Message.
+    if (new_device) {
+        LOG(INFO) << "Sending Topology Notification on newly discovered 1905.1 device";
+        auto cmdu_header =
+            m_cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE);
+        if (!cmdu_header) {
+            LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
+            return;
+        }
+        m_btl_ctx.send_cmdu_to_broker(m_cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR,
+                                      tlvf::mac_to_string(db->bridge.mac));
+    }
+}
+
 void TopologyTask::send_topology_discovery()
 {
     // TODO: get the list of interfaces that are up_and_running using the event-driven mechanism
