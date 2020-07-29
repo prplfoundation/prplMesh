@@ -1261,7 +1261,7 @@ class TestFlows:
     def test_topology(self):
         mid = env.controller.dev_send_1905(env.agents[0].mac, 0x0002)
         debug("Confirming topology query was received")
-        self.check_log(env.agents[0], r"TOPOLOGY_QUERY_MESSAGE.*mid={:d}".format(mid))
+        self.check_log(env.agents[0], r"TOPOLOGY_QUERY_MESSAGE.*mid=0x{:x}".format(mid))
 
     def test_beacon_report_query(self):
         # associated STA
