@@ -7,15 +7,15 @@ services:
         container_name: controller
         environment:
             - USER
-            - INSTALL_DIR=$ROOT_DIR/build/install
-            - ROOT_DIR
+            - INSTALL_DIR=/builds/prpl-foundation/prplMesh/build/install
+            - ROOT_DIR=/builds/prpl-foundation/prplMesh
             - CURRENT_ID
             - CI_PIPELINE_ID
         expose:
             - "5000"
             - "8002"
         volumes:
-            - "$ROOT_DIR:$ROOT_DIR"
+            - "$ROOT_DIR:/builds/prpl-foundation/prplMesh"
         entrypoint: ["/root/entrypoint.sh", "/usr/bin/start-controller-agent"]
 
     agent:
@@ -24,15 +24,15 @@ services:
         container_name: agent
         environment:
             - USER
-            - INSTALL_DIR=$ROOT_DIR/build/install
-            - ROOT_DIR
+            - INSTALL_DIR=/builds/prpl-foundation/prplMesh/build/install
+            - ROOT_DIR=/builds/prpl-foundation/prplMesh
             - CURRENT_ID
             - CI_PIPELINE_ID
         expose:
             - "5000"
             - "8002"
         volumes:
-          - "$ROOT_DIR:$ROOT_DIR"
+          - "$ROOT_DIR:/builds/prpl-foundation/prplMesh"
         entrypoint: ["/root/entrypoint.sh", "/usr/bin/start-agent"]
 
     # Boardfarm image is launched from dctest.py, TARGET_DIR refers to the
