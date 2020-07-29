@@ -132,6 +132,8 @@ class Services:
         # local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(docker_gid)
         local_env['CURRENT_ID'] = str(os.getuid())
         local_env['RUN_ID'] = self.build_id
+        if os.getenv('CI_PIPELINE_ID') is None:
+            local_env['CI_PIPELINE_ID'] = 'latest'
         # local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(os.getgid())
         if not interactive:
             proc = Popen(params, stdout=PIPE, stderr=PIPE)

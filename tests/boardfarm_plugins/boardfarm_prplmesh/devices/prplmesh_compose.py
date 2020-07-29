@@ -78,7 +78,14 @@ class PrplMeshCompose(PrplMeshBase):
 
         print('_docker_compose: {}'.format(' '.join(full_args)))
         # os.environ['CURRENT_UID'] = '1000:998'
-        self._run_shell_cmd("/usr/local/bin/docker-compose", full_args)
+        if os.getenv('CI_PIPELINE_ID') is None:
+            print('Setting CI_PIPELINE_ID "latest"')
+            os.environ['CI_PIPELINE_ID'] = 'latest'
+            self._run_shell_cmd("/usr/local/bin/docker-compose",
+                                full_args, env=os.environ)
+        else:
+            self._run_shell_cmd("/usr/local/bin/docker-compose", full_args)
+
 
     def __del__(self):
         # self._docker_compose(["stop", self.name])
