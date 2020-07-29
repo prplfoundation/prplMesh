@@ -119,13 +119,6 @@ cACTION_CLI_CLIENT_BEACON_11K_REQUEST:
   repeats: uint16_t
   op_class: int16_t
 
-cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST:
-  _type: class
-  hostap_mac: sMacAddr
-  client_mac: sMacAddr
-  peer_mac: sMacAddr
-  group_identity: uint8_t
-
 #################################################
 # HOSTAP
 #################################################
