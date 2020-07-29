@@ -216,7 +216,7 @@ private:
                              bool is_single_scan = false);
     int client_get_client_list();
     int client_set_client(const std::string &sta_mac, int8_t selected_bands,
-                          int8_t stay_on_initial_radio, int8_t stay_on_selected_device);
+                          int8_t stay_on_initial_radio);
     int client_get_client(const std::string &sta_mac);
     template <typename T> const std::string string_from_int_array(T *arr, size_t arr_max_size);
     // Variable

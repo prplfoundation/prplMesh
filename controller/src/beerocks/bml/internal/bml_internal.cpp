@@ -1221,11 +1221,12 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                 if (m_client) {
                     std::copy_n(response->client().sta_mac.oct, BML_MAC_ADDR_LEN,
                                 m_client->sta_mac);
-                    m_client->timestamp_sec           = response->client().timestamp_sec;
-                    m_client->stay_on_initial_radio   = response->client().stay_on_initial_radio;
-                    m_client->stay_on_selected_device = response->client().stay_on_selected_device;
-                    m_client->selected_bands          = response->client().selected_bands;
-                    m_client->time_life_delay_days    = response->client().time_life_delay_days;
+                    m_client->timestamp_sec         = response->client().timestamp_sec;
+                    m_client->stay_on_initial_radio = response->client().stay_on_initial_radio;
+                    // TODO: add stay_on_selected_device to BML_CLIENT when support is added
+                    //m_client->stay_on_selected_device = response->client().stay_on_selected_device;
+                    m_client->selected_bands       = response->client().selected_bands;
+                    m_client->time_life_delay_days = response->client().time_life_delay_days;
                     //Resolve promise to "true"
                     promise_result = true;
                 }
@@ -1963,9 +1964,11 @@ int bml_internal::client_set_client(const sMacAddr &sta_mac, const BML_CLIENT_CO
         return (-BML_RET_OP_FAILED);
     }
 
-    request->sta_mac()                               = sta_mac;
-    request->client_config().stay_on_initial_radio   = client_config.stay_on_initial_radio;
-    request->client_config().stay_on_selected_device = client_config.stay_on_selected_device;
+    request->sta_mac()                             = sta_mac;
+    request->client_config().stay_on_initial_radio = client_config.stay_on_initial_radio;
+    // TODO: add stay_on_selected_device to BML_CLIENT when support is added
+    //       currently, it is only available as infrastructure in the request/response message
+    request->client_config().stay_on_selected_device = PARAMETER_NOT_CONFIGURED;
     request->client_config().selected_bands          = client_config.selected_bands;
 
     int result = 0;
