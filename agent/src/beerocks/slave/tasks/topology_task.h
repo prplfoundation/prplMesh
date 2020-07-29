@@ -25,7 +25,20 @@ public:
 
     void work() override;
 
+    bool handle_cmdu(ieee1905_1::CmduMessageRx &cmdu_rx, const sMacAddr &src_mac,
+                     std::shared_ptr<beerocks_header> beerocks_header) override;
+
 private:
+    /* 1905.1 message handlers: */
+
+    /**
+    * @brief Handles 1905 Topology Discovery message.
+    * 
+    * @param[in] cmdu_rx Received CMDU.
+    * @param[in] src_mac MAC address of the message sender.
+    */
+    void handle_topology_discovery(ieee1905_1::CmduMessageRx &cmdu_rx, const sMacAddr &src_mac);
+
     /* Helper functions */
     void send_topology_discovery();
     void send_topology_notification();
