@@ -36,6 +36,53 @@ TopologyTask::TopologyTask(backhaul_manager &btl_ctx, ieee1905_1::CmduMessageTx 
 {
 }
 
+void TopologyTask::work()
+{
+    auto now = std::chrono::steady_clock::now();
+
+    // Send topology discovery every 60 seconds according to IEEE_Std_1905.1-2013 specification
+    constexpr uint8_t TOPOLOGY_DISCOVERY_TX_CYCLE_SEC = 60;
+    static std::chrono::steady_clock::time_point discovery_timestamp =
+        std::chrono::steady_clock::now();
+
+    if (now - discovery_timestamp > std::chrono::seconds(TOPOLOGY_DISCOVERY_TX_CYCLE_SEC)) {
+        discovery_timestamp = now;
+        send_topology_discovery();
+    }
+
+    // Each platform must send Topology Discovery message every 60 seconds to its first circle
+    // 1905.1 neighbors.
+    // Iterate on each of known 1905.1 neighbors and check if we have received in the last
+    // 60 seconds a Topology Discovery message from it. If not, remove this neighbor from our list
+    // and send a Topology Notification message.
+    static constexpr uint8_t DISCOVERY_NEIGHBOUR_REMOVAL_TIMEOUT_SEC =
+        ieee1905_1_consts::DISCOVERY_NOTIFICATION_TIMEOUT_SEC + 3; // 3 seconds grace period.
+
+    auto db = AgentDB::get();
+
+    bool neighbors_list_changed = false;
+    for (auto &neighbors_on_local_iface_entry : db->neighbor_devices) {
+        auto &neighbors_on_local_iface = neighbors_on_local_iface_entry.second;
+        for (auto it = neighbors_on_local_iface.begin(); it != neighbors_on_local_iface.end();) {
+            auto &last_topology_discovery = it->second.timestamp;
+            if (now - last_topology_discovery >
+                std::chrono::seconds(DISCOVERY_NEIGHBOUR_REMOVAL_TIMEOUT_SEC)) {
+                auto &device_al_mac = it->first;
+                LOG(INFO) << "Removed 1905.1 device " << device_al_mac << " from neighbors list";
+                it                     = neighbors_on_local_iface.erase(it);
+                neighbors_list_changed = true;
+                continue;
+            }
+            it++;
+        }
+    }
+
+    if (neighbors_list_changed) {
+        LOG(INFO) << "Sending topology notification on removeing of 1905.1 neighbors";
+        send_topology_notification();
+    }
+}
+
 void TopologyTask::send_topology_discovery()
 {
     // TODO: get the list of interfaces that are up_and_running using the event-driven mechanism

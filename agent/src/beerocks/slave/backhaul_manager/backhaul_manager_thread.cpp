@@ -447,53 +447,6 @@ void backhaul_manager::after_select(bool timeout)
         }
     }
 
-    auto db = AgentDB::get();
-
-    // Send topology discovery every 60 seconds according to IEEE_Std_1905.1-2013 specification
-    static std::chrono::steady_clock::time_point discovery_timestamp =
-        std::chrono::steady_clock::now();
-    auto now     = std::chrono::steady_clock::now();
-    auto elapsed = std::chrono::duration_cast<std::chrono::seconds>(now - discovery_timestamp);
-    if ((m_eFSMState == EState::CONNECTED) ||
-        (m_eFSMState == EState::OPERATIONAL && elapsed.count() == 60)) {
-        discovery_timestamp = now;
-        send_1905_topology_discovery_message();
-    }
-
-    // Each platform must send Topology Discovery message every 60 seconds to its first circle
-    // 1905.1 neighbors.
-    // Iterate on each of known 1905.1 neighbors and check if we have received in the last
-    // 60 seconds a Topology Discovery message from it. If not, remove this neighbor from our list
-    // and send a Topology Notification message.
-    bool neighbors_list_changed = false;
-    for (auto &neighbors_on_local_iface_entry : db->neighbor_devices) {
-        auto &neighbors_on_local_iface = neighbors_on_local_iface_entry.second;
-        for (auto it = neighbors_on_local_iface.begin(); it != neighbors_on_local_iface.end();) {
-            auto &last_topology_discovery = it->second.timestamp;
-            if (now - last_topology_discovery >
-                std::chrono::seconds(DISCOVERY_NEIGHBOUR_REMOVAL_TIMEOUT)) {
-                auto &device_al_mac = it->first;
-                LOG(INFO) << "Removed 1905.1 device " << device_al_mac << " from neighbors list";
-                it                     = neighbors_on_local_iface.erase(it);
-                neighbors_list_changed = true;
-                continue;
-            }
-            it++;
-        }
-    }
-
-    if (neighbors_list_changed) {
-        LOG(INFO) << "Sending topology notification on removeing of 1905.1 neighbors";
-        auto cmdu_header =
-            cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE);
-        if (!cmdu_header) {
-            LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
-            return;
-        }
-        send_cmdu_to_broker(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR,
-                            tlvf::mac_to_string(db->bridge.mac));
-    }
-
     // Run Tasks
     m_task_pool.run_tasks();
 }

@@ -23,6 +23,8 @@ public:
     TopologyTask(backhaul_manager &btl_ctx, ieee1905_1::CmduMessageTx &cmdu_tx);
     ~TopologyTask() {}
 
+    void work() override;
+
 private:
     /* Helper functions */
     void send_topology_discovery();
