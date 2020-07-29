@@ -69,17 +69,6 @@ cACTION_CLI_DUMP_NODE_INFO:
   _type: class
   mac: sMacAddr
 
-cACTION_CLI_PING_SLAVE_REQUEST:
-  _type: class
-  mac: sMacAddr
-  num_of_req: uint16_t
-  size: uint16_t
-
-cACTION_CLI_PING_ALL_SLAVES_REQUEST:
-  _type: class
-  num_of_req: uint16_t
-  size: uint16_t
-
 cACTION_CLI_BACKHAUL_SCAN_RESULTS:
   _type: class
   mac: sMacAddr
