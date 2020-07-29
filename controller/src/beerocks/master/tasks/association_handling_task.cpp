@@ -372,6 +372,24 @@ void association_handling_task::finalize_new_connection()
      */
     if (!database.get_node_handoff_flag(sta_mac)) {
         if (database.get_node_type(sta_mac) == beerocks::TYPE_CLIENT) {
+            // The client's stay-on-initial-radio can be enabled prior to the client connection.
+            // If this is the case, when the client connects the initial-radio should be configured (if not already configured)
+            // to allow the functionality of stay-on-initial-radio.
+            // Note: The initial-radio is persistent configuration and if is already set, the client-connection flow should
+            // not override the existing configuration.
+            auto client_mac = tlvf::mac_from_string(sta_mac);
+            if ((database.get_client_stay_on_initial_radio(client_mac) == eTriStateBool::ENABLE) &&
+                (database.get_client_initial_radio(client_mac) == network_utils::ZERO_MAC)) {
+                auto bssid            = database.get_node_parent(sta_mac);
+                auto parent_radio_mac = database.get_node_parent_radio(bssid);
+                // If stay_on_initial_radio is enabled and initial_radio is not set yet, set to parent radio mac (not bssid)
+                if (!database.set_client_initial_radio(client_mac,
+                                                       tlvf::mac_from_string(parent_radio_mac),
+                                                       database.config.persistent_db)) {
+                    LOG(WARNING) << "Failed to set client " << client_mac << "  initial radio to "
+                                 << parent_radio_mac;
+                }
+            }
             auto new_task = std::make_shared<optimal_path_task>(
                 database, cmdu_tx, tasks, sta_mac, 6000, "handle_completed_connection");
             tasks.add_task(new_task);
