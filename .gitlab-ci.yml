@@ -195,7 +195,6 @@ dctest_one_test:
   stage: test
   script:
     - ./dctest.py
-    - chown -R gitlab-runner:gitlab-runner .
   tags:
     - boardfarm-compose
   needs:
