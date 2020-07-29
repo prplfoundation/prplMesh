@@ -54,6 +54,37 @@ private:
     */
     void handle_topology_query(ieee1905_1::CmduMessageRx &cmdu_rx, const sMacAddr &src_mac);
 
+    /**
+     * @brief Handles Vendor Specific messages. 
+     * 
+     * @param[in] cmdu_rx Received CMDU.
+     * @param[in] src_mac MAC address of the message sender.
+     * @param[in] beerocks_header Shared pointer to beerocks header.
+     * @return true, if the message has been handled, otherwise false.
+     */
+    bool handle_vendor_specific(ieee1905_1::CmduMessageRx &cmdu_rx, const sMacAddr &src_mac,
+                                std::shared_ptr<beerocks_header> beerocks_header);
+
+    /* Vendor specific message handlers: */
+
+    /**
+     * @brief Handles Vendor Specific Client Associated message. 
+     * 
+     * @param[in] cmdu_rx Received CMDU.
+     * @param[in] beerocks_header Shared pointer to beerocks header.
+     */
+    void handle_vs_client_associated(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                     std::shared_ptr<beerocks_header> beerocks_header);
+
+    /**
+     * @brief Handles Vendor Specific Client Disassociated message. 
+     * 
+     * @param[in] cmdu_rx Received CMDU.
+     * @param[in] beerocks_header Shared pointer to beerocks header.
+     */
+    void handle_vs_client_disassociated(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                        std::shared_ptr<beerocks_header> beerocks_header);
+
     /* Helper functions */
     void send_topology_discovery();
     void send_topology_notification();

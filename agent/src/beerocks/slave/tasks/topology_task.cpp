@@ -113,6 +113,9 @@ bool TopologyTask::handle_cmdu(ieee1905_1::CmduMessageRx &cmdu_rx, const sMacAdd
         handle_topology_query(cmdu_rx, src_mac);
         break;
     }
+    case ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE: {
+        return handle_vendor_specific(cmdu_rx, src_mac, beerocks_header);
+    }
     default: {
         // Message was not handled, therefore return false.
         return false;
@@ -517,6 +520,48 @@ void TopologyTask::handle_topology_query(ieee1905_1::CmduMessageRx &cmdu_rx,
     LOG(DEBUG) << "Sending topology response message, mid=" << std::hex << mid;
     m_btl_ctx.send_cmdu_to_broker(m_cmdu_tx, tlvf::mac_to_string(src_mac),
                                   tlvf::mac_to_string(db->bridge.mac));
+}
+
+bool TopologyTask::handle_vendor_specific(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                          const sMacAddr &src_mac,
+                                          std::shared_ptr<beerocks_header> beerocks_header)
+{
+    if (!beerocks_header) {
+        LOG(ERROR) << "beerocks_header is nullptr";
+        return false;
+    }
+
+    // Since currently we handle only action_ops of action type "ACTION_BACKHAUL", use a single
+    // switch-case on "ACTION_BACKHAUL" only.
+    switch (beerocks_header->action_op()) {
+    case beerocks_message::ACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION: {
+        handle_vs_client_associated(cmdu_rx, beerocks_header);
+        break;
+    }
+    case beerocks_message::ACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION: {
+        handle_vs_client_disassociated(cmdu_rx, beerocks_header);
+        break;
+    }
+    default: {
+        // Message was not handled, therefore return false.
+        return false;
+    }
+    }
+    return true;
+}
+
+void TopologyTask::handle_vs_client_associated(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                               std::shared_ptr<beerocks_header> beerocks_header)
+{
+    // TODO: Move handling of "ACTION_APMANAGER_CLIENT_ASSOCIATED_NOTIFICATION" to here when
+    // moving this task to unified agent context.
+}
+
+void TopologyTask::handle_vs_client_disassociated(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                                  std::shared_ptr<beerocks_header> beerocks_header)
+{
+    // TODO: Move handling of "ACTION_APMANAGER_CLIENT_DISCONNECTED_NOTIFICATION" to here when
+    // moving this task to unified agent context.
 }
 
 void TopologyTask::send_topology_discovery()
