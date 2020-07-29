@@ -83,6 +83,24 @@ void TopologyTask::work()
     }
 }
 
+void TopologyTask::handle_event(uint8_t event_enum_value)
+{
+    switch (eEvent(event_enum_value)) {
+    case AGENT_RADIO_STATE_CHANGED: {
+        send_topology_notification();
+        break;
+    }
+    case AGENT_DEVICE_INITIALIZED: {
+        send_topology_discovery();
+        break;
+    }
+    default: {
+        LOG(DEBUG) << "Message handler doesn't exists for event type " << event_enum_value;
+        break;
+    }
+    }
+}
+
 bool TopologyTask::handle_cmdu(ieee1905_1::CmduMessageRx &cmdu_rx, const sMacAddr &src_mac,
                                std::shared_ptr<beerocks_header> beerocks_header)
 {

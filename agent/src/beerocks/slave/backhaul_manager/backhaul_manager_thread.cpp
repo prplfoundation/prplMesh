@@ -366,14 +366,8 @@ bool backhaul_manager::socket_disconnected(Socket *sd)
 
             if (m_eFSMState >= EState::CONNECT_TO_MASTER) {
                 LOG(INFO) << "Sending topology notification on son_slave disconnect";
-                auto cmdu_header =
-                    cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE);
-                if (!cmdu_header) {
-                    LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
-                    return false;
-                }
-                send_cmdu_to_broker(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR,
-                                    tlvf::mac_to_string(db->bridge.mac));
+                m_task_pool.send_event(eTaskType::TOPOLOGY,
+                                       TopologyTask::eEvent::AGENT_RADIO_STATE_CHANGED);
             }
             return false;
         } else {
@@ -879,6 +873,15 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
     }
     // Successfully connected to the master
     case EState::CONNECTED: {
+
+        /** 
+         * According to the 1905.1 specification section 8.2.1.1 - A 1905.1 management entity shall
+         * transmit a topology discovery message every 60 seconds or if an "implementation-specific" 
+         * event occurs (e.g., device initialized or an interface is connected).
+         * Sending "AGENT_DEVICE_INITIALIZED" event will trigger sending of topology discovery
+         * message.
+         */
+        m_task_pool.send_event(eTaskType::TOPOLOGY, TopologyTask::eEvent::AGENT_DEVICE_INITIALIZED);
 
         stop_on_failure_attempts = configuration_stop_on_failure_attempts;
 
@@ -1816,14 +1819,8 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
 
         if (m_eFSMState >= EState::CONNECT_TO_MASTER) {
             LOG(INFO) << "Sending topology notification on reconnected son_slave";
-            auto cmdu_header =
-                cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE);
-            if (!cmdu_header) {
-                LOG(ERROR) << "cmdu creation of type TOPOLOGY_NOTIFICATION_MESSAGE, has failed";
-                return false;
-            }
-            send_cmdu_to_broker(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR,
-                                tlvf::mac_to_string(db->bridge.mac));
+            m_task_pool.send_event(eTaskType::TOPOLOGY,
+                                   TopologyTask::eEvent::AGENT_RADIO_STATE_CHANGED);
         }
 
         // If we're already connected, send a notification to the slave
