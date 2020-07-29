@@ -589,9 +589,6 @@ struct BML_CLIENT_CONFIG {
     // 1 for true, 0 for false, -1 for "not configured".
     int8_t stay_on_initial_radio;
 
-    // 1 for true, 0 for false, -1 for "not configured".
-    int8_t stay_on_selected_device;
-
     // Bitwise value of selected bands for the client.
     // Correlates to BML_CLIENT_SELECTED_BANDS
     int8_t selected_bands;
@@ -609,9 +606,6 @@ struct BML_CLIENT {
 
     // 1 for true, 0 for false, -1 for "not configured".
     int8_t stay_on_initial_radio;
-
-    // 1 for true, 0 for false, -1 for "not configured".
-    int8_t stay_on_selected_device;
 
     // Bitwise value of selected bands for the client.
     // Correlates to BML_CLIENT_SELECTED_BANDS
