@@ -34,6 +34,7 @@
 #include "../helpers/media_type.h"
 #include "../link_metrics/ieee802_11_link_metrics_collector.h"
 #include "../link_metrics/ieee802_3_link_metrics_collector.h"
+#include "../tasks/topology_task.h"
 #include "../tlvf_utils.h"
 
 #include <bcl/beerocks_utils.h>
@@ -186,6 +187,12 @@ backhaul_manager::backhaul_manager(const config_file::sConfigSlave &config,
 
     m_eFSMState = EState::INIT;
     set_select_timeout(SELECT_TIMEOUT_MSC);
+
+    auto topology_task = std::make_shared<TopologyTask>(*this, cmdu_tx);
+    if (!topology_task) {
+        LOG(ERROR) << "failed to allocate Topology Task!";
+    }
+    m_task_pool.add_task(topology_task);
 }
 
 backhaul_manager::~backhaul_manager() { backhaul_manager::on_thread_stop(); }
