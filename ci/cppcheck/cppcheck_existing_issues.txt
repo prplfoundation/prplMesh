@@ -7,8 +7,6 @@ agent/src/beerocks/fronthaul_manager/monitor/monitor_thread.cpp: style: Variable
 agent/src/beerocks/fronthaul_manager/monitor/monitor_thread.cpp: style: Variable 'iface' is assigned a value that is never used. [unreadVariable]        std::string iface = radio_node->get_iface();
 agent/src/beerocks/fronthaul_manager/monitor/rdkb/monitor_rdkb_hal.cpp: style: Consecutive return, break, continue, goto or throw statements are unnecessary. [duplicateBreak]        break;
 agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Local variable 'iface_hal' shadows outer variable [shadowVariable]                            auto iface_hal = get_wireless_hal(sta_iface);
-agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Local variable 'local_interface_name' shadows outer variable [shadowVariable]        std::string local_interface_name = soc->hostap_iface;
-agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Local variable 'supportedServiceTuple' shadows outer variable [shadowVariable]        auto supportedServiceTuple = tlvSupportedService->supported_service_list(1);
 agent/src/beerocks/slave/backhaul_manager/backhaul_manager_thread.cpp: style: Variable 'p_cmdu_header' is assigned a value that is never used. [unreadVariable]    auto p_cmdu_header =
 agent/src/beerocks/slave/beerocks_slave_main.cpp: style: Parameter 'beerocks_slave_conf' can be declared with const [constParameter]start_son_slave_thread(int slave_num, beerocks::config_file::sConfigSlave &beerocks_slave_conf,
 agent/src/beerocks/slave/gate/unit_tests/gate_test.cpp: error: syntax error [syntaxError]TEST(gate_beacon_query_test, loading_vs_from_1905_beacon_query)
