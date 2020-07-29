@@ -794,7 +794,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
     }
     case EState::MASTER_DISCOVERY: {
 
-        auto db = AgentDB ::get();
+        auto db = AgentDB::get();
         if (network_utils::get_iface_info(bridge_info, db->bridge.iface_name) != 0) {
             LOG(ERROR) << "Failed reading addresses from the bridge!";
             platform_notify_error(bpl::eErrorCode::BH_READING_DATA_FROM_THE_BRIDGE, "");
@@ -2120,6 +2120,11 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     }
     case ieee1905_1::eMessageType::BACKHAUL_STEERING_REQUEST_MESSAGE: {
         return handle_backhaul_steering_request(cmdu_rx, src_mac);
+    }
+    case ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE: {
+        // We should not handle vendor specific messages here, return false so the message will
+        // be forwarded and will not be passed to the task_pool.
+        return false;
     }
     default: {
         // TODO add a warning once all vendor specific flows are replaced with EasyMesh
