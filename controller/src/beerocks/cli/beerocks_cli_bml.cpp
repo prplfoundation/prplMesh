@@ -561,10 +561,9 @@ void cli_bml::setFunctionsMapAndArray()
         "bml_client_set_client", "<sta_mac> [<params>]",
         "Set client with the given STA MAC:"
         " selected_bands - Bitwise parameter, 1 for 2.4G, 2 for 5G, 3 for both, 0 for Disabled"
-        " stay_on_initial_radio - 1 for true, 0 for false or (default) -1 for not configured,"
-        " stay_on_selected_device - 1 for true, 0 for false or (default) -1 for not configured",
-        static_cast<pFunction>(&cli_bml::client_set_client_caller), 2, 4, STRING_ARG, STRING_ARG,
-        STRING_ARG, STRING_ARG);
+        " stay_on_initial_radio - 1 for true, 0 for false or (default) -1 for not configured,",
+        static_cast<pFunction>(&cli_bml::client_set_client_caller), 2, 3, STRING_ARG, STRING_ARG,
+        STRING_ARG);
     insertCommandToMap("bml_client_get_client", "<sta_mac>", "Get client with the given STA MAC.",
                        static_cast<pFunction>(&cli_bml::client_get_client_caller), 1, 1,
                        STRING_ARG);
@@ -1345,13 +1344,11 @@ int cli_bml::client_set_client_caller(int numOfArgs)
      * Optional:
      *  selected_bands=<selected_bands>
      *  stay_on_initial_radio=<stay_on_initial_radio>
-     *  stay_on_selected_device=<stay_on_selected_device>
     ]*/
     std::string::size_type pos;
     std::string sta_mac(network_utils::WILD_MAC_STRING);
-    int8_t selected_bands          = BML_PARAMETER_NOT_CONFIGURED;
-    int8_t stay_on_initial_radio   = BML_PARAMETER_NOT_CONFIGURED;
-    int8_t stay_on_selected_device = BML_PARAMETER_NOT_CONFIGURED;
+    int8_t selected_bands        = BML_PARAMETER_NOT_CONFIGURED;
+    int8_t stay_on_initial_radio = BML_PARAMETER_NOT_CONFIGURED;
     if (numOfArgs > 1) {
         sta_mac = args.stringArgs[0];
         for (int i = 1; i < numOfArgs; i++) { //first optional arg
@@ -1362,14 +1359,9 @@ int cli_bml::client_set_client_caller(int numOfArgs)
                        std::string::npos) {
                 stay_on_initial_radio = string_utils::stoi(
                     args.stringArgs[i].substr(pos + sizeof("stay_on_initial_radio")));
-            } else if ((pos = args.stringArgs[i].find("stay_on_selected_device=")) !=
-                       std::string::npos) {
-                stay_on_selected_device = string_utils::stoi(
-                    args.stringArgs[i].substr(pos + sizeof("stay_on_selected_device")));
             }
         }
-        return client_set_client(sta_mac, selected_bands, stay_on_initial_radio,
-                                 stay_on_selected_device);
+        return client_set_client(sta_mac, selected_bands, stay_on_initial_radio);
     }
     return -1;
 }
@@ -2222,22 +2214,19 @@ int cli_bml::client_get_client_list()
  * @param [in] sta_mac MAC address of requested client.
  * @param [in] selected_bands comma-seperated selected bands.
  * @param [in] stay_on_initial_radio Whather to stay on initial radio or not.
- * @param [in] stay_on_selected_device Whather to stay on selected device or not.
  * @return 0 on success.
  */
 int cli_bml::client_set_client(const std::string &sta_mac, int8_t selected_bands,
-                               int8_t stay_on_initial_radio, int8_t stay_on_selected_device)
+                               int8_t stay_on_initial_radio)
 {
     std::cout << "client_set_client: " << std::endl
               << "  sta_mac: " << sta_mac << std::endl
               << "  selected_bands: " << int(selected_bands) << std::endl
-              << "  stay_on_initial_radio: " << int(stay_on_initial_radio) << std::endl
-              << "  stay_on_selected_device: " << int(stay_on_selected_device) << std::endl;
+              << "  stay_on_initial_radio: " << int(stay_on_initial_radio) << std::endl;
 
     BML_CLIENT_CONFIG cfg{
-        .stay_on_initial_radio   = stay_on_initial_radio,
-        .stay_on_selected_device = stay_on_selected_device,
-        .selected_bands          = selected_bands,
+        .stay_on_initial_radio = stay_on_initial_radio,
+        .selected_bands        = selected_bands,
     };
 
     int ret = bml_client_set_client(ctx, sta_mac.c_str(), &cfg);
@@ -2289,8 +2278,6 @@ int cli_bml::client_get_client(const std::string &sta_mac)
                   << " timestamp_sec: " << client.timestamp_sec << std::endl
                   << " stay_on_initial_radio: " << client_bool_print(client.stay_on_initial_radio)
                   << std::endl
-                  << " stay_on_selected_device: "
-                  << client_bool_print(client.stay_on_selected_device) << std::endl
                   << " selected_bands: " << client_selected_bands_print(client.selected_bands)
                   << std::endl
                   << " single_band: " << client_bool_print(client.single_band) << std::endl
