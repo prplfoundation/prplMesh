@@ -72,12 +72,13 @@ class PrplMeshCompose(PrplMeshBase):
             if not os.path.exists(log_path):
                 os.mkdir(log_path)
 
-            if os.getenv('CI_PIPELINE_ID') is None:
+            pipeline_id = os.getenv('CI_PIPELINE_ID')
+            if pipeline_id is None or pipeline_id == 'latest':
                 vol = '{}:/tmp/{}/beerocks/logs'.format(log_path, self.user_id)
             else:
                 vol = '{}:/tmp/beerocks/logs'.format(log_path)
 
-            full_args += ["run", "-v", vol]
+            full_args += ["run", "--rm", "-v", vol]
             # full_args += ["--entrypoint", entrypoint + ' ' + start]
             full_args += args
 

@@ -18,6 +18,7 @@ from __future__ import print_function  # To check for python2 or < 3.5 execution
 import argparse
 import fcntl
 import os
+import grp
 import shutil
 import getpass
 import sys
@@ -129,12 +130,19 @@ class Services:
         params += args
         local_env = os.environ
         local_env['ROOT_DIR'] = self.rootdir
-        # docker_gid = grp.getgrnam('docker')[2]
-        # local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(docker_gid)
+        docker_gid = grp.getgrnam('docker')[2]
+        local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(docker_gid)
         local_env['CURRENT_ID'] = str(os.getuid())
         local_env['RUN_ID'] = self.build_id
+
         if os.getenv('CI_PIPELINE_ID') is None:
+            # Running locally
             local_env['CI_PIPELINE_ID'] = 'latest'
+            local_env['FINAL_ROOT_DIR'] = self.rootdir
+        else:
+            # Running inside gitlab-ci
+            local_env['FINAL_ROOT_DIR'] = '/builds/prpl-foundation/prplMesh'
+
         # local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(os.getgid())
         if not interactive:
             proc = Popen(params, stdout=PIPE, stderr=PIPE)
@@ -193,6 +201,10 @@ if __name__ == '__main__':
     parser.add_argument('--id', dest='bid', type=str,
                         help='Specify the id to use for build/shell/comp/clean')
     args, rest = parser.parse_known_args()
+
+    if os.getenv('CI_PIPELINE_ID') is not None:
+        args.bid == os.getenv('CI_PIPELINE_ID')
+
     if args.comp:
         if args.bid is None:
             print('Specify --id for the --comp parameter')
@@ -219,7 +231,7 @@ if __name__ == '__main__':
             print('Specify --id for the shell parameter')
             sys.exit(0)
         services = Services(bid=args.bid)
-        rc = services.dc(['run', '--service-ports', '--entrypoint',
+        rc = services.dc(['run', '--rm', '--service-ports', '--entrypoint',
                           '/bin/bash', 'boardfarm'], interactive=True)
         cleanup(rc)
     elif args.build:
@@ -237,6 +249,6 @@ if __name__ == '__main__':
         # rc = services.dc(['up', 'boardfarm'])
         #rc = services.dc(['run', '--service-ports', '--entrypoint',
         #                  '/bin/bash', 'boardfarm'], interactive=True)
-        rc = services.dc(['run', '--service-ports', '--use-aliases',
+        rc = services.dc(['run', '--rm', '--service-ports', '--use-aliases',
                           'boardfarm'], interactive=True)
         cleanup(rc)

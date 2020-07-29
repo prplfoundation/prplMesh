@@ -7,15 +7,15 @@ services:
         container_name: controller
         environment:
             - USER
-            - INSTALL_DIR=/builds/prpl-foundation/prplMesh/build/install
-            - ROOT_DIR=/builds/prpl-foundation/prplMesh
+            - INSTALL_DIR=${FINAL_ROOT_DIR}/build/install
+            - ROOT_DIR=${FINAL_ROOT_DIR}
             - CURRENT_ID
             - CI_PIPELINE_ID
         expose:
             - "5000"
             - "8002"
         volumes:
-            - "$ROOT_DIR:/builds/prpl-foundation/prplMesh"
+            - "$ROOT_DIR:${FINAL_ROOT_DIR}"
         entrypoint: ["/root/entrypoint.sh", "/usr/bin/start-controller-agent"]
 
     agent:
@@ -24,15 +24,16 @@ services:
         container_name: agent
         environment:
             - USER
-            - INSTALL_DIR=/builds/prpl-foundation/prplMesh/build/install
-            - ROOT_DIR=/builds/prpl-foundation/prplMesh
+            - INSTALL_DIR=${FINAL_ROOT_DIR}/build/install
+            - ROOT_DIR=${FINAL_ROOT_DIR}
+              # /builds/prpl-foundation/prplMesh
             - CURRENT_ID
             - CI_PIPELINE_ID
         expose:
             - "5000"
             - "8002"
         volumes:
-          - "$ROOT_DIR:/builds/prpl-foundation/prplMesh"
+          - "$ROOT_DIR:${FINAL_ROOT_DIR}"
         entrypoint: ["/root/entrypoint.sh", "/usr/bin/start-agent"]
 
     # Boardfarm image is launched from dctest.py, TARGET_DIR refers to the
@@ -47,12 +48,13 @@ services:
             - CURRENT_ID
             - RUN_ID
             - CI_PIPELINE_ID
+            - FINAL_ROOT_DIR
         ports:
             - "5000:5000"
         volumes:
             - "$ROOT_DIR:$ROOT_DIR"
             - "/var/run/docker:/var/run/docker"
             - "/var/run/docker.sock:/var/run/docker.sock"
-        # user: ${CURRENT_UID}
+        user: ${CURRENT_UID}
         working_dir: $ROOT_DIR/tests
         entrypoint: ["bash", "run_bf_compose.sh"]
