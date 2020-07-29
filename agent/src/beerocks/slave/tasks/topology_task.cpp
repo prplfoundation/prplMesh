@@ -91,6 +91,10 @@ bool TopologyTask::handle_cmdu(ieee1905_1::CmduMessageRx &cmdu_rx, const sMacAdd
         handle_topology_discovery(cmdu_rx, src_mac);
         break;
     }
+    case ieee1905_1::eMessageType::TOPOLOGY_QUERY_MESSAGE: {
+        handle_topology_query(cmdu_rx, src_mac);
+        break;
+    }
     default: {
         // Message was not handled, therefore return false.
         return false;
@@ -176,6 +180,325 @@ void TopologyTask::handle_topology_discovery(ieee1905_1::CmduMessageRx &cmdu_rx,
         m_btl_ctx.send_cmdu_to_broker(m_cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR,
                                       tlvf::mac_to_string(db->bridge.mac));
     }
+}
+
+void TopologyTask::handle_topology_query(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                         const sMacAddr &src_mac)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received TOPOLOGY_QUERY_MESSAGE, mid=" << std::hex << mid;
+    auto cmdu_tx_header =
+        m_cmdu_tx.create(mid, ieee1905_1::eMessageType::TOPOLOGY_RESPONSE_MESSAGE);
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "Failed creating topology response header";
+        return;
+    }
+
+    auto db = AgentDB::get();
+
+    auto tlvDeviceInformation = m_cmdu_tx.addClass<ieee1905_1::tlvDeviceInformation>();
+    if (!tlvDeviceInformation) {
+        LOG(ERROR) << "addClass ieee1905_1::tlvDeviceInformation failed";
+        return;
+    }
+
+    /**
+     * 1905.1 AL MAC address of the device.
+     */
+    tlvDeviceInformation->mac() = db->bridge.mac;
+
+    /**
+     * Set the number of local interfaces and fill info of each of the local interfaces, according
+     * to IEEE_1905 section 6.4.5
+     */
+
+    /**
+     * Add a LocalInterfaceInfo field for the wired interface, if any.
+     */
+    std::string &local_interface_name = db->ethernet.iface_name;
+    if (!local_interface_name.empty() &&
+        network_utils::linux_iface_is_up_and_running(local_interface_name)) {
+        ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::UNKNOWN_MEDIA;
+        if (!MediaType::get_media_type(local_interface_name,
+                                       ieee1905_1::eMediaTypeGroup::IEEE_802_3, media_type)) {
+            LOG(ERROR) << "Unable to compute media type for interface " << local_interface_name;
+            return;
+        }
+
+        std::shared_ptr<ieee1905_1::cLocalInterfaceInfo> localInterfaceInfo =
+            tlvDeviceInformation->create_local_interface_list();
+
+        // default to zero mac if get_mac fails.
+        std::string wire_iface_mac = network_utils::ZERO_MAC_STRING;
+        network_utils::linux_iface_get_mac(local_interface_name, wire_iface_mac);
+        localInterfaceInfo->mac()               = tlvf::mac_from_string(wire_iface_mac);
+        localInterfaceInfo->media_type()        = media_type;
+        localInterfaceInfo->media_info_length() = 0;
+
+        tlvDeviceInformation->add_local_interface_list(localInterfaceInfo);
+    }
+
+    /**
+     * Add a LocalInterfaceInfo field for each wireless interface.
+     */
+    for (const auto radio : db->get_radios_list()) {
+        if (radio == nullptr) {
+            continue;
+        }
+
+        // Iterate on front radio iface and then switch to back radio iface
+        auto fill_radio_iface_info = [&](ieee1905_1::eMediaType media_type, bool front_iface) {
+            LOG(DEBUG) << "filling interface information on radio="
+                       << (front_iface ? radio->front.iface_name : radio->back.iface_name);
+
+            // Skip Backhaul iteration iface when STA BWL is not allocated (Eth connection or GW).
+            if (!front_iface && radio->back.iface_name != db->backhaul.selected_iface_name) {
+                LOG(TRACE) << "Skip radio interface with no active STA BWL, front_radio="
+                           << radio->front.iface_name << ", back_radio=" << radio->back.iface_name;
+                return true;
+            }
+
+            auto localInterfaceInfo = tlvDeviceInformation->create_local_interface_list();
+
+            localInterfaceInfo->mac() =
+                front_iface ? radio->front.iface_mac : radio->back.iface_mac;
+
+            LOG(DEBUG) << "Added radio interface to tlvDeviceInformation: "
+                       << localInterfaceInfo->mac();
+
+            localInterfaceInfo->media_type() = media_type;
+
+            ieee1905_1::s802_11SpecificInformation media_info = {};
+            localInterfaceInfo->alloc_media_info(sizeof(media_info));
+
+            // BSSID field is not defined well for interface. The common definition is in simple
+            // words "the AP/ETH mac that we are connected to".
+            // For fronthaul radio interface or unused backhaul interface put zero mac.
+            if (db->device_conf.local_gw ||
+                db->backhaul.connection_type == AgentDB::sBackhaul::eConnectionType::Wired ||
+                front_iface ||
+                (db->backhaul.connection_type == AgentDB::sBackhaul::eConnectionType::Wireless &&
+                 radio->back.iface_name != db->backhaul.selected_iface_name)) {
+                media_info.network_membership = network_utils::ZERO_MAC;
+            } else {
+                media_info.network_membership = radio->back.iface_mac;
+            }
+
+            media_info.role =
+                front_iface ? ieee1905_1::eRole::AP : ieee1905_1::eRole::NON_AP_NON_PCP_STA;
+
+            // TODO: The Backhaul manager does not hold the information on the front radios.
+            // For now, put zeros and when the Agent management will be move to unified Agent thread
+            // this field will be filled. #435
+            media_info.ap_channel_bandwidth               = 0;
+            media_info.ap_channel_center_frequency_index1 = 0;
+            media_info.ap_channel_center_frequency_index2 = 0;
+
+            auto *media_info_ptr = localInterfaceInfo->media_info(0);
+            if (media_info_ptr == nullptr) {
+                LOG(ERROR) << "media_info is nullptr";
+                return false;
+            }
+
+            std::copy_n(reinterpret_cast<uint8_t *>(&media_info), sizeof(media_info),
+                        media_info_ptr);
+
+            tlvDeviceInformation->add_local_interface_list(localInterfaceInfo);
+
+            return true;
+        };
+
+        std::string &local_interface_name = radio->front.iface_name;
+
+        ieee1905_1::eMediaTypeGroup media_type_group = ieee1905_1::eMediaTypeGroup::IEEE_802_11;
+        ieee1905_1::eMediaType media_type            = ieee1905_1::eMediaType::UNKNOWN_MEDIA;
+        if (!MediaType::get_media_type(local_interface_name, media_type_group, media_type)) {
+            LOG(ERROR) << "Unable to compute media type for interface " << local_interface_name;
+            return;
+        }
+
+        if (!fill_radio_iface_info(media_type, true)) {
+            LOG(DEBUG) << "filling interface information on radio=" << radio->front.iface_name
+                       << " has failed!";
+            return;
+        }
+
+        if (!fill_radio_iface_info(media_type, false)) {
+            LOG(DEBUG) << "filling interface information on radio=" << radio->back.iface_name
+                       << " backhaul has failed!";
+            return;
+        }
+    }
+
+    /**
+     * Add a 1905.1 neighbor device TLV for each local interface for which this management entity
+     * has inferred the presence of a 1905.1 neighbor device. Include each discovered neighbor
+     * device in its corresponding 1905.1 neighbor device TLV.
+     *
+     * First, group known 1905 neighbor devices by the local interface that links to them. Create
+     * a map which key is the name of the local interface and the value is the list of neighbor
+     * devices inferred from that interface.
+     */
+    for (auto &neighbors_on_local_iface_entry : db->neighbor_devices) {
+        auto tlv1905NeighborDevice = m_cmdu_tx.addClass<ieee1905_1::tlv1905NeighborDevice>();
+        if (!tlv1905NeighborDevice) {
+            LOG(ERROR) << "addClass ieee1905_1::tlv1905NeighborDevice failed";
+            return;
+        }
+
+        tlv1905NeighborDevice->mac_local_iface() = neighbors_on_local_iface_entry.first;
+        auto &neighbors_on_local_iface           = neighbors_on_local_iface_entry.second;
+
+        if (!tlv1905NeighborDevice->alloc_mac_al_1905_device(neighbors_on_local_iface.size())) {
+            LOG(ERROR) << "alloc_mac_al_1905_device() has failed";
+            return;
+        }
+
+        size_t index = 0;
+        for (const auto &neighbor_on_local_iface_entry : neighbors_on_local_iface) {
+            auto &neighbor_al_mac = neighbor_on_local_iface_entry.first;
+
+            auto mac_al_1905_device_tuple = tlv1905NeighborDevice->mac_al_1905_device(index);
+            if (!std::get<0>(mac_al_1905_device_tuple)) {
+                LOG(ERROR) << "getting mac_al_1905_device element has failed";
+                return;
+            }
+
+            auto &mac_al_1905_device = std::get<1>(mac_al_1905_device_tuple);
+            mac_al_1905_device.mac   = neighbor_al_mac;
+            mac_al_1905_device.bridges_exist =
+                ieee1905_1::tlv1905NeighborDevice::eBridgesExist::AT_LEAST_ONE_BRIDGES_EXIST;
+            index++;
+        }
+    }
+
+    auto tlvSupportedService = m_cmdu_tx.addClass<wfa_map::tlvSupportedService>();
+    if (!tlvSupportedService) {
+        LOG(ERROR) << "addClass wfa_map::tlvSupportedService failed";
+        return;
+    }
+
+    size_t number_of_supported_services = 1;
+    if (db->device_conf.local_controller) {
+        number_of_supported_services++;
+    }
+
+    if (!tlvSupportedService->alloc_supported_service_list(number_of_supported_services)) {
+        LOG(ERROR) << "alloc_supported_service_list failed";
+        return;
+    }
+
+    auto supportedServiceTuple = tlvSupportedService->supported_service_list(0);
+    if (!std::get<0>(supportedServiceTuple)) {
+        LOG(ERROR) << "Failed accessing supported_service_list(0)";
+        return;
+    }
+
+    std::get<1>(supportedServiceTuple) =
+        wfa_map::tlvSupportedService::eSupportedService::MULTI_AP_AGENT;
+
+    if (db->device_conf.local_controller) {
+        auto supportedServiceTuple = tlvSupportedService->supported_service_list(1);
+        if (!std::get<0>(supportedServiceTuple)) {
+            LOG(ERROR) << "Failed accessing supported_service_list(1)";
+            return;
+        }
+
+        std::get<1>(supportedServiceTuple) =
+            wfa_map::tlvSupportedService::eSupportedService::MULTI_AP_CONTROLLER;
+    }
+
+    auto tlvApOperationalBSS = m_cmdu_tx.addClass<wfa_map::tlvApOperationalBSS>();
+    if (!tlvApOperationalBSS) {
+        LOG(ERROR) << "addClass wfa_map::tlvApOperationalBSS failed";
+        return;
+    }
+
+    for (const auto &radio : db->get_radios_list()) {
+        if (!radio) {
+            continue;
+        }
+
+        auto radio_list         = tlvApOperationalBSS->create_radio_list();
+        radio_list->radio_uid() = radio->front.iface_mac;
+        for (const auto &bssid : radio->front.bssids) {
+            if (bssid.mac == network_utils::ZERO_MAC) {
+                continue;
+            }
+            if (bssid.ssid.empty()) {
+                continue;
+            }
+            auto radio_bss_list           = radio_list->create_radio_bss_list();
+            radio_bss_list->radio_bssid() = bssid.mac;
+            radio_bss_list->set_ssid(bssid.ssid);
+
+            radio_list->add_radio_bss_list(radio_bss_list);
+        }
+        tlvApOperationalBSS->add_radio_list(radio_list);
+    }
+
+    // The Multi-AP Agent shall include an Associated Clients TLV in the message if there is at
+    // least one 802.11 client directly associated with any of the BSS(s) that is operated by the
+    // Multi-AP Agent
+    bool include_associated_clients_tlv = false;
+    for (const auto &radio : db->get_radios_list()) {
+        if (!radio) {
+            continue;
+        }
+        if (radio->associated_clients.size() > 0) {
+            include_associated_clients_tlv = true;
+            break;
+        }
+    }
+
+    if (include_associated_clients_tlv) {
+        auto tlvAssociatedClients = m_cmdu_tx.addClass<wfa_map::tlvAssociatedClients>();
+        if (!tlvAssociatedClients) {
+            LOG(ERROR) << "addClass wfa_map::tlvAssociatedClients failed, mid=" << std::hex << mid;
+            return;
+        }
+
+        // Get current time to compute elapsed time since last client association
+        auto now = std::chrono::steady_clock::now();
+
+        // Fill in Associated Clients TLV
+        for (const auto &radio : db->get_radios_list()) {
+            if (!radio) {
+                continue;
+            }
+
+            for (const auto &bssid : radio->front.bssids) {
+                auto bss_list     = tlvAssociatedClients->create_bss_list();
+                bss_list->bssid() = bssid.mac;
+
+                for (const auto &associated_client_entry : radio->associated_clients) {
+                    if (associated_client_entry.second.bssid != bssid.mac) {
+                        continue;
+                    }
+
+                    auto client_info = bss_list->create_clients_associated_list();
+
+                    auto &association_time = associated_client_entry.second.association_time;
+                    auto elapsed =
+                        std::chrono::duration_cast<std::chrono::seconds>(now - association_time)
+                            .count();
+                    if ((elapsed < 0) || (elapsed > UINT16_MAX)) {
+                        elapsed = UINT16_MAX;
+                    }
+
+                    client_info->mac()                             = associated_client_entry.first;
+                    client_info->time_since_last_association_sec() = elapsed;
+
+                    bss_list->add_clients_associated_list(client_info);
+                }
+                tlvAssociatedClients->add_bss_list(bss_list);
+            }
+        }
+    }
+
+    LOG(DEBUG) << "Sending topology response message, mid=" << std::hex << mid;
+    m_btl_ctx.send_cmdu_to_broker(m_cmdu_tx, tlvf::mac_to_string(src_mac),
+                                  tlvf::mac_to_string(db->bridge.mac));
 }
 
 void TopologyTask::send_topology_discovery()
