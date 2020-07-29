@@ -154,6 +154,16 @@ void slave_thread::slave_reset()
     is_backhaul_manager   = false;
     detach_on_conf_change = false;
 
+    auto db = AgentDB::get();
+
+    auto radio = db->radio(m_fronthaul_iface);
+    if (!radio) {
+        LOG(ERROR) << "Radio of iface " << m_fronthaul_iface << " does not exist on the db";
+        return;
+    }
+    // Clear the front interface mac.
+    radio->front.iface_mac = network_utils::ZERO_MAC;
+
     if (configuration_stop_on_failure_attempts && !stop_on_failure_attempts) {
         LOG(ERROR) << "Reached to max stop on failure attempts!";
         stopped = true;
