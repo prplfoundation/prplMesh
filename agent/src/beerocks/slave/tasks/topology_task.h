@@ -24,6 +24,9 @@ public:
     ~TopologyTask() {}
 
 private:
+    /* Helper functions */
+    void send_topology_notification();
+
     backhaul_manager &m_btl_ctx;
     ieee1905_1::CmduMessageTx &m_cmdu_tx;
 };
