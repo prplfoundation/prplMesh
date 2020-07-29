@@ -1091,66 +1091,6 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
     return (true);
 } // namespace beerocks
 
-bool backhaul_manager::send_1905_topology_discovery_message()
-{
-    // TODO: get the list of interfaces that are up_and_running using the event-driven mechanism
-    // to be implemented in #866
-
-    /**
-     * Transmission type of Topology Discovery message is 'neighbor multicast'.
-     * That is, the CMDU must be transmitted once on each and every of its 1905.1 interfaces.
-     * Also, according to IEEE1905.1, the message should include a MAC Address TLV which contains
-     * the address of the interface on which the message is sent. Thus, a different message should
-     * be sent on each interface.
-     */
-    auto db     = AgentDB::get();
-    auto ifaces = network_utils::linux_get_iface_list_from_bridge(db->bridge.iface_name);
-    for (const auto &iface_name : ifaces) {
-        if (!network_utils::linux_iface_is_up_and_running(iface_name)) {
-            continue;
-        }
-
-        send_1905_topology_discovery_message(iface_name);
-    }
-
-    return true;
-}
-
-bool backhaul_manager::send_1905_topology_discovery_message(const std::string &iface_name)
-{
-    sMacAddr iface_mac;
-    if (!get_iface_mac(iface_name, iface_mac)) {
-        return false;
-    }
-
-    auto cmdu_hdr = cmdu_tx.create(0, ieee1905_1::eMessageType::TOPOLOGY_DISCOVERY_MESSAGE);
-    if (!cmdu_hdr) {
-        LOG(ERROR) << "Failed to create TOPOLOGY_DISCOVERY_MESSAGE cmdu";
-        return false;
-    }
-
-    auto db = AgentDB::get();
-
-    auto tlvAlMacAddress = cmdu_tx.addClass<ieee1905_1::tlvAlMacAddress>();
-    if (!tlvAlMacAddress) {
-        LOG(ERROR) << "Failed to create tlvAlMacAddress tlv";
-        return false;
-    }
-    tlvAlMacAddress->mac() = db->bridge.mac;
-
-    auto tlvMacAddress = cmdu_tx.addClass<ieee1905_1::tlvMacAddress>();
-    if (!tlvMacAddress) {
-        LOG(ERROR) << "Failed to create tlvMacAddress tlv";
-        return false;
-    }
-    tlvMacAddress->mac() = iface_mac;
-
-    LOG(DEBUG) << "send_1905_topology_discovery_message, bridge_mac=" << db->bridge.mac
-               << ", iface=" << iface_name;
-    return send_cmdu_to_broker(cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR,
-                               tlvf::mac_to_string(db->bridge.mac), iface_name);
-}
-
 bool backhaul_manager::send_autoconfig_search_message(const std::string &front_radio_iface_name)
 {
     auto db = AgentDB::get();

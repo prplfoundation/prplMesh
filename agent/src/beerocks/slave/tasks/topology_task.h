@@ -25,6 +25,7 @@ public:
 
 private:
     /* Helper functions */
+    void send_topology_discovery();
     void send_topology_notification();
 
     backhaul_manager &m_btl_ctx;
