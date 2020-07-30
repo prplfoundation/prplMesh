@@ -63,6 +63,8 @@ private:
     double calculate_weighted_phy_rate(const std::string &hostap_mac, int &hops);
     bool is_hostap_on_cs_process(const std::string &hostap_mac);
 
+    template <typename C>
+    void remove_all_client_non_selected_band_radios(C &radios, const sMacAddr &client);
     db &database;
     ieee1905_1::CmduMessageTx &cmdu_tx;
     task_pool &tasks;

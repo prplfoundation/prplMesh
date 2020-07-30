@@ -227,8 +227,88 @@ void optimal_path_task::work()
                 TASK_LOG(INFO) << "Remove candidate " << it->first << " , vap " << candidate_bssid
                                << " is not in steer list: " << database.config.load_steer_on_vaps;
                 it = potential_11k_aps.erase(it);
+            } else {
+                ++it;
             }
-            ++it;
+        }
+
+        // Check client's steering persistant database for any band/radio/device restrictions
+        auto client = tlvf::mac_from_string(sta_mac);
+        if (database.get_client_stay_on_initial_radio(client) == eTriStateBool::ENABLE) {
+            TASK_LOG(INFO) << "Client stay on initial radio enabled";
+            auto client_initial_radio = database.get_client_initial_radio(client);
+
+            if (client_initial_radio == tlvf::mac_from_string(current_hostap)) {
+                TASK_LOG(INFO) << "Client is already on initial radio " << client_initial_radio;
+                finish();
+                break;
+            }
+            // Client is not on initial radio, lets try to find it in the steering potential candidate list
+            if (potential_11k_aps.find(tlvf::mac_to_string(client_initial_radio)) !=
+                potential_11k_aps.end()) {
+                // Initial client hostap is on the candidate list, force steer the client there.
+                chosen_bssid = database.get_hostap_vap_with_ssid(
+                    tlvf::mac_to_string(client_initial_radio), current_hostap_ssid);
+                state          = SEND_STEER_ACTION;
+                is_force_steer = true;
+                TASK_LOG(INFO) << "Steer client imminently to initial radio "
+                               << client_initial_radio;
+                break;
+            }
+            TASK_LOG(WARNING) << "Client's initial radio " << client_initial_radio
+                              << " is not on the candidate ap list, continue as usual.";
+        }
+
+        if (database.get_client_stay_on_selected_band(client) == eTriStateBool::ENABLE) {
+            TASK_LOG(INFO) << "Client stay on selected bands enabled";
+            if (!database.is_hostap_on_client_selected_bands(
+                    client, tlvf::mac_from_string(current_hostap))) {
+                TASK_LOG(INFO) << "Current radio " << current_hostap
+                               << " is not on one of client's selected bands "
+                               << int(database.get_client_selected_bands(client));
+                // Try to find radio with selected bands first on local device (same device the client
+                // is currently connected on) and force steer the client to that radio.
+                auto current_hostap_siblings = database.get_node_siblings(current_hostap);
+                auto sibling_it =
+                    std::find_if(current_hostap_siblings.begin(), current_hostap_siblings.end(),
+                                 [&](const std::string &sibling) {
+                                     return database.is_hostap_on_client_selected_bands(
+                                         client, tlvf::mac_from_string(sibling));
+                                 });
+
+                if (sibling_it != current_hostap_siblings.end()) {
+                    chosen_bssid =
+                        database.get_hostap_vap_with_ssid(sibling_it->data(), current_hostap_ssid);
+                    state          = SEND_STEER_ACTION;
+                    is_force_steer = true;
+                    TASK_LOG(INFO) << "Found local radio " << sibling_it->data()
+                                   << " on selected bands, force steer client to that radio";
+                    break;
+                }
+                TASK_LOG(WARNING) << "Couldnt find local radio on selected bands "
+                                  << int(database.get_client_selected_bands(client))
+                                  << " with same client's ssid " << current_hostap_ssid;
+            }
+            // In case client is already connected to one of the selected bands
+            // continue with optimal path task but remove all non selected band hostaps
+            // from steering candidate list.
+            remove_all_client_non_selected_band_radios(potential_11k_aps, client);
+        }
+
+        // hostap's list is ready , lets check if we have candidates left
+        const auto hostap_candidates_size = potential_11k_aps.size();
+        if (hostap_candidates_size == 0) {
+            TASK_LOG(WARNING) << "Candidates list is empty, aborting optimal path task";
+            finish();
+            break;
+        }
+
+        if ((hostap_candidates_size == 1) && (potential_11k_aps.begin()->first == current_hostap)) {
+            TASK_LOG(WARNING)
+                << "Current hostap " << current_hostap
+                << "is the only steering candidate left on the list, aborting optimal path task";
+            finish();
+            break;
         }
 
         potential_ap_iter = potential_11k_aps.begin();
@@ -790,7 +870,8 @@ void optimal_path_task::work()
         if (request == nullptr) {
             LOG(ERROR)
                 << "Failed building ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_REQUEST message!";
-            return;
+            finish();
+            break;
         }
 
         request->params().mac  = tlvf::mac_from_string(sta_mac);
@@ -921,6 +1002,92 @@ void optimal_path_task::work()
                                << " sibling = " << int(it->second);
                 ++it;
             }
+        }
+
+        // Check client's steering persistent database for any band/radio/device restrictions.
+        // This code is duplicated for both FIND_AND_PICK_HOSTAP_CROSS FIND_AND_PICK_HOSTAP_11K
+        // TODO: Need to create preliminary state that prepares candidate radio list
+        // regardless of client's 11k support #PPM-102.
+        auto client = tlvf::mac_from_string(sta_mac);
+        if (database.get_client_stay_on_initial_radio(client) == eTriStateBool::ENABLE) {
+            TASK_LOG(INFO) << "Client stay on initial radio enabled";
+            auto client_initial_radio = database.get_client_initial_radio(client);
+
+            if (client_initial_radio == tlvf::mac_from_string(current_hostap)) {
+                TASK_LOG(INFO) << "Client is already on initial radio " << client_initial_radio;
+                finish();
+                break;
+            }
+            // Client is not on initial radio, let's try to find it on the steering potential candidate list.
+            auto hostap_it =
+                std::find_if(hostap_candidates.begin(), hostap_candidates.end(),
+                             [&](const std::pair<std::string, bool> &hostap) {
+                                 return hostap.first == tlvf::mac_to_string(client_initial_radio);
+                             });
+
+            if (hostap_it != hostap_candidates.end()) {
+                // Initial client radio is on the candidate list, force steer the client there.
+                chosen_bssid =
+                    database.get_hostap_vap_with_ssid(hostap_it->first, current_hostap_ssid);
+                state          = SEND_STEER_ACTION;
+                is_force_steer = true;
+                TASK_LOG(INFO) << "Steer client imminently to initial radio " << hostap_it->first;
+                break;
+            }
+            TASK_LOG(WARNING) << "Client's initial radio " << client_initial_radio
+                              << " is not on the candidate ap list, continue as usual.";
+        }
+
+        if (database.get_client_stay_on_selected_band(client) == eTriStateBool::ENABLE) {
+            TASK_LOG(INFO) << "Client stay on selected bands enabled";
+            if (!database.is_hostap_on_client_selected_bands(
+                    client, tlvf::mac_from_string(current_hostap))) {
+                TASK_LOG(INFO) << "Current radio " << current_hostap
+                               << " is not on one of client's selected bands "
+                               << int(database.get_client_selected_bands(client));
+                // Try to find radio with selected bands first on local device (same device the client
+                // is currently connected on) and force steer the client to that radio.
+                auto current_hostap_siblings = database.get_node_siblings(current_hostap);
+                auto sibling_it =
+                    std::find_if(current_hostap_siblings.begin(), current_hostap_siblings.end(),
+                                 [&](const std::string &sibling) {
+                                     return database.is_hostap_on_client_selected_bands(
+                                         client, tlvf::mac_from_string(sibling));
+                                 });
+
+                if (sibling_it != current_hostap_siblings.end()) {
+                    chosen_bssid =
+                        database.get_hostap_vap_with_ssid(sibling_it->data(), current_hostap_ssid);
+                    state          = SEND_STEER_ACTION;
+                    is_force_steer = true;
+                    TASK_LOG(INFO) << "Found local radio " << sibling_it->data()
+                                   << " on selected bands, force steer client to that radio";
+                    break;
+                }
+                TASK_LOG(WARNING) << "Couldnt find local radio on selected bands "
+                                  << int(database.get_client_selected_bands(client))
+                                  << " with same client's ssid " << current_hostap_ssid;
+            }
+            // In case client is already connected to one of the selected bands
+            // continue with optimal path task but remove all non selected band hostaps
+            // from steering candidate list.
+            remove_all_client_non_selected_band_radios(hostap_candidates, client);
+        }
+
+        // hostap's list is ready , lets check if we have candidates left
+        const auto hostap_candidates_size = hostap_candidates.size();
+        if (hostap_candidates_size == 0) {
+            TASK_LOG(WARNING) << "Candidates list is empty, aborting optimal path task";
+            finish();
+            break;
+        }
+
+        if ((hostap_candidates_size == 1) && (hostap_candidates.begin()->first == current_hostap)) {
+            TASK_LOG(DEBUG)
+                << "Current hostap " << current_hostap
+                << "is the only steering candidate left on the list, aborting optimal path task";
+            finish();
+            break;
         }
 
         //calculate tx phy rate and find best_weighted_phy_rate
@@ -1755,4 +1922,29 @@ bool optimal_path_task::is_hostap_on_cs_process(const std::string &hostap_mac)
         return true;
     }
     return false;
+}
+
+template <typename C>
+void optimal_path_task::remove_all_client_non_selected_band_radios(C &radios,
+                                                                   const sMacAddr &client)
+{
+    if (radios.empty()) {
+        TASK_LOG(ERROR) << "Candidate list is empty, nothing to remove";
+        return;
+    }
+
+    // Remove all non selected bands from potential steering target list and continue
+    // with optimal path task
+    auto it = radios.begin();
+    while (it != radios.end()) {
+        if (!database.is_hostap_on_client_selected_bands(client,
+                                                         tlvf::mac_from_string(it->first))) {
+            TASK_LOG(INFO) << "Remove candidate " << it->first
+                           << " since its not on one of client's selected bands "
+                           << int(database.get_client_selected_bands(client));
+            it = radios.erase(it);
+        } else {
+            ++it;
+        }
+    }
 }
