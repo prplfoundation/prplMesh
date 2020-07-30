@@ -2737,6 +2737,22 @@ bool db::clear_client_persistent_db(const sMacAddr &mac)
     return true;
 }
 
+bool db::is_hostap_on_client_selected_bands(const sMacAddr &client, const sMacAddr &hostap)
+{
+    auto hostap_band    = wireless_utils::which_freq(get_node_channel(tlvf::mac_to_string(hostap)));
+    auto selected_bands = get_client_selected_bands(client);
+
+    switch (hostap_band) {
+    case beerocks::eFreqType::FREQ_24G:
+        return (selected_bands & eClientSelectedBands::eSelectedBands_24G);
+    case beerocks::eFreqType::FREQ_5G:
+        return (selected_bands & eClientSelectedBands::eSelectedBands_5G);
+    default:
+        LOG(WARNING) << "hostap band " << hostap_band << " is not supported by client";
+        return false;
+    }
+}
+
 bool db::update_client_persistent_db(const sMacAddr &mac)
 {
     // if persistent db is disabled
