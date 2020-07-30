@@ -192,6 +192,8 @@ void clean_start()
     tmp.flush();
 }
 
+// Suppress cppcheck syntax error for gtest TEST macro
+// cppcheck-suppress syntaxError
 TEST(configuration_test, load)
 {
     //// start prerequsite ////

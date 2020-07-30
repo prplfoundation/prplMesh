@@ -102,6 +102,9 @@ bool Configuration::store()
         }
     }
 
+    m_ok           = true;
+    m_last_message = m_configuration_file + " was stored";
+
     // close the file
     out_file.close();
     if (out_file.fail()) {
@@ -109,7 +112,6 @@ bool Configuration::store()
         m_ok           = false;
     }
 
-    m_ok = true;
     return *this;
 }
 
