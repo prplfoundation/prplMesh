@@ -6,10 +6,10 @@
  * See LICENSE file for more details.
  */
 
-#include "configuration.h"
 #include <algorithm>
 #include <easylogging++.h>
 #include <fstream>
+#include <hostapd/configuration.h>
 
 namespace prplmesh {
 namespace hostapd {
@@ -20,9 +20,9 @@ Configuration::operator bool() const { return m_ok; }
 
 bool Configuration::load(const std::string &vap_indication)
 {
-    // please take a look at the end of this file for
-    // the expected format of hostapd configuration file
-    // loading the file relays on the expected format
+    // please take a look at README.md (common/beerocks/hostapd/README.md) for
+    // the expected format of hostapd configuration file.
+    // loading the file relies on the expected format
     // otherwise the load fails
 
     // for cases when load is called more than once, we
@@ -317,74 +317,29 @@ bool Configuration::is_key_in_line(const std::string &line, const std::string &k
     return ret;
 }
 
-std::ostream &operator<<(std::ostream &o, const Configuration &conf)
+std::ostream &operator<<(std::ostream &os, const Configuration &conf)
 {
-    o << "== configuration details ==\n"
-      << "= ok:           " << std::boolalpha << conf.m_ok << '\n'
-      << "= last message: " << conf.m_last_message << '\n'
-      << "= file:         " << conf.m_configuration_file << '\n'
-      << "= head:         " << '\n';
+    os << "== configuration details ==\n"
+       << "= ok:           " << std::boolalpha << conf.m_ok << '\n'
+       << "= last message: " << conf.m_last_message << '\n'
+       << "= file:         " << conf.m_configuration_file << '\n'
+       << "= head:         " << '\n';
 
     for (const auto &line : conf.m_hostapd_config_head) {
-        o << line << '\n';
+        os << line << '\n';
     }
 
-    o << "== vaps (total of: " << conf.m_hostapd_config_vaps.size() << " vaps) ==\n";
+    os << "== vaps (total of: " << conf.m_hostapd_config_vaps.size() << " vaps) ==\n";
 
     for (const auto &vap : conf.m_hostapd_config_vaps) {
-        o << "   vap: " << vap.first << "\n";
+        os << "   vap: " << vap.first << "\n";
         for (const auto &line : vap.second) {
-            o << line << '\n';
+            os << line << '\n';
         }
     }
 
-    return o;
+    return os;
 }
 
 } // namespace hostapd
 } // namespace prplmesh
-
-/*
-//////////////// hostapd configuration format ////////////////
-
-hostapd has a special format that does NOT have an ini like format.
-between /// BEGIN hostapd.conf /// and /// END hostapd.conf /// is the 
-format of the file.
-note: the string "bss=" may be replaced by the
-user in the call to load() with another vap-indicator (e.g. "interface=")
-
-/// BEGIN hostapd.conf ///  
-
-## "head" part ##
-
-# everything until the first `bss=` in the file
-# is considered "head"
-# after the first `bss=` "vaps" are presented.
-# so we expect no parametrs that does not belong to vaps
-# after the first `bss=`
-# take a look below for more details
-
-# note that we don't expect a space between the key and the equal sign
-# the code in this class seeks for `key=` when a key is needed.
-# therefore `key =` (with space) will fail
-# also, everything immidiatly after the equal sign (=) is 
-# part of the value. the space before 11 in this is part of the value:
-# bassid= 11:22:33:44:55:66
-key=value 
-
-## "vaps part - we expect at least one vap to be configured ##
-
-# vap (bss and vap are interchangable) 
-bss=wlan0_0
-
-# this key (ssid) belongs to the previous vap (bss value which is wlan0_0)
-ssid=test2
-
-# another vap 
-bss=wlan0_1
-
-# this key (bssid) belongs to the previous vap wlan0_1
-bssid=00:13:10:95:fe:0b
-
-///// END hostapd.conf ///
-*/

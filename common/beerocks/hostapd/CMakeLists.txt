@@ -37,7 +37,7 @@ set(PRPLMESH_HOSTAPD_TYPE ${PRPLMESH_HOSTAPD_TYPE} CACHE STRING "Which PRPLMESH_
 
 set(
     hostapd_sources
-    configuration.cpp
+    source/configuration.cpp
 )
 
 

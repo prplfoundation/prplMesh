@@ -211,7 +211,12 @@ private:
 private:
     std::string m_configuration_file;
 
-    // may be changed because of const functions, therefore mutable
+    // m_ok hoslds the internal state of the configuration
+    // the user may query the success/fail state of the last command
+    // simply by reading the value of this variable.
+    // the access to it is via operator bool()
+    // m_ok itslef may be changed because of a call to
+    // const function, therefore it is mutable
     mutable bool m_ok = false;
 
     // each string is a line in the original configuration file
@@ -261,8 +266,8 @@ template <class func, class iter, class ap_predicate>
 void Configuration::for_all_ap_vaps(func f, iter current_iter, const iter end, ap_predicate pred)
 {
     for_each(m_hostapd_config_vaps.begin(), m_hostapd_config_vaps.end(),
-             [this, &f, &current_iter,
-              &end, &pred](const std::pair<std::string, std::vector<std::string>> &vap) {
+             [this, &f, &current_iter, &end,
+              &pred](const std::pair<std::string, std::vector<std::string>> &vap) {
                  if (pred(vap.first)) {
                      if (end == current_iter) {
                          f(vap.first, end);
