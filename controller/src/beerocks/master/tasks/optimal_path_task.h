@@ -64,7 +64,7 @@ private:
     bool is_hostap_on_cs_process(const std::string &hostap_mac);
 
     template <typename C>
-    void remove_all_non_selected_band_radios(C &radios, beerocks::eFreqType selected_bands);
+    void remove_all_non_selected_band_radios(C &radios, const int8_t selected_bands);
     db &database;
     ieee1905_1::CmduMessageTx &cmdu_tx;
     task_pool &tasks;

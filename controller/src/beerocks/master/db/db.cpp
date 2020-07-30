@@ -2553,6 +2553,9 @@ eTriStateBool db::get_client_stay_on_initial_radio(const sMacAddr &mac)
         return eTriStateBool::NOT_CONFIGURED;
     }
 
+    LOG(TRACE) << "Client " << mac
+               << " Stay on initial radio: " << node->client_stay_on_initial_radio;
+
     return node->client_stay_on_initial_radio;
 }
 
@@ -2600,6 +2603,8 @@ sMacAddr db::get_client_initial_radio(const sMacAddr &mac)
         LOG(ERROR) << "client node not found for mac " << mac;
         return network_utils::ZERO_MAC;
     }
+
+    LOG(TRACE) << "Client " << mac << " Initial radio: " << node->client_initial_radio;
 
     return node->client_initial_radio;
 }
@@ -2651,6 +2656,9 @@ eTriStateBool db::get_client_stay_on_selected_band(const sMacAddr &mac)
         return eTriStateBool::NOT_CONFIGURED;
     }
 
+    LOG(TRACE) << "Client " << mac
+               << " Stay on selected band: " << node->client_stay_on_selected_band;
+
     return node->client_stay_on_selected_band;
 }
 
@@ -2699,6 +2707,8 @@ int8_t db::get_client_selected_bands(const sMacAddr &mac)
         return PARAMETER_NOT_CONFIGURED;
     }
 
+    LOG(TRACE) << "Client " << mac << " Selected band: " << int(node->client_selected_bands);
+
     return node->client_selected_bands;
 }
 
@@ -2737,11 +2747,17 @@ bool db::clear_client_persistent_db(const sMacAddr &mac)
     return true;
 }
 
-bool db::is_hostap_on_selected_bands(beerocks::eFreqType selected_bands, const sMacAddr &hostap)
+bool db::is_hostap_on_selected_bands(const int8_t selected_bands, const sMacAddr &hostap)
 {
-    //todo need to change selected_bands type to eClientSelectedBands when merged to master
-    return (selected_bands ==
-            wireless_utils::which_freq(get_node_channel(tlvf::mac_to_string(hostap))));
+    auto hostap_band = wireless_utils::which_freq(get_node_channel(tlvf::mac_to_string(hostap)));
+    switch (hostap_band) {
+    case beerocks::eFreqType::FREQ_24G:
+        return (selected_bands & 1) != 0;
+    case beerocks::eFreqType::FREQ_5G:
+        return (selected_bands & 2) != 0;
+    default:
+        return false;
+    }
 }
 
 bool db::update_client_persistent_db(const sMacAddr &mac)
