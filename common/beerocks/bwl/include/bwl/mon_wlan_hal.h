@@ -34,8 +34,6 @@ public:
         RRM_Channel_Load_Response,
         RRM_Beacon_Request_Status,
         RRM_Beacon_Response,
-        RRM_STA_Statistics_Response,
-        RRM_Link_Measurement_Response,
         //CHANNEL_SCAN events
         Channel_Scan_Triggered,
         Channel_Scan_New_Results_Ready,
@@ -55,7 +53,6 @@ public:
 
     virtual bool sta_channel_load_11k_request(const SStaChannelLoadRequest11k &req)      = 0;
     virtual bool sta_beacon_11k_request(const SBeaconRequest11k &req, int &dialog_token) = 0;
-    virtual bool sta_statistics_11k_request(const SStatisticsRequest11k &req)            = 0;
     virtual bool sta_link_measurements_11k_request(const std::string &sta_mac)           = 0;
     virtual bool channel_scan_trigger(int dwell_time_msec,
                                       const std::vector<unsigned int> &channel_pool)     = 0;
@@ -64,8 +61,9 @@ public:
 };
 
 // mon HAL factory types
-std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(std::string iface_name,
-                                                  base_wlan_hal::hal_event_cb_t cb);
+std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(const std::string &iface_name,
+                                                  base_wlan_hal::hal_event_cb_t cb,
+                                                  const bwl::hal_conf_t &hal_conf);
 
 } // namespace bwl
 

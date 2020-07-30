@@ -117,8 +117,6 @@ private:
     int get_onboarding_state_caller(int numOfArgs);
     int wps_onboarding_caller(int numOfArgs);
 
-    int get_device_info_caller(int numOfArgs);
-
     int get_bml_version_caller(int numOfArgs);
     int get_master_slave_versions_caller(int numOfArgs);
 
@@ -150,6 +148,9 @@ private:
     int get_dcs_continuous_scan_params_caller(int numOfArgs);
     int start_dcs_single_scan_caller(int numOfArgs);
     int get_dcs_scan_results_caller(int numOfArgs);
+    int client_get_client_list_caller(int numOfArgs);
+    int client_set_client_caller(int numOfArgs);
+    int client_get_client_caller(int numOfArgs);
     // Functions
     int onboard_status();
     int ping();
@@ -170,7 +171,6 @@ private:
     int get_onboarding_state();
     int wps_onboarding(const std::string iface = std::string());
 
-    int get_device_info();
     int get_bml_version();
     int get_master_slave_versions();
 
@@ -214,6 +214,10 @@ private:
                               const std::string &channel_pool);
     int get_dcs_scan_results(const std::string &radio_mac, uint32_t max_results_size,
                              bool is_single_scan = false);
+    int client_get_client_list();
+    int client_set_client(const std::string &sta_mac, int8_t selected_bands,
+                          int8_t stay_on_initial_radio, int8_t stay_on_selected_device);
+    int client_get_client(const std::string &sta_mac);
     template <typename T> const std::string string_from_int_array(T *arr, size_t arr_max_size);
     // Variable
     std::string beerocks_conf_path;

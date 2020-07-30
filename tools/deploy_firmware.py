@@ -104,7 +104,7 @@ class PrplwrtDevice:
             print(diff_str)
         return bool(diff_str)
 
-    def reach(self, attempts: int = 5, wait: int = 5):
+    def reach(self, attempts: int = 5, wait: int = 5) -> bool:
         """Check if the device is reachable via SSH (and optionally try multiple times).
 
         Parameters
@@ -124,7 +124,7 @@ class PrplwrtDevice:
                 with pexpect.pxssh.pxssh() as shell:
                     shell.login(self.name, self.username, login_timeout=5)
                     return True
-            except pexpect.pxssh.ExceptionPxssh:
+            except (pexpect.pxssh.ExceptionPxssh, pexpect.exceptions.EOF):
                 print("Waiting for the device to be reachable")
                 time.sleep(wait)
         return False
@@ -174,8 +174,13 @@ class NetgearRax40(PrplwrtDevice):
             # make the shell prompt appear:
             self.set_prompt(shell)
             shell.expect(self.serial_prompt)
-            # reboot:
-            shell.sendline("reboot")
+            # kill any instance of the init script, if the current
+            # firmware doesn't have working wireless interfaces it
+            # will prevent it from rebooting:
+            shell.sendline("pgrep -f 'S99prplmesh boot' | xargs kill")
+            # remove overlay and reboot
+            shell.sendline("rm -rf /overlay/upper/usr /overlay/upper/opt")
+            shell.sendline("reboot -f")
             shell.expect(["Hit any key to stop autoboot:",
                           pexpect.EOF, pexpect.TIMEOUT], timeout=120)
             # stop autoboot:
@@ -265,7 +270,7 @@ def main():
 
     args = parser.parse_args()
 
-    if args.device == "netgear-rax40":
+    if args.device in ["netgear-rax40", "axepoint"]:
         dev = NetgearRax40(args.device, args.target_name, args.image)
     else:
         dev = Generic(args.device, args.target_name, args.image)

@@ -83,111 +83,6 @@ void son_management::handle_cli_message(Socket *sd,
     //LOG(DEBUG) << "NEW CLI action=" << int(header->action()) << " action_op=" << int(header->action_op());
 
     switch (beerocks_header->action_op()) {
-
-    case beerocks_message::ACTION_CLI_PING_SLAVE_REQUEST: {
-        LOG(DEBUG) << "PING_SLAVE_REQUEST from CLI";
-        auto cli_request =
-            beerocks_header->addClass<beerocks_message::cACTION_CLI_PING_SLAVE_REQUEST>();
-        if (cli_request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_CLI_PING_SLAVE_REQUEST failed";
-            isOK = false;
-            break;
-        }
-        std::string slave = tlvf::mac_to_string(cli_request->mac());
-        if (database.is_hostap_active(slave)) {
-            auto agent_mac = database.get_node_parent_ire(slave);
-
-            auto request = message_com::create_vs_message<
-                beerocks_message::cACTION_CONTROL_CONTROLLER_PING_REQUEST>(cmdu_tx);
-            if (request == nullptr) {
-                LOG(ERROR) << "Failed building message!";
-                isOK = false;
-                break;
-            }
-
-            request->total() = cli_request->num_of_req();
-            request->seq()   = 0;
-
-            auto size_left =
-                MTU_SIZE - message_com::get_vs_cmdu_size_on_buffer<
-                               beerocks_message::cACTION_CONTROL_CONTROLLER_PING_REQUEST>();
-            if (size_left > cli_request->size()) {
-                request->size() = cli_request->size();
-            } else {
-                LOG(DEBUG) << "PING_MSG_REQUEST size > tx_buffer size left setting size to "
-                           << (int)size_left << " bytes";
-                request->size() = size_left;
-            }
-
-            if (!request->alloc_data(size_left)) {
-                LOG(ERROR) << "Failed buffer allocation to size=" << int(size_left);
-                isOK = false;
-                break;
-            }
-            memset(request->data(), 0, request->data_length());
-            if (!database.update_node_last_ping_sent(slave)) {
-                LOG(DEBUG) << "PING_MSG_REQUEST received for slave " << slave
-                           << " , can't update last ping sent time for ";
-            }
-
-            const auto parent_radio = database.get_node_parent_radio(slave);
-            son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
-        }
-        break;
-    }
-    case beerocks_message::ACTION_CLI_PING_ALL_SLAVES_REQUEST: {
-        LOG(DEBUG) << "PING_ALL_SLAVES_REQUEST from CLI";
-        auto cli_request =
-            beerocks_header->addClass<beerocks_message::cACTION_CLI_PING_ALL_SLAVES_REQUEST>();
-        if (cli_request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_CLI_PING_SLAVE_REQUEST failed";
-            isOK = false;
-            break;
-        }
-
-        auto request = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CONTROLLER_PING_REQUEST>(cmdu_tx);
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            isOK = false;
-            break;
-        }
-        request->total() = cli_request->num_of_req();
-        request->seq()   = 0;
-        auto size_left =
-            MTU_SIZE - message_com::get_vs_cmdu_size_on_buffer<
-                           beerocks_message::cACTION_CONTROL_CONTROLLER_PING_REQUEST>();
-        if (size_left > cli_request->size()) {
-            request->size() = cli_request->size();
-        } else {
-            LOG(DEBUG) << "PING_MSG_REQUEST size > tx_buffer size left setting size to "
-                       << (int)size_left << " bytes";
-            request->size() = size_left;
-        }
-
-        if (!request->alloc_data(size_left)) {
-            LOG(ERROR) << "Failed buffer allocation to size=" << int(size_left);
-            isOK = false;
-            break;
-        }
-
-        memset(request->data(), 0, request->data_length());
-
-        auto slaves = database.get_active_hostaps();
-        for (const auto &slave : slaves) {
-            LOG(DEBUG) << "tending to send PING_MSG_REQUEST to " << slave;
-            if (database.is_hostap_active(slave)) {
-                auto agent_mac = database.get_node_parent_ire(slave);
-                if (!database.update_node_last_ping_sent(slave)) {
-                    LOG(DEBUG) << "PING_MSG_REQUEST received for slave " << slave
-                               << " , can't update last ping sent time for ";
-                }
-                LOG(DEBUG) << "send PING_MSG_REQUEST to " << slave;
-                son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, slave);
-            }
-        }
-        break;
-    }
     case beerocks_message::ACTION_CLI_HOSTAP_STATS_MEASUREMENT: {
         auto request_in =
             beerocks_header->addClass<beerocks_message::cACTION_CLI_HOSTAP_STATS_MEASUREMENT>();
@@ -523,8 +418,8 @@ void son_management::handle_cli_message(Socket *sd,
         // Optional:
         if (cli_request->use_optional_ssid()) {
             request->params().use_optional_ssid = 1; // bool
-            mapf::utils::copy_string(request->params().ssid, (char *)cli_request->ssid(),
-                                     beerocks::message::WIFI_SSID_MAX_LENGTH);
+            string_utils::copy_string(request->params().ssid, (char *)cli_request->ssid(),
+                                      beerocks::message::WIFI_SSID_MAX_LENGTH);
         } else {
             request->params().use_optional_ssid = 0;
         }
@@ -532,176 +427,6 @@ void son_management::handle_cli_message(Socket *sd,
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
         son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
 
-        break;
-    }
-    case beerocks_message::ACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST: {
-        auto cli_request =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST>();
-        if (cli_request == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST failed";
-            isOK = false;
-            break;
-        }
-
-        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
-        auto agent_mac         = database.get_node_parent_ire(hostap_mac);
-        LOG(DEBUG) << "CLI channel load request for " << client_mac << " to " << hostap_mac;
-
-        auto request = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST>(cmdu_tx);
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_REQUEST message!";
-            isOK = false;
-            break;
-        }
-
-        request->params().channel   = cli_request->channel();
-        request->params().op_class  = 0;
-        request->params().repeats   = 0;
-        request->params().rand_ival = 1000;
-        request->params().duration  = 50;
-        request->params().sta_mac   = cli_request->client_mac();
-
-        request->params().parallel           = 0;
-        request->params().enable             = 0;
-        request->params().request            = 0;
-        request->params().report             = 0;
-        request->params().mandatory_duration = 0;
-
-        // Optional:
-        request->params().use_optional_ch_load_rep = 0;
-        request->params().ch_load_rep_first        = 0;
-        request->params().ch_load_rep_second       = 0;
-
-        request->params().use_optional_wide_band_ch_switch = 0;
-        request->params().new_ch_width                     = 0;
-        request->params().new_ch_center_freq_seg_0         = 0;
-        request->params().new_ch_center_freq_seg_1         = 0;
-
-        const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
-
-        break;
-    }
-    case beerocks_message::ACTION_CLI_CLIENT_STATISTICS_11K_REQUEST: {
-        auto cli_request =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST>();
-        if (cli_request == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CLI_CLIENT_STATISTICS_11K_REQUEST failed";
-            isOK = false;
-            break;
-        }
-
-        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
-        auto agent_mac         = database.get_node_parent_ire(hostap_mac);
-        LOG(DEBUG) << "CLI statistics request for " << client_mac << " to " << hostap_mac;
-
-        auto request = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST>(cmdu_tx);
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_STATISTICS_11K_REQUEST message!";
-            isOK = false;
-            break;
-        }
-
-        //TODO: set params values
-        request->params().group_identity = cli_request->group_identity();
-        request->params().repeats =
-            0; // '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
-        request->params().rand_ival =
-            1000; // random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
-        request->params().duration =
-            10; // measurement duration, expressed in units of TUs [=1024usec]
-        request->params().sta_mac = cli_request->client_mac();
-        request->params().peer_mac_addr =
-            cli_request
-                ->peer_mac(); // the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
-
-        // Measurement request mode booleans:
-        request->params().parallel =
-            0; // (for multiple requests)'0' - measurements are to be performed in sequence,
-        //  '1' - request that the measurement is to start at the same time as the measurement described
-        //  by the next Measurement Request element in the same Measurement Request frame
-        request->params().enable  = 0;
-        request->params().request = 0;
-        request->params().report  = 0;
-        request->params().mandatory_duration =
-            0; // '0' - the duration can be lower than in the duration field, '1' - duration is mandantory
-
-        // Optional:
-        request->params().use_optional_trig_rep_sta_counters = 0; // bool
-        // request.params.measurement_count_1;
-        // request.params.trigger_timeout_1;
-        // request.params.sta_counter_trigger_condition;
-        // request.params.dot11FailedCountThreshold;
-        // request.params.dot11FCSErrorCountThreshold;
-        // request.params.dot11MultipleRetryCountThreshold;
-        // request.params.dot11FrameDuplicateCountThreshold;
-        // request.params.dot11RTSFailureCountThreshold;
-        // request.params.dot11AckFailureCountThreshold;
-        // request.params.dot11RetryCountThreshold;
-
-        request->params().use_optional_trig_rep_qos_sta_counters = 0; // bool
-        // request.params.measurement_count_2;
-        // request.params.trigger_timeout_2;
-        // request.params.qos_sta_counter_trigger_condition;
-        // request.params.dot11QoSFailedCountThreshold;
-        // request.params.dot11QoSRetryCountThreshold;
-        // request.params.dot11QoSMultipleRetryCountThreshold;
-        // request.params.dot11QoSFrameDuplicateCountThreshold;
-        // request.params.dot11QoSRTSCountFailureThreshold;
-        // request.params.dot11QoSAckFailureCountThreshold;
-        // request.params.dot11QoSDiscardedCountThreshold;
-
-        request->params().use_optional_trig_rep_rsna_counters = 0; // bool
-        // request.params.measurement_count_3;
-        // request.params.trigger_timeout_3;
-        // request.params.rsna_counter_trigger_condition;
-        // request.params.dot11RSNAStatsCMACICVErrorsThreshold;
-        // request.params.dot11RSNAStatsCMACReplaysThreshold;
-        // request.params.dot11RSNAStatsRobustMgmtCCMPReplaysThreshold;
-        // request.params.dot11RSNAStatsTKIPICVErrorsThreshold;
-        // request.params.dot11RSNAStatsTKIPReplaysThreshold;
-        // request.params.dot11RSNAStatsCCMPDecryptErrorsThreshold;
-        // request.params.dot11RSNAStatsCCMPReplaysThreshold;
-
-        const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
-
-        break;
-    }
-    case beerocks_message::ACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST: {
-        auto cli_request =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST>();
-        if (cli_request == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST failed";
-            isOK = false;
-            break;
-        }
-
-        std::string client_mac = tlvf::mac_to_string(cli_request->client_mac());
-        std::string hostap_mac = tlvf::mac_to_string(cli_request->hostap_mac());
-        auto agent_mac         = database.get_node_parent_ire(hostap_mac);
-        LOG(DEBUG) << "CLI link measurement request for " << client_mac << " to " << hostap_mac;
-
-        auto request = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST>(cmdu_tx);
-        if (request == nullptr) {
-            LOG(ERROR)
-                << "Failed building ACTION_CONTROL_CLIENT_LINK_MEASUREMENT_11K_REQUEST message!";
-            isOK = false;
-            break;
-        }
-
-        request->mac() = cli_request->client_mac();
-
-        const auto parent_radio = database.get_node_parent_radio(hostap_mac);
-        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
         break;
     }
     case beerocks_message::ACTION_CLI_HOSTAP_CHANNEL_SWITCH_REQUEST: {
@@ -1761,7 +1486,7 @@ void son_management::handle_bml_message(Socket *sd,
 
         response->result() = result;
         if (!message_com::send_cmdu(sd, cmdu_tx)) {
-            LOG(ERROR) << "Error sending get vaps list responce  message";
+            LOG(ERROR) << "Error sending get vaps list response message";
         }
         break;
     }
@@ -2181,7 +1906,7 @@ void son_management::handle_bml_message(Socket *sd,
             break;
         }
 
-        //Results avaliablity check
+        //Results availability check
         if (scan_results_size == 0) {
             LOG(DEBUG) << "no scan results are available";
             auto response = gen_new_results_response();
@@ -2306,6 +2031,121 @@ void son_management::handle_bml_message(Socket *sd,
     }
     case beerocks_message::ACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST: {
         LOG(TRACE) << "ACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST";
+        break;
+    }
+    case beerocks_message::ACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST";
+
+        auto request =
+            beerocks_header
+                ->addClass<beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST failed";
+            break;
+        }
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE>(cmdu_tx);
+        if (!response) {
+            LOG(ERROR) << "Failed building message "
+                          "cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE !";
+            break;
+        }
+
+        auto send_response = [&](bool result) {
+            //TODO: replace all BML_CLIENT requests to use boolean: (0=failure, 1-=success)
+            response->result() = (result) ? 0 : 1;
+            if (!message_com::send_cmdu(sd, cmdu_tx)) {
+                LOG(ERROR) << "Error sending get client list response message";
+            }
+        };
+
+        // TODO: replace with a list of configured clients read from controller-db
+        std::vector<sMacAddr> client_list;
+        if (!client_list.size()) {
+            LOG(DEBUG) << "client list is empty!";
+            // Send a valid response with an empty list
+            send_response(true);
+            break;
+        }
+
+        auto client_list_size = client_list.size();
+        LOG(INFO) << "Returning " << client_list_size << " clients to BML caller";
+
+        if (!response->alloc_client_list(client_list_size)) {
+            LOG(ERROR) << "Failed buffer allocation to size = " << int(client_list_size);
+            send_response(false);
+            break;
+        }
+
+        auto client_list_tuple = response->client_list(0);
+        if (!std::get<0>(client_list_tuple)) {
+            LOG(ERROR) << "client list access fail!";
+            send_response(false);
+            break;
+        }
+
+        auto clients = &std::get<1>(client_list_tuple);
+        for (size_t i = 0; i < client_list.size(); i++) {
+            clients[i] = client_list[i];
+        }
+
+        send_response(true);
+        break;
+    }
+    case beerocks_message::ACTION_BML_CLIENT_SET_CLIENT_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_CLIENT_SET_CLIENT_REQUEST";
+
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_BML_CLIENT_SET_CLIENT_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_CLIENT_SET_CLIENT_REQUEST failed";
+            break;
+        }
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_CLIENT_SET_CLIENT_RESPONSE>(cmdu_tx);
+        if (!response) {
+            LOG(ERROR) << "Failed building message "
+                          "cACTION_BML_CLIENT_SET_CLIENT_RESPONSE !";
+            break;
+        }
+
+        //TODO: add client to persistent DB if required and set client parameters
+        response->result() = 0; //Success.
+
+        message_com::send_cmdu(sd, cmdu_tx);
+        break;
+    }
+    case beerocks_message::ACTION_BML_CLIENT_GET_CLIENT_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_CLIENT_GET_CLIENT_REQUEST";
+
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass cACTION_BML_CLIENT_GET_CLIENT_REQUEST failed";
+            break;
+        }
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_RESPONSE>(cmdu_tx);
+        if (!response) {
+            LOG(ERROR) << "Failed building message "
+                          "cACTION_BML_CLIENT_GET_CLIENT_RESPONSE !";
+            break;
+        }
+
+        //TODO: fill client information from controller DB
+        response->client().sta_mac                 = request->sta_mac();
+        response->client().timestamp_sec           = 0;
+        response->client().stay_on_initial_radio   = PARAMETER_NOT_CONFIGURED;
+        response->client().stay_on_selected_device = PARAMETER_NOT_CONFIGURED;
+        response->client().selected_bands          = eClientSelectedBands::eSelectedBands_Disabled;
+        response->client().single_band             = PARAMETER_NOT_CONFIGURED;
+        response->client().time_life_delay_days    = PARAMETER_NOT_CONFIGURED;
+        response->result()                         = 0; //Success.
+
+        message_com::send_cmdu(sd, cmdu_tx);
         break;
     }
     default: {

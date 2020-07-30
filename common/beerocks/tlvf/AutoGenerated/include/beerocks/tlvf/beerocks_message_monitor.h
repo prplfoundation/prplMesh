@@ -476,29 +476,6 @@ class cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST : public BaseClass
         uint8_t* m_sync = nullptr;
 };
 
-class cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION : public BaseClass
-{
-    public:
-        cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION();
-
-        static eActionOp_MONITOR get_action_op(){
-            return (eActionOp_MONITOR)(ACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION);
-        }
-        int8_t& new_tx_state();
-        int8_t& new_hostap_enabled_state();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_MONITOR* m_action_op = nullptr;
-        int8_t* m_new_tx_state = nullptr;
-        int8_t* m_new_hostap_enabled_state = nullptr;
-};
-
 class cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE : public BaseClass
 {
     public:
@@ -634,90 +611,6 @@ class cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE : public BaseClass
         bool init();
         eActionOp_MONITOR* m_action_op = nullptr;
         sStaChannelLoadResponse11k* m_params = nullptr;
-};
-
-class cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST : public BaseClass
-{
-    public:
-        cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST();
-
-        static eActionOp_MONITOR get_action_op(){
-            return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST);
-        }
-        sStatisticsRequest11k& params();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_MONITOR* m_action_op = nullptr;
-        sStatisticsRequest11k* m_params = nullptr;
-};
-
-class cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE : public BaseClass
-{
-    public:
-        cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE();
-
-        static eActionOp_MONITOR get_action_op(){
-            return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE);
-        }
-        sStatisticsResponse11k& params();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_MONITOR* m_action_op = nullptr;
-        sStatisticsResponse11k* m_params = nullptr;
-};
-
-class cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST : public BaseClass
-{
-    public:
-        cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST();
-
-        static eActionOp_MONITOR get_action_op(){
-            return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST);
-        }
-        sMacAddr& mac();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_MONITOR* m_action_op = nullptr;
-        sMacAddr* m_mac = nullptr;
-};
-
-class cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE : public BaseClass
-{
-    public:
-        cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(uint8_t* buff, size_t buff_len, bool parse = false);
-        explicit cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE(std::shared_ptr<BaseClass> base, bool parse = false);
-        ~cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE();
-
-        static eActionOp_MONITOR get_action_op(){
-            return (eActionOp_MONITOR)(ACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE);
-        }
-        sLinkMeasurementsResponse11k& params();
-        void class_swap() override;
-        bool finalize() override;
-        static size_t get_initial_size();
-
-    private:
-        bool init();
-        eActionOp_MONITOR* m_action_op = nullptr;
-        sLinkMeasurementsResponse11k* m_params = nullptr;
 };
 
 class cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION : public BaseClass

@@ -40,7 +40,6 @@ public:
         uint16_t ucc_listener_port;
         std::string bridge_iface;
         int stop_on_failure_attempts;
-        bool enable_keep_alive;
         bool enable_repeater_mode;
         std::string backhaul_wire_iface;
         beerocks::eIfaceType backhaul_wire_iface_type;
@@ -59,8 +58,6 @@ public:
         std::string gw_bridge_mac;
         std::string controller_bridge_mac;
         bool is_prplmesh_controller;
-        std::string bridge_iface;
-        std::string bridge_mac;
         std::string bridge_ipv4;
         std::string backhaul_iface;
         std::string backhaul_mac;
@@ -127,7 +124,6 @@ private:
                                      std::shared_ptr<beerocks::beerocks_header> beerocks_header);
     bool handle_cmdu_control_ieee1905_1_message(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_cmdu_monitor_ieee1905_1_message(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
-    void process_keep_alive();
 
     bool slave_fsm(bool &call_slave_select);
     void slave_reset();
@@ -177,13 +173,13 @@ private:
     bool is_backhual_reconf        = false;
     bool detach_on_conf_change     = false;
     bool configuration_in_progress = false;
+    bool m_logger_configured       = false;
 
     bool is_backhaul_manager = false;
 
     //slave FSM //
     eSlaveState slave_state;
     std::chrono::steady_clock::time_point slave_state_timer;
-    int keep_alive_retries = 0;
     bool hostap_params_available;
     int slave_resets_counter = 0;
 
@@ -200,8 +196,8 @@ private:
 
     Socket *monitor_socket    = nullptr;
     Socket *ap_manager_socket = nullptr;
+    std::string m_fronthaul_iface;
 
-    std::chrono::steady_clock::time_point master_last_seen;
     std::chrono::steady_clock::time_point monitor_last_seen;
     std::chrono::steady_clock::time_point ap_manager_last_seen;
     int monitor_retries_counter    = 0;

@@ -8,6 +8,7 @@
 
 #include "bml_utils.h"
 
+#include <bcl/beerocks_string_utils.h>
 #include <bcl/beerocks_utils.h>
 #include <bcl/network/network_utils.h>
 
@@ -89,10 +90,11 @@ int bml_utils_node_to_string(const struct BML_NODE *node, char *buffer, int buff
     ss << ", Type: " << node_type_to_string(node->type) << " (" << std::to_string(node->type) << ")"
        << ", State: " << node_state_to_string(node->state) << " (" << std::to_string(node->state)
        << ")"
-       << ", MAC: " << node->mac << ", IP: " << network_utils::ipv4_to_string(node->ip_v4);
+       << ", MAC: " << tlvf::mac_to_string(node->mac)
+       << ", IP: " << network_utils::ipv4_to_string(node->ip_v4);
 
     if (node->type != BML_NODE_TYPE_CLIENT) {
-        ss << ", Backhaul: " << node->data.gw_ire.backhaul_mac;
+        ss << ", Backhaul: " << tlvf::mac_to_string(node->data.gw_ire.backhaul_mac);
     }
 
     if (node->channel) {
@@ -100,8 +102,8 @@ int bml_utils_node_to_string(const struct BML_NODE *node, char *buffer, int buff
     }
 
     if (node->parent_bridge[0]) {
-        ss << ", Parent Bridge: " << node->parent_bridge
-           << ", Parent BSSID: " << node->parent_bssid;
+        ss << ", Parent Bridge: " << tlvf::mac_to_string(node->parent_bridge)
+           << ", Parent BSSID: " << tlvf::mac_to_string(node->parent_bssid);
     }
 
     // New line
@@ -153,7 +155,7 @@ int bml_utils_node_to_string(const struct BML_NODE *node, char *buffer, int buff
         std::cout << "ERROR: bml_node length > given buffer length" << std::endl;
         return 0;
     } else {
-        mapf::utils::copy_string(buffer, ss.str().c_str(), buffer_len);
+        beerocks::string_utils::copy_string(buffer, ss.str().c_str(), buffer_len);
         return offset;
     }
 }
@@ -165,7 +167,7 @@ int bml_utils_stats_to_string(const struct BML_STATS *stats, char *buffer, int b
     ss << "Type: " << node_type_to_string(stats->type) << " (" << int(stats->type)
        << ")"
           ", MAC: "
-       << stats->mac
+       << tlvf::mac_to_string(stats->mac)
        << ", measurement_window_msec: " << std::to_string(stats->measurement_window_msec);
 
     if (stats->type == BML_STAT_TYPE_RADIO) {
@@ -256,7 +258,7 @@ int bml_utils_stats_to_string(const struct BML_STATS *stats, char *buffer, int b
         std::cout << "ERROR: bml_stats length > given buffer length" << std::endl;
         return 0;
     } else {
-        mapf::utils::copy_string(buffer, ss.str().c_str(), buffer_len);
+        beerocks::string_utils::copy_string(buffer, ss.str().c_str(), buffer_len);
         return offset;
     }
 }
@@ -265,7 +267,7 @@ int bml_utils_stats_to_string_raw(const struct BML_STATS *stats, char *buffer, i
 {
     std::stringstream ss;
 
-    ss << "Type: " << int(stats->type) << ", mac: " << stats->mac
+    ss << "Type: " << int(stats->type) << ", mac: " << tlvf::mac_to_string(stats->mac)
        << ", measurement_window_msec: " << std::to_string(stats->measurement_window_msec);
 
     if (stats->type == BML_STAT_TYPE_RADIO) {
@@ -317,7 +319,7 @@ int bml_utils_stats_to_string_raw(const struct BML_STATS *stats, char *buffer, i
         std::cout << "ERROR: bml_stats length > given buffer length" << std::endl;
         return 0;
     } else {
-        mapf::utils::copy_string(buffer, ss.str().c_str(), buffer_len);
+        beerocks::string_utils::copy_string(buffer, ss.str().c_str(), buffer_len);
         return offset;
     }
 }
@@ -330,42 +332,42 @@ int bml_utils_event_to_string(const struct BML_EVENT *event, char *buffer, int b
     case BML_EVENT_TYPE_BSS_TM_REQ: {
         ss << "BML_EVENT_TYPE_BSS_TM_REQ";
         auto event_data = (BML_EVENT_BSS_TM_REQ *)(event->data);
-        ss << ", target bssid: " << event_data->target_bssid << ", "
+        ss << ", target bssid: " << tlvf::mac_to_string(event_data->target_bssid) << ", "
            << "disassoc imminent: " << std::to_string(event_data->disassoc_imminent) << std::endl;
         break;
     }
     case BML_EVENT_TYPE_BH_ROAM_REQ: {
         ss << "BML_EVENT_TYPE_BH_ROAM_REQ";
         auto event_data = (BML_EVENT_BH_ROAM_REQ *)(event->data);
-        ss << ", bssid: " << event_data->bssid << ", "
+        ss << ", bssid: " << tlvf::mac_to_string(event_data->bssid) << ", "
            << "channel: " << std::to_string(event_data->channel) << std::endl;
         break;
     }
     case BML_EVENT_TYPE_CLIENT_ALLOW_REQ: {
         ss << "BML_EVENT_TYPE_CLIENT_ALLOW_REQ";
         auto event_data = (BML_EVENT_CLIENT_ALLOW_REQ *)(event->data);
-        ss << ", hostap_mac: " << event_data->hostap_mac << ", "
-           << "sta_mac: " << event_data->sta_mac << ", "
+        ss << ", hostap_mac: " << tlvf::mac_to_string(event_data->hostap_mac) << ", "
+           << "sta_mac: " << tlvf::mac_to_string(event_data->sta_mac) << ", "
            << "ip: " << network_utils::ipv4_to_string(event_data->ip) << std::endl;
         break;
     }
     case BML_EVENT_TYPE_CLIENT_DISALLOW_REQ: {
         ss << "BML_EVENT_TYPE_CLIENT_DISALLOW_REQ";
         auto event_data = (BML_EVENT_CLIENT_ALLOW_REQ *)(event->data);
-        ss << ", hostap_mac: " << event_data->hostap_mac << ", sta_mac: " << event_data->sta_mac
-           << std::endl;
+        ss << ", hostap_mac: " << tlvf::mac_to_string(event_data->hostap_mac)
+           << ", sta_mac: " << tlvf::mac_to_string(event_data->sta_mac) << std::endl;
         break;
     }
     case BML_EVENT_TYPE_ACS_START: {
         ss << "BML_EVENT_TYPE_ACS_START";
         auto event_data = (BML_EVENT_ACS_START *)(event->data);
-        ss << ", hostap_mac: " << event_data->hostap_mac << std::endl;
+        ss << ", hostap_mac: " << tlvf::mac_to_string(event_data->hostap_mac) << std::endl;
         break;
     }
     case BML_EVENT_TYPE_CSA_NOTIFICATION: {
         ss << "BML_EVENT_TYPE_CSA_NOTIFICATION";
         auto event_data = (BML_EVENT_CSA_NOTIFICATION *)(event->data);
-        ss << ", hostap_mac: " << event_data->hostap_mac
+        ss << ", hostap_mac: " << tlvf::mac_to_string(event_data->hostap_mac)
            << ", bandwidth: " << std::to_string(event_data->bandwidth)
            << ", channel: " << std::to_string(event_data->channel)
            << ", channel_ext_above_primary: "
@@ -377,7 +379,7 @@ int bml_utils_event_to_string(const struct BML_EVENT *event, char *buffer, int b
     case BML_EVENT_TYPE_CAC_STATUS_CHANGED_NOTIFICATION: {
         ss << "BML_EVENT_TYPE_CAC_STATUS_CHANGED_NOTIFICATION";
         auto event_data = (BML_EVENT_CAC_STATUS_CHANGED_NOTIFICATION *)(event->data);
-        ss << ", hostap_mac: " << event_data->hostap_mac
+        ss << ", hostap_mac: " << tlvf::mac_to_string(event_data->hostap_mac)
            << ", cac_completed: " << std::to_string(event_data->cac_completed) << std::endl;
         break;
     }
@@ -433,7 +435,7 @@ int bml_utils_event_to_string(const struct BML_EVENT *event, char *buffer, int b
         std::cout << "ERROR: bml_stats length > given buffer length" << std::endl;
         return 0;
     } else {
-        mapf::utils::copy_string(buffer, ss.str().c_str(), buffer_len);
+        beerocks::string_utils::copy_string(buffer, ss.str().c_str(), buffer_len);
         return offset;
     }
 }

@@ -9,7 +9,7 @@
 #include <tlvf/CmduMessageRx.h>
 #include <tlvf/WSC/AttrList.h>
 #include <tlvf/ieee_1905_1/tlv1905NeighborDevice.h>
-#include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
+#include <tlvf/ieee_1905_1/tlvAlMacAddress.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvDeviceBridgingCapability.h>
 #include <tlvf/ieee_1905_1/tlvDeviceInformation.h>
@@ -35,6 +35,8 @@
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
 #include <tlvf/wfa_map/tlvAssociatedStaTrafficStats.h>
+#include <tlvf/wfa_map/tlvBackhaulSteeringRequest.h>
+#include <tlvf/wfa_map/tlvBackhaulSteeringResponse.h>
 #include <tlvf/wfa_map/tlvBeaconMetricsQuery.h>
 #include <tlvf/wfa_map/tlvBeaconMetricsResponse.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
@@ -88,7 +90,7 @@ std::shared_ptr<BaseClass> CmduMessageRx::parseNextTlv()
         return msg.addClass<tlvEndOfMessage>();
     }
     case (1): {
-        return msg.addClass<tlvAlMacAddressType>();
+        return msg.addClass<tlvAlMacAddress>();
     }
     case (2): {
         return msg.addClass<tlvMacAddress>();
@@ -229,6 +231,12 @@ std::shared_ptr<BaseClass> CmduMessageRx::parseNextTlv()
     }
     case (157): {
         return msg.addClass<wfa_map::tlvClientAssociationControlRequest>();
+    }
+    case (158): {
+        return msg.addClass<wfa_map::tlvBackhaulSteeringRequest>();
+    }
+    case (159): {
+        return msg.addClass<wfa_map::tlvBackhaulSteeringResponse>();
     }
     case (160): {
         return msg.addClass<wfa_map::tlvHigherLayerData>();

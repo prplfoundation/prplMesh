@@ -6,63 +6,10 @@ _include: {
   tlvf/WSC/eWscVendorId.h,
   tlvf/WSC/eWscVendorExt.h,
   tlvf/WSC/eWscDev.h,
+  tlvf/WSC/eWscWfaVendorExtSubelement.h,
   tlvf/common/sMacAddr.h,
 }
 _namespace: WSC
-
-sWscAttrVersion2:
-  _type: struct
-  attribute_type:
-    _type: eWscAttributes
-    _value: ATTR_VENDOR_EXTENSION
-  data_length:
-    _type: uint16_t
-    _value: WSC_VENDOR_EXTENSIONS_LENGTH
-  vendor_id_0:
-    _type: uint8_t
-    _value: WSC_VENDOR_ID_WFA_1
-  vendor_id_1:
-    _type: uint8_t
-    _value: WSC_VENDOR_ID_WFA_2
-  vendor_id_2:
-    _type: uint8_t
-    _value: WSC_VENDOR_ID_WFA_3
-  subelement_id:
-    _type: uint8_t
-    _value: 0x0
-  subelement_length:
-    _type: uint8_t
-    _value: 0x1
-  subelement_value:
-    _type: uint8_t
-    _value: WSC_VERSION2
-
-sWscAttrVendorExtMultiAp:
-  _type: struct
-  attribute_type:
-    _type: eWscAttributes
-    _value: ATTR_VENDOR_EXTENSION
-  data_length:
-    _type: uint16_t
-    _value: WSC_VENDOR_EXTENSIONS_LENGTH
-  vendor_id_0:
-    _type: uint8_t
-    _value: WSC_VENDOR_ID_WFA_1
-  vendor_id_1:
-    _type: uint8_t
-    _value: WSC_VENDOR_ID_WFA_2
-  vendor_id_2:
-    _type: uint8_t
-    _value: WSC_VENDOR_ID_WFA_3
-  subelement_id:
-    _type: uint8_t
-    _value: 0x6
-  subelement_length:
-    _type: uint8_t
-    _value: 0x1
-  subelement_value:
-    _type: uint8_t
-    _value: TEARDOWN
 
 sWscAttrKeyWrapAuthenticator:
   _type: struct
@@ -113,6 +60,52 @@ sWscAttrBssid:
   data:
     _type: sMacAddr
 
+sWscWfaVendorExtSubelementVersion2:
+  _type: struct
+  id:
+    _type: uint8_t
+    _value: VERSION2
+  length:
+    _type: uint8_t
+    _value: 0x1
+  value:
+    _type: uint8_t
+    _value: WSC_VERSION2
+
+sWscWfaVendorExtSubelementMultiApIdentifier:
+  _type: struct
+  id:
+    _type: uint8_t
+    _value: MULTI_AP_IDENTIFIER
+  length:
+    _type: uint8_t
+    _value: 0x1
+  value:
+    _type: uint8_t
+    _value: TEARDOWN
+    
+cWscAttrVendorExtension:
+  _type: class
+  _is_tlv_class: True
+  type:
+    _type: eWscAttributes
+    _value: ATTR_VENDOR_EXTENSION
+  length:
+    _type: uint16_t
+    _length_var: True
+  vendor_id_0:
+    _type: uint8_t
+    _value: WSC_VENDOR_ID_WFA_1
+  vendor_id_1:
+    _type: uint8_t
+    _value: WSC_VENDOR_ID_WFA_2
+  vendor_id_2:
+    _type: uint8_t
+    _value: WSC_VENDOR_ID_WFA_3
+  vendor_data:
+    _type: uint8_t
+    _length: []
+
 cConfigData:
   _type: class
   ssid_type:
@@ -138,7 +131,9 @@ cConfigData:
     _length: [ network_key_length ]
     _length_max: WSC_MAX_NETWORK_KEY_LENGTH
   bssid_attr: sWscAttrBssid
-  multiap_attr: sWscAttrVendorExtMultiAp
+  bss_type:
+    _type: uint8_t
+    _value: TEARDOWN
 
 cWscAttrEncryptedSettings:
   _type: class
@@ -154,37 +149,6 @@ cWscAttrEncryptedSettings:
     _length: [WSC_ENCRYPTED_SETTINGS_IV_LENGTH]
   encrypted_settings:
     _type: char
-    _length: []
-
-cWscVendorExtWfa:
-  _type: class
-  _is_tlv_class: True
-  type:
-    _type: eWscAttributes
-    _value: ATTR_VENDOR_EXTENSION
-  length:
-    _type: uint16_t
-    _length_var: True
-  vendor_id_0:
-    _type: uint8_t
-    _value: WSC_VENDOR_ID_WFA_1
-  vendor_id_1:
-    _type: uint8_t
-    _value: WSC_VENDOR_ID_WFA_2
-  vendor_id_2:
-    _type: uint8_t
-    _value: WSC_VENDOR_ID_WFA_3
-  subelement_id:
-    _type: uint8_t
-    _value: 0x6
-  subelement_length:
-    _type: uint8_t
-    _value: 0x1
-  subelement_value:
-    _type: uint8_t
-    _value: TEARDOWN
-  vs_data:
-    _type: uint8_t
     _length: []
 
 cWscAttrVersion:
@@ -513,34 +477,6 @@ cWscAttrRegistrarNonce:
   nonce:
     _type: uint8_t
     _length: [ WSC_NONCE_LENGTH ]
-
-cWscAttrVersion2:
-  _type: class
-  _is_tlv_class: True
-  type:
-    _type: eWscAttributes
-    _value: ATTR_VENDOR_EXTENSION
-  length:
-    _type: uint16_t
-    _value_const: WSC_VENDOR_EXTENSIONS_LENGTH
-  vendor_id_0:
-    _type: uint8_t
-    _value: WSC_VENDOR_ID_WFA_1
-  vendor_id_1:
-    _type: uint8_t
-    _value: WSC_VENDOR_ID_WFA_2
-  vendor_id_2:
-    _type: uint8_t
-    _value: WSC_VENDOR_ID_WFA_3
-  subelement_id:
-    _type: uint8_t
-    _value: 0x0
-  subelement_length:
-    _type: uint8_t
-    _value: 0x1
-  subelement_value:
-    _type: uint8_t
-    _value: WSC_VERSION2
 
 cWscAttrSsid:
   _type: class

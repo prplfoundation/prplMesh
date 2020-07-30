@@ -18,7 +18,6 @@ RUN apt-get update && apt-get install -y \
     libreadline-dev \
     libssl-dev \
     libtool \
-    libzmq3-dev \
     ninja-build \
     pkg-config \
     python \

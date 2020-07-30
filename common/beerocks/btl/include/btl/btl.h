@@ -17,13 +17,6 @@
 
 #include <unordered_set>
 
-// Forward Declarations
-namespace mapf {
-class Poller;
-class LocalBusInterface;
-class SubSocket;
-} // namespace mapf
-
 namespace beerocks {
 namespace btl {
 class transport_socket_thread : public socket_thread {
@@ -35,42 +28,53 @@ public:
     virtual void set_select_timeout(unsigned msec) override;
     virtual bool work() override;
 
-    bool send_cmdu_to_bus(ieee1905_1::CmduMessageTx &cmdu, const std::string &dst_mac,
-                          const std::string &src_mac);
+    /**
+     * @brief Sends CDMU to transport for dispatching.
+     *
+     * @param cmdu Control Message Data Unit to send.
+     * @param dst_mac Destination MAC address.
+     * @param src_mac Source MAC address.
+     * @param iface_name Name of the network interface to use (set to empty string to send on all
+     * available interfaces).
+     * @return True on success and false otherwise.
+     */
+    bool send_cmdu_to_broker(ieee1905_1::CmduMessageTx &cmdu, const std::string &dst_mac,
+                             const std::string &src_mac, const std::string &iface_name = "");
 
 protected:
     void add_socket(Socket *s, bool add_to_vector = true) override;
-    void remove_socket(Socket *s) override;
-    bool read_ready(Socket *s) override;
     bool configure_ieee1905_transport_interfaces(const std::string &bridge_iface,
                                                  const std::vector<std::string> &ifaces);
-    bool from_bus(Socket *sd);
 
-    bool bus_subscribe(const std::vector<ieee1905_1::eMessageType> &msg_types);
-    bool bus_connect(const std::string &beerocks_temp_path, const bool local_master);
-    void bus_connected(Socket *sd);
+    bool from_broker(Socket *sd);
 
-    bool send_cmdu_to_bus(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
-                          const std::string &src_mac, uint16_t length);
+    bool broker_connect(const std::string &beerocks_temp_path, const bool local_master);
+    bool broker_subscribe(const std::vector<ieee1905_1::eMessageType> &msg_types);
+
+    /**
+     * @brief Sends CDMU to transport for dispatching.
+     *
+     * @param cmdu Control Message Data Unit to send.
+     * @param dst_mac Destination MAC address.
+     * @param src_mac Source MAC address.
+     * @param length Message length.
+     * @param iface_name Name of the network interface to use (set to empty string to send on all
+     * available interfaces).
+     * @return True on success and false otherwise.
+     */
+    bool send_cmdu_to_broker(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
+                             const std::string &src_mac, uint16_t length,
+                             const std::string &iface_name = "");
 
 private:
-    bool bus_init();
-    bool bus_send(ieee1905_1::CmduMessage &cmdu, const std::string &dst_mac,
-                  const std::string &src_mac, uint16_t length);
-    bool handle_cmdu_message_bus();
+    bool broker_init();
+    bool broker_send(ieee1905_1::CmduMessage &cmdu, const std::string &iface_name,
+                     const std::string &dst_mac, const std::string &src_mac, uint16_t length);
+    bool handle_cmdu_message_broker();
 
     int poll_timeout_ms = 500;
 
-#ifdef UDS_BUS
-    bool skip_filtered_message_type(Socket *sd, ieee1905_1::eMessageType msg_type) override;
-
-    Socket *bus = nullptr;
-    std::unique_ptr<SocketServer> bus_server_socket;
-    std::unordered_set<ieee1905_1::eMessageType> m_subscribed_messages;
-#else
-    std::shared_ptr<mapf::LocalBusInterface> bus = nullptr;
-    std::shared_ptr<mapf::Poller> poller         = nullptr;
-#endif
+    std::unique_ptr<SocketClient> m_broker;
 };
 } // namespace btl
 

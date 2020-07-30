@@ -8,6 +8,23 @@ set(MODULE_PATH ${CMAKE_CURRENT_LIST_DIR})
 # Common Sources
 file(GLOB_RECURSE bpl_common_sources ${MODULE_PATH}/common/*.c*)
 
+# Common prplmesh_db values
+set(BEEROCKS_MANAGEMENT_MODE  "Multi-AP-Controller-and-Agent" CACHE STRING "Set management mode")
+set(BEEROCKS_OPERATING_MODE  "Gateway" CACHE STRING "Set operating mode")
+set(BEEROCKS_STOP_ON_FAILURE_ATTEMPTS  0 CACHE INT "In common config stop on failure disabled")
+set(BEEROCKS_CERTIFICATION_MODE  1 CACHE INT "In certification, agent must retry onboarding indefinitely")
+
+set(BEEROCKS_HOSTAP_WLAN1_CTRL_IFACE "/var/run/hostapd/${BEEROCKS_WLAN1_IFACE}" CACHE PATH "hostapd ctrl iface path for 1st WLAN")
+set(BEEROCKS_HOSTAP_WLAN2_CTRL_IFACE "/var/run/hostapd/${BEEROCKS_WLAN2_IFACE}" CACHE PATH "hostapd ctrl iface path for 2nd WLAN")
+set(BEEROCKS_HOSTAP_WLAN3_CTRL_IFACE "/var/run/hostapd/${BEEROCKS_WLAN3_IFACE}" CACHE PATH "hostapd ctrl iface path for 3rd WLAN")
+
+set(BEEROCKS_WPA_SUPPLICANT_WLAN1_CTRL_IFACE "/var/run/wpa_supplicant/${BEEROCKS_WLAN1_IFACE}" CACHE PATH "wpa_supplicant ctrl iface path for 1st WLAN")
+set(BEEROCKS_WPA_SUPPLICANT_WLAN2_CTRL_IFACE "/var/run/wpa_supplicant/${BEEROCKS_WLAN2_IFACE}" CACHE PATH "wpa_supplicant ctrl iface path for 2nd WLAN")
+set(BEEROCKS_WPA_SUPPLICANT_WLAN3_CTRL_IFACE "/var/run/wpa_supplicant/${BEEROCKS_WLAN3_IFACE}" CACHE PATH "wpa_supplicant ctrl iface path for 3rd WLAN")
+
+# Add prplmesh_platform_db config generation
+add_subdirectory(platform_db)
+
 # OpenWRT
 if (TARGET_PLATFORM STREQUAL "openwrt")
 
@@ -48,7 +65,6 @@ if (TARGET_PLATFORM STREQUAL "openwrt")
 
         add_definitions(-DPLATFORM_DB_PATH="${INSTALL_PATH}/share/prplmesh_platform_db")
         add_definitions(-DPLATFORM_DB_PATH_TEMP="${TMP_PATH}/prplmesh_platform_db")
-        install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
 
     endif()
 
@@ -84,7 +100,6 @@ elseif (TARGET_PLATFORM STREQUAL "linux")
 
     add_definitions(-DPLATFORM_DB_PATH="${INSTALL_PATH}/share/prplmesh_platform_db")
     add_definitions(-DPLATFORM_DB_PATH_TEMP="${TMP_PATH}/prplmesh_platform_db")
-    install(FILES "${MODULE_PATH}/linux/prplmesh_platform_db" DESTINATION ${CMAKE_INSTALL_PREFIX}/share)
 
 else()
 

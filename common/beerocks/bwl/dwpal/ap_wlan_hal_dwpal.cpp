@@ -709,7 +709,7 @@ update_vap_credentials_configure_wpa(const std::string &vap_if,
 // NOTE: Since *base_wlan_hal_dwpal* inherits *base_wlan_hal* virtually, we
 //       need to explicitly call it's from any deriving class
 ap_wlan_hal_dwpal::ap_wlan_hal_dwpal(const std::string &iface_name, hal_event_cb_t callback,
-                                     hal_conf_t hal_conf)
+                                     const hal_conf_t &hal_conf)
     : base_wlan_hal(bwl::HALType::AccessPoint, iface_name, IfaceType::Intel, callback, hal_conf),
       base_wlan_hal_dwpal(bwl::HALType::AccessPoint, iface_name, callback, hal_conf)
 {
@@ -1693,6 +1693,9 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
 {
     LOG(TRACE) << __func__ << " - opcode: |" << opcode << "|";
 
+    // For key-value parser.
+    int64_t tmp_int;
+
     auto event = dwpal_to_bwl_event(opcode);
 
     switch (event) {
@@ -2330,6 +2333,9 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
     case Event::DFS_CAC_Completed: {
         LOG(DEBUG) << buffer;
 
+        parsed_line_t parsed_obj;
+        parse_event(buffer, parsed_obj);
+
         if (!get_radio_info().is_5ghz) {
             LOG(WARNING) << "DFS event on 2.4Ghz radio. Ignoring...";
             return true;
@@ -2344,44 +2350,34 @@ bool ap_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std:
         // Initialize the message
         memset(msg_buff.get(), 0, sizeof(sACTION_APMANAGER_HOSTAP_DFS_CAC_COMPLETED_NOTIFICATION));
 
-        uint8_t chan_width            = 0;
-        size_t numOfValidArgs[6]      = {0};
-        FieldsToParse fieldsToParse[] = {
-            {NULL /*opCode*/, &numOfValidArgs[0], DWPAL_STR_PARAM, NULL, 0},
-            {NULL, &numOfValidArgs[1], DWPAL_STR_PARAM, NULL, 0},
-            {(void *)&msg->params.success, &numOfValidArgs[2], DWPAL_CHAR_PARAM, "cac_status=", 0},
-            {(void *)&msg->params.frequency, &numOfValidArgs[3], DWPAL_INT_PARAM, "freq=", 0},
-            {(void *)&msg->params.timeout, &numOfValidArgs[4], DWPAL_INT_PARAM, "timeout=", 0},
-            {(void *)&chan_width, &numOfValidArgs[5], DWPAL_CHAR_PARAM, "chan_width=", 0},
-            /* Must be at the end */
-            {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
-
-        if (dwpal_string_to_struct_parse(buffer, bufLen, fieldsToParse, sizeof(int)) ==
-            DWPAL_FAILURE) {
-            LOG(ERROR) << "DWPAL parse error ==> Abort";
-            return false;
-        }
-
-        /* TEMP: Traces... */
-        // HOSTAPD_CAC_STAT_FAILED = 0, HOSTAPD_CAC_STAT_SUCCESS = 1, HOSTAPD_CAC_STAT_PAUSED = 2
-        LOG(DEBUG) << "numOfValidArgs[2]= " << numOfValidArgs[2]
-                   << " cac_status= " << (int)msg->params.success;
-        LOG(DEBUG) << "numOfValidArgs[3]= " << numOfValidArgs[3]
-                   << " freq= " << msg->params.frequency;
-        LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4]
-                   << " timeout= " << msg->params.timeout;
-        LOG(DEBUG) << "numOfValidArgs[5]= " << numOfValidArgs[5]
-                   << " chan_width= " << (int)chan_width;
-
-        for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
-            if (numOfValidArgs[i] == 0) {
-                LOG(ERROR) << "Failed reading parsed parameter " << (int)i << " ==> Abort";
+        if (!read_param("cac_status", parsed_obj, tmp_int)) {
+            // older intel hostapd versions still use "success" parameter
+            // same as the original openWrt syntax , we should support it as well.
+            if (!read_param("success", parsed_obj, tmp_int)) {
+                LOG(ERROR) << "Failed reading cac finished success parameter!";
                 return false;
             }
         }
+        msg->params.success = tmp_int;
 
+        if (!read_param("freq", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading freq parameter!";
+            return false;
+        }
+        msg->params.frequency = tmp_int;
         msg->params.channel   = son::wireless_utils::freq_to_channel(msg->params.frequency);
-        msg->params.bandwidth = dwpal_bw_to_beerocks_bw(chan_width);
+
+        if (!read_param("timeout", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading timeout parameter!";
+            return false;
+        }
+        msg->params.timeout = tmp_int;
+
+        if (!read_param("chan_width", parsed_obj, tmp_int)) {
+            LOG(ERROR) << "Failed reading chan_width parameter!";
+            return false;
+        }
+        msg->params.bandwidth = dwpal_bw_to_beerocks_bw(tmp_int);
 
         // Add the message to the queue
         event_queue_push(Event::DFS_CAC_Completed, msg_buff);

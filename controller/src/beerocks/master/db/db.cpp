@@ -10,6 +10,7 @@
 
 #include <bcl/beerocks_utils.h>
 #include <bcl/son/son_wireless_utils.h>
+#include <bpl/bpl_db.h>
 #include <easylogging++.h>
 
 #include <algorithm>
@@ -18,6 +19,71 @@ using namespace beerocks;
 using namespace beerocks_message;
 using namespace son;
 using namespace net;
+
+const std::string db::TIMESTAMP_STR            = "timestamp";
+const std::string db::TIMELIFE_DELAY_STR       = "timelife";
+const std::string db::INITIAL_RADIO_ENABLE_STR = "initial_radio_enable";
+const std::string db::INITIAL_RADIO_STR        = "initial_radio";
+const std::string db::SELECTED_BAND_ENABLE_STR = "selected_band_enable";
+const std::string db::SELECTED_BANDS_STR       = "selected_bands";
+
+// static
+std::string db::type_to_string(beerocks::eType type)
+{
+    switch (type) {
+    case beerocks::eType::TYPE_GW:
+        return "gateway";
+    case beerocks::eType::TYPE_IRE:
+        return "ire";
+    case beerocks::eType::TYPE_IRE_BACKHAUL:
+        return "ire_bh";
+    case beerocks::eType::TYPE_SLAVE:
+        return "slave";
+    case beerocks::eType::TYPE_CLIENT:
+        return "client";
+    case beerocks::eType::TYPE_ETH_SWITCH:
+        return "eth_switch";
+    case beerocks::eType::TYPE_ANY:
+        return "any";
+    default:
+        return {};
+    }
+}
+
+std::string db::client_db_entry_from_mac(const sMacAddr &mac)
+{
+    std::string db_entry = tlvf::mac_to_string(mac);
+
+    std::replace(db_entry.begin(), db_entry.end(), ':', '_');
+
+    return db_entry;
+}
+
+sMacAddr db::client_db_entry_to_mac(const std::string &db_entry)
+{
+    std::string entry = db_entry;
+
+    std::replace(entry.begin(), entry.end(), '_', ':');
+
+    if (!network_utils::is_valid_mac(entry)) {
+        return network_utils::ZERO_MAC;
+    }
+
+    return tlvf::mac_from_string(entry);
+}
+
+std::string db::timestamp_to_string_seconds(const std::chrono::steady_clock::time_point timestamp)
+{
+    return std::to_string(
+        std::chrono::duration_cast<std::chrono::seconds>(timestamp.time_since_epoch()).count());
+}
+
+std::chrono::steady_clock::time_point db::timestamp_from_seconds(int timestamp_sec)
+{
+    return std::chrono::steady_clock::time_point(std::chrono::seconds(timestamp_sec));
+}
+
+// static - end
 
 void db::set_log_level_state(const beerocks::eLogLevel &log_level, const bool &new_state)
 {
@@ -515,17 +581,6 @@ bool db::update_node_last_seen(const std::string &mac)
     return true;
 }
 
-bool db::update_node_last_ping_sent(const std::string &mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return false;
-    }
-    n->last_ping_sent = std::chrono::steady_clock::now();
-    return true;
-}
-
 std::chrono::steady_clock::time_point db::get_node_last_seen(const std::string &mac)
 {
     auto n = get_node(mac);
@@ -535,107 +590,6 @@ std::chrono::steady_clock::time_point db::get_node_last_seen(const std::string &
     }
 
     return n->last_seen;
-}
-
-std::chrono::steady_clock::time_point db::get_node_last_ping_sent(const std::string &mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return std::chrono::steady_clock::now();
-    }
-    return n->last_ping_sent;
-}
-
-bool db::update_node_last_ping_received(const std::string &mac, int seq)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return false;
-    }
-    n->last_ping_received = std::chrono::steady_clock::now();
-    n->last_seen          = n->last_ping_received;
-
-    n->last_ping_delta_ms =
-        (double)((std::chrono::duration_cast<std::chrono::duration<double>>(
-                      get_node_last_ping_received(mac) - get_node_last_ping_sent(mac)))
-                     .count()) *
-        1000;
-    if (n->last_ping_delta_ms < n->last_ping_min_ms || (seq == 0)) {
-        n->last_ping_min_ms = n->last_ping_delta_ms;
-    }
-    if (n->last_ping_delta_ms > n->last_ping_max_ms || (seq == 0)) {
-        n->last_ping_max_ms = n->last_ping_delta_ms;
-    }
-    if (seq == 0) {
-        n->last_ping_avg_ms_acc = n->last_ping_delta_ms;
-    } else {
-        n->last_ping_avg_ms_acc += n->last_ping_delta_ms;
-    }
-
-    return true;
-}
-
-bool db::update_node_last_ping_received_avg(const std::string &mac, int total_seq)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return false;
-    }
-    n->last_ping_avg_ms = n->last_ping_avg_ms_acc / total_seq;
-    return true;
-}
-
-std::chrono::steady_clock::time_point db::get_node_last_ping_received(const std::string &mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return std::chrono::steady_clock::now();
-    }
-    return n->last_ping_received;
-}
-
-int db::get_node_last_ping_delta_ms(const std::string &mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return -1;
-    }
-    return n->last_ping_delta_ms;
-}
-
-int db::get_node_last_ping_min_ms(const std::string &mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return -1;
-    }
-    return n->last_ping_min_ms;
-}
-
-int db::get_node_last_ping_max_ms(const std::string &mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return -1;
-    }
-    return n->last_ping_max_ms;
-}
-
-int db::get_node_last_ping_avg_ms(const std::string &mac)
-{
-    auto n = get_node(mac);
-    if (!n) {
-        LOG(WARNING) << __FUNCTION__ << " - node " << mac << " does not exist!";
-        return -1;
-    }
-    return n->last_ping_avg_ms;
 }
 
 std::unordered_map<sMacAddr, std::unordered_map<sMacAddr, son::node::link_metrics_data>> &
@@ -2419,6 +2373,554 @@ const std::list<sChannelScanResults> &db::get_channel_scan_results(const sMacAdd
 }
 
 //
+// Client Persistent Data
+//
+bool db::is_client_in_persistent_db(const sMacAddr &mac)
+{
+    auto client_db_entry = client_db_entry_from_mac(mac);
+
+    return bpl::db_has_entry(type_to_string(beerocks::eType::TYPE_CLIENT), client_db_entry);
+}
+
+bool db::add_client_to_persistent_db(const sMacAddr &mac,
+                                     const std::unordered_map<std::string, std::string> &params)
+{
+    // if persistent db is disabled
+    if (!config.persistent_db) {
+        LOG(ERROR) << "persistent db is disabled";
+        return false;
+    }
+
+    auto db_entry = client_db_entry_from_mac(mac);
+
+    if (bpl::db_has_entry(type_to_string(beerocks::eType::TYPE_CLIENT), db_entry)) {
+        // if entry already exists in DB
+        if (!remove_client_entry_and_update_counter(db_entry)) {
+            LOG(ERROR) << "failed to remove client entry " << db_entry
+                       << "from persistent db (for re-adding)";
+            return false;
+        }
+    } else if (bpl::db_has_entry(std::string(), db_entry)) {
+        // if entry exists in db but with different type
+        LOG(ERROR) << "client entry cannot be added to persistent db, " << db_entry
+                   << " already exists but with different type";
+        return false;
+    }
+
+    if (m_persistent_db_clients_count >= config.clients_persistent_db_max_size) {
+        LOG(DEBUG) << "reached max clients size in persistent db - removing a client before adding "
+                      "new client";
+        if (!remove_candidate_client()) {
+            LOG(ERROR) << "failed to remove next-to-be-aged client entry " << db_entry
+                       << "from persistent db (due to full persistent db)";
+            return false;
+        }
+    }
+
+    // add entry to the persistent db
+    if (!add_client_entry_and_update_counter(db_entry, params)) {
+        LOG(ERROR) << "failed to add client entry " << db_entry << " to persistent db";
+        return false;
+    }
+
+    LOG(DEBUG) << "added client entry " << db_entry
+               << " to persistent db, total clients count in persisttent-db: "
+               << m_persistent_db_clients_count;
+
+    return true;
+}
+
+std::chrono::steady_clock::time_point db::get_client_parameters_last_edit(const sMacAddr &mac)
+{
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return std::chrono::steady_clock::time_point::min();
+    }
+
+    return node->client_parameters_last_edit;
+}
+
+bool db::set_client_time_life_delay(const sMacAddr &mac,
+                                    const std::chrono::seconds &time_life_delay_sec,
+                                    bool save_to_persistent_db)
+{
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return false;
+    }
+
+    LOG(DEBUG) << "time_life_delay_sec = " << time_life_delay_sec.count();
+
+    auto timestamp = std::chrono::steady_clock::now();
+    if (save_to_persistent_db) {
+        // if persistent db is disabled
+        if (!config.persistent_db) {
+            LOG(DEBUG) << "persistent db is disabled";
+        } else {
+            LOG(DEBUG) << "configuring persistent-db, timelife = " << time_life_delay_sec.count();
+
+            std::unordered_map<std::string, std::string> values_map;
+            values_map[TIMESTAMP_STR]      = timestamp_to_string_seconds(timestamp);
+            values_map[TIMELIFE_DELAY_STR] = std::to_string(time_life_delay_sec.count());
+
+            // update the persistent db
+            if (!update_client_entry_in_persistent_db(mac, values_map)) {
+                LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
+                return false;
+            }
+        }
+    }
+
+    node->client_time_life_delay_sec  = time_life_delay_sec;
+    node->client_parameters_last_edit = timestamp;
+
+    return true;
+}
+
+std::chrono::seconds db::get_client_time_life_delay(const sMacAddr &mac)
+{
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return std::chrono::seconds::zero();
+    }
+
+    return node->client_time_life_delay_sec;
+}
+
+bool db::set_client_stay_on_initial_radio(const sMacAddr &mac, bool stay_on_initial_radio,
+                                          bool save_to_persistent_db)
+{
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return false;
+    }
+
+    LOG(DEBUG) << "stay_on_initial_radio = " << stay_on_initial_radio;
+
+    auto timestamp = std::chrono::steady_clock::now();
+    if (save_to_persistent_db) {
+        // if persistent db is disabled
+        if (!config.persistent_db) {
+            LOG(DEBUG) << "persistent db is disabled";
+        } else {
+            LOG(DEBUG) << "configuring persistent-db, initial_radio_enable = "
+                       << stay_on_initial_radio;
+
+            std::unordered_map<std::string, std::string> values_map;
+            values_map[TIMESTAMP_STR]            = timestamp_to_string_seconds(timestamp);
+            values_map[INITIAL_RADIO_ENABLE_STR] = std::to_string(stay_on_initial_radio);
+
+            // update the persistent db
+            if (!update_client_entry_in_persistent_db(mac, values_map)) {
+                LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
+                return false;
+            }
+        }
+    }
+
+    node->client_stay_on_initial_radio =
+        (stay_on_initial_radio) ? eTriStateBool::ENABLE : eTriStateBool::DISABLE;
+    node->client_parameters_last_edit = timestamp;
+
+    return true;
+}
+
+eTriStateBool db::get_client_stay_on_initial_radio(const sMacAddr &mac)
+{
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return eTriStateBool::NOT_CONFIGURED;
+    }
+
+    return node->client_stay_on_initial_radio;
+}
+
+bool db::set_client_initial_radio(const sMacAddr &mac, const sMacAddr &initial_radio_mac,
+                                  bool save_to_persistent_db)
+{
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return false;
+    }
+
+    LOG(DEBUG) << "initial_radio = " << initial_radio_mac;
+
+    auto timestamp = std::chrono::steady_clock::now();
+    if (save_to_persistent_db) {
+        // if persistent db is disabled
+        if (!config.persistent_db) {
+            LOG(DEBUG) << "persistent db is disabled";
+        } else {
+            LOG(DEBUG) << "configuring persistent-db, initial_radio = " << initial_radio_mac;
+
+            std::unordered_map<std::string, std::string> values_map;
+            values_map[TIMESTAMP_STR]     = timestamp_to_string_seconds(timestamp);
+            values_map[INITIAL_RADIO_STR] = tlvf::mac_to_string(initial_radio_mac);
+
+            // update the persistent db
+            if (!update_client_entry_in_persistent_db(mac, values_map)) {
+                LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
+                return false;
+            }
+        }
+    }
+
+    node->client_initial_radio        = initial_radio_mac;
+    node->client_parameters_last_edit = timestamp;
+
+    return true;
+}
+
+sMacAddr db::get_client_initial_radio(const sMacAddr &mac)
+{
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return network_utils::ZERO_MAC;
+    }
+
+    return node->client_initial_radio;
+}
+
+bool db::set_client_stay_on_selected_band(const sMacAddr &mac, bool stay_on_selected_band,
+                                          bool save_to_persistent_db)
+{
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return false;
+    }
+
+    LOG(DEBUG) << "stay_on_selected_band = " << stay_on_selected_band;
+
+    auto timestamp = std::chrono::steady_clock::now();
+    if (save_to_persistent_db) {
+        // if persistent db is disabled
+        if (!config.persistent_db) {
+            LOG(DEBUG) << "persistent db is disabled";
+        } else {
+            LOG(DEBUG) << "configuring persistent-db, selected_band_enable = "
+                       << stay_on_selected_band;
+
+            std::unordered_map<std::string, std::string> values_map;
+            values_map[TIMESTAMP_STR]            = timestamp_to_string_seconds(timestamp);
+            values_map[SELECTED_BAND_ENABLE_STR] = std::to_string(stay_on_selected_band);
+
+            // update the persistent db
+            if (!update_client_entry_in_persistent_db(mac, values_map)) {
+                LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
+                return false;
+            }
+        }
+    }
+
+    node->client_stay_on_selected_band =
+        (stay_on_selected_band) ? eTriStateBool::ENABLE : eTriStateBool::DISABLE;
+    node->client_parameters_last_edit = timestamp;
+
+    return true;
+}
+
+eTriStateBool db::get_client_stay_on_selected_band(const sMacAddr &mac)
+{
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return eTriStateBool::NOT_CONFIGURED;
+    }
+
+    return node->client_stay_on_selected_band;
+}
+
+bool db::set_client_selected_bands(const sMacAddr &mac, beerocks::eFreqType selected_bands,
+                                   bool save_to_persistent_db)
+{
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return false;
+    }
+
+    LOG(DEBUG) << "selected_band = " << int(selected_bands);
+
+    auto timestamp = std::chrono::steady_clock::now();
+    if (save_to_persistent_db) {
+        // if persistent db is disabled
+        if (!config.persistent_db) {
+            LOG(DEBUG) << "persistent db is disabled";
+        } else {
+            LOG(DEBUG) << ", configuring persistent-db, selected_bands = " << int(selected_bands);
+
+            std::unordered_map<std::string, std::string> values_map;
+            values_map[TIMESTAMP_STR]      = timestamp_to_string_seconds(timestamp);
+            values_map[SELECTED_BANDS_STR] = std::to_string(selected_bands);
+
+            // update the persistent db
+            if (!update_client_entry_in_persistent_db(mac, values_map)) {
+                LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
+                return false;
+            }
+        }
+    }
+
+    node->client_selected_bands       = selected_bands;
+    node->client_parameters_last_edit = timestamp;
+
+    return true;
+}
+
+beerocks::eFreqType db::get_client_selected_bands(const sMacAddr &mac)
+{
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return beerocks::eFreqType::FREQ_UNKNOWN;
+    }
+
+    return node->client_selected_bands;
+}
+
+bool db::clear_client_persistent_db(const sMacAddr &mac)
+{
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return false;
+    }
+
+    LOG(DEBUG) << "setting client " << mac << " runtime info to default values";
+
+    node->client_parameters_last_edit  = std::chrono::steady_clock::time_point::min();
+    node->client_time_life_delay_sec   = std::chrono::seconds::zero();
+    node->client_stay_on_initial_radio = eTriStateBool::NOT_CONFIGURED;
+    node->client_initial_radio         = network_utils::ZERO_MAC;
+    node->client_stay_on_selected_band = eTriStateBool::NOT_CONFIGURED;
+    node->client_selected_bands        = beerocks::eFreqType::FREQ_UNKNOWN;
+
+    // if persistent db is enabled
+    if (config.persistent_db) {
+        auto db_entry = client_db_entry_from_mac(mac);
+        if (!bpl::db_has_entry(type_to_string(beerocks::eType::TYPE_CLIENT), db_entry)) {
+            LOG(DEBUG) << "client entry does not exist in persistent-db for " << db_entry;
+            return true;
+        }
+
+        LOG(DEBUG) << "removing client entry " << db_entry << " from persistent db";
+        if (!remove_client_entry_and_update_counter(db_entry)) {
+            LOG(ERROR) << "failed to remove client entry " << db_entry;
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool db::update_client_persistent_db(const sMacAddr &mac)
+{
+    // if persistent db is disabled
+    if (!config.persistent_db) {
+        LOG(ERROR) << "persistent db is disabled";
+        return false;
+    }
+
+    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
+    if (!node) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return false;
+    }
+
+    // any persistent parameter update also sets the last-edit timestamp
+    // if it is with default value - no other persistent configuration was performed
+    if (node->client_parameters_last_edit == std::chrono::steady_clock::time_point::min()) {
+        LOG(DEBUG) << "persistent client parameters are empty for " << mac
+                   << ", no need to update persistent-db";
+        return true;
+    }
+
+    std::unordered_map<std::string, std::string> values_map;
+
+    //fill values map of client persistent params
+    values_map[TIMESTAMP_STR] = timestamp_to_string_seconds(node->client_parameters_last_edit);
+
+    if (node->client_time_life_delay_sec != std::chrono::seconds::zero()) {
+        LOG(DEBUG) << "setting client time-life-delay in persistent-db to for " << mac << " to "
+                   << node->client_time_life_delay_sec.count();
+        values_map[TIMELIFE_DELAY_STR] = std::to_string(node->client_time_life_delay_sec.count());
+    }
+
+    if (node->client_stay_on_initial_radio != eTriStateBool::NOT_CONFIGURED) {
+        auto enable = (node->client_stay_on_initial_radio == eTriStateBool::ENABLE);
+        LOG(DEBUG) << "setting client stay-on-initial-radio in persistent-db to for " << mac
+                   << " to " << enable;
+        values_map[INITIAL_RADIO_ENABLE_STR] = std::to_string(enable);
+    }
+
+    if (node->client_initial_radio != network_utils::ZERO_MAC) {
+        LOG(DEBUG) << "setting client initial-radio in persistent-db to for " << mac << " to "
+                   << node->client_initial_radio;
+        values_map[INITIAL_RADIO_STR] = tlvf::mac_to_string(node->client_initial_radio);
+    }
+
+    if (node->client_stay_on_selected_band != eTriStateBool::NOT_CONFIGURED) {
+        auto enable = (node->client_stay_on_selected_band == eTriStateBool::ENABLE);
+        LOG(DEBUG) << "setting client stay-on-selected-band in persistent-db to for " << mac
+                   << " to " << enable;
+        values_map[SELECTED_BAND_ENABLE_STR] = std::to_string(enable);
+    }
+
+    if (node->client_selected_bands != beerocks::eFreqType::FREQ_UNKNOWN) {
+        LOG(DEBUG) << "setting client selected-bands in persistent-db to for " << mac << " to "
+                   << node->client_selected_bands;
+        values_map[SELECTED_BANDS_STR] = std::to_string(node->client_selected_bands);
+    }
+
+    // update the persistent db
+    if (!update_client_entry_in_persistent_db(mac, values_map)) {
+        LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
+        return false;
+    }
+
+    LOG(DEBUG) << "client successfully updated in persistent-db for " << mac;
+
+    return true;
+}
+
+bool db::load_persistent_db_clients()
+{
+    // If persistent db is disabled function should not be called
+    if (!config.persistent_db) {
+        LOG(ERROR) << "Persistent db is disabled";
+        return false;
+    }
+
+    std::unordered_map<std::string, std::unordered_map<std::string, std::string>> clients;
+    if (!bpl::db_get_entries_by_type(type_to_string(beerocks::eType::TYPE_CLIENT), clients)) {
+        LOG(ERROR) << "Failed to get all clients from persistent DB";
+        return false;
+    }
+
+    if (clients.empty()) {
+        LOG(DEBUG) << "Persistent DB doesn't exist, is empty, or doesn't contain clients";
+        return false;
+    }
+
+    // Counters for client nodes-add success/fail (filtered-out client entries are not counted)
+    int add_node_error_count   = 0;
+    int set_node_error_count   = 0;
+    int clients_added_no_error = 0;
+
+    // Add clients to runtime db - invalid client (no timestamp or aged entries) are filtered out
+    for (const auto &client : clients) {
+        const auto &client_entry = client.first;
+        auto &client_data_map    = client.second;
+
+        // Add node for client and fill with persistent data.
+        auto add_new_client_with_persistent_data_to_nodes_list =
+            [&](const sMacAddr &client_mac,
+                const std::unordered_map<std::string, std::string> values_map) -> bool {
+            // Add client node with defaults and in default location
+            if (!add_node(client_mac)) {
+                LOG(ERROR) << "Failed to add client node for client_entry " << client_entry;
+                ++add_node_error_count;
+                return false;
+            }
+
+            // Set clients persistent information in the node
+            if (!set_node_params_from_map(client_mac, values_map)) {
+                LOG(ERROR) << "Failed to set client " << client_mac
+                           << " node in runtime db with values read from persistent db: "
+                           << values_map;
+                ++set_node_error_count;
+                return false;
+            }
+
+            LOG(DEBUG) << "Client " << client_mac
+                       << " added successfully to node-list with parameters: " << values_map;
+
+            ++clients_added_no_error;
+            return true;
+        };
+
+        static const auto type_client_str = db::type_to_string(beerocks::eType::TYPE_CLIENT);
+
+        // Clients with invalid mac are invalid.
+        // Invalid clients are removed from persistent db and not added to runtime db
+        auto client_mac = client_db_entry_to_mac(client_entry);
+        if (client_mac == network_utils::ZERO_MAC) {
+            LOG(ERROR) << "Invalid entry - not a valid mac as client entry " << client_entry;
+            // Calling BPL API directly as there's no need to increment/decrement counter at this point
+            if (!beerocks::bpl::db_remove_entry(type_client_str, client_entry)) {
+                // Failure to remove the client will not fail the adding rest of valid client
+                LOG(ERROR) << "Failed to remove client entry " << client_entry;
+            }
+            continue;
+        }
+
+        // Clients without timestamp are invalid.
+        // Invalid clients are removed from persistent db and not added to runtime db
+        auto timestamp_it = client_data_map.find(TIMESTAMP_STR);
+        if (timestamp_it == client_data_map.end()) {
+            LOG(ERROR) << "Invalid entry - no timestamp is configured for client entry "
+                       << client_entry;
+            // Calling BPL API directly as there's no need to increment/decrement counter at this point
+            if (!beerocks::bpl::db_remove_entry(type_client_str, client_entry)) {
+                // Failure to remove the client will not fail the adding rest of valid client
+                LOG(ERROR) << "Failed to remove client entry " << client_entry;
+            }
+            continue;
+        }
+
+        // Aged clients are removed from persistent db and not added to runtime db
+        auto timestamp_sec              = beerocks::string_utils::stoi(timestamp_it->second);
+        auto timestamp                  = db::timestamp_from_seconds(timestamp_sec);
+        auto client_timelife_passed_sec = std::chrono::duration_cast<std::chrono::seconds>(
+                                              std::chrono::steady_clock::now() - timestamp)
+                                              .count();
+
+        /* TODO: aging validation against specific client configuration and unfriendly-device-max-timelife-delay:
+         * 1. If client has timelife_delay_str param configured, it should be checked against it instead of global max-timelife-delay param.
+         * 2.a. If client is unfriendly - and timelife_delay_str is not configured - check against the global unfriendly-device-max-timelife-delay param.
+         * 2.b. Is "unfriendly" something we know at boot?
+         */
+        static const int max_timelife_delay_sec = config.max_timelife_delay_days * 24 * 3600;
+        if (client_timelife_passed_sec > max_timelife_delay_sec) {
+            LOG(ERROR) << "Invalid entry - configured data has aged for client entry "
+                       << client_entry;
+            // Calling BPL API directly as there's no need to increment/decrement counter at this point
+            if (!beerocks::bpl::db_remove_entry(type_client_str, client_entry)) {
+                // Failure to remove the client will not fail the adding rest of valid client
+                LOG(ERROR) << "Failed to remove client entry " << client_entry;
+            }
+            continue;
+        }
+
+        // Add client node
+        if (!add_new_client_with_persistent_data_to_nodes_list(client_mac, client_data_map)) {
+            LOG(ERROR) << "Failed to add client node with persistent data for client " << client_mac
+                       << ", client-params=" << client_data_map;
+        }
+    }
+
+    // Print counters
+    LOG_IF(add_node_error_count, ERROR)
+        << "Failed to add nodes for " << add_node_error_count << " clients";
+    LOG_IF(set_node_error_count, ERROR) << "Failed to set nodes with values from persistent db for "
+                                        << set_node_error_count << " clients";
+    LOG(DEBUG) << "Added " << clients_added_no_error << " clients successfully";
+
+    // Set clients count to number of clients added successfully to runtime db
+    m_persistent_db_clients_count = clients_added_no_error;
+
+    return true;
+}
+
+//
 // CLI
 //
 void db::add_cli_socket(Socket *sd)
@@ -3493,6 +3995,21 @@ std::shared_ptr<node> db::get_node(sMacAddr al_mac, sMacAddr ruid)
     return get_node(key);
 }
 
+std::shared_ptr<node> db::get_node_verify_type(const sMacAddr &mac, beerocks::eType type)
+{
+    auto node = get_node(mac);
+    if (!node) {
+        LOG(ERROR) << "node not found for mac " << mac;
+        return nullptr;
+    } else if (node->get_type() != type) {
+        LOG(ERROR) << "node " << mac << " type(" << node->get_type() << ") != requested-type("
+                   << type << ")";
+        return nullptr;
+    }
+
+    return node;
+}
+
 std::shared_ptr<node::radio> db::get_hostap_by_mac(const sMacAddr &mac)
 {
     auto n = get_node(mac);
@@ -3703,4 +4220,179 @@ void db::set_prplmesh(const sMacAddr &mac)
         add_node(mac, beerocks::net::network_utils::ZERO_MAC, ire_type);
     }
     get_node(mac)->is_prplmesh = true;
+}
+
+bool db::update_client_entry_in_persistent_db(
+    const sMacAddr &mac, const std::unordered_map<std::string, std::string> &values_map)
+{
+    auto db_entry        = client_db_entry_from_mac(mac);
+    auto type_client_str = type_to_string(beerocks::eType::TYPE_CLIENT);
+
+    if (!bpl::db_has_entry(type_client_str, db_entry)) {
+        if (!add_client_to_persistent_db(mac, values_map)) {
+            LOG(ERROR) << "failed to add client entry in persistent-db for " << mac;
+            return false;
+        }
+    } else if (!bpl::db_set_entry(type_client_str, db_entry, values_map)) {
+        LOG(ERROR) << "failed to set client in persistent-db for " << mac;
+        return false;
+    }
+
+    return true;
+}
+
+bool db::set_node_params_from_map(const sMacAddr &mac,
+                                  const std::unordered_map<std::string, std::string> &values_map)
+{
+    auto node = get_node(mac);
+    if (!node) {
+        LOG(WARNING) << " - node " << mac << " does not exist!";
+        return false;
+    }
+
+    for (const auto &param : values_map) {
+        if (param.first == TIMESTAMP_STR) {
+            LOG(DEBUG) << "setting node client_parameters_last_edit to " << param.second << " for "
+                       << mac;
+            node->client_parameters_last_edit =
+                timestamp_from_seconds(string_utils::stoi(param.second));
+        } else if (param.first == TIMELIFE_DELAY_STR) {
+            LOG(DEBUG) << "setting node client_time_life_delay_sec to " << param.second << " for "
+                       << mac;
+            node->client_time_life_delay_sec =
+                std::chrono::seconds(string_utils::stoi(param.second));
+        } else if (param.first == INITIAL_RADIO_ENABLE_STR) {
+            LOG(DEBUG) << "setting node client_stay_on_initial_radio to " << param.second << " for "
+                       << mac;
+
+            node->client_stay_on_initial_radio =
+                (param.second == "1") ? eTriStateBool::ENABLE : eTriStateBool::DISABLE;
+        } else if (param.first == INITIAL_RADIO_STR) {
+            LOG(DEBUG) << "setting node client_initial_radio to " << param.second << " for " << mac;
+
+            node->client_initial_radio = tlvf::mac_from_string(param.second);
+        } else if (param.first == SELECTED_BAND_ENABLE_STR) {
+            LOG(DEBUG) << "setting node client_stay_on_selected_band to " << param.second << " for "
+                       << mac;
+
+            node->client_stay_on_selected_band =
+                (param.second == "1") ? eTriStateBool::ENABLE : eTriStateBool::DISABLE;
+        } else if (param.first == SELECTED_BANDS_STR) {
+            LOG(DEBUG) << "setting node client_selected_bands to " << param.second << " for "
+                       << mac;
+            node->client_selected_bands = beerocks::eFreqType(string_utils::stoi(param.second));
+        } else {
+            LOG(WARNING) << "Unknown parameter, skipping: " << param.first << " for " << mac;
+        }
+    }
+
+    return true;
+}
+
+bool db::add_client_entry_and_update_counter(
+    const std::string &entry_name, const std::unordered_map<std::string, std::string> &values_map)
+{
+    if (!bpl::db_add_entry(type_to_string(beerocks::eType::TYPE_CLIENT), entry_name, values_map)) {
+        LOG(ERROR) << "failed to add client entry " << entry_name << " to persistent db";
+        return false;
+    }
+
+    ++m_persistent_db_clients_count;
+
+    return true;
+}
+
+bool db::remove_client_entry_and_update_counter(const std::string &entry_name)
+{
+    if (!bpl::db_remove_entry(type_to_string(beerocks::eType::TYPE_CLIENT), entry_name)) {
+        LOG(ERROR) << "failed to remove entry " << entry_name << "from persistent db";
+        return false;
+    }
+    --m_persistent_db_clients_count;
+
+    return false;
+}
+
+bool db::remove_candidate_client()
+{
+
+    // find cadidate client to be removed
+    sMacAddr client_to_remove = get_candidate_client_for_removal();
+    if (client_to_remove == network_utils::ZERO_MAC) {
+        LOG(ERROR) << "failed to find client to be removed, number of persistent db clients is "
+                   << m_persistent_db_clients_count;
+        return false;
+    }
+
+    // clear persistent data in runtime db and remove from persistent db
+    if (!clear_client_persistent_db(client_to_remove)) {
+        LOG(ERROR) << "failed to clear client persistent data and remove it from persistent db";
+        return false;
+    }
+
+    return true;
+}
+
+sMacAddr db::get_candidate_client_for_removal()
+{
+    const auto max_timelife_delay_sec =
+        std::chrono::seconds(config.max_timelife_delay_days * 24 * 3600);
+
+    sMacAddr candidate_client_to_be_removed  = network_utils::ZERO_MAC;
+    bool is_disconnected_candidate_available = false;
+    auto candidate_client_expiry_due_time    = std::chrono::steady_clock::time_point::max();
+
+    for (const auto &node_map : nodes) {
+        for (const auto &key_value : node_map) {
+            const auto client = key_value.second;
+            if (client->get_type() == beerocks::eType::TYPE_CLIENT) {
+                //TODO: improvement - stop search if "already-aged" candidate is found (don't-care of connectivity status)
+
+                // Skip clients which have no persistent information.
+                if (client->client_parameters_last_edit ==
+                    std::chrono::steady_clock::time_point::min()) {
+                    continue;
+                }
+
+                // Preferring disconnected clients over connected ones (even if less aged).
+                if (is_disconnected_candidate_available &&
+                    client->state != beerocks::STATE_DISCONNECTED) {
+                    continue;
+                }
+
+                // Client timelife delay
+                //TODO: use max_timelife_delay_sec/unfriendly_max_timelife_delay_sec according to "is_unfriendly" check which is yet-to-be-defined
+                auto timelife_delay =
+                    (client->client_time_life_delay_sec != std::chrono::seconds::zero())
+                        ? client->client_time_life_delay_sec
+                        : max_timelife_delay_sec;
+
+                // Calculate client expiry due time
+                auto current_client_expiry_due =
+                    client->client_parameters_last_edit + timelife_delay;
+
+                // Compare to currently chosen candidate expiry due time.
+                // The case where a client is connected and we already found a disconnected cadidate
+                // is handled above - meaning we can assume that either we didn't find any candidate
+                // yet or the candidate found is connected (meaning only the remaining timelife
+                // should be compared)
+                if (current_client_expiry_due < candidate_client_expiry_due_time) {
+                    candidate_client_expiry_due_time = current_client_expiry_due;
+                    if (client->state == beerocks::STATE_DISCONNECTED) {
+                        is_disconnected_candidate_available = true;
+                    }
+                    candidate_client_to_be_removed = tlvf::mac_from_string(key_value.first);
+                }
+            }
+        }
+    }
+
+    if (candidate_client_to_be_removed == network_utils::ZERO_MAC) {
+        LOG(DEBUG) << "no client to be removed is found";
+    } else {
+        LOG(DEBUG) << "candidate client to be removed is currently "
+                   << ((is_disconnected_candidate_available) ? "disconnected" : "connected");
+    }
+
+    return candidate_client_to_be_removed;
 }

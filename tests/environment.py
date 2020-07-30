@@ -228,16 +228,23 @@ def _docker_wait_for_log(container: str, programs: [str], regex: str, start_line
 
 
 def _device_wait_for_log(device: None, log_path: str, regex: str,
-                         start_line: int, timeout: int) -> bool:
-    """Waits for log mathing regex expression to show up."""
-    device.sendline("tail -n10 -f {}".format(log_path))
-    match = device.expect(
-        pattern=[regex, device.pexpect.EOF, device.pexpect.TIMEOUT],
-        timeout=timeout)
-    if match == 1:
-        return True
+                         timeout: int, start_line: int = 0):
+    """Waits for log matching regex expression to show up."""
+    device.sendline("tail -f -n +{:d} {}".format(start_line + 1, log_path))
+    device.expect(regex, timeout=timeout)
+    match = device.match.group(0)
+    # Send Ctrl-C to interrupt tail -f
+    device.send('\003')
+    device.expect(device.prompt)
+    if match:
+        device.sendline("tail -n +{:d} {} | grep -n \"{}\"".format(start_line, log_path, match))
+        # Typical output of grep -n from log: "line_num:severity"
+        # this regex has to capture just number of line in log
+        device.expect(r"(?P<line_number>[0-9]+):[A-Z]+\s[0-9]", timeout=timeout)
+        matched_line = int(device.match.group('line_number')) + start_line
+        return (True, matched_line, match)
     else:
-        return False
+        return (False, start_line, None)
 
 
 class ALEntityDocker(ALEntity):
@@ -245,11 +252,13 @@ class ALEntityDocker(ALEntity):
 
     The entity is defined from the name of the container, the rest is derived from that.
     '''
-
     def __init__(self, name: str, is_controller: bool = False,
                  compose: bool = False):
+
         self.name = name
         self.bridge_name = 'br-lan'
+        if device:
+            self.device = device
 
         # First, get the UCC port from the config file
         if is_controller:
@@ -258,7 +267,8 @@ class ALEntityDocker(ALEntity):
             config_file_name = 'beerocks_agent.conf'
         with open(os.path.join(installdir, 'config', config_file_name)) as config_file:
             ucc_port = \
-                re.search(r'ucc_listener_port=(?P<port>[0-9]+)', config_file.read()).group('port')
+                re.search(r'ucc_listener_port=(?P<port>[0-9]+)',
+                          config_file.read()).group('port')
 
         # On WSL, connect to the locally exposed container port
         if not compose:
@@ -293,14 +303,17 @@ class ALEntityDocker(ALEntity):
         program = "controller" if self.is_controller else "agent"
         return _docker_wait_for_log(self.name, [program], regex, start_line, timeout)
 
+    def prprlmesh_status_check(self):
+        return self.device.prprlmesh_status_check()
+
 
 class RadioDocker(Radio):
     '''Docker implementation of a radio.'''
-
     def __init__(self, agent: ALEntityDocker, iface_name: str):
         self.iface_name = iface_name
         ip_output = agent.command("ip", "-o",  "link", "list", "dev", self.iface_name).decode()
-        mac = re.search(r"link/ether (([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})", ip_output).group(1)
+        mac = re.search(r"link/ether (([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})",
+                        ip_output).group(1)
         super().__init__(agent, mac)
 
         # Since dummy bwl always uses the first VAP, in practice we always have a single VAP with
@@ -396,8 +409,8 @@ def launch_environment_docker(unique_id: str, skip_init: bool = False, tag: str 
             wired_sniffer.stop()
 
     global controller, agents
-    controller = ALEntityDocker(gateway, True)
-    agents = (ALEntityDocker(repeater1), ALEntityDocker(repeater2))
+    controller = ALEntityDocker(name=gateway, is_controller=True)
+    agents = (ALEntityDocker(name=repeater1), ALEntityDocker(name=repeater2))
 
     debug('controller: {}'.format(controller.mac))
     debug('agent1: {}'.format(agents[0].mac))
@@ -411,66 +424,89 @@ def launch_environment_docker(unique_id: str, skip_init: bool = False, tag: str 
 class ALEntityPrplWrt(ALEntity):
     """Abstraction of ALEntity in real device."""
 
-    def __init__(self, name: str, device: None, is_controller: bool = False):
+    def __init__(self, device: None, is_controller: bool = False):
         self.device = device
-        self.name = name
-        self.bridge_name = 'br-lan'
+        self.name = device.name
 
         if is_controller:
             self.config_file_name = '/opt/prplmesh/config/beerocks_controller.conf'
         else:
             self.config_file_name = '/opt/prplmesh/config/beerocks_agent.conf'
 
-        ucc_port = self.command(("grep \"ucc_listener_port\" {} "
-                                "| cut -d'=' -f2 | cut -d\" \" -f 1").format(self.config_file_name))
-
-        device_ip_output = self.command(
-            "ip -f inet addr show {} | head -n 2".format(self.bridge_name))
-        device_ip = re.search(
-            r'inet (?P<ip>[0-9.]+)', device_ip_output.decode('utf-8')).group('ip')
-        self.log_folder = self.command(
-            "grep log_files_path {} | cut -d=\'=\' -f2".format(self.config_file_name))
-
-        ucc_socket = UCCSocket(device_ip, ucc_port)
+        ucc_port_raw = self.command("grep \"ucc_listener_port\" {}".format(self.config_file_name))
+        ucc_port = int(re.search(r'ucc_listener_port=(?P<port>[0-9]+)',
+                                 ucc_port_raw).group('port'))
+        bridge_name_raw = self.command("grep \"bridge_iface\" {}".format(self.config_file_name))
+        self.bridge_name = re.search(r'bridge_iface=(?P<bridge>.+)\r\n',
+                                     bridge_name_raw).group('bridge')
+        log_folder_raw = self.command(
+            "grep log_files_path {}".format(self.config_file_name))
+        self.log_folder = re.search(r'log_files_path=(?P<log_path>[a-zA-Z0-9_\/]+)',
+                                    log_folder_raw).group('log_path')
+        ucc_socket = UCCSocket(str(self.device.wan_ip), int(ucc_port))
         mac = ucc_socket.dev_get_parameter('ALid')
 
         super().__init__(mac, ucc_socket, installdir, is_controller)
 
         # We always have two radios, wlan0 and wlan2
-        RadioHostapd(self, "wlan0", device=self)
-        RadioHostapd(self, "wlan2", device=self)
+        RadioHostapd(self, "wlan0")
+        RadioHostapd(self, "wlan2")
 
     def command(self, *command: str) -> bytes:
         """Execute `command` in device and return its output."""
-        self.device.sendline(command)
-        return self.device.read()
+        self.device.sendline(" ".join(command))
+        self.device.expect(self.device.prompt, timeout=10)
+        return self.device.before
 
     def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
         """Poll the entity's logfile until it contains "regex" or times out."""
         program = "controller" if self.is_controller else "agent"
+        # Multiply timeout by 100, as test sets it in float.
         return _device_wait_for_log(self.device,
                                     "{}/beerocks_{}.log".format(self.log_folder, program),
-                                    regex, start_line, timeout)
+                                    regex, timeout, start_line)
+
+    def prprlmesh_status_check(self):
+        return self.device.prprlmesh_status_check()
 
 
 class RadioHostapd(Radio):
     """Abstraction of real Radio in prplWRT device."""
 
-    def __init__(self, agent: ALEntityPrplWrt, bssid: str, device: None):
-        self.iface_name = bssid
-        ip_output = agent.command("ip -o link list dev {}".format(self.iface_name))
-        mac = re.search(r"link/ether (([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})", ip_output).group(1)
-        self.log_folder = self.command(
-            "grep log_files_path {} | cut -d=\'=\' -f2".format(self.config_file_name))
+    def __init__(self, agent: ALEntityPrplWrt, iface_name: str):
+        self.iface_name = iface_name
+        self.agent = agent
+        ip_raw = self.agent.command("ip link list dev {}".format(self.iface_name))
+        mac = re.search(r"link/ether (([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})",
+                        ip_raw).group(1)
+        self.log_folder = agent.log_folder
         super().__init__(agent, mac)
 
-        VirtualAPHostapd(self, mac)
-        VirtualAPHostapd(self, mac)
+        # Find out amount of VAPs avalaible on device.
+        # If 0 - spawn one VAP to represent AP.
+        self.agent.device.sendline("ip link list | grep -c \"{}\\.\"".format(self.iface_name))
+        # Look for number of 1 or 2 digits surrounded by CRLF.
+        self.agent.device.expect("\r\n(?P<vaps>[0-9]{1,2})\r\n")
+        vap_amount = int(self.agent.device.match.group('vaps'))
+        if vap_amount == 0:
+            VirtualAPHostapd(self, mac)
+        else:
+            for vap_number in range(0, vap_amount):
+                vap_mac = self.get_mac("{}.{}".format(self.iface_name, vap_number))
+                VirtualAPHostapd(self, vap_mac)
 
-    def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
+    def wait_for_log(self, regex: str, start_line: int, timeout: float):
         ''' Poll the Radio's logfile until it match regular expression '''
-        return _device_wait_for_log(self.device, "{}/beerocks_agent_{}.log".format(
-            self.log_folder, self.iface_name), regex, start_line, timeout)
+        # Multiply timeout by 100, as test sets it in float.
+        return _device_wait_for_log(self.agent.device, "{}/beerocks_agent_{}.log".format(
+            self.log_folder, self.iface_name), regex, timeout, start_line)
+
+    def get_mac(self, iface: str) -> str:
+        """Return mac of specified iface"""
+        device = self.agent.device
+        device.sendline("ip link show {}".format(iface))
+        device.expect("link/ether (?P<mac>([0-9a-fA-F]{2}:){5}[0-9a-fA-F]{2})")
+        return device.match.group('mac')
 
 
 class VirtualAPHostapd(VirtualAP):
@@ -478,11 +514,42 @@ class VirtualAPHostapd(VirtualAP):
 
     def __init__(self, radio: RadioHostapd, bssid: str):
         super().__init__(radio, bssid)
+        self.iface = self.get_iface(self.bssid)
+
+    def get_ssid(self) -> str:
+        """Get current SSID of attached radio. Return string."""
+        device = self.radio.agent.device
+        device.sendline("iw {} info".format(self.iface))
+        # We are looking for SSID definition
+        # ssid Multi-AP-24G-1
+        # type AP
+        device.expect("ssid (?P<ssid>.*)\r\n\ttype AP\r\n\t")
+        return device.match.group('ssid')
+
+    def get_psk(self) -> str:
+        """Get SSIDs personal key set during last autoconfiguration. Return string"""
+        device = self.radio.agent.device
+        ssid = self.get_ssid()
+        device.sendline(("grep \"Autoconfiguration for ssid: " +
+                        "{}\" \"{}/beerocks_agent_{}.log\" | tail -n 1")
+                        .format(ssid, self.radio.log_folder, self.radio.iface_name))
+        # We looking for key, which was set during last autoconfiguration. E.g of such string:
+        # network_key: maprocks2 fronthaul:
+        device.expect("network_key: (?P<psk>.*) fronthaul")
+        return device.match.group('psk')
+
+    def get_iface(self, bssid: str) -> str:
+        device = self.radio.agent.device
+        device.sendline("ip link list | grep -B1 \"{}\"".format(bssid))
+        device.expect("[0-9]{1,4}: (?P<iface_name>wlan[0-9.]{1,4}): <")
+        return device.match.group('iface_name')
 
     def associate(self, sta: Station) -> bool:
         ''' Associate "sta" with this VAP '''
         # TODO: complete this stub
+        return True
 
     def disassociate(self, sta: Station) -> bool:
         ''' Disassociate "sta" from this VAP.'''
         # TODO: complete this stub
+        return True

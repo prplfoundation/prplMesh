@@ -58,11 +58,14 @@
         "streambuf": "cpp",
         "thread": "cpp",
         "cinttypes": "cpp",
-        "typeinfo": "cpp"
+        "typeinfo": "cpp",
+        "future": "cpp"
     },
     "files.exclude": {
         "build": true
     },
+    "files.insertFinalNewline": true,
+    "files.trimFinalNewlines": true,
     "editor.formatOnSave": true,
     "C_Cpp.default.defines": [
         "BEEROCKS_LINUX",
@@ -79,7 +82,9 @@
         "${workspaceFolder}/agent/**",
         "${workspaceFolder}/common/**",
         "${workspaceFolder}/framework/**",
-        "${workspaceFolder}/controller/**"
+        "${workspaceFolder}/controller/**",
+        "${workspaceFolder}/build/googletest-src/googletest/include",
+        "${workspaceFolder}/build/googletest-src/googlemock/include"
     ],
     "python.linting.flake8Enabled": true,
     "cSpell.words": [
@@ -99,5 +104,6 @@
         "backhual",
         "fronthaul"
     ],
-    "git.alwaysSignOff": true
+    "git.alwaysSignOff": true,
+    "python.pythonPath": "/usr/bin/python3"
 }

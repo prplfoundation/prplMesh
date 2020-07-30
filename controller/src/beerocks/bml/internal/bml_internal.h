@@ -106,9 +106,6 @@ public:
     // Get administrator user credentials
     int get_administrator_credentials(char *user_password);
 
-    // Get device information
-    int get_device_info(BML_DEVICE_INFO &device_info);
-
     // Enable/Disable client roaming
     int set_client_roaming(bool enable);
 
@@ -263,6 +260,34 @@ public:
     */
     int start_dcs_single_scan(const sMacAddr &mac, int dwell_time_ms, unsigned int *channel_pool,
                               int channel_pool_size);
+
+    /**
+     * Get client list.
+     *
+     * @param [in,out] client_list List of MAC addresses sepereted by a comma.
+     * @param [in,out] client_list_size Size of client list.
+     * @return BML_RET_OK on success.
+     */
+    int client_get_client_list(char *client_list, unsigned int *client_list_size);
+
+    /**
+     * Set client configuration.
+     *
+     * @param [in] sta_mac MAC address of a station.
+     * @param [in] client_config Client configuration to be set.
+     * @return BML_RET_OK on success.
+     */
+    int client_set_client(const sMacAddr &sta_mac, const BML_CLIENT_CONFIG &client_config);
+
+    /**
+     * Get client info.
+     *
+     * @param [in] sta_mac MAC address of a station.
+     * @param [in,out] client Client information.
+     * @return BML_RET_OK on success.
+     */
+    int client_get_client(const sMacAddr &sta_mac, BML_CLIENT *client);
+
     /*
  * Public static methods:
  */
@@ -324,7 +349,6 @@ private:
     beerocks::promise<bool> *m_prmWiFiCredentialsClear  = nullptr;
     beerocks::promise<bool> *m_prmWiFiCredentialsGet    = nullptr;
     beerocks::promise<bool> *m_prmAdminCredentialsGet   = nullptr;
-    beerocks::promise<bool> *m_prmDeviceInfoGet         = nullptr;
     beerocks::promise<bool> *m_prmDeviceDataGet         = nullptr;
     beerocks::promise<bool> *m_prmMasterSlaveVersions   = nullptr;
     beerocks::promise<bool> *m_prmLocalMasterGet        = nullptr;
@@ -334,6 +358,8 @@ private:
     beerocks::promise<bool> *m_prmChannelScanParamsGet = nullptr;
     //Promise used to indicate the GetResults response was received
     beerocks::promise<int> *m_prmChannelScanResultsGet = nullptr;
+    beerocks::promise<bool> *m_prmClientListGet        = nullptr;
+    beerocks::promise<bool> *m_prmClientGet            = nullptr;
 
     std::map<uint8_t, beerocks::promise<int> *> m_prmCliResponses;
 
@@ -343,7 +369,6 @@ private:
     BML_STATS_UPDATE_CB m_cbStatsUpdate  = nullptr;
     BML_EVENT_CB m_cbEvent               = nullptr;
 
-    beerocks_message::sDeviceInfo *m_device_info                 = nullptr;
     beerocks_message::sDeviceData *m_device_data                 = nullptr;
     beerocks_message::sWifiCredentials *m_wifi_credentials       = nullptr;
     beerocks_message::sAdminCredentials *m_admin_credentials     = nullptr;
@@ -356,10 +381,13 @@ private:
     //m_scan_results_status is used to store the results' latest status
     uint8_t *m_scan_results_status = nullptr;
     //m_scan_results_maxsize is used to indicate the maximum capacity of the requested results
-    uint32_t *m_scan_results_maxsize = nullptr;
-    BML_VAP_INFO *m_vaps             = nullptr;
-    uint8_t *m_pvaps_list_size       = nullptr;
-    uint16_t id                      = 0;
+    uint32_t *m_scan_results_maxsize   = nullptr;
+    std::list<sMacAddr> *m_client_list = nullptr;
+    uint32_t *m_client_list_size       = nullptr;
+    BML_CLIENT *m_client               = nullptr;
+    BML_VAP_INFO *m_vaps               = nullptr;
+    uint8_t *m_pvaps_list_size         = nullptr;
+    uint16_t id                        = 0;
     static bool s_fExtLogContext;
 };
 

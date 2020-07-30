@@ -130,20 +130,21 @@ wan_monitor::ELinkState wan_monitor::process()
 
         // LINK related message
         if (hnl->nlmsg_type == RTM_NEWLINK || hnl->nlmsg_type == RTM_DELLINK) {
-            char name[IFNAMSIZ]   = {0};
+
             struct ifinfomsg *ifi = (struct ifinfomsg *)NLMSG_DATA(hnl);
 
             // Convert the interface index to name
-            if_indextoname(ifi->ifi_index, name);
+            auto iface_name = network_utils::linux_get_iface_name(ifi->ifi_index);
 
             // Skip events for other interfaces
-            if (m_strWanIfaceName.compare(name) != 0) {
-                LOG(DEBUG) << "Link detected for non-WAN interface '" << name << "'. Skipping...";
+            if (m_strWanIfaceName != iface_name) {
+                LOG(DEBUG) << "Link detected for non-WAN interface '" << iface_name
+                           << "'. Skipping...";
 
                 continue;
             }
 
-            LOG(DEBUG) << "Interface '" << name << "', msg_type: " << int(hnl->nlmsg_type)
+            LOG(DEBUG) << "Interface '" << iface_name << "', msg_type: " << int(hnl->nlmsg_type)
                        << ", running: " << int(ifi->ifi_flags & IFF_RUNNING);
 
             // Return WAN interface link state

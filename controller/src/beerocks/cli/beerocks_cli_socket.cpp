@@ -158,26 +158,12 @@ void cli_socket::setFunctionsMapAndArray()
                        "starts an IRE network optimization task",
                        static_cast<pFunction>(&cli_socket::ire_network_optimization_task_caller), 0,
                        0, STRING_ARG, STRING_ARG);
-    insertCommandToMap(
-        "client_channel_load_11k_req", "<hostap_mac> <client_mac> <channel>",
-        "sends to 'hostap_mac' 11k channel load request for 'client_mac' on 'channel' number",
-        static_cast<pFunction>(&cli_socket::client_channel_load_11k_req_caller), 2, 3, STRING_ARG,
-        STRING_ARG, INT_ARG);
     insertCommandToMap("client_beacon_11k_req", "<sta_mac> <[params]>",
                        "sends beacon request to 'sta_mac' with 'params' = (bssid, ch, ssid, "
                        "duration, rand_ival, repeats, op_class, mode)=value",
                        static_cast<pFunction>(&cli_socket::client_beacon_11k_req_caller), 1, 9,
                        STRING_ARG, STRING_ARG, STRING_ARG, STRING_ARG, STRING_ARG, STRING_ARG,
                        STRING_ARG, STRING_ARG, STRING_ARG);
-    insertCommandToMap(
-        "client_statistics_11k_req", "<hostap_mac> <client_mac> <group_identity> <peer_mac>",
-        "sends statistics 11k request to 'client_mac', with 'group_identity', about 'peer_mac'",
-        static_cast<pFunction>(&cli_socket::client_statistics_11k_req_caller), 3, 4, STRING_ARG,
-        STRING_ARG, INT_ARG, STRING_ARG);
-    insertCommandToMap("client_link_measurement_11k_req", "<hostap_mac> <client_mac>",
-                       "sends link measurement 11k request for 'client_mac'",
-                       static_cast<pFunction>(&cli_socket::client_link_measurement_11k_req_caller),
-                       2, 2, STRING_ARG, STRING_ARG);
     insertCommandToMap(
         "ap_neighbor_11k_set", "<hostap_mac> <bssid> <channel> <vap_id>",
         "add 'bssid' with 'channel' to 11k neighbor list of 'hostap_mac' with 'vap_id'",
@@ -187,16 +173,6 @@ void cli_socket::setFunctionsMapAndArray()
                        "remove 'bssid' from  11k neighbor list of 'hostap_mac' 'vap_id'",
                        static_cast<pFunction>(&cli_socket::rm_neighbor_11k_caller), 3, 3,
                        STRING_ARG, STRING_ARG);
-    insertCommandToMap("ping_slave", "<ire_mac> [<num_of_req>] [<packet_size>]",
-                       "send ping request to slave mac, num_of_req times (1 time by default), with "
-                       "size = 'packet_size' (0 by default) ",
-                       static_cast<pFunction>(&cli_socket::ping_slave_caller), 1, 3, STRING_ARG,
-                       INT_ARG, INT_ARG);
-    insertCommandToMap("ping_all_slaves", "[<num_of_req>] [<packet_size>]",
-                       "send ping request to all slaves, num_of_req times each (1 time by "
-                       "default), with size = 'packet_size' (0 by default) ",
-                       static_cast<pFunction>(&cli_socket::ping_all_slaves_caller), 0, 2, INT_ARG,
-                       INT_ARG);
 }
 
 bool cli_socket::waitResponseReady()
@@ -403,16 +379,6 @@ int cli_socket::ire_network_optimization_task_caller(int numOfArgs)
     return ire_network_optimization_task();
 }
 
-int cli_socket::client_channel_load_11k_req_caller(int numOfArgs)
-{
-    if (numOfArgs == 3) {
-        return client_channel_load_11k_req(args.stringArgs[0], args.stringArgs[1], args.intArgs[2]);
-    } else if (numOfArgs == 2) {
-        return client_channel_load_11k_req(args.stringArgs[0], args.stringArgs[1]);
-    } else
-        return -1;
-}
-
 int cli_socket::client_beacon_11k_req_caller(int numOfArgs)
 {
 
@@ -453,24 +419,6 @@ int cli_socket::client_beacon_11k_req_caller(int numOfArgs)
         return -1;
 }
 
-int cli_socket::client_statistics_11k_req_caller(int numOfArgs)
-{
-    if (numOfArgs == 4) {
-        return client_statistics_11k_req(args.stringArgs[0], args.stringArgs[1], args.intArgs[2],
-                                         args.stringArgs[3]);
-    } else if (numOfArgs == 3) {
-        return client_statistics_11k_req(args.stringArgs[0], args.stringArgs[1], args.intArgs[2]);
-    } else
-        return -1;
-}
-
-int cli_socket::client_link_measurement_11k_req_caller(int numOfArgs)
-{
-    if (numOfArgs != 2)
-        return -1;
-    return client_link_measurement_11k_req(args.stringArgs[0], args.stringArgs[1]);
-}
-
 int cli_socket::set_neighbor_11k_caller(int numOfArgs)
 {
     if (numOfArgs == 4) {
@@ -486,28 +434,6 @@ int cli_socket::rm_neighbor_11k_caller(int numOfArgs)
         return rm_neighbor_11k(args.stringArgs[0], args.stringArgs[1], args.intArgs[2]);
     }
     return -1;
-}
-
-int cli_socket::ping_slave_caller(int numOfArgs)
-{
-    if (numOfArgs < 0)
-        return -1;
-    else if (numOfArgs == 3)
-        return ping_slave(args.stringArgs[0], args.intArgs[1], args.intArgs[2]);
-    else if (numOfArgs == 2)
-        return ping_slave(args.stringArgs[0], args.intArgs[1]);
-    return ping_slave(args.stringArgs[0]);
-}
-
-int cli_socket::ping_all_slaves_caller(int numOfArgs)
-{
-    if (numOfArgs < 0)
-        return -1;
-    else if (numOfArgs == 2)
-        return ping_all_slaves(args.intArgs[0], args.intArgs[1]);
-    else if (numOfArgs == 1)
-        return ping_all_slaves(args.intArgs[0]);
-    return ping_all_slaves();
 }
 
 //
@@ -765,24 +691,6 @@ int cli_socket::ire_network_optimization_task()
     return 0;
 }
 
-int cli_socket::client_channel_load_11k_req(std::string hostap_mac, std::string client_mac,
-                                            int channel)
-{
-    auto request = message_com::create_vs_message<
-        beerocks_message::cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST>(cmdu_tx);
-    if (request == nullptr) {
-        LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_CHANNEL_LOAD_11K_REQUEST message!";
-        return -1;
-    }
-    request->client_mac() = tlvf::mac_from_string(client_mac);
-    request->hostap_mac() = tlvf::mac_from_string(hostap_mac);
-    request->channel()    = channel;
-    wait_response         = true;
-    message_com::send_cmdu(master_socket, cmdu_tx);
-    waitResponseReady();
-    return 0;
-}
-
 int cli_socket::client_beacon_11k_req(std::string client_mac, std::string bssid, uint8_t channel,
                                       std::string ssid, uint16_t duration, uint16_t rand_ival,
                                       uint16_t repeats, int16_t op_class, std::string mode)
@@ -810,46 +718,9 @@ int cli_socket::client_beacon_11k_req(std::string client_mac, std::string bssid,
 
     if (!ssid.empty()) {
         request->use_optional_ssid() = true;
-        mapf::utils::copy_string(reinterpret_cast<char *>(request->ssid()), ssid.c_str(),
-                                 message::WIFI_SSID_MAX_LENGTH);
+        string_utils::copy_string(reinterpret_cast<char *>(request->ssid()), ssid.c_str(),
+                                  message::WIFI_SSID_MAX_LENGTH);
     }
-    wait_response = true;
-    message_com::send_cmdu(master_socket, cmdu_tx);
-    waitResponseReady();
-    return 0;
-}
-
-int cli_socket::client_statistics_11k_req(std::string hostap_mac, std::string client_mac,
-                                          uint8_t group_identity, std::string peer_mac)
-{
-    auto request =
-        message_com::create_vs_message<beerocks_message::cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST>(
-            cmdu_tx);
-    if (request == nullptr) {
-        LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_STATISTICS_11K_REQUEST message!";
-        return -1;
-    }
-    request->client_mac()     = tlvf::mac_from_string(client_mac);
-    request->hostap_mac()     = tlvf::mac_from_string(hostap_mac);
-    request->peer_mac()       = tlvf::mac_from_string(peer_mac);
-    request->group_identity() = group_identity;
-    wait_response             = true;
-    message_com::send_cmdu(master_socket, cmdu_tx);
-    waitResponseReady();
-    return 0;
-}
-
-int cli_socket::client_link_measurement_11k_req(std::string hostap_mac, std::string client_mac)
-{
-    auto request = message_com::create_vs_message<
-        beerocks_message::cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST>(cmdu_tx);
-    if (request == nullptr) {
-        LOG(ERROR) << "Failed building cACTION_CLI_CLIENT_LINK_MEASUREMENT_11K_REQUEST message!";
-        return -1;
-    }
-    request->client_mac() = tlvf::mac_from_string(client_mac);
-    request->hostap_mac() = tlvf::mac_from_string(hostap_mac);
-
     wait_response = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
     waitResponseReady();
@@ -889,40 +760,6 @@ int cli_socket::rm_neighbor_11k(std::string ap_mac, std::string bssid, int8_t va
     wait_response     = true;
     message_com::send_cmdu(master_socket, cmdu_tx);
     waitResponseReady();
-    return 0;
-}
-
-int cli_socket::ping_slave(std::string ire_mac, int num_of_req, int ping_size)
-{
-    auto request =
-        message_com::create_vs_message<beerocks_message::cACTION_CLI_PING_SLAVE_REQUEST>(cmdu_tx);
-    if (request == nullptr) {
-        LOG(ERROR) << "Failed building cACTION_CLI_PING_SLAVE_REQUEST message!";
-        return -1;
-    }
-    request->mac()        = tlvf::mac_from_string(ire_mac);
-    request->num_of_req() = (uint16_t)num_of_req;
-    request->size()       = (uint16_t)ping_size;
-
-    message_com::send_cmdu(master_socket, cmdu_tx);
-
-    return 0;
-}
-
-int cli_socket::ping_all_slaves(int num_of_req, int ping_size)
-{
-    auto request =
-        message_com::create_vs_message<beerocks_message::cACTION_CLI_PING_ALL_SLAVES_REQUEST>(
-            cmdu_tx);
-    if (request == nullptr) {
-        LOG(ERROR) << "Failed building cACTION_CLI_PING_ALL_SLAVES_REQUEST message!";
-        return -1;
-    }
-    request->num_of_req() = (uint16_t)num_of_req;
-    request->size()       = (uint16_t)ping_size;
-
-    message_com::send_cmdu(master_socket, cmdu_tx);
-
     return 0;
 }
 

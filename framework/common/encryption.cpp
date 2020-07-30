@@ -291,7 +291,7 @@ bool aes_encrypt(const uint8_t *key, const uint8_t *iv, uint8_t *plaintext, int 
     /* Verify that the ciphertext buffer has enough storage room
      * for block size alignment padding which will be added
      * during encryption, which is up to plen + cipher_block_size -1
-     * for the update, and another cipher_block_size for the final one. 
+     * for the update, and another cipher_block_size for the final one.
      */
     int padlen = 16 - (plen % 16);
     if (clen < plen + padlen) {
@@ -429,6 +429,7 @@ void wps_calculate_keys(const diffie_hellman &dh, const uint8_t *remote_pubkey,
         struct {
             uint8_t authkey[32];
             uint8_t keywrapkey[16];
+            // cppcheck-suppress unusedStructMember
             uint8_t emsk[32];
         } keys;
         uint8_t buf[3][32];
@@ -440,23 +441,19 @@ void wps_calculate_keys(const diffie_hellman &dh, const uint8_t *remote_pubkey,
     // The output is stored in the memory buffer pointed by 'res', which must be
     // "SHA256_MAC_LEN" bytes long (ie. 're_len' must always be "SHA256_MAC_LEN",
     // even if it is an input argument)
-    //
-    union {
-        uint32_t i;
-        uint8_t buf[4];
-    } kdf_iter, kdf_key_length;
 
-    kdf_key_length.i = htonl(sizeof(keys.keys) * 8);
+    uint32_t kdf_key_length = htonl(sizeof(keys.keys) * 8);
 
     std::string personalization_string("Wi-Fi Easy and Secure Key Derivation");
     for (unsigned iter = 1; iter < sizeof(keys) / 32; iter++) {
-        kdf_iter.i = htonl(iter);
+        uint32_t kdf_iter = htonl(iter);
 
         hmac hmac_iter(kdk, sizeof(kdk));
-        hmac_iter.update(kdf_iter.buf, sizeof(kdf_iter.buf));
+        hmac_iter.update(reinterpret_cast<const uint8_t *>(&kdf_iter), sizeof(kdf_iter));
         hmac_iter.update(reinterpret_cast<const uint8_t *>(personalization_string.data()),
                          personalization_string.length());
-        hmac_iter.update(kdf_key_length.buf, sizeof(kdf_key_length.buf));
+        hmac_iter.update(reinterpret_cast<const uint8_t *>(&kdf_key_length),
+                         sizeof(kdf_key_length));
         static_assert(sizeof(keys.buf[1]) == 32, "Correct size");
         hmac_iter.digest(keys.buf[iter - 1]);
     }

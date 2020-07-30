@@ -6,7 +6,7 @@ _multi_class: True
 _multi_class_auto_insert:
   action_op:
     _type: eActionOp_MONITOR
-    _value_const: [_auto_value_by_name, 1]  
+    _value_const: [_auto_value_by_name, 1]
     _class_const: True
 
 #################################################
@@ -20,15 +20,15 @@ cACTION_MONITOR_JOINED_NOTIFICATION:
 
 cACTION_MONITOR_SON_CONFIG_UPDATE:
   _type: class
-  config: sSonConfig 
+  config: sSonConfig
 
 cACTION_MONITOR_CHANGE_MODULE_LOGGING_LEVEL:
   _type: class
-  params: sLoggingLevelChange 
+  params: sLoggingLevelChange
 
 cACTION_MONITOR_ERROR_NOTIFICATION:
   _type: class
-  error_code: uint32_t 
+  error_code: uint32_t
 
 cACTION_MONITOR_ERROR_NOTIFICATION_ACK:
   _type: class
@@ -42,7 +42,7 @@ cACTION_MONITOR_HEARTBEAT_NOTIFICATION:
 
 cACTION_MONITOR_CLIENT_START_MONITORING_REQUEST:
   _type: class
-  params: sClientMonitoringParams 
+  params: sClientMonitoringParams
 
 cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE:
   _type: class
@@ -50,41 +50,41 @@ cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE:
 
 cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_REQUEST:
   _type: class
-  params: sNodeRssiMeasurementRequest 
+  params: sNodeRssiMeasurementRequest
 
 cACTION_MONITOR_CLIENT_DISCONNECT_REQUEST:
   _type: class
-  mac: sMacAddr 
-  ipv4: beerocks::net::sIpv4Addr 
-  channel: uint8_t 
+  mac: sMacAddr
+  ipv4: beerocks::net::sIpv4Addr
+  channel: uint8_t
 
 cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_NOTIFICATION:
   _type: class
-  params: sNodeRssiMeasurement 
- 
+  params: sNodeRssiMeasurement
+
 cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_RESPONSE:
   _type: class
-  params: sNodeRssiMeasurement 
+  params: sNodeRssiMeasurement
 
 cACTION_MONITOR_CLIENT_NO_RESPONSE_NOTIFICATION:
   _type: class
-  mac: sMacAddr 
+  mac: sMacAddr
 
 cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION:
   _type: class
-  mac: sMacAddr 
- 
+  mac: sMacAddr
+
 cACTION_MONITOR_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE:
   _type: class
-  mac: sMacAddr 
+  mac: sMacAddr
 
 cACTION_MONITOR_CLIENT_NO_ACTIVITY_NOTIFICATION:
   _type: class
-  mac: sMacAddr 
+  mac: sMacAddr
 
 cACTION_MONITOR_HOSTAP_ACTIVITY_NOTIFICATION:
   _type: class
-  params: sApActivityNotificationParams 
+  params: sApActivityNotificationParams
 
 cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_REQUEST:
   _type: class
@@ -93,7 +93,7 @@ cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_REQUEST:
 
 cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE:
   _type: class
-  _is_tlv_class : True
+  _is_tlv_class: True
   length: uint16_t
   sta_mac: sMacAddr
   bssid_info_list_length:
@@ -101,7 +101,7 @@ cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE:
     _length_var: True
   bssid_info_list:
     _type: sBssidInfo
-    _length: [ bssid_info_list_length ]
+    _length: [bssid_info_list_length]
 
 #################################################
 # HOSTAP
@@ -109,88 +109,67 @@ cACTION_MONITOR_CLIENT_ASSOCIATED_STA_LINK_METRIC_RESPONSE:
 
 cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_REQUEST:
   _type: class
-  sync: uint8_t 
-
-cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION:
-  _type: class
-  new_tx_state: int8_t
-  new_hostap_enabled_state: int8_t
+  sync: uint8_t
 
 cACTION_MONITOR_HOSTAP_STATS_MEASUREMENT_RESPONSE:
   _type: class
   ap_stats_size:
     _type: uint8_t
     _length_var: True
-  ap_stats: 
+  ap_stats:
     _type: sApStatsParams
-    _length: [ ap_stats_size ]
+    _length: [ap_stats_size]
   sta_stats_size:
     _type: uint8_t
     _length_var: True
   sta_stats:
     _type: sStaStatsParams
-    _length: [ sta_stats_size ]
+    _length: [sta_stats_size]
 
 cACTION_MONITOR_HOSTAP_LOAD_MEASUREMENT_NOTIFICATION:
   _type: class
-  params: sApLoadNotificationParams 
+  params: sApLoadNotificationParams
 
 cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST:
   _type: class
-  params: sBeaconRequest11k 
+  params: sBeaconRequest11k
 
 cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE:
   _type: class
-  params: sBeaconResponse11k 
+  params: sBeaconResponse11k
 
 cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_REQUEST:
   _type: class
-  params: sStaChannelLoadRequest11k 
+  params: sStaChannelLoadRequest11k
 
 cACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE:
   _type: class
-  params: sStaChannelLoadResponse11k 
-
-cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST:
-  _type: class
-  params: sStatisticsRequest11k 
-
-cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE:
-  _type: class
-  params: sStatisticsResponse11k 
-
-cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST:
-  _type: class
-  mac: sMacAddr 
-
-cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE:
-  _type: class
-  params: sLinkMeasurementsResponse11k 
+  params: sStaChannelLoadResponse11k
 
 cACTION_MONITOR_CLIENT_NEW_IP_ADDRESS_NOTIFICATION:
   _type: class
   mac: sMacAddr
-  ipv4: beerocks::net::sIpv4Addr 
+  ipv4: beerocks::net::sIpv4Addr
 
 #################################################
 # CLIENT MONITOR RDKB HAL
 #################################################
-cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST: 
+cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_REQUEST:
   _type: class
   params: sSteeringSetGroupRequest
 
-cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE: 
+cACTION_MONITOR_STEERING_CLIENT_SET_GROUP_RESPONSE:
   _type: class
   params: sSteeringSetGroupResponse
 
-cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST: 
+cACTION_MONITOR_STEERING_CLIENT_SET_REQUEST:
   _type: class
   params: sSteeringClientSetRequest
 
-cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE: 
+cACTION_MONITOR_STEERING_CLIENT_SET_RESPONSE:
   _type: class
   params: sSteeringClientSetResponse
- 
+
 cACTION_MONITOR_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION:
   _type: class
   params: sSteeringEvActivity
@@ -231,4 +210,3 @@ cACTION_MONITOR_CHANNEL_SCAN_ABORT_NOTIFICATION:
 
 cACTION_MONITOR_CHANNEL_SCAN_FINISHED_NOTIFICATION:
   _type: class
-

@@ -58,11 +58,7 @@ static mon_wlan_hal::Event wav_to_bwl_event(const std::string &opcode)
     } else if (opcode == "BEACON-RESP-RX") {
         return mon_wlan_hal::Event::RRM_Beacon_Response;
     }
-    // } else if (opcode == "RRM-STA-STATISTICS-RECEIVED") {
-    //     return mon_wlan_hal::Event::RRM_STA_Statistics_Response;
     // } else if (opcode == "RRM-LINK-MEASUREMENT-RECEIVED") {
-    //     return mon_wlan_hal::Event::RRM_Link_Measurement_Response;
-    // }
 
     return mon_wlan_hal::Event::Invalid;
 }
@@ -88,9 +84,10 @@ static void calc_curr_traffic(std::string buff, uint64_t &total, uint32_t &curr)
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-mon_wlan_hal_nl80211::mon_wlan_hal_nl80211(const std::string &iface_name, hal_event_cb_t callback)
-    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, callback),
-      base_wlan_hal_nl80211(bwl::HALType::Monitor, iface_name, callback, BUFFER_SIZE)
+mon_wlan_hal_nl80211::mon_wlan_hal_nl80211(const std::string &iface_name, hal_event_cb_t callback,
+                                           const bwl::hal_conf_t &hal_conf)
+    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, callback, hal_conf),
+      base_wlan_hal_nl80211(bwl::HALType::Monitor, iface_name, callback, BUFFER_SIZE, hal_conf)
 {
 }
 
@@ -98,21 +95,19 @@ mon_wlan_hal_nl80211::~mon_wlan_hal_nl80211() {}
 
 bool mon_wlan_hal_nl80211::update_radio_stats(SRadioStats &radio_stats)
 {
-    radio_stats.tx_bytes_cnt = 0;
-    radio_stats.tx_bytes     = 0;
+    beerocks::net::sInterfaceStats iface_stats;
+    if (!beerocks::net::network_utils::get_iface_stats(get_iface_name(), iface_stats)) {
+        LOG(ERROR) << "Failed to get interface statistics for interface " << get_iface_name();
+        return false;
+    }
 
-    radio_stats.rx_bytes_cnt = 0;
-    radio_stats.rx_bytes     = 0;
+    calc_curr_traffic(iface_stats.tx_bytes, radio_stats.tx_bytes_cnt, radio_stats.tx_bytes);
+    calc_curr_traffic(iface_stats.rx_bytes, radio_stats.rx_bytes_cnt, radio_stats.rx_bytes);
+    calc_curr_traffic(iface_stats.tx_packets, radio_stats.tx_packets_cnt, radio_stats.tx_packets);
+    calc_curr_traffic(iface_stats.rx_packets, radio_stats.rx_packets_cnt, radio_stats.rx_packets);
 
-    radio_stats.tx_packets_cnt = 0;
-    radio_stats.tx_packets     = 0;
-
-    radio_stats.rx_packets_cnt = 0;
-    radio_stats.rx_packets     = 0;
-
-    radio_stats.bss_load        = 0;
-    radio_stats.errors_sent     = 0;
-    radio_stats.errors_received = 0;
+    radio_stats.errors_sent     = iface_stats.tx_errors;
+    radio_stats.errors_received = iface_stats.rx_errors;
     radio_stats.noise           = 0;
 
     return true;
@@ -120,27 +115,20 @@ bool mon_wlan_hal_nl80211::update_radio_stats(SRadioStats &radio_stats)
 
 bool mon_wlan_hal_nl80211::update_vap_stats(const std::string &vap_iface_name, SVapStats &vap_stats)
 {
-    vap_stats.tx_bytes_cnt = 0;
-    vap_stats.tx_bytes     = 0;
+    beerocks::net::sInterfaceStats iface_stats;
+    if (!beerocks::net::network_utils::get_iface_stats(vap_iface_name, iface_stats)) {
+        LOG(ERROR) << "Failed to get interface statistics for interface " << vap_iface_name;
+        return false;
+    }
 
-    vap_stats.rx_bytes_cnt = 0;
-    vap_stats.rx_bytes     = 0;
+    calc_curr_traffic(iface_stats.tx_bytes, vap_stats.tx_bytes_cnt, vap_stats.tx_bytes);
+    calc_curr_traffic(iface_stats.rx_bytes, vap_stats.rx_bytes_cnt, vap_stats.rx_bytes);
+    calc_curr_traffic(iface_stats.tx_packets, vap_stats.tx_packets_cnt, vap_stats.tx_packets);
+    calc_curr_traffic(iface_stats.rx_packets, vap_stats.rx_packets_cnt, vap_stats.rx_packets);
 
-    vap_stats.tx_packets_cnt = 0;
-    vap_stats.tx_packets     = 0;
-
-    vap_stats.rx_packets_cnt = 0;
-    vap_stats.rx_packets     = 0;
-
-    vap_stats.errors_sent     = 0;
-    vap_stats.errors_received = 0;
+    vap_stats.errors_sent     = iface_stats.tx_errors;
+    vap_stats.errors_received = iface_stats.rx_errors;
     vap_stats.retrans_count   = 0;
-
-    // TODO: Handle timeouts/deltas externally!
-    // auto now = std::chrono::steady_clock::now();
-    // auto time_span = std::chrono::duration_cast<std::chrono::milliseconds>(now - vap_stats->last_update_time);
-    // vap_stats->delta_ms = float(time_span.count());
-    // vap_stats->last_update_time = now;
 
     return true;
 }
@@ -377,12 +365,6 @@ bool mon_wlan_hal_nl80211::sta_beacon_11k_request(const SBeaconRequest11k &req, 
     return true;
 }
 
-bool mon_wlan_hal_nl80211::sta_statistics_11k_request(const SStatisticsRequest11k &req)
-{
-    LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
-    return true;
-}
-
 bool mon_wlan_hal_nl80211::sta_link_measurements_11k_request(const std::string &sta_mac)
 {
     LOG(TRACE) << __func__ << " - NOT IMPLEMENTED!";
@@ -592,10 +574,11 @@ bool mon_wlan_hal_nl80211::process_nl80211_event(parsed_obj_map_t &parsed_obj)
 
 } // namespace nl80211
 
-std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(std::string iface_name,
-                                                  base_wlan_hal::hal_event_cb_t callback)
+std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(const std::string &iface_name,
+                                                  base_wlan_hal::hal_event_cb_t callback,
+                                                  const bwl::hal_conf_t &hal_conf)
 {
-    return std::make_shared<nl80211::mon_wlan_hal_nl80211>(iface_name, callback);
+    return std::make_shared<nl80211::mon_wlan_hal_nl80211>(iface_name, callback, hal_conf);
 }
 
 } // namespace bwl

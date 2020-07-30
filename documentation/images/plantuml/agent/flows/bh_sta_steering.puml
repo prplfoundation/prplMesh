@@ -1,0 +1,19 @@
+@startuml
+->controller: dev_reset_default
+->controller: Prepare setup( execute 4.1.2 test)
+controller->backhaul_manager: send_cmdu(Backhaul Steering Request with correct data)
+backhaul_manager->backhaul_manager: handle_1905_msg(\n Backhaul Steering Request message,\n Backhaul Steering Request TLV(0x9E))
+backhaul_manager->controller: send_cmdu(ACK)
+backhaul_manager->backhaul_manager: sta_wlan_hal->connect(bssid,channel)
+backhaul_manager->wpa_supplicant: NETWORK_ENABLE
+wpa_supplicant->ctt_agent_2: Association Request
+ctt_agent_2->wpa_supplicant: Association Response
+wpa_supplicant->backhaul_manager: ENABLED
+backhaul_manager->controller: send_cmdu(Backhaul Steering Response message)
+controller->controller: handle_1905_msg(Backhaul Steering Response message)
+controller->backhaul_manager: send_cmdu(Backhaul Steering Request with bogus channel number)
+backhaul_manager->backhaul_manager: handle_1905_msg(\n Backhaul Steering Request message,\n Backhaul Steering Request TLV(0x9E))
+backhaul_manager->controller: send_cmdu(ACK)
+backhaul_manager->controller: send_cmdu(Backhaul Steering Response message)
+controller->controller: handle_1905_msg(Backhaul Steering Response message)
+@enduml

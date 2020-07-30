@@ -204,21 +204,24 @@ bool m1::init(const config &cfg)
         return false;
     }
 
-    auto vendor_ext_attr = addAttr<cWscVendorExtWfa>();
+    auto vendor_ext_attr = addAttr<cWscAttrVendorExtension>();
     if (!vendor_ext_attr) {
-        TLVF_LOG(ERROR) << "addAttr<cWscVendorExtWfa> failed";
+        TLVF_LOG(ERROR) << "addAttr<cWscAttrVendorExtension> failed";
         return false;
     }
 
-    if (!vendor_ext_attr->alloc_vs_data(sizeof(sWscAttrVersion2))) {
-        LOG(ERROR) << "buffer allocation failed for version2 attribute";
+    // WFA Vendor Data
+    const size_t vendor_data_size = sizeof(sWscWfaVendorExtSubelementVersion2);
+    if (!vendor_ext_attr->alloc_vendor_data(vendor_data_size)) {
+        LOG(ERROR) << "Failed to allocate vendor data [" << vendor_data_size << "]!";
         return false;
     }
+    auto vendor_data = vendor_ext_attr->vendor_data();
 
-    sWscAttrVersion2 version2;
-    version2.struct_swap();
-    uint8_t *version2_buf = reinterpret_cast<uint8_t *>(&version2);
-    std::copy(version2_buf, version2_buf + sizeof(version2), vendor_ext_attr->vs_data());
+    // WFA Vendor Extension Subelement at #0: Version2
+    sWscWfaVendorExtSubelementVersion2 version2{eWscWfaVendorExtSubelement::VERSION2, 0x01,
+                                                eWscVendorExtVersionIE::WSC_VERSION2};
+    std::copy_n(reinterpret_cast<uint8_t *>(&version2), sizeof(version2), vendor_data);
 
     return true;
 }
@@ -309,8 +312,8 @@ bool m1::valid() const
         TLVF_LOG(ERROR) << "getAttr<cWscAttrMac> failed";
         return false;
     }
-    if (!getAttr<cWscVendorExtWfa>()) {
-        TLVF_LOG(ERROR) << "getAttr<cWscVendorExtWfa> failed";
+    if (!getAttr<cWscAttrVendorExtension>()) {
+        TLVF_LOG(ERROR) << "getAttr<cWscAttrVendorExtension> failed";
         return false;
     }
     return true;

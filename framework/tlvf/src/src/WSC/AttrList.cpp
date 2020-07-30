@@ -143,8 +143,8 @@ bool AttrList::init()
             }
             break;
         case ATTR_VENDOR_EXTENSION:
-            if (!addAttr<cWscVendorExtWfa>()) {
-                TLVF_LOG(ERROR) << "Failed to add cWscVendorExtWfa";
+            if (!addAttr<cWscAttrVendorExtension>()) {
+                TLVF_LOG(ERROR) << "Failed to add cWscAttrVendorExtension";
                 return false;
             }
             break;

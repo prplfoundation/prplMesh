@@ -16,13 +16,16 @@
 namespace bwl {
 namespace dummy {
 
-sta_wlan_hal_dummy::sta_wlan_hal_dummy(const std::string &iface_name, hal_event_cb_t callback)
-    : base_wlan_hal(bwl::HALType::Station, iface_name, IfaceType::Intel, callback, {}),
-      base_wlan_hal_dummy(bwl::HALType::Station, iface_name, callback, {})
+sta_wlan_hal_dummy::sta_wlan_hal_dummy(const std::string &iface_name, hal_event_cb_t callback,
+                                       const bwl::hal_conf_t &hal_conf)
+    : base_wlan_hal(bwl::HALType::Station, iface_name, IfaceType::Intel, callback, hal_conf),
+      base_wlan_hal_dummy(bwl::HALType::Station, iface_name, callback, hal_conf)
 {
 }
 
 sta_wlan_hal_dummy::~sta_wlan_hal_dummy() { sta_wlan_hal_dummy::detach(); }
+
+bool sta_wlan_hal_dummy::start_wps_pbc() { return true; }
 
 bool sta_wlan_hal_dummy::detach() { return true; }
 
@@ -43,7 +46,7 @@ bool sta_wlan_hal_dummy::connect(const std::string &ssid, const std::string &pas
 
 bool sta_wlan_hal_dummy::disconnect() { return true; }
 
-bool sta_wlan_hal_dummy::roam(const std::string &bssid, uint8_t channel) { return true; }
+bool sta_wlan_hal_dummy::roam(const sMacAddr &bssid, uint8_t channel) { return true; }
 
 bool sta_wlan_hal_dummy::get_4addr_mode() { return true; }
 
@@ -79,9 +82,10 @@ bool sta_wlan_hal_dummy::update_status()
 } // namespace dummy
 
 std::shared_ptr<sta_wlan_hal> sta_wlan_hal_create(const std::string &iface_name,
-                                                  base_wlan_hal::hal_event_cb_t callback)
+                                                  base_wlan_hal::hal_event_cb_t callback,
+                                                  const bwl::hal_conf_t &hal_conf)
 {
-    return std::make_shared<dummy::sta_wlan_hal_dummy>(iface_name, callback);
+    return std::make_shared<dummy::sta_wlan_hal_dummy>(iface_name, callback, hal_conf);
 }
 
 } // namespace bwl

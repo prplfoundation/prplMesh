@@ -45,6 +45,18 @@ class db {
     } sBmlListener;
 
 public:
+    /**
+     * @brief Client parameter names.
+     * The parameter names can be used to set/get multiple parameters in one-shot.
+     * This is done using key-value map (where key is the param name and value is it value)
+     */
+    static const std::string TIMESTAMP_STR;
+    static const std::string TIMELIFE_DELAY_STR;
+    static const std::string INITIAL_RADIO_ENABLE_STR;
+    static const std::string INITIAL_RADIO_STR;
+    static const std::string SELECTED_BAND_ENABLE_STR;
+    static const std::string SELECTED_BANDS_STR;
+
     // VAPs info list type
     typedef std::list<std::shared_ptr<beerocks_message::sConfigVapInfo>> vaps_list_t;
 
@@ -75,6 +87,7 @@ public:
         bool load_health_check;
         bool load_monitor_on_vaps;
         bool certification_mode;
+        bool persistent_db;
         int roaming_5ghz_failed_attemps_threshold;
         int roaming_24ghz_failed_attemps_threshold;
         int roaming_11v_failed_attemps_threshold;
@@ -95,7 +108,6 @@ public:
         int monitor_ap_active_threshold_B;
         int monitor_ap_idle_stable_time_sec;
         int monitor_disable_initiative_arp;
-        int slave_keep_alive_retries;
 
         int idle_steer_activity_check_timeout;
         int channel_selection_random_delay;
@@ -107,6 +119,9 @@ public:
         int blacklist_channel_remove_timeout;
         int failed_roaming_counter_threshold;
         int roaming_sticky_client_rssi_threshold;
+        int clients_persistent_db_max_size;
+        int max_timelife_delay_days;
+        int unfriendly_device_max_timelife_delay_days;
 
     } sDbMasterConfig;
 
@@ -156,6 +171,49 @@ public:
         settings.rdkb_extensions &= config_.load_rdkb_extensions;
     }
     ~db(){};
+
+    //static
+    /**
+     * @brief Get string representation of node type.
+     * 
+     * @param type Type of a node.
+     * @return std::string the string representation of the type.
+     */
+    static std::string type_to_string(beerocks::eType type);
+
+    /**
+     * @brief Get db entry from MAC address.
+     * 
+     * @param mac MAC address of a client.
+     * @return std::string the string representation of the MAC address with ':' replaced with '_' removed.
+     * @return An empty string is returned on failure.
+     */
+    static std::string client_db_entry_from_mac(const sMacAddr &mac);
+
+    /**
+     * @brief Get client MAC address from db entry.
+     * 
+     * @param db_entry Client entry name in persistent db.
+     * @return sMacAddr MAC address of the client the db_entry is representing. On failure ZERO_MAC is returned.
+     */
+    static sMacAddr client_db_entry_to_mac(const std::string &db_entry);
+
+    /**
+     * @brief Get string representation of number of seconds in timestamp.
+     * 
+     * @param timestamp A time-point.
+     * @return std::string the string representation of the integer number of seconds in the timestamp.
+     */
+    static std::string
+    timestamp_to_string_seconds(const std::chrono::steady_clock::time_point timestamp);
+
+    /**
+     * @brief Translate an integer number of seconds to a timepoint.
+     * 
+     * @param timestamp_sec Number of seconds in the timestamp.
+     * @return std::chrono::steady_clock::time_point a time-point representation of the number of seconds.
+     */
+    static std::chrono::steady_clock::time_point timestamp_from_seconds(int timestamp_sec);
 
     //logger
     void set_log_level_state(const beerocks::eLogLevel &log_level, const bool &new_state);
@@ -214,17 +272,7 @@ public:
 
     bool update_node_last_seen(const std::string &mac);
 
-    bool update_node_last_ping_sent(const std::string &mac);
     std::chrono::steady_clock::time_point get_node_last_seen(const std::string &mac);
-    std::chrono::steady_clock::time_point get_node_last_ping_sent(const std::string &mac);
-
-    bool update_node_last_ping_received(const std::string &mac, int seq);
-    bool update_node_last_ping_received_avg(const std::string &mac, int total_seq);
-    std::chrono::steady_clock::time_point get_node_last_ping_received(const std::string &mac);
-    int get_node_last_ping_delta_ms(const std::string &mac);
-    int get_node_last_ping_min_ms(const std::string &mac);
-    int get_node_last_ping_max_ms(const std::string &mac);
-    int get_node_last_ping_avg_ms(const std::string &mac);
 
     bool set_hostap_active(const std::string &mac, bool active);
     bool is_hostap_active(const std::string &mac);
@@ -590,6 +638,157 @@ public:
                                                                    bool single_scan);
 
     //
+    // Client Persistent Data
+    //
+    /**
+     * @brief Check if client exists in persistent db.
+     * 
+     * @param mac MAC address of a client.
+     * @return true if client exists, false otherwise.
+     */
+    bool is_client_in_persistent_db(const sMacAddr &mac);
+
+    /**
+     * @brief Adds a client to the persistent db, if already exists, remove old entry and add a new one.
+     * 
+     * @param mac MAC address of a client.
+     * @param params An unordered map of key-value of client parameters.
+     * @return true on success, otherwise false.
+     */
+    bool add_client_to_persistent_db(const sMacAddr &mac,
+                                     const std::unordered_map<std::string, std::string> &params =
+                                         std::unordered_map<std::string, std::string>());
+
+    /**
+     * @brief Get the client's parameters last edit time.
+     * 
+     * @param mac MAC address of a client.
+     * @return Client persistent data last edit time (even if edit was done only to runtime-dbb and not saved to persistent db), or time_point::min() if not-configured or failure.
+     */
+    std::chrono::steady_clock::time_point get_client_parameters_last_edit(const sMacAddr &mac);
+
+    /**
+     * @brief Set the client's time-life delay.
+     * 
+     * @param mac MAC address of a client.
+     * @param time_life_delay_sec Client-specific aging time.
+     * @param save_to_persistent_db If set to true, update the persistent-db (write-through), default is true.
+     * @return true on success, otherwise false.
+     */
+    bool set_client_time_life_delay(const sMacAddr &mac,
+                                    const std::chrono::seconds &time_life_delay_sec,
+                                    bool save_to_persistent_db = true);
+
+    /**
+     * @brief Get the client's time-life delay.
+     * 
+     * @param mac MAC address of a client.
+     * @return Client time-life delay, value of 0 means not-configured.
+     */
+    std::chrono::seconds get_client_time_life_delay(const sMacAddr &mac);
+
+    /**
+     * @brief Set the client's stay-on-initial-radio.
+     * 
+     * @param mac MAC address of a client.
+     * @param stay_on_initial_radio Enable client stay on the radio it initially connected to.
+     * @param save_to_persistent_db If set to true, update the persistent-db (write-through), default is true.
+     * @return true on success, otherwise false.
+     */
+    bool set_client_stay_on_initial_radio(const sMacAddr &mac, bool stay_on_initial_radio,
+                                          bool save_to_persistent_db = true);
+
+    /**
+     * @brief Get the client's stay-on-initial-radio.
+     * 
+     * @param mac MAC address of a client.
+     * @return Enable client stay on the radio it initially connected to.
+     */
+    eTriStateBool get_client_stay_on_initial_radio(const sMacAddr &mac);
+
+    /**
+     * @brief Set the client's initial-radio.
+     * 
+     * @param mac MAC address of a client.
+     * @param initial_radio_mac The MAC address of the radio that the client has initially connected to.
+     * @param save_to_persistent_db If set to true, update the persistent-db (write-through), default is true.
+     * @return true on success, otherwise false.
+     */
+    bool set_client_initial_radio(const sMacAddr &mac, const sMacAddr &initial_radio_mac,
+                                  bool save_to_persistent_db = true);
+
+    /**
+     * @brief Get the client's initial-radio.
+     * 
+     * @param mac MAC address of a client.
+     * @return MAC adddress of the radio that the client has initially connected to.
+     */
+    sMacAddr get_client_initial_radio(const sMacAddr &mac);
+
+    /**
+     * @brief Set the client's stay-on-selected-band.
+     * 
+     * @param mac MAC address of a client.
+     * @param stay_on_selected_band Enable client stay on the selected band/bands.
+     * @param save_to_persistent_db If set to true, update the persistent-db (write-through), default is true.
+     * @return true on success, otherwise false.
+     */
+    bool set_client_stay_on_selected_band(const sMacAddr &mac, bool stay_on_selected_band,
+                                          bool save_to_persistent_db = true);
+
+    /**
+     * @brief Get the client's stay-on-selected-band.
+     * 
+     * @param mac MAC address of a client.
+     * @return Enable client stay on the selected band/bands.
+     */
+    eTriStateBool get_client_stay_on_selected_band(const sMacAddr &mac);
+
+    /**
+     * @brief Set the client's selected-bands.
+     * 
+     * @param mac MAC address of a client.
+     * @param selected_bands Client selected band/bands. FREQ_UNKNOWN is considered as "not-configured".
+     * @param save_to_persistent_db If set to true, update the persistent-db (write-through), default is true.
+     * @return true on success, otherwise false.
+     */
+    bool set_client_selected_bands(const sMacAddr &mac, beerocks::eFreqType selected_bands,
+                                   bool save_to_persistent_db = true);
+
+    /**
+     * @brief Get the client's selected-bands.
+     * 
+     * @param mac MAC address of a client.
+     * @return Selected band/bands.
+     */
+    beerocks::eFreqType get_client_selected_bands(const sMacAddr &mac);
+
+    /**
+     * @brief Clear client's persistent information.
+     * 
+     * @param mac MAC address of a client.
+     * @return true on success, otherwise false.
+     */
+    bool clear_client_persistent_db(const sMacAddr &mac);
+
+    /**
+     * @brief Update client's persistent information with the runtime information.
+     * 
+     * @param mac MAC address of a client.
+     * @return true on success, otherwise false.
+     */
+    bool update_client_persistent_db(const sMacAddr &mac);
+
+    /**
+     * @brief Load all clients from persistent db.
+     * Creates nodes for the clients in runtime-db and set persistent parameters values accordingly.
+     * Aged Clients and Clients with invalid data are filtered-out and removed from persistent-DB.
+     * 
+     * @return true on success, otherwise false.
+     */
+    bool load_persistent_db_clients();
+
+    //
     // CLI
     //
     void add_cli_socket(Socket *sd);
@@ -861,6 +1060,15 @@ private:
     std::shared_ptr<node> get_node(std::string key); //key can be <mac> or <al_mac>_<ruid>
     std::shared_ptr<node> get_node(sMacAddr mac);
     std::shared_ptr<node> get_node(sMacAddr al_mac, sMacAddr ruid);
+    /**
+     * @brief Returns the node object after verifing node type.
+     * if node is found but type is not requested type a nullptr is returned.
+     * 
+     * @param mac MAC address of the node.
+     * @param type The type of node used for node-type verification.
+     * @return std::shared_ptr<node> pointer to the node on success, nullptr otherwise.
+     */
+    std::shared_ptr<node> get_node_verify_type(const sMacAddr &mac, beerocks::eType type);
     std::shared_ptr<node::radio> get_hostap_by_mac(const sMacAddr &mac);
     int get_node_hierarchy(std::shared_ptr<node> n);
     std::set<std::shared_ptr<node>> get_node_subtree(std::shared_ptr<node> n);
@@ -875,6 +1083,62 @@ private:
     void rewind();
     bool get_next_node(std::shared_ptr<node> &n, int &hierarchy);
     bool get_next_node(std::shared_ptr<node> &n);
+
+    /**
+     * @brief Updates the client values in the persistent db.
+     * 
+     * @param mac MAC address of a client.
+     * @param values_map A map of client params and their values.
+     * @return true on success, otherwise false.
+     */
+    bool update_client_entry_in_persistent_db(
+        const sMacAddr &mac, const std::unordered_map<std::string, std::string> &values_map);
+
+    /**
+     * @brief Sets the node params (runtime db) from a param-value map.
+     * 
+     * @param mac MAC address of node to be updated.
+     * @param values_map A map of client params and their values.
+     * @return true on success, otherwise false.
+     */
+    bool set_node_params_from_map(const sMacAddr &mac,
+                                  const std::unordered_map<std::string, std::string> &values_map);
+
+    /**
+     * @brief Adds a client entry to persistent_db with configured parameters and increments clients counter.
+     * 
+     * @param entry_name Client entry name in persistent db.
+     * @param values_map A map of client params and their values.
+     * @return true on success, otherwise false.
+     */
+    bool add_client_entry_and_update_counter(
+        const std::string &entry_name,
+        const std::unordered_map<std::string, std::string> &values_map);
+
+    /**
+     * @brief Removes a client entry from persistent_db and decrements clients counter.
+     * 
+     * @param entry_name Client entry name in persistent db.
+     * @return true on success, otherwise false.
+     */
+    bool remove_client_entry_and_update_counter(const std::string &entry_name);
+
+    /**
+     * @brief Removes client with least timelife remaining from persistent db (with preference to disconnected clients).
+     * 
+     * @return true on success, otherwise false.
+     */
+    bool remove_candidate_client();
+
+    /**
+     * @brief Returns the preferred client to be removed.
+     * Preference is determined as follows:
+     * - Prefer disconnected clients over connected ones.
+     * - According to above, the client with least time left before aging.
+     *
+     * @return sMacAddr mac of candidate client to be removed - if not found, string_utils::ZERO_MAC is returned.
+     */
+    sMacAddr get_candidate_client_for_removal();
 
     int network_optimization_task_id = -1;
     int channel_selection_task_id    = -1;
@@ -936,6 +1200,8 @@ private:
 
     master_thread *m_master_thread_ctx = nullptr;
     const std::string m_local_bridge_mac;
+
+    int m_persistent_db_clients_count = 0;
 };
 
 } // namespace son

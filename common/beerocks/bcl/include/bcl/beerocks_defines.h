@@ -22,6 +22,7 @@ namespace beerocks {
 #define BEEROCKS_MONITOR "beerocks_monitor"
 #define BEEROCKS_CLI "beerocks_cli"
 
+#define BEEROCKS_BROKER_UDS "uds_broker"
 #define BEEROCKS_SLAVE_UDS "uds_slave"
 #define BEEROCKS_MASTER_UDS "uds_master"
 #define BEEROCKS_PLAT_MGR_UDS "uds_platform_manager"
@@ -82,7 +83,6 @@ enum eMessageConsts {
 enum eGlobals {
     HIERARCHY_MAX                           = 14,
     IRE_MAX_SLAVES                          = 3,
-    KEEP_ALIVE_INTERVAL_MSC                 = 20000,
     RSSI_MAX                                = 20,
     RSSI_MIN                                = -100,
     RSSI_INVALID                            = -127,
@@ -472,6 +472,8 @@ enum class eChannelScanOperationCode : uint8_t {
 
 #define CHANNEL_SCAN_INVALID_PARAM -1
 #define SCAN_ALL_CHANNELS 0
+
+constexpr int PARAMETER_NOT_CONFIGURED = -1;
 
 } // namespace beerocks
 

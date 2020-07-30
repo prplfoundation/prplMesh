@@ -13,6 +13,7 @@
 #include "bpl_err.h"
 
 #include <stdint.h>
+#include <string>
 
 namespace beerocks {
 namespace bpl {
@@ -86,11 +87,25 @@ namespace bpl {
 #define BPL_GW_DB_OPER_MODE_LEN (127 + 1)   /* Maximal length of OPERATING MODE string */
 
 /* Default values */
-#define DEFAULT_STOP_ON_FAILURE_ATTEMPTS 1
-#define DEFAULT_RDKB_EXTENSIONS 0
-#define DEFAULT_BAND_STEERING 1
-#define DEFAULT_DFS_REENTRY 1
-#define DEFAULT_CLIENT_ROAMING 1
+constexpr int DEFAULT_STOP_ON_FAILURE_ATTEMPTS = 1;
+constexpr int DEFAULT_RDKB_EXTENSIONS          = 0;
+constexpr int DEFAULT_BAND_STEERING            = 1;
+constexpr int DEFAULT_DFS_REENTRY              = 1;
+constexpr int DEFAULT_CLIENT_ROAMING           = 1;
+// by-default the persistent DB is disabled to allow backwards compatability
+// if the parameter is not configured in the prplmesh config and set to 1, DB is disabled
+constexpr int DEFAULT_PERSISTENT_DB = 0;
+// the DB of clients is limited in size to prevent high memory consumption
+// this is configurable to enable flexibility and support for low-memory platforms
+// by default, the number of clients's configuration to be cached is limited to 256
+constexpr int DEFAULT_CLIENTS_PERSISTENT_DB_MAX_SIZE = 256;
+// the persistent data of clients has aging limit
+// by default, the limit is 365 days, but it is configurable via the UCI
+constexpr int DEFAULT_MAX_TIMELIFE_DELAY_DAYS = 365;
+// the timelife of unfriendly-devices is set separately and can be shorter than the timelife
+// TODO: add description of "unfriendly-device" and how it is determined
+// by default, the limit is 1 day, but it is configurable via the UCI
+constexpr int DEFAULT_UNFRIENDLY_DEVICE_MAX_TIMELIFE_DELAY_DAYS = 1;
 
 /****************************************************************************/
 /******************************* Structures *********************************/
@@ -104,37 +119,6 @@ struct BPL_ERROR {
 
     /* Custom string data reported by the module */
     char data[BPL_ERROR_STRING_LEN];
-};
-
-/* Generic device information */
-struct BPL_DEVICE_INFO {
-
-    /* Device manufacturer name (e.g. Intel Corporation) */
-    char manufacturer[BPL_DEV_INFO_LEN];
-
-    /* Device model name */
-    char model_name[BPL_DEV_INFO_LEN];
-
-    /* Device serial number */
-    char serial_number[BPL_DEV_INFO_LEN];
-
-    /* LAN interface name */
-    char lan_iface_name[BPL_IFNAME_LEN];
-
-    /* LAN interface IP address */
-    uint32_t lan_ip_address;
-
-    /* LAN interface network mask */
-    uint32_t lan_network_mask;
-
-    /* WAN interface name */
-    char wan_iface_name[BPL_IFNAME_LEN];
-
-    /* WAN interface IP address */
-    uint32_t wan_ip_address;
-
-    /* WAN interface network mask */
-    uint32_t wan_network_mask;
 };
 
 /* Wi-Fi Credentials */
@@ -334,16 +318,6 @@ int cfg_get_dfs_reentry();
 int cfg_get_client_roaming();
 
 /**
- * Returns generic device information.
- * 
- * @param [out] Device information structure.
- *
- * @return 0 Success.
- * @return -1 Error.
- */
-int cfg_get_device_info(struct BPL_DEVICE_INFO *device_info);
-
-/**
  * Returns miscellaneous Wi-Fi parameters. 
  * 
  * @param [in] iface Interface name for the requested parameters.
@@ -489,6 +463,57 @@ int cfg_get_hostap_iface(int32_t radio_num, char hostap_iface[BPL_IFNAME_LEN]);
  * @return -1 Error, or no hostap_iface is configured.
  */
 int cfg_get_all_prplmesh_wifi_interfaces(BPL_WLAN_IFACE *interfaces, int *num_of_interfaces);
+
+/**
+ * @brief Returns whether the persistent DB is enabled.
+ * 
+ * @param [out] enable true if the DB is enabled and false otherwise.
+ * @return true on success, otherwise false.
+ */
+bool cfg_get_persistent_db_enable(bool &enable);
+
+/**
+ * @brief Returns the max number of clients in the persistent DB.
+ * 
+ * @param [out] max_size Max number of clients the persistent-db supports.
+ * @return true on success, otherwise false.
+ */
+bool cfg_get_clients_persistent_db_max_size(int &max_size);
+
+/**
+ * @brief Returns the max time-life delay of clients (used for aging of client's persistent data).
+ * 
+ * @param [out] max_timelife_delay_days Max clients' timelife delay.
+ * @return true on success, otherwise false.
+ */
+bool cfg_get_max_timelife_delay_days(int &max_timelife_delay_days);
+
+/**
+ * @brief Returns the max time-life delay for unfriendly clients.
+ * 
+ * @param [out] unfriendly_device_max_timelife_delay_days Max unfriendly clients' timelife delay.
+ * @return true on success, otherwise false.
+ */
+bool cfg_get_unfriendly_device_max_timelife_delay_days(
+    int &unfriendly_device_max_timelife_delay_days);
+
+/**
+ * @brief Returns configured WPA Control Path for the given interface.
+ *
+ * @param [in] Interface name
+ * @param [out] WPA Control Path
+ * @return true on success, otherwise false.
+ */
+bool bpl_cfg_get_wpa_supplicant_ctrl_path(const std::string &iface, std::string &wpa_ctrl_path);
+
+/**
+ * @brief Returns configured Hostapd Control Path for the given interface.
+ *
+ * @param [in] Interface name
+ * @param [out] Hostapd Control Path
+ * @return true on success, otherwise false.
+ */
+bool bpl_cfg_get_hostapd_ctrl_path(const std::string &iface, std::string &hostapd_ctrl_path);
 
 } // namespace bpl
 } // namespace beerocks

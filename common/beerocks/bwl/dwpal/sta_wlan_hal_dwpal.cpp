@@ -91,13 +91,25 @@ static std::string dwpal_security_val(WiFiSec sec)
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-sta_wlan_hal_dwpal::sta_wlan_hal_dwpal(const std::string &iface_name, hal_event_cb_t callback)
-    : base_wlan_hal(bwl::HALType::Station, iface_name, IfaceType::Intel, callback),
-      base_wlan_hal_dwpal(bwl::HALType::Station, iface_name, callback)
+sta_wlan_hal_dwpal::sta_wlan_hal_dwpal(const std::string &iface_name, hal_event_cb_t callback,
+                                       const bwl::hal_conf_t &hal_conf)
+    : base_wlan_hal(bwl::HALType::Station, iface_name, IfaceType::Intel, callback, hal_conf),
+      base_wlan_hal_dwpal(bwl::HALType::Station, iface_name, callback, hal_conf)
 {
 }
 
 sta_wlan_hal_dwpal::~sta_wlan_hal_dwpal() {}
+
+bool sta_wlan_hal_dwpal::start_wps_pbc()
+{
+    LOG(DEBUG) << "Initiating wps_pbc multi_ap=1 on interface: " << get_iface_name();
+
+    if (!dwpal_send_cmd("WPS_PBC multi_ap=1")) {
+        LOG(ERROR) << "start_wps_pbc - wpa_ctrl_send_msg failed for " << get_iface_name();
+        return false;
+    }
+    return true;
+}
 
 bool sta_wlan_hal_dwpal::initiate_scan()
 {
@@ -207,9 +219,8 @@ bool sta_wlan_hal_dwpal::connect(const std::string &ssid, const std::string &pas
 
     // Add a new network
     auto network_id = add_network();
-    if (network_id < 0) {
-        LOG(ERROR) << "Failed (" << network_id
-                   << ") adding new network to interface: " << get_iface_name();
+    if (invalid_network_id == network_id) {
+        LOG(ERROR) << "Failed adding new network to interface: " << get_iface_name();
         return false;
     }
 
@@ -288,7 +299,7 @@ bool sta_wlan_hal_dwpal::disconnect()
     return true;
 }
 
-bool sta_wlan_hal_dwpal::roam(const std::string &bssid, uint8_t channel)
+bool sta_wlan_hal_dwpal::roam(const sMacAddr &bssid, uint8_t channel)
 {
     if (m_active_network_id == -1) {
         LOG(ERROR) << "Incorrect active network " << m_active_network_id;
@@ -300,7 +311,9 @@ bool sta_wlan_hal_dwpal::roam(const std::string &bssid, uint8_t channel)
         return false;
     }
 
-    const std::string cmd = "ROAM " + bssid;
+    auto bssid_str = tlvf::mac_to_string(bssid);
+
+    const std::string cmd = "ROAM " + bssid_str;
     if (!dwpal_send_cmd(cmd)) {
         LOG(ERROR) << get_iface_name() << " ROAM failed!";
         return false;
@@ -313,10 +326,10 @@ bool sta_wlan_hal_dwpal::roam(const std::string &bssid, uint8_t channel)
     }
 
     // Update the active channel and bssid
-    m_active_bssid.assign(bssid);
+    m_active_bssid.assign(bssid_str);
     m_active_channel = channel;
 
-    return false;
+    return true;
 }
 
 bool sta_wlan_hal_dwpal::get_4addr_mode()
@@ -544,7 +557,7 @@ int sta_wlan_hal_dwpal::add_network()
     // Send command
     if (!dwpal_send_cmd(cmd, &reply)) {
         LOG(ERROR) << "ADD_NETWORK failed!";
-        return false;
+        return invalid_network_id;
     }
 
     // Return the newly added network ID
@@ -832,9 +845,10 @@ bool sta_wlan_hal_dwpal::parse_fapi_event(const std::string& opcode, std::shared
 } // namespace dwpal
 
 std::shared_ptr<sta_wlan_hal> sta_wlan_hal_create(const std::string &iface_name,
-                                                  base_wlan_hal::hal_event_cb_t callback)
+                                                  base_wlan_hal::hal_event_cb_t callback,
+                                                  const bwl::hal_conf_t &hal_conf)
 {
-    return std::make_shared<dwpal::sta_wlan_hal_dwpal>(iface_name, callback);
+    return std::make_shared<dwpal::sta_wlan_hal_dwpal>(iface_name, callback, hal_conf);
 }
 
 } // namespace bwl

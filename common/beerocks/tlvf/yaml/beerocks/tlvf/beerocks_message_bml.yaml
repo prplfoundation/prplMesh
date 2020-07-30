@@ -6,14 +6,14 @@ _multi_class: True
 _multi_class_auto_insert:
   action_op:
     _type: eActionOp_BML
-    _value_const: [_auto_value_by_name, 1]  
+    _value_const: [_auto_value_by_name, 1]
     _class_const: True
 
 #################################################
 #################################################
 
 cACTION_BML_PING_REQUEST:
-  _type: class 
+  _type: class
 
 cACTION_BML_PING_RESPONSE:
   _type: class
@@ -27,9 +27,9 @@ cACTION_BML_NW_MAP_RESPONSE:
   buffer_size:
     _type: uint32_t
     _length_var: True
-  buffer: 
+  buffer:
     _type: char
-    _length: [ buffer_size ]
+    _length: [buffer_size]
 
 cACTION_BML_NW_MAP_UPDATE:
   _type: class
@@ -37,9 +37,9 @@ cACTION_BML_NW_MAP_UPDATE:
   buffer_size:
     _type: uint32_t
     _length_var: True
-  buffer: 
+  buffer:
     _type: char
-    _length: [ buffer_size ]
+    _length: [buffer_size]
 
 cACTION_BML_STATS_UPDATE:
   _type: class
@@ -47,18 +47,18 @@ cACTION_BML_STATS_UPDATE:
   buffer_size:
     _type: uint32_t
     _length_var: True
-  buffer: 
+  buffer:
     _type: char
-    _length: [ buffer_size ]
+    _length: [buffer_size]
 
 cACTION_BML_EVENTS_UPDATE:
   _type: class
   buffer_size:
     _type: uint32_t
     _length_var: True
-  buffer: 
+  buffer:
     _type: char
-    _length: [ buffer_size ]
+    _length: [buffer_size]
 
 cACTION_BML_REGISTER_TO_NW_MAP_UPDATES_REQUEST:
   _type: class
@@ -79,28 +79,28 @@ cACTION_BML_GET_LEGACY_CLIENT_ROAMING_REQUEST:
   _type: class
 
 cACTION_BML_REGISTER_TO_EVENTS_UPDATES_REQUEST:
-  _type: class 
+  _type: class
 
 cACTION_BML_REGISTER_TO_EVENTS_UPDATES_RESPONSE:
-  _type: class    
+  _type: class
 
 cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_REQUEST:
-  _type: class 
+  _type: class
 
 cACTION_BML_UNREGISTER_FROM_EVENTS_UPDATES_RESPONSE:
-  _type: class 
+  _type: class
 
 cACTION_BML_REGISTER_TO_STATS_UPDATES_REQUEST:
-  _type: class 
+  _type: class
 
 cACTION_BML_REGISTER_TO_STATS_UPDATES_RESPONSE:
-  _type: class    
+  _type: class
 
 cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_REQUEST:
-  _type: class 
+  _type: class
 
 cACTION_BML_UNREGISTER_FROM_STATS_UPDATES_RESPONSE:
-  _type: class 
+  _type: class
 
 cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST:
   _type: class
@@ -109,16 +109,16 @@ cACTION_BML_SET_LEGACY_CLIENT_ROAMING_REQUEST:
 cACTION_BML_GET_LEGACY_CLIENT_ROAMING_RESPONSE:
   _type: class
   isEnable: uint8_t
-  
+
 cACTION_BML_SET_CLIENT_ROAMING_REQUEST:
   _type: class
   isEnable: uint8_t
 
 cACTION_BML_SET_CLIENT_ROAMING_RESPONSE:
   _type: class
-  
+
 cACTION_BML_GET_CLIENT_ROAMING_REQUEST:
-  _type: class 
+  _type: class
 
 cACTION_BML_GET_CLIENT_ROAMING_RESPONSE:
   _type: class
@@ -130,9 +130,9 @@ cACTION_BML_SET_DFS_REENTRY_REQUEST:
 
 cACTION_BML_SET_DFS_REENTRY_RESPONSE:
   _type: class
-  
+
 cACTION_BML_GET_DFS_REENTRY_REQUEST:
-  _type: class 
+  _type: class
 
 cACTION_BML_GET_DFS_REENTRY_RESPONSE:
   _type: class
@@ -227,19 +227,19 @@ cACTION_BML_WIFI_CREDENTIALS_SET_REQUEST:
     _length_var: True
   ssid:
     _type: char
-    _length: [ ssid_size ]
+    _length: [ssid_size]
   network_key_size:
     _type: uint8_t
     _length_var: True
   network_key:
     _type: char
-    _length: [ network_key_size ]
+    _length: [network_key_size]
   operating_classes_size:
     _type: uint8_t
     _length_var: True
   operating_classes:
     _type: uint8_t
-    _length: [ operating_classes_size ]
+    _length: [operating_classes_size]
 
 cACTION_BML_WIFI_CREDENTIALS_SET_RESPONSE:
   _type: class
@@ -276,37 +276,37 @@ cACTION_BML_GET_CERTIFICATION_MODE_RESPONSE:
   isEnable: uint8_t
 
 cACTION_BML_SET_VAP_LIST_CREDENTIALS_REQUEST:
-  _type: class 
+  _type: class
   result:
     _type: uint32_t
-    _comment: # 0 - Failure, 1 - Success    
+    _comment: # 0 - Failure, 1 - Success
   vap_list_size:
     _type: uint8_t
     _length_var: True
   vap_list:
     _type: sConfigVapInfo
-    _length: [ vap_list_size ]
+    _length: [vap_list_size]
 
 cACTION_BML_SET_VAP_LIST_CREDENTIALS_RESPONSE:
-  _type: class 
+  _type: class
   result:
     _type: uint32_t
-    _comment: # 0 - Failure, 1 - Success  
-    
+    _comment: # 0 - Failure, 1 - Success
+
 cACTION_BML_GET_VAP_LIST_CREDENTIALS_RESPONSE:
-  _type: class 
+  _type: class
   result:
     _type: uint32_t
-    _comment: # 0 - Failure, 1 - Success  
+    _comment: # 0 - Failure, 1 - Success
   vap_list_size:
     _type: uint8_t
     _length_var: True
   vap_list:
     _type: sConfigVapInfo
-    _length: [ vap_list_size ]
-    
+    _length: [vap_list_size]
+
 cACTION_BML_GET_VAP_LIST_CREDENTIALS_REQUEST:
-  _type: class 
+  _type: class
   result:
     _type: uint32_t
     _comment: # 0 - Failure, 1 - Success
@@ -320,7 +320,7 @@ cACTION_BML_STEERING_SET_GROUP_REQUEST:
 
 cACTION_BML_STEERING_SET_GROUP_RESPONSE:
   _type: class
-  error_code: int32_t 
+  error_code: int32_t
 
 cACTION_BML_STEERING_CLIENT_SET_REQUEST:
   _type: class
@@ -339,7 +339,7 @@ cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_REQUEST:
   unregister: uint8_t
 
 cACTION_BML_STEERING_EVENT_REGISTER_UNREGISTER_RESPONSE:
-  _type: class  
+  _type: class
   error_code: int32_t
 
 cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST:
@@ -351,7 +351,7 @@ cACTION_BML_STEERING_CLIENT_DISCONNECT_REQUEST:
   reason: uint32_t
 
 cACTION_BML_STEERING_CLIENT_DISCONNECT_RESPONSE:
-  _type: class  
+  _type: class
   error_code: int32_t
 
 cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST:
@@ -361,7 +361,7 @@ cACTION_BML_STEERING_CLIENT_MEASURE_REQUEST:
   client_mac: sMacAddr
 
 cACTION_BML_STEERING_CLIENT_MEASURE_RESPONSE:
-  _type: class  
+  _type: class
   error_code: int32_t
 
 ################################################
@@ -372,9 +372,9 @@ cACTION_BML_STEERING_EVENTS_UPDATE:
   buffer_size:
     _type: uint32_t
     _length_var: True
-  buffer: 
+  buffer:
     _type: char
-    _length: [ buffer_size ]
+    _length: [buffer_size]
 
 cACTION_BML_TRIGGER_TOPOLOGY_QUERY:
   _type: class
@@ -385,7 +385,7 @@ cACTION_BML_TOPOLOGY_RESPONSE:
   device_data: sDeviceData
   result:
     _type: uint32_t
-    _comment: # 0 - Failure, 1 - Success  
+    _comment: # 0 - Failure, 1 - Success
 
 cACTION_BML_REGISTER_TOPOLOGY_QUERY:
   _type: class
@@ -469,7 +469,7 @@ cACTION_BML_CHANNEL_SCAN_GET_RESULTS_RESPONSE:
     _length_var: True
   results:
     _type: sChannelScanResults
-    _length: [ results_size ]
+    _length: [results_size]
 
 cACTION_BML_CHANNEL_SCAN_DUMP_RESULTS_REQUEST:
   _type: class
@@ -492,3 +492,40 @@ cACTION_BML_WIFI_CREDENTIALS_CLEAR_REQUEST:
 cACTION_BML_WIFI_CREDENTIALS_CLEAR_RESPONSE:
   _type: class
   error_code: uint32_t
+
+cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST:
+  _type: class
+
+cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE:
+  _type: class
+  result:
+    _type: uint8_t
+    _comment: # 0 - Failure, 1 - Success
+  client_list_size:
+    _type: uint32_t
+    _length_var: True
+  client_list:
+    _type: sMacAddr
+    _length: [client_list_size]
+
+cACTION_BML_CLIENT_SET_CLIENT_REQUEST:
+  _type: class
+  sta_mac: sMacAddr
+  client_config: sClientConfig
+
+cACTION_BML_CLIENT_SET_CLIENT_RESPONSE:
+  _type: class
+  result:
+    _type: uint8_t
+    _comment: # 0 - Failure, 1 - Success
+
+cACTION_BML_CLIENT_GET_CLIENT_REQUEST:
+  _type: class
+  sta_mac: sMacAddr
+
+cACTION_BML_CLIENT_GET_CLIENT_RESPONSE:
+  _type: class
+  result:
+    _type: uint8_t
+    _comment: # 0 - Failure, 1 - Success
+  client: sClient

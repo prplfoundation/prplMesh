@@ -28,11 +28,6 @@ elseif(TARGET_PLATFORM STREQUAL "openwrt")
         set(BWL_TYPE "NL80211")
     endif()
 
-    # hostapd directory
-    file(GLOB HOSTAPD_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/hostapd*/hostapd-*")
-    find_path(HOSTAPD_INCLUDE_DIR NAMES "src/common/wpa_ctrl.h" PATHS ${HOSTAPD_SEARCH_PATHS} NO_CMAKE_FIND_ROOT_PATH)
-    set(HOSTAPD_DIR "${HOSTAPD_INCLUDE_DIR}")
-
 endif()
 
 set(BWL_TYPE ${BWL_TYPE} CACHE STRING "Which BWL backend to use")
@@ -43,6 +38,10 @@ set(BWL_TYPE ${BWL_TYPE} CACHE STRING "Which BWL backend to use")
 
 if(BWL_TYPE STREQUAL "DWPAL")
     
+    file(GLOB HOSTAPD_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/hostapd*/hostapd-*")
+    find_path(HOSTAPD_INCLUDE_DIR NAMES "src/common/wpa_ctrl.h" PATHS ${HOSTAPD_SEARCH_PATHS} NO_CMAKE_FIND_ROOT_PATH)
+    set(HOSTAPD_DIR "${HOSTAPD_INCLUDE_DIR}")
+
     include_directories(
         ${HOSTAPD_DIR}/src/drivers
         ${PLATFORM_BUILD_DIR}/iwlwav-iw-4.14
@@ -76,6 +75,13 @@ if(BWL_TYPE STREQUAL "DWPAL")
 
 elseif(BWL_TYPE STREQUAL "NL80211")
 
+    file(GLOB HOSTAPD_SEARCH_PATHS "${PLATFORM_BUILD_DIR}/hostapd*/hostapd-*")
+    find_path(HOSTAPD_INCLUDE_DIR NAMES "src/common/wpa_ctrl.h" PATHS ${HOSTAPD_SEARCH_PATHS} NO_CMAKE_FIND_ROOT_PATH)
+    set(HOSTAPD_DIR "${HOSTAPD_INCLUDE_DIR}")
+
+    find_package(nl-genl-3 REQUIRED)
+    list(APPEND BWL_LIBS nl-genl-3)
+
     file(GLOB bwl_platform_sources
         ${MODULE_PATH}/shared/*.c*
         ${MODULE_PATH}/nl80211/*.c*
@@ -96,15 +102,12 @@ elseif(BWL_TYPE STREQUAL "NL80211")
         ${HOSTAPD_DIR}/src/utils
         ${HOSTAPD_DIR}/src/common
         ${HOSTAPD_DIR}/src/drivers
-        ${PLATFORM_INCLUDE_DIR}/libnl-tiny
     )
 
     # Platform libraries
     link_directories(
         ${PLATFORM_STAGING_DIR}/usr/lib
     )
-
-    list(APPEND BWL_LIBS nl-tiny)
 
 elseif(BWL_TYPE STREQUAL "DUMMY")
 

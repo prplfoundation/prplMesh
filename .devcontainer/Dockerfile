@@ -13,13 +13,13 @@ RUN apt-get update \
     # Install C++ tools
     && apt-get -y install build-essential cmake cppcheck valgrind \
     # Libraries
-    libjson-c-dev python-yaml libzmq3-dev libssl-dev \
+    libjson-c-dev python-yaml python3-yaml libssl-dev \
     libncurses-dev libreadline-dev libnl-3-dev libnl-route-3-dev libnl-genl-3-dev \
     # Install Helper tools
     bash-completion locales ninja-build pkg-config shellcheck \
     flake8 clang-format vim \
     # Network capturing
-    tcpdump openssh-server
+    tcpdump tshark wireshark-common openssh-server
 
 # Install podman
 RUN echo "deb https://download.opensuse.org/repositories/devel:/kubic:/libcontainers:/stable/xUbuntu_$(lsb_release -sr)/ /" \

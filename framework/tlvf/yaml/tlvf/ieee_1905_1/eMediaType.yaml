@@ -19,7 +19,7 @@ eMediaType:
   IEEE_1901_WAVELET: 0x0200
   IEEE_1901_FFT: 0x0201
   MOCA_V1_1: 0x0300
-  UNKNONWN_MEDIA: 0xFFFF
+  UNKNOWN_MEDIA: 0xFFFF
 
 eMediaTypeGroup:
   _type: enum
@@ -29,4 +29,3 @@ eMediaTypeGroup:
   IEEE_1901: 0x02
   MoCA: 0x03
   UNKNOWN: 0xFF
-

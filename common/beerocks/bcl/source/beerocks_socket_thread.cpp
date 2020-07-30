@@ -147,13 +147,17 @@ int socket_thread::socket_disconnected_uds(Socket *sd)
 
 bool socket_thread::handle_cmdu_message_uds(Socket *sd)
 {
-    size_t available_bytes;
+    ssize_t available_bytes;
 
     // Check if UDS Header exists
     available_bytes = sd->readBytes(rx_buffer, sizeof(rx_buffer), true, sizeof(message::sUdsHeader),
                                     true); // PEEK UDS Header, blocking
+    if (available_bytes < 0) {
+        LOG(ERROR) << "Error reading from socket";
+        return false;
+    }
 
-    if (available_bytes < sizeof(message::sUdsHeader)) {
+    if (static_cast<size_t>(available_bytes) < sizeof(message::sUdsHeader)) {
         THREAD_LOG(ERROR) << "available bytes = " << available_bytes
                           << " is less then sizeof(sUdsHeader)=" << sizeof(message::sUdsHeader);
         return false;
@@ -167,7 +171,7 @@ bool socket_thread::handle_cmdu_message_uds(Socket *sd)
     available_bytes =
         sd->readBytes(rx_buffer, sizeof(rx_buffer), true, message_size); // blocking read
 
-    if (available_bytes != message_size) {
+    if (static_cast<size_t>(available_bytes) != message_size) {
         THREAD_LOG(ERROR) << "available bytes = " << available_bytes
                           << " message_size = " << message_size;
         return false;
@@ -349,6 +353,6 @@ bool socket_thread::work()
         }
         // The loop should go over all the sockets. In case something break the for loop before it ended,
         // start iterating over the sockets again.
-    } while (i < sockets_count);
+    } while ((i < sockets_count) && !should_stop);
     return true;
 }

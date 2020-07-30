@@ -32,7 +32,8 @@ public:
      * @param [in] iface_name Monitor interface name.
      * @param [in] callback Callback for handling internal events.
      */
-    mon_wlan_hal_dummy(const std::string &iface_name, hal_event_cb_t callback);
+    mon_wlan_hal_dummy(const std::string &iface_name, hal_event_cb_t callback,
+                       const bwl::hal_conf_t &hal_conf);
     virtual ~mon_wlan_hal_dummy();
 
     virtual bool update_radio_stats(SRadioStats &radio_stats) override;
@@ -41,7 +42,7 @@ public:
                                        const std::string &sta_mac, SStaStats &sta_stats) override;
     virtual bool sta_channel_load_11k_request(const SStaChannelLoadRequest11k &req) override;
     virtual bool sta_beacon_11k_request(const SBeaconRequest11k &req, int &dialog_token) override;
-    virtual bool sta_statistics_11k_request(const SStatisticsRequest11k &req) override;
+
     virtual bool sta_link_measurements_11k_request(const std::string &sta_mac) override;
     virtual bool channel_scan_trigger(int dwell_time_msec,
                                       const std::vector<unsigned int> &channel_pool) override;

@@ -9,6 +9,7 @@
 #ifndef _BACKHAUL_MANAGER_THREAD_H
 #define _BACKHAUL_MANAGER_THREAD_H
 
+#include "../tasks/task_pool.h"
 #include "wan_monitor.h"
 
 #include <bcl/beerocks_backport.h>
@@ -24,9 +25,11 @@
 #include <tlvf/ieee_1905_1/eLinkMetricsType.h>
 #include <tlvf/ieee_1905_1/eMediaType.h>
 
+#include <tlvf/CmduMessageTx.h>
 #include <tlvf/wfa_map/tlvApMetrics.h>
 #include <tlvf/wfa_map/tlvAssociatedStaLinkMetrics.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
+#include <tlvf/wfa_map/tlvErrorCode.h>
 
 #include "../agent_ucc_listener.h"
 #include "../link_metrics/link_metrics.h"
@@ -73,6 +76,8 @@ private:
     // Forward declaration
     struct sRadioInfo;
 
+    std::shared_ptr<bwl::sta_wlan_hal> get_selected_backhaul_sta_wlan_hal();
+
     virtual bool handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx) override;
     virtual void before_select() override;
     virtual void after_select(bool timeout) override;
@@ -89,9 +94,37 @@ private:
     finalize_slaves_connect_state(bool fConnected,
                                   std::shared_ptr<sRadioInfo> pSocket = nullptr); // cmdu_duplicate
 
-    bool send_autoconfig_search_message(std::shared_ptr<sRadioInfo> soc);
+    bool send_autoconfig_search_message(const std::string &front_radio_iface_name);
     bool send_1905_topology_discovery_message();
-    bool send_slave_ap_metric_query_message(uint16_t mid, std::vector<sMacAddr> const &bssid_list);
+
+    /**
+     * @brief Sends Topology Discovery message on given interface.
+     *
+     * @param iface_name Name of the network interface on which the message is transmitted.
+     * @return True on success and false otherwise
+     */
+    bool send_1905_topology_discovery_message(const std::string &iface_name);
+
+    /**
+     * @brief Sends an AP Metrics Query message for each bssid on 'bssid_list' to the son_slaves.
+     * If the 'bssid_list' is empty, sends a query on each bssid that exists on the Agent.
+     * 
+     * @param mid MID of the message to be sent.
+     * @param bssid_list List of bssids to send a query on.
+     * @return true on success, otherwise false.
+     */
+    bool send_slave_ap_metric_query_message(
+        uint16_t mid,
+        const std::unordered_set<sMacAddr> &bssid_list = std::unordered_set<sMacAddr>());
+
+    /**
+     * @brief Creates Backhaul STA Steering Response message with 2 tlvs Steering Response
+     *        and Error Code.
+     *
+     * @param error_code One of the error codes presented in wfa_map::tlvErrorCode::eReasonCode.
+     * @return True on success and false otherwise
+     */
+    bool create_backhaul_steering_response(const wfa_map::tlvErrorCode::eReasonCode &error_code);
 
     // cmdu handlers
     bool handle_master_message(ieee1905_1::CmduMessageRx &cmdu_rx,
@@ -130,6 +163,9 @@ private:
                                           const std::string &src_mac);
     bool handle_slave_channel_selection_response(ieee1905_1::CmduMessageRx &cmdu_rx,
                                                  const std::string &src_mac);
+    bool handle_backhaul_steering_request(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                          const std::string &src_mac);
+
     //bool sta_handle_event(const std::string &iface,const std::string& event_name, void* event_obj);
     bool hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr, std::string iface);
 
@@ -139,8 +175,6 @@ private:
     void platform_notify_error(bpl::eErrorCode code, const std::string &error_data);
     bool send_slaves_enable();
 
-    void remove_client_from_all_radios(sMacAddr &client_mac);
-
     std::shared_ptr<bwl::sta_wlan_hal> get_wireless_hal(std::string iface = "");
 
 private:
@@ -149,20 +183,8 @@ private:
     SocketClient *master_discovery_socket = nullptr;
 
     struct SBackhaulConfig {
-
-        // Current connection type
-        enum class EType {
-            Invalid = 0, //!< Invalid connection
-            Wired,       //!< Wired connection
-            Wireless     //!< Wireless connection
-
-        } eType;
-
         std::string ssid;
         std::string pass;
-        std::string bridge_iface;
-        std::string wire_iface;
-        std::string wireless_iface;
         std::string preferred_bssid;
         std::string vendor;
         std::string model;
@@ -198,9 +220,7 @@ private:
     const std::string config_const_bh_slave;
 
     int stop_on_failure_attempts;
-    bool local_master = false;
-    bool local_gw     = false;
-    bool onboarding   = true;
+    bool onboarding = true;
 
     //backlist bssid and timers (remove con(or wrong passphrase) ap from select bssid for limited time )
     struct ap_blacklist_entry {
@@ -229,6 +249,7 @@ private:
     const int WIRELESS_WAIT_FOR_RECONNECT_TIMEOUT     = 2;
     const int RSSI_POLL_INTERVAL_MS                   = 1000;
     const int STATE_WAIT_ENABLE_TIMEOUT_SECONDS       = 600;
+    const int STATE_WAIT_WPS_TIMEOUT_SECONDS          = 600;
     const int AP_BLACK_LIST_TIMEOUT_SECONDS           = 120;
     const int AP_BLACK_LIST_FAILED_ATTEMPTS_THRESHOLD = 2;
     const int INTERFACE_BRING_UP_TIMEOUT_SECONDS      = 600;
@@ -264,6 +285,8 @@ private:
 
     std::unique_ptr<beerocks::agent_ucc_listener> m_agent_ucc_listener;
 
+    TaskPool m_task_pool;
+
     /**
      * AP Metrics Reporting configuration and status information type.
      */
@@ -285,44 +308,6 @@ private:
      * AP Metrics Reporting configuration and status information.
      */
     sApMetricsReportingInfo ap_metrics_reporting_info;
-
-    struct sClientInfo {
-        sMacAddr client_mac;
-        sMacAddr bssid; // VAP mac
-        std::chrono::steady_clock::time_point time_stamp;
-        size_t asso_len;
-        uint8_t assoc_req[ASSOCIATION_FRAME_SIZE];
-    };
-
-    /**
-     * @brief Type definition for associated clients information.
-     *
-     * Associated client information consists of sClientInfo strucrt, which has the 
-     * following fields:
-     * - The MAC address of the 802.11 client that associates to a BSS.
-     * - Timestamp of the 802.11 client's last association to this Multi-AP device.
-     * - The length of the association frame.
-     * - the association frame itself.
-     *
-     * Associated client information is gathered from
-     * ACTION_BACKHAUL_CLIENT_ASSOCIATED_NOTIFICATION events received from slave threads.
-     *
-     * Associated client information is later used to fill in the Associated Clients TLV
-     * in the Topology Response message and Client Capability Response message.
-     */
-
-    typedef std::unordered_map<sMacAddr, sClientInfo> associated_clients_t;
-
-    /**
-     * @brief Gets BSSID to which STA with given MAC is connected
-     *
-     * @param[in] clients_map Associated client map to seach
-     * @param[in] sta_mac MAC address of the STA
-     * @return BSSID in case of success or network_utils::ZERO_MAC otherwise
-     */
-    static sMacAddr
-    get_sta_bssid(const std::unordered_map<sMacAddr, associated_clients_t> &clients_map,
-                  const sMacAddr &sta_mac);
 
     /**
      * @brief Information gathered about a radio (= slave).
@@ -354,12 +339,9 @@ private:
         uint32_t vht_capability = 0;     /**< VHT capabilities */
         std::array<uint8_t, beerocks::message::VHT_MCS_SET_SIZE>
             vht_mcs_set; /**< 32-byte attribute containing the MCS set as defined in 802.11ac */
-        bool he_supported = false;             /**< Is HE supported flag */
-        beerocks_message::sVapsList vaps_list; /**< List of VAPs in radio. */
+        bool he_supported = false; /**< Is HE supported flag */
         std::array<beerocks::message::sWifiChannel, beerocks::message::SUPPORTED_CHANNELS_LENGTH>
             preferred_channels; /**< Array of supported channels in radio. */
-        std::unordered_map<sMacAddr, associated_clients_t>
-            associated_clients_map; /**< Associated clients grouped by BSSID. */
     };
 
     /**
@@ -369,14 +351,6 @@ private:
      * @return shared pointer to radio info in case of success or nullptr otherwise
      */
     std::shared_ptr<sRadioInfo> get_radio(const sMacAddr &radio_mac) const;
-
-    /**
-     * @brief Gets radio info for the STA with given MAC address
-     *
-     * @param[in] sta_mac MAC address of the STA
-     * @return shared pointer to radio info in case of success or nullptr otherwise
-     */
-    std::shared_ptr<sRadioInfo> get_sta_radio(const sMacAddr &sta_mac);
 
     /**
      * @brief Interface in this device which connects to an interface in one or more neighbors.
@@ -389,7 +363,7 @@ private:
         sMacAddr iface_mac =
             beerocks::net::network_utils::ZERO_MAC; /**< The MAC address of the interface. */
         ieee1905_1::eMediaType media_type = ieee1905_1::eMediaType::
-            UNKNONWN_MEDIA; /**< The underlying network technology of the connecting interface. */
+            UNKNOWN_MEDIA; /**< The underlying network technology of the connecting interface. */
         bool operator<(const sLinkInterface &rhs) const { return iface_name < rhs.iface_name; }
     };
 
@@ -453,17 +427,6 @@ private:
     bool
     get_neighbor_links(const sMacAddr &neighbor_mac_filter,
                        std::map<sLinkInterface, std::vector<sLinkNeighbor>> &neighbor_links_map);
-
-    /*
-     * @brief List of known 1905 neighbor devices
-     * 
-     * key:     1905.1 device AL-MAC
-     * value:   Last timestamp receiving discovery message from AL-MAC
-     * Devices are being added to the list when receiving a 1905.1 Topology Discovery message from
-     * an unknown 1905.1 device. Every 1905.1 device shall send this message every 60 seconds, and
-     * we update the time stamp in which the message is received.
-     */
-    std::unordered_map<sMacAddr, std::chrono::steady_clock::time_point> m_1905_neighbor_devices;
 
     /**
      * @brief Adds an AP HT Capabilities TLV to AP Capability Report message.
@@ -569,6 +532,8 @@ private:
 
     sExpectedChannelSelection m_expected_channel_selection;
 
+    bool m_backhaul_sta_steering_enable = false;
+
     /*
  * State Machines
  */
@@ -586,6 +551,7 @@ private:
     STATE(INIT_HAL)                                                                                \
     STATE(WPA_ATTACH)                                                                              \
     STATE(INITIATE_SCAN)                                                                           \
+    STATE(WAIT_WPS)                                                                                \
     STATE(WAIT_FOR_SCAN_RESULTS)                                                                   \
     STATE(WIRELESS_CONFIG_4ADDR_MODE)                                                              \
     STATE(WIRELESS_ASSOCIATE_4ADDR)                                                                \

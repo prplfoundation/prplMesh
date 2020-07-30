@@ -418,8 +418,6 @@ void cli_bml::setFunctionsMapAndArray()
     insertCommandToMap("bml_wps_onboarding", "[<iface>]",
                        "Start WPS onboarding process on 'iface' or all ifaces in case of empty.",
                        static_cast<pFunction>(&cli_bml::wps_onboarding_caller), 0, 1, STRING_ARG);
-    insertCommandToMap("bml_get_device_info", "", "Get device information",
-                       static_cast<pFunction>(&cli_bml::get_device_info_caller), 0, 0);
     insertCommandToMap("bml_get_bml_version", "", "prints bml version",
                        static_cast<pFunction>(&cli_bml::get_bml_version_caller), 0, 0);
     insertCommandToMap("bml_get_master_slave_versions", "",
@@ -557,6 +555,19 @@ void cli_bml::setFunctionsMapAndArray()
         " is-single-scan - 0 for continuous-scan results (default), 1 for single scan.",
         static_cast<pFunction>(&cli_bml::get_dcs_scan_results_caller), 2, 3, STRING_ARG, INT_ARG,
         INT_ARG);
+    insertCommandToMap("bml_client_get_client_list", "", "Get client list.",
+                       static_cast<pFunction>(&cli_bml::client_get_client_list_caller), 0, 0);
+    insertCommandToMap(
+        "bml_client_set_client", "<sta_mac> [<params>]",
+        "Set client with the given STA MAC:"
+        " selected_bands - Bitwise parameter, 1 for 2.4G, 2 for 5G, 3 for both, 0 for Disabled"
+        " stay_on_initial_radio - 1 for true, 0 for false or (default) -1 for not configured,"
+        " stay_on_selected_device - 1 for true, 0 for false or (default) -1 for not configured",
+        static_cast<pFunction>(&cli_bml::client_set_client_caller), 2, 4, STRING_ARG, INT_ARG,
+        INT_ARG, INT_ARG);
+    insertCommandToMap("bml_client_get_client", "<sta_mac>", "Get client with the given STA MAC.",
+                       static_cast<pFunction>(&cli_bml::client_get_client_caller), 1, 1,
+                       STRING_ARG);
     //bool insertCommandToMap(std::string command, std::string help_args, std::string help,  pFunction funcPtr, uint8_t minNumOfArgs, uint8_t maxNumOfArgs,
 }
 
@@ -641,7 +652,7 @@ void cli_bml::map_query_cb(const struct BML_NODE_ITER *node_iter, bool to_consol
                 std::cout << "ERROR: MARK sign > print_buffer available length" << std::endl;
                 return;
             } else {
-                mapf::utils::copy_string(p, ss.str().c_str(), sizeof(pThis->print_buffer));
+                string_utils::copy_string(p, ss.str().c_str(), sizeof(pThis->print_buffer));
                 p += offset;
             }
         }
@@ -1001,8 +1012,6 @@ int cli_bml::wps_onboarding_caller(int numOfArgs)
         return wps_onboarding(args.stringArgs[0]);
 }
 
-int cli_bml::get_device_info_caller(int numOfArgs) { return get_device_info(); }
-
 int cli_bml::get_bml_version_caller(int numOfArgs)
 {
     if (numOfArgs != 0)
@@ -1307,6 +1316,78 @@ int cli_bml::get_dcs_scan_results_caller(int numOfArgs)
     return -1;
 }
 
+/**
+ * Caller function for client_get_client_list_caller.
+ *
+ * @param [in] numOfArgs Number of received arguments
+ * @return 0 on success.
+ */
+int cli_bml::client_get_client_list_caller(int numOfArgs)
+{
+    if (numOfArgs == 0) {
+        return client_get_client_list();
+    }
+    return -1;
+}
+
+/**
+ * Caller function for client_set_client_caller.
+ *
+ * @param [in] numOfArgs Number of received arguments
+ * @return 0 on success.
+ */
+int cli_bml::client_set_client_caller(int numOfArgs)
+{
+
+    /*
+     * Mandatory:
+     *  sta_mac=<sta_mac>
+     * Optional:
+     *  selected_bands=<selected_bands>
+     *  stay_on_initial_radio=<stay_on_initial_radio>
+     *  stay_on_selected_device=<stay_on_selected_device>
+    ]*/
+    std::string::size_type pos;
+    std::string sta_mac(network_utils::WILD_MAC_STRING);
+    int8_t selected_bands          = BML_PARAMETER_NOT_CONFIGURED;
+    int8_t stay_on_initial_radio   = BML_PARAMETER_NOT_CONFIGURED;
+    int8_t stay_on_selected_device = BML_PARAMETER_NOT_CONFIGURED;
+    if (numOfArgs > 1) {
+        sta_mac = args.stringArgs[0];
+        for (int i = 1; i < numOfArgs; i++) { //first optional arg
+            if ((pos = args.stringArgs[i].find("selected_bands=")) != std::string::npos) {
+                selected_bands = beerocks::string_utils::stoi(
+                    args.stringArgs[i].substr(pos + sizeof("selected_bands")));
+            } else if ((pos = args.stringArgs[i].find("stay_on_initial_radio=")) !=
+                       std::string::npos) {
+                stay_on_initial_radio = string_utils::stoi(
+                    args.stringArgs[i].substr(pos + sizeof("stay_on_initial_radio")));
+            } else if ((pos = args.stringArgs[i].find("stay_on_selected_device=")) !=
+                       std::string::npos) {
+                stay_on_selected_device = string_utils::stoi(
+                    args.stringArgs[i].substr(pos + sizeof("stay_on_selected_device")));
+            }
+        }
+        return client_set_client(sta_mac, selected_bands, stay_on_initial_radio,
+                                 stay_on_selected_device);
+    }
+    return -1;
+}
+
+/**
+ * Caller function for client_get_client_caller.
+ *
+ * @param [in] numOfArgs Number of received arguments
+ * @return 0 on success.
+ */
+int cli_bml::client_get_client_caller(int numOfArgs)
+{
+    if (numOfArgs == 1) {
+        return client_get_client(args.stringArgs[0]);
+    }
+    return -1;
+}
+
 //
 // Functions
 //
@@ -1504,39 +1585,6 @@ int cli_bml::wps_onboarding(std::string iface)
 {
     int ret = bml_wps_onboarding(ctx, iface.c_str());
     printBmlReturnVals("bml_wps_onboarding", ret);
-    return 0;
-}
-
-int cli_bml::get_device_info()
-{
-    BML_DEVICE_INFO device_info;
-    int ret = bml_get_device_info(ctx, &device_info);
-
-    std::cout << "Manufacturer : " << device_info.manufacturer << std::endl;
-    std::cout << "Model Name   : " << device_info.model_name << std::endl;
-    std::cout << "Serial Number: " << device_info.serial_number << std::endl;
-
-    std::cout << "LAN          : ";
-    if (device_info.lan_iface_name[0]) {
-        std::cout << device_info.lan_iface_name << " ("
-                  << network_utils::ipv4_to_string(device_info.lan_ip_address) << "/"
-                  << network_utils::ipv4_to_string(device_info.lan_network_mask) << ")";
-    } else {
-        std::cout << "N/A";
-    }
-    std::cout << std::endl;
-
-    std::cout << "WAN          : ";
-    if (device_info.wan_iface_name[0]) {
-        std::cout << device_info.wan_iface_name << " ("
-                  << network_utils::ipv4_to_string(device_info.wan_ip_address) << "/"
-                  << network_utils::ipv4_to_string(device_info.wan_network_mask) << ")";
-    } else {
-        std::cout << "N/A";
-    }
-    std::cout << std::endl;
-
-    printBmlReturnVals("bml_get_device_info", ret);
     return 0;
 }
 
@@ -2140,6 +2188,116 @@ int cli_bml::get_dcs_scan_results(const std::string &radio_mac, uint32_t max_res
         }
     }
     printBmlReturnVals("bml_get_dcs_scan_results", ret);
+
+    return 0;
+}
+
+/**
+ * get all client list.
+ * 
+ * @return 0 on success.
+ */
+int cli_bml::client_get_client_list()
+{
+    char client_list[256];
+    unsigned int client_list_size;
+
+    int ret = bml_client_get_client_list(ctx, client_list, &client_list_size);
+    auto client_list_vec =
+        beerocks::string_utils::str_split(std::string(client_list, client_list_size), ',');
+
+    std::cout << "client list:" << std::endl;
+    for (const auto &client : client_list_vec) {
+        std::cout << "- " << client << std::endl;
+    }
+
+    printBmlReturnVals("bml_client_get_client_list", ret);
+
+    return 0;
+}
+
+/**
+ * Set specific client according to MAC.
+ * 
+ * @param [in] sta_mac MAC address of requested client.
+ * @param [in] selected_bands comma-seperated selected bands.
+ * @param [in] stay_on_initial_radio Whather to stay on initial radio or not.
+ * @param [in] stay_on_selected_device Whather to stay on selected device or not.
+ * @return 0 on success.
+ */
+int cli_bml::client_set_client(const std::string &sta_mac, int8_t selected_bands,
+                               int8_t stay_on_initial_radio, int8_t stay_on_selected_device)
+{
+    std::cout << "client_set_client: " << std::endl
+              << "  sta_mac: " << sta_mac << std::endl
+              << "  selected_bands: " << selected_bands << std::endl
+              << "  stay_on_initial_radio: " << stay_on_initial_radio << std::endl
+              << "  stay_on_selected_device: " << stay_on_selected_device << std::endl;
+
+    BML_CLIENT_CONFIG cfg{
+        .stay_on_initial_radio   = stay_on_initial_radio,
+        .stay_on_selected_device = stay_on_selected_device,
+        .selected_bands          = selected_bands,
+    };
+
+    int ret = bml_client_set_client(ctx, sta_mac.c_str(), &cfg);
+
+    printBmlReturnVals("bml_client_set_client", ret);
+
+    return 0;
+}
+
+/**
+ * get specific client according to MAC.
+ * 
+ * @param [in] sta_mac MAC address of requested client
+ * 
+ * @return 0 on success.
+ */
+int cli_bml::client_get_client(const std::string &sta_mac)
+{
+    BML_CLIENT client;
+    int ret = bml_client_get_client(ctx, sta_mac.c_str(), &client);
+
+    if (ret == BML_RET_OK) {
+        auto client_bool_print = [](int8_t val) -> std::string {
+            if (val == BML_PARAMETER_NOT_CONFIGURED)
+                return "Not configured";
+            return val ? "True" : "False";
+        };
+        auto client_selected_bands_print = [](int8_t val) -> std::string {
+            std::string ret = "";
+            if (val == BML_CLIENT_SELECTED_BANDS_DISABLED)
+                return "Disabled";
+            if (val & BML_CLIENT_SELECTED_BANDS_24G)
+                ret += "2.4 Ghz,";
+            if (val & BML_CLIENT_SELECTED_BANDS_5G)
+                ret += "5 Ghz,";
+            if (val & BML_CLIENT_SELECTED_BANDS_6G)
+                ret += "6 Ghz,";
+            if (val & BML_CLIENT_SELECTED_BANDS_60G)
+                ret += "60 Ghz,";
+
+            // remove ending comma
+            if (!ret.empty() && (ret.back() == ',')) {
+                ret.pop_back();
+            }
+
+            return ret;
+        };
+        std::cout << "client: " << client.sta_mac << std::endl
+                  << " timestamp_sec: " << client.timestamp_sec << std::endl
+                  << " stay_on_initial_radio: " << client_bool_print(client.stay_on_initial_radio)
+                  << std::endl
+                  << " stay_on_selected_device: "
+                  << client_bool_print(client.stay_on_selected_device) << std::endl
+                  << " selected_bands: " << client_selected_bands_print(client.selected_bands)
+                  << std::endl
+                  << " single_band: " << client_bool_print(client.single_band) << std::endl
+                  << " time_life_delay_days:" << client.time_life_delay_days << std::endl;
+    }
+
+    printBmlReturnVals("bml_client_get_client", ret);
 
     return 0;
 }

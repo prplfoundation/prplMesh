@@ -24,6 +24,7 @@ run_cppcheck() {
              -i"$rootdir/common/beerocks/bwl/unit_tests" \
              -i"$rootdir/common/beerocks/bcl/unit_tests" \
              -i"$rootdir/build" \
+             --inline-suppr \
              --suppressions-list="$rootdir"/tools/docker/static-analysis/suppressions.txt \
              -rp="$rootdir" \
              -j"$(nproc)" \

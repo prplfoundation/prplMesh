@@ -179,8 +179,6 @@ static void fill_master_config(son::db::sDbMasterConfig &master_conf,
         beerocks::string_utils::stoi(main_master_conf.monitor_rx_rssi_notification_delta_db);
     master_conf.monitor_disable_initiative_arp =
         beerocks::string_utils::stoi(main_master_conf.monitor_disable_initiative_arp);
-    master_conf.slave_keep_alive_retries =
-        beerocks::string_utils::stoi(main_master_conf.slave_keep_alive_retries);
     master_conf.channel_selection_random_delay =
         beerocks::string_utils::stoi(main_master_conf.channel_selection_random_delay);
     master_conf.fail_safe_5G_frequency =
@@ -217,6 +215,34 @@ static void fill_master_config(son::db::sDbMasterConfig &master_conf,
         master_conf.load_steer_on_vaps = std::string();
     } else {
         master_conf.load_steer_on_vaps = std::string(load_steer_on_vaps);
+    }
+
+    if (!beerocks::bpl::cfg_get_persistent_db_enable(master_conf.persistent_db)) {
+        LOG(DEBUG) << "failed to read persistent db enable, setting to default value: "
+                   << bool(beerocks::bpl::DEFAULT_PERSISTENT_DB);
+        master_conf.persistent_db = bool(beerocks::bpl::DEFAULT_PERSISTENT_DB);
+    }
+    if (!beerocks::bpl::cfg_get_clients_persistent_db_max_size(
+            master_conf.clients_persistent_db_max_size)) {
+        LOG(DEBUG)
+            << "failed to read max number of clients in persistent db, setting to default value: "
+            << beerocks::bpl::DEFAULT_CLIENTS_PERSISTENT_DB_MAX_SIZE;
+        master_conf.clients_persistent_db_max_size =
+            beerocks::bpl::DEFAULT_CLIENTS_PERSISTENT_DB_MAX_SIZE;
+    }
+    if (!beerocks::bpl::cfg_get_max_timelife_delay_days(master_conf.max_timelife_delay_days)) {
+        LOG(DEBUG)
+            << "failed to read max lifetime of clients in persistent db, setting to default value: "
+            << beerocks::bpl::DEFAULT_MAX_TIMELIFE_DELAY_DAYS << " days";
+        master_conf.max_timelife_delay_days = beerocks::bpl::DEFAULT_MAX_TIMELIFE_DELAY_DAYS;
+    }
+    if (!beerocks::bpl::cfg_get_unfriendly_device_max_timelife_delay_days(
+            master_conf.unfriendly_device_max_timelife_delay_days)) {
+        LOG(DEBUG) << "failed to read max lifetime of unfriendly clients in persistent db, setting "
+                      "to default value: "
+                   << beerocks::bpl::DEFAULT_UNFRIENDLY_DEVICE_MAX_TIMELIFE_DELAY_DAYS << " days";
+        master_conf.unfriendly_device_max_timelife_delay_days =
+            beerocks::bpl::DEFAULT_UNFRIENDLY_DEVICE_MAX_TIMELIFE_DELAY_DAYS;
     }
 }
 
@@ -314,7 +340,6 @@ int main(int argc, char *argv[])
     }
 
     son::db master_db(master_conf, logger, bridge_info.mac);
-    LOG(DEBUG) << "slave_keep_alive_retries=" << master_db.config.slave_keep_alive_retries;
     // diagnostics_thread diagnostics(master_db);
     son::master_thread son_master(master_uds, master_db);
 

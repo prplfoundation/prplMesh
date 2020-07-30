@@ -67,10 +67,6 @@ static mon_wlan_hal::Event dwpal_to_bwl_event(const std::string &opcode)
         return mon_wlan_hal::Event::RRM_Channel_Load_Response;
     } else if (opcode == "RRM-BEACON-REP-RECEIVED") {
         return mon_wlan_hal::Event::RRM_Beacon_Response;
-    } else if (opcode == "RRM-STA-STATISTICS-RECEIVED") {
-        return mon_wlan_hal::Event::RRM_STA_Statistics_Response;
-    } else if (opcode == "RRM-LINK-MEASUREMENT-RECEIVED") {
-        return mon_wlan_hal::Event::RRM_Link_Measurement_Response;
     } else if (opcode == "AP-ENABLED") {
         return mon_wlan_hal::Event::AP_Enabled;
     } else if (opcode == "AP-DISABLED") {
@@ -99,16 +95,6 @@ static mon_wlan_hal::Event dwpal_nl_to_bwl_event(uint8_t cmd)
         LOG(ERROR) << "Unknown event received: " << int(cmd);
         return mon_wlan_hal::Event::Invalid;
     }
-}
-
-static void calc_curr_traffic(const uint64_t val, uint64_t &total, uint32_t &curr)
-{
-    if (val >= total) {
-        curr = val - total;
-    } else {
-        curr = val;
-    }
-    total = val;
 }
 
 /**
@@ -541,9 +527,10 @@ static std::shared_ptr<char> generate_client_assoc_event(const std::string &even
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-mon_wlan_hal_dwpal::mon_wlan_hal_dwpal(const std::string &iface_name, hal_event_cb_t callback)
-    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, callback),
-      base_wlan_hal_dwpal(bwl::HALType::Monitor, iface_name, callback)
+mon_wlan_hal_dwpal::mon_wlan_hal_dwpal(const std::string &iface_name, hal_event_cb_t callback,
+                                       const bwl::hal_conf_t &hal_conf)
+    : base_wlan_hal(bwl::HALType::Monitor, iface_name, IfaceType::Intel, callback, hal_conf),
+      base_wlan_hal_dwpal(bwl::HALType::Monitor, iface_name, callback, hal_conf)
 {
 }
 
@@ -558,7 +545,7 @@ bool mon_wlan_hal_dwpal::update_radio_stats(SRadioStats &radio_stats)
         return false;
     }
 
-    size_t numOfValidArgs[8] = {0}, replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
+    size_t numOfValidArgs[7] = {0}, replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
     uint64_t BytesSent = 0, BytesReceived = 0, PacketsSent = 0, PacketsReceived = 0;
     FieldsToParse fieldsToParse[] = {
         {(void *)&BytesSent, &numOfValidArgs[0], DWPAL_LONG_LONG_INT_PARAM, "BytesSent=", 0},
@@ -567,11 +554,10 @@ bool mon_wlan_hal_dwpal::update_radio_stats(SRadioStats &radio_stats)
         {(void *)&PacketsSent, &numOfValidArgs[2], DWPAL_LONG_LONG_INT_PARAM, "PacketsSent=", 0},
         {(void *)&PacketsReceived, &numOfValidArgs[3], DWPAL_LONG_LONG_INT_PARAM,
          "PacketsReceived=", 0},
-        {(void *)&radio_stats.bss_load, &numOfValidArgs[4], DWPAL_CHAR_PARAM, "BSS load=", 0},
-        {(void *)&radio_stats.errors_sent, &numOfValidArgs[5], DWPAL_INT_PARAM, "ErrorsSent=", 0},
-        {(void *)&radio_stats.errors_received, &numOfValidArgs[6], DWPAL_INT_PARAM,
+        {(void *)&radio_stats.errors_sent, &numOfValidArgs[4], DWPAL_INT_PARAM, "ErrorsSent=", 0},
+        {(void *)&radio_stats.errors_received, &numOfValidArgs[5], DWPAL_INT_PARAM,
          "ErrorsReceived=", 0},
-        {(void *)&radio_stats.noise, &numOfValidArgs[7], DWPAL_CHAR_PARAM, "Noise=", 0},
+        {(void *)&radio_stats.noise, &numOfValidArgs[6], DWPAL_CHAR_PARAM, "Noise=", 0},
         /* Must be at the end */
         {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
 
@@ -587,10 +573,9 @@ bool mon_wlan_hal_dwpal::update_radio_stats(SRadioStats &radio_stats)
     // LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " BytesReceived= " << BytesReceived;
     // LOG(DEBUG) << "numOfValidArgs[2]= " << numOfValidArgs[2] << " PacketsSent= " << PacketsSent;
     // LOG(DEBUG) << "numOfValidArgs[3]= " << numOfValidArgs[3] << " PacketsReceived= " << PacketsReceived;
-    // LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4] << " BSS load= " << (int)radio_stats.bss_load;
-    // LOG(DEBUG) << "numOfValidArgs[5]= " << numOfValidArgs[5] << " ErrorsSent= " << radio_stats.errors_sent;
-    // LOG(DEBUG) << "numOfValidArgs[6]= " << numOfValidArgs[6] << " ErrorsReceived= " << radio_stats.errors_received;
-    // LOG(DEBUG) << "numOfValidArgs[7]= " << numOfValidArgs[7] << " Noise= " << (int)radio_stats.noise;
+    // LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4] << " ErrorsSent= " << radio_stats.errors_sent;
+    // LOG(DEBUG) << "numOfValidArgs[5]= " << numOfValidArgs[5] << " ErrorsReceived= " << radio_stats.errors_received;
+    // LOG(DEBUG) << "numOfValidArgs[6]= " << numOfValidArgs[6] << " Noise= " << (int)radio_stats.noise;
     /* End of TEMP: Traces... */
 
     for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
@@ -600,11 +585,10 @@ bool mon_wlan_hal_dwpal::update_radio_stats(SRadioStats &radio_stats)
         }
     }
 
-    calc_curr_traffic((uint64_t)BytesSent, radio_stats.tx_bytes_cnt, radio_stats.tx_bytes);
-    calc_curr_traffic((uint64_t)BytesReceived, radio_stats.rx_bytes_cnt, radio_stats.rx_bytes);
-    calc_curr_traffic((uint64_t)PacketsSent, radio_stats.tx_packets_cnt, radio_stats.tx_packets);
-    calc_curr_traffic((uint64_t)PacketsReceived, radio_stats.rx_packets_cnt,
-                      radio_stats.rx_packets);
+    calc_curr_traffic(BytesSent, radio_stats.tx_bytes_cnt, radio_stats.tx_bytes);
+    calc_curr_traffic(BytesReceived, radio_stats.rx_bytes_cnt, radio_stats.rx_bytes);
+    calc_curr_traffic(PacketsSent, radio_stats.tx_packets_cnt, radio_stats.tx_packets);
+    calc_curr_traffic(PacketsReceived, radio_stats.rx_packets_cnt, radio_stats.rx_packets);
 
     return true;
 }
@@ -677,92 +661,88 @@ bool mon_wlan_hal_dwpal::update_vap_stats(const std::string &vap_iface_name, SVa
 bool mon_wlan_hal_dwpal::update_stations_stats(const std::string &vap_iface_name,
                                                const std::string &sta_mac, SStaStats &sta_stats)
 {
-    char *reply = nullptr;
+    const char *tmp_str;
+    int64_t tmp_int;
+    parsed_line_t reply;
 
     std::string cmd = "GET_STA_MEASUREMENTS " + vap_iface_name + " " + sta_mac;
 
-    if (!dwpal_send_cmd(cmd, &reply)) {
+    if (!dwpal_send_cmd(cmd, reply)) {
         LOG(ERROR) << __func__ << " failed";
         return false;
     }
 
-    size_t numOfValidArgs[10] = {0}, replyLen = strnlen(reply, HOSTAPD_TO_DWPAL_MSG_LENGTH);
-    uint64_t BytesSent = 0, BytesReceived = 0, PacketsSent = 0, PacketsReceived = 0,
-             LastDataDownlinkRate = 0, LastDataUplinkRate = 0, Active = 0;
-    char ShortTermRSSIAverage[32][HOSTAPD_TO_DWPAL_VALUE_STRING_LENGTH] = {'\0'};
-    char SNR[32][HOSTAPD_TO_DWPAL_VALUE_STRING_LENGTH]                  = {'\0'};
-    FieldsToParse fieldsToParse[]                                       = {
-        {(void *)&BytesSent, &numOfValidArgs[0], DWPAL_LONG_LONG_INT_PARAM, "BytesSent=", 0},
-        {(void *)&BytesReceived, &numOfValidArgs[1], DWPAL_LONG_LONG_INT_PARAM,
-         "BytesReceived=", 0},
-        {(void *)&PacketsSent, &numOfValidArgs[2], DWPAL_LONG_LONG_INT_PARAM, "PacketsSent=", 0},
-        {(void *)&PacketsReceived, &numOfValidArgs[3], DWPAL_LONG_LONG_INT_PARAM,
-         "PacketsReceived=", 0},
-        {(void *)&sta_stats.retrans_count, &numOfValidArgs[4], DWPAL_INT_PARAM, "RetransCount=", 0},
-        {(void *)ShortTermRSSIAverage, &numOfValidArgs[5], DWPAL_STR_ARRAY_PARAM,
-         "ShortTermRSSIAverage=", sizeof(ShortTermRSSIAverage)},
-        {(void *)SNR, &numOfValidArgs[6], DWPAL_STR_ARRAY_PARAM, "SNR=", sizeof(SNR)},
-        {(void *)&Active, &numOfValidArgs[7], DWPAL_LONG_LONG_INT_PARAM, "Active=", 0},
-        {(void *)&LastDataDownlinkRate, &numOfValidArgs[8], DWPAL_LONG_LONG_INT_PARAM,
-         "LastDataDownlinkRate=", 0},
-        {(void *)&LastDataUplinkRate, &numOfValidArgs[9], DWPAL_LONG_LONG_INT_PARAM,
-         "LastDataUplinkRate=", 0},
-
-        /* Must be at the end */
-        {NULL, NULL, DWPAL_NUM_OF_PARSING_TYPES, NULL, 0}};
-
-    if (dwpal_string_to_struct_parse(reply, replyLen, fieldsToParse, sizeof(SStaStats)) ==
-        DWPAL_FAILURE) {
-        LOG(ERROR) << "DWPAL parse error ==> Abort";
+    // RSSI
+    if (!read_param("ShortTermRSSIAverage", reply, &tmp_str)) {
+        LOG(ERROR) << "Failed reading ShortTermRSSIAverage parameter!";
         return false;
     }
-
-    /* TEMP: Traces... */
-    // LOG(DEBUG) << "GET_STA_MEASUREMENTS reply= \n" << reply;
-    // LOG(DEBUG) << "numOfValidArgs[0]= " << numOfValidArgs[0] << " BytesSent= " << BytesSent;
-    // LOG(DEBUG) << "numOfValidArgs[1]= " << numOfValidArgs[1] << " BytesReceived= " << BytesReceived;
-    // LOG(DEBUG) << "numOfValidArgs[2]= " << numOfValidArgs[2] << " PacketsSent= " << PacketsSent;
-    // LOG(DEBUG) << "numOfValidArgs[3]= " << numOfValidArgs[3] << " PacketsReceived= " << PacketsReceived;
-    // LOG(DEBUG) << "numOfValidArgs[4]= " << numOfValidArgs[4] << " RetransCount= " << sta_stats.retrans_count;
-    // LOG(DEBUG) << "numOfValidArgs[5]= " << numOfValidArgs[5] << " ShortTermRSSIAverage= " << ShortTermRSSIAverage;
-    // LOG(DEBUG) << "numOfValidArgs[6]= " << numOfValidArgs[6] << " SNR= " << SNR;
-    // LOG(DEBUG) << "numOfValidArgs[0]= " << numOfValidArgs[7] << " Active= " << Active;
-    // LOG(DEBUG) << "numOfValidArgs[7]= " << numOfValidArgs[8] << " LastDataDownlinkRate= " << LastDataDownlinkRate;
-    // LOG(DEBUG) << "numOfValidArgs[8]= " << numOfValidArgs[9] << " LastDataUplinkRate= " << LastDataUplinkRate;
-    /* End of TEMP: Traces... */
-
-    for (uint8_t i = 0; i < (sizeof(numOfValidArgs) / sizeof(size_t)); i++) {
-        if (numOfValidArgs[i] == 0) {
-            LOG(ERROR) << "Failed reading parsed parameter " << (int)i << " ==> Abort";
-            return false;
-        }
-    }
-
-    //save avarage RSSI in watt
-    for (uint8_t i = 0; i < numOfValidArgs[5]; i++) {
-        float s_float = float(beerocks::string_utils::stoi(std::string(ShortTermRSSIAverage[i])));
+    // Format "ShortTermRSSIAverage=%d %d %d %d"
+    auto samples = beerocks::string_utils::str_split(tmp_str, ' ');
+    for (const auto &s : samples) {
+        float s_float = float(beerocks::string_utils::stoi(s));
         if (s_float > beerocks::RSSI_MIN) {
             sta_stats.rx_rssi_watt += std::pow(10, s_float / float(10));
             sta_stats.rx_rssi_watt_samples_cnt++;
         }
     }
 
-    //save avarage SNR in watt
-    for (uint8_t i = 0; i < numOfValidArgs[6]; i++) {
-        float s_float = float(beerocks::string_utils::stoi(std::string(SNR[i])));
-        if (s_float > beerocks::SNR_MIN) {
+    // SNR
+    if (!read_param("SNR", reply, &tmp_str)) {
+        LOG(ERROR) << "Failed reading SNR parameter!";
+        return false;
+    }
+    // Format "SNR=%d %d %d %d"
+    samples = beerocks::string_utils::str_split(tmp_str, ' ');
+    for (const auto &s : samples) {
+        float s_float = float(beerocks::string_utils::stoi(s));
+        if (s_float >= beerocks::SNR_MIN) {
             sta_stats.rx_snr_watt += std::pow(10, s_float / float(10));
             sta_stats.rx_snr_watt_samples_cnt++;
         }
     }
 
-    // TODO: Update RSSI externally!
-    sta_stats.tx_phy_rate_100kb = (LastDataDownlinkRate / 100);
-    sta_stats.rx_phy_rate_100kb = (LastDataUplinkRate / 100);
-    calc_curr_traffic(BytesSent, sta_stats.tx_bytes_cnt, sta_stats.tx_bytes);
-    calc_curr_traffic(BytesReceived, sta_stats.rx_bytes_cnt, sta_stats.rx_bytes);
-    calc_curr_traffic(PacketsSent, sta_stats.tx_packets_cnt, sta_stats.tx_packets);
-    calc_curr_traffic(PacketsReceived, sta_stats.rx_packets_cnt, sta_stats.rx_packets);
+    // Last Downlink (TX) Rate
+    if (!read_param("LastDataDownlinkRate", reply, tmp_int)) {
+        LOG(ERROR) << "Failed reading LastDataDownlinkRate parameter!";
+        return false;
+    }
+    sta_stats.tx_phy_rate_100kb = (tmp_int / 100);
+
+    // Last Uplink (RX) Rate
+    if (!read_param("LastDataUplinkRate", reply, tmp_int)) {
+        LOG(ERROR) << "Failed reading LastDataUplinkRate parameter!";
+        return false;
+    }
+    sta_stats.rx_phy_rate_100kb = (tmp_int / 100);
+
+    // TX Bytes
+    if (!read_param("BytesSent", reply, tmp_int)) {
+        LOG(ERROR) << "Failed reading BytesSent parameter!";
+        return false;
+    }
+    calc_curr_traffic(tmp_int, sta_stats.tx_bytes_cnt, sta_stats.tx_bytes);
+
+    // RX Bytes
+    if (!read_param("BytesReceived", reply, tmp_int)) {
+        LOG(ERROR) << "Failed reading BytesReceived parameter!";
+        return false;
+    }
+    calc_curr_traffic(tmp_int, sta_stats.rx_bytes_cnt, sta_stats.rx_bytes);
+
+    // TX Packets
+    if (!read_param("PacketsSent", reply, tmp_int)) {
+        LOG(ERROR) << "Failed reading PacketsSent parameter!";
+        return false;
+    }
+    calc_curr_traffic(tmp_int, sta_stats.rx_packets_cnt, sta_stats.rx_packets);
+
+    // Retranmission Count
+    if (!read_param("RetransCount", reply, tmp_int, true)) {
+        LOG(ERROR) << "Failed reading RetransCount parameter!";
+        return false;
+    }
+    sta_stats.retrans_count = tmp_int;
 
     return true;
 }
@@ -888,12 +868,6 @@ bool mon_wlan_hal_dwpal::sta_beacon_11k_request(const SBeaconRequest11k &req, in
         }
     }
 
-    return true;
-}
-
-bool mon_wlan_hal_dwpal::sta_statistics_11k_request(const SStatisticsRequest11k &req)
-{
-    LOG(TRACE) << __func__;
     return true;
 }
 
@@ -1309,9 +1283,6 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
         event_queue_push(Event::STA_Disconnected, msg_buff); // send message to the AP manager
         break;
     }
-
-    case Event::RRM_STA_Statistics_Response:
-    case Event::RRM_Link_Measurement_Response:
     case Event::RRM_Channel_Load_Response:
         break;
     // Gracefully ignore unhandled events
@@ -1327,21 +1298,23 @@ bool mon_wlan_hal_dwpal::process_dwpal_event(char *buffer, int bufLen, const std
 
 bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
 {
-    struct nlmsghdr *nlh     = nlmsg_hdr(msg);
-    struct genlmsghdr *gnlh  = (genlmsghdr *)nlmsg_data(nlh);
-    char ifname[IF_NAMESIZE] = "\0";
+    struct nlmsghdr *nlh    = nlmsg_hdr(msg);
+    struct genlmsghdr *gnlh = (genlmsghdr *)nlmsg_data(nlh);
+    std::string iface_name;
+
     struct nlattr *tb[NL80211_ATTR_MAX + 1];
     nla_parse(tb, NL80211_ATTR_MAX, genlmsg_attrdata(gnlh, 0), genlmsg_attrlen(gnlh, 0), NULL);
 
     if (tb[NL80211_ATTR_IFINDEX]) {
-        if_indextoname(nla_get_u32(tb[NL80211_ATTR_IFINDEX]), ifname);
+        auto index = nla_get_u32(tb[NL80211_ATTR_IFINDEX]);
+        iface_name = beerocks::net::network_utils::linux_get_iface_name(index);
     }
 
     auto event = dwpal_nl_to_bwl_event(gnlh->cmd);
 
     switch (event) {
     case Event::Channel_Scan_Triggered: {
-        if (m_radio_info.iface_name.compare(ifname) != 0) {
+        if (m_radio_info.iface_name != iface_name) {
             // ifname doesn't match current interface
             // meaning the event was recevied for a diffrent channel
             return true;
@@ -1354,64 +1327,92 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
         break;
     }
     case Event::Channel_Scan_Dump_Result: {
-        if (m_radio_info.iface_name.compare(ifname) != 0) {
+        if (m_radio_info.iface_name != iface_name) {
             // ifname doesn't match current interface
             // meaning the event was received for a diffrent channel
             return true;
         }
 
-        // We need to distinguish 1st and rest of dump events (NL80211_CMD_NEW_SCAN_RESULTS)
-        // 1st event is an empty dump result that we should reply with scan dump request.
-        // nlh->nlmsg_seq = 0 only with the 1st dump result.
-        // rest of events are the actual scan dump results that need to be parsed.
-        // unique sequence number is chosen by the nl (nlh->nlmsg_seq != 0) for the rest of events.
+        /*
+            As part of the scan results dump sequence, we always receive at least two messages.
+            NL80211_CMD_NEW_SCAN_RESULTS (Channel_Scan_Dump_Result) & SCAN_FINISH_CB
+            (Channel_Scan_Finished).
+
+            We receive the Channel_Scan_Dump_Result once to alert us that we have pending results
+            waiting, so on the first occurrence of the message, we request the rest of the dump results.
+
+            On the 2nd->Nth Channel_Scan_Dump_Result we receive a sequence number which we can use
+            to indicate the current message is part of the active dump sequence.
+
+            The last message received as part of the dump sequence is Channel_Scan_Finished, which
+            indicates that there are no more pending scan dumps.
+
+            In case we have no neighboring beacons for a particular scan we would only receive
+            the initial Channel_Scan_Dump_Result followed right after by a Channel_Scan_Finished.
+            This can cause an issue since we would not have an initial sequence number to later
+            validate against.
+
+            To solve this issue we add a "scan dump in progress flag" to verify against later on.
+        */
         if (m_nl_seq == 0) {
             if (nlh->nlmsg_seq == 0) {
+                // First "empty" Channel_Scan_Dump_Result message
                 LOG(DEBUG) << "Results dump are ready";
                 event_queue_push(Event::Channel_Scan_New_Results_Ready);
+                m_scan_dump_in_progress = true;
                 channel_scan_dump_results();
                 return true;
             } else {
+                //2nd -> Nth Channel_Scan_Dump_Result
                 LOG(DEBUG) << "Results dump new sequence:" << int(nlh->nlmsg_seq);
                 m_nl_seq = nlh->nlmsg_seq;
             }
         }
 
-        if (m_nl_seq == nlh->nlmsg_seq) {
-            LOG(DEBUG) << "DWPAL NL event channel scan results dump, seq = " << int(nlh->nlmsg_seq);
-
-            auto results = std::make_shared<sCHANNEL_SCAN_RESULTS_NOTIFICATION>();
-
-            if (!get_scan_results_from_nl_msg(results->channel_scan_results, msg)) {
-                LOG(ERROR) << "read NL msg to monitor msg failed!";
-                return false;
-            }
-            LOG(DEBUG) << "Processing results for BSSID:" << results->channel_scan_results.bssid;
-            event_queue_push(event, results);
-        } else {
+        // Check if current Channel_Scan_Dump_Result is part of the dump sequence.
+        if (m_nl_seq != nlh->nlmsg_seq) {
             LOG(ERROR) << "channel scan results dump received with unexpected seq number";
             return false;
         }
+
+        LOG(DEBUG) << "DWPAL NL event channel scan results dump, seq = " << int(nlh->nlmsg_seq);
+
+        auto results = std::make_shared<sCHANNEL_SCAN_RESULTS_NOTIFICATION>();
+
+        if (!get_scan_results_from_nl_msg(results->channel_scan_results, msg)) {
+            LOG(ERROR) << "read NL msg to monitor msg failed!";
+            return false;
+        }
+
+        LOG(DEBUG) << "Processing results for BSSID:" << results->channel_scan_results.bssid;
+        event_queue_push(event, results);
         break;
     }
     case Event::Channel_Scan_Abort: {
 
-        if (m_radio_info.iface_name.compare(ifname) != 0) {
+        if (m_radio_info.iface_name != iface_name) {
             // ifname doesn't match current interface
             // meaning the event was recevied for a diffrent channel
             return true;
         }
         LOG(DEBUG) << "DWPAL NL event channel scan aborted";
 
-        //zero sequence number for next scan
-        m_nl_seq = 0;
-
+        //reset scan indicators for next scan
+        m_nl_seq                = 0;
+        m_scan_dump_in_progress = false;
         event_queue_push(event);
         break;
     }
     case Event::Channel_Scan_Finished: {
-        // ifname is corrupted for Channel_Scan_Finished event using nlh->nlmsg_seq instead.
-        if (nlh->nlmsg_seq != m_nl_seq) {
+
+        // We are not in a dump sequence, ignoring the message
+        if (!m_scan_dump_in_progress) {
+            return true;
+        }
+
+        // ifname is invalid  for Channel_Scan_Finished event using nlh->nlmsg_seq instead.
+        // In case there are no results first check if current sequence number was set.
+        if (m_nl_seq != 0 && nlh->nlmsg_seq != m_nl_seq) {
             // Current event has a sequence number not matching the current sequence number
             // meaning the event was recevied for a diffrent channel
             return true;
@@ -1420,9 +1421,9 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
         LOG(DEBUG) << "DWPAL NL event channel scan results finished for sequence: "
                    << (int)nlh->nlmsg_seq;
 
-        //zero sequence number for next scan
-        m_nl_seq = 0;
-
+        //reset scan indicators for next scan
+        m_nl_seq                = 0;
+        m_scan_dump_in_progress = false;
         event_queue_push(event);
         break;
     }
@@ -1436,10 +1437,11 @@ bool mon_wlan_hal_dwpal::process_dwpal_nl_event(struct nl_msg *msg)
 
 } // namespace dwpal
 
-std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(std::string iface_name,
-                                                  base_wlan_hal::hal_event_cb_t callback)
+std::shared_ptr<mon_wlan_hal> mon_wlan_hal_create(const std::string &iface_name,
+                                                  base_wlan_hal::hal_event_cb_t callback,
+                                                  const bwl::hal_conf_t &hal_conf)
 {
-    return std::make_shared<dwpal::mon_wlan_hal_dwpal>(iface_name, callback);
+    return std::make_shared<dwpal::mon_wlan_hal_dwpal>(iface_name, callback, hal_conf);
 }
 
 } // namespace bwl

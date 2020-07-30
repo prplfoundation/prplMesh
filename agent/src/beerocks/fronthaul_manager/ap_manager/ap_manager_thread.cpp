@@ -8,9 +8,11 @@
 
 #include "ap_manager_thread.h"
 
+#include <bcl/beerocks_string_utils.h>
 #include <bcl/beerocks_utils.h>
 #include <bcl/network/network_utils.h>
 #include <bcl/son/son_wireless_utils.h>
+#include <bpl/bpl_cfg.h>
 #include <easylogging++.h>
 
 #include <beerocks/tlvf/beerocks_message.h>
@@ -78,8 +80,8 @@ static void copy_vaps_info(std::shared_ptr<bwl::ap_wlan_hal> &ap_wlan_hal,
 
             // Copy the VAP MAC and SSID
             vaps[i].mac = tlvf::mac_from_string(curr_vap.mac);
-            mapf::utils::copy_string(vaps[i].ssid, curr_vap.ssid.c_str(),
-                                     beerocks::message::WIFI_SSID_MAX_LENGTH);
+            beerocks::string_utils::copy_string(vaps[i].ssid, curr_vap.ssid.c_str(),
+                                                beerocks::message::WIFI_SSID_MAX_LENGTH);
         }
     }
 }
@@ -112,6 +114,11 @@ bool ap_manager_thread::create_ap_wlan_hal()
 
     bwl::hal_conf_t hal_conf;
     hal_conf.ap_acs_enabled = acs_enabled;
+
+    if (!beerocks::bpl::bpl_cfg_get_hostapd_ctrl_path(m_iface, hal_conf.wpa_ctrl_path)) {
+        LOG(ERROR) << "Couldn't get hostapd control path for interface " << m_iface;
+        return false;
+    }
 
     // Create a new AP HAL instance
     ap_wlan_hal = bwl::ap_wlan_hal_create(
@@ -886,8 +893,8 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
             // value set to one (see Table 4), it shall tear down all currently operating BSS(s)
             // on the radio indicated by the Radio Unique Identifier, and shall ignore the other
             // attributes in the M2.
-            auto bss_type = static_cast<WSC::eWscVendorExtSubelementBssType>(
-                config_data.multiap_attr().subelement_value);
+            auto bss_type =
+                static_cast<WSC::eWscVendorExtSubelementBssType>(config_data.bss_type());
             if ((bss_type & WSC::eWscVendorExtSubelementBssType::TEARDOWN) != 0) {
                 LOG(DEBUG) << "received teardown";
                 bss_info_conf_list.clear();
@@ -1477,11 +1484,11 @@ void ap_manager_thread::handle_hostapd_attached()
         return;
     }
 
-    mapf::utils::copy_string(notification->params().iface_name,
-                             ap_wlan_hal->get_iface_name().c_str(), message::IFACE_NAME_LENGTH);
-    mapf::utils::copy_string(notification->params().driver_version,
-                             ap_wlan_hal->get_radio_driver_version().c_str(),
-                             message::WIFI_DRIVER_VER_LENGTH);
+    string_utils::copy_string(notification->params().iface_name,
+                              ap_wlan_hal->get_iface_name().c_str(), message::IFACE_NAME_LENGTH);
+    string_utils::copy_string(notification->params().driver_version,
+                              ap_wlan_hal->get_radio_driver_version().c_str(),
+                              message::WIFI_DRIVER_VER_LENGTH);
 
     notification->params().iface_type    = uint8_t(ap_wlan_hal->get_iface_type());
     notification->params().iface_mac     = tlvf::mac_from_string(ap_wlan_hal->get_radio_mac());
@@ -1632,8 +1639,8 @@ bool ap_manager_thread::handle_ap_enabled(int vap_id)
 
     // Copy the VAP MAC and SSID
     notification->vap_info().mac = tlvf::mac_from_string(vap_info.mac);
-    mapf::utils::copy_string(notification->vap_info().ssid, vap_info.ssid.c_str(),
-                             beerocks::message::WIFI_SSID_MAX_LENGTH);
+    string_utils::copy_string(notification->vap_info().ssid, vap_info.ssid.c_str(),
+                              beerocks::message::WIFI_SSID_MAX_LENGTH);
     notification->vap_info().backhaul_vap = vap_info.backhaul;
 
     message_com::send_cmdu(slave_socket, cmdu_tx);

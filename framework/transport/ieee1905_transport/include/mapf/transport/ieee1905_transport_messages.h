@@ -9,11 +9,15 @@
 #ifndef MAP_IEEE1905_TRANSPORT_MESSAGES_H_
 #define MAP_IEEE1905_TRANSPORT_MESSAGES_H_
 
-#include <mapf/common/message.h>
+#include <bcl/network/socket.h>
+#include <mapf/common/err.h>
 
-#include <iomanip>
 #include <net/if.h>
 #include <netinet/ether.h>
+
+#include <algorithm>
+#include <iomanip>
+#include <memory>
 #include <sstream>
 
 #ifndef ETH_P_1905_1
@@ -23,7 +27,122 @@
 #define ETH_P_LLDP 0x88CC
 #endif
 
-namespace mapf {
+namespace beerocks {
+namespace transport {
+namespace messages {
+
+/**
+ * Transport internal message types
+ */
+enum class Type {
+    Invalid                                 = 0,
+    CmduRxMessage                           = 1,
+    CmduTxMessage                           = 2,
+    SubscribeMessage                        = 3,
+    CmduTxConfirmationMessage               = 4,
+    InterfaceConfigurationQueryMessage      = 5,
+    InterfaceConfigurationRequestMessage    = 6,
+    InterfaceConfigurationIndicationMessage = 7
+};
+
+class Message {
+public:
+    static constexpr uint32_t kMessageMagic   = 0xB8C16F47;
+    static constexpr uint32_t kMaxFrameLength = 0x100000; // 100kb max for now
+
+    class Frame {
+    public:
+        explicit Frame(size_t len, const void *init_data = nullptr)
+            : data_(std::make_shared<std::vector<uint8_t>>(
+                  (len < kMaxFrameLength) ? len : kMaxFrameLength))
+        {
+            if (init_data)
+                set_data(init_data, len);
+        }
+
+        Frame() : Frame(0) {}
+        virtual ~Frame() = default;
+
+        size_t len() const { return data_->size(); }
+
+        uint8_t *data() const { return data_->data(); }
+        std::string str() const { return std::string(reinterpret_cast<char *>(data()), len()); }
+
+        void set_size(size_t size) { data_->resize(size); }
+
+        void set_data(const void *data, size_t len)
+        {
+            set_size(len);
+            std::copy_n((uint8_t *)data, len, data_->data());
+        }
+
+        virtual std::ostream &print(std::ostream &os) const
+        {
+            return os << "size=" << len() << " use_count=" << data_.use_count();
+        }
+
+    private:
+        std::shared_ptr<std::vector<uint8_t>> data_ = nullptr;
+    }; // class Frame
+
+    struct Header {
+        uint32_t magic = kMessageMagic; // magic value
+        uint32_t type  = 0;             // message type
+        uint32_t len   = 0;             // total length of the message (excluding topic & header)
+    };
+
+    Message() {}
+
+    explicit Message(Type type) : m_type(type) {}
+
+    Message(Type type, std::initializer_list<Frame> frames) : Message(type)
+    {
+        for (auto f : frames)
+            Add(f);
+    }
+
+    virtual ~Message() = default;
+
+    void Add(Frame &frame) { m_frames.push_back(frame); }
+
+    void Clear() { m_frames.clear(); }
+
+    // Get the first frame
+    Frame frame() const { return m_frames.empty() ? Frame() : m_frames.back(); }
+
+    // Accessors & Mutators
+    const Header header() const
+    {
+        Header hdr;
+        hdr.type = uint32_t(m_type);
+        for (const auto &f : m_frames)
+            hdr.len += f.len();
+        return hdr;
+    }
+
+    uint32_t len() const { return header().len; }
+    Type type() const { return m_type; }
+
+    std::vector<Frame> &frames() const { return m_frames; }
+
+    virtual std::ostream &print(std::ostream &os) const
+    {
+        std::stringstream ss;
+        ss << " type    : " << uint32_t(type()) << std::endl;
+        ss << " len     : " << len() << std::endl;
+        ss << " frames  : " << m_frames.size() << std::endl;
+
+        return os << ss.str();
+    }
+
+private:
+    Type m_type = Type::Invalid;
+    mutable std::vector<Frame> m_frames;
+};
+
+inline std::ostream &operator<<(std::ostream &os, const Message::Frame &f) { return f.print(os); }
+
+inline std::ostream &operator<<(std::ostream &os, const Message &m) { return m.print(os); }
 
 // Notes:
 //
@@ -57,12 +176,8 @@ public:
             0; // payload length (including IEEE1905 header, excluding Ethernet header)
     };
 
-    CmduXxMessage() : CmduXxMessage("", {}) {}
-
-    CmduXxMessage(const std::string &topic) : CmduXxMessage(topic, {}) {}
-
-    CmduXxMessage(const std::string &topic, std::initializer_list<Frame> frames)
-        : Message(topic, frames)
+    explicit CmduXxMessage(Type type, std::initializer_list<Frame> frames = {})
+        : Message(type, frames)
     {
         // maximum one frame is allowed (if none are given we will allocate one below)
         mapf_assert(this->frames().size() <= 1);
@@ -75,14 +190,7 @@ public:
         }
     }
 
-    virtual const std::string topic_prefix() const = 0;
-
-    virtual const std::string topic() const
-    {
-        return build_topic(topic_prefix(), metadata()->ether_type, metadata()->msg_type);
-    }
-
-    Metadata *metadata() const { return (Metadata *)frames().back().data(); };
+    Metadata *metadata() const { return reinterpret_cast<Metadata *>(frames().back().data()); };
 
     uint8_t *data() const
     {
@@ -92,7 +200,7 @@ public:
         return frames().back().data() + sizeof(Metadata);
     };
 
-    virtual std::ostream &print(std::ostream &os) const
+    virtual std::ostream &print(std::ostream &os) const override
     {
         Message::print(os);
 
@@ -127,70 +235,64 @@ public:
 
         return os << ss.str();
     }
-
-protected:
-    static const std::string build_topic(const std::string prefix, uint16_t ether_type,
-                                         uint16_t msg_type)
-    {
-        std::ostringstream topic;
-        topic << prefix << std::setfill('0') << std::setw(4) << std::hex << ether_type << "."
-              << std::setfill('0') << std::setw(4) << std::hex << msg_type;
-        return topic.str();
-    }
 };
 
 class CmduRxMessage : public CmduXxMessage {
-    using CmduXxMessage::CmduXxMessage; // inherit base class constructors
-
 public:
-    static const std::string kTopicPrefix;
-
-    virtual const std::string topic_prefix() const override { return kTopicPrefix; }
-
-    static const std::string ieee1905_topic(uint16_t msg_type)
+    explicit CmduRxMessage(std::initializer_list<Frame> frame = {})
+        : CmduXxMessage(Type::CmduRxMessage, frame)
     {
-        return build_topic(kTopicPrefix, ETH_P_1905_1, msg_type);
     }
-
-    static const std::string lldp_topic() { return build_topic(kTopicPrefix, ETH_P_LLDP, 0x0000); }
 };
 
 class CmduTxMessage : public CmduXxMessage {
-    using CmduXxMessage::CmduXxMessage; // inherit base class constructors
-
 public:
-    static const std::string kTopicPrefix;
-
-    virtual const std::string topic_prefix() const override { return kTopicPrefix; }
+    explicit CmduTxMessage(std::initializer_list<Frame> frame = {})
+        : CmduXxMessage(Type::CmduTxMessage, frame)
+    {
+    }
 };
 
-class CmduTxConfirmationMessage : public Message {
+class SubscribeMessage : public Message {
     static const uint8_t kVersion = 0;
 
 public:
-    static const std::string kTopicPrefix;
+    /**
+     * Maximal number of types for a single subscribe/unsubscribe message
+     */
+    static constexpr uint8_t MAX_SUBSCRIBE_TYPES = 64;
 
-    struct Metadata {
-        uint8_t version = kVersion;
-        uint16_t cookie =
-            0; // The cookie value copied from the CmduTxMessage that triggered this confirmation
-        uint16_t ether_type =
-            0; // The ether_type value copied from the CmduTxMessage that triggered this confirmation
-        uint16_t msg_type =
-            0; // The msg_type value copied from the CmduTxMessage that triggered this confirmation
-        uint16_t msg_id =
-            0; // The IEEE1905 messageId used by the IEEE1905 Transport to send the CmduTxMessage that triggered this confirmation
+    /**
+     * The type of the request
+     */
+    enum class ReqType : uint8_t {
+        INVALID     = 0,
+        SUBSCRIBE   = 1,
+        UNSUBSCRIBE = 2,
     };
 
-    CmduTxConfirmationMessage() : CmduTxConfirmationMessage("", {}) {}
+    /**
+     * Message type to subscribe/unsubscribe
+     */
+    union MsgType {
+        struct {
+            uint32_t internal : 1;        // 0 - external [cmdu], 1 - internal
+            uint32_t vendor_specific : 1; // 0 - easymesh, 1 - vendor specific
+            uint32_t reserved : 14;       // unused
+            uint32_t type : 16;           // message type (opcode)
+        } bits;
+        uint32_t value = 0;
+    };
 
-    explicit CmduTxConfirmationMessage(const std::string &topic)
-        : CmduTxConfirmationMessage(topic, {})
-    {
-    }
+    struct Metadata {
+        uint8_t version         = kVersion;
+        ReqType type            = ReqType::INVALID;
+        uint8_t msg_types_count = 0;
+        MsgType msg_types[MAX_SUBSCRIBE_TYPES];
+    };
 
-    CmduTxConfirmationMessage(const std::string &topic, std::initializer_list<Frame> frames)
-        : Message(topic, frames)
+    explicit SubscribeMessage(std::initializer_list<Frame> frames = {})
+        : Message(Type::SubscribeMessage, frames)
     {
         // maximum one frame is allowed (if none are given we will allocate one below)
         mapf_assert(this->frames().size() <= 1);
@@ -203,26 +305,71 @@ public:
         }
     }
 
-    virtual const std::string topic_prefix() const { return kTopicPrefix; }
-
-    virtual const std::string topic() const
+    Metadata *metadata() const
     {
-        return build_topic(topic_prefix(), metadata()->ether_type, metadata()->msg_type);
+        mapf_assert(!frames().empty());
+
+        return reinterpret_cast<Metadata *>(frames().back().data());
+    };
+
+    virtual std::ostream &print(std::ostream &os) const override
+    {
+        Message::print(os);
+
+        Metadata *m = metadata();
+        os << " metadata:" << std::endl;
+        os << "  version         : " << static_cast<int>(m->version) << std::endl;
+        os << "  type            : " << static_cast<int>(m->type) << std::endl;
+        os << "  msg_types_count : " << std::dec << int(m->msg_types_count) << std::endl;
+        os << "  msg_types       : " << std::hex << std::setfill('0') << std::setw(4)
+           << m->msg_types[0].value;
+        for (int i = 1; i < m->msg_types_count; i++) {
+            os << ", " << m->msg_types[i].value;
+        }
+        os << std::endl;
+
+        return os;
     }
+};
 
-    static const std::string ieee1905_topic(uint16_t msg_type)
+class CmduTxConfirmationMessage : public Message {
+    static const uint8_t kVersion = 0;
+
+public:
+    struct Metadata {
+        uint8_t version = kVersion;
+        uint16_t cookie =
+            0; // The cookie value copied from the CmduTxMessage that triggered this confirmation
+        uint16_t ether_type =
+            0; // The ether_type value copied from the CmduTxMessage that triggered this confirmation
+        uint16_t msg_type =
+            0; // The msg_type value copied from the CmduTxMessage that triggered this confirmation
+        uint16_t msg_id =
+            0; // The IEEE1905 messageId used by the IEEE1905 Transport to send the CmduTxMessage that triggered this confirmation
+    };
+
+    explicit CmduTxConfirmationMessage(std::initializer_list<Frame> frames = {})
+        : Message(Type::CmduTxConfirmationMessage, frames)
     {
-        return build_topic(kTopicPrefix, ETH_P_1905_1, msg_type);
+        // maximum one frame is allowed (if none are given we will allocate one below)
+        mapf_assert(this->frames().size() <= 1);
+
+        if (this->frames().empty()) {
+            Message::Frame frame(sizeof(Metadata));
+            Add(frame);
+        } else if (this->frames().back().len() < sizeof(Metadata)) {
+            this->frames().back().set_size(sizeof(Metadata));
+        }
     }
 
     Metadata *metadata() const
     {
         mapf_assert(!frames().empty());
 
-        return (Metadata *)frames().back().data();
+        return reinterpret_cast<Metadata *>(frames().back().data());
     };
 
-    virtual std::ostream &print(std::ostream &os) const
+    virtual std::ostream &print(std::ostream &os) const override
     {
         Message::print(os);
 
@@ -240,25 +387,16 @@ public:
 
         return os << ss.str();
     }
-
-protected:
-    static const std::string build_topic(const std::string prefix, uint16_t ether_type,
-                                         uint16_t msg_type)
-    {
-        std::ostringstream topic;
-        topic << prefix << std::setfill('0') << std::setw(4) << std::hex << ether_type << "."
-              << std::setfill('0') << std::setw(4) << std::hex << msg_type;
-        return topic.str();
-    }
 };
 
 class InterfaceConfigurationQueryMessage : public Message {
-    using Message::Message; // inherit base class constructors
-
 public:
-    static const std::string kTopicPrefix;
+    explicit InterfaceConfigurationQueryMessage(std::initializer_list<Frame> frames = {})
+        : Message(Type::InterfaceConfigurationQueryMessage, frames)
+    {
+    }
 
-    virtual const std::string topic_prefix() const { return kTopicPrefix; }
+    virtual ~InterfaceConfigurationQueryMessage() = default;
 };
 
 class InterfaceConfigurationMessage : public Message {
@@ -285,15 +423,8 @@ public:
         Interface interfaces[kMaxInterfaces];
     };
 
-    InterfaceConfigurationMessage() : InterfaceConfigurationMessage("", {}) {}
-
-    InterfaceConfigurationMessage(const std::string &topic)
-        : InterfaceConfigurationMessage(topic, {})
-    {
-    }
-
-    InterfaceConfigurationMessage(const std::string &topic, std::initializer_list<Frame> frames)
-        : Message(topic, frames)
+    explicit InterfaceConfigurationMessage(Type type, std::initializer_list<Frame> frames)
+        : Message(type, frames)
     {
         // maximum one frame is allowed (if none are given we will allocate one below)
         mapf_assert(this->frames().size() <= 1);
@@ -306,9 +437,9 @@ public:
         }
     }
 
-    Metadata *metadata() const { return (Metadata *)frames().back().data(); };
+    Metadata *metadata() const { return reinterpret_cast<Metadata *>(frames().back().data()); };
 
-    virtual std::ostream &print(std::ostream &os) const
+    virtual std::ostream &print(std::ostream &os) const override
     {
         Message::print(os);
 
@@ -328,31 +459,49 @@ public:
 
         return os << ss.str();
     }
-
-    virtual const std::string topic_prefix() const = 0;
-    virtual const std::string topic() const { return topic_prefix(); }
 };
 
 class InterfaceConfigurationRequestMessage : public InterfaceConfigurationMessage {
-    using InterfaceConfigurationMessage::
-        InterfaceConfigurationMessage; // inherit base class constructors
-
 public:
-    static const std::string kTopicPrefix;
-
-    virtual const std::string topic_prefix() const override { return kTopicPrefix; }
+    explicit InterfaceConfigurationRequestMessage(std::initializer_list<Frame> frames = {})
+        : InterfaceConfigurationMessage(Type::InterfaceConfigurationRequestMessage, frames)
+    {
+    }
 };
-// same as InterfaceConfigurationRequestMessage - only with different topic
+
+// same as InterfaceConfigurationRequestMessage - only with different type
 class InterfaceConfigurationIndicationMessage : public InterfaceConfigurationMessage {
-    using InterfaceConfigurationMessage::
-        InterfaceConfigurationMessage; // inherit base class constructors
-
 public:
-    static const std::string kTopicPrefix;
-
-    virtual const std::string topic_prefix() const override { return kTopicPrefix; }
+    explicit InterfaceConfigurationIndicationMessage(std::initializer_list<Frame> frames = {})
+        : InterfaceConfigurationMessage(Type::InterfaceConfigurationIndicationMessage, frames)
+    {
+    }
 };
 
-}; // namespace mapf
+/**
+ * @brief Read and parse internal transport message from a socket.
+ * 
+ * @param [in] sd Socket of the incoming message.
+ * 
+ * @return Unique pointer to the received message object or nullptr on error.
+ */
+std::unique_ptr<Message> read_transport_message(Socket &sd);
+
+/**
+ * @brief Send internal message to a socket.
+ * 
+ * @param [in] sd Socket for sending the message.
+ * @param [in] msg The message to send.
+ * @param [in] header OPTIONAL: Pointer to a custom header. 
+ *                    Calculated automatically if not provided.
+ * 
+ * @return true on success of false otherwise.
+ */
+bool send_transport_message(Socket &sd, const Message &msg,
+                            const Message::Header *header = nullptr);
+
+} // namespace messages
+} // namespace transport
+} // namespace beerocks
 
 #endif // MAP_IEEE1905_TRANSPORT_MESSAGES_H_

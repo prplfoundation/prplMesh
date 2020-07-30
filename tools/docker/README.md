@@ -67,13 +67,13 @@ Build prplMesh (build/install directory will be the only directory mapped to the
 containers).
 
 ```bash
-./maptools.py build map -f MSGLIB=zmq BUILD_TESTS=ON CMAKE_BUILD_TYPE=Debug
+./maptools.py build map BUILD_TESTS=ON CMAKE_BUILD_TYPE=Debug
 ```
 
 If you want to see more verbose build output use "--make-verbose" option
 
 ```bash
-./maptools.py build map -f MSGLIB=zmq BUILD_TESTS=ON CMAKE_BUILD_TYPE=Debug --make-verbose
+./maptools.py build map BUILD_TESTS=ON CMAKE_BUILD_TYPE=Debug --make-verbose
 ```
 
 ### Run the Containers

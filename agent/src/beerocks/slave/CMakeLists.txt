@@ -10,6 +10,7 @@ file(GLOB beerocks_agent_sources
     # [TASK] Move link metric related classes to BPL #910
     ${MODULE_PATH}/link_metrics/*.c*
     ${MODULE_PATH}/platform_manager/*.c*
+    ${MODULE_PATH}/tasks/*.c*
     ${MODULE_PATH}/gate/*.c*
     ${MODULE_PATH}/*.c*
 )
@@ -34,3 +35,34 @@ target_link_libraries(${PROJECT_NAME} rt dl bcl btl tlvf elpp btlvf bwl bpl ${LI
 
 # Install
 install(TARGETS ${PROJECT_NAME} DESTINATION ${CMAKE_INSTALL_BINDIR})
+
+# Tests
+if (BUILD_TESTS)
+    set(TEST_PROJECT_NAME ${PROJECT_NAME}_unit_tests)
+    set(unit_tests_sources
+        gate/unit_tests/gate_test.cpp
+        ${MODULE_PATH}/gate/1905_beacon_query_to_vs.cpp 
+        ${MODULE_PATH}/gate/vs_beacon_response_to_1905.cpp
+    )
+    add_executable(${TEST_PROJECT_NAME}
+        ${unit_tests_sources}
+    )
+    if (COVERAGE)
+        set_target_properties(${TEST_PROJECT_NAME} PROPERTIES COMPILE_FLAGS "--coverage -fPIC -O0")
+        set_target_properties(${TEST_PROJECT_NAME} PROPERTIES LINK_FLAGS "--coverage")
+    endif()
+    target_include_directories(${TEST_PROJECT_NAME}
+        PRIVATE
+            ${PLATFORM_INCLUDE_DIR}
+            ${CMAKE_CURRENT_SOURCE_DIR}/gate
+        PUBLIC
+            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+    )
+    target_link_libraries(${TEST_PROJECT_NAME} btlvf tlvf mapfcommon)
+    target_link_libraries(${TEST_PROJECT_NAME} gtest_main)
+    install(TARGETS ${TEST_PROJECT_NAME} DESTINATION bin/tests)
+    add_test(NAME ${TEST_PROJECT_NAME} COMMAND $<TARGET_FILE:${TEST_PROJECT_NAME}>)
+endif()
+
+
+

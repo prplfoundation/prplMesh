@@ -10,7 +10,9 @@ import argparse
 import os
 import sys
 import time
-from typing import Callable, Union
+import traceback
+from collections import Counter
+from typing import Callable, Union, Any, NoReturn
 
 import connmap
 import environment as env
@@ -77,8 +79,7 @@ class TestFlows:
         """
         debug("Checking for CMDU {}".format(msg))
         result = env.wired_sniffer.get_cmdu_capture(match_function)
-        if not result:
-            self.fail("No CMDU {} found".format(msg))
+        assert result, "No CMDU {} found".format(msg)
         return result
 
     def check_cmdu_type(
@@ -114,20 +115,20 @@ class TestFlows:
         """
         debug("Checking for CMDU {} (0x{:04x}) from {}".format(msg, msg_type, eth_src))
         result = env.wired_sniffer.get_cmdu_capture_type(msg_type, eth_src, eth_dst, mid)
-        if not result:
-            self.fail("No CMDU {} found".format(msg))
+        assert result, "No CMDU {} found".format(msg)
         return result
 
     def check_cmdu_type_single(
         self, msg: str, msg_type: int, eth_src: str, eth_dst: str = None, mid: int = None
-    ) -> Union[sniffer.Packet, None]:
+    ) -> sniffer.Packet:
         '''Like check_cmdu_type, but also check that only a single CMDU is found.'''
+        debug("Checking for single CMDU {} (0x{:04x}) from {}".format(msg, msg_type, eth_src))
         cmdus = self.check_cmdu_type(msg, msg_type, eth_src, eth_dst, mid)
         if not cmdus:
-            return None  # Failure already reported by check_cmdu
+            assert False  # Failure already reported by check_cmdu
         if len(cmdus) > 1:
             self.fail("Multiple CMDUs {} found".format(msg))
-            return None
+            assert False
         return cmdus[0]
 
     def check_no_cmdu_type(
@@ -140,10 +141,11 @@ class TestFlows:
             self.fail("Unexpected CMDU {}".format(msg))
             for packet in result:
                 debug("  {}".format(packet))
+            assert False
         return result
 
     def check_cmdu_has_tlvs(
-        self, packet: Union[sniffer.Packet, None], tlv_type: int
+        self, packet: sniffer.Packet, tlv_type: int
     ) -> [sniffer.Tlv]:
         '''Check that the packet has at least one TLV of the given type.
 
@@ -173,42 +175,38 @@ class TestFlows:
         if not tlvs:
             self.fail("No TLV of type 0x{:02x} found in packet".format(tlv_type))
             debug("  {}".format(packet))
+            assert False
         return tlvs
 
     def check_cmdu_has_tlv_single(
         self, packet: Union[sniffer.Packet, None], tlv_type: int
-    ) -> Union[sniffer.Tlv, None]:
+    ) -> sniffer.Tlv:
         '''Like check_cmdu_has_tlvs, but also check that only one TLV of that type is found.'''
         tlvs = self.check_cmdu_has_tlvs(packet, tlv_type)
         if not tlvs:
-            return None
+            assert False
         if len(tlvs) > 1:
             self.fail("More than one ({}) TLVs of type 0x{:02x} found".format(len(tlvs), tlv_type))
             debug("  {}".format(packet))
-            return None
+            assert False
         return tlvs[0]
 
     def check_cmdu_has_tlvs_exact(
         self, packet: Union[sniffer.Packet, None], tlvs: [sniffer.Tlv]
-    ) -> None:
+    ) -> NoReturn:
         '''Check that the CMDU has exactly the TLVs given.'''
-        if not packet:
-            return False
-        if not packet.ieee1905:
-            self.fail("Packet is not IEEE1905: {}".format(packet))
-            return False
+        assert packet, "Packet not found"
+        assert packet.ieee1905, "Packet is not IEEE1905: {}".format(packet)
+
         packet_tlvs = list(packet.ieee1905_tlvs)
-        result = True
         for t in tlvs:
             if t in packet_tlvs:
                 packet_tlvs.remove(t)
             else:
-                self.fail("Packet misses tlv:\n {}".format(str(t)))
-                result = False
-        if packet_tlvs:
-            self.fail("Packet has unexpected tlvs:\n {}".format("\n ".join(map(str, packet_tlvs))))
-            result = False
-        return result
+                assert False, "Packet misses tlv:\n {}".format(str(t))
+
+        assert not packet_tlvs, "Packet has unexpected tlvs:\n {}".format(
+            "\n ".join(map(str, packet_tlvs)))
 
     def check_topology_notification(self, eth_src: str, neighbors: list,
                                     sta: env.Station, event: env.StationEvent, bssid: str) -> bool:
@@ -266,6 +264,15 @@ class TestFlows:
 
         return True
 
+    def safe_check_obj_attribute(self, obj: object, attrib_name: str,
+                                 expected_val: Any, fail_str: str) -> NoReturn:
+        """Check if expected attrib exists first, fail test if it does not exist"""
+        try:
+            if getattr(obj, attrib_name) != expected_val:
+                self.fail(fail_str)
+        except AttributeError:
+            self.fail("{} has no attribute {}".format(type(obj).__name__, attrib_name))
+
     def run_tests(self, tests):
         '''Run all tests as specified on the command line.'''
         total_errors = 0
@@ -278,6 +285,18 @@ class TestFlows:
             self.check_error = 0
             try:
                 getattr(self, test_full)()
+            except AssertionError as ae:
+                # do not add empty message if test has already been marked as failed
+                # and AssertionError does not contain a message
+                if str(ae):
+                    self.fail("{}".format(ae))
+                elif not self.check_error:
+                    self.fail("Assertion failed\n{}"
+                              .format(traceback.format_exc()))
+
+            except Exception as e:
+                self.fail("Test failed unexpectedly: {}\n{}"
+                          .format(e.__repr__(), traceback.format_exc()))
             finally:
                 env.wired_sniffer.stop()
             if self.check_error != 0:
@@ -314,14 +333,25 @@ class TestFlows:
         # Step 2: config
         env.checkpoint()
         agent.cmd_reply("dev_set_config,backhaul,0x{}".format(agent.radios[0].mac.replace(':', '')))
-        # TODO
+
         # At this point, the wired backhaul should be removed from the bridge so autoconfig search
         # should still not come through.
         time.sleep(2)
-        # self.check_no_cmdu_type("autoconfig search while awaiting onboarding", 0x0007, agent.mac)
+        self.check_no_cmdu_type("autoconfig search while awaiting onboarding", 0x0007, agent.mac)
 
         # Step 3: start WPS
-        # TODO do backhaul onboarding
+        agent.cmd_reply("start_wps_registration,band,24G,WpsConfigMethod,PBC")
+
+        # TODO start WPS on CTT agent as well to complete onboarding
+        # On dummy, it does nothing anyway
+        time.sleep(2)
+
+        backhaul_mac = agent.cmd_reply(
+            "dev_get_parameter,program,map,ruid,0x{},parameter,macaddr".format(
+                agent.radios[0].mac.replace(':', ''))).get('macaddr')
+
+        # prplMesh uses the radio MAC as the backhaul MAC
+        assert backhaul_mac == agent.radios[0].mac
 
         # Clean up: reset to ethernet backhaul
         self.test_dev_reset_default()
@@ -695,17 +725,65 @@ class TestFlows:
         self.check_log(env.controller, "AP_CAPABILITY_REPORT_MESSAGE")
 
     def test_link_metric_query(self):
-        env.controller.dev_send_1905(env.agents[0].mac, 0x0005,
-                                     tlv(0x08, 0x0002, "0x00 0x02"))
+        mid = env.controller.dev_send_1905(env.agents[0].mac, 0x0005,
+                                           tlv(0x08, 0x0002, "0x00 0x02"))
         time.sleep(1)
 
-        debug("Confirming link metric query has been received on agent")
-        self.check_log(env.agents[0], "Received LINK_METRIC_QUERY_MESSAGE")
+        query = self.check_cmdu_type_single("link metric query", 0x0005,
+                                            env.controller.mac, env.agents[0].mac,
+                                            mid)
+        query_tlv = self.check_cmdu_has_tlv_single(query, 0x08)
 
-        debug("Confirming link metric response has been received on controller")
-        self.check_log(env.controller, "Received LINK_METRIC_RESPONSE_MESSAGE")
-        self.check_log(env.controller, "Received TLV_TRANSMITTER_LINK_METRIC")
-        self.check_log(env.controller, "Received TLV_RECEIVER_LINK_METRIC")
+        debug("Checking query type and queried metrics are correct")
+        self.safe_check_obj_attribute(query_tlv, 'link_metric_query_type', str(0x00),
+                                      "Query type is not 'All neighbors'")
+        self.safe_check_obj_attribute(query_tlv, 'link_metrics_requested', str(0x02),
+                                      "Metrics for both Tx and Rx is not requested")
+
+        resp = self.check_cmdu_type_single("link metric response", 0x0006,
+                                           env.agents[0].mac, env.controller.mac,
+                                           mid)
+
+        debug("Checking response contains expected links to/from agent and nothing else")
+        # neighbor macs are based on the setup in "launch_environment_docker" method
+        expected_tx_link_neighbors = [env.controller.mac, env.agents[1].mac]
+        expected_rx_link_neighbors = [env.controller.mac, env.agents[1].mac]
+        actual_tx_links = self.check_cmdu_has_tlvs(resp, 0x09)
+        actual_rx_links = self.check_cmdu_has_tlvs(resp, 0x0a)
+
+        def verify_links(links, expected_neighbors, link_type):
+            verified_neighbors = []
+            unexpected_neighbors = []
+            for link in links:
+                self.safe_check_obj_attribute(link, 'responder_mac_addr', env.agents[0].mac,
+                                              "Responder MAC address is wrong")
+
+                try:
+                    # a tshark (v3.2.4) bug causes "neighbor_mac_addr" field to
+                    # show up as "responder_mac_addr_2"
+                    if link.responder_mac_addr_2 in expected_neighbors:
+                        verified_neighbors += [link.responder_mac_addr_2]
+                    else:
+                        unexpected_neighbors += [link.responder_mac_addr_2]
+                except AttributeError as e:
+                    self.fail(e)
+
+            # we expect each neighbor to appear only once
+            for neighbor, count in Counter(verified_neighbors).items():
+                if count != 1:
+                    self.fail("{} link to neighbor {} appears {} times."
+                              "It was expected to appear only once"
+                              .format(link_type, neighbor, count))
+
+            # report any extra neighbors that show up
+            for unexpected_neighbor in unexpected_neighbors:
+                self.fail("An unexpected {} link for neighbor with MAC address {} exists"
+                          "It was expected to appear only once"
+                          .format(link_type, unexpected_neighbor))
+
+        # check responder mac is our own mac, neighbor is one of the expected macs for each link
+        verify_links(actual_tx_links, expected_tx_link_neighbors, "tx")
+        verify_links(actual_rx_links, expected_rx_link_neighbors, "rx")
 
     def test_combined_infra_metrics(self):
 
@@ -810,58 +888,83 @@ class TestFlows:
         vap1.disassociate(sta1)
         vap2.disassociate(sta2)
 
-    def test_client_capability_query(self):
-        sta1 = env.Station.create()
-        sta2 = env.Station.create()
+    def base_test_client_capability_query(self, sta: env.Station):
+        mid = env.controller.dev_send_1905(env.agents[0].mac, 0x8009, tlv(
+            0x90, 0x000C, '{} {}'.format(env.agents[0].radios[0].mac, sta.mac)))
+        time.sleep(1)
 
-        association_frame = """00 0e 4d 75 6c 74 69 2d 41 50 2d 32 34 47 2d 31
-01 08 02 04 0b 0c 12 16 18 24 21 02 00 14 30 14
-01 00 00 0f ac 04 01 00 00 0f ac 04 01 00 00 0f
-ac 02 00 00 32 04 30 48 60 6c 3b 10 51 51 53 54
-73 74 75 76 77 78 7c 7d 7e 7f 80 82 3b 16 0c 01
-02 03 04 05 0c 16 17 18 19 1a 1b 1c 1d 1e 1f 20
-21 80 81 82 46 05 70 00 00 00 00 46 05 71 50 50
-00 04 7f 0a 04 00 0a 82 21 40 00 40 80 00 dd 07
-00 50 f2 02 00 01 00 2d 1a 2d 11 03 ff ff 00 00
-00 00 00 00 00 00 00 00 00 00 00 00 00 00 18 e6
-e1 09 00 bf 0c b0 79 d1 33 fa ff 0c 03 fa ff 0c
-03 c7 01 10 """
+        query = self.check_cmdu_type_single("client capability query", 0x8009,
+                                            env.controller.mac, env.agents[0].mac, mid)
+
+        query_tlv = self.check_cmdu_has_tlv_single(query, 0x90)
+        self.safe_check_obj_attribute(query_tlv, 'client_info_mac_addr', sta.mac,
+                                      "Wrong mac address in query")
+        self.safe_check_obj_attribute(query_tlv, 'client_info_bssid',
+                                      env.agents[0].radios[0].mac,
+                                      "Wrong bssid in query")
+
+        report = self.check_cmdu_type_single("client capability report", 0x800a,
+                                             env.agents[0].mac, env.controller.mac, mid)
+
+        client_info_tlv = self.check_cmdu_has_tlv_single(report, 0x90)
+        self.safe_check_obj_attribute(client_info_tlv, 'client_info_mac_addr', sta.mac,
+                                      "Wrong mac address in report")
+        self.safe_check_obj_attribute(client_info_tlv, 'client_info_bssid',
+                                      env.agents[0].radios[0].mac,
+                                      "Wrong bssid in report")
+        return report
+
+    def test_client_capability_query_fails_with_no_sta(self):
+        sta = env.Station.create()
 
         debug("Send client capability query for unconnected STA")
-        env.controller.dev_send_1905(env.agents[0].mac, 0x8009,
-                                     tlv(0x90, 0x000C,
-                                         '{} {}'.format(env.agents[0].radios[0].mac, sta1.mac)))
-        time.sleep(1)
-        debug("Confirming client capability query has been received on agent")
-        # check that both radio agents received it, in the future we'll add a check to verify which
-        # radio the query was intended for.
-        self.check_log(env.agents[0], r"CLIENT_CAPABILITY_QUERY_MESSAGE")
+        report = self.base_test_client_capability_query(sta)
 
-        debug("Confirming client capability report message has been received on controller")
-        self.check_log(env.controller, r"Received CLIENT_CAPABILITY_REPORT_MESSAGE")
-        self.check_log(env.controller,
-                       r"Result Code= FAILURE, client MAC= {}, BSSID= {}"
-                       .format(sta1.mac, env.agents[0].radios[0].mac))
+        cap_report_tlv = self.check_cmdu_has_tlv_single(report, 0x91)
+        self.safe_check_obj_attribute(cap_report_tlv, 'client_capability_result', '0x00000001',
+                                      "Capability query was successful for disconnected STA")
 
+        error_tlv = self.check_cmdu_has_tlv_single(report, 0xa3)
+        self.safe_check_obj_attribute(error_tlv, 'error_code_reason', '0x00000002',
+                                      "Wrong error reason code")
+        self.safe_check_obj_attribute(error_tlv, 'error_code_mac_addr', sta.mac,
+                                      "Wrong mac address in error code")
+
+    def test_client_capability_query_successful(self):
+        sta = env.Station.create()
+
+        expected_association_frame = "00:0e:4d:75:6c:74:69:2d:41:50:2d:32:34:47:2d:31:"\
+                                     "01:08:02:04:0b:0c:12:16:18:24:21:02:00:14:30:14:"\
+                                     "01:00:00:0f:ac:04:01:00:00:0f:ac:04:01:00:00:0f:"\
+                                     "ac:02:00:00:32:04:30:48:60:6c:3b:10:51:51:53:54:"\
+                                     "73:74:75:76:77:78:7c:7d:7e:7f:80:82:3b:16:0c:01:"\
+                                     "02:03:04:05:0c:16:17:18:19:1a:1b:1c:1d:1e:1f:20:"\
+                                     "21:80:81:82:46:05:70:00:00:00:00:46:05:71:50:50:"\
+                                     "00:04:7f:0a:04:00:0a:82:21:40:00:40:80:00:dd:07:"\
+                                     "00:50:f2:02:00:01:00:2d:1a:2d:11:03:ff:ff:00:00:"\
+                                     "00:00:00:00:00:00:00:00:00:00:00:00:00:00:18:e6:"\
+                                     "e1:09:00:bf:0c:b0:79:d1:33:fa:ff:0c:03:fa:ff:0c:"\
+                                     "03:c7:01:10"
+        # connect a station
         debug("Connect dummy STA to wlan0")
-        env.agents[0].radios[0].vaps[0].associate(sta2)
+        env.agents[0].radios[0].vaps[0].associate(sta)
 
-        debug("Send client capability query for connected STA")
-        env.controller.dev_send_1905(env.agents[0].mac, 0x8009,
-                                     tlv(0x90, 0x000C,
-                                         '{} {}'.format(env.agents[0].radios[0].mac, sta2.mac)))
-        time.sleep(1)
+        # then check capability query is successful with connected station
+        try:
+            report = self.base_test_client_capability_query(sta)
 
-        debug("Confirming client capability report message has been received on controller")
-        self.check_log(env.controller, r"Received CLIENT_CAPABILITY_REPORT_MESSAGE")
-        self.check_log(env.controller,
-                       r"Result Code= SUCCESS, client MAC= {}, BSSID= {}"
-                       .format(sta2.mac, env.agents[0].radios[0].mac))
-
-        for line in association_frame.splitlines():
-            self.check_log(env.controller, r"{}".format(line))
-
-        env.agents[0].radios[0].vaps[0].disassociate(sta2)
+            cap_report_tlv = self.check_cmdu_has_tlvs(report, 0x91)[0]
+            self.safe_check_obj_attribute(cap_report_tlv, 'client_capability_result', '0x00000000',
+                                          "Capability report result is not successful")
+            try:
+                if cap_report_tlv.client_capability_frame != expected_association_frame:
+                    self.fail("Capability report does not contain expected frame")
+                    debug(f"Frame received\n{cap_report_tlv.client_capability_frame}")
+                    debug(f"Frame expected\n{expected_association_frame}")
+            except AttributeError:
+                self.fail("Report does not contain capability frame")
+        finally:  # cleanup
+            env.agents[0].radios[0].vaps[0].disassociate(sta)
 
     def test_client_association_dummy(self):
         sta = env.Station.create()

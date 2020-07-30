@@ -18,7 +18,8 @@ If you encounter a problem with someone's conduct, contact the prpl Community Ma
 
 ## Reporting bugs
 
-To report bugs, use the [github issues](https://github.com/prplfoundation/prplMesh/issues/new/choose) entry form.
+To report bugs, use the [JIRA create issue](https://jira.prplfoundation.org/secure/CreateIssue!default.jspa) entry form.
+Select Prplmesh as the project, and "Bug" as the issue type (you can use "Task" for feature requests)
 
 ## Improving documentation
 
@@ -31,14 +32,37 @@ It is intended to be migrated to Jekyll markdown and to be published with github
 
 ## Contributing code
 
+Before development is started, a [JIRA task or bug](#working-with-jira) should have been created for the issue.
 All development is managed using [pull requests](#pull-requests-workflow).
-[Commits](#commits) must be in logical, consistent units and have a good commit message.
+[Commits](#commits) must be in logical, consistent units and have a good commit message that includes the JIRA key of the corresponding issue.
 Every commit must carry a Signed-off-by tag to assert your agreement with the [DCO](#developers-certificate-of-origin).
 Pull requests are reviewed and checks are performed on them before they are merged.
 Code should adhere to the [coding style](#coding-style).
 
 Note that everybody follows these same guidelines.
 Core contributors, occasional contributors and maintainers are all alike.
+
+### Working with JIRA
+
+Every bug or feature needs to have a JIRA task associated with it, so that we can track the progress and see what people are working on.
+An exception is made for "hotfixes": small fixes that are uncontroversial, e.g. fixing whitespace in one file. Those don't need an explicit JIRA issue.
+
+To enable automatic tracking between JIRA and git, we ask that all branches (except for hotfixes) contain the JIRA id, and all commits contain it as well.
+This is unfortunately necessary for matching up the information between the two systems.
+Adding the JIRA key to pull/merge request names is also recommended, but not required.
+
+The JIRA issue should be created before any work is started.
+When work is started, the developer should transition the issue to "In progress" and assign his- or herself to the issue.
+Please also make sure that any issue you work on is part of the current sprint (even if you don't think it'll be finished in the sprint)
+Usage of the time tracking features is also recommended; for this to work, make sure that you add an estimation of how much time the work is going to take before you start, and then remember to log the time it takes you to work on the issue.
+Time spent reviewing other issues is not counted, but time spent implementing review feedback is.
+When it's time for review, please transition the issue manually to the "In review" state.
+We're looking at possibly automating this in the future, but it still needs to be done manually for now.
+Make sure the JIRA issue has an informative description; it will form the basis of any discussion of the feature or bug in question, so you want to make sure that the description makes the problem clear.
+You can then copy the description to the pull request description (it's OK if they're the same).
+You may need to adjust the syntax manually if you do this, though.
+
+JIRA uses a syntax that's different from the markdown used by github/gitlab. It's described [here](https://jira.prplfoundation.org/secure/WikiRendererHelpAction.jspa)
 
 ### Copyright
 
@@ -80,6 +104,8 @@ A commit message consists of a subject, a message body and a set of tags.
 
     Do this thing and do that thing.
 
+    https://jira.prplfoundation.org/browse/PPM-204
+
     Signed-off-by: The Author <author.mail@address.com>
     Co-Authored-by: The Other Author <email@address.com>
     Signed-off-by: The Other Author <email@address.com>
@@ -112,6 +138,7 @@ It generally describes the "why" and "what" according to the following pattern:
 * the chosen solution and why it was chosen;
 * the (core) change itself - in the imperative (i.e. "add foo()", not ("added foo()");
 * additional changes needed to keep things working (e.g. "Update callers with the new argument").
+* The JIRA key should ideally be part of every commit. It can be either on its own (PPM-204) or as a link to JIRA (https://jira.prplfoundation.org/browse/PPM-204).
 
 Since commits should be split up, there will be many commits that are not useful on their own, but just prepare for another commit.
 In that case, the preparatory commits should refer to what they prepare for.
@@ -121,6 +148,8 @@ For example, you could have the preparatory commit:
 
     Prepare for "tlvf: message_com::send_cmdu(): don't swap internal
     messages".
+
+    PPM-204
 
     Signed-off-by: Joe Developer <joe@prplfoundation.org>
 
@@ -137,6 +166,8 @@ Followed by the commit that actually makes the change:
 
     Use the swap_needed parameter of CmduMessageTx::finalize() to avoid
     swapping.
+
+    https://jira.prplfoundation.org/browse/PPM-204
 
     Signed-off-by: Joe Developer <joe@prplfoundation.org>
 
@@ -196,6 +227,7 @@ The workflow is explained in detail below. In summary, it consists of these step
 Start by creating a branch.
 We give branches a name following `<type>/<subject>`.
 Types are `feature` for feature development, `bugfix` for fixing bugs from the issues list, `hotfix` for small fixes without an issue, and `dev/<user>` for personal development branches that are not meant for merging.
+Both `bugfix` and `feature` branches should have a JIRA identifier in their branch name (e.g. feature/PPM-204-implement-dynamic-steering)
 
 This branch is immediately pushed, and a draft pull request is created for it.
 The pull request can be created with the [`hub`](https://github.com/github/hub) tool: `hub pull-request -d`.
@@ -306,7 +338,7 @@ That means the following conditions must hold.
 
 * All commits have a Signed-off-by. Automatic with the DCO check.
 * At least one maintainer has reviewed and approvied.
-* Code builds on Ubuntu, with `MSGLIB=zmq` and `BWL_TYPE=DUMMY`. Automatic with gitlab CI.
+* Code builds on Ubuntu, with `BWL_TYPE=DUMMY`. Automatic with gitlab CI.
 * Unit tests run successfully. Automatic with gitlab CI.
 * For each new flow being added, `tests/test_flows.py` must be updated accordingly to test the new flow, and the corresponding certification test (if any) must be added to `tests/certification/passing_agent_tests.txt`.
 * Run clang-format.sh. If it fixes lines you did not change, commit that separately.

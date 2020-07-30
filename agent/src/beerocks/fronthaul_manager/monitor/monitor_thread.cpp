@@ -13,6 +13,7 @@
 
 #define BEEROCKS_CUSTOM_LOGGER_ID BEEROCKS_MONITOR
 #include <bcl/beerocks_logging_custom.h>
+#include <bpl/bpl_cfg.h>
 
 #include <beerocks/tlvf/beerocks_message.h>
 
@@ -64,9 +65,15 @@ monitor_thread::monitor_thread(const std::string &slave_uds_, const std::string 
 
     using namespace std::placeholders; // for `_1`
 
+    bwl::hal_conf_t hal_conf;
+
+    if (!beerocks::bpl::bpl_cfg_get_hostapd_ctrl_path(monitor_iface, hal_conf.wpa_ctrl_path)) {
+        LOG(ERROR) << "Couldn't get hostapd control path for interface " << monitor_iface;
+    }
+
     // Create new Monitor HAL instance
     mon_wlan_hal = bwl::mon_wlan_hal_create(
-        monitor_iface_, std::bind(&monitor_thread::hal_event_handler, this, _1));
+        monitor_iface_, std::bind(&monitor_thread::hal_event_handler, this, _1), hal_conf);
 
     LOG_IF(!mon_wlan_hal, FATAL) << "Failed creating HAL instance!";
 }
@@ -480,14 +487,11 @@ void monitor_thread::after_select(bool timeout)
                 }
             }
 
-            int8_t new_tx_state               = mon_wlan_hal->get_radio_info().tx_enabled;
-            int8_t new_hostap_enabled_state   = mon_wlan_hal->get_radio_info().wifi_ctrl_enabled;
-            bool tx_state_changed             = false;
-            bool hostap_enabled_state_changed = false;
+            int8_t new_tx_state             = mon_wlan_hal->get_radio_info().tx_enabled;
+            int8_t new_hostap_enabled_state = mon_wlan_hal->get_radio_info().wifi_ctrl_enabled;
 
             if (mon_db.get_ap_tx_enabled() != new_tx_state) { // tx was changed
                 mon_db.set_ap_tx_enabled(new_tx_state);
-                tx_state_changed = true;
             }
 
             if (mon_db.get_hostapd_enabled() !=
@@ -496,21 +500,6 @@ void monitor_thread::after_select(bool timeout)
                     LOG(DEBUG) << "wifi_ctrl_enabled=2 on already attached to Hostapd";
                 }
                 mon_db.set_hostapd_enabled(new_hostap_enabled_state);
-                hostap_enabled_state_changed = true;
-            }
-
-            if (tx_state_changed || hostap_enabled_state_changed) {
-                // LOG(DEBUG) << "wifi_ctrl_enabled=" << int(new_hostap_enabled_state) << ", tx_enabled=" << int(new_tx_state);
-
-                auto notification = message_com::create_vs_message<
-                    beerocks_message::cACTION_MONITOR_HOSTAP_STATUS_CHANGED_NOTIFICATION>(cmdu_tx);
-                if (notification == nullptr) {
-                    LOG(ERROR) << "Failed building message!";
-                    return;
-                }
-                notification->new_tx_state()             = new_tx_state;
-                notification->new_hostap_enabled_state() = new_hostap_enabled_state;
-                message_com::send_cmdu(slave_socket, cmdu_tx);
             }
         }
 
@@ -967,7 +956,7 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
         std::string sta_ipv4             = network_utils::ipv4_to_string(request->params().ipv4);
         std::string set_bridge_4addr_mac = tlvf::mac_to_string(request->params().bridge_4addr_mac);
         LOG(INFO) << "ACTION_MONITOR_CLIENT_START_MONITORING_REQUEST=" << sta_mac
-                  << " ip=" << sta_ipv4;
+                  << " ip=" << sta_ipv4 << " set_bridge_4addr_mac=" << set_bridge_4addr_mac;
 
         auto response = message_com::create_vs_message<
             beerocks_message::cACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE>(
@@ -975,12 +964,13 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
 
         if (!response) {
             LOG(ERROR)
-                << "Failed building ACTION_CONTROL_CLIENT_START_MONITORING_RESPONSE message!";
+                << "Failed building ACTION_MONITOR_CLIENT_START_MONITORING_RESPONSE message!";
             return false;
         }
 
         auto sta_node = mon_db.sta_find(sta_mac);
         if (!sta_node) {
+            LOG(ERROR) << "Could not find sta_node " << sta_mac;
             response->success() = false;
             message_com::send_cmdu(slave_socket, cmdu_tx);
             return false;
@@ -1289,105 +1279,6 @@ bool monitor_thread::handle_cmdu_vs_message(Socket &sd, ieee1905_1::CmduMessageR
                     bwl_request.sta_mac.oct);
 
         mon_wlan_hal->sta_channel_load_11k_request(bwl_request);
-        break;
-    }
-    case beerocks_message::ACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST: {
-        auto request =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST failed";
-            return false;
-        }
-
-        // debug_statistics_11k_request(request);
-
-        // TODO: TEMPORARY CONVERSION!
-        bwl::SStatisticsRequest11k bwl_request;
-
-        bwl_request.group_identity     = request->params().group_identity;
-        bwl_request.parallel           = request->params().parallel;
-        bwl_request.enable             = request->params().enable;
-        bwl_request.request            = request->params().request;
-        bwl_request.report             = request->params().report;
-        bwl_request.mandatory_duration = request->params().mandatory_duration;
-        bwl_request.repeats            = request->params().repeats;
-        bwl_request.rand_ival          = request->params().rand_ival;
-        bwl_request.duration           = request->params().duration;
-        bwl_request.use_optional_trig_rep_sta_counters =
-            request->params().use_optional_trig_rep_sta_counters;
-        bwl_request.measurement_count_1           = request->params().measurement_count_1;
-        bwl_request.trigger_timeout_1             = request->params().trigger_timeout_1;
-        bwl_request.sta_counter_trigger_condition = request->params().sta_counter_trigger_condition;
-        bwl_request.dot11FailedCountThreshold     = request->params().dot11FailedCountThreshold;
-        bwl_request.dot11FCSErrorCountThreshold   = request->params().dot11FCSErrorCountThreshold;
-        bwl_request.dot11MultipleRetryCountThreshold =
-            request->params().dot11MultipleRetryCountThreshold;
-        bwl_request.dot11FrameDuplicateCountThreshold =
-            request->params().dot11FrameDuplicateCountThreshold;
-        bwl_request.dot11RTSFailureCountThreshold = request->params().dot11RTSFailureCountThreshold;
-        bwl_request.dot11AckFailureCountThreshold = request->params().dot11AckFailureCountThreshold;
-        bwl_request.dot11RetryCountThreshold      = request->params().dot11RetryCountThreshold;
-        bwl_request.use_optional_trig_rep_qos_sta_counters =
-            request->params().use_optional_trig_rep_qos_sta_counters;
-        bwl_request.measurement_count_2 = request->params().measurement_count_2;
-        bwl_request.trigger_timeout_2   = request->params().trigger_timeout_2;
-        bwl_request.qos_sta_counter_trigger_condition =
-            request->params().qos_sta_counter_trigger_condition;
-        bwl_request.dot11QoSFailedCountThreshold = request->params().dot11QoSFailedCountThreshold;
-        bwl_request.dot11QoSRetryCountThreshold  = request->params().dot11QoSRetryCountThreshold;
-        bwl_request.dot11QoSMultipleRetryCountThreshold =
-            request->params().dot11QoSMultipleRetryCountThreshold;
-        bwl_request.dot11QoSFrameDuplicateCountThreshold =
-            request->params().dot11QoSFrameDuplicateCountThreshold;
-        bwl_request.dot11QoSRTSCountFailureThreshold =
-            request->params().dot11QoSRTSCountFailureThreshold;
-        bwl_request.dot11QoSAckFailureCountThreshold =
-            request->params().dot11QoSAckFailureCountThreshold;
-        bwl_request.dot11QoSDiscardedCountThreshold =
-            request->params().dot11QoSDiscardedCountThreshold;
-        bwl_request.use_optional_trig_rep_rsna_counters =
-            request->params().use_optional_trig_rep_rsna_counters;
-        bwl_request.measurement_count_3 = request->params().measurement_count_3;
-        bwl_request.trigger_timeout_3   = request->params().trigger_timeout_3;
-        bwl_request.rsna_counter_trigger_condition =
-            request->params().rsna_counter_trigger_condition;
-        bwl_request.dot11RSNAStatsCMACICVErrorsThreshold =
-            request->params().dot11RSNAStatsCMACICVErrorsThreshold;
-        bwl_request.dot11RSNAStatsCMACReplaysThreshold =
-            request->params().dot11RSNAStatsCMACReplaysThreshold;
-        bwl_request.dot11RSNAStatsRobustMgmtCCMPReplaysThreshold =
-            request->params().dot11RSNAStatsRobustMgmtCCMPReplaysThreshold;
-        bwl_request.dot11RSNAStatsTKIPICVErrorsThreshold =
-            request->params().dot11RSNAStatsTKIPICVErrorsThreshold;
-        bwl_request.dot11RSNAStatsTKIPReplaysThreshold =
-            request->params().dot11RSNAStatsTKIPReplaysThreshold;
-        bwl_request.dot11RSNAStatsCCMPDecryptErrorsThreshold =
-            request->params().dot11RSNAStatsCCMPDecryptErrorsThreshold;
-        bwl_request.dot11RSNAStatsCCMPReplaysThreshold =
-            request->params().dot11RSNAStatsCCMPReplaysThreshold;
-        std::copy_n(request->params().sta_mac.oct, sizeof(bwl_request.sta_mac.oct),
-                    bwl_request.sta_mac.oct);
-        std::copy_n(request->params().peer_mac_addr.oct, sizeof(bwl_request.peer_mac_addr.oct),
-                    bwl_request.peer_mac_addr.oct);
-
-        mon_wlan_hal->sta_statistics_11k_request(bwl_request);
-        break;
-    }
-    case beerocks_message::ACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST: {
-        auto request =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST failed";
-            return false;
-        }
-        std::string mac_str = tlvf::mac_to_string(request->mac());
-
-        LOG(DEBUG) << "ACTION_MONITOR_CLIENT_LINK_MEASUREMENT_11K_REQUEST:" << std::endl
-                   << "mac=" << mac_str;
-
-        mon_wlan_hal->sta_link_measurements_11k_request(mac_str);
         break;
     }
     case beerocks_message::ACTION_MONITOR_CHANNEL_SCAN_TRIGGER_SCAN_REQUEST: {
@@ -1735,79 +1626,6 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 
     } break;
 
-    case Event::RRM_STA_Statistics_Response: {
-
-        auto hal_data = static_cast<bwl::SStatisticsResponse11k *>(data);
-
-        auto response = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE>(cmdu_tx);
-        if (response == nullptr) {
-            LOG(ERROR) << "Failed building cACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE message!";
-            break;
-        }
-
-        response->params().dialog_token               = hal_data->dialog_token;
-        response->params().measurement_token          = hal_data->measurement_token;
-        response->params().rep_mode                   = hal_data->rep_mode;
-        response->params().group_identity             = hal_data->group_identity;
-        response->params().statistics_group_data_size = hal_data->statistics_group_data_size;
-        response->params().duration                   = hal_data->duration;
-        response->params().use_optional_rep_reason    = hal_data->use_optional_rep_reason;
-        response->params().average_trigger            = hal_data->average_trigger;
-        response->params().consecutive_trigger        = hal_data->consecutive_trigger;
-        response->params().delay_trigger              = hal_data->delay_trigger;
-        std::copy_n(hal_data->statistics_group_data,
-                    sizeof(response->params().statistics_group_data),
-                    response->params().statistics_group_data);
-        std::copy_n(hal_data->sta_mac.oct, sizeof(response->params().sta_mac.oct),
-                    response->params().sta_mac.oct);
-
-        // debug_statistics_11k_response(msg);
-
-        message_com::send_cmdu(slave_socket, cmdu_tx);
-
-    } break;
-
-    case Event::RRM_Link_Measurement_Response: {
-
-        auto hal_data = static_cast<bwl::SLinkMeasurementsResponse11k *>(data);
-        auto response = message_com::create_vs_message<
-            beerocks_message::cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE>(cmdu_tx);
-        if (response == nullptr) {
-            LOG(ERROR)
-                << "Failed building cACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE message!";
-            break;
-        }
-
-        response->params().dialog_token                 = hal_data->dialog_token;
-        response->params().rep_mode                     = hal_data->rep_mode;
-        response->params().rx_ant_id                    = hal_data->rx_ant_id;
-        response->params().tx_ant_id                    = hal_data->tx_ant_id;
-        response->params().rcpi                         = hal_data->rcpi;
-        response->params().rsni                         = hal_data->rsni;
-        response->params().transmit_power               = hal_data->transmit_power;
-        response->params().link_margin                  = hal_data->link_margin;
-        response->params().use_optional_dmg_link_margin = hal_data->use_optional_dmg_link_margin;
-        response->params().dmg_link_margin_activity     = hal_data->dmg_link_margin_activity;
-        response->params().dmg_link_margin_mcs          = hal_data->dmg_link_margin_mcs;
-        response->params().dmg_link_margin_link_margin  = hal_data->dmg_link_margin_link_margin;
-        response->params().dmg_link_margin_snr          = hal_data->dmg_link_margin_snr;
-        response->params().use_optional_dmg_link_adapt_ack =
-            hal_data->use_optional_dmg_link_adapt_ack;
-        response->params().dmg_link_adapt_ack_activity = hal_data->dmg_link_adapt_ack_activity;
-        response->params().dmg_link_margin_reference_timestamp =
-            hal_data->dmg_link_margin_reference_timestamp;
-        response->params().dmg_link_adapt_ack_reference_timestamp =
-            hal_data->dmg_link_adapt_ack_reference_timestamp;
-        std::copy_n(hal_data->sta_mac.oct, sizeof(response->params().sta_mac.oct),
-                    response->params().sta_mac.oct);
-
-        // debug_link_measurements_11k_response(msg);
-
-        message_com::send_cmdu(slave_socket, cmdu_tx);
-
-    } break;
-
     case Event::AP_Enabled: {
         if (!data) {
             LOG(ERROR) << "AP_Enabled without data";
@@ -1870,8 +1688,8 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
             auto &out_result = notification->scan_results();
 
             // Arrays
-            mapf::utils::copy_string(out_result.ssid, in_result.ssid,
-                                     beerocks::message::WIFI_SSID_MAX_LENGTH);
+            string_utils::copy_string(out_result.ssid, in_result.ssid,
+                                      beerocks::message::WIFI_SSID_MAX_LENGTH);
             std::copy_n(in_result.bssid.oct, sizeof(out_result.bssid.oct), out_result.bssid.oct);
             std::copy(in_result.basic_data_transfer_rates_kbps.begin(),
                       in_result.basic_data_transfer_rates_kbps.end(),
@@ -2063,58 +1881,6 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 //     ;
 // }
 
-// void monitor_thread::debug_statistics_11k_request(message::sACTION_MONITOR_CLIENT_STATISTICS_11K_REQUEST* request)
-// {
-//     LOG(DEBUG) << "ACTION_MONITOR_CLIENT_STATISTICS_REQUEST:" << std::endl
-//     << std::endl << "group_identity: "                               << (int)request->params.group_identity
-//     << std::endl << "repeats: "                                      << (int)request->params.repeats
-//     << std::endl << "rand_ival: "                                    << (int)request->params.rand_ival
-//     << std::endl << "duration: "                                     << (int)request->params.duration
-//     << std::endl << "sta_mac: "                                      << request->params.sta_mac
-//     << std::endl << "peer_mac_addr: "                                << request->params.peer_mac_addr
-//     << std::endl << "parallel: "                                     << (int)request->params.parallel
-//     << std::endl << "enable: "                                       << (int)request->params.enable
-//     << std::endl << "request: "                                      << (int)request->params.request
-//     << std::endl << "report: "                                       << (int)request->params.report
-//     << std::endl << "mandatory_duration: "                           << (int)request->params.mandatory_duration;
-//     //Optional:
-//     // << std::endl << "use_optional_trig_rep_sta_counters: "           << (int)request->params.use_optional_trig_rep_sta_counters
-//     // << std::endl << "measurement_count_1: "                          << (int)request->params.measurement_count_1
-//     // << std::endl << "trigger_timeout_1: "                            << (int)request->params.trigger_timeout_1
-//     // << std::endl << "sta_counter_trigger_condition: "                << (int)request->params.sta_counter_trigger_condition
-//     // << std::endl << "dot11FailedCountThreshold: "                    << (int)request->params.dot11FailedCountThreshold
-//     // << std::endl << "dot11FCSErrorCountThreshold: "                  << (int)request->params.dot11FCSErrorCountThreshold
-//     // << std::endl << "dot11MultipleRetryCountThreshold: "             << (int)request->params.dot11MultipleRetryCountThreshold
-//     // << std::endl << "dot11FrameDuplicateCountThreshold: "            << (int)request->params.dot11FrameDuplicateCountThreshold
-//     // << std::endl << "dot11RTSFailureCountThreshold: "                << (int)request->params.dot11RTSFailureCountThreshold
-//     // << std::endl << "dot11AckFailureCountThreshold: "                << (int)request->params.dot11AckFailureCountThreshold
-//     // << std::endl << "dot11RetryCountThreshold: "                     << (int)request->params.dot11RetryCountThreshold
-//     // << std::endl << "use_optional_trig_rep_qos_sta_counters: "       << (int)request->params.use_optional_trig_rep_qos_sta_counters
-//     // << std::endl << "measurement_count_2: "                          << (int)request->params.measurement_count_2
-//     // << std::endl << "trigger_timeout_2: "                            << (int)request->params.trigger_timeout_2
-//     // << std::endl << "qos_sta_counter_trigger_condition: "            << (int)request->params.qos_sta_counter_trigger_condition
-//     // << std::endl << "dot11QoSFailedCountThreshold: "                 << (int)request->params.dot11QoSFailedCountThreshold
-//     // << std::endl << "dot11QoSRetryCountThreshold: "                  << (int)request->params.dot11QoSRetryCountThreshold
-//     // << std::endl << "dot11QoSMultipleRetryCountThreshold: "          << (int)request->params.dot11QoSMultipleRetryCountThreshold
-//     // << std::endl << "dot11QoSFrameDuplicateCountThreshold: "         << (int)request->params.dot11QoSFrameDuplicateCountThreshold
-//     // << std::endl << "dot11QoSRTSCountFailureThreshold: "             << (int)request->params.dot11QoSRTSCountFailureThreshold
-//     // << std::endl << "dot11QoSAckFailureCountThreshold: "             << (int)request->params.dot11QoSAckFailureCountThreshold
-//     // << std::endl << "dot11QoSDiscardedCountThreshold: "              << (int)request->params.dot11QoSDiscardedCountThreshold
-//     // << std::endl << "use_optional_trig_rep_rsna_counters: "          << (int)request->params.use_optional_trig_rep_rsna_counters
-//     // << std::endl << "measurement_count_3: "                          << (int)request->params.measurement_count_3
-//     // << std::endl << "trigger_timeout_3: "                            << (int)request->params.trigger_timeout_3
-//     // << std::endl << "rsna_counter_trigger_condition: "               << (int)request->params.rsna_counter_trigger_condition
-//     // << std::endl << "dot11RSNAStatsCMACICVErrorsThreshold: "         << (int)request->params.dot11RSNAStatsCMACICVErrorsThreshold
-//     // << std::endl << "dot11RSNAStatsCMACReplaysThreshold: "           << (int)request->params.dot11RSNAStatsCMACReplaysThreshold
-//     // << std::endl << "dot11RSNAStatsRobustMgmtCCMPReplaysThreshold: " << (int)request->params.dot11RSNAStatsRobustMgmtCCMPReplaysThreshold
-//     // << std::endl << "dot11RSNAStatsTKIPICVErrorsThreshold: "         << (int)request->params.dot11RSNAStatsTKIPICVErrorsThreshold
-//     // << std::endl << "dot11RSNAStatsTKIPReplaysThreshold: "           << (int)request->params.dot11RSNAStatsTKIPReplaysThreshold
-//     // << std::endl << "dot11RSNAStatsCCMPDecryptErrorsThreshold: "     << (int)request->params.dot11RSNAStatsCCMPDecryptErrorsThreshold
-//     // << std::endl << "dot11RSNAStatsCCMPReplaysThreshold: "           << (int)request->params.dot11RSNAStatsCCMPReplaysThreshold
-//     // ;
-
-// }
-
 // void monitor_thread::debug_channel_load_11k_response(message::sACTION_MONITOR_CLIENT_CHANNEL_LOAD_11K_RESPONSE* event)
 // {
 //     LOG(DEBUG) << "DATA TEST:"
@@ -2152,48 +1918,6 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
 //     << std::endl << "new_ch_width: "                         << (int)event->params.new_ch_width
 //     << std::endl << "new_ch_center_freq_seg_0: "             << (int)event->params.new_ch_center_freq_seg_0
 //     << std::endl << "new_ch_center_freq_seg_1: "             << (int)event->params.new_ch_center_freq_seg_1
-//     ;
-// }
-
-// void monitor_thread::debug_statistics_11k_response(message::sACTION_MONITOR_CLIENT_STATISTICS_11K_RESPONSE* event)
-// {
-//     std::string statistics_group_data;
-//     for(uint8_t i=0;i<event->params.statistics_group_data_size;i++){
-//         statistics_group_data +=  string_utils::to_string(event->params.statistics_group_data[i]) + ",";
-//     }
-//     statistics_group_data.pop_back(); // deletes last comma
-
-//     LOG(DEBUG) << "DATA TEST:"
-//     << std::endl << "sta_mac: "              << event->params.sta_mac
-//     << std::endl << "measurement_rep_mode: " << (int)event->params.rep_mode
-//     << std::endl << "duration: "             << (int)event->params.duration
-//     << std::endl << "group_identity: "       << (int)event->params.group_identity
-//     << std::endl << "statistics_group_data: "<< statistics_group_data
-
-//     << std::endl << "average_trigger: "      << (int)event->params.average_trigger
-//     << std::endl << "consecutive_trigger: "  << (int)event->params.consecutive_trigger
-//     << std::endl << "delay_trigger: "        << (int)event->params.delay_trigger
-//     ;
-// }
-
-// void monitor_thread::debug_link_measurements_11k_response(message::sACTION_MONITOR_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE* event)
-// {
-//     LOG(DEBUG) << "DATA TEST:"
-//     << std::endl << "sta_mac: "          << event->params.sta_mac
-//     << std::endl << "transmit_power: "   << (int)event->params.transmit_power
-//     << std::endl << "link_margin: "      << (int)event->params.link_margin
-//     << std::endl << "rx_ant_id: "        << (int)event->params.rx_ant_id
-//     << std::endl << "tx_ant_id: "        << (int)event->params.tx_ant_id
-//     << std::endl << "rcpi: "             << (int)event->params.rcpi
-//     << std::endl << "rsni: "             << (int)event->params.rsni
-
-//     << std::endl << "dmg_link_margin_activity: "                 << (int)event->params.dmg_link_margin_activity
-//     << std::endl << "dmg_link_margin_mcs: "                      << (int)event->params.dmg_link_margin_mcs
-//     << std::endl << "dmg_link_margin_link_margin: "              << (int)event->params.dmg_link_margin_link_margin
-//     << std::endl << "dmg_link_margin_snr: "                      << (int)event->params.dmg_link_margin_snr
-//     << std::endl << "dmg_link_margin_reference_timestamp: "      << (int)event->params.dmg_link_margin_reference_timestamp
-//     << std::endl << "dmg_link_adapt_ack_activity: "              << (int)event->params.dmg_link_adapt_ack_activity
-//     << std::endl << "dmg_link_adapt_ack_reference_timestamp: "   << (int)event->params.dmg_link_adapt_ack_reference_timestamp
 //     ;
 // }
 

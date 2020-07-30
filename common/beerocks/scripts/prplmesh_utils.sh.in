@@ -27,9 +27,24 @@ run() {
 
 killall_program() {
     PROGRAM_NAME=$1
-    KILL_SIG=${2:-KILL}
-    echo "killing $PROGRAM_NAME ($KILL_SIG)"
-    start-stop-daemon -K -s "$KILL_SIG" -x "$PRPLMESH_BIN_DIR"/"$PROGRAM_NAME" > /dev/null 2>&1
+    TERM_SIG=${2:-TERM}
+    TIMEOUT=10
+    echo "terminating $PROGRAM_NAME ($TERM_SIG)"
+    start-stop-daemon -K -s "$TERM_SIG" -x "$PRPLMESH_BIN_DIR"/"$PROGRAM_NAME" > /dev/null 2>&1
+
+    # If an explicit signal was provided, we don't do a SIGKILL
+    if [ -n "$2" ]; then return; fi
+
+    # `-R` option is not always available for `start-stop-daemon`, we need to imitate it
+    for _ in $(seq 1 "$TIMEOUT"); do
+        if ! pgrep "$PROGRAM_NAME" > /dev/null; then
+           return
+        fi
+        sleep 1
+    done
+
+    echo "killing $PROGRAM_NAME (KILL)"
+    start-stop-daemon -K -s "KILL" -x "$PRPLMESH_BIN_DIR"/"$PROGRAM_NAME" > /dev/null 2>&1
 }
 
 platform_init() {
@@ -77,19 +92,17 @@ prplmesh_platform_db_init() {
     operating_mode=${2-Gateway}
 
     mkdir -p @TMP_PATH@
-    {
-        echo "management_mode=${management_mode}"
-        echo "operating_mode=${operating_mode}"
 
-        # In certification, agent must retry onboarding indefinitely
-        echo "certification_mode=1"
-        echo "stop_on_failure_attempts=0"
-    } > @TMP_PATH@/prplmesh_platform_db
+    # Put generated prplmesh_platform_db file to the temporary directory
+    cp @INSTALL_PATH@/share/prplmesh_platform_db @TMP_PATH@/prplmesh_platform_db
+
+    # Modify generated parameters to current
+    sed -i "s/management_mode=.*/management_mode=${management_mode}/g" @TMP_PATH@/prplmesh_platform_db
+    sed -i "s/operating_mode=.*/operating_mode=${operating_mode}/g" @TMP_PATH@/prplmesh_platform_db
 }
 
 prplmesh_framework_init() {
-    echo "prplmesh_framework_init - starting local_bus and ieee1905_transport processes..."
-    @INSTALL_PATH@/bin/local_bus &
+    echo "prplmesh_framework_init - starting ieee1905_transport process..."
     @INSTALL_PATH@/bin/ieee1905_transport &
 
     # This is required for solveing issue which causing meesges not geeting to their destination.
@@ -98,8 +111,7 @@ prplmesh_framework_init() {
 }
 
 prplmesh_framework_deinit() {
-    echo "prplmesh_framework_deinit - killing local_bus and ieee1905_transport processes..."
-    killall_program local_bus
+    echo "prplmesh_framework_deinit - killing ieee1905_transport process..."
     killall_program ieee1905_transport
     ebtables -D FORWARD -d 01:80:c2:00:00:13 -j DROP
 }
@@ -146,7 +158,7 @@ prplmesh_watchdog() {
 
     # Monitor the number of running processes
     while [ "$CURR_PIDS" -ge "$PREV_PIDS" ]; do
-        sleep 1
+        sleep 5
         CURR_PIDS="$(pgrep 'beerocks_(agent|controller)' | wc -l)"
         if [ "$CURR_PIDS" -gt "$PREV_PIDS" ]; then
             PREV_PIDS=$CURR_PIDS
@@ -213,8 +225,7 @@ start_function() {
 
     # shellcheck disable=SC2050
     [ "@BWL_TYPE@" = "DUMMY" ] && [ "$PLATFORM_INIT" = "true" ] && platform_init
-    # shellcheck disable=SC2050
-    [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_init
+    prplmesh_framework_init
     case "$PRPLMESH_MODE" in
         CA | ca)
             prplmesh_platform_db_init "Multi-AP-Controller-and-Agent"
@@ -239,11 +250,22 @@ stop_function() {
 
     # shellcheck disable=SC2050
     [ "@BWL_TYPE@" = "DUMMY" ] && [ "$PLATFORM_INIT" = "true" ] && platform_deinit
-    # shellcheck disable=SC2050
-    [ "@BTL_TYPE@" = "LOCAL_BUS" ] && prplmesh_framework_deinit
+    prplmesh_framework_deinit
     prplmesh_controller_stop
     prplmesh_agent_stop
     [ "$DELETE_LOGS" = "true" ] && prplmesh_delete_logs
+}
+
+execute_beerocks_command() {
+    dbg "Executing beerocks cli command: $*"
+    if [ -e $PRPLMESH_BIN_DIR/beerocks_cli ]; then
+        output=$(${PRPLMESH_BIN_DIR}/beerocks_cli -c "$@")
+        return $?
+    else
+        err "BML CLI not found"
+        output=""
+        return 1
+    fi
 }
 
 # Note: Apparently on some Linux version space is added to the process name.
@@ -255,7 +277,6 @@ main_agent_operational() {
 }
 
 radio_agent_operational() {
-    pgrep -fx "@INSTALL_PATH@/bin/beerocks_agent -i $2($|[[:blank:]])" > /dev/null 2>&1 || return 1
     grep -q 'goto STATE_OPERATIONAL' "$1/beerocks_agent_$2@BEEROCKS_LOG_FILES_SUFFIX@"
 }
 
@@ -274,23 +295,56 @@ status_function() {
 
     pgrep -l beerocks
     pgrep -l ieee1905_transport
-    pgrep -l local_bus
 
-    # check for operational status
-    LOGS_PATH=@BEEROCKS_LOG_FILES_PATH@
+    # Use the given argument as birdge mac if it filled with something, otherwise get the bridge mac
+    # of the local platform.
+    ARGUMENT_LEN=${#1}
+    if [ "$ARGUMENT_LEN" -ne "0" ]; then
+        BRIDGE_MAC=$1
+    else 
+        BRIDGE_MAC="$(ip link show dev @BEEROCKS_BRIDGE_IFACE@ | awk '/^ *link\/ether / {print $2}')"
+    fi
 
-    error=0
-    report "Main agent operational" main_agent_operational $LOGS_PATH
-    report "@BEEROCKS_WLAN1_IFACE@ radio agent operational" radio_agent_operational $LOGS_PATH @BEEROCKS_WLAN1_IFACE@
-    report "@BEEROCKS_WLAN2_IFACE@ radio agent operational" radio_agent_operational $LOGS_PATH @BEEROCKS_WLAN2_IFACE@
+    bml_cmd="bml_get_device_operational_radios $BRIDGE_MAC"
 
-    [ "$VERBOSE" = "true" ] && [  $error = 1 ] && {
-        cat $LOGS_PATH/beerocks_agent@BEEROCKS_LOG_FILES_SUFFIX@
-        cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN1_IFACE@@BEEROCKS_LOG_FILES_SUFFIX@
-        cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN2_IFACE@@BEEROCKS_LOG_FILES_SUFFIX@
-    }
+    if  pgrep -l beerocks_cont ; then
+        echo "executing operational test using bml"
+        if execute_beerocks_command "$bml_cmd" ; then
+            # Expecting
+            # > OK Main radio agent operational
+            # > OK wlan0 radio agent operational
+            # > OK wlan2 radio agent operational
+            OK_Count=$(echo "$output" | grep -c -e "OK.*operational")
+            if [ "$OK_Count" -eq 3 ]; then
+                success "operational test success!"
+                exit 0
+            else
+                err "operational test failed!"
+                err "$output"
+                exit 1
+            fi
+        else
+            err "Beerocks command failed to execute!"
+            exit 1
+        fi
+    else
+        echo "executing operational test using grep on log files"
+        # check for operational status
+        LOGS_PATH=@BEEROCKS_LOG_FILES_PATH@
 
-    exit $error
+        error=0
+        report "Main agent operational" main_agent_operational $LOGS_PATH
+        report "@BEEROCKS_WLAN1_IFACE@ radio agent operational" radio_agent_operational $LOGS_PATH @BEEROCKS_WLAN1_IFACE@
+        report "@BEEROCKS_WLAN2_IFACE@ radio agent operational" radio_agent_operational $LOGS_PATH @BEEROCKS_WLAN2_IFACE@
+
+        [ "$VERBOSE" = "true" ] && [  $error = 1 ] && {
+            cat $LOGS_PATH/beerocks_agent@BEEROCKS_LOG_FILES_SUFFIX@
+            cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN1_IFACE@@BEEROCKS_LOG_FILES_SUFFIX@
+            cat $LOGS_PATH/beerocks_agent_@BEEROCKS_WLAN2_IFACE@@BEEROCKS_LOG_FILES_SUFFIX@
+        }
+
+        exit $error
+    fi
 }
 
 usage() {
@@ -343,7 +397,7 @@ main() {
             start_function
             ;;
         "status")
-            status_function
+            status_function "$2"
             ;;
         "roll_logs")
             roll_logs_function

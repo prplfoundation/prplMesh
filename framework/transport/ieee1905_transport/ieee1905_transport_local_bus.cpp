@@ -7,27 +7,29 @@
  */
 
 #include <mapf/common/utils.h>
-#include <mapf/transport/ieee1905_transport.h>
+
+#include "ieee1905_transport.h"
 
 #include <arpa/inet.h>
 #include <net/if.h>
 
-namespace mapf {
+namespace beerocks {
+namespace transport {
 
-void Ieee1905Transport::handle_local_bus_pollin_event()
+// Use transport messaging classes
+using namespace beerocks::transport::messages;
+
+void Ieee1905Transport::handle_broker_pollin_event(std::unique_ptr<messages::Message> &msg)
 {
-    auto msg = local_bus_->subscriber().Receive();
-
     if (auto *cmdu_tx_msg = dynamic_cast<CmduTxMessage *>(msg.get())) {
         MAPF_DBG("received CmduTxMessage message:" << std::endl << *cmdu_tx_msg);
-        handle_local_bus_cmdu_tx_message(*cmdu_tx_msg);
+        handle_broker_cmdu_tx_message(*cmdu_tx_msg);
     } else if (auto *interface_configuration_request_msg =
                    dynamic_cast<InterfaceConfigurationRequestMessage *>(msg.get())) {
         MAPF_DBG("received InterfaceConfigurationRequestMessage message:"
                  << std::endl
                  << *interface_configuration_request_msg);
-        handle_local_bus_interface_configuration_request_message(
-            *interface_configuration_request_msg);
+        handle_broker_interface_configuration_request_message(*interface_configuration_request_msg);
     } else if (auto *interface_configuration_query_msg =
                    dynamic_cast<InterfaceConfigurationQueryMessage *>(msg.get())) {
         MAPF_DBG("received InterfaceConfigurationQueryMessage message:"
@@ -40,13 +42,13 @@ void Ieee1905Transport::handle_local_bus_pollin_event()
     }
 }
 
-void Ieee1905Transport::handle_local_bus_cmdu_tx_message(CmduTxMessage &msg)
+void Ieee1905Transport::handle_broker_cmdu_tx_message(CmduTxMessage &msg)
 {
-    // parse Local Bus CmduTxMessage message
+    // parse CmduTxMessage message
     struct Packet packet;
     packet.dst_if_type  = msg.metadata()->if_type;
     packet.dst_if_index = msg.metadata()->if_index;
-    packet.src_if_type  = CmduRxMessage::IF_TYPE_LOCAL_BUS;
+    packet.src_if_type  = CmduTxMessage::IF_TYPE_LOCAL_BUS;
     packet.src_if_index = 0;
     std::copy_n(msg.metadata()->dst, ETH_ALEN, packet.dst.oct);
     std::copy_n(msg.metadata()->src, ETH_ALEN, packet.src.oct);
@@ -77,8 +79,8 @@ void Ieee1905Transport::handle_local_bus_cmdu_tx_message(CmduTxMessage &msg)
             confMsg.metadata()->msg_id     = ntohs(ch->messageId);
 
             MAPF_DBG("publishing CmduTxConfirmationMessage:" << std::endl << confMsg);
-            if (local_bus_->publisher().Send(confMsg) == false) {
-                MAPF_ERR("cannot publish message on local bus.");
+            if (!m_broker->publish(confMsg)) {
+                MAPF_ERR("cannot publish message to broker.");
             }
         }
 
@@ -93,7 +95,7 @@ void Ieee1905Transport::handle_local_bus_cmdu_tx_message(CmduTxMessage &msg)
     handle_packet(packet);
 }
 
-void Ieee1905Transport::handle_local_bus_interface_configuration_request_message(
+void Ieee1905Transport::handle_broker_interface_configuration_request_message(
     InterfaceConfigurationRequestMessage &msg)
 {
     std::map<std::string, NetworkInterface> updated_network_interfaces;
@@ -128,9 +130,9 @@ void Ieee1905Transport::handle_local_bus_interface_configuration_request_message
     publish_interface_configuration_indication();
 }
 
-bool Ieee1905Transport::send_packet_to_local_bus(Packet &packet)
+bool Ieee1905Transport::send_packet_to_broker(Packet &packet)
 {
-    // create and fill an CmduRxMessage to be sent on the local bus
+    // Create and fill an CmduRxMessage to be sent to the broker
     CmduRxMessage msg;
 
     std::copy_n(packet.src.oct, ETH_ALEN, msg.metadata()->src);
@@ -143,7 +145,7 @@ bool Ieee1905Transport::send_packet_to_local_bus(Packet &packet)
     std::copy_n((uint8_t *)packet.payload.iov_base, packet.payload.iov_len, msg.data());
 
     if (packet.ether_type == ETH_P_1905_1) {
-        Ieee1905CmduHeader *ch   = (Ieee1905CmduHeader *)packet.payload.iov_base;
+        Ieee1905CmduHeader *ch   = reinterpret_cast<Ieee1905CmduHeader *>(packet.payload.iov_base);
         msg.metadata()->msg_type = ntohs(ch->messageType);
         msg.metadata()->relay    = ch->GetRelayIndicator() ? 1 : 0;
     } else {
@@ -154,8 +156,8 @@ bool Ieee1905Transport::send_packet_to_local_bus(Packet &packet)
     counters_[CounterId::INCOMMING_LOCAL_BUS_PACKETS]++;
 
     MAPF_DBG("publishing CmduRxMessage:" << std::endl << msg);
-    if (local_bus_->publisher().Send(msg) == false) {
-        MAPF_ERR("failed to publish message on local bus.");
+    if (!m_broker->publish(msg)) {
+        MAPF_ERR("failed to publish message to broker.");
         return false;
     }
 
@@ -187,8 +189,8 @@ void Ieee1905Transport::publish_interface_configuration_indication()
     indication_msg.metadata()->numInterfaces = n;
 
     MAPF_DBG("publishing InterfaceConfigurationIndicationMessage:" << std::endl << indication_msg);
-    if (local_bus_->publisher().Send(indication_msg) == false) {
-        MAPF_ERR("failed to publish message on local bus.");
+    if (!m_broker->publish(indication_msg)) {
+        MAPF_ERR("failed to publish message to broker.");
     }
 }
 
@@ -204,4 +206,5 @@ uint16_t Ieee1905Transport::get_next_message_id()
     return message_id_;
 }
 
-} // namespace mapf
+} // namespace transport
+} // namespace beerocks

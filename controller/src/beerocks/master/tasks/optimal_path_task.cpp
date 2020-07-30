@@ -31,6 +31,18 @@ using namespace son;
 #define ONE_PERCENT 0.01f
 #define EIGHTY_PERCENT 0.80f
 
+/*
+* Responsiveness may be less than 100% since the station might refuse to the measurement
+* request or failed to measure it due to incapability (to measure in another band for
+* example), missed the probe or due to the AP bad reception.
+* There is a high probability to get responsiveness less than 100% and therefore, the
+* threshold was changed to 50% as part of demo optimizations.
+* This hardcoded threshold is temporary and shall be revised in the future. 
+* update: increasing to 80% since in bandsteering scenario there are only 2 radios
+* and 50% means optimal path always will fail to find an additional candidate.
+*/
+static constexpr uint8_t RESPONSIVENESS_PRECENT_11K_THRESHOLD = 80;
+
 /////////////// FOR DEBUG ONLY ////////////////
 int optimal_path_task::cli_beacon_request_duration  = -1;
 int optimal_path_task::cli_beacon_request_rand_ival = -1;
@@ -278,7 +290,7 @@ void optimal_path_task::work()
                         measurement_request.duration =
                             beerocks::BEACON_MEASURE_DEFAULT_ACTIVE_DURATION;
                     }
-                    // ap_mac is a radio mac, but we need to request measurment on some vap since radio don't beacon
+                    // ap_mac is a radio mac, but we need to request measurement on some vap since radio don't beacon
                     const std::string vap_mac =
                         database.get_hostap_vap_with_ssid(ap_mac, current_hostap_ssid);
                     if (vap_mac.empty()) {
@@ -289,8 +301,10 @@ void optimal_path_task::work()
                         ++potential_ap_iter;
                         continue;
                     }
-                    measurement_request.bssid                  = tlvf::mac_from_string(vap_mac);
-                    measurement_request.channel                = database.get_node_channel(ap_mac);
+                    measurement_request.bssid   = tlvf::mac_from_string(vap_mac);
+                    measurement_request.channel = database.get_node_channel(ap_mac);
+                    measurement_request.op_class =
+                        database.get_hostap_operating_class(tlvf::mac_from_string(ap_mac));
                     measurement_request.expected_reports_count = 1;
 
                     /////////////// FOR DEBUG ONLY ////////////////
@@ -355,16 +369,9 @@ void optimal_path_task::work()
         TASK_LOG(DEBUG) << "responsiveness_precentage_11k: " << int(responsiveness_precentage_11k)
                         << "%";
 
-        /*
-         * Responsiveness may be less than 100% since the station might refuse to the measurement
-         * request or failed to measure it due to incapability (to measure in another band for
-         * example), missed the probe or due to the AP bad reception.
-         * There is a high probability to get responsiveness less than 100% and therefore, the
-         * threshold was changed to 50% as part of demo optimizations.
-         * This hardcoded threshold is temporary and shall be revised in the future. 
-         */
-        if (responsiveness_precentage_11k < 50) {
-            TASK_LOG(DEBUG) << "11k measurement request responsiveness is less than 50%";
+        if (responsiveness_precentage_11k < RESPONSIVENESS_PRECENT_11K_THRESHOLD) {
+            TASK_LOG(DEBUG) << "11k measurement request responsiveness is less than "
+                            << RESPONSIVENESS_PRECENT_11K_THRESHOLD << "%";
             if (database.settings_front_measurements()) {
                 /////////////// FOR DEBUG ONLY ////////////////
                 if (use_cli_value) {

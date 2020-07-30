@@ -9,9 +9,9 @@
 #include "bml.h"
 #include "internal/bml_internal.h"
 
+#include <bcl/beerocks_string_utils.h>
 #include <bcl/network/network_utils.h>
 #include <bcl/son/son_wireless_utils.h>
-#include <mapf/common/utils.h>
 
 #include <easylogging++.h>
 
@@ -304,37 +304,6 @@ int bml_get_administrator_credentials(BML_CTX ctx, char *user_password)
     return (pBML->get_administrator_credentials(user_password));
 }
 
-int bml_get_serial_number(BML_CTX ctx, char *serial_number)
-{
-    // Validate input parameters
-    if (!ctx || !serial_number)
-        return (-BML_RET_INVALID_ARGS);
-
-    bml_internal *pBML = (bml_internal *)ctx;
-
-    BML_DEVICE_INFO device_info;
-    auto ret = pBML->get_device_info(device_info);
-    if (ret != 0) {
-        return ret;
-    }
-
-    // Copy only the serial number
-    mapf::utils::copy_string(serial_number, device_info.serial_number, BML_DEV_INFO_LEN);
-
-    return 0;
-}
-
-int bml_get_device_info(BML_CTX ctx, BML_DEVICE_INFO *device_info)
-{
-    // Validate input parameters
-    if (!ctx || !device_info)
-        return (-BML_RET_INVALID_ARGS);
-
-    bml_internal *pBML = (bml_internal *)ctx;
-
-    return (pBML->get_device_info(*device_info));
-}
-
 int bml_set_client_roaming(BML_CTX ctx, int enable)
 {
     // Validate input parameters
@@ -540,8 +509,8 @@ int bml_get_master_slave_versions(BML_CTX ctx, char *master_version, char *slave
 
     bml_internal *pBML = (bml_internal *)ctx;
     if (pBML->is_local_master()) {
-        mapf::utils::copy_string(master_version, bml_get_bml_version(), BML_VERSION_LEN);
-        mapf::utils::copy_string(slave_version, bml_get_bml_version(), BML_VERSION_LEN);
+        beerocks::string_utils::copy_string(master_version, bml_get_bml_version(), BML_VERSION_LEN);
+        beerocks::string_utils::copy_string(slave_version, bml_get_bml_version(), BML_VERSION_LEN);
         return BML_RET_OK;
     }
 
@@ -686,7 +655,7 @@ int bml_get_dcs_scan_results(BML_CTX ctx, const char *radio_mac,
                              unsigned int *output_results_size, unsigned char *output_result_status,
                              bool is_single_scan)
 {
-    // Validate intput params;
+    // Validate input parameters
     if (!ctx) {
         return (-BML_RET_INVALID_ARGS);
     }
@@ -700,7 +669,7 @@ int bml_get_dcs_scan_results(BML_CTX ctx, const char *radio_mac,
 int bml_start_dcs_single_scan(BML_CTX ctx, const char *radio_mac, int dwell_time,
                               int channel_pool_size, unsigned int *channel_pool)
 {
-    // Validate intput params;
+    // Validate input parameters
     if (!ctx) {
         return (-BML_RET_INVALID_ARGS);
     }
@@ -708,4 +677,42 @@ int bml_start_dcs_single_scan(BML_CTX ctx, const char *radio_mac, int dwell_time
     auto pBML = static_cast<bml_internal *>(ctx);
     return pBML->start_dcs_single_scan(tlvf::mac_from_string(std::string(radio_mac)), dwell_time,
                                        channel_pool, channel_pool_size);
+}
+
+int bml_client_get_client_list(BML_CTX ctx, char *client_list, unsigned int *client_list_size)
+{
+    // Validate input parameters
+    if (!ctx || !client_list || !client_list_size) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    if (*client_list_size == 0) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    auto pBML = static_cast<bml_internal *>(ctx);
+    return pBML->client_get_client_list(client_list, client_list_size);
+}
+
+int bml_client_set_client(BML_CTX ctx, const char *sta_mac,
+                          const struct BML_CLIENT_CONFIG *client_config)
+{
+    // Validate input parameters
+    if (!ctx || !sta_mac || !client_config) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    auto pBML = static_cast<bml_internal *>(ctx);
+    return pBML->client_set_client(tlvf::mac_from_string(std::string(sta_mac)), *client_config);
+}
+
+int bml_client_get_client(BML_CTX ctx, const char *sta_mac, struct BML_CLIENT *client)
+{
+    // Validate input parameters
+    if (!ctx || !sta_mac || !client) {
+        return (-BML_RET_INVALID_ARGS);
+    }
+
+    auto pBML = static_cast<bml_internal *>(ctx);
+    return pBML->client_get_client(tlvf::mac_from_string(std::string(sta_mac)), client);
 }

@@ -53,10 +53,10 @@
             }
         },
         {
-            "name": "(gdb) GATEWAY - Attach to beerocks_monitor",
+            "name": "(gdb) GATEWAY - Attach to beerocks_fronthaul",
             "type": "cppdbg",
             "request": "attach",
-            "program": "${workspaceFolder}/build/install/bin/beerocks_monitor",
+            "program": "${workspaceFolder}/build/install/bin/beerocks_fronthaul",
             "processId": "${command:pickRemoteProcess}",
             "pipeTransport": {
                 "pipeCwd": "${workspaceRoot}",
@@ -125,10 +125,10 @@
             }
         },
         {
-            "name": "(gdb) REPEATER #1 - Attach to beerocks_monitor",
+            "name": "(gdb) REPEATER #1 - Attach to beerocks_fronthaul",
             "type": "cppdbg",
             "request": "attach",
-            "program": "${workspaceFolder}/build/install/bin/beerocks_monitor",
+            "program": "${workspaceFolder}/build/install/bin/beerocks_fronthaul",
             "processId": "${command:pickRemoteProcess}",
             "pipeTransport": {
                 "pipeCwd": "${workspaceRoot}",
@@ -173,10 +173,10 @@
             }
         },
         {
-            "name": "(gdb) REPEATER #2 - Attach to beerocks_monitor",
+            "name": "(gdb) REPEATER #2 - Attach to beerocks_fronthaul",
             "type": "cppdbg",
             "request": "attach",
-            "program": "${workspaceFolder}/build/install/bin/beerocks_monitor",
+            "program": "${workspaceFolder}/build/install/bin/beerocks_fronthaul",
             "processId": "${command:pickRemoteProcess}",
             "pipeTransport": {
                 "pipeCwd": "${workspaceRoot}",

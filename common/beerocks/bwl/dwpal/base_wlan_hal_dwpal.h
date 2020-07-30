@@ -12,6 +12,7 @@
 #include "base_wlan_hal_dwpal_types.h"
 
 #include <bwl/base_wlan_hal.h>
+#include <bwl/key_value_parser.h>
 #include <bwl/nl80211_client.h>
 
 #include <bcl/beerocks_state_machine.h>
@@ -35,7 +36,8 @@ enum class dwpal_fsm_event { Attach, Detach };
  * Read more about virtual inheritance: https://en.wikipedia.org/wiki/Virtual_inheritance
  */
 class base_wlan_hal_dwpal : public virtual base_wlan_hal,
-                            protected beerocks::beerocks_fsm<dwpal_fsm_state, dwpal_fsm_event> {
+                            protected beerocks::beerocks_fsm<dwpal_fsm_state, dwpal_fsm_event>,
+                            public KeyValueParser {
 
     // Public methods:
 public:
@@ -68,7 +70,7 @@ public:
     // Protected methods
 protected:
     base_wlan_hal_dwpal(HALType type, const std::string &iface_name, hal_event_cb_t callback,
-                        hal_conf_t hal_conf = {});
+                        const hal_conf_t &hal_conf = {});
 
     // Process dwpal event
     virtual bool process_dwpal_event(char *buffer, int bufLen, const std::string &opcode) = 0;
@@ -77,8 +79,16 @@ protected:
     bool set(const std::string &param, const std::string &value,
              int vap_id = beerocks::IFACE_RADIO_ID);
 
+    bool dwpal_send_cmd(const std::string &cmd, parsed_line_t &reply,
+                        int vap_id = beerocks::IFACE_RADIO_ID);
+
+    bool dwpal_send_cmd(const std::string &cmd, parsed_multiline_t &reply,
+                        int vap_id = beerocks::IFACE_RADIO_ID);
+
+    // for external process
     bool dwpal_send_cmd(const std::string &cmd, char **reply,
-                        int vap_id = beerocks::IFACE_RADIO_ID); // for external process
+                        int vap_id = beerocks::IFACE_RADIO_ID);
+
     bool dwpal_send_cmd(const std::string &cmd, int vap_id = beerocks::IFACE_RADIO_ID);
     bool attach_ctrl_interface(int vap_id);
 

@@ -235,8 +235,6 @@ int cfg_get_client_roaming()
     return retVal;
 }
 
-int cfg_get_device_info(BPL_DEVICE_INFO *device_info) { return 0; }
-
 int cfg_get_wifi_params(const char iface[BPL_IFNAME_LEN], struct BPL_WLAN_PARAMS *wlan_params)
 {
     if (!iface || !wlan_params) {
@@ -399,6 +397,78 @@ int cfg_get_all_prplmesh_wifi_interfaces(BPL_WLAN_IFACE *interfaces, int *num_of
     *num_of_interfaces = interfaces_count;
 
     return RETURN_OK;
+}
+
+bool cfg_get_persistent_db_enable(bool &enable)
+{
+    int retVal = -1;
+    if (cfg_get_prplmesh_param_int_default("persistent_db", &retVal, DEFAULT_PERSISTENT_DB) ==
+        RETURN_ERR) {
+        MAPF_ERR("Failed to read persistent-db-enable parameter");
+        return false;
+    }
+
+    enable = (retVal == 1);
+
+    return true;
+}
+
+bool cfg_get_clients_persistent_db_max_size(int &max_size)
+{
+    int retVal = -1;
+    if (cfg_get_prplmesh_param_int_default("clients_persistent_db_max_size", &retVal,
+                                           DEFAULT_CLIENTS_PERSISTENT_DB_MAX_SIZE) == RETURN_ERR) {
+        MAPF_ERR("Failed to read clients-persistent-db-max-size parameter");
+        return false;
+    }
+
+    max_size = retVal;
+
+    return true;
+}
+
+bool cfg_get_max_timelife_delay_days(int &max_timelife_delay_days)
+{
+    int retVal = -1;
+    if (cfg_get_prplmesh_param_int_default("max_timelife_delay_days", &retVal,
+                                           DEFAULT_MAX_TIMELIFE_DELAY_DAYS) == RETURN_ERR) {
+        MAPF_ERR("Failed to read max-timelife-delay-days parameter");
+        return false;
+    }
+
+    max_timelife_delay_days = retVal;
+
+    return true;
+}
+
+bool cfg_get_unfriendly_device_max_timelife_delay_days(
+    int &unfriendly_device_max_timelife_delay_days)
+{
+    int retVal = -1;
+    if (cfg_get_prplmesh_param_int_default("unfriendly_device_max_timelife_delay_days", &retVal,
+                                           DEFAULT_UNFRIENDLY_DEVICE_MAX_TIMELIFE_DELAY_DAYS) ==
+        RETURN_ERR) {
+        MAPF_ERR("Failed to read unfriendly-device-max-timelife-delay-days parameter");
+        return false;
+    }
+
+    unfriendly_device_max_timelife_delay_days = retVal;
+
+    return true;
+}
+
+bool bpl_cfg_get_wpa_supplicant_ctrl_path(const std::string &iface, std::string &wpa_ctrl_path)
+{
+    const char *path{"/var/run/wpa_supplicant/"};
+    wpa_ctrl_path = path + iface;
+    return true;
+}
+
+bool bpl_cfg_get_hostapd_ctrl_path(const std::string &iface, std::string &hostapd_ctrl_path)
+{
+    const char *path{"/var/run/hostapd/"};
+    hostapd_ctrl_path = path + iface;
+    return true;
 }
 
 } // namespace bpl

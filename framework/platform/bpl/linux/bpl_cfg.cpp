@@ -221,8 +221,6 @@ int cfg_get_dfs_reentry() { return 0; }
 
 int cfg_get_client_roaming() { return 1; }
 
-int cfg_get_device_info(BPL_DEVICE_INFO *device_info) { return RETURN_ERR; }
-
 int cfg_get_wifi_params(const char *iface, struct BPL_WLAN_PARAMS *wlan_params)
 {
     if (!iface || !wlan_params) {
@@ -333,6 +331,94 @@ int cfg_get_all_prplmesh_wifi_interfaces(BPL_WLAN_IFACE *interfaces, int *num_of
     *num_of_interfaces = interfaces_count;
 
     return RETURN_OK;
+}
+
+bool cfg_get_persistent_db_enable(bool &enable)
+{
+    int persistent_db_enable = DEFAULT_PERSISTENT_DB;
+
+    // persistent db value is optional
+    if (cfg_get_param_int("persistent_db=", persistent_db_enable) < 0) {
+        MAPF_DBG("Failed to read persistent-db-enable parameter - setting default value");
+        persistent_db_enable = DEFAULT_PERSISTENT_DB;
+    }
+
+    enable = (persistent_db_enable == 1);
+
+    return true;
+}
+
+bool cfg_get_clients_persistent_db_max_size(int &max_size)
+{
+    int max_size_val = -1;
+    if (cfg_get_param_int("clients_persistent_db_max_size=", max_size_val) == RETURN_ERR) {
+        MAPF_ERR("Failed to read clients-persistent-db-max-size parameter - setting default value");
+        max_size_val = DEFAULT_CLIENTS_PERSISTENT_DB_MAX_SIZE;
+    }
+
+    max_size = max_size_val;
+
+    return true;
+}
+
+bool cfg_get_max_timelife_delay_days(int &max_timelife_delay_days)
+{
+    int val = -1;
+    if (cfg_get_param_int("max_timelife_delay_days=", val) == RETURN_ERR) {
+        MAPF_ERR("Failed to read max-timelife-delay-days parameter - setting default value");
+        val = DEFAULT_MAX_TIMELIFE_DELAY_DAYS;
+    }
+
+    max_timelife_delay_days = val;
+
+    return true;
+}
+
+bool cfg_get_unfriendly_device_max_timelife_delay_days(
+    int &unfriendly_device_max_timelife_delay_days)
+{
+    int val = -1;
+    if (cfg_get_param_int("unfriendly_device_max_timelife_delay_days=", val) == RETURN_ERR) {
+        MAPF_ERR("Failed to read unfriendly-device-max-timelife-delay-days parameter - setting "
+                 "default value");
+        val = DEFAULT_MAX_TIMELIFE_DELAY_DAYS;
+    }
+
+    unfriendly_device_max_timelife_delay_days = val;
+
+    return true;
+}
+
+bool bpl_cfg_get_wpa_supplicant_ctrl_path(const std::string &iface, std::string &wpa_ctrl_path)
+{
+
+    std::string param = "wpa_supplicant_ctrl_path_";
+
+    param += iface;
+    param += '=';
+
+    if (cfg_get_param(param, wpa_ctrl_path) < 0) {
+        MAPF_ERR("Failed to read: " << param);
+        return false;
+    }
+
+    return true;
+}
+
+bool bpl_cfg_get_hostapd_ctrl_path(const std::string &iface, std::string &hostapd_ctrl_path)
+{
+
+    std::string param = "hostapd_ctrl_path_";
+
+    param += iface;
+    param += '=';
+
+    if (cfg_get_param(param, hostapd_ctrl_path) < 0) {
+        MAPF_ERR("Failed to read: " << param);
+        return false;
+    }
+
+    return true;
 }
 
 } // namespace bpl

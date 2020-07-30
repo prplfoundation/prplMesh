@@ -73,21 +73,11 @@ private:
 
     int ire_network_optimization_task_caller(int numOfArgs);
 
-    int ping_slave_caller(int numOfArgs);
-
-    int ping_all_slaves_caller(int numOfArgs);
-
     int rm_neighbor_11k_caller(int numOfArgs);
 
     int set_neighbor_11k_caller(int numOfArgs);
 
     int client_beacon_11k_req_caller(int numOfArgs);
-
-    int client_channel_load_11k_req_caller(int numOfArgs);
-
-    int client_link_measurement_11k_req_caller(int numOfArgs);
-
-    int client_statistics_11k_req_caller(int numOfArgs);
 
     // Functions
 
@@ -124,10 +114,6 @@ private:
 
     int ire_network_optimization_task();
 
-    int ping_slave(std::string ire_mac, int num_of_req = 1, int ping_size = 0);
-
-    int ping_all_slaves(int num_of_req = 1, int ping_size = 0);
-
     int rm_neighbor_11k(std::string ap_mac, std::string bssid, int8_t vap_id);
 
     int set_neighbor_11k(std::string ap_mac, std::string bssid, uint8_t channel, int8_t vap_id);
@@ -135,15 +121,6 @@ private:
     int client_beacon_11k_req(std::string client_mac, std::string bssid, uint8_t channel,
                               std::string ssid, uint16_t duration, uint16_t rand_ival,
                               uint16_t repeats, int16_t op_class, std::string mode);
-
-    int client_channel_load_11k_req(std::string hostap_mac, std::string client_mac,
-                                    int channel = 0);
-
-    int client_link_measurement_11k_req(std::string hostap_mac, std::string client_mac);
-
-    int client_statistics_11k_req(std::string hostap_mac, std::string client_mac,
-                                  uint8_t group_identity,
-                                  std::string peer_mac = net::network_utils::WILD_MAC_STRING);
 
     // Variables
     std::string temp_path;

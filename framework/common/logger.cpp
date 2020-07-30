@@ -30,27 +30,27 @@ static inline std::string const bool_to_string(bool b)
 static void *watch_log_file(void *args)
 {
     const char *logger_name = (const char *)args;
-    int fd = -1, length = -1, i = 0, ret = 0;
-    int event_buf_len = (sizeof(struct inotify_event) + 16) * 1024;
+    int event_buf_len       = (sizeof(struct inotify_event) + 16) * 1024;
     char buffer[event_buf_len];
     struct inotify_event *fileEvent;
 
-    fd = inotify_init();
+    int fd = inotify_init();
     if (fd < 0) {
         return nullptr;
     }
 
-    ret = inotify_add_watch(fd, std::string(CONF_FILE_PATH).c_str(),
-                            IN_MODIFY | IN_CLOSE_WRITE | IN_IGNORED | IN_DELETE_SELF);
+    int ret = inotify_add_watch(fd, std::string(CONF_FILE_PATH).c_str(),
+                                IN_MODIFY | IN_CLOSE_WRITE | IN_IGNORED | IN_DELETE_SELF);
     if (ret < 0) {
         return nullptr;
     }
 
     while (1) {
-        length = read(fd, buffer, event_buf_len);
+        int length = read(fd, buffer, event_buf_len);
         if (length < 0) {
             MAPF_ERR("can't watch logger configuration file");
         } else {
+            int i = 0;
             while (i < length) {
                 fileEvent = (struct inotify_event *)&buffer[i];
                 if (fileEvent->mask) {
@@ -92,9 +92,9 @@ void Logger::LoggerInit(const char *logger_name)
     LoggerConfig(logger_name);
     static bool init_performed = false;
     if (!init_performed) {
+        init_performed = true;
         el::Helpers::installCustomFormatSpecifier(el::CustomFormatSpecifier("%proc", get_name));
 #ifdef USE_INOTIFY
-        init_performed = true;
         pthread_t watchThread;
         int rc = pthread_create(&watchThread, NULL, watch_log_file, (void *)logger_name);
         if (rc)
@@ -137,7 +137,7 @@ void Logger::LoggerConfig(Logger::Config &cfg)
     el::Loggers::reconfigureLogger(DEFAULT_LOGGER_NAME, conf);
 }
 
-int Logger::Config::SetValuesFromJson(std::string file_path, std::string logger_name)
+int Logger::Config::SetValuesFromJson(const std::string &file_path, const std::string &logger_name)
 {
     struct json_object *jobj = json_object_from_file(file_path.c_str());
     if (!jobj) {
@@ -150,7 +150,7 @@ int Logger::Config::SetValuesFromJson(std::string file_path, std::string logger_
             SetValuesFromJson(jlogger, logger_name);
         }
 
-        if (std::string(logger_name).compare(DEFAULT_LOGGER_NAME) != 0) //string are not equal
+        if (logger_name.compare(DEFAULT_LOGGER_NAME) != 0) //string are not equal
         {
             if (json_object_object_get_ex(jobj, logger_name.c_str(), &jlogger)) {
                 SetValuesFromJson(jlogger, logger_name);
@@ -160,7 +160,7 @@ int Logger::Config::SetValuesFromJson(std::string file_path, std::string logger_
     return 0;
 }
 
-void Logger::Config::SetValuesFromJson(struct json_object *jlogger, std::string logger_name)
+void Logger::Config::SetValuesFromJson(struct json_object *jlogger, const std::string &logger_name)
 {
     struct json_object *jfile, *jtmp;
     if (json_object_object_get_ex(jlogger, "level", &jtmp)) {

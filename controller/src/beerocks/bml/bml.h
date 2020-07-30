@@ -229,28 +229,6 @@ int bml_wps_onboarding(BML_CTX ctx, const char *iface);
 int bml_get_administrator_credentials(BML_CTX ctx, char *user_password);
 
 /**
- * Get serial number of the device
- * NOTE: DEPRECATED - Use bml_get_device_info() instead.
- *
- * @param [in] ctx BML Context.
- * @param [out] serial_number[BML_NODE_SERIAL_NUMBER_LEN] The serial number of the device
- *
- * @return BML_RET_OK on success.
- */
-int __attribute__((deprecated)) bml_get_serial_number(BML_CTX ctx, char *serial_number);
-
-/**
- * Get generic device information.
- *
- * @param [in] ctx BML Context.
- * @param [out] device_info Device information structure.
- *
- * @return BML_RET_OK on success.
- */
-
-int bml_get_device_info(BML_CTX ctx, struct BML_DEVICE_INFO *device_info);
-
-/**
  * Enables or disables beerocks roaming.
  *
  * @param [in] ctx BML Context.
@@ -647,6 +625,37 @@ int bml_get_dcs_scan_results(BML_CTX ctx, const char *radio_mac,
  */
 int bml_start_dcs_single_scan(BML_CTX ctx, const char *radio_mac, int dwell_time_ms,
                               int channel_pool_size, unsigned int *channel_pool);
+
+/**
+ * Get client list.
+ *
+ * @param [in] ctx BML Context.
+ * @param [in,out] client_list List of MAC addresses sepereted by a comma.
+ * @param [in,out] client_list_size Size of client list.
+ * @return BML_RET_OK on success.
+ */
+int bml_client_get_client_list(BML_CTX ctx, char *client_list, unsigned int *client_list_size);
+
+/**
+ * Set client configuration.
+ *
+ * @param [in] ctx BML Context.
+ * @param [in] sta_mac MAC address of a station.
+ * @param [in] client_config Client configuration to be set.
+ * @return BML_RET_OK on success.
+ */
+int bml_client_set_client(BML_CTX ctx, const char *sta_mac,
+                          const struct BML_CLIENT_CONFIG *client_config);
+
+/**
+ * Get client info.
+ *
+ * @param [in] ctx BML Context.
+ * @param [in] sta_mac MAC address of a station.
+ * @param [in,out] client Client information.
+ * @return BML_RET_OK on success.
+ */
+int bml_client_get_client(BML_CTX ctx, const char *sta_mac, struct BML_CLIENT *client);
 
 #ifdef __cplusplus
 } /* extern "C" */

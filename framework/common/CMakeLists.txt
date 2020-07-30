@@ -1,40 +1,13 @@
 # Logging
 configure_file(
-	"${CMAKE_CURRENT_SOURCE_DIR}/logging.conf.in"
-	"${CMAKE_CURRENT_BINARY_DIR}/logging.conf"
+	"${CMAKE_CURRENT_SOURCE_DIR}/framework_logging.conf.in"
+	"${CMAKE_CURRENT_BINARY_DIR}/framework_logging.conf"
 )
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/logging.conf" DESTINATION share)
-file(COPY "${CMAKE_CURRENT_BINARY_DIR}/logging.conf" DESTINATION "${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/share/")
+install(FILES "${CMAKE_CURRENT_BINARY_DIR}/framework_logging.conf" DESTINATION config)
+file(COPY "${CMAKE_CURRENT_BINARY_DIR}/framework_logging.conf" DESTINATION "${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/config/")
 
-# Messaging
-if(MSGLIB STREQUAL "None")
-
-message(STATUS "${BoldYellow}Messaging library - None${ColourReset}")
+# mapfcommon sources
 set(sources logger.cpp encryption.cpp utils.cpp)
-
-else()
-
-message(STATUS "${BoldGreen}Messaging library - ${MSGLIB}${ColourReset}")
-find_package(${MSGLIB} REQUIRED)
-set(MSGLIB_TARGET ${MSGLIB}::${MSGLIB})
-set(sources logger.cpp encryption.cpp utils.cpp message_factory.cpp broker_config.cpp broker_interface.cpp ${MSGLIB}/broker.cpp ${MSGLIB}/socket.cpp ${MSGLIB}/context.cpp ${MSGLIB}/poller.cpp )
-
-add_executable(version ${MSGLIB}/version.cpp)
-target_link_libraries(version mapfcommon elpp ${MSGLIB_TARGET})
-
-add_executable(local_bus local_bus.cpp)
-target_link_libraries(local_bus PRIVATE mapfcommon elpp json-c)
-
-configure_file(
-	"${CMAKE_CURRENT_SOURCE_DIR}/local_bus.conf.in"
-	"${CMAKE_CURRENT_BINARY_DIR}/local_bus.conf"
-	)
-install(FILES "${CMAKE_CURRENT_BINARY_DIR}/local_bus.conf" DESTINATION share)
-file(COPY "${CMAKE_CURRENT_BINARY_DIR}/local_bus.conf" DESTINATION "${CMAKE_MULTIAP_OUTPUT_DIRECTORY}/share")
-install(TARGETS version DESTINATION bin)
-install(TARGETS local_bus DESTINATION bin)
-
-endif()
 
 # We use OpenSSL 1.1.x for Encryption
 find_package(OpenSSL 1.1 QUIET)
@@ -49,7 +22,6 @@ add_library(mapfcommon ${sources})
 set_target_properties(mapfcommon PROPERTIES VERSION ${prplmesh_VERSION} SOVERSION ${prplmesh_VERSION_MAJOR})
 target_link_libraries(mapfcommon
 	PRIVATE 
-		${MSGLIB_TARGET} 
 		elpp
 		json-c 
 	PUBLIC
@@ -70,7 +42,6 @@ target_include_directories(mapfcommon
 		PUBLIC
 				$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
 				$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-				$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/${MSGLIB}/include>
 		PRIVATE
 				$<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/>
 		)

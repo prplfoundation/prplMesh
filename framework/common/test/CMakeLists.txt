@@ -1,18 +1,13 @@
 if(BUILD_TESTS)
-	if(MSGLIB STREQUAL "None")
-		add_executable(encryption_test encryption_test.cpp)
-		target_link_libraries(encryption_test mapfcommon elpp)
-		install(TARGETS encryption_test DESTINATION bin/tests/common)
-		add_test(NAME encryption_test COMMAND $<TARGET_FILE:encryption_test>)
-	else()
-		add_subdirectory(messages)
-		file(GLOB tests *_test.cpp)
-		foreach(test ${tests})
-			get_filename_component(target ${test} NAME_WE)
-			add_executable(${target} ${test})
-			target_link_libraries(${target} mapfcommon dummy_messages elpp)
-			install(TARGETS ${target} DESTINATION bin/tests/common)
-			add_test(NAME ${target} COMMAND $<TARGET_FILE:${target}>)
-		endforeach(test ${tests})
-	endif()
+
+	# Encryption Tests
+	set(TEST_NAME mapf_common_encryption_tests)
+    add_executable(${TEST_NAME}
+        encryption_test.cpp
+    )
+
+    target_link_libraries(${TEST_NAME} mapfcommon elpp)
+
+    install(TARGETS ${TEST_NAME} DESTINATION ${CMAKE_INSTALL_FULL_BINDIR}/tests)
+    add_test(NAME ${TEST_NAME} COMMAND $<TARGET_FILE:${TEST_NAME}>)
 endif()

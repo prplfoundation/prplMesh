@@ -45,32 +45,31 @@ namespace bpl {
 /* 14 */ ERROR_CODE(BH_SLAVE_SOCKET_DISCONNECTED)                                           \
 /* 15 */ ERROR_CODE(BH_STOPPED)                                                             \
 /* 16 */ ERROR_CODE(SLAVE_CONNECTING_TO_BACKHAUL_MANAGER)                                   \
-/* 17 */ ERROR_CODE(SLAVE_MASTER_KEEP_ALIVE_TIMEOUT)                                        \
-/* 18 */ ERROR_CODE(SLAVE_INVALID_MASTER_SOCKET)                                            \
-/* 19 */ ERROR_CODE(SLAVE_FAILED_CONNECT_TO_PLATFORM_MANAGER)                               \
-/* 20 */ ERROR_CODE(SLAVE_PLATFORM_MANAGER_REGISTER_TIMEOUT)                                \
-/* 21 */ ERROR_CODE(SLAVE_SLAVE_BACKHAUL_MANAGER_DISCONNECTED)                              \
-/* 22 */ ERROR_CODE(SLAVE_STOPPED)                                                          \
-/* 23 */ ERROR_CODE(AP_MANAGER_START)                                                       \
-/* 24 */ ERROR_CODE(AP_MANAGER_DISCONNECTED)                                                \
-/* 25 */ ERROR_CODE(AP_MANAGER_HOSTAP_DISABLED)                                             \
-/* 26 */ ERROR_CODE(AP_MANAGER_ATTACH_FAIL)                                                 \
-/* 27 */ ERROR_CODE(AP_MANAGER_SUDDEN_DETACH)                                               \
-/* 28 */ ERROR_CODE(AP_MANAGER_HAL_DISCONNECTED)                                            \
-/* 29 */ ERROR_CODE(AP_MANAGER_CAC_TIMEOUT)                                                 \
-/* 30 */ ERROR_CODE(MONITOR_DISCONNECTED)                                                   \
-/* 31 */ ERROR_CODE(MONITOR_HOSTAP_DISABLED)                                                \
-/* 32 */ ERROR_CODE(MONITOR_ATTACH_FAIL)                                                    \
-/* 33 */ ERROR_CODE(MONITOR_SUDDEN_DETACH)                                                  \
-/* 34 */ ERROR_CODE(MONITOR_HAL_DISCONNECTED)                                               \
-/* 35 */ ERROR_CODE(MONITOR_REPORT_PROCESS_FAIL)                                            \
-/* 36 */ ERROR_CODE(CONFIG_PLATFORM_REPORTED_INVALID_CONFIGURATION)                         \
-/* 37 */ ERROR_CODE(CONFIG_BACKHAUL_WIRED_INTERFACE_IS_UNSUPPORTED)                         \
-/* 38 */ ERROR_CODE(CONFIG_BACKHAUL_WIRELESS_INTERFACE_IS_UNSUPPORTED)                      \
-/* 39 */ ERROR_CODE(CONFIG_NO_VALID_BACKHAUL_INTERFACE)                                     \
-/* 40 */ ERROR_CODE(WATCHDOG_PROCESS_STUCK)                                                 \
-/* 41 */ ERROR_CODE(WATCHDOG_PROCESS_ZOMBIE)                                                \
-/* 42 */ ERROR_CODE(LAST)
+/* 17 */ ERROR_CODE(SLAVE_INVALID_MASTER_SOCKET)                                            \
+/* 18 */ ERROR_CODE(SLAVE_FAILED_CONNECT_TO_PLATFORM_MANAGER)                               \
+/* 19 */ ERROR_CODE(SLAVE_PLATFORM_MANAGER_REGISTER_TIMEOUT)                                \
+/* 20 */ ERROR_CODE(SLAVE_SLAVE_BACKHAUL_MANAGER_DISCONNECTED)                              \
+/* 21 */ ERROR_CODE(SLAVE_STOPPED)                                                          \
+/* 22 */ ERROR_CODE(AP_MANAGER_START)                                                       \
+/* 23 */ ERROR_CODE(AP_MANAGER_DISCONNECTED)                                                \
+/* 24 */ ERROR_CODE(AP_MANAGER_HOSTAP_DISABLED)                                             \
+/* 25 */ ERROR_CODE(AP_MANAGER_ATTACH_FAIL)                                                 \
+/* 26 */ ERROR_CODE(AP_MANAGER_SUDDEN_DETACH)                                               \
+/* 27 */ ERROR_CODE(AP_MANAGER_HAL_DISCONNECTED)                                            \
+/* 28 */ ERROR_CODE(AP_MANAGER_CAC_TIMEOUT)                                                 \
+/* 29 */ ERROR_CODE(MONITOR_DISCONNECTED)                                                   \
+/* 30 */ ERROR_CODE(MONITOR_HOSTAP_DISABLED)                                                \
+/* 31 */ ERROR_CODE(MONITOR_ATTACH_FAIL)                                                    \
+/* 32 */ ERROR_CODE(MONITOR_SUDDEN_DETACH)                                                  \
+/* 33 */ ERROR_CODE(MONITOR_HAL_DISCONNECTED)                                               \
+/* 34 */ ERROR_CODE(MONITOR_REPORT_PROCESS_FAIL)                                            \
+/* 35 */ ERROR_CODE(CONFIG_PLATFORM_REPORTED_INVALID_CONFIGURATION)                         \
+/* 36 */ ERROR_CODE(CONFIG_BACKHAUL_WIRED_INTERFACE_IS_UNSUPPORTED)                         \
+/* 37 */ ERROR_CODE(CONFIG_BACKHAUL_WIRELESS_INTERFACE_IS_UNSUPPORTED)                      \
+/* 38 */ ERROR_CODE(CONFIG_NO_VALID_BACKHAUL_INTERFACE)                                     \
+/* 39 */ ERROR_CODE(WATCHDOG_PROCESS_STUCK)                                                 \
+/* 40 */ ERROR_CODE(WATCHDOG_PROCESS_ZOMBIE)                                                \
+/* 41 */ ERROR_CODE(LAST)
 
 // clang-format on
 

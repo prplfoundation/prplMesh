@@ -111,7 +111,23 @@ public:
     static std::string get_mac_from_arp_table(const std::string &ipv4);
 
     static std::vector<std::string> linux_get_iface_list_from_bridge(const std::string &bridge);
-    static int linux_get_iface_index(const std::string &iface);
+
+    /**
+     * @brief Gets the interface index corresponding to a particular name.
+     *
+     * @param iface_name The name of the network interface.
+     * @return interface index or 0 if no interface exists with the name given.
+     */
+    static uint32_t linux_get_iface_index(const std::string &iface_name);
+
+    /**
+     * @brief Gets the interface name corresponding to a particular index.
+     *
+     * @param iface_index The index of the network interface.
+     * @return interface name or empty string if no interface exists with the index given.
+     */
+    static std::string linux_get_iface_name(uint32_t iface_index);
+
     static bool linux_add_iface_to_bridge(const std::string &bridge, const std::string &iface);
     static bool linux_remove_iface_from_bridge(const std::string &bridge, const std::string &iface);
     static bool linux_iface_ctrl(const std::string &iface, bool up, std::string ip = "",
@@ -144,6 +160,16 @@ public:
      * @return True if speed could be successfully obtained and false otherwise.
      */
     static bool linux_iface_get_speed(const std::string &iface, uint32_t &speed);
+
+    /**
+     * @brief Gets interface statistics for the given network interface.
+     *
+     * @param[in] iface Name of the local network interface.
+     * @param[out] iface_stats Interface statistics.
+     *
+     * @return True on success and false otherwise.
+     */
+    static bool get_iface_stats(const std::string &iface, sInterfaceStats &iface_stats);
 
     static bool arp_send(const std::string &iface, const std::string &dst_ip,
                          const std::string &src_ip, sMacAddr dst_mac, sMacAddr src_mac, int count,

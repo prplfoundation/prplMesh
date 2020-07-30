@@ -1,4 +1,10 @@
 #!/bin/sh -e
+###############################################################
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+# SPDX-FileCopyrightText: 2019-2020 the prplMesh contributors (see AUTHORS.md)
+# This code is subject to the terms of the BSD+Patent license.
+# See LICENSE file for more details.
+###############################################################
 
 scriptdir="$(cd "${0%/*}"; pwd)"
 rootdir="${scriptdir%/*/*/*/*}"
@@ -12,6 +18,7 @@ usage() {
     echo "      -h|--help - show this help menu"
     echo "      -v|--verbose - increase the script's verbosity"
     echo "      -d|--target-device the device to build for"
+    echo "      --docker-target-stage docker target build stage (implies -i)"
     echo "      -i|--image - build the docker image only"
     echo "      -o|--openwrt-version - the openwrt version to use"
     echo "      -r|--openwrt-repository - the openwrt repository to use"
@@ -31,9 +38,11 @@ build_image() {
            --build-arg OPENWRT_VERSION="$OPENWRT_VERSION" \
            --build-arg TARGET_SYSTEM="$TARGET_SYSTEM" \
            --build-arg SUBTARGET="$SUBTARGET" \
+           --build-arg TARGET_DEVICE="$TARGET_DEVICE" \
            --build-arg TARGET_PROFILE="$TARGET_PROFILE" \
            --build-arg PRPL_FEED="$PRPL_FEED" \
            --build-arg PRPLMESH_VARIANT="$PRPLMESH_VARIANT" \
+           --target="$DOCKER_TARGET_STAGE" \
            "$scriptdir/"
 }
 
@@ -46,6 +55,7 @@ build_prplmesh() {
            --name "$container_name" \
            -e TARGET_SYSTEM \
            -e SUBTARGET \
+           -e TARGET_DEVICE \
            -e TARGET_PROFILE \
            -e OPENWRT_VERSION \
            -e PRPLMESH_VERSION \
@@ -67,7 +77,7 @@ main() {
         exit 1
     fi
 
-    if ! OPTS=$(getopt -o 'hvd:io:r:t:' --long help,verbose,target-device:,image,openwrt-version:,openwrt-repository:,tag: -n 'parse-options' -- "$@"); then
+    if ! OPTS=$(getopt -o 'hvd:io:r:t:' --long help,verbose,target-device:,docker-target-stage:,image,openwrt-version:,openwrt-repository:,tag: -n 'parse-options' -- "$@"); then
         err "Failed parsing options." >&2
         usage
         exit 1
@@ -75,13 +85,14 @@ main() {
 
     eval set -- "$OPTS"
 
-    SUPPORTED_TARGETS="turris-omnia glinet-b1300 netgear-rax40"
+    SUPPORTED_TARGETS="turris-omnia glinet-b1300 netgear-rax40 axepoint intel_mips"
 
     while true; do
         case "$1" in
             -h | --help)               usage; exit 0; shift ;;
             -v | --verbose)            VERBOSE=true; shift ;;
             -d | --target-device)      TARGET_DEVICE="$2"; shift ; shift ;;
+            --docker-target-stage)     DOCKER_TARGET_STAGE="$2"; IMAGE_ONLY=true; shift 2 ;;
             -i | --image)              IMAGE_ONLY=true; shift ;;
             -o | --openwrt-version)    OPENWRT_VERSION="$2"; shift; shift ;;
             -r | --openwrt-repository) OPENWRT_REPOSITORY="$2"; shift; shift ;;
@@ -102,11 +113,10 @@ main() {
             SUBTARGET=generic
             TARGET_PROFILE=DEVICE_glinet_gl-b1300
             ;;
-        netgear-rax40)
+        netgear-rax40|axepoint|intel_mips)
             TARGET_SYSTEM=intel_mips
             SUBTARGET=xrx500
-            TARGET_PROFILE=DEVICE_NETGEAR_RAX40
-            PRPLMESH_VARIANT="-dwpal"
+            TARGET_PROFILE=
             ;;
         *)
             err "Unknown target device: $TARGET_DEVICE"
@@ -132,7 +142,7 @@ main() {
     if [ -n "$TAG" ] ; then
         image_tag="$TAG"
     else
-        image_tag="prplmesh-builder-${TARGET_DEVICE}:${OPENWRT_VERSION}"
+        image_tag="${DOCKER_TARGET_STAGE}-${TARGET_DEVICE}:${OPENWRT_VERSION}"
         dbg "image tag not set, using default value $image_tag"
     fi
 
@@ -163,8 +173,9 @@ main() {
 VERBOSE=false
 IMAGE_ONLY=false
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
-OPENWRT_VERSION='bd19f9ab26ad234b6f10cce23cd0dc41b9371929'
-PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^53d1e11003ce318c043c42063bbd2f57d15aac81'
+OPENWRT_VERSION='3d511d477e72bd1845c75101a7f3d4e00780991d'
+PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^89e6602655713f8487c72d8d636daa610d76a468'
 PRPLMESH_VARIANT="-nl80211"
+DOCKER_TARGET_STAGE="prplmesh-builder"
 
 main "$@"

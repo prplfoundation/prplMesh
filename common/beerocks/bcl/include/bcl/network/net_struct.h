@@ -52,6 +52,44 @@ typedef struct sScanResult {
     bool operator!=(sScanResult const &rhs) const { return !(rhs == *this); }
 } __attribute__((packed)) sScanResult;
 
+/**
+ * @brief Interface statistics.
+ *
+ * Information in this structure is obtained from IFLA_STATS attribute of a rtnetlink message
+ * through a Rtnetlink socket.
+ */
+struct sInterfaceStats {
+    /**
+     * Total bytes transmitted.
+     */
+    uint32_t tx_bytes = 0;
+
+    /**
+     * Packet transmit problems.
+     */
+    uint32_t tx_errors = 0;
+
+    /**
+     * Total packets transmitted.
+     */
+    uint32_t tx_packets = 0;
+
+    /**
+     * Total bytes received.
+     */
+    uint32_t rx_bytes = 0;
+
+    /**
+     * Bad packets received.
+     */
+    uint32_t rx_errors = 0;
+
+    /**
+     * Total packets received.
+     */
+    uint32_t rx_packets = 0;
+};
+
 } // namespace net
 } // namespace beerocks
 

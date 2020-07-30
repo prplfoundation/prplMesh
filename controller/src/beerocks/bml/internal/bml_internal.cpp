@@ -67,7 +67,8 @@ static void config_logger(const std::string log_file = std::string())
 static void translate_channel_scan_results(const beerocks_message::sChannelScanResults &res_in,
                                            BML_NEIGHBOR_AP &res_out)
 {
-    mapf::utils::copy_string(res_out.ap_SSID, res_in.ssid, beerocks::message::WIFI_SSID_MAX_LENGTH);
+    string_utils::copy_string(res_out.ap_SSID, res_in.ssid,
+                              beerocks::message::WIFI_SSID_MAX_LENGTH);
     std::copy_n(res_in.bssid.oct, BML_MAC_ADDR_LEN, res_out.ap_BSSID);
     std::copy_n(res_in.security_mode_enabled, beerocks::message::CHANNEL_SCAN_LIST_LENGTH,
                 res_out.ap_SecurityModeEnabled);
@@ -1127,6 +1128,113 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                              << " response, but no one is waiting...";
             }
         } break;
+        case beerocks_message::ACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE: {
+            LOG(DEBUG) << "ACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE received";
+
+            if (!m_prmClientListGet) {
+                LOG(WARNING) << "Received GET_CLIENT_LIST response, but no one is waiting...";
+                break;
+            }
+
+            auto response =
+                beerocks_header
+                    ->addClass<beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE>();
+            if (!response) {
+                LOG(ERROR) << "addClass cACTION_BML_CLIENT_GET_CLIENT_LIST_RESPONSE failed";
+                return BML_RET_OP_FAILED;
+            }
+
+            if (!m_client_list || !m_client_list_size) {
+                LOG(ERROR) << "The pointer to the user data buffer is null!";
+                m_prmClientListGet->set_value(false);
+                break;
+            }
+
+            if (response->result() != 0) {
+                LOG(ERROR) << "GET_CLIENT_LIST_REQUEST failed with error: " << response->result();
+                m_prmClientListGet->set_value(false);
+                break;
+            }
+
+            auto client_list_size = response->client_list_size();
+            LOG(INFO) << "Received " << client_list_size << " clients from the controller";
+            // Store the received data.
+            if (client_list_size == 0) {
+                LOG(DEBUG) << "Received an empty client list!";
+                m_prmClientListGet->set_value(true);
+                break;
+            }
+
+            LOG_IF((client_list_size > *m_client_list_size), WARNING)
+                << "Not enough space in input buffer, writing " << *m_client_list_size << "/"
+                << client_list_size << " clients";
+
+            uint8_t max_clients_size = std::min(client_list_size, *m_client_list_size);
+
+            bool failed_to_copy = false;
+            for (uint8_t index = 0; index < max_clients_size; ++index) {
+                auto client_list_tuple = response->client_list(index);
+                if (!std::get<0>(client_list_tuple)) {
+                    LOG(ERROR) << "client list access fail!";
+                    m_prmClientListGet->set_value(false);
+                    failed_to_copy = true;
+                    break;
+                }
+
+                auto &client_element = std::get<1>(client_list_tuple);
+                m_client_list->push_back(client_element);
+            }
+
+            *m_client_list_size = m_client_list->size();
+            m_prmClientListGet->set_value(!failed_to_copy);
+        } break;
+        case beerocks_message::ACTION_BML_CLIENT_SET_CLIENT_RESPONSE: {
+            LOG(DEBUG) << "ACTION_BML_CLIENT_SET_CLIENT_RESPONSE received";
+            auto response =
+                beerocks_header
+                    ->addClass<beerocks_message::cACTION_BML_CLIENT_SET_CLIENT_RESPONSE>();
+            if (!response) {
+                LOG(ERROR) << "addClass cACTION_BML_CLIENT_SET_CLIENT_RESPONSE failed";
+                return BML_RET_OP_FAILED;
+            }
+
+            ///Signal any waiting threads
+            if (!wake_up(beerocks_message::ACTION_BML_CLIENT_SET_CLIENT_REQUEST,
+                         response->result())) {
+                LOG(WARNING) << "Received ACTION_BML_CLIENT_SET_CLIENT_RESPONSE"
+                             << " response, but no one is waiting...";
+            }
+        } break;
+        case beerocks_message::ACTION_BML_CLIENT_GET_CLIENT_RESPONSE: {
+            LOG(DEBUG) << "ACTION_BML_CLIENT_GET_CLIENT_RESPONSE received";
+            auto response =
+                beerocks_header
+                    ->addClass<beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_RESPONSE>();
+            if (!response) {
+                LOG(ERROR) << "addClass cACTION_BML_CLIENT_GET_CLIENT_RESPONSE failed";
+                return BML_RET_OP_FAILED;
+            }
+
+            //Signal any waiting threads
+            if (m_prmClientGet) {
+                bool promise_result = false;
+                if (m_client) {
+                    std::copy_n(response->client().sta_mac.oct, BML_MAC_ADDR_LEN,
+                                m_client->sta_mac);
+                    m_client->timestamp_sec           = response->client().timestamp_sec;
+                    m_client->stay_on_initial_radio   = response->client().stay_on_initial_radio;
+                    m_client->stay_on_selected_device = response->client().stay_on_selected_device;
+                    m_client->selected_bands          = response->client().selected_bands;
+                    m_client->time_life_delay_days    = response->client().time_life_delay_days;
+                    //Resolve promise to "true"
+                    promise_result = true;
+                }
+                m_prmClientGet->set_value(promise_result);
+            } else {
+                LOG(WARNING) << "Received ACTION_BML_CLIENT_GET_CLIENT_RESPONSE response, "
+                             << "but no one is waiting...";
+            }
+        } break;
         default: {
             LOG(WARNING) << "unhandled header BML action type 0x" << std::hex
                          << int(beerocks_header->action_op());
@@ -1223,29 +1331,6 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
                     << "Received ADMIN_CREDENTIALS_GET_RESPONSE response, but no one is waiting...";
             }
         } break;
-        case beerocks_message::ACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE: {
-            auto response =
-                beerocks_header
-                    ->addClass<beerocks_message::cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE>();
-            if (response == nullptr) {
-                LOG(ERROR) << "addClass cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE failed";
-                return BML_RET_OP_FAILED;
-            }
-            // Signal any waiting threads
-            if (m_prmDeviceInfoGet) {
-                if (m_device_info != nullptr) {
-                    *m_device_info = response->params();
-                    m_prmDeviceInfoGet->set_value(response->result() == 0);
-                } else {
-                    m_prmDeviceInfoGet->set_value(0);
-                }
-                m_prmDeviceInfoGet = nullptr;
-            } else {
-                LOG(WARNING)
-                    << "Received SERIAL_NUMBER_GET_RESPONSE response, but no one is waiting...";
-            }
-            return BML_RET_OP_FAILED;
-        } break;
         case beerocks_message::ACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE: {
             auto response = beerocks_header->addClass<
                 beerocks_message::cACTION_PLATFORM_GET_MASTER_SLAVE_VERSIONS_RESPONSE>();
@@ -1256,12 +1341,12 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             // Signal any waiting threads
             if (m_prmMasterSlaveVersions) {
                 if (m_master_slave_versions != nullptr) {
-                    mapf::utils::copy_string(m_master_slave_versions->master_version,
-                                             response->versions().master_version,
-                                             message::VERSION_LENGTH);
-                    mapf::utils::copy_string(m_master_slave_versions->slave_version,
-                                             response->versions().slave_version,
-                                             message::VERSION_LENGTH);
+                    string_utils::copy_string(m_master_slave_versions->master_version,
+                                              response->versions().master_version,
+                                              message::VERSION_LENGTH);
+                    string_utils::copy_string(m_master_slave_versions->slave_version,
+                                              response->versions().slave_version,
+                                              message::VERSION_LENGTH);
                     m_prmMasterSlaveVersions->set_value(response->result() == 0);
                 } else {
                     LOG(DEBUG) << "m_master_slave_versions == nullptr !";
@@ -1766,6 +1851,193 @@ int bml_internal::start_dcs_single_scan(const sMacAddr &mac, int dwell_time_ms,
     return BML_RET_OK;
 }
 
+int bml_internal::client_get_client_list(char *client_list, unsigned int *client_list_size)
+{
+    LOG(DEBUG) << "client_get_client_list";
+
+    // Invalid input
+    if (!client_list || !client_list_size) {
+        LOG(ERROR) << "Invalid input: null pointers";
+        return (-BML_RET_INVALID_DATA);
+    }
+
+    // Not enough space for even one result
+    if (*client_list_size < (network_utils::ZERO_MAC_STRING.size() + 1)) {
+        LOG(ERROR) << "Invalid input: insufficient minimal space for results, client-list-max-size="
+                   << *client_list_size;
+        return (-BML_RET_INVALID_DATA);
+    }
+
+    // If the socket is not valid, attempt to re-establish the connection
+    if (!m_sockMaster) {
+        int iRet = connect_to_master();
+        if (iRet != BML_RET_OK) {
+            LOG(ERROR) << " Unable to create context, connect_to_master failed!";
+            return iRet;
+        }
+    }
+
+    // Initialize the promise for receiving the response
+    beerocks::promise<bool> prmClientListGet;
+    m_prmClientListGet   = &prmClientListGet;
+    int iOpTimeout       = RESPONSE_TIMEOUT; // Default timeout
+    auto client_mac_list = std::list<sMacAddr>();
+    m_client_list        = &client_mac_list;
+    uint32_t client_mac_list_max_count =
+        *client_list_size / (network_utils::ZERO_MAC_STRING.size() + 1); // The 1 is for delimiters
+    m_client_list_size = &client_mac_list_max_count;
+
+    // Save client list max size to be used as copy-to-buffer max size when results are received
+    auto client_list_max_size = *client_list_size;
+
+    auto request = message_com::create_vs_message<
+        beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST>(cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR) << "Failed building cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    // Build and send the message
+    if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
+        LOG(ERROR) << "Failed sending param get message!";
+        m_prmClientListGet = nullptr;
+        m_client_list      = nullptr;
+        m_client_list_size = nullptr;
+        return (-BML_RET_OP_FAILED);
+    }
+    LOG(DEBUG) << "cACTION_BML_CLIENT_GET_CLIENT_LIST_REQUEST sent";
+
+    int iRet = BML_RET_OK;
+
+    if (!m_prmClientListGet->wait_for(iOpTimeout)) {
+        LOG(WARNING) << "Timeout while waiting for client list get response...";
+        iRet = -BML_RET_TIMEOUT;
+    }
+
+    // Clear the get client list members
+    m_client_list      = nullptr;
+    m_client_list_size = nullptr;
+
+    // Clear the promise holder
+    m_prmClientListGet = nullptr;
+
+    if (iRet != BML_RET_OK) {
+        LOG(ERROR) << "Get client list request returned with error code:" << iRet;
+        return (iRet);
+    }
+
+    bool result = prmClientListGet.get_value();
+    LOG(DEBUG) << "Promise resolved, received " << client_mac_list.size() << " clients";
+    if (!result) {
+        LOG(ERROR) << "Get client list request failed";
+        return -BML_RET_OP_FAILED;
+    }
+
+    // Translate sMacAddr list to string
+    std::string client_list_str;
+    for (const auto &client : client_mac_list) {
+        auto mac_str = tlvf::mac_to_string(client);
+        client_list_str.append(mac_str);
+        client_list_str.append(",");
+    }
+
+    // Return results
+    *client_list_size      = client_list_str.size();
+    client_list_str.back() = '\0';
+    beerocks::string_utils::copy_string(client_list, client_list_str.c_str(), client_list_max_size);
+
+    return BML_RET_OK;
+}
+
+int bml_internal::client_set_client(const sMacAddr &sta_mac, const BML_CLIENT_CONFIG &client_config)
+{
+    LOG(DEBUG) << "client_set_client";
+
+    auto request =
+        message_com::create_vs_message<beerocks_message::cACTION_BML_CLIENT_SET_CLIENT_REQUEST>(
+            cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR) << "Failed building cACTION_BML_CLIENT_SET_CLIENT_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->sta_mac()                               = sta_mac;
+    request->client_config().stay_on_initial_radio   = client_config.stay_on_initial_radio;
+    request->client_config().stay_on_selected_device = client_config.stay_on_selected_device;
+    request->client_config().selected_bands          = client_config.selected_bands;
+
+    int result = 0;
+    if (send_bml_cmdu(result, request->get_action_op()) != BML_RET_OK) {
+        LOG(ERROR) << "Send cACTION_BML_CLIENT_SET_CLIENT_REQUEST failed";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    if (result != 0) {
+        LOG(ERROR) << "Set client request returned error code:" << result;
+        return result;
+    }
+
+    return BML_RET_OK;
+}
+
+int bml_internal::client_get_client(const sMacAddr &sta_mac, BML_CLIENT *client)
+{
+    LOG(DEBUG) << "client_get_client";
+
+    // If the socket is not valid, attempt to re-establish the connection
+    if (!m_sockMaster) {
+        int iRet = connect_to_master();
+        if (iRet != BML_RET_OK) {
+            LOG(ERROR) << " Unable to create context, connect_to_master failed!";
+            return iRet;
+        }
+    }
+
+    // Initialize the promise for receiving the response
+    beerocks::promise<bool> prmClientGet;
+    m_prmClientGet = &prmClientGet;
+    int iOpTimeout = RESPONSE_TIMEOUT; // Default timeout
+    m_client       = client;
+
+    auto request =
+        message_com::create_vs_message<beerocks_message::cACTION_BML_CLIENT_GET_CLIENT_REQUEST>(
+            cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR) << "Failed building cACTION_BML_CLIENT_GET_CLIENT_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->sta_mac() = sta_mac;
+    // Build and send the message
+    if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
+        LOG(ERROR) << "Failed sending param get message!";
+        m_prmClientGet = nullptr;
+        m_client       = nullptr;
+        return (-BML_RET_OP_FAILED);
+    }
+    LOG(DEBUG) << "cACTION_BML_CLIENT_GET_CLIENT_REQUEST sent";
+
+    int iRet = BML_RET_OK;
+
+    if (!m_prmClientGet->wait_for(iOpTimeout)) {
+        LOG(WARNING) << "Timeout while waiting for client get response...";
+        iRet = -BML_RET_TIMEOUT;
+    }
+
+    // Clear the get client members
+    m_client = nullptr;
+
+    // Clear the promise holder
+    m_prmClientGet = nullptr;
+
+    LOG_IF(iRet != BML_RET_OK, ERROR) << "Get client request returned with error code:" << iRet;
+
+    return BML_RET_OK;
+}
+
 int bml_internal::ping()
 {
     // Command supported only on local master
@@ -1927,9 +2199,9 @@ int bml_internal::device_oper_radios_query(BML_DEVICE_DATA *device_data)
         device_data->radios[idx].is_connected = true;
         device_data->radios[idx].is_operational =
             (iface_status == beerocks::eNodeState::STATE_CONNECTED) ? true : false;
-        mapf::utils::copy_string(device_data->radios[idx].iface_name,
-                                 DeviceData.radios[idx].iface_name,
-                                 beerocks::message::IFACE_NAME_LENGTH);
+        string_utils::copy_string(device_data->radios[idx].iface_name,
+                                  DeviceData.radios[idx].iface_name,
+                                  beerocks::message::IFACE_NAME_LENGTH);
     }
 
     return iRet;
@@ -2102,8 +2374,8 @@ int bml_internal::register_event_cb(BML_EVENT_CB pCB)
     }
 
     if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
-        LOG(ERROR)
-            << "Failed sending ACTION_BML_REGISTER/UNREGISTER_TO_EVENTS_UPDATES_REQUEST message!";
+        LOG(ERROR) << "Failed sending ACTION_BML_REGISTER/UNREGISTER_TO_EVENTS_UPDATES_REQUEST "
+                      "message!";
         return (-BML_RET_OP_FAILED);
     }
 
@@ -2393,9 +2665,9 @@ int bml_internal::get_wifi_credentials(int vap_id, char *ssid, char *pass, int *
     // Clear the promise holder
     m_prmWiFiCredentialsGet = nullptr;
 
-    mapf::utils::copy_string(ssid, sWifiCredentials.ssid, BML_NODE_SSID_LEN);
+    string_utils::copy_string(ssid, sWifiCredentials.ssid, BML_NODE_SSID_LEN);
     if (pass != nullptr) {
-        mapf::utils::copy_string(pass, sWifiCredentials.pass, BML_NODE_PASS_LEN);
+        string_utils::copy_string(pass, sWifiCredentials.pass, BML_NODE_PASS_LEN);
     }
     *sec = sWifiCredentials.sec;
 
@@ -2504,8 +2776,8 @@ int bml_internal::bml_wps_onboarding(const char *iface)
         return (-BML_RET_OP_FAILED);
     }
 
-    mapf::utils::copy_string(request->iface_name(message::IFACE_NAME_LENGTH), iface,
-                             message::IFACE_NAME_LENGTH);
+    string_utils::copy_string(request->iface_name(message::IFACE_NAME_LENGTH), iface,
+                              message::IFACE_NAME_LENGTH);
 
     if (!message_com::send_cmdu(m_sockPlatform, cmdu_tx)) {
         LOG(ERROR) << "Failed sending ACTION_PLATFORM_WPS_ONBOARDING_REQUEST message!";
@@ -2567,7 +2839,8 @@ int bml_internal::get_administrator_credentials(char *user_password)
     // Clear the promise holder
     m_prmAdminCredentialsGet = nullptr;
 
-    mapf::utils::copy_string(user_password, AdminCredentials.user_password, BML_NODE_USER_PASS_LEN);
+    string_utils::copy_string(user_password, AdminCredentials.user_password,
+                              BML_NODE_USER_PASS_LEN);
 
     //clear the memory with password in it.
     volatile char *creds_pass = const_cast<volatile char *>(AdminCredentials.user_password);
@@ -2575,73 +2848,6 @@ int bml_internal::get_administrator_credentials(char *user_password)
 
     if (iRet != BML_RET_OK) {
         LOG(ERROR) << "Configuration get failed!";
-        return (iRet);
-    }
-
-    return (iRet);
-}
-
-int bml_internal::get_device_info(BML_DEVICE_INFO &device_info)
-{
-    // If the socket is not valid, attempt to re-establish the connection
-    if (m_sockPlatform == nullptr && !connect_to_platform()) {
-        return (-BML_RET_CONNECT_FAIL);
-    }
-
-    // Initialize the promise for receiving the response
-    beerocks::promise<bool> prmDeviceInfoGet;
-    m_prmDeviceInfoGet = &prmDeviceInfoGet;
-    int iOpTimeout     = RESPONSE_TIMEOUT; // Default timeout
-
-    beerocks_message::sDeviceInfo DeviceInfo;
-    m_device_info = &DeviceInfo;
-
-    //CMDU message
-    auto request =
-        message_com::create_vs_message<beerocks_message::cACTION_PLATFORM_DEVICE_INFO_GET_REQUEST>(
-            cmdu_tx);
-
-    if (request == nullptr) {
-        LOG(ERROR) << "Failed building ACTION_PLATFORM_DEVICE_INFO_GET_REQUEST message!";
-        return (-BML_RET_OP_FAILED);
-    }
-
-    if (!message_com::send_cmdu(m_sockPlatform, cmdu_tx)) {
-        LOG(ERROR) << "Failed sending ACTION_PLATFORM_DEVICE_INFO_GET_REQUEST message!";
-        return (-BML_RET_OP_FAILED);
-    }
-
-    int iRet = BML_RET_OK;
-
-    if (!prmDeviceInfoGet.wait_for(iOpTimeout)) {
-        LOG(WARNING) << "Timeout while waiting for device info get response...";
-        iRet = -BML_RET_TIMEOUT;
-    }
-
-    // Clear the credentials member
-    m_device_info = nullptr;
-
-    // Clear the promise holder
-    m_prmDeviceInfoGet = nullptr;
-
-    mapf::utils::copy_string(device_info.manufacturer, DeviceInfo.manufacturer, BML_DEV_INFO_LEN);
-    mapf::utils::copy_string(device_info.model_name, DeviceInfo.model_name, BML_DEV_INFO_LEN);
-    mapf::utils::copy_string(device_info.serial_number, DeviceInfo.serial_number, BML_DEV_INFO_LEN);
-
-    // LAN
-    mapf::utils::copy_string(device_info.lan_iface_name, DeviceInfo.lan_iface_name,
-                             BML_IFACE_NAME_LEN);
-    device_info.lan_ip_address   = DeviceInfo.lan_ip_address;
-    device_info.lan_network_mask = DeviceInfo.lan_network_mask;
-
-    // WAN
-    mapf::utils::copy_string(device_info.wan_iface_name, DeviceInfo.wan_iface_name,
-                             BML_IFACE_NAME_LEN);
-    device_info.wan_ip_address   = DeviceInfo.wan_ip_address;
-    device_info.wan_network_mask = DeviceInfo.wan_network_mask;
-
-    if (iRet != BML_RET_OK) {
-        LOG(ERROR) << "Device information get failed!";
         return (iRet);
     }
 
@@ -3076,8 +3282,8 @@ int bml_internal::get_master_slave_versions(char *master_version, char *slave_ve
     // Clear the promise holder
     m_prmMasterSlaveVersions = nullptr;
 
-    mapf::utils::copy_string(master_version, sVersion.master_version, message::VERSION_LENGTH);
-    mapf::utils::copy_string(slave_version, sVersion.slave_version, message::VERSION_LENGTH);
+    string_utils::copy_string(master_version, sVersion.master_version, message::VERSION_LENGTH);
+    string_utils::copy_string(slave_version, sVersion.slave_version, message::VERSION_LENGTH);
 
     if (iRet != BML_RET_OK) {
         LOG(ERROR) << "master_slave_versions request failed!";

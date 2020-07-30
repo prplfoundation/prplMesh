@@ -28,9 +28,11 @@ public:
      * @param [in] iface_name STA/Client interface name.
      * @param [in] callback Callback for handling internal events.
      */
-    sta_wlan_hal_dummy(const std::string &iface_name, hal_event_cb_t callback);
+    sta_wlan_hal_dummy(const std::string &iface_name, hal_event_cb_t callback,
+                       const bwl::hal_conf_t &hal_conf);
     virtual ~sta_wlan_hal_dummy();
 
+    virtual bool start_wps_pbc() override;
     virtual bool detach() override;
 
     virtual bool initiate_scan() override;
@@ -43,7 +45,7 @@ public:
 
     virtual bool disconnect() override;
 
-    virtual bool roam(const std::string &bssid, uint8_t channel) override;
+    virtual bool roam(const sMacAddr &bssid, uint8_t channel) override;
 
     virtual bool get_4addr_mode() override;
     virtual bool set_4addr_mode(bool enable) override;

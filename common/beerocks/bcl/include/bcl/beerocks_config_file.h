@@ -74,7 +74,6 @@ public:
         std::string monitor_ap_active_threshold_B;
         std::string monitor_ap_idle_stable_time_sec;
         std::string monitor_disable_initiative_arp;
-        std::string slave_keep_alive_retries;
         std::string channel_selection_random_delay;
         std::string fail_safe_5G_frequency;
         std::string fail_safe_5G_bw;
@@ -94,13 +93,11 @@ public:
         std::string model;
         std::string ucc_listener_port;
         std::string enable_arp_monitor;
-        std::string enable_keep_alive;
         std::string bridge_iface;
         std::string backhaul_preferred_bssid;
         std::string backhaul_wire_iface;
         std::string backhaul_wire_iface_type;
         std::string enable_system_hang_test;
-        std::string enable_son_slaves_watchdog;
         std::string const_backhaul_slave;
         //[slaveX]
         std::string radio_identifier[IRE_MAX_SLAVES]; // mAP RUID

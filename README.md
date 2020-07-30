@@ -13,13 +13,15 @@ This project is part of a wider collaboration between Prpl Foundation and Broadb
 
 Architecture documentation can be found in the [documentation](documentation/) folder.
 
+The latest build artifacts are [always accessible](https://ftp.essensium.com/owncloud/index.php/s/xidrhY3JKEYS9dK?path=%2Fartifacts%2Flatest%2Fbuild).
+
 ## Requirements
 
 To build prplMesh, you need (on Ubuntu) the following packages:
 
 ```bash
 sudo apt install curl gcc cmake binutils git autoconf autogen libtool pkg-config \
-     libreadline-dev libncurses-dev libssl-dev libjson-c-dev libnl-genl-3-dev libzmq3-dev \
+     libreadline-dev libncurses-dev libssl-dev libjson-c-dev libnl-genl-3-dev \
      python python-yaml python-paramiko repo bridge-utils clang-format ninja-build
 ```
 

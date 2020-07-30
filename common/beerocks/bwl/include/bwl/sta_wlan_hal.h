@@ -39,6 +39,8 @@ public:
 public:
     virtual ~sta_wlan_hal() = default;
 
+    virtual bool start_wps_pbc() = 0;
+
     virtual bool initiate_scan() = 0;
 
     virtual int get_scan_results(const std::string &ssid, std::vector<SScanResult> &list,
@@ -50,7 +52,7 @@ public:
 
     virtual bool disconnect() = 0;
 
-    virtual bool roam(const std::string &bssid, uint8_t channel) = 0;
+    virtual bool roam(const sMacAddr &bssid, uint8_t channel) = 0;
 
     virtual bool get_4addr_mode()            = 0;
     virtual bool set_4addr_mode(bool enable) = 0;
@@ -68,7 +70,8 @@ public:
 
 // STA HAL factory types
 std::shared_ptr<sta_wlan_hal> sta_wlan_hal_create(const std::string &iface_name,
-                                                  base_wlan_hal::hal_event_cb_t cb);
+                                                  base_wlan_hal::hal_event_cb_t cb,
+                                                  const bwl::hal_conf_t &hal_conf);
 
 } // namespace bwl
 

@@ -38,7 +38,6 @@ extern "C" {
 #define BML_IP_ADDR_LEN 4           /* IP Address Length */
 #define BML_VERSION_LEN 16          /* Version Length */
 #define BML_IFACE_NAME_LEN (32 + 4) /* Maximal interface name length (32) + null termination */
-#define BML_DEV_INFO_LEN 32         /* Device information string length */
 
 /* BML Node Types */
 #define BML_NODE_TYPE_GW 1     /* GW Node */
@@ -122,6 +121,15 @@ extern "C" {
 #define BML_CHANNEL_SCAN_MAX_CHANNEL_POOL_SIZE 32 /* Maximal size of the channel pool */
 #define BML_CHANNEL_SCAN_ENUM_LIST_SIZE 8
 
+/* BML Client Selected Bands */
+#define BML_CLIENT_SELECTED_BANDS_DISABLED 0
+#define BML_CLIENT_SELECTED_BANDS_24G 1
+#define BML_CLIENT_SELECTED_BANDS_5G 2
+#define BML_CLIENT_SELECTED_BANDS_6G 4
+#define BML_CLIENT_SELECTED_BANDS_60G 8
+
+#define BML_PARAMETER_NOT_CONFIGURED -1
+
 /****************************************************************************/
 /******************************* General Types ******************************/
 /****************************************************************************/
@@ -164,39 +172,6 @@ struct BML_VAP_INFO {
     char ssid[BML_SSID_MAX_LENGTH];
     /* network encryption key */
     char key[BML_PASS_MAX_LENGTH];
-};
-
-/**
- * Device information.
- */
-struct BML_DEVICE_INFO {
-
-    /* Device manufacturer name (e.g. Intel Corporation) */
-    char manufacturer[BML_DEV_INFO_LEN];
-
-    /* Device model name */
-    char model_name[BML_DEV_INFO_LEN];
-
-    /* Device serial number */
-    char serial_number[BML_DEV_INFO_LEN];
-
-    /* LAN interface name */
-    char lan_iface_name[BML_IFACE_NAME_LEN];
-
-    /* LAN interface IP address */
-    uint32_t lan_ip_address;
-
-    /* LAN interface network mask */
-    uint32_t lan_network_mask;
-
-    /* WAN interface name */
-    char wan_iface_name[BML_IFACE_NAME_LEN];
-
-    /* WAN interface IP address */
-    uint32_t wan_ip_address;
-
-    /* WAN interface network mask */
-    uint32_t wan_network_mask;
 };
 
 /**
@@ -608,6 +583,45 @@ struct BML_NEIGHBOR_AP {
     uint32_t ap_DTIMPeriod;
     //Indicates the fraction of the time AP senses that the channel is in use by the neighboring AP for transmissions.
     uint32_t ap_ChannelUtilization;
+};
+
+struct BML_CLIENT_CONFIG {
+    // 1 for true, 0 for false, -1 for "not configured".
+    int8_t stay_on_initial_radio;
+
+    // 1 for true, 0 for false, -1 for "not configured".
+    int8_t stay_on_selected_device;
+
+    // Bitwise value of selected bands for the client.
+    // Correlates to BML_CLIENT_SELECTED_BANDS
+    int8_t selected_bands;
+};
+
+struct BML_CLIENT {
+    // Client MAC.
+    char sta_mac[BML_MAC_ADDR_LEN];
+
+    // Time of last client configuration edit (in Seconds)
+    uint32_t timestamp_sec;
+
+    // 1 for true, 0 for false, -1 for "parameter is not configured".
+    int8_t single_band;
+
+    // 1 for true, 0 for false, -1 for "not configured".
+    int8_t stay_on_initial_radio;
+
+    // 1 for true, 0 for false, -1 for "not configured".
+    int8_t stay_on_selected_device;
+
+    // Bitwise value of selected bands for the client.
+    // Correlates to BML_CLIENT_SELECTED_BANDS
+    int8_t selected_bands;
+
+    // Optional parameter,
+    // Determines the period of time after which the client configuration should be cleared,
+    //   0 - Never age.
+    //  -1 - Not Configured.
+    uint32_t time_life_delay_days;
 };
 
 /****************************************************************************/

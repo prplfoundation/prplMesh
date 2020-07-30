@@ -29,7 +29,8 @@ public:
      * @param [in] iface_name Monitor interface name.
      * @param [in] callback Callback for handling internal events.
      */
-    mon_wlan_hal_dwpal(const std::string &iface_name, hal_event_cb_t callback);
+    mon_wlan_hal_dwpal(const std::string &iface_name, hal_event_cb_t callback,
+                       const bwl::hal_conf_t &hal_conf);
     virtual ~mon_wlan_hal_dwpal();
 
     virtual bool update_radio_stats(SRadioStats &radio_stats) override;
@@ -38,7 +39,6 @@ public:
                                        const std::string &sta_mac, SStaStats &sta_stats) override;
     virtual bool sta_channel_load_11k_request(const SStaChannelLoadRequest11k &req) override;
     virtual bool sta_beacon_11k_request(const SBeaconRequest11k &req, int &dialog_token) override;
-    virtual bool sta_statistics_11k_request(const SStatisticsRequest11k &req) override;
     virtual bool sta_link_measurements_11k_request(const std::string &sta_mac) override;
     virtual bool channel_scan_trigger(int dwell_time_msec,
                                       const std::vector<unsigned int> &channel_pool) override;
@@ -112,7 +112,10 @@ private:
     }
 
     std::shared_ptr<char> m_temp_dwpal_value;
+    // Unique sequence number for the scan result dump sequence
     uint32_t m_nl_seq = 0;
+    // Flag indicating if we are currently in a dump sequence
+    bool m_scan_dump_in_progress = false;
 };
 
 } // namespace dwpal

@@ -7,6 +7,7 @@
  */
 
 #include "agent_ucc_listener.h"
+#include "agent_db.h"
 
 #include <bcl/network/network_utils.h>
 #include <beerocks/tlvf/beerocks_message.h>
@@ -44,7 +45,7 @@ bool agent_ucc_listener::init()
 
 /**
  * @brief Returns string filled with reply to "DEVICE_GET_INFO" command.
- * 
+ *
  * @return const std::string Device info in UCC reply format.
  */
 std::string agent_ucc_listener::fill_version_reply_string()
@@ -55,17 +56,18 @@ std::string agent_ucc_listener::fill_version_reply_string()
 
 /**
  * @brief Clear configuration on Agent, and initiate onboarding sequence.
- * 
+ *
  * @return None.
  */
 void agent_ucc_listener::clear_configuration()
 {
-    m_onboarding_state = eOnboardingState::WAIT_FOR_RESET;
+    m_in_reset        = true;
+    m_reset_completed = false;
 
     auto timeout =
         std::chrono::steady_clock::now() + std::chrono::seconds(UCC_REPLY_COMPLETE_TIMEOUT_SEC);
 
-    while (m_onboarding_state != eOnboardingState::WAIT_FOR_CONFIG) {
+    while (!m_reset_completed) {
 
         if (std::chrono::steady_clock::now() > timeout) {
             LOG(ERROR) << "Reached timeout!";
@@ -76,24 +78,6 @@ void agent_ucc_listener::clear_configuration()
         unlock();
         UTILS_SLEEP_MSEC(1000);
     }
-}
-
-/**
- * @brief Update list of VAPs for ruid.
- * 
- * @return None.
- */
-
-typedef struct {
-    std::string mac;
-    std::string ssid;
-    bool backhaul_vap;
-} sVapElement;
-void agent_ucc_listener::update_vaps_list(std::string ruid, beerocks_message::sVapsList &vaps)
-{
-    LOG(INFO) << "Update VAP map for ruid " << ruid << " bssid " << vaps.vaps->mac << " ssid "
-              << std::string(vaps.vaps->ssid, 36);
-    vaps_map[ruid] = vaps;
 }
 
 /**
@@ -109,12 +93,38 @@ void agent_ucc_listener::update_vaps_list(std::string ruid, beerocks_message::sV
 bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, std::string> &params,
                                               std::string &value)
 {
-    auto parameter = params["parameter"];
+    auto parameter     = params["parameter"];
+    auto db            = AgentDB::get();
+    sMacAddr mac_value = net::network_utils::ZERO_MAC;
+
     std::transform(parameter.begin(), parameter.end(), parameter.begin(), ::tolower);
     if (parameter == "alid") {
         value = m_bridge_mac;
         return true;
-    } else if (parameter == "macaddr" || parameter == "bssid") {
+    } else if (parameter == "macaddr") {
+        if (params.find("ruid") == params.end()) {
+            value = "missing ruid";
+            return false;
+        }
+        auto ruid_str = tlvf::mac_to_string(std::strtoull(params["ruid"].c_str(), nullptr, 16));
+        auto ruid     = tlvf::mac_from_string(ruid_str);
+        if (params.find("ssid") == params.end()) {
+            // No ssid was given, return the radio MAC.
+            // We use MAC address as Radio UID, so we can just return it here.
+            value = ruid_str;
+            return true;
+        }
+        auto ssid = params["ssid"];
+        // there is an ssid, lookup the corresponding mac address
+        if (!db->get_mac_by_ssid(ruid, ssid, mac_value)) {
+            LOG(ERROR) << " failed to find the MAC address for ruid '" << ruid_str << "'"
+                       << " ssid '" << ssid << "'";
+            value = "macaddr/bssid not found for ruid " + ruid_str + " ssid " + ssid;
+            return false;
+        }
+        value = tlvf::mac_to_string(mac_value);
+        return true;
+    } else if (parameter == "bssid") {
         if (params.find("ruid") == params.end()) {
             value = "missing ruid";
             return false;
@@ -123,22 +133,18 @@ bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, st
             value = "missing ssid";
             return false;
         }
-        auto ruid = tlvf::mac_to_string(std::strtoull(params["ruid"].c_str(), nullptr, 16));
-        auto ssid = params["ssid"];
+        auto ruid_str = tlvf::mac_to_string(std::strtoull(params["ruid"].c_str(), nullptr, 16));
+        auto ruid     = tlvf::mac_from_string(ruid_str);
+        auto ssid     = params["ssid"];
 
-        auto it = vaps_map.find(ruid);
-        if (it == vaps_map.end()) {
-            value = "ruid " + ruid + " not found";
+        if (!db->get_mac_by_ssid(ruid, ssid, mac_value)) {
+            LOG(ERROR) << " failed to find the BSSID for ruid '" << ruid_str << "'"
+                       << " ssid '" << ssid << "'";
+            value = "macaddr/bssid not found for ruid " + ruid_str + " ssid " + ssid;
             return false;
         }
-        for (const auto &vap : it->second.vaps) {
-            if (std::string(vap.ssid) == ssid) {
-                value = tlvf::mac_to_string(vap.mac);
-                return true;
-            }
-        }
-        value = "macaddr/bssid not found for ruid " + ruid + " ssid " + ssid;
-        return false;
+        value = tlvf::mac_to_string(mac_value);
+        return true;
     }
     value = "parameter " + parameter + " not supported";
     return false;
@@ -146,7 +152,7 @@ bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, st
 
 /**
  * @brief Send CMDU to destined Agent.
- * 
+ *
  * @param[in] dest_mac Controllers mac address
  * @param[in] cmdu_tx CMDU object
  * @return true if successful, false if not.
@@ -154,7 +160,7 @@ bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, st
 bool agent_ucc_listener::send_cmdu_to_destination(ieee1905_1::CmduMessageTx &cmdu_tx,
                                                   const std::string &dest_mac)
 {
-    return m_backhaul_manager_ctx.send_cmdu_to_bus(cmdu_tx, dest_mac, m_bridge_mac);
+    return m_backhaul_manager_ctx.send_cmdu_to_broker(cmdu_tx, dest_mac, m_bridge_mac);
 }
 
 static enum eFreqType band_to_freq(const std::string &band)
@@ -173,28 +179,21 @@ static enum eFreqType band_to_freq(const std::string &band)
 bool agent_ucc_listener::handle_start_wps_registration(const std::string &band,
                                                        std::string &err_string)
 {
-    auto freq      = band_to_freq(band);
-    auto radio_mac = m_backhaul_manager_ctx.freq_to_radio_mac(freq);
-    if (radio_mac.empty()) {
+    auto freq          = band_to_freq(band);
+    auto radio_mac_str = m_backhaul_manager_ctx.freq_to_radio_mac(freq);
+    if (radio_mac_str.empty()) {
         err_string = "Failed to get radio for " + band;
         return false;
     }
 
-    auto it = vaps_map.find(radio_mac);
-    if (it == vaps_map.end()) {
-        LOG(ERROR) << "radio_mac " + radio_mac + " not found";
-        err_string = "Failed to get radio for " + band;
-        return false;
-    }
-
-    LOG(DEBUG) << "Trigger WPS PBC on radio mac " << radio_mac;
+    LOG(DEBUG) << "Trigger WPS PBC on radio mac " << radio_mac_str;
     err_string = "Failed to start wps pbc";
-    return m_backhaul_manager_ctx.start_wps_pbc(tlvf::mac_from_string(radio_mac));
+    return m_backhaul_manager_ctx.start_wps_pbc(tlvf::mac_from_string(radio_mac_str));
 }
 
 /**
  * @brief Handle DEV_SET_CONFIG command. Parse the command and save the parameters on the agent.
- * 
+ *
  * @param[in] params Command parameters.
  * @param[out] err_string Contains an error description if the function fails.
  * @return true if successful, false if not.
@@ -231,71 +230,15 @@ bool agent_ucc_listener::handle_dev_set_config(std::unordered_map<std::string, s
         m_selected_backhaul = tlvf::mac_to_string(backhaul_radio_uid);
     }
 
-    auto timeout =
-        std::chrono::steady_clock::now() + std::chrono::seconds(UCC_REPLY_COMPLETE_TIMEOUT_SEC);
-
-    while (m_onboarding_state == eOnboardingState::WAIT_FOR_CONFIG ||
-           m_onboarding_state == eOnboardingState::IN_PROGRESS) {
-        if (std::chrono::steady_clock::now() > timeout) {
-            err_string         = "onboarding timeout";
-            m_onboarding_state = eOnboardingState::NOT_IN_PROGRESS;
-            m_selected_backhaul.clear();
-            return false;
-        }
-        // Unlock the thread mutex and allow the Agent thread to work while this thread sleeps
-        unlock();
-        UTILS_SLEEP_MSEC(1000);
-    }
-
-    if (m_onboarding_state != eOnboardingState::SUCCESS) {
-        err_string         = "onboarding failed";
-        m_onboarding_state = eOnboardingState::NOT_IN_PROGRESS;
-        m_selected_backhaul.clear();
-        return false;
-    }
-
-    m_onboarding_state = eOnboardingState::NOT_IN_PROGRESS;
-    m_selected_backhaul.clear();
+    // Signal to backhaul that it can continue onboarding.
+    m_in_reset = false;
     return true;
 }
 
 /**
- * @brief Get the onboarding state, and update the state if needed. 
- * 
- * @return eOnboardingState The onboarding state.
- */
-eOnboardingState agent_ucc_listener::get_and_update_onboarding_state()
-{
-    if (m_onboarding_state == eOnboardingState::WAIT_FOR_RESET) {
-        m_onboarding_state = eOnboardingState::RESET_TO_DEFAULT;
-    } else if (m_onboarding_state == eOnboardingState::RESET_TO_DEFAULT) {
-        m_onboarding_state = eOnboardingState::WAIT_FOR_CONFIG;
-        return eOnboardingState::RESET_TO_DEFAULT;
-    } else if (m_onboarding_state == eOnboardingState::WAIT_FOR_CONFIG) {
-        if (!m_selected_backhaul.empty()) {
-            m_onboarding_state = eOnboardingState::IN_PROGRESS;
-        }
-    }
-
-    return m_onboarding_state;
-}
-
-/**
- * @brief Set the Agent onboarding status. Calling this function will trigger sending the UCC
- * COMPLETE/ERROR status.
- * 
- * @param success Onboarding success status.
- * @return None.
- */
-void agent_ucc_listener::set_onboarding_status(bool success)
-{
-    m_onboarding_state = success ? eOnboardingState::SUCCESS : eOnboardingState::FAIL;
-}
-
-/**
  * @brief Get the selected backhaul which has been received on "DEV_SET_CONFIG" command from UCC.
- * 
- * @return std::string "eth" or RUID of selected radio or empty string if "DEV_SET_CONFIG" has not 
+ *
+ * @return std::string "eth" or RUID of selected radio or empty string if "DEV_SET_CONFIG" has not
  * been received.
  */
 std::string agent_ucc_listener::get_selected_backhaul() { return m_selected_backhaul; }

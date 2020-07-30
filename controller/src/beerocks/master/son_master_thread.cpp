@@ -38,7 +38,7 @@
 #include <tlvf/ieee_1905_1/eTlvType.h>
 #include <tlvf/ieee_1905_1/s802_11SpecificInformation.h>
 #include <tlvf/ieee_1905_1/tlv1905NeighborDevice.h>
-#include <tlvf/ieee_1905_1/tlvAlMacAddressType.h>
+#include <tlvf/ieee_1905_1/tlvAlMacAddress.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvDeviceInformation.h>
 #include <tlvf/ieee_1905_1/tlvEndOfMessage.h>
@@ -49,6 +49,7 @@
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
 #include <tlvf/wfa_map/tlvApMetrics.h>
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
+#include <tlvf/wfa_map/tlvBackhaulSteeringResponse.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
 #include <tlvf/wfa_map/tlvClientAssociationEvent.h>
@@ -87,13 +88,23 @@ bool master_thread::init()
     set_server_max_connections(SOCKET_MAX_CONNECTIONS);
     set_select_timeout(SOCKETS_SELECT_TIMEOUT_MSEC);
 
+    LOG(DEBUG) << "persistent db enable=" << database.config.persistent_db;
+    if (database.config.persistent_db) {
+        LOG(DEBUG) << "loading clients from persistent db";
+        if (!database.load_persistent_db_clients()) {
+            LOG(WARNING) << "failed to load clients from persistent db";
+        } else {
+            LOG(DEBUG) << "load clients from persistent db finished successfully";
+        }
+    }
+
     if (!transport_socket_thread::init()) {
         LOG(ERROR) << "Failed init of transport_socket_thread";
         stop();
         return false;
     }
 
-    if (!bus_subscribe(std::vector<ieee1905_1::eMessageType>{
+    if (!broker_subscribe(std::vector<ieee1905_1::eMessageType>{
             ieee1905_1::eMessageType::ACK_MESSAGE,
             ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_SEARCH_MESSAGE,
             ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_WSC_MESSAGE,
@@ -111,6 +122,7 @@ bool master_thread::init()
             ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE,
             ieee1905_1::eMessageType::TOPOLOGY_RESPONSE_MESSAGE,
             ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE,
+            ieee1905_1::eMessageType::BACKHAUL_STEERING_RESPONSE_MESSAGE,
 
         })) {
         LOG(ERROR) << "Failed subscribing to the Bus";
@@ -217,10 +229,7 @@ bool master_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
     std::string src_mac = tlvf::mac_to_string(uds_header->src_bridge_mac);
     std::string dst_mac = tlvf::mac_to_string(uds_header->dst_bridge_mac);
 
-    // LOG(DEBUG) << "handle_cmdu() - received msg from " << std::string(from_bus(sd) ? "bus" : "uds") << ", src=" << src_mac
-    //            << ", dst=" << dst_mac << ", " << print_cmdu_types(uds_header); // floods the log
-
-    if (from_bus(sd)) {
+    if (from_broker(sd)) {
 
         if (src_mac == network_utils::ZERO_MAC_STRING) {
             LOG(ERROR) << "src_mac is zero!";
@@ -312,6 +321,9 @@ bool master_thread::handle_cmdu_1905_1_message(const std::string &src_mac,
         return handle_cmdu_1905_topology_notification(src_mac, cmdu_rx);
     case ieee1905_1::eMessageType::TOPOLOGY_RESPONSE_MESSAGE:
         return handle_cmdu_1905_topology_response(src_mac, cmdu_rx);
+    case ieee1905_1::eMessageType::BACKHAUL_STEERING_RESPONSE_MESSAGE:
+        return handle_cmdu_1905_backhaul_sta_steering_response(src_mac, cmdu_rx);
+
     default:
         break;
     }
@@ -326,9 +338,9 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(const std::string 
 {
     LOG(DEBUG) << "Received AP_AUTOCONFIGURATION_SEARCH_MESSAGE";
 
-    auto tlvAlMacAddressType = cmdu_rx.getClass<ieee1905_1::tlvAlMacAddressType>();
-    if (!tlvAlMacAddressType) {
-        LOG(ERROR) << "getClass<tlvAlMacAddressType> failed";
+    auto tlvAlMacAddress = cmdu_rx.getClass<ieee1905_1::tlvAlMacAddress>();
+    if (!tlvAlMacAddress) {
+        LOG(ERROR) << "getClass<tlvAlMacAddress> failed";
         return false;
     }
     auto tlvSearchedRole = cmdu_rx.getClass<ieee1905_1::tlvSearchedRole>();
@@ -352,7 +364,7 @@ bool master_thread::handle_cmdu_1905_autoconfiguration_search(const std::string 
         return false;
     }
 
-    auto al_mac = tlvf::mac_to_string((const unsigned char *)tlvAlMacAddressType->mac().oct);
+    auto al_mac = tlvf::mac_to_string((const unsigned char *)tlvAlMacAddress->mac().oct);
     LOG(DEBUG) << "mac=" << al_mac;
 
     LOG(DEBUG) << "searched_role=" << int(tlvSearchedRole->value());
@@ -1794,6 +1806,44 @@ bool master_thread::handle_cmdu_1905_topology_response(const std::string &src_ma
     return true;
 }
 
+bool master_thread::handle_cmdu_1905_backhaul_sta_steering_response(
+    const std::string &src_mac, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received BACKHAUL_STA_STEERING_MESSAGE from " << src_mac << ", mid=" << std::hex
+               << mid;
+
+    auto tlv_backhaul_sta_steering_resp = cmdu_rx.getClass<wfa_map::tlvBackhaulSteeringResponse>();
+    if (!tlv_backhaul_sta_steering_resp) {
+        LOG(ERROR) << "Failed getClass<wfa_map::tlvBackhaulSteeringResponse>";
+        return false;
+    }
+
+    auto bh_steering_resp_code = tlv_backhaul_sta_steering_resp->result_code();
+    LOG(DEBUG) << "BACKHAUL_STA_STEERING_MESSAGE result_code: " << int(bh_steering_resp_code);
+
+    if (bh_steering_resp_code) {
+        auto error_code_tlv = cmdu_rx.getClass<wfa_map::tlvErrorCode>();
+        if (!error_code_tlv) {
+            LOG(ERROR) << "Failed getClass<wfa_map::tlvErrorCode>";
+            return false;
+        }
+        LOG(DEBUG) << "BACKHAUL_STA_STEERING_MESSAGE error_code: "
+                   << int(error_code_tlv->reason_code());
+    }
+
+    // build ACK message CMDU
+    auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
+
+    LOG(DEBUG) << "sending ACK message to the agent, mid=" << std::hex << mid;
+
+    return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
+}
+
 bool master_thread::handle_cmdu_1905_beacon_response(const std::string &src_mac,
                                                      ieee1905_1::CmduMessageRx &cmdu_rx)
 {
@@ -2035,8 +2085,8 @@ bool master_thread::handle_intel_slave_join(
     auto slave_version_s  = version::version_from_string(slave_version);
     auto master_version_s = version::version_from_string(BEEROCKS_VERSION);
 
-    mapf::utils::copy_string(join_response->master_version(), BEEROCKS_VERSION,
-                             message::VERSION_LENGTH);
+    string_utils::copy_string(join_response->master_version(), BEEROCKS_VERSION,
+                              message::VERSION_LENGTH);
 
     // check if fatal mismatch
     if (slave_version_s.major != master_version_s.major ||
@@ -2047,8 +2097,8 @@ bool master_thread::handle_intel_slave_join(
         LOG(INFO) << " bridge_mac=" << bridge_mac << " bridge_ipv4=" << bridge_ipv4;
 
         join_response->err_code() = beerocks::JOIN_RESP_VERSION_MISMATCH;
-        mapf::utils::copy_string(join_response->master_version(message::VERSION_LENGTH),
-                                 BEEROCKS_VERSION, message::VERSION_LENGTH);
+        string_utils::copy_string(join_response->master_version(message::VERSION_LENGTH),
+                                  BEEROCKS_VERSION, message::VERSION_LENGTH);
         return son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database);
     }
 
@@ -2172,8 +2222,8 @@ bool master_thread::handle_intel_slave_join(
     // send JOINED_RESPONSE with son config
     {
 
-        mapf::utils::copy_string(join_response->master_version(message::VERSION_LENGTH),
-                                 BEEROCKS_VERSION, message::VERSION_LENGTH);
+        string_utils::copy_string(join_response->master_version(message::VERSION_LENGTH),
+                                  BEEROCKS_VERSION, message::VERSION_LENGTH);
         join_response->config().monitor_total_ch_load_notification_hi_th_percent =
             database.config.monitor_total_ch_load_notification_hi_th_percent;
         join_response->config().monitor_total_ch_load_notification_lo_th_percent =
@@ -2197,7 +2247,6 @@ bool master_thread::handle_intel_slave_join(
             database.config.monitor_ap_idle_stable_time_sec;
         join_response->config().monitor_disable_initiative_arp =
             database.config.monitor_disable_initiative_arp;
-        join_response->config().slave_keep_alive_retries = database.config.slave_keep_alive_retries;
         join_response->config().ire_rssi_report_rate_sec = database.config.ire_rssi_report_rate_sec;
 
         LOG(DEBUG) << "send SLAVE_JOINED_RESPONSE";
@@ -2781,21 +2830,6 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
 
         break;
     }
-    case beerocks_message::ACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION: {
-        auto notification =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION>();
-        if (notification == nullptr) {
-            LOG(ERROR) << "addClass cACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION failed";
-            return false;
-        }
-        auto bridge_mac = tlvf::mac_to_string(notification->bridge_mac());
-
-        LOG(TRACE) << "ACTION_CONTROL_PLATFORM_OPERATIONAL_NOTIFICATION: " << bridge_mac
-                   << ", new_operational_state=" << int(notification->operational());
-        database.set_node_operational_state(bridge_mac, notification->operational());
-        break;
-    }
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION: {
         auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION>();
@@ -2910,106 +2944,6 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
                 auto new_task = std::make_shared<optimal_path_task>(database, cmdu_tx, tasks,
                                                                     client_mac, 0, "");
                 tasks.add_task(new_task);
-            }
-        }
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_AGENT_PING_REQUEST: {
-        if (hostap_mac.empty()) {
-            LOG(WARNING) << "PING_MSG_REQUEST unknown peer mac!";
-        } else if (!database.update_node_last_seen(hostap_mac)) {
-            LOG(DEBUG) << "PING_MSG_REQUEST received from ire " << hostap_mac
-                       << " , can't update last seen time for ";
-        }
-
-        auto request =
-            beerocks_header->addClass<beerocks_message::cACTION_CONTROL_AGENT_PING_REQUEST>();
-        if (request == nullptr) {
-            LOG(ERROR) << "addClass cACTION_CONTROL_AGENT_PING_REQUEST failed";
-            return false;
-        }
-
-        auto response =
-            message_com::create_vs_message<beerocks_message::cACTION_CONTROL_AGENT_PING_RESPONSE>(
-                cmdu_tx);
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            return false;
-        }
-        response->total() = request->total();
-        response->seq()   = request->seq();
-        response->size()  = request->size();
-
-        if (response->size()) {
-            if (!request->alloc_data(response->size())) {
-                LOG(ERROR) << "Failed buffer allocation to size=" << int(response->size());
-                break;
-            }
-            memset(request->data(), 0, request->data_length());
-        }
-
-        son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database, hostap_mac);
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_CONTROLLER_PING_RESPONSE: {
-        if (hostap_mac.empty()) {
-            LOG(ERROR) << "PING_MSG_RESPONSE unknown peer mac!";
-        } else {
-            auto response =
-                beerocks_header
-                    ->addClass<beerocks_message::cACTION_CONTROL_CONTROLLER_PING_RESPONSE>();
-            if (response == nullptr) {
-                LOG(ERROR) << "addClass cACTION_CONTROL_CONTROLLER_PING_RESPONSE failed";
-                return false;
-            }
-            if (!database.update_node_last_ping_received(hostap_mac, response->seq())) {
-                LOG(DEBUG) << "PING_MSG_RESPONSE received from slave " << hostap_mac
-                           << " , can't update last seen time for ";
-            } else {
-                LOG_CLI(DEBUG,
-                        "PING_MSG_RESPONSE received from slave = "
-                            << hostap_mac << " , seq = " << (int)response->seq()
-                            << " , size = " << (int)response->size() << " , RTT = "
-                            << float((std::chrono::duration_cast<std::chrono::duration<double>>(
-                                          database.get_node_last_ping_received(hostap_mac) -
-                                          database.get_node_last_ping_sent(hostap_mac)))
-                                         .count())
-                            << "[sec]" << std::endl);
-            }
-            if (response->seq() < (response->total() - 1)) { //send next ping request
-                auto request = message_com::create_vs_message<
-                    beerocks_message::cACTION_CONTROL_CONTROLLER_PING_REQUEST>(cmdu_tx);
-                if (request == nullptr) {
-                    LOG(ERROR) << "Failed building message!";
-                    return false;
-                }
-                request->total() = response->total();
-                request->seq()   = response->seq() + 1;
-                request->size()  = response->size();
-                if (!request->alloc_data(response->size())) {
-                    LOG(ERROR) << "Failed buffer allocation to size=" << int(response->size());
-                    break;
-                }
-                memset(request->data(), 0, request->data_length());
-                if (!database.update_node_last_ping_sent(hostap_mac)) {
-                    LOG(DEBUG) << "sending PING_MSG_REQUEST for slave " << hostap_mac
-                               << " , can't update last ping sent time for ";
-                }
-                son_actions::send_cmdu_to_agent(src_mac, cmdu_tx, database, hostap_mac);
-            } else if (response->seq() == (response->total() - 1)) {
-                if (!database.update_node_last_ping_received_avg(hostap_mac, response->total())) {
-                    LOG(DEBUG) << "last PING_MSG_RESPONSE received from slave " << hostap_mac
-                               << " , can't update last ping received avg ";
-                } else {
-                    LOG_CLI(DEBUG, "last PING_MSG_RESPONSE received from slave = "
-                                       << hostap_mac << " RTT summary: " << std::endl
-                                       << "min = " << database.get_node_last_ping_min_ms(hostap_mac)
-                                       << " [ms], "
-                                       << "max = " << database.get_node_last_ping_max_ms(hostap_mac)
-                                       << " [ms], "
-                                       << "avg = " << database.get_node_last_ping_avg_ms(hostap_mac)
-                                       << " [ms]" << std::endl);
-                }
             }
         }
         break;
@@ -3316,98 +3250,6 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
             //<< std::endl << "new_ch_center_freq_seg_0: "             << (int)response->params.new_ch_center_freq_seg_0
             //<< std::endl << "new_ch_center_freq_seg_1: "             << (int)response->params.new_ch_center_freq_seg_1
         );
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE: {
-        auto response =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE>();
-        if (response == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_CHANNEL_LOAD_11K_RESPONSE failed";
-            return false;
-        }
-        LOG_CLI(DEBUG, "sta channel load response:"
-                           << std::endl
-                           << "sta_mac: " << response->params().sta_mac << std::endl
-                           << "measurement_rep_mode: " << (int)response->params().rep_mode
-                           << std::endl
-                           << "op_class: " << (int)response->params().op_class << std::endl
-                           << "channel: " << (int)response->params().channel << std::endl
-                           << "start_time: " << (int)response->params().start_time << std::endl
-                           << "duration: " << (int)response->params().duration << std::endl
-                           << "channel_load: " << (int)response->params().channel_load
-
-                           << std::endl
-                           << "new_ch_width: " << (int)response->params().new_ch_width << std::endl
-                           << "new_ch_center_freq_seg_0: "
-                           << (int)response->params().new_ch_center_freq_seg_0 << std::endl
-                           << "new_ch_center_freq_seg_1: "
-                           << (int)response->params().new_ch_center_freq_seg_1);
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE: {
-        auto response =
-            beerocks_header
-                ->addClass<beerocks_message::cACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE>();
-        if (response == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_STATISTICS_11K_RESPONSE failed";
-            return false;
-        }
-        std::string statistics_group_data;
-        for (uint8_t i = 0; i < response->params().statistics_group_data_size; i++) {
-            statistics_group_data +=
-                std::to_string(response->params().statistics_group_data[i]) + ",";
-        }
-        statistics_group_data.pop_back(); // deletes last comma
-        LOG_CLI(DEBUG,
-                "statistics response: "
-                    << std::endl
-                    << "sta_mac: " << response->params().sta_mac << std::endl
-                    << "measurement_rep_mode: " << (int)response->params().rep_mode << std::endl
-                    << "duration: " << (int)response->params().duration << std::endl
-                    << "group_identity: " << (int)response->params().group_identity << std::endl
-                    << "statistics_group_data: " << statistics_group_data
-
-                    << std::endl
-                    << "average_trigger: " << (int)response->params().average_trigger << std::endl
-                    << "consecutive_trigger: " << (int)response->params().consecutive_trigger
-                    << std::endl
-                    << "delay_trigger: " << (int)response->params().delay_trigger);
-        break;
-    }
-    case beerocks_message::ACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE: {
-        auto response = beerocks_header->addClass<
-            beerocks_message::cACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE>();
-        if (response == nullptr) {
-            LOG(ERROR) << "addClass ACTION_CONTROL_CLIENT_LINK_MEASUREMENTS_11K_RESPONSE failed";
-            return false;
-        }
-        LOG_CLI(DEBUG,
-                "link measurements response: "
-                    << std::endl
-                    << "sta_mac: " << response->params().sta_mac << std::endl
-                    << "transmit_power: " << (int)response->params().transmit_power << std::endl
-                    << "link_margin: " << (int)response->params().link_margin << std::endl
-                    << "rx_ant_id: " << (int)response->params().rx_ant_id << std::endl
-                    << "tx_ant_id: " << (int)response->params().tx_ant_id << std::endl
-                    << "rcpi: " << (int)response->params().rcpi << std::endl
-                    << "rsni: " << (int)response->params().rsni
-
-                    << std::endl
-                    << "dmg_link_margin_activity: "
-                    << (int)response->params().dmg_link_margin_activity << std::endl
-                    << "dmg_link_margin_mcs: " << (int)response->params().dmg_link_margin_mcs
-                    << std::endl
-                    << "dmg_link_margin_link_margin: "
-                    << (int)response->params().dmg_link_margin_link_margin << std::endl
-                    << "dmg_link_margin_snr: " << (int)response->params().dmg_link_margin_snr
-                    << std::endl
-                    << "dmg_link_margin_reference_timestamp: "
-                    << (int)response->params().dmg_link_margin_reference_timestamp << std::endl
-                    << "dmg_link_adapt_ack_activity: "
-                    << (int)response->params().dmg_link_adapt_ack_activity << std::endl
-                    << "dmg_link_adapt_ack_reference_timestamp: "
-                    << (int)response->params().dmg_link_adapt_ack_reference_timestamp);
         break;
     }
     case beerocks_message::ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_CMD_RESPONSE: {

@@ -127,8 +127,9 @@ public:
     bool isBlocking() { return m_isBlocking; }
     std::string getError()
     {
-        return m_error;
+        auto error = m_error;
         m_error.clear();
+        return error;
     }
 
 private:

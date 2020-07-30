@@ -38,8 +38,8 @@ static const std::map<uint8_t, sOperatingClass> operating_classes_list = {
     {119,       {{52, 60},                                                     beerocks::BANDWIDTH_40}},
     {120,       {{56, 64},                                                     beerocks::BANDWIDTH_40}},
     {121,       {{100, 104, 108, 112, 116, 120, 124, 128, 132, 136, 140, 144}, beerocks::BANDWIDTH_20}},
-    {122,       {{100, 108, 116, 124, 132, 140},                               beerocks::BANDWIDTH_40}},
-    {123,       {{104, 112, 120, 128, 136, 144},                               beerocks::BANDWIDTH_40}},
+    {122,       {{100, 108, 116, 124, 132, 136, 140},                          beerocks::BANDWIDTH_40}},
+    {123,       {{104, 112, 120, 128, 134, 136, 138, 144},                     beerocks::BANDWIDTH_40}},
     {124,       {{149, 153, 157, 161},                                         beerocks::BANDWIDTH_20}},
     {125,       {{149, 153, 157, 161, 165, 169},                               beerocks::BANDWIDTH_20}},
     {126,       {{149, 157},                                                   beerocks::BANDWIDTH_40}},
@@ -868,4 +868,11 @@ std::list<uint8_t> wireless_utils::string_to_wsc_oper_class(const std::string &o
     } else {
         return {};
     }
+}
+
+bool wireless_utils::is_channel_in_operating_class(uint8_t operating_class, uint8_t channel)
+{
+    auto channel_set = operating_class_to_channel_set(operating_class);
+
+    return (channel_set.find(channel) != channel_set.end());
 }

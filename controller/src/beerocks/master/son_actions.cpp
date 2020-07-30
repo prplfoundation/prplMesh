@@ -445,7 +445,8 @@ bool son_actions::send_cmdu_to_agent(const std::string &dest_mac,
         return false;
     }
 
-    return master_thread_ctx->send_cmdu_to_bus(cmdu_tx, dest_mac, database.get_local_bridge_mac());
+    return master_thread_ctx->send_cmdu_to_broker(cmdu_tx, dest_mac,
+                                                  database.get_local_bridge_mac());
 }
 
 bool son_actions::send_ap_config_renew_msg(ieee1905_1::CmduMessageTx &cmdu_tx, db &database,
@@ -467,9 +468,9 @@ bool son_actions::send_ap_config_renew_msg(ieee1905_1::CmduMessageTx &cmdu_tx, d
             LOG(ERROR) << "Failed building IEEE1905 AP_AUTOCONFIGURATION_RENEW_MESSAGE";
         }
 
-        auto tlvAlMac = cmdu_tx.addClass<ieee1905_1::tlvAlMacAddressType>();
+        auto tlvAlMac = cmdu_tx.addClass<ieee1905_1::tlvAlMacAddress>();
         if (!tlvAlMac) {
-            LOG(ERROR) << "Failed addClass ieee1905_1::tlvAlMacAddressType";
+            LOG(ERROR) << "Failed addClass ieee1905_1::tlvAlMacAddress";
             result = false;
         }
 

@@ -57,7 +57,7 @@ build only dep modules(nng, safeclib, dwpal):
 
 Build map with nng messaging library (needs to have nng installed):
 ```
-./maptools.py build map -f MSGLIB=nng
+./maptools.py build map
 ```
 
 Clean and rebuild controller only:

@@ -61,7 +61,6 @@ typedef struct sSonConfig {
     uint32_t monitor_ap_active_threshold_B;
     uint16_t monitor_ap_idle_stable_time_sec;
     uint8_t monitor_disable_initiative_arp;
-    uint8_t slave_keep_alive_retries;
     uint8_t ire_rssi_report_rate_sec;
     void struct_swap(){
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&monitor_ap_idle_threshold_B));
@@ -858,16 +857,6 @@ typedef struct sOnboarding {
 
 typedef struct sAdminCredentials {
     char user_password[beerocks::message::USER_PASS_LEN];
-    void struct_swap(){
-    }
-    void struct_init(){
-    }
-} __attribute__((packed)) sAdminCredentials;
-
-typedef struct sDeviceInfo {
-    char manufacturer[beerocks::message::DEV_INFO_STR_MAX_LEN];
-    char model_name[beerocks::message::DEV_INFO_STR_MAX_LEN];
-    char serial_number[beerocks::message::DEV_INFO_STR_MAX_LEN];
     char lan_iface_name[beerocks::message::IFACE_NAME_LENGTH];
     uint32_t lan_ip_address;
     uint32_t lan_network_mask;
@@ -882,7 +871,7 @@ typedef struct sDeviceInfo {
     }
     void struct_init(){
     }
-} __attribute__((packed)) sDeviceInfo;
+} __attribute__((packed)) sAdminCredentials;
 
 typedef struct sIfaceInfo {
     char iface_name[beerocks::message::IFACE_NAME_LENGTH];
@@ -1363,6 +1352,61 @@ typedef struct sBssidInfo {
         bssid.struct_init();
     }
 } __attribute__((packed)) sBssidInfo;
+
+enum eClientSelectedBands: uint8_t {
+    eSelectedBands_Disabled = 0x0,
+    eSelectedBands_24G = 0x1,
+    eSelectedBands_5G = 0x2,
+    eSelectedBands_6G = 0x4,
+    eSelectedBands_60G = 0x8,
+};
+
+typedef struct sClientConfig {
+    //1 for true, 0 for false, -1 for "not configured".
+    int8_t stay_on_initial_radio;
+    //1 for true, 0 for false, -1 for "not configured".
+    int8_t stay_on_selected_device;
+    //Bitset of selected bands supported by the client according to eClientSelectedBands
+    int8_t selected_bands;
+    void struct_swap(){
+    }
+    void struct_init(){
+        stay_on_initial_radio = -0x1;
+        stay_on_selected_device = -0x1;
+    }
+} __attribute__((packed)) sClientConfig;
+
+typedef struct sClient {
+    //Client MAC
+    sMacAddr sta_mac;
+    //Time of last client configuration edit (in Seconds)
+    uint32_t timestamp_sec;
+    //1 for true, 0 for false, -1 for "not configured".
+    int8_t stay_on_initial_radio;
+    //1 for true, 0 for false, -1 for "not configured".
+    int8_t stay_on_selected_device;
+    //Bitset of selected bands supported by the client according to eClientSelectedBands
+    int8_t selected_bands;
+    //1 for true, 0 for false, -1 for "not configured".
+    int8_t single_band;
+    //Optional parameter,
+    //Determines the period of time after which the client configuration should be cleared,
+    //0 - Never age.
+    //-1 - Not Configured.
+    int32_t time_life_delay_days;
+    void struct_swap(){
+        sta_mac.struct_swap();
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&timestamp_sec));
+        tlvf_swap(32, reinterpret_cast<uint8_t*>(&time_life_delay_days));
+    }
+    void struct_init(){
+        timestamp_sec = 0x0;
+        stay_on_initial_radio = -0x1;
+        stay_on_selected_device = -0x1;
+        single_band = -0x1;
+        time_life_delay_days = -0x1;
+    }
+} __attribute__((packed)) sClient;
 
 
 }; // close namespace: beerocks_message

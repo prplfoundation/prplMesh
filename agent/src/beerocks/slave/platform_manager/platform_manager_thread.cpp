@@ -10,6 +10,8 @@
 
 #include "platform_manager_thread.h"
 
+#include "../agent_db.h"
+
 #include <bcl/network/network_utils.h>
 #include <easylogging++.h>
 
@@ -62,6 +64,8 @@ static bool fill_platform_settings(
         &iface_wlan_params_map,
     Socket *sd)
 {
+    auto db = AgentDB::get();
+
     if (bpl::cfg_get_beerocks_credentials(BPL_RADIO_FRONT, msg->platform_settings().front_ssid,
                                           msg->platform_settings().front_pass,
                                           msg->platform_settings().front_security_type) < 0) {
@@ -126,6 +130,8 @@ static bool fill_platform_settings(
         BPL_BACK_VAPS_GROUPS * BPL_BACK_VAPS_IN_GROUP * BPL_MAC_ADDR_OCTETS_LEN;
     char back_vaps[back_vaps_buff_len];
 
+    int temp_int;
+
     if ((platform_common_conf.onboarding = bpl::cfg_is_onboarding()) < 0) {
         LOG(ERROR) << "Failed reading 'onboarding'";
         return false;
@@ -142,10 +148,11 @@ static bool fill_platform_settings(
         LOG(ERROR) << "Failed reading 'client_roaming";
         return false;
     }
-    if ((platform_common_conf.local_master = bpl::cfg_is_master()) < 0) {
-        LOG(ERROR) << "Failed reading 'local_master'";
+    if ((temp_int = bpl::cfg_is_master()) < 0) {
+        LOG(ERROR) << "Failed reading 'local_controller'";
         return false;
     }
+    db->device_conf.local_controller = temp_int;
     if ((platform_common_conf.management_mode = bpl::cfg_get_management_mode()) < 0) {
         LOG(ERROR) << "Failed reading 'management_mode'";
         return false;
@@ -180,10 +187,9 @@ static bool fill_platform_settings(
         return false;
     }
 
-    // set local_gw flag
-    platform_common_conf.local_gw =
-        (platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY ||
-         platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY_WISP);
+    // Set local_gw flag
+    db->device_conf.local_gw = (platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY ||
+                                platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY_WISP);
 
     msg->platform_settings().onboarding          = uint8_t(platform_common_conf.onboarding);
     msg->platform_settings().dfs_reentry_enabled = uint8_t(platform_common_conf.dfs_reentry);
@@ -197,13 +203,13 @@ static bool fill_platform_settings(
         0; // TODO add platform DB flag
     msg->platform_settings().client_11k_roaming_enabled =
         uint8_t(platform_common_conf.client_roaming || platform_common_conf.band_steering);
-    msg->platform_settings().local_gw           = uint8_t(platform_common_conf.local_gw);
+    msg->platform_settings().local_gw           = uint8_t(db->device_conf.local_gw);
     msg->platform_settings().operating_mode     = uint8_t(platform_common_conf.operating_mode);
     msg->platform_settings().management_mode    = uint8_t(platform_common_conf.management_mode);
     msg->platform_settings().certification_mode = uint8_t(platform_common_conf.certification_mode);
     msg->platform_settings().stop_on_failure_attempts =
         uint8_t(platform_common_conf.stop_on_failure_attempts);
-    msg->platform_settings().local_master      = uint8_t(platform_common_conf.local_master);
+    msg->platform_settings().local_master      = uint8_t(db->device_conf.local_controller);
     msg->platform_settings().backhaul_max_vaps = uint8_t(platform_common_conf.backhaul_max_vaps);
     msg->platform_settings().backhaul_network_enabled =
         uint8_t(platform_common_conf.backhaul_network_enabled);
@@ -223,8 +229,8 @@ static bool fill_platform_settings(
                << (unsigned)msg->platform_settings()
                       .client_optimal_path_roaming_prefer_signal_strength_enabled;
     LOG(DEBUG) << "band_enabled: " << (unsigned)msg->wlan_settings().band_enabled;
-    LOG(DEBUG) << "local_gw: " << (unsigned)msg->platform_settings().local_gw;
-    LOG(DEBUG) << "local_master: " << (unsigned)msg->platform_settings().local_master;
+    LOG(DEBUG) << "local_gw: " << db->device_conf.local_gw;
+    LOG(DEBUG) << "local_controller: " << db->device_conf.local_controller;
     LOG(DEBUG) << "dfs_reentry_enabled: " << (unsigned)msg->platform_settings().dfs_reentry_enabled;
     LOG(DEBUG) << "backhaul_preferred_radio_band: "
                << (unsigned)msg->platform_settings().backhaul_preferred_radio_band;
@@ -430,7 +436,7 @@ void main_thread::send_dhcp_notification(const std::string &op, const std::strin
 
     dhcp_notif->mac()  = tlvf::mac_from_string(mac);
     dhcp_notif->ipv4() = network_utils::ipv4_from_string(ip);
-    mapf::utils::copy_string(dhcp_notif->hostname(0), hostname.c_str(), message::NODE_NAME_LENGTH);
+    string_utils::copy_string(dhcp_notif->hostname(0), hostname.c_str(), message::NODE_NAME_LENGTH);
 
     // Get a slave socket
     Socket *sd = get_backhaul_socket();
@@ -745,7 +751,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             response->result() = 1;
         }
 
-        mapf::utils::copy_string(response->params().user_password, pass, message::USER_PASS_LEN);
+        string_utils::copy_string(response->params().user_password, pass, message::USER_PASS_LEN);
 
         // Sent with unsafe because BML is reachable only on platform thread
         message_com::send_cmdu(sd, cmdu_tx);
@@ -764,10 +770,10 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             return false;
         }
         if (!master_version.empty() && !slave_version.empty()) {
-            mapf::utils::copy_string(response->versions().master_version, master_version.c_str(),
-                                     message::VERSION_LENGTH);
-            mapf::utils::copy_string(response->versions().slave_version, slave_version.c_str(),
-                                     message::VERSION_LENGTH);
+            string_utils::copy_string(response->versions().master_version, master_version.c_str(),
+                                      message::VERSION_LENGTH);
+            string_utils::copy_string(response->versions().slave_version, slave_version.c_str(),
+                                      message::VERSION_LENGTH);
             response->result() = 1;
         } else {
             response->result() = 0;
@@ -832,7 +838,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             }
 
             // Start DHCP monitor
-            if (platform_common_conf.local_gw) {
+            if (AgentDB::get()->device_conf.local_gw) {
                 if (!init_dhcp_monitor()) {
                     LOG(ERROR) << "can't start DHCP monitor";
                     return false;
@@ -928,8 +934,8 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                 }
             }
 
-            mapf::utils::copy_string(msg_ssid, ssid, message::WIFI_SSID_MAX_LENGTH);
-            mapf::utils::copy_string(msg_pass, pass, message::WIFI_PASS_MAX_LENGTH);
+            string_utils::copy_string(msg_ssid, ssid, message::WIFI_SSID_MAX_LENGTH);
+            string_utils::copy_string(msg_pass, pass, message::WIFI_PASS_MAX_LENGTH);
 
             //clear the pwd in the memory
             memset(&pass, 0, sizeof(pass));
@@ -994,54 +1000,6 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
                                                      0);
             },
             iface);
-    } break;
-
-    case beerocks_message::ACTION_PLATFORM_DEVICE_INFO_GET_REQUEST: {
-        // Request message
-        LOG(TRACE) << "ACTION_PLATFORM_DEVICE_INFO_GET_REQUEST";
-
-        auto response = message_com::create_vs_message<
-            beerocks_message::cACTION_PLATFORM_DEVICE_INFO_GET_RESPONSE>(cmdu_tx);
-
-        if (response == nullptr) {
-            LOG(ERROR) << "Failed building message!";
-            break;
-        }
-
-        auto &params = response->params();
-        memset(&params, 0, sizeof(params));
-
-        bpl::BPL_DEVICE_INFO bpl_device_info;
-
-        if (bpl::cfg_get_device_info(&bpl_device_info) < 0) {
-            LOG(ERROR) << "Failed reading device information!";
-            response->result() = 0;
-        } else {
-            response->result() = 1;
-        }
-
-        mapf::utils::copy_string(params.manufacturer, bpl_device_info.manufacturer,
-                                 message::DEV_INFO_STR_MAX_LEN);
-        mapf::utils::copy_string(params.model_name, bpl_device_info.model_name,
-                                 message::DEV_INFO_STR_MAX_LEN);
-        mapf::utils::copy_string(params.serial_number, bpl_device_info.serial_number,
-                                 message::DEV_INFO_STR_MAX_LEN);
-
-        // LAN
-        mapf::utils::copy_string(params.lan_iface_name, bpl_device_info.lan_iface_name,
-                                 message::IFACE_NAME_LENGTH);
-        params.lan_ip_address   = bpl_device_info.lan_ip_address;
-        params.lan_network_mask = bpl_device_info.lan_network_mask;
-
-        // WAN
-        mapf::utils::copy_string(params.wan_iface_name, bpl_device_info.wan_iface_name,
-                                 message::IFACE_NAME_LENGTH);
-        params.wan_ip_address   = bpl_device_info.wan_ip_address;
-        params.wan_network_mask = bpl_device_info.wan_network_mask;
-
-        // Sent with unsafe because BML is reachable only on platform thread
-        message_com::send_cmdu(sd, cmdu_tx);
-
     } break;
 
     case beerocks_message::ACTION_PLATFORM_ERROR_NOTIFICATION: {
@@ -1122,15 +1080,14 @@ bool main_thread::handle_arp_monitor()
     Socket *sd       = nullptr;
     auto iIfaceIndex = arp_notif->params().iface_idx;
 
-    char if_name_buffer[IF_NAMESIZE];
-    if (!if_indextoname(iIfaceIndex, if_name_buffer)) {
+    auto iface_name = network_utils::linux_get_iface_name(iIfaceIndex);
+
+    if (iface_name.empty()) {
         LOG(ERROR) << "Failed to find iface of iface_index" << int(iIfaceIndex);
         return false;
     }
 
-    std::string strIfaceName(if_name_buffer);
-
-    sd = get_slave_socket_from_hostap_iface_name(strIfaceName);
+    sd = get_slave_socket_from_hostap_iface_name(iface_name);
 
     // Use the Backhaul Manager Slave as the default destination
     if ((sd == nullptr) && ((sd = get_backhaul_socket()) == nullptr)) {
@@ -1138,7 +1095,7 @@ bool main_thread::handle_arp_monitor()
         return false;
     }
 
-    auto it_iface = m_mapIfaces.find(strIfaceName);
+    auto it_iface = m_mapIfaces.find(iface_name);
     if (it_iface != m_mapIfaces.end()) {
         auto &pIfaceParams         = it_iface->second;
         arp_notif->params().source = pIfaceParams.eType;
@@ -1158,9 +1115,8 @@ bool main_thread::handle_arp_monitor()
                              : "FRONT";
 
     // Send the message to the Slave
-    LOG(INFO) << "ARP - Interface: " << strIfaceName
-              << ", State: " << int(arp_notif->params().state) << ", IP: " << client_ipv4 << " ("
-              << client_mac << ")"
+    LOG(INFO) << "ARP - Interface: " << iface_name << ", State: " << int(arp_notif->params().state)
+              << ", IP: " << client_ipv4 << " (" << client_mac << ")"
               << ", Source: " << source << ", Type: " << int(arp_notif->params().type);
 
     // Check if the master should be notified
