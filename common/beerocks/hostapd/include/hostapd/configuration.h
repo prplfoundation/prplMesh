@@ -21,7 +21,7 @@ public:
      * @brief construct a Configurationn object
      * @param file_name the name of the configuration file.
      */
-    Configuration(const std::string &file_name);
+    explicit Configuration(const std::string &file_name);
 
     ~Configuration()                     = default;
     Configuration(const Configuration &) = default;
@@ -216,7 +216,7 @@ private:
     // simply by reading the value of this variable.
     // the access to it is via operator bool()
     // m_ok itslef may be changed because of a call to
-    // const function, therefore it is mutable
+    // may be changed because of const functions, therefore mutable
     mutable bool m_ok = false;
 
     // each string is a line in the original configuration file
