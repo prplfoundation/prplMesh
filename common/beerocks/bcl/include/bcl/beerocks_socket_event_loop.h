@@ -12,6 +12,7 @@
 #include "beerocks_event_loop.h"
 #include "network/socket.h"
 
+#include <chrono>
 #include <memory>
 #include <unordered_map>
 
@@ -22,10 +23,8 @@ namespace beerocks {
  * @see EventLoop
  * 
  * This class uses the Linux epoll APIs for monitoring the provided sockets for I/O operations.
- * Timeout operations are achieved by using the timerfd mechanism, which delivers timer 
- * expiration notifications via a file descriptor.
  */
-class SocketEventLoop : public EventLoop<std::shared_ptr<Socket>, std::chrono::milliseconds> {
+class SocketEventLoop : public EventLoop<std::shared_ptr<Socket>> {
 public:
     /**
      * @brief Class constructor.
@@ -34,7 +33,7 @@ public:
      * 
      * @param [in] timeout Sets the master timeout (in milliseconds) for the event loop.
      */
-    explicit SocketEventLoop(TimeoutType timeout = TimeoutType::min());
+    explicit SocketEventLoop(std::chrono::milliseconds timeout = std::chrono::milliseconds::min());
 
     /**
      * @brief Class destructor.
@@ -44,8 +43,7 @@ public:
     /**
      * @see EventPoll::add_event
      */
-    virtual bool add_event(EventType socket, EventHandlers handlers,
-                           TimeoutType timeout = TimeoutType::min()) override;
+    virtual bool add_event(EventType socket, EventHandlers handlers) override;
 
     /**
      * @see EventPoll::del_event
@@ -69,7 +67,7 @@ private:
     /**
      * Event loop master timeout (used for the epoll_wait function).
      */
-    TimeoutType m_timeout = TimeoutType::min();
+    std::chrono::milliseconds m_timeout = std::chrono::milliseconds::min();
 
     /**
      * @brief Data structure representing a socket added to the poll.
@@ -85,16 +83,6 @@ private:
          * Shared pointer to the socket object.
          */
         EventType socket = nullptr;
-
-        /**
-         * timer file descriptor.
-         */
-        int timerfd = -1;
-
-        /**
-         * Socket timeout value in milliseconds.
-         */
-        TimeoutType timeout_value = TimeoutType::min();
     };
 
     /**

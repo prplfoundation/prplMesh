@@ -36,7 +36,7 @@ public:
     /**
      * The type of the supported EventLoop.
      */
-    using BrokerEventLoop = EventLoop<std::shared_ptr<Socket>, std::chrono::milliseconds>;
+    using BrokerEventLoop = EventLoop<std::shared_ptr<Socket>>;
 
     /**
      * @brief Transport messages (@see Message) handler function definition.

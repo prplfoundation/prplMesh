@@ -74,8 +74,7 @@ BrokerServer::BrokerServer(SocketServer &broker_server, BrokerEventLoop &event_l
                     },
 
                 // Not implemented
-                .on_write   = nullptr,
-                .on_timeout = nullptr,
+                .on_write = nullptr,
 
                 // Fail on server socket disconnections or errors
                 .on_disconnect =
@@ -301,8 +300,7 @@ bool BrokerServer::socket_connected(std::shared_ptr<SocketServer> sd)
                     },
 
                 // Not implemented
-                .on_write   = nullptr,
-                .on_timeout = nullptr,
+                .on_write = nullptr,
 
                 // Remove the socket on disconnections or errors
                 .on_disconnect =

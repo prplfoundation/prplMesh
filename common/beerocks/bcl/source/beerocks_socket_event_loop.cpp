@@ -27,7 +27,7 @@ static constexpr int MAX_POLL_EVENTS = 17;
 /////////////////////////////// Implementation ///////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-SocketEventLoop::SocketEventLoop(TimeoutType timeout) : m_timeout(timeout)
+SocketEventLoop::SocketEventLoop(std::chrono::milliseconds timeout) : m_timeout(timeout)
 {
     m_epoll_fd = epoll_create1(0);
     LOG_IF(m_epoll_fd == -1, FATAL) << "Failed creating epoll: " << strerror(errno);
@@ -49,8 +49,7 @@ SocketEventLoop::~SocketEventLoop()
         << "Failed closing epoll file descriptor: " << strerror(errno);
 }
 
-bool SocketEventLoop::add_event(SocketEventLoop::EventType socket,
-                                EventLoop::EventHandlers handlers, TimeoutType timeout)
+bool SocketEventLoop::add_event(SocketEventLoop::EventType socket, EventHandlers handlers)
 {
     if (!socket) {
         LOG(ERROR) << "Invalid socket pointer!";
@@ -70,43 +69,6 @@ bool SocketEventLoop::add_event(SocketEventLoop::EventType socket,
     event_data->socket   = socket;
     event_data->handlers = handlers;
 
-    // If timeout is set and a handler is defined, initialize a timerfd
-    if (timeout > TimeoutType::zero()) {
-        if (handlers.on_timeout) {
-
-            // TODO: timerfd may not be supported on all kernels.
-            //       Implement a check at creation, and in case it's not supported
-            //       base the timeouts mechanism on the main timeout of the loop.
-
-            // Create a new timerfd file descriptor and initialize the timeout values
-            event_data->timeout_value = timeout;
-            event_data->timerfd       = timerfd_create(CLOCK_MONOTONIC, 0);
-
-            if (event_data->timerfd == -1) {
-                LOG(ERROR) << "Failed creating timerfd: " << strerror(errno);
-                return false;
-            }
-
-            // Convert the timeout into seconds and nano-seconds
-            auto timeout_sec = std::chrono::duration_cast<std::chrono::seconds>(timeout);
-            auto timeout_nanosec =
-                std::chrono::duration_cast<std::chrono::nanoseconds>(timeout - timeout_sec);
-
-            timespec timeout_spec({.tv_sec  = static_cast<time_t>(timeout_sec.count()),
-                                   .tv_nsec = static_cast<long>(timeout_nanosec.count())});
-            itimerspec timer_val({.it_interval = timeout_spec, .it_value = timeout_spec});
-
-            // Set the timerfd timeout value
-            if (timerfd_settime(event_data->timerfd, 0, &timer_val, nullptr) == -1) {
-                LOG(ERROR) << "Failed setting timerfd value: " << strerror(errno);
-                return false;
-            }
-        } else {
-            LOG(WARNING) << "Timeout was requested for '" << timeout.count()
-                         << "' milliseconds, but not handler is provided. Ignoring.";
-        }
-    }
-
     // Helper lambda function for adding a fd to the poll, and register for the following events:
     // EPOLLIN: The associated fd is available for read operations.
     // EPOLLOUT: The associated fd is available for write operations.
@@ -118,8 +80,8 @@ bool SocketEventLoop::add_event(SocketEventLoop::EventType socket,
         event.data.fd     = fd;
         event.events      = EPOLLRDHUP | EPOLLERR | EPOLLHUP;
 
-        // If read or timeout handlers were set, also listen for POLL-IN events
-        if (event_data->handlers.on_read || event_data->handlers.on_timeout) {
+        // If read handler was set, also listen for POLL-IN events
+        if (event_data->handlers.on_read) {
             event.events |= EPOLLIN;
         }
 
@@ -142,15 +104,6 @@ bool SocketEventLoop::add_event(SocketEventLoop::EventType socket,
     // Add the socket fd to the poll
     if (!add_fd_to_epoll(event_data->socket->getSocketFd())) {
         return false;
-    }
-
-    // Add the timeout fd to the poll
-    if (event_data->timerfd != -1) {
-        if (!add_fd_to_epoll(event_data->timerfd)) {
-            // Remove the socket from the poll and fail
-            del_event(socket);
-            return false;
-        }
     }
 
     return true;
@@ -188,21 +141,6 @@ bool SocketEventLoop::del_event(SocketEventLoop::EventType socket)
     // Erase the fd from the map
     m_fd_to_event_data.erase(event_data->socket->getSocketFd());
 
-    // Delete the timeout fd from the poll
-    if (event_data->timerfd != -1) {
-        if (epoll_ctl(m_epoll_fd, EPOLL_CTL_DEL, event_data->timerfd, nullptr) == -1) {
-            LOG(ERROR) << "Failed deleting timeout FD (" << event_data->timerfd
-                       << ") from the poll: " << strerror(errno);
-
-            error = true;
-        }
-
-        // Remove the fd from the map. Since timeout sockets are created
-        // automatically by the event pool, also close the fd.
-        m_fd_to_event_data.erase(event_data->timerfd);
-        close(event_data->timerfd);
-    }
-
     return !error;
 }
 
@@ -213,7 +151,7 @@ int SocketEventLoop::run()
 
     // Convert the global event loop timeout (if set) to milliseconds
     int timeout_millis =
-        (m_timeout > TimeoutType::zero())
+        (m_timeout > std::chrono::milliseconds::zero())
             ? static_cast<int>(
                   std::chrono::duration_cast<std::chrono::milliseconds>(m_timeout).count())
             : -1;
@@ -224,7 +162,9 @@ int SocketEventLoop::run()
     if (num_events == -1) {
         LOG(ERROR) << "Error during epoll_wait: " << strerror(errno);
         return -1;
-    } else if (num_events == 0) {
+    }
+
+    if (num_events == 0) {
         // Timeout... Do nothing
         return 0;
     }
@@ -277,47 +217,16 @@ int SocketEventLoop::run()
                 }
             }
 
-            // Handle Data & Timeouts
+            // Handle incoming data
         } else if (events[i].events & EPOLLIN) {
 
-            // Handle incoming data
-            if (event_data->socket->getSocketFd() == fd) {
-                if (!event_data->handlers.on_read) {
-                    LOG(WARNING) << "Incoming data on socket FD (" << fd
-                                 << ") without handler. Removing.";
-                    del_event(socket);
-                } else {
-                    if (!event_data->handlers.on_read(socket, *this)) {
-                        return -1;
-                    }
-                }
-                // Handle timeouts
-            } else if (event_data->timerfd == fd) {
-                if (!event_data->handlers.on_timeout) {
-                    // This shouldn't happen as the timeout socket is created only if
-                    // a handler was provided... If somehow if does happen, remove the
-                    // associated socket and the timeout socket.
-                    LOG(ERROR) << "Event on timeout FD (" << fd << ") without handler. Removing.";
-                    del_event(socket);
-                } else {
-                    // Read the number of expirations occurred on this timerfd
-                    uint64_t num_exp;
-                    if (read(event_data->timerfd, &num_exp, sizeof(num_exp)) != sizeof(num_exp)) {
-                        LOG(ERROR)
-                            << "Failed reading timerfd number of expirations: " << strerror(errno);
-                        return -1;
-                    }
-
-                    // If a timer has expired more than once, it means that there is some
-                    // delay in processing events, so print a warning
-                    if (num_exp > 1) {
-                        LOG(WARNING) << "Timer on FD (" << fd << ") expired " << num_exp
-                                     << " times since it was previously handled";
-                    }
-
-                    if (!event_data->handlers.on_timeout(socket, *this)) {
-                        return -1;
-                    }
+            if (!event_data->handlers.on_read) {
+                LOG(WARNING) << "Incoming data on socket FD (" << fd
+                             << ") without handler. Removing.";
+                del_event(socket);
+            } else {
+                if (!event_data->handlers.on_read(socket, *this)) {
+                    return -1;
                 }
             }
 

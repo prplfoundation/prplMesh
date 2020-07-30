@@ -9,9 +9,6 @@
 #ifndef _BEEROCKS_EVENT_LOOP_H_
 #define _BEEROCKS_EVENT_LOOP_H_
 
-#include "beerocks_backport.h"
-
-#include <chrono>
 #include <functional>
 
 namespace beerocks {
@@ -33,10 +30,7 @@ namespace beerocks {
  * event loop is at the highest level of control within the program.
  */
 
-template <typename E, typename T> class EventLoop {
-    // Fail the build if T (timeout type) is not derived from std::chrono::duration
-    static_assert(is_chrono_duration<T>::value, "T must be derived from std::chrono::duration");
-
+template <typename E> class EventLoop {
 public:
     /**
      * The type of the event source (e.g. file descriptor).
@@ -46,12 +40,7 @@ public:
     /**
      * The type of the event loop.
      */
-    using EventLoopType = EventLoop<E, T>;
-
-    /**
-     * The type of the timeout units for the event loop.
-     */
-    using TimeoutType = T;
+    using EventLoopType = EventLoop<E>;
 
     /**
      * @brief Event handler function definition.
@@ -92,15 +81,6 @@ public:
         EventHandler on_write;
 
         /**
-         * Hook method that is called back by the event loop to handle timeout events.
-         * Timeout events are dispatched when timeout expires while waiting for the socket to
-         * be ready for a read or write operation.
-         * @param socket Socket the event was originated at.
-         * @param loop Event loop where the event was caught on.
-         */
-        EventHandler on_timeout;
-
-        /**
          * Hook method that is called back by the event loop to handle disconnect events.
          * Disconnect events are dispatched when the remote socket is closed.
          * @param socket Socket the event was originated at.
@@ -127,17 +107,14 @@ public:
      * @brief Registers a set of event handlers for the given event source (e.g. socket).
      *
      * Event handler for the event that occurred will be called back when the event source is
-     * ready for a read/write operation, when a disconnect/error occurs or when given timeout expires.
+     * ready for a read/write operation, when a disconnect/error occurs.
      *
      * @param event Event source object.
      * @param handlers Set of event handlers: class with the methods to be called back when an
      * event occurs.
-     * @param timeout Time to wait in milliseconds (-1 to wait indefinitely) for a read/write
-     * event to occur.
      * @return True on success and false otherwise.
      */
-    virtual bool add_event(EventType event, EventHandlers handlers,
-                           TimeoutType timeout = TimeoutType::min()) = 0;
+    virtual bool add_event(EventType event, EventHandlers handlers) = 0;
 
     /**
      * @brief Removes previously registered event handlers for the given event source.

@@ -6,6 +6,7 @@
  * See LICENSE file for more details.
  */
 
+#include <bcl/beerocks_backport.h>
 #include <bcl/beerocks_defines.h>
 #include <bcl/beerocks_socket_event_loop.h>
 
@@ -89,7 +90,6 @@ void Ieee1905Transport::run()
 
                                     // Not implemented
                                     .on_write   = nullptr,
-                                    .on_timeout = nullptr,
 
                                     // Fail on server socket disconnections or errors
                                     .on_disconnect =

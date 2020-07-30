@@ -147,7 +147,6 @@ void Ieee1905Transport::update_network_interfaces(
 
                         // Not implemented
                         .on_write      = nullptr,
-                        .on_timeout    = nullptr,
                         .on_disconnect = nullptr,
 
                         // Handle interface errors
@@ -310,7 +309,6 @@ void Ieee1905Transport::handle_interface_status_change(unsigned int if_index, bo
 
                     // Not implemented
                     .on_write      = nullptr,
-                    .on_timeout    = nullptr,
                     .on_disconnect = nullptr,
 
                     // Handle interface errors
