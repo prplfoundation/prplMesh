@@ -6,13 +6,14 @@
  * See LICENSE file for more details.
  */
 
-#include "configuration.h"
 #include <fstream>
+#include <hostapd/configuration.h>
 
 #include <gtest/gtest.h>
 
 namespace {
 
+//const std::string vap_indication("bss=");
 const std::string vap_indication("interface=");
 const std::string configuration_path("/tmp/");
 const std::string configuration_file_name("omnia.conf");
@@ -56,9 +57,10 @@ const std::string configuration_content(
     "wpa=0\n"
     "ssid=dummy_ssid_0\n"
     "bridge=br-lan\n"
-    "bssid=02:9A:96:FB:59:0F\n"
+    "bssid=02:9A:96:FB:59:0F\n" +
 
-    "bss=wlan0.0\n"
+    vap_indication +
+    "wlan0.0\n"
     "ctrl_interface=/var/run/hostapd\n"
     "ap_isolate=1\n"
     "ap_max_inactivity=60\n"
@@ -100,9 +102,10 @@ const std::string configuration_content(
     "wps_state=2\n"
     "mesh_mode=fAP\n"
     "multi_ap_backhaul_ssid=\"Multi-AP-24G-2\"\n"
-    "multi_ap_backhaul_wpa_passphrase=maprocks2\n"
+    "multi_ap_backhaul_wpa_passphrase=maprocks2\n" +
 
-    "bss=wlan0.1\n"
+    vap_indication +
+    "wlan0.1\n"
     "mode=non-ap\n"
     "ctrl_interface=/var/run/hostapd\n"
     "ap_isolate=1\n"
@@ -134,7 +137,9 @@ const std::string configuration_content(
     "sFourAddrMode=1\n"
     "max_num_sta=1\n"
 
-    "#bss=wlan0.2\n"
+    "#" +
+    vap_indication +
+    "wlan0.2\n"
     "#ctrl_interface=/var/run/hostapd\n"
     "#ap_isolate=1\n"
     "#ap_max_inactivity=60\n"
@@ -154,9 +159,10 @@ const std::string configuration_content(
     "#wpa=0\n"
     "#bridge=br-lan\n"
     "#bssid=02:9A:96:FB:59:13\n"
-    "#start_disabled=1\n"
+    "#start_disabled=1\n" +
 
-    "bss=wlan0.3\n"
+    vap_indication +
+    "wlan0.3\n"
     "ctrl_interface=/var/run/hostapd\n"
     "ap_isolate=1\n"
     "ap_max_inactivity=60\n"
@@ -178,8 +184,6 @@ const std::string configuration_content(
     "start_disabled=1\n"
     "mode=ap\n");
 
-
-/*
 void clean_start()
 {
     // save the content of the string (start clean)
@@ -187,7 +191,6 @@ void clean_start()
     tmp << configuration_content;
     tmp.flush();
 }
-*/
 
 TEST(configuration_test, load)
 {
@@ -228,7 +231,7 @@ TEST(configuration_test, store)
     //// end prerequsite ////
 
     // add a value to vap
-    conf.set_create_vap_value("wlan1", "was_i_stroed", "yes_you_were");
+    conf.set_create_vap_value("wlan0.1", "was_i_stroed", "yes_you_were");
     EXPECT_TRUE(conf) << conf;
 
     // store
@@ -315,8 +318,8 @@ TEST(configuration_test, get_head_values)
     //// end prerequsite ////
 
     // get existing key
-    auto val = conf.get_head_value("ctrl_interface");
-    EXPECT_EQ(val, "/var/run/hostapd");
+    auto val = conf.get_head_value("acs_num_scans");
+    EXPECT_EQ(val, "1");
 
     // get non existing key
     val = conf.get_head_value("out_of_office");
@@ -332,7 +335,7 @@ TEST(configuration_test, set_string_vap_values)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    //   // //clean_start();
+    clean_start();
 
     // construct a configuration
     prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
@@ -340,12 +343,14 @@ TEST(configuration_test, set_string_vap_values)
 
     // load the dummy configuration file
     conf.load(vap_indication);
-    ;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
 
     //// start test ////
+
+    conf.set_create_vap_value("wlan0", "ssid", "ran_home");
+    EXPECT_TRUE(conf) << conf;
 
     // replace existing value for existing key for existing vap
     conf.set_create_vap_value("wlan0.2", "disassoc_low_ack", "734");
