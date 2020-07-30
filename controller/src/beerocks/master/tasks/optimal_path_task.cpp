@@ -828,30 +828,6 @@ void optimal_path_task::work()
             }
         }
 
-        // Check if hostap has suitable ssid
-        auto it = hostaps.begin();
-        while (it != hostaps.end()) {
-
-            std::string candidate_bssid =
-                database.get_hostap_vap_with_ssid(*it, current_hostap_ssid);
-
-            if (candidate_bssid.empty()) {
-                LOG(INFO) << "Remove candidate " << *it
-                          << ". Hostap doesn't have current_hostap_ssid " << current_hostap_ssid;
-                it = hostaps.erase(it);
-                continue;
-            }
-
-            // Steering allowed on all vaps unless load_steer_on_vaps list is defined
-            // on the platform , in that case verify that vap is on that list
-            if (!database.is_vap_on_steer_list(candidate_bssid)) {
-                TASK_LOG(INFO) << "Remove candidate " << *it << " , vap " << candidate_bssid
-                               << " is not in steer list: " << database.config.load_steer_on_vaps;
-                it = hostaps.erase(it);
-            }
-            ++it;
-        }
-
         state = REQUEST_CROSS_RSSI_MEASUREMENTS;
         break;
     }
@@ -989,17 +965,26 @@ void optimal_path_task::work()
             }
         }
 
-        // Check if hostapd has suitable ssid
+        // Check if hostap has suitable ssid
         auto it = hostap_candidates.begin();
         while (it != hostap_candidates.end()) {
-            if (database.get_hostap_vap_with_ssid(it->first, current_hostap_ssid).empty()) {
-                TASK_LOG(INFO) << "Remove candidate " << it->first
-                               << ". Hostap doesn't have current_hostap_ssid "
-                               << current_hostap_ssid;
+            std::string candidate_bssid =
+                database.get_hostap_vap_with_ssid(it->first, current_hostap_ssid);
+
+            if (candidate_bssid.empty()) {
+                LOG(INFO) << "Remove candidate " << it->first
+                          << ". Hostap doesn't have current_hostap_ssid " << current_hostap_ssid;
+                it = hostap_candidates.erase(it);
+                continue;
+            }
+
+            // Steering allowed on all vaps unless load_steer_on_vaps list is defined
+            // on the platform, in that case, verify that vap is on that list.
+            if (!database.is_vap_on_steer_list(candidate_bssid)) {
+                TASK_LOG(INFO) << "Remove candidate " << it->first << " , vap " << candidate_bssid
+                               << " is not in steer list: " << database.config.load_steer_on_vaps;
                 it = hostap_candidates.erase(it);
             } else {
-                TASK_LOG(INFO) << " sta_mac = " << sta_mac << " cadidate_mac = " << it->first
-                               << " sibling = " << int(it->second);
                 ++it;
             }
         }
