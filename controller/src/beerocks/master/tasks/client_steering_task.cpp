@@ -14,6 +14,7 @@
 #include <bcl/network/network_utils.h>
 #include <beerocks/tlvf/beerocks_message_1905_vs.h>
 #include <easylogging++.h>
+#include <tlvf/wfa_map/tlvBackhaulSteeringRequest.h>
 #include <tlvf/wfa_map/tlvClientAssociationControlRequest.h>
 #include <tlvf/wfa_map/tlvSteeringRequest.h>
 
@@ -146,14 +147,25 @@ void client_steering_task::steer_sta()
         TASK_LOG(DEBUG) << "SLAVE " << sta_mac
                         << " has an active socket, sending BACKHAUL_ROAM_REQUEST";
         auto roam_request =
-            message_com::create_vs_message<beerocks_message::cACTION_CONTROL_BACKHAUL_ROAM_REQUEST>(
-                cmdu_tx, 0);
-        if (roam_request == nullptr) {
-            LOG(ERROR) << "Failed building message!";
+            cmdu_tx.create(0, ieee1905_1::eMessageType::BACKHAUL_STEERING_REQUEST_MESSAGE);
+        if (!roam_request) {
+            LOG(ERROR) << "Failed building BACKHAUL_STEERING_REQUEST_MESSAGE!";
             return;
         }
-        roam_request->params().bssid   = tlvf::mac_from_string(target_bssid);
-        roam_request->params().channel = database.get_node_channel(target_bssid);
+
+        auto bh_steer_req_tlv = cmdu_tx.addClass<wfa_map::tlvBackhaulSteeringRequest>();
+        if (!bh_steer_req_tlv) {
+            LOG(ERROR) << "Failed building addClass<wfa_map::tlvSteeringRequest!";
+            return;
+        }
+
+        bh_steer_req_tlv->backhaul_station_mac()  = tlvf::mac_from_string(sta_mac);
+        bh_steer_req_tlv->target_bssid()          = tlvf::mac_from_string(target_bssid);
+        bh_steer_req_tlv->target_channel_number() = database.get_node_channel(target_bssid);
+        bh_steer_req_tlv->operating_class() =
+            database.get_hostap_operating_class(tlvf::mac_from_string(target_bssid));
+        bh_steer_req_tlv->finalize();
+
         son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
 
         // update bml listeners
