@@ -2737,6 +2737,13 @@ bool db::clear_client_persistent_db(const sMacAddr &mac)
     return true;
 }
 
+bool db::is_hostap_on_selected_bands(beerocks::eFreqType selected_bands, const sMacAddr &hostap)
+{
+    //todo need to change selected_bands type to eClientSelectedBands when merged to master
+    return (selected_bands ==
+            wireless_utils::which_freq(get_node_channel(tlvf::mac_to_string(hostap))));
+}
+
 bool db::update_client_persistent_db(const sMacAddr &mac)
 {
     // if persistent db is disabled
