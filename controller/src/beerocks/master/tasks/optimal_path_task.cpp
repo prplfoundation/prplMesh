@@ -1355,8 +1355,7 @@ void optimal_path_task::work()
 
         state                = WAIT_FOR_HANDOVER;
         int steering_task_id = 0;
-
-        if (database.get_node_11v_capability(sta_mac)) {
+        if (database.get_node_11v_capability(sta_mac) && !is_force_steer) {
             if (sticky_roaming_rssi <= database.config.roaming_sticky_client_rssi_threshold) {
                 TASK_LOG(DEBUG) << "optimal_path_task: steering with disassociate imminent, sta "
                                 << sta_mac << " steer from BSSID " << current_hostap_vap
@@ -1373,7 +1372,7 @@ void optimal_path_task::work()
                                                           chosen_bssid, disassoc_imminent);
             }
         } else if (database.settings_legacy_client_roaming()) {
-            TASK_LOG(DEBUG) << "optimal_path_task: steering with disassociate imminent 1sec, sta "
+            TASK_LOG(DEBUG) << "optimal_path_task: steering with disassociate imminent, sta "
                             << sta_mac << " steer from BSSID " << current_hostap_vap << " to BSSID "
                             << chosen_bssid;
             bool disassoc_imminent = true;

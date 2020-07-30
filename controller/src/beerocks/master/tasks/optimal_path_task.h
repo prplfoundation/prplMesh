@@ -72,6 +72,7 @@ private:
     int starting_delay_ms   = 0;
     bool sta_support_11k    = false;
     bool started_as_client  = false;
+    bool is_force_steer     = false;
     int sticky_roaming_rssi = 0;
     std::string current_hostap_vap;
     std::string current_hostap;
