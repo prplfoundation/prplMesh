@@ -21,7 +21,6 @@
 
 #include <arpa/inet.h>
 #include <chrono>
-#include <linux/netlink.h>
 #include <map>
 #include <net/if.h>
 
@@ -126,9 +125,6 @@ private:
     //
     // interface name (ifname) is used as Key to the table
     std::map<std::string, NetworkInterface> network_interfaces_;
-
-    // netlink socket file descriptor (used to track network interface status)
-    int netlink_fd_ = -1;
 
     uint16_t message_id_           = 0;
     uint8_t al_mac_addr_[ETH_ALEN] = {0};
@@ -314,13 +310,6 @@ private:
     bool get_interface_mac_addr(unsigned int if_index, uint8_t *addr);
     bool send_packet_to_network_interface(unsigned int if_index, Packet &packet);
     void set_al_mac_addr(const uint8_t *addr);
-
-    //
-    // NETLINK STUFF
-    //
-    bool open_netlink_socket();
-    int handle_netlink_message(struct nlmsghdr *msg);
-    void handle_netlink_pollin_event();
 
     //
     // BROKER STUFF
