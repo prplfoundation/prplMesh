@@ -80,7 +80,7 @@ int Ieee1905Transport::handle_netlink_message(struct nlmsghdr *msghdr)
                  << ifname << " is " << (is_active ? "active" : "inactive") << ").");
 
         if (ifi->ifi_index > 0 && network_interfaces_.count(ifname) > 0) {
-            handle_interface_status_change((unsigned)ifi->ifi_index, is_active);
+            handle_interface_status_change(ifname, is_active);
         } else if (ifi->ifi_index < 0) {
             MAPF_WARN("bad interface index (" << ifi->ifi_index << ") in netlink message.");
         }
