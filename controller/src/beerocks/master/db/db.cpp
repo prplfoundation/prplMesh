@@ -2387,6 +2387,12 @@ bool db::add_client_to_persistent_db(const sMacAddr &mac, const ValuesMap &param
         return false;
     }
 
+    if (config.clients_persistent_db_max_size <= 0) {
+        LOG(ERROR) << "Invalid max clients persistent db size: "
+                   << config.clients_persistent_db_max_size;
+        return false;
+    }
+
     auto db_entry = client_db_entry_from_mac(mac);
 
     if (bpl::db_has_entry(type_to_string(beerocks::eType::TYPE_CLIENT), db_entry)) {
@@ -2403,7 +2409,7 @@ bool db::add_client_to_persistent_db(const sMacAddr &mac, const ValuesMap &param
         return false;
     }
 
-    if (m_persistent_db_clients_count >= config.clients_persistent_db_max_size) {
+    while (m_persistent_db_clients_count >= config.clients_persistent_db_max_size) {
         LOG(DEBUG) << "reached max clients size in persistent db - removing a client before adding "
                       "new client";
         if (!remove_candidate_client()) {
