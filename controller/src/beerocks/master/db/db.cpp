@@ -2498,6 +2498,8 @@ bool db::set_client_stay_on_initial_radio(const sMacAddr &mac, bool stay_on_init
     LOG(DEBUG) << "stay_on_initial_radio = " << stay_on_initial_radio;
 
     auto is_client_connected = (node->state == STATE_CONNECTED);
+    LOG(DEBUG) << "client "
+               << " state=" << ((stay_on_initial_radio) ? "connected" : "disconnected");
 
     auto timestamp = std::chrono::steady_clock::now();
     if (save_to_persistent_db) {
@@ -2535,9 +2537,11 @@ bool db::set_client_stay_on_initial_radio(const sMacAddr &mac, bool stay_on_init
         node->client_initial_radio = network_utils::ZERO_MAC;
         // if enabling stay-on-initial-radio and client is already connected, update the initial_radio as well
     } else if (is_client_connected) {
-        auto bssid                 = node->parent_mac;
-        auto parent_radio_mac      = get_node_parent_radio(bssid);
-        node->client_initial_radio = tlvf::mac_from_string(parent_radio_mac);
+        auto bssid            = node->parent_mac;
+        auto parent_radio_mac = get_node_parent_radio(bssid);
+        auto initial_radio    = tlvf::mac_from_string(parent_radio_mac);
+        LOG(DEBUG) << "Setting client " << mac << " initial-radio to " << initial_radio;
+        node->client_initial_radio = initial_radio;
     }
     node->client_parameters_last_edit = timestamp;
 
@@ -4329,8 +4333,10 @@ bool db::set_node_params_from_map(const sMacAddr &mac, const ValuesMap &values_m
                 node->client_initial_radio = network_utils::ZERO_MAC;
                 // if enabling stay-on-initial-radio and client is already connected, update the initial_radio as well
             } else if (node->state == STATE_CONNECTED) {
-                auto bssid                 = node->parent_mac;
-                auto parent_radio_mac      = get_node_parent_radio(bssid);
+                auto bssid            = node->parent_mac;
+                auto parent_radio_mac = get_node_parent_radio(bssid);
+                auto initial_radio    = tlvf::mac_from_string(parent_radio_mac);
+                LOG(DEBUG) << "Setting client " << mac << " initial-radio to " << initial_radio;
                 node->client_initial_radio = tlvf::mac_from_string(parent_radio_mac);
             }
         } else if (param.first == INITIAL_RADIO_STR) {
