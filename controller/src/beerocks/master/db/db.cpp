@@ -4415,7 +4415,7 @@ bool db::remove_client_entry_and_update_counter(const std::string &entry_name)
     }
     --m_persistent_db_clients_count;
 
-    return false;
+    return true;
 }
 
 bool db::remove_candidate_client()
