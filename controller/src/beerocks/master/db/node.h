@@ -287,12 +287,8 @@ public:
     // The client_initial_radio bssid must be set.
     sMacAddr client_initial_radio;
 
-    // If enabled, the client will be steered to pre-selected-bands defined by client_selected_bands.
-    // Not enforced if client_selected_bands is not set.
-    eTriStateBool client_stay_on_selected_band = eTriStateBool::NOT_CONFIGURED;
-
-    // The selected bands the client should be steered to if the client_stay_on_selected_band is set.
-    // Default value is PARAMETER_NOT_CONFIGURED.
+    // The selected bands the client should be steered to.
+    // Default value is PARAMETER_NOT_CONFIGURED - which means no limitation on bands.
     // Possible values are bitwise options of eClientSelectedBands.
     int8_t client_selected_bands = beerocks::PARAMETER_NOT_CONFIGURED;
 

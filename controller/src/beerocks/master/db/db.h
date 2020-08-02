@@ -59,7 +59,6 @@ public:
     static const std::string TIMELIFE_DELAY_STR;
     static const std::string INITIAL_RADIO_ENABLE_STR;
     static const std::string INITIAL_RADIO_STR;
-    static const std::string SELECTED_BAND_ENABLE_STR;
     static const std::string SELECTED_BANDS_STR;
 
     // VAPs info list type
@@ -727,25 +726,6 @@ public:
      * @return MAC adddress of the radio that the client has initially connected to.
      */
     sMacAddr get_client_initial_radio(const sMacAddr &mac);
-
-    /**
-     * @brief Set the client's stay-on-selected-band.
-     * 
-     * @param mac MAC address of a client.
-     * @param stay_on_selected_band Enable client stay on the selected band/bands.
-     * @param save_to_persistent_db If set to true, update the persistent-db (write-through), default is true.
-     * @return true on success, otherwise false.
-     */
-    bool set_client_stay_on_selected_band(const sMacAddr &mac, bool stay_on_selected_band,
-                                          bool save_to_persistent_db = true);
-
-    /**
-     * @brief Get the client's stay-on-selected-band.
-     * 
-     * @param mac MAC address of a client.
-     * @return Enable client stay on the selected band/bands.
-     */
-    eTriStateBool get_client_stay_on_selected_band(const sMacAddr &mac);
 
     /**
      * @brief Set the client's selected-bands.

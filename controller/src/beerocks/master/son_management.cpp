@@ -2171,20 +2171,9 @@ void son_management::handle_bml_message(Socket *sd,
             // }
         }
 
-        // Set stay_on_selected_bands and selected_bands if requested.
+        // Set selected_bands if requested.
         if (request->client_config().selected_bands != PARAMETER_NOT_CONFIGURED) {
             auto selected_bands = eClientSelectedBands(request->client_config().selected_bands);
-            auto stay_on_selected_band =
-                (selected_bands != eClientSelectedBands::eSelectedBands_Disabled);
-            // Set stay_on_selected_bands.
-            if (!database.set_client_stay_on_selected_band(client_mac, stay_on_selected_band,
-                                                           false)) {
-                LOG(ERROR) << " Failed to stay_on_selected_band to " << stay_on_selected_band
-                           << " for client " << client_mac;
-                send_response(false);
-                break;
-            }
-            // Set selected_bands.
             if (!database.set_client_selected_bands(client_mac, selected_bands, false)) {
                 LOG(ERROR) << " Failed to set selected-bands to " << selected_bands
                            << " for client " << client_mac;
@@ -2250,12 +2239,7 @@ void son_management::handle_bml_message(Socket *sd,
         response->client().stay_on_initial_radio =
             int(database.get_client_stay_on_initial_radio(client_mac));
         // Selected bands
-        auto selected_band_enable = database.get_client_stay_on_selected_band(client_mac);
-        if (selected_band_enable == eTriStateBool::NOT_CONFIGURED) {
-            response->client().selected_bands = PARAMETER_NOT_CONFIGURED;
-        } else {
-            response->client().selected_bands = database.get_client_selected_bands(client_mac);
-        }
+        response->client().selected_bands = database.get_client_selected_bands(client_mac);
         // Timelife Delay - scaled from seconds to days
         auto timelife_delay_sec = database.get_client_time_life_delay(client_mac);
         response->client().time_life_delay_days =

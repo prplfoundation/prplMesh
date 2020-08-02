@@ -24,7 +24,6 @@ const std::string db::TIMESTAMP_STR            = "timestamp";
 const std::string db::TIMELIFE_DELAY_STR       = "timelife";
 const std::string db::INITIAL_RADIO_ENABLE_STR = "initial_radio_enable";
 const std::string db::INITIAL_RADIO_STR        = "initial_radio";
-const std::string db::SELECTED_BAND_ENABLE_STR = "selected_band_enable";
 const std::string db::SELECTED_BANDS_STR       = "selected_bands";
 
 // static
@@ -2609,59 +2608,6 @@ sMacAddr db::get_client_initial_radio(const sMacAddr &mac)
     return node->client_initial_radio;
 }
 
-bool db::set_client_stay_on_selected_band(const sMacAddr &mac, bool stay_on_selected_band,
-                                          bool save_to_persistent_db)
-{
-    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
-    if (!node) {
-        LOG(ERROR) << "client node not found for mac " << mac;
-        return false;
-    }
-
-    LOG(DEBUG) << "stay_on_selected_band = " << stay_on_selected_band;
-
-    auto timestamp = std::chrono::steady_clock::now();
-    if (save_to_persistent_db) {
-        // if persistent db is disabled
-        if (!config.persistent_db) {
-            LOG(DEBUG) << "persistent db is disabled";
-        } else {
-            LOG(DEBUG) << "configuring persistent-db, selected_band_enable = "
-                       << stay_on_selected_band;
-
-            ValuesMap values_map;
-            values_map[TIMESTAMP_STR]            = timestamp_to_string_seconds(timestamp);
-            values_map[SELECTED_BAND_ENABLE_STR] = std::to_string(stay_on_selected_band);
-
-            // update the persistent db
-            if (!update_client_entry_in_persistent_db(mac, values_map)) {
-                LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
-                return false;
-            }
-        }
-    }
-
-    node->client_stay_on_selected_band =
-        (stay_on_selected_band) ? eTriStateBool::ENABLE : eTriStateBool::DISABLE;
-    node->client_parameters_last_edit = timestamp;
-
-    return true;
-}
-
-eTriStateBool db::get_client_stay_on_selected_band(const sMacAddr &mac)
-{
-    auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
-    if (!node) {
-        LOG(ERROR) << "client node not found for mac " << mac;
-        return eTriStateBool::NOT_CONFIGURED;
-    }
-
-    LOG(TRACE) << "Client " << mac
-               << " Stay on selected band: " << node->client_stay_on_selected_band;
-
-    return node->client_stay_on_selected_band;
-}
-
 bool db::set_client_selected_bands(const sMacAddr &mac, int8_t selected_bands,
                                    bool save_to_persistent_db)
 {
@@ -2726,7 +2672,6 @@ bool db::clear_client_persistent_db(const sMacAddr &mac)
     node->client_time_life_delay_sec   = std::chrono::seconds::zero();
     node->client_stay_on_initial_radio = eTriStateBool::NOT_CONFIGURED;
     node->client_initial_radio         = network_utils::ZERO_MAC;
-    node->client_stay_on_selected_band = eTriStateBool::NOT_CONFIGURED;
     node->client_selected_bands        = PARAMETER_NOT_CONFIGURED;
 
     // if persistent db is enabled
@@ -2804,13 +2749,6 @@ bool db::update_client_persistent_db(const sMacAddr &mac)
         LOG(DEBUG) << "setting client initial-radio in persistent-db to for " << mac << " to "
                    << node->client_initial_radio;
         values_map[INITIAL_RADIO_STR] = tlvf::mac_to_string(node->client_initial_radio);
-    }
-
-    if (node->client_stay_on_selected_band != eTriStateBool::NOT_CONFIGURED) {
-        auto enable = (node->client_stay_on_selected_band == eTriStateBool::ENABLE);
-        LOG(DEBUG) << "setting client stay-on-selected-band in persistent-db to for " << mac
-                   << " to " << enable;
-        values_map[SELECTED_BAND_ENABLE_STR] = std::to_string(enable);
     }
 
     if (node->client_selected_bands != PARAMETER_NOT_CONFIGURED) {
@@ -4399,12 +4337,6 @@ bool db::set_node_params_from_map(const sMacAddr &mac, const ValuesMap &values_m
             LOG(DEBUG) << "setting node client_initial_radio to " << param.second << " for " << mac;
 
             node->client_initial_radio = tlvf::mac_from_string(param.second);
-        } else if (param.first == SELECTED_BAND_ENABLE_STR) {
-            LOG(DEBUG) << "setting node client_stay_on_selected_band to " << param.second << " for "
-                       << mac;
-
-            node->client_stay_on_selected_band =
-                (param.second == "1") ? eTriStateBool::ENABLE : eTriStateBool::DISABLE;
         } else if (param.first == SELECTED_BANDS_STR) {
             LOG(DEBUG) << "setting node client_selected_bands to " << param.second << " for "
                        << mac;

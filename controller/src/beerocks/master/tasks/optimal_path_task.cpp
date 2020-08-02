@@ -258,9 +258,10 @@ void optimal_path_task::work()
                               << " is not on the candidate ap list, continue as usual.";
         }
 
-        if (database.get_client_stay_on_selected_band(client) == eTriStateBool::ENABLE) {
+        auto selected_bands = database.get_client_selected_bands(client);
+        if ((selected_bands != PARAMETER_NOT_CONFIGURED) &&
+            (selected_bands != eClientSelectedBands::eSelectedBands_Disabled)) {
             TASK_LOG(INFO) << "Client stay on selected bands enabled";
-            auto selected_bands = database.get_client_selected_bands(client);
             if (!database.is_hostap_on_selected_bands(selected_bands,
                                                       tlvf::mac_from_string(current_hostap))) {
                 TASK_LOG(INFO) << "Current radio " << current_hostap
@@ -1022,7 +1023,9 @@ void optimal_path_task::work()
                               << " is not on the candidate ap list, continue as usual.";
         }
 
-        if (database.get_client_stay_on_selected_band(client) == eTriStateBool::ENABLE) {
+        auto selected_bands = database.get_client_selected_bands(client);
+        if ((selected_bands != PARAMETER_NOT_CONFIGURED) &&
+            (selected_bands != eClientSelectedBands::eSelectedBands_Disabled)) {
             TASK_LOG(INFO) << "Client stay on selected bands enabled";
             auto selected_bands = database.get_client_selected_bands(client);
             if (!database.is_hostap_on_selected_bands(selected_bands,
