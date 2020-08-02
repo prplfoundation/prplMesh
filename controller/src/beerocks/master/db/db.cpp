@@ -2403,7 +2403,8 @@ bool db::add_client_to_persistent_db(const sMacAddr &mac, const ValuesMap &param
         return false;
     }
 
-    if (m_persistent_db_clients_count >= config.clients_persistent_db_max_size) {
+    while ((m_persistent_db_clients_count >= config.clients_persistent_db_max_size) &&
+           (m_persistent_db_clients_count > 0)) {
         LOG(DEBUG) << "reached max clients size in persistent db - removing a client before adding "
                       "new client";
         if (!remove_candidate_client()) {
