@@ -2733,33 +2733,33 @@ bool db::update_client_persistent_db(const sMacAddr &mac)
     values_map[TIMESTAMP_STR] = timestamp_to_string_seconds(node->client_parameters_last_edit);
 
     if (node->client_time_life_delay_sec != std::chrono::seconds::zero()) {
-        LOG(DEBUG) << "setting client time-life-delay in persistent-db to for " << mac << " to "
-                   << node->client_time_life_delay_sec.count();
+        LOG(DEBUG) << "setting client time-life-delay in persistent-db to "
+                   << node->client_time_life_delay_sec.count() << " for " << mac;
         values_map[TIMELIFE_DELAY_STR] = std::to_string(node->client_time_life_delay_sec.count());
     }
 
     if (node->client_stay_on_initial_radio != eTriStateBool::NOT_CONFIGURED) {
         auto enable = (node->client_stay_on_initial_radio == eTriStateBool::ENABLE);
-        LOG(DEBUG) << "setting client stay-on-initial-radio in persistent-db to for " << mac
-                   << " to " << enable;
+        LOG(DEBUG) << "setting client stay-on-initial-radio in persistent-db to " << enable
+                   << " for " << mac;
         values_map[INITIAL_RADIO_ENABLE_STR] = std::to_string(enable);
     }
 
     if (node->client_initial_radio != network_utils::ZERO_MAC) {
-        LOG(DEBUG) << "setting client initial-radio in persistent-db to for " << mac << " to "
-                   << node->client_initial_radio;
+        LOG(DEBUG) << "setting client initial-radio in persistent-db to "
+                   << node->client_initial_radio << " for " << mac;
         values_map[INITIAL_RADIO_STR] = tlvf::mac_to_string(node->client_initial_radio);
     }
 
     if (node->client_selected_bands != PARAMETER_NOT_CONFIGURED) {
-        LOG(DEBUG) << "setting client selected-bands in persistent-db to for " << mac << " to "
-                   << node->client_selected_bands;
+        LOG(DEBUG) << "setting client selected-bands in persistent-db to "
+                   << node->client_selected_bands << " for " << mac;
         values_map[SELECTED_BANDS_STR] = std::to_string(node->client_selected_bands);
     }
 
     // update the persistent db
     if (!update_client_entry_in_persistent_db(mac, values_map)) {
-        LOG(ERROR) << "failed to update client entry in persistent-db to for " << mac;
+        LOG(ERROR) << "failed to update client entry in persistent-db for " << mac;
         return false;
     }
 
