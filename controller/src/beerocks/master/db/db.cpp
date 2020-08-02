@@ -2709,20 +2709,20 @@ bool db::update_client_persistent_db(const sMacAddr &mac)
 {
     // if persistent db is disabled
     if (!config.persistent_db) {
-        LOG(ERROR) << "persistent db is disabled";
+        LOG(ERROR) << "Persistent db is disabled";
         return false;
     }
 
     auto node = get_node_verify_type(mac, beerocks::TYPE_CLIENT);
     if (!node) {
-        LOG(ERROR) << "client node not found for mac " << mac;
+        LOG(ERROR) << "Client node not found for mac " << mac;
         return false;
     }
 
     // any persistent parameter update also sets the last-edit timestamp
     // if it is with default value - no other persistent configuration was performed
     if (node->client_parameters_last_edit == std::chrono::steady_clock::time_point::min()) {
-        LOG(DEBUG) << "persistent client parameters are empty for " << mac
+        LOG(DEBUG) << "Persistent client parameters are empty for " << mac
                    << ", no need to update persistent-db";
         return true;
     }
@@ -2733,37 +2733,37 @@ bool db::update_client_persistent_db(const sMacAddr &mac)
     values_map[TIMESTAMP_STR] = timestamp_to_string_seconds(node->client_parameters_last_edit);
 
     if (node->client_time_life_delay_sec != std::chrono::seconds::zero()) {
-        LOG(DEBUG) << "setting client time-life-delay in persistent-db to "
+        LOG(DEBUG) << "Setting client time-life-delay in persistent-db to "
                    << node->client_time_life_delay_sec.count() << " for " << mac;
         values_map[TIMELIFE_DELAY_STR] = std::to_string(node->client_time_life_delay_sec.count());
     }
 
     if (node->client_stay_on_initial_radio != eTriStateBool::NOT_CONFIGURED) {
         auto enable = (node->client_stay_on_initial_radio == eTriStateBool::ENABLE);
-        LOG(DEBUG) << "setting client stay-on-initial-radio in persistent-db to " << enable
+        LOG(DEBUG) << "Setting client stay-on-initial-radio in persistent-db to " << enable
                    << " for " << mac;
         values_map[INITIAL_RADIO_ENABLE_STR] = std::to_string(enable);
     }
 
     if (node->client_initial_radio != network_utils::ZERO_MAC) {
-        LOG(DEBUG) << "setting client initial-radio in persistent-db to "
+        LOG(DEBUG) << "Setting client initial-radio in persistent-db to "
                    << node->client_initial_radio << " for " << mac;
         values_map[INITIAL_RADIO_STR] = tlvf::mac_to_string(node->client_initial_radio);
     }
 
     if (node->client_selected_bands != PARAMETER_NOT_CONFIGURED) {
-        LOG(DEBUG) << "setting client selected-bands in persistent-db to "
+        LOG(DEBUG) << "Setting client selected-bands in persistent-db to "
                    << node->client_selected_bands << " for " << mac;
         values_map[SELECTED_BANDS_STR] = std::to_string(node->client_selected_bands);
     }
 
     // update the persistent db
     if (!update_client_entry_in_persistent_db(mac, values_map)) {
-        LOG(ERROR) << "failed to update client entry in persistent-db for " << mac;
+        LOG(ERROR) << "Failed to update client entry in persistent-db for " << mac;
         return false;
     }
 
-    LOG(DEBUG) << "client successfully updated in persistent-db for " << mac;
+    LOG(DEBUG) << "Client successfully updated in persistent-db for " << mac;
 
     return true;
 }
@@ -4450,7 +4450,8 @@ sMacAddr db::get_candidate_client_for_removal()
     if (candidate_client_to_be_removed == network_utils::ZERO_MAC) {
         LOG(DEBUG) << "no client to be removed is found";
     } else {
-        LOG(DEBUG) << "candidate client to be removed is currently "
+        LOG(DEBUG) << "candidate client to be removed " << candidate_client_to_be_removed
+                   << " is currently "
                    << ((is_disconnected_candidate_available) ? "disconnected" : "connected");
     }
 
