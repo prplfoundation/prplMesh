@@ -2281,7 +2281,11 @@ int cli_bml::client_get_client(const std::string &sta_mac)
                   << " selected_bands: " << client_selected_bands_print(client.selected_bands)
                   << std::endl
                   << " single_band: " << client_bool_print(client.single_band) << std::endl
-                  << " time_life_delay_days:" << client.time_life_delay_days << std::endl;
+                  << " time_life_delay_days: "
+                  << ((client.time_life_delay_days == PARAMETER_NOT_CONFIGURED)
+                          ? "not-configred"
+                          : std::to_string(client.time_life_delay_days))
+                  << std::endl;
     }
 
     printBmlReturnVals("bml_client_get_client", ret);
