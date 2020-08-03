@@ -8,11 +8,11 @@ scriptdir=$(dirname "$(readlink -f "${0}")")
 bf_plugins_dir=${scriptdir}/boardfarm_plugins
 
 if [ -n "${PYTHONPATH}" ]; then
-   PYTHONPATH="${bf_dir}:${bf_plugins_dir}:${scriptdir}:${PYTHONPATH}"
+   PYTHONPATH="${bf_plugins_dir}:${scriptdir}:${PYTHONPATH}"
 else
-   PYTHONPATH="${bf_dir}:${bf_plugins_dir}:${scriptdir}"
+   PYTHONPATH="${bf_plugins_dir}:${scriptdir}"
 fi
-echo $PYTHONPATH
+echo "$PYTHONPATH"
 export PYTHONPATH
 
 exec bft -c "${bf_plugins_dir}"/boardfarm_prplmesh/prplmesh_config_compose.json -n prplmesh_docker -x test_flows
