@@ -2404,10 +2404,10 @@ bool db::add_client_to_persistent_db(const sMacAddr &mac, const ValuesMap &param
     }
 
     while ((m_persistent_db_clients_count >= config.clients_persistent_db_max_size) &&
-           (m_persistent_db_clients_count > 0)) {
+           ((m_persistent_db_clients_count > 0) || (config.clients_persistent_db_max_size == 0))) {
         LOG(DEBUG) << "reached max clients size in persistent db - removing a client before adding "
                       "new client";
-        if (!remove_candidate_client()) {
+        if (!remove_candidate_client(mac)) {
             LOG(ERROR) << "failed to remove next-to-be-aged client entry " << db_entry
                        << "from persistent db (due to full persistent db)";
             return false;
@@ -4384,11 +4384,11 @@ bool db::remove_client_entry_and_update_counter(const std::string &entry_name)
     return true;
 }
 
-bool db::remove_candidate_client()
+bool db::remove_candidate_client(sMacAddr client_to_skip)
 {
 
     // find cadidate client to be removed
-    sMacAddr client_to_remove = get_candidate_client_for_removal();
+    sMacAddr client_to_remove = get_candidate_client_for_removal(client_to_skip);
     if (client_to_remove == network_utils::ZERO_MAC) {
         LOG(ERROR) << "failed to find client to be removed, number of persistent db clients is "
                    << m_persistent_db_clients_count;
@@ -4404,7 +4404,7 @@ bool db::remove_candidate_client()
     return true;
 }
 
-sMacAddr db::get_candidate_client_for_removal()
+sMacAddr db::get_candidate_client_for_removal(sMacAddr client_to_skip)
 {
     const auto max_timelife_delay_sec =
         std::chrono::seconds(config.max_timelife_delay_days * 24 * 3600);
@@ -4416,44 +4416,50 @@ sMacAddr db::get_candidate_client_for_removal()
     for (const auto &node_map : nodes) {
         for (const auto &key_value : node_map) {
             const auto client = key_value.second;
-            if (client->get_type() == beerocks::eType::TYPE_CLIENT) {
-                //TODO: improvement - stop search if "already-aged" candidate is found (don't-care of connectivity status)
+            if (client->get_type() != beerocks::eType::TYPE_CLIENT) {
+                continue;
+            }
+            const auto client_mac = tlvf::mac_from_string(key_value.first);
 
-                // Skip clients which have no persistent information.
-                if (client->client_parameters_last_edit ==
-                    std::chrono::steady_clock::time_point::min()) {
-                    continue;
+            // skip client if matches the provided client to skip
+            if (client_mac == client_to_skip) {
+                continue;
+            }
+            //TODO: improvement - stop search if "already-aged" candidate is found (don't-care of connectivity status)
+
+            // Skip clients which have no persistent information.
+            if (client->client_parameters_last_edit ==
+                std::chrono::steady_clock::time_point::min()) {
+                continue;
+            }
+
+            // Preferring disconnected clients over connected ones (even if less aged).
+            if (is_disconnected_candidate_available &&
+                client->state != beerocks::STATE_DISCONNECTED) {
+                continue;
+            }
+
+            // Client timelife delay
+            //TODO: use max_timelife_delay_sec/unfriendly_max_timelife_delay_sec according to "is_unfriendly" check which is yet-to-be-defined
+            auto timelife_delay =
+                (client->client_time_life_delay_sec != std::chrono::seconds::zero())
+                    ? client->client_time_life_delay_sec
+                    : max_timelife_delay_sec;
+
+            // Calculate client expiry due time
+            auto current_client_expiry_due = client->client_parameters_last_edit + timelife_delay;
+
+            // Compare to currently chosen candidate expiry due time.
+            // The case where a client is connected and we already found a disconnected cadidate
+            // is handled above - meaning we can assume that either we didn't find any candidate
+            // yet or the candidate found is connected (meaning only the remaining timelife
+            // should be compared)
+            if (current_client_expiry_due < candidate_client_expiry_due_time) {
+                candidate_client_expiry_due_time = current_client_expiry_due;
+                if (client->state == beerocks::STATE_DISCONNECTED) {
+                    is_disconnected_candidate_available = true;
                 }
-
-                // Preferring disconnected clients over connected ones (even if less aged).
-                if (is_disconnected_candidate_available &&
-                    client->state != beerocks::STATE_DISCONNECTED) {
-                    continue;
-                }
-
-                // Client timelife delay
-                //TODO: use max_timelife_delay_sec/unfriendly_max_timelife_delay_sec according to "is_unfriendly" check which is yet-to-be-defined
-                auto timelife_delay =
-                    (client->client_time_life_delay_sec != std::chrono::seconds::zero())
-                        ? client->client_time_life_delay_sec
-                        : max_timelife_delay_sec;
-
-                // Calculate client expiry due time
-                auto current_client_expiry_due =
-                    client->client_parameters_last_edit + timelife_delay;
-
-                // Compare to currently chosen candidate expiry due time.
-                // The case where a client is connected and we already found a disconnected cadidate
-                // is handled above - meaning we can assume that either we didn't find any candidate
-                // yet or the candidate found is connected (meaning only the remaining timelife
-                // should be compared)
-                if (current_client_expiry_due < candidate_client_expiry_due_time) {
-                    candidate_client_expiry_due_time = current_client_expiry_due;
-                    if (client->state == beerocks::STATE_DISCONNECTED) {
-                        is_disconnected_candidate_available = true;
-                    }
-                    candidate_client_to_be_removed = tlvf::mac_from_string(key_value.first);
-                }
+                candidate_client_to_be_removed = client_mac;
             }
         }
     }

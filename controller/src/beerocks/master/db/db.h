@@ -1121,19 +1121,22 @@ private:
     /**
      * @brief Removes client with least timelife remaining from persistent db (with preference to disconnected clients).
      * 
+     * @param [in] client_to_skip A client mac that should not be selected as cadidate. This is to prevent currently added node as candidate.
      * @return true on success, otherwise false.
      */
-    bool remove_candidate_client();
+    bool remove_candidate_client(sMacAddr client_to_skip = beerocks::net::network_utils::ZERO_MAC);
 
     /**
      * @brief Returns the preferred client to be removed.
      * Preference is determined as follows:
      * - Prefer disconnected clients over connected ones.
      * - According to above, the client with least time left before aging.
-     *
+     
+     * @param [in] client_to_skip A client mac that should not be selected as cadidate. This is to prevent currently added node as candidate.
      * @return sMacAddr mac of candidate client to be removed - if not found, string_utils::ZERO_MAC is returned.
      */
-    sMacAddr get_candidate_client_for_removal();
+    sMacAddr get_candidate_client_for_removal(
+        sMacAddr client_to_skip = beerocks::net::network_utils::ZERO_MAC);
 
     int network_optimization_task_id = -1;
     int channel_selection_task_id    = -1;
