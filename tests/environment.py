@@ -252,13 +252,13 @@ class ALEntityDocker(ALEntity):
 
     The entity is defined from the name of the container, the rest is derived from that.
     '''
-    def __init__(self, name: str, is_controller: bool = False,
+    def __init__(self, name: str, device: None = None, is_controller: bool = False,
                  compose: bool = False):
 
         self.name = name
         self.bridge_name = 'br-lan'
-        # if device:
-        #    self.device = device
+        if device:
+            self.device = device
 
         # First, get the UCC port from the config file
         if is_controller:
