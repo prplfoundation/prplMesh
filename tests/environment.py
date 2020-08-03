@@ -257,8 +257,8 @@ class ALEntityDocker(ALEntity):
 
         self.name = name
         self.bridge_name = 'br-lan'
-        if device:
-            self.device = device
+        # if device:
+        #    self.device = device
 
         # First, get the UCC port from the config file
         if is_controller:
