@@ -17,7 +17,8 @@ class CommandError(Exception):
 class PrplMeshBase(linux.LinuxDevice):
     """PrplMesh abstract device."""
 
-    def _run_shell_cmd(self, cmd: str = "", args: list = None, timeout: int = 30, env: Dict[str, str] = None):
+    def _run_shell_cmd(self, cmd: str = "", args: list = None, timeout: int = 30,
+                       env: Dict[str, str] = None):
         """Wrapper that executes command with specified args on host machine and logs output."""
         if env is not None:
             res, exitstatus = pexpect.run(cmd, args=args, timeout=timeout, encoding="utf-8",

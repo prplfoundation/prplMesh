@@ -131,7 +131,7 @@ class Services:
         local_env = os.environ
         local_env['ROOT_DIR'] = self.rootdir
         docker_gid = grp.getgrnam('docker')[2]
-        local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(docker_gid)
+        local_env['CURRENT_UID'] = str(os.getuid()) + ':' + str(docker_gid)
         local_env['CURRENT_ID'] = str(os.getuid())
         local_env['RUN_ID'] = self.build_id
 
@@ -185,6 +185,7 @@ def cleanup(rc):
     if getpass.getuser() == 'gitlab-runner':
         os.system('chown -R gitlab-runner:gitlab-runner .')
     sys.exit(rc)
+
 
 if __name__ == '__main__':
     check_docker_versions()
@@ -247,7 +248,7 @@ if __name__ == '__main__':
         else:
             services = Services()   # With new build id
         # rc = services.dc(['up', 'boardfarm'])
-        #rc = services.dc(['run', '--service-ports', '--entrypoint',
+        # rc = services.dc(['run', '--service-ports', '--entrypoint',
         #                  '/bin/bash', 'boardfarm'], interactive=True)
         rc = services.dc(['run', '--rm', '--service-ports', '--use-aliases',
                           'boardfarm'], interactive=True)

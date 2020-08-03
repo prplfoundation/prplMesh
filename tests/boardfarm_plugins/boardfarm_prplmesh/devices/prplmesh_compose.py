@@ -53,9 +53,7 @@ class PrplMeshCompose(PrplMeshBase):
             self._docker_compose(["-d", "--name", self.name, "agent"],
                                  "run", "start-agent")
             time.sleep(self.delay)
-            self.agent_entity = \
-                    ALEntityDocker(self.name, is_controller=False,
-                                   compose=True)
+            self.agent_entity = ALEntityDocker(self.name, is_controller=False, compose=True)
 
         self.wired_sniffer = Sniffer(_get_bridge_interface(self.docker_network),
                                      boardfarm.config.output_dir)
@@ -65,8 +63,6 @@ class PrplMeshCompose(PrplMeshBase):
         print('_docker_compose: args {}'.format(args))
         yml_path = "tools/docker/boardfarm-ci/docker-compose.yml"
         full_args = ["-f", os.path.join(rootdir, yml_path)]
-        entrypoint_path = "tools/docker/boardfarm-ci/runner-entrypoint.sh"
-        entrypoint = os.path.join(rootdir, entrypoint_path)
         if parameter == "run":
             log_path = os.path.join(rootdir, "logs/{}".format(self.name))
             if not os.path.exists(log_path):
@@ -91,7 +87,6 @@ class PrplMeshCompose(PrplMeshBase):
                                 full_args, env=os.environ)
         else:
             self._run_shell_cmd("/usr/local/bin/docker-compose", full_args)
-
 
     def __del__(self):
         # self._docker_compose(["stop", self.name])
