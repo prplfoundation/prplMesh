@@ -66,16 +66,16 @@ static bool fill_platform_settings(
 {
     auto db = AgentDB::get();
 
-    if (bpl::cfg_get_beerocks_credentials(BPL_RADIO_FRONT, msg->platform_settings().front_ssid,
-                                          msg->platform_settings().front_pass,
-                                          msg->platform_settings().front_security_type) < 0) {
+    if (bpl::cfg_get_beerocks_credentials(BPL_RADIO_FRONT, db->device_conf.front_radio.ssid,
+                                          db->device_conf.front_radio.pass,
+                                          db->device_conf.front_radio.security_type) < 0) {
         LOG(ERROR) << "Failed reading front Wi-Fi credentials!";
         return false;
     }
 
     LOG(DEBUG) << "Front Credentials:"
-               << " ssid=" << msg->platform_settings().front_ssid
-               << " sec=" << msg->platform_settings().front_security_type << " pass=***";
+               << " ssid=" << db->device_conf.front_radio.ssid
+               << " sec=" << db->device_conf.front_radio.security_type << " pass=***";
 
     if (bpl::cfg_get_beerocks_credentials(BPL_RADIO_BACK, msg->platform_settings().back_ssid,
                                           msg->platform_settings().back_pass,
