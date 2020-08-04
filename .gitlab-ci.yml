@@ -198,6 +198,20 @@ bwl_dummy_unit_tests:
 bcl_unit_tests:
   extends: .run-test-in-docker
 
+dctest_one_test:
+  stage: test
+  script:
+    - ./dctest.py
+  artifacts:
+    paths:
+      - logs
+      - results
+    when: always
+  tags:
+    - boardfarm-compose
+  needs:
+    - job: build-in-docker
+
 mapf_common_encryption_tests:
   extends: .run-test-in-docker
 
