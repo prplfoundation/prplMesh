@@ -1013,6 +1013,9 @@ sClient:
     _type: int8_t
     _value: -1
     _comment: 1 for true, 0 for false, -1 for "not configured".
+  initial_radio:
+    _type: sMacAddr
+    _comment: Initial radio stored for the client, set to network_utils::ZERO_MAC if not configured.
   stay_on_selected_device:
     _type: int8_t
     _value: -1

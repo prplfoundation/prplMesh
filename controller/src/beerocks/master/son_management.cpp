@@ -2238,6 +2238,8 @@ void son_management::handle_bml_message(Socket *sd,
         // Stay on initial radio
         response->client().stay_on_initial_radio =
             int(database.get_client_stay_on_initial_radio(client_mac));
+        // Initial radio
+        response->client().initial_radio = database.get_client_initial_radio(client_mac);
         // Selected bands
         response->client().selected_bands = database.get_client_selected_bands(client_mac);
         // Timelife Delay - scaled from seconds to days
