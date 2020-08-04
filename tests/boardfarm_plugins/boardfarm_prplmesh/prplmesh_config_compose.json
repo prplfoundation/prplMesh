@@ -1,0 +1,15 @@
+{
+    "prplmesh_docker": {
+        "name": "dockerized_device",
+        "board_type": "prplmesh_compose",
+        "role": "controller",
+        "conn_cmd": "",
+        "devices": [
+            {
+                "name": "repeater1",
+                "type": "prplmesh_compose",
+                "conn_cmd": ""
+            }
+        ]
+    }
+}
