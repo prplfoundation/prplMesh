@@ -1851,9 +1851,11 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
                 } else {
 
                     m_sConfig.preferred_bssid = tlvf::mac_to_string(request->preferred_bssid());
-                    m_sConfig.ssid.assign(request->ssid(message::WIFI_SSID_MAX_LENGTH));
-                    m_sConfig.pass.assign(request->pass(message::WIFI_PASS_MAX_LENGTH));
-                    m_sConfig.security_type = static_cast<bwl::WiFiSec>(request->security_type());
+                    m_sConfig.ssid.assign(std::string(db->device_conf.back_radio.pass));
+                    m_sConfig.pass.assign(std::string(db->device_conf.back_radio.ssid));
+                    m_sConfig.security_type =
+                        static_cast<bwl::WiFiSec>(db->device_conf.back_radio.security_type_bwl);
+
                     m_sConfig.mem_only_psk  = request->mem_only_psk();
                     if (request->backhaul_preferred_radio_band() ==
                         beerocks::eFreqType::FREQ_UNKNOWN) {

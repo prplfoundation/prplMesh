@@ -87,7 +87,17 @@ public:
         } front_radio;
 
         struct sBackRadio {
-
+            char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
+            char pass[beerocks::message::WIFI_PASS_MAX_LENGTH];
+            char security_type[beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH];
+<<<<<<< HEAD
+=======
+            uint32_t security_type_bwl;
+            uint8_t mem_only_psk;
+            uint8_t backhaul_max_vaps;
+            uint8_t backhaul_network_enabled;
+            uint8_t backhaul_preferred_radio_band;
+>>>>>>> 086cb3f6... fixup! agent: Move back radio configuration to AgentDB
         } back_radio;
 
         bool local_gw;

@@ -77,9 +77,9 @@ static bool fill_platform_settings(
                << " ssid=" << db->device_conf.front_radio.ssid
                << " sec=" << db->device_conf.front_radio.security_type << " pass=***";
 
-    if (bpl::cfg_get_beerocks_credentials(BPL_RADIO_BACK, msg->platform_settings().back_ssid,
-                                          msg->platform_settings().back_pass,
-                                          msg->platform_settings().back_security_type) < 0) {
+    if (bpl::cfg_get_beerocks_credentials(BPL_RADIO_BACK, db->device_conf.back_radio.ssid,
+                                          db->device_conf.back_radio.pass,
+                                          db->device_conf.back_radio.security_type) < 0) {
         LOG(ERROR) << "Failed reading Wi-Fi back credentials!";
         return false;
     }
@@ -93,8 +93,8 @@ static bool fill_platform_settings(
     msg->platform_settings().mem_only_psk = mem_only_psk;
 
     LOG(DEBUG) << "Back Credentials:"
-               << " ssid=" << msg->platform_settings().back_ssid
-               << " sec=" << msg->platform_settings().back_security_type
+               << " ssid=" << db->device_conf.back_radio.ssid
+               << " sec=" << db->device_conf.back_radio.security_type
                << " mem_only_psk=" << int(msg->platform_settings().mem_only_psk) << " pass=***";
 
     bpl::BPL_WLAN_PARAMS params;
