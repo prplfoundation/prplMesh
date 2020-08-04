@@ -277,7 +277,7 @@ void optimal_path_task::work()
                                          selected_bands, tlvf::mac_from_string(sibling));
                                  });
 
-                if (it == current_hostap_siblings.end()) {
+                if (it != current_hostap_siblings.end()) {
                     chosen_bssid =
                         database.get_hostap_vap_with_ssid(it->data(), current_hostap_ssid);
                     state          = SEND_STEER_ACTION;
@@ -1045,7 +1045,7 @@ void optimal_path_task::work()
                 for (auto &sibling : current_hostap_siblings) {
                     TASK_LOG(TRACE) << sibling;
                 }
-                if (it == current_hostap_siblings.end()) {
+                if (it != current_hostap_siblings.end()) {
                     chosen_bssid =
                         database.get_hostap_vap_with_ssid(it->data(), current_hostap_ssid);
                     state          = SEND_STEER_ACTION;
