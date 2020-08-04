@@ -794,7 +794,7 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         if (request_in->params().use_optional_ssid &&
             std::string((char *)request_in->params().ssid).empty()) {
             //LOG(DEBUG) << "ssid field is empty! using slave ssid -> " << config.ssid;
-            string_utils::copy_string(request_in->params().ssid, platform_settings.front_ssid,
+            string_utils::copy_string(request_in->params().ssid, db->device_conf.front_radio.ssid,
                                       message::WIFI_SSID_MAX_LENGTH);
         }
 
