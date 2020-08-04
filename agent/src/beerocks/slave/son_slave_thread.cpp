@@ -3105,11 +3105,13 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             // to the backhaul manager will no longer be necessary, and therefore should be be
             // removed completely from beerocks including the BPL.
             string_utils::copy_string(bh_enable->ssid(message::WIFI_SSID_MAX_LENGTH),
-                                      platform_settings.back_ssid, message::WIFI_SSID_MAX_LENGTH);
+                                      db->device_conf.back_radio.ssid,
+                                      message::WIFI_SSID_MAX_LENGTH);
             string_utils::copy_string(bh_enable->pass(message::WIFI_PASS_MAX_LENGTH),
-                                      platform_settings.back_pass, message::WIFI_PASS_MAX_LENGTH);
+                                      db->device_conf.back_radio.pass,
+                                      message::WIFI_PASS_MAX_LENGTH);
             bh_enable->security_type() = static_cast<uint32_t>(
-                platform_to_bwl_security(platform_settings.back_security_type));
+                platform_to_bwl_security(db->device_conf.back_radio.security_type));
             bh_enable->mem_only_psk() = platform_settings.mem_only_psk;
             bh_enable->backhaul_preferred_radio_band() =
                 platform_settings.backhaul_preferred_radio_band;
