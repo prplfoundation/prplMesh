@@ -180,6 +180,7 @@ upload-artifacts:
     - build-for-glinet-b1300
     - build-for-turris-omnia
 
+
 .run-test-in-docker:
   stage: test
   extends: .in-prplmesh-builder
@@ -197,6 +198,15 @@ bwl_dummy_unit_tests:
 
 bcl_unit_tests:
   extends: .run-test-in-docker
+
+dctest_one_test:
+  stage: test
+  script:
+    - ./dctest.py
+  tags:
+    - boardfarm-compose
+  needs:
+    - job: build-in-docker
 
 mapf_common_encryption_tests:
   extends: .run-test-in-docker
