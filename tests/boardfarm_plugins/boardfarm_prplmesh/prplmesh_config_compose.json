@@ -1,0 +1,55 @@
+{
+    "prplmesh_compose": {
+        "name": "agent",
+        "board_type": "prplmesh_compose",
+        "role": "agent",
+        "conn_cmd": "",
+        "devices": [
+            {
+                "name": "lan",
+                "type": "prplmesh_compose",
+                "role": "controller",
+                "delay" : 7,
+                "conn_cmd": ""
+            },
+            {
+                "name": "lan2",
+                "type": "prplmesh_compose",
+                "role": "agent",
+                "delay" : 30,
+                "conn_cmd": ""
+            },
+            {
+                "name": "wifi",
+                "type": "STA_dummy",
+                "mac": "51:a1:10:20:00:01",
+                "conn_cmd": ""
+            }
+        ]
+    },
+    "netgear-rax40-1": {
+        "name": "agent-rax40",
+        "board_type": "prplWRT",
+        "role": "agent",
+        "docker_network": "prplMesh-net-rax40-1",
+        "conn_cmd": "cu -s 115200 -l /dev/ttyUSB0",
+        "devices": [
+            {
+            "name": "lan",
+            "type": "prplmesh_compose",
+            "role": "controller",
+            "docker_network": "prplMesh-net-rax40-1",
+            "conn_cmd": ""
+            },
+            {
+                "name": "wifi",
+                "type": "prplWRT_STA",
+                "iface": "wlan0",
+                "driver": "nl80211,wext",
+                "connection_type": "local_cmd",
+                "conn_cmd": "bash",
+                "color": "yellow"
+            }
+        ]
+    }
+}
