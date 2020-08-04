@@ -1237,6 +1237,8 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             std::copy_n(response->client().sta_mac.oct, BML_MAC_ADDR_LEN, m_client->sta_mac);
             m_client->timestamp_sec         = response->client().timestamp_sec;
             m_client->stay_on_initial_radio = response->client().stay_on_initial_radio;
+            std::copy_n(response->client().initial_radio.oct, BML_MAC_ADDR_LEN,
+                        m_client->initial_radio);
             // TODO: add stay_on_selected_device to BML_CLIENT when support is added
             //m_client->stay_on_selected_device = response->client().stay_on_selected_device;
             m_client->selected_bands       = response->client().selected_bands;
