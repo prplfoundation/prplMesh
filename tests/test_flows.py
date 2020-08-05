@@ -44,14 +44,17 @@ class TestFlows:
         status(test + " starting")
 
     def check_log(self, entity_or_radio: Union[env.ALEntity, env.Radio], regex: str,
-                  start_line: int = 0) -> bool:
-        '''Verify that the logfile for "entity_or_radio" matches "regex", fail if not.'''
-        return self.wait_for_log(entity_or_radio, regex, start_line, 0.3)
+                  start_line: int = 0, fail_on_mismatch: bool = True) -> bool:
+        '''Verify that the log-file for "entity_or_radio" matches "regex",
+           fail if no match is found when "fail_on_mismatch" is enabled.
+        '''
+        return self.wait_for_log(entity_or_radio, regex, start_line, 0.3,
+                                 fail_on_mismatch=fail_on_mismatch)
 
     def wait_for_log(self, entity_or_radio: Union[env.ALEntity, env.Radio], regex: str,
-                     start_line: int, timeout: float) -> bool:
+                     start_line: int, timeout: float, fail_on_mismatch: bool = True) -> bool:
         result, line, match = entity_or_radio.wait_for_log(regex, start_line, timeout)
-        if not result:
+        if fail_on_mismatch and (not result):
             self.__fail_no_message()
         return result, line, match
 
