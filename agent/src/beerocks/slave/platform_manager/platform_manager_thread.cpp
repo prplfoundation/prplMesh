@@ -90,12 +90,12 @@ static bool fill_platform_settings(
         return false;
     }
 
-    msg->platform_settings().mem_only_psk = mem_only_psk;
+    db->device_conf.back_radio.mem_only_psk = mem_only_psk;
 
     LOG(DEBUG) << "Back Credentials:"
                << " ssid=" << db->device_conf.back_radio.ssid
                << " sec=" << db->device_conf.back_radio.security_type
-               << " mem_only_psk=" << int(msg->platform_settings().mem_only_psk) << " pass=***";
+               << " mem_only_psk=" << int(db->device_conf.back_radio.mem_only_psk) << " pass=***";
 
     bpl::BPL_WLAN_PARAMS params;
     if (bpl::cfg_get_wifi_params(iface_name.c_str(), &params) < 0) {

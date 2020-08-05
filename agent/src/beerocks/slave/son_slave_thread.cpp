@@ -3112,7 +3112,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                                       message::WIFI_PASS_MAX_LENGTH);
             bh_enable->security_type() = static_cast<uint32_t>(
                 platform_to_bwl_security(db->device_conf.back_radio.security_type));
-            bh_enable->mem_only_psk() = platform_settings.mem_only_psk;
+            bh_enable->mem_only_psk() = db->device_conf.back_radio.mem_only_psk;
             bh_enable->backhaul_preferred_radio_band() =
                 platform_settings.backhaul_preferred_radio_band;
 
