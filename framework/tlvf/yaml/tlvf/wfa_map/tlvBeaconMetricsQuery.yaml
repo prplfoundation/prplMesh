@@ -20,6 +20,7 @@ tlvBeaconMetricsQuery:
   ssid:
     _type: char
     _length: [ ssid_length ]
+  ap_channel_reports_num: uint8_t
   ap_channel_reports_list_length:
     _type: uint8_t
     _length_var: True

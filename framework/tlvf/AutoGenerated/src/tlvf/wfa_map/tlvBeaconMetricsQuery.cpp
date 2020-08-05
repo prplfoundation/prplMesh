@@ -98,6 +98,7 @@ bool tlvBeaconMetricsQuery::alloc_ssid(size_t count) {
         size_t move_length = getBuffRemainingBytes(src) - len;
         std::copy_n(src, move_length, dst);
     }
+    m_ap_channel_reports_num = (uint8_t *)((uint8_t *)(m_ap_channel_reports_num) + len);
     m_ap_channel_reports_list_length = (uint8_t *)((uint8_t *)(m_ap_channel_reports_list_length) + len);
     m_ap_channel_reports_list = (cApChannelReports *)((uint8_t *)(m_ap_channel_reports_list) + len);
     m_elemnt_id_list_length = (uint8_t *)((uint8_t *)(m_elemnt_id_list_length) + len);
@@ -110,6 +111,10 @@ bool tlvBeaconMetricsQuery::alloc_ssid(size_t count) {
     }
     if(m_length){ (*m_length) += len; }
     return true;
+}
+
+uint8_t& tlvBeaconMetricsQuery::ap_channel_reports_num() {
+    return (uint8_t&)(*m_ap_channel_reports_num);
 }
 
 uint8_t& tlvBeaconMetricsQuery::ap_channel_reports_list_length() {
@@ -284,6 +289,7 @@ size_t tlvBeaconMetricsQuery::get_initial_size()
     class_size += sizeof(sMacAddr); // bssid
     class_size += sizeof(uint8_t); // reporting_detail_value
     class_size += sizeof(uint8_t); // ssid_length
+    class_size += sizeof(uint8_t); // ap_channel_reports_num
     class_size += sizeof(uint8_t); // ap_channel_reports_list_length
     class_size += sizeof(uint8_t); // elemnt_id_list_length
     return class_size;
@@ -353,6 +359,12 @@ bool tlvBeaconMetricsQuery::init()
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (ssid_length) << ") Failed!";
         return false;
     }
+    m_ap_channel_reports_num = reinterpret_cast<uint8_t*>(m_buff_ptr__);
+    if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
+        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint8_t) << ") Failed!";
+        return false;
+    }
+    if(m_length && !m_parse__){ (*m_length) += sizeof(uint8_t); }
     m_ap_channel_reports_list_length = reinterpret_cast<uint8_t*>(m_buff_ptr__);
     if (!m_parse__) *m_ap_channel_reports_list_length = 0;
     if (!buffPtrIncrementSafe(sizeof(uint8_t))) {
