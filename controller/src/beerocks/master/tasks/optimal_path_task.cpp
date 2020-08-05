@@ -37,7 +37,7 @@ using namespace son;
 * example), missed the probe or due to the AP bad reception.
 * There is a high probability to get responsiveness less than 100% and therefore, the
 * threshold was changed to 50% as part of demo optimizations.
-* This hardcoded threshold is temporary and shall be revised in the future. 
+* This hardcoded threshold is temporary and shall be revised in the future.
 * update: increasing to 80% since in bandsteering scenario there are only 2 radios
 * and 50% means optimal path always will fail to find an additional candidate.
 */
@@ -328,20 +328,11 @@ void optimal_path_task::work()
                     TASK_LOG(DEBUG)
                         << "requested 11K beacon measurement request from sta: " << sta_mac
                         << " on bssid: " << vap_mac;
-                    auto request = message_com::create_vs_message<
-                        beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST>(cmdu_tx, id);
 
-                    if (request == nullptr) {
-                        LOG(ERROR)
-                            << "Failed building ACTION_CONTROL_CLIENT_BEACON_11K_REQUEST message!";
-                        break;
+                    if (!son::son_actions::send_beacon_metrics_query_msg(
+                            cmdu_tx, database, tlvf::mac_from_string(sta_mac))) {
+                        LOG(ERROR) << "Failed sending BEACON_METRICS_QUERY_MESSAGE";
                     }
-                    request->params() = measurement_request;
-
-                    son_actions::send_cmdu_to_agent(current_agent_mac, cmdu_tx, database,
-                                                    current_hostap);
-
-                    set_responses_timeout(BEACON_MEASUREMENT_REQUEST_TIMEOUT_MSEC);
 
                     iterator_element_counter++;
                     potential_ap_iter++;
