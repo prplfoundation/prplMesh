@@ -132,37 +132,11 @@ void association_handling_task::work()
         TASK_LOG(DEBUG) << "started association_handling_task, looking for beacon measurement "
                            "capabilities on "
                         << sta_mac;
-        std::string bssid     = database.get_node_parent(sta_mac);
-        std::string radio_mac = database.get_node_parent_radio(bssid);
-        auto agent_mac        = database.get_node_parent_ire(bssid);
-
-        auto measurement_request = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST>(cmdu_tx, id);
-
-        if (measurement_request == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_BEACON_11K_REQUEST message!";
+        if (!son::son_actions::send_beacon_metrics_query_msg(cmdu_tx, database,
+                                                             tlvf::mac_from_string(sta_mac))) {
+            LOG(ERROR) << "Failed sending BEACON_METRICS_QUERY_MESSAGE for sta: " << sta_mac;
             return;
         }
-        measurement_request->params().measurement_mode =
-            beerocks::MEASURE_MODE_ACTIVE; // son::eMeasurementMode11K "passive"/"active"/"table"
-        measurement_request->params().channel = database.get_node_channel(bssid);
-        measurement_request->params().op_class =
-            database.get_hostap_operating_class(tlvf::mac_from_string(bssid));
-        measurement_request->params().rand_ival = beerocks::
-            BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL; // random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
-        measurement_request->params().duration = beerocks::
-            BEACON_MEASURE_DEFAULT_ACTIVE_DURATION; // measurement duration, expressed in units of TUs [=1024usec]
-        measurement_request->params().sta_mac = tlvf::mac_from_string(sta_mac);
-        measurement_request->params().bssid   = tlvf::mac_from_string(bssid);
-        //measurement_request.params.use_optional_ssid = true;
-        measurement_request->params().expected_reports_count = 1;
-        //mapf::utils::copy_string(measurement_request.params.ssid, database.get_hostap_vap_ssid(bssid).c_str(), sizeof(measurement_request.params.ssid));
-        add_pending_mac(radio_mac, beerocks_message::ACTION_CONTROL_CLIENT_BEACON_11K_RESPONSE);
-        TASK_LOG(DEBUG) << "requested beacon measurement request from sta: " << sta_mac
-                        << " on bssid: " << bssid;
-
-        son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
-        set_responses_timeout(BEACON_MEASURE_REQ_TIME_SPAN);
         break;
     }
 
@@ -397,8 +371,8 @@ void association_handling_task::finalize_new_connection()
     } else {
         LOG(INFO) << "handoff complete for " << sta_mac;
 
-        /* 
-         * kill existing roaming task 
+        /*
+         * kill existing roaming task
          */
         int prev_roaming_task = database.get_roaming_task_id(sta_mac);
         LOG(DEBUG) << "kill prev_roaming_task " << prev_roaming_task;
