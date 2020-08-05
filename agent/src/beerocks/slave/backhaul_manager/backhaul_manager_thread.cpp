@@ -1856,7 +1856,7 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
                     m_sConfig.security_type =
                         static_cast<bwl::WiFiSec>(db->device_conf.back_radio.security_type_bwl);
 
-                    m_sConfig.mem_only_psk  = request->mem_only_psk();
+                    m_sConfig.mem_only_psk = db->device_conf.back_radio.mem_only_psk;
                     if (request->backhaul_preferred_radio_band() ==
                         beerocks::eFreqType::FREQ_UNKNOWN) {
                         LOG(DEBUG) << "Unknown backhaul preferred radio band, setting to auto";
