@@ -26,6 +26,7 @@ node::node(beerocks::eType type_, const std::string &mac_)
     }
     m_sta_5ghz_capabilities.valid  = false;
     m_sta_24ghz_capabilities.valid = false;
+    client_initial_radio           = net::network_utils::ZERO_MAC;
 }
 
 namespace son {
