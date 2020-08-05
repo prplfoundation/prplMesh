@@ -318,7 +318,7 @@ void son_actions::handle_dead_node(std::string mac, std::string hostap_mac, db &
         }
 
         /*
-         * set all nodes in the subtree as disconnected 
+         * set all nodes in the subtree as disconnected
          */
         if (mac_type != beerocks::TYPE_CLIENT) {
 
@@ -504,4 +504,71 @@ bool son_actions::send_ap_config_renew_msg(ieee1905_1::CmduMessageTx &cmdu_tx, d
     }
 
     return result;
+}
+
+bool son_actions::send_beacon_metrics_query_msg(ieee1905_1::CmduMessageTx &cmdu_tx, db &database,
+                                                const sMacAddr &sta_mac)
+{
+    std::string bssid     = database.get_node_parent(tlvf::mac_to_string(sta_mac));
+    std::string radio_mac = database.get_node_parent_radio(bssid);
+    auto agent_mac        = database.get_node_parent_ire(bssid);
+
+    auto measurement_request =
+        cmdu_tx.create(0, ieee1905_1::eMessageType::BEACON_METRICS_QUERY_MESSAGE);
+
+    if (!measurement_request) {
+        LOG(ERROR) << "Failed building BEACON_METRICS_QUERY_MESSAGE";
+        return false;
+    }
+
+    auto tlvBeaconMtericsQuery = cmdu_tx.addClass<wfa_map::tlvBeaconMetricsQuery>();
+
+    if (!tlvBeaconMtericsQuery) {
+        LOG(ERROR) << "Failed addClass<wfa_map::tlvBeaconMetricsQuery>";
+        return false;
+    }
+
+    tlvBeaconMtericsQuery->associated_sta_mac() = sta_mac;
+    tlvBeaconMtericsQuery->operating_class() =
+        database.get_hostap_operating_class(tlvf::mac_from_string(bssid));
+    tlvBeaconMtericsQuery->channel_number() = database.get_node_channel(bssid);
+    tlvBeaconMtericsQuery->bssid()          = tlvf::mac_from_string(bssid);
+
+    // According to the 10.3.3 from EMR1 specification
+    // reporting_detail_value should be 1 for minimize
+    // the disruption potentially caused to the ongoing
+    // traffic of the specified STA
+    tlvBeaconMtericsQuery->reporting_detail_value() = 1;
+
+    auto ssid = database.get_hostap_ssid(bssid);
+
+    tlvBeaconMtericsQuery->ssid_length() = ssid.length();
+
+    if (!tlvBeaconMtericsQuery->alloc_ssid(ssid.length() + 1)) {
+        LOG(ERROR) << "Failed allocage buffer for SSID";
+        return false;
+    }
+    tlvBeaconMtericsQuery->set_ssid(ssid);
+
+    if (tlvBeaconMtericsQuery->channel_number() != 255) {
+
+        // If the value of Channel Number field is not set to 255,
+        // h (ap_channel_reports_num) is set to 0.
+        tlvBeaconMtericsQuery->ap_channel_reports_num() = 0;
+    } else {
+        // TODO: If the value of the Number of AP Channel Reports field (h)
+        //       in the query is greater than zero and the value of the
+        //       Channel Number field in the query is 255, then h AP Channel
+        //       Report subelements shall be included in the 802.11 Beacon request,
+        //       each containing thespecified Operating Class and Channel List.
+        LOG(DEBUG) << "Unsupported condition: channel_number == 255";
+    }
+
+    // TODO: find the correct value for elemnt_id_list_length()
+    tlvBeaconMtericsQuery->elemnt_id_list_length() = 0;
+
+    LOG(DEBUG) << "Send BEACON_METRICS_QUERY_MESSAGE for sta: " << sta_mac;
+    son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, radio_mac);
+
+    return true;
 }

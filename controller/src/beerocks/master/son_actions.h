@@ -18,6 +18,7 @@
 #include <tlvf/ieee_1905_1/tlvLinkMetricQuery.h>
 #include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSupportedRole.h>
+#include <tlvf/wfa_map/tlvBeaconMetricsQuery.h>
 
 #define CLI_LOG(a) LOG(a)
 
@@ -59,6 +60,8 @@ public:
                                    db &database, const std::string &radio_mac = std::string());
     static bool send_ap_config_renew_msg(ieee1905_1::CmduMessageTx &cmdu_tx, db &database,
                                          const sMacAddr &al_mac);
+    static bool send_beacon_metrics_query_msg(ieee1905_1::CmduMessageTx &cmdu_tx, db &database,
+                                              const sMacAddr &sta_mac);
 
 private:
     static bool
