@@ -40,6 +40,7 @@
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
 #include <tlvf/wfa_map/tlvClientAssociationControlRequest.h>
 #include <tlvf/wfa_map/tlvClientAssociationEvent.h>
+#include <tlvf/wfa_map/tlvHigherLayerData.h>
 #include <tlvf/wfa_map/tlvMetricReportingPolicy.h>
 #include <tlvf/wfa_map/tlvOperatingChannelReport.h>
 #include <tlvf/wfa_map/tlvSteeringBTMReport.h>
@@ -355,6 +356,8 @@ bool slave_thread::handle_cmdu_control_ieee1905_1_message(Socket *sd,
         return handle_client_association_request(sd, cmdu_rx);
     case ieee1905_1::eMessageType::CLIENT_STEERING_REQUEST_MESSAGE:
         return handle_client_steering_request(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE:
+        return handle_1905_higher_layer_data_message(*sd, cmdu_rx);
     case ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE:
         return handle_multi_ap_policy_config_request(sd, cmdu_rx);
 
@@ -4195,6 +4198,38 @@ bool slave_thread::handle_client_association_request(Socket *sd, ieee1905_1::Cmd
     }
 
     LOG(DEBUG) << "sending ACK message back to controller";
+    return send_cmdu_to_controller(cmdu_tx);
+}
+
+bool slave_thread::handle_1905_higher_layer_data_message(Socket &sd,
+                                                         ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    // Only one backhaul manager (the slave) should return ACK for higher layer data message.
+    if (is_backhaul_manager) {
+        return true;
+    }
+
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Received HIGHER_LAYER_DATA_MESSAGE , mid=" << std::hex << int(mid);
+
+    auto tlvHigherLayerData = cmdu_rx.getClass<wfa_map::tlvHigherLayerData>();
+    if (!tlvHigherLayerData) {
+        LOG(ERROR) << "addClass wfa_map::tlvHigherLayerData failed";
+        return false;
+    }
+
+    const auto protocol       = tlvHigherLayerData->protocol();
+    const auto payload_length = tlvHigherLayerData->payload_length();
+    LOG(DEBUG) << "Protocol: " << std::hex << int(protocol);
+    LOG(DEBUG) << "Payload-Length: " << std::hex << int(payload_length);
+
+    // Build ACK message CMDU
+    auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
+    if (!cmdu_tx_header) {
+        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
+        return false;
+    }
+    LOG(DEBUG) << "Sending ACK message to the originator, mid=" << std::hex << int(mid);
     return send_cmdu_to_controller(cmdu_tx);
 }
 

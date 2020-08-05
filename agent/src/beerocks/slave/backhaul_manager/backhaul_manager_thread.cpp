@@ -83,7 +83,6 @@
 #include <tlvf/wfa_map/tlvClientCapabilityReport.h>
 #include <tlvf/wfa_map/tlvClientInfo.h>
 #include <tlvf/wfa_map/tlvErrorCode.h>
-#include <tlvf/wfa_map/tlvHigherLayerData.h>
 #include <tlvf/wfa_map/tlvMetricReportingPolicy.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
 #include <tlvf/wfa_map/tlvStaMacAddressType.h>
@@ -2091,9 +2090,6 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
     case ieee1905_1::eMessageType::AP_CAPABILITY_QUERY_MESSAGE: {
         return handle_ap_capability_query(cmdu_rx, src_mac);
     }
-    case ieee1905_1::eMessageType::HIGHER_LAYER_DATA_MESSAGE: {
-        return handle_1905_higher_layer_data_message(cmdu_rx, src_mac);
-    }
     case ieee1905_1::eMessageType::LINK_METRIC_QUERY_MESSAGE: {
         return handle_1905_link_metric_query(cmdu_rx, src_mac);
     }
@@ -2642,34 +2638,6 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
 
     LOG(DEBUG) << "Sending AP_METRICS_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
     return send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, tlvf::mac_to_string(db->bridge.mac));
-}
-
-bool backhaul_manager::handle_1905_higher_layer_data_message(ieee1905_1::CmduMessageRx &cmdu_rx,
-                                                             const std::string &src_mac)
-{
-    const auto mid = cmdu_rx.getMessageId();
-    LOG(DEBUG) << "Received HIGHER_LAYER_DATA_MESSAGE , mid=" << std::hex << int(mid);
-
-    auto tlvHigherLayerData = cmdu_rx.getClass<wfa_map::tlvHigherLayerData>();
-    if (!tlvHigherLayerData) {
-        LOG(ERROR) << "addClass wfa_map::tlvHigherLayerData failed";
-        return false;
-    }
-
-    const auto protocol       = tlvHigherLayerData->protocol();
-    const auto payload_length = tlvHigherLayerData->payload_length();
-    LOG(DEBUG) << "protocol: " << std::hex << int(protocol);
-    LOG(DEBUG) << "payload_length: " << std::hex << int(payload_length);
-
-    // build ACK message CMDU
-    auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);
-    if (!cmdu_tx_header) {
-        LOG(ERROR) << "cmdu creation of type ACK_MESSAGE, has failed";
-        return false;
-    }
-    LOG(DEBUG) << "sending ACK message to the originator, mid=" << std::hex << int(mid);
-    auto db = AgentDB::get();
-    return send_cmdu_to_broker(cmdu_tx, src_mac, tlvf::mac_to_string(db->bridge.mac));
 }
 
 bool backhaul_manager::handle_1905_link_metric_query(ieee1905_1::CmduMessageRx &cmdu_rx,
