@@ -90,6 +90,7 @@ public:
             char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
             char pass[beerocks::message::WIFI_PASS_MAX_LENGTH];
             char security_type[beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH];
+            uint8_t mem_only_psk;
         } back_radio;
 
         bool local_gw;
