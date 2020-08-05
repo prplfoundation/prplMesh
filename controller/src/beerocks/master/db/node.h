@@ -284,7 +284,7 @@ public:
     // If enabled, the client will be steered to the initial radio it connected to - save at client_initial_radio.
     eTriStateBool client_stay_on_initial_radio = eTriStateBool::NOT_CONFIGURED;
 
-    // The client_initial_radio bssid must be set.
+    // The client_initial_radio mac must be set, default value is network_utils::ZERO_MAC.
     sMacAddr client_initial_radio;
 
     // If enabled, the client will be steered to pre-selected-bands defined by client_selected_bands.
