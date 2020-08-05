@@ -45,7 +45,7 @@ class PrplMeshCompose(PrplMeshBase):
 
         if self.role == "controller":
             self._docker_compose(["-d", "--name", self.name, "controller"],
-                                 "run", "start-controller")
+                                 "run", "start-controller-agent")
             time.sleep(self.delay)
             self.controller_entity = \
                 ALEntityDocker(self.name, device=self, is_controller=True, compose=True)
@@ -110,3 +110,7 @@ class PrplMeshCompose(PrplMeshBase):
 
         """
         return True
+
+    def prprlmesh_status_check(self):
+        return True
+
