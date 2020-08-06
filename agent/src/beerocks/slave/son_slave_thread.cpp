@@ -2976,7 +2976,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
 
         request->sta_iface_filter_low() = config.backhaul_wireless_iface_filter_low;
         request->onboarding()           = platform_settings.onboarding;
-        request->certification_mode()   = platform_settings.certification_mode;
+        request->certification_mode()   = db->device_conf.certification_mode;
 
         LOG(INFO) << "ACTION_BACKHAUL_REGISTER_REQUEST "
                   << " hostap_iface=" << request->hostap_iface(message::IFACE_NAME_LENGTH)
