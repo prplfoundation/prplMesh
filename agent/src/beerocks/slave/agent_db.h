@@ -102,6 +102,7 @@ public:
         uint8_t operating_mode;
         uint8_t management_mode;
         uint8_t certification_mode;
+        uint8_t stop_on_failure_attempts;
     } device_conf;
 
     /** 
