@@ -195,8 +195,7 @@ static bool fill_platform_settings(
     msg->platform_settings().dfs_reentry_enabled = uint8_t(platform_common_conf.dfs_reentry);
     msg->platform_settings().rdkb_extensions_enabled =
         uint8_t(platform_common_conf.rdkb_extensions);
-    msg->platform_settings().client_band_steering_enabled =
-        uint8_t(platform_common_conf.band_steering);
+    db->device_conf.client_band_steering_enabled = uint8_t(platform_common_conf.band_steering);
     msg->platform_settings().client_optimal_path_roaming_enabled =
         uint8_t(platform_common_conf.client_roaming);
     msg->platform_settings().client_optimal_path_roaming_prefer_signal_strength_enabled =
@@ -220,7 +219,7 @@ static bool fill_platform_settings(
     LOG(DEBUG) << "iface " << iface_name << " settings:";
     LOG(DEBUG) << "onboarding: " << (unsigned)msg->platform_settings().onboarding;
     LOG(DEBUG) << "client_band_steering_enabled: "
-               << (unsigned)msg->platform_settings().client_band_steering_enabled;
+               << (unsigned)db->device_conf.client_band_steering_enabled;
     LOG(DEBUG) << "client_optimal_path_roaming_enabled: "
                << (unsigned)msg->platform_settings().client_optimal_path_roaming_enabled;
     LOG(DEBUG) << "client_optimal_path_roaming_prefer_signal_strength_enabled: "
