@@ -3114,7 +3114,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 platform_to_bwl_security(db->device_conf.back_radio.security_type));
             bh_enable->mem_only_psk() = db->device_conf.back_radio.mem_only_psk;
             bh_enable->backhaul_preferred_radio_band() =
-                platform_settings.backhaul_preferred_radio_band;
+                db->device_conf.back_radio.backhaul_preferred_radio_band;
 
             string_utils::copy_string(bh_enable->wire_iface(message::IFACE_NAME_LENGTH),
                                       db->ethernet.iface_name.c_str(), message::IFACE_NAME_LENGTH);
