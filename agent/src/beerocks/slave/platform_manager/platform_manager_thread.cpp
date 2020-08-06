@@ -192,7 +192,7 @@ static bool fill_platform_settings(
                                 platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY_WISP);
 
     msg->platform_settings().onboarding          = uint8_t(platform_common_conf.onboarding);
-    msg->platform_settings().dfs_reentry_enabled = uint8_t(platform_common_conf.dfs_reentry);
+    db->device_conf.dfs_reentry_enabled = uint8_t(platform_common_conf.dfs_reentry);
     msg->platform_settings().rdkb_extensions_enabled =
         uint8_t(platform_common_conf.rdkb_extensions);
     db->device_conf.client_band_steering_enabled = uint8_t(platform_common_conf.band_steering);
@@ -227,7 +227,7 @@ static bool fill_platform_settings(
     LOG(DEBUG) << "band_enabled: " << (unsigned)msg->wlan_settings().band_enabled;
     LOG(DEBUG) << "local_gw: " << db->device_conf.local_gw;
     LOG(DEBUG) << "local_controller: " << db->device_conf.local_controller;
-    LOG(DEBUG) << "dfs_reentry_enabled: " << (unsigned)msg->platform_settings().dfs_reentry_enabled;
+    LOG(DEBUG) << "dfs_reentry_enabled: " << (unsigned)db->device_conf.dfs_reentry_enabled;
     LOG(DEBUG) << "backhaul_preferred_radio_band: "
                << (unsigned)db->device_conf.back_radio.backhaul_preferred_radio_band;
     LOG(DEBUG) << "rdkb_extensions: " << (unsigned)msg->platform_settings().rdkb_extensions_enabled;
