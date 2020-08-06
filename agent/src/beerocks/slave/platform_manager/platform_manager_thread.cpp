@@ -213,8 +213,8 @@ static bool fill_platform_settings(
     db->device_conf.back_radio.backhaul_preferred_radio_band =
         uint8_t(bpl_band_to_freq_type(platform_common_conf.backhaul_preferred_radio_band));
 
-    db->device_conf.load_balancing_enabled            = 0; // for v1.3 TODO read from CAL DB
-    msg->platform_settings().service_fairness_enabled = 0; // for v1.3 TODO read from CAL DB
+    db->device_conf.load_balancing_enabled   = 0; // for v1.3 TODO read from CAL DB
+    db->device_conf.service_fairness_enabled = 0; // for v1.3 TODO read from CAL DB
 
     LOG(DEBUG) << "iface " << iface_name << " settings:";
     LOG(DEBUG) << "onboarding: " << (unsigned)msg->platform_settings().onboarding;
