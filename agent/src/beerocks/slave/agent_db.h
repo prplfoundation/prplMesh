@@ -109,6 +109,7 @@ public:
         uint8_t dfs_reentry_enabled;
         uint8_t client_optimal_path_roaming_prefer_signal_strength_enabled;
         uint8_t client_11k_roaming_enabled;
+        uint8_t load_balancing_enabled;
     } device_conf;
 
     /** 
