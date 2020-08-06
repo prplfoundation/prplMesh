@@ -211,7 +211,7 @@ static bool fill_platform_settings(
     db->device_conf.back_radio.backhaul_max_vaps = uint8_t(platform_common_conf.backhaul_max_vaps);
     db->device_conf.back_radio.backhaul_network_enabled =
         uint8_t(platform_common_conf.backhaul_network_enabled);
-    msg->platform_settings().backhaul_preferred_radio_band =
+    db->device_conf.back_radio.backhaul_preferred_radio_band =
         uint8_t(bpl_band_to_freq_type(platform_common_conf.backhaul_preferred_radio_band));
 
     msg->platform_settings().load_balancing_enabled   = 0; // for v1.3 TODO read from CAL DB
@@ -231,7 +231,7 @@ static bool fill_platform_settings(
     LOG(DEBUG) << "local_controller: " << db->device_conf.local_controller;
     LOG(DEBUG) << "dfs_reentry_enabled: " << (unsigned)msg->platform_settings().dfs_reentry_enabled;
     LOG(DEBUG) << "backhaul_preferred_radio_band: "
-               << (unsigned)msg->platform_settings().backhaul_preferred_radio_band;
+               << (unsigned)db->device_conf.back_radio.backhaul_preferred_radio_band;
     LOG(DEBUG) << "rdkb_extensions: " << (unsigned)msg->platform_settings().rdkb_extensions_enabled;
 
     return true;

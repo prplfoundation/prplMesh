@@ -1857,13 +1857,14 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
                         static_cast<bwl::WiFiSec>(db->device_conf.back_radio.security_type_bwl);
 
                     m_sConfig.mem_only_psk = db->device_conf.back_radio.mem_only_psk;
-                    if (request->backhaul_preferred_radio_band() ==
+                    if (db->device_conf.back_radio.backhaul_preferred_radio_band ==
                         beerocks::eFreqType::FREQ_UNKNOWN) {
                         LOG(DEBUG) << "Unknown backhaul preferred radio band, setting to auto";
                         m_sConfig.backhaul_preferred_radio_band = beerocks::eFreqType::FREQ_AUTO;
                     } else {
                         m_sConfig.backhaul_preferred_radio_band =
-                            (beerocks::eFreqType)request->backhaul_preferred_radio_band();
+                            (beerocks::eFreqType)
+                                db->device_conf.back_radio.backhaul_preferred_radio_band;
                     }
 
                     // Change mixed state to WPA2

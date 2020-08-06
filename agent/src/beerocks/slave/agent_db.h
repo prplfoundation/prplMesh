@@ -94,6 +94,7 @@ public:
             uint8_t mem_only_psk;
             uint8_t backhaul_max_vaps;
             uint8_t backhaul_network_enabled;
+            uint8_t backhaul_preferred_radio_band;
         } back_radio;
 
         bool local_gw;
