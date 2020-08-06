@@ -3947,7 +3947,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     // All EasyMesh VAPs will be stored in the platform DB.
     // All other VAPs are manual, AKA should not be modified by prplMesh
     ////////////////////////////////////////////////////////////////////
-    if (platform_settings.management_mode != BPL_MGMT_MODE_NOT_MULTIAP) {
+    if (db->device_conf.management_mode != BPL_MGMT_MODE_NOT_MULTIAP) {
         message_com::send_cmdu(ap_manager_socket, cmdu_tx);
     } else {
         LOG(WARNING) << "non-EasyMesh mode - skip updating VAP credentials";
@@ -4710,7 +4710,7 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
     // and in this case don't switch channel
     //
     ////////////////////////////////////////////////////////////////////
-    if (platform_settings.management_mode != BPL_MGMT_MODE_NOT_MULTIAP) {
+    if (db->device_conf.management_mode != BPL_MGMT_MODE_NOT_MULTIAP) {
         message_com::send_cmdu(ap_manager_socket, cmdu_tx);
     } else {
         LOG(WARNING) << "non-EasyMesh mode - skip channel switch";
