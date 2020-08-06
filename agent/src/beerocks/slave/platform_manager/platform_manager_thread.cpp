@@ -191,13 +191,14 @@ static bool fill_platform_settings(
     db->device_conf.local_gw = (platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY ||
                                 platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY_WISP);
 
-    msg->platform_settings().onboarding          = uint8_t(platform_common_conf.onboarding);
+    msg->platform_settings().onboarding = uint8_t(platform_common_conf.onboarding);
     db->device_conf.dfs_reentry_enabled = uint8_t(platform_common_conf.dfs_reentry);
     msg->platform_settings().rdkb_extensions_enabled =
         uint8_t(platform_common_conf.rdkb_extensions);
     db->device_conf.client_band_steering_enabled = uint8_t(platform_common_conf.band_steering);
-    db->device_conf.client_optimal_path_roaming_enabled = uint8_t(platform_common_conf.client_roaming);
-    msg->platform_settings().client_optimal_path_roaming_prefer_signal_strength_enabled =
+    db->device_conf.client_optimal_path_roaming_enabled =
+        uint8_t(platform_common_conf.client_roaming);
+    db->device_conf.client_optimal_path_roaming_prefer_signal_strength_enabled =
         0; // TODO add platform DB flag
     msg->platform_settings().client_11k_roaming_enabled =
         uint8_t(platform_common_conf.client_roaming || platform_common_conf.band_steering);
@@ -222,8 +223,8 @@ static bool fill_platform_settings(
     LOG(DEBUG) << "client_optimal_path_roaming_enabled: "
                << (unsigned)db->device_conf.client_optimal_path_roaming_enabled;
     LOG(DEBUG) << "client_optimal_path_roaming_prefer_signal_strength_enabled: "
-               << (unsigned)msg->platform_settings()
-                      .client_optimal_path_roaming_prefer_signal_strength_enabled;
+               << (unsigned)
+                      db->device_conf.client_optimal_path_roaming_prefer_signal_strength_enabled;
     LOG(DEBUG) << "band_enabled: " << (unsigned)msg->wlan_settings().band_enabled;
     LOG(DEBUG) << "local_gw: " << db->device_conf.local_gw;
     LOG(DEBUG) << "local_controller: " << db->device_conf.local_controller;
