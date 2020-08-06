@@ -103,7 +103,6 @@ public:
         uint8_t management_mode;
         uint8_t certification_mode;
         uint8_t stop_on_failure_attempts;
-
         uint8_t client_band_steering_enabled;
         uint8_t client_optimal_path_roaming_enabled;
         uint8_t dfs_reentry_enabled;
@@ -111,6 +110,7 @@ public:
         uint8_t client_11k_roaming_enabled;
         uint8_t load_balancing_enabled;
         uint8_t service_fairness_enabled;
+        uint8_t rdkb_extensions_enabled;
     } device_conf;
 
     /** 
