@@ -208,7 +208,7 @@ static bool fill_platform_settings(
     msg->platform_settings().certification_mode = uint8_t(platform_common_conf.certification_mode);
     msg->platform_settings().stop_on_failure_attempts =
         uint8_t(platform_common_conf.stop_on_failure_attempts);
-    msg->platform_settings().backhaul_max_vaps = uint8_t(platform_common_conf.backhaul_max_vaps);
+    db->device_conf.back_radio.backhaul_max_vaps = uint8_t(platform_common_conf.backhaul_max_vaps);
     msg->platform_settings().backhaul_network_enabled =
         uint8_t(platform_common_conf.backhaul_network_enabled);
     msg->platform_settings().backhaul_preferred_radio_band =
