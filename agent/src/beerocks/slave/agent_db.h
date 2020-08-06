@@ -99,6 +99,7 @@ public:
         bool local_gw;
         bool local_controller;
         uint8_t operating_mode;
+        uint8_t management_mode;
     } device_conf;
 
     /** 
