@@ -200,7 +200,7 @@ static bool fill_platform_settings(
         uint8_t(platform_common_conf.client_roaming);
     db->device_conf.client_optimal_path_roaming_prefer_signal_strength_enabled =
         0; // TODO add platform DB flag
-    msg->platform_settings().client_11k_roaming_enabled =
+    db->device_conf.client_11k_roaming_enabled =
         uint8_t(platform_common_conf.client_roaming || platform_common_conf.band_steering);
     db->device_conf.operating_mode     = uint8_t(platform_common_conf.operating_mode);
     db->device_conf.management_mode    = uint8_t(platform_common_conf.management_mode);
