@@ -209,7 +209,7 @@ static bool fill_platform_settings(
     msg->platform_settings().stop_on_failure_attempts =
         uint8_t(platform_common_conf.stop_on_failure_attempts);
     db->device_conf.back_radio.backhaul_max_vaps = uint8_t(platform_common_conf.backhaul_max_vaps);
-    msg->platform_settings().backhaul_network_enabled =
+    db->device_conf.back_radio.backhaul_network_enabled =
         uint8_t(platform_common_conf.backhaul_network_enabled);
     msg->platform_settings().backhaul_preferred_radio_band =
         uint8_t(bpl_band_to_freq_type(platform_common_conf.backhaul_preferred_radio_band));
