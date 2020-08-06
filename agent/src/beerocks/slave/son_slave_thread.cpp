@@ -3713,7 +3713,7 @@ bool slave_thread::autoconfig_wsc_parse_m2_encrypted_settings(WSC::m2 &m2, uint8
     }
 
     LOG(DEBUG) << "M2 Parse: parse config_data, len = " << datalen;
-
+    LOG(DEBUG) << "encrypted settings:\n" << utils::dump_buffer(decrypted, datalen);
     // Parsing failure means that the config data is invalid,
     // in which case it is unclear what we should do.
     // In practice, some controllers simply send an empty config data
