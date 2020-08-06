@@ -106,6 +106,7 @@ public:
 
         uint8_t client_band_steering_enabled;
         uint8_t client_optimal_path_roaming_enabled;
+        uint8_t dfs_reentry_enabled;
     } device_conf;
 
     /** 
