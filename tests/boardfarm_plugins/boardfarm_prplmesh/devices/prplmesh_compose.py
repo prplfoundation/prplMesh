@@ -34,7 +34,8 @@ class PrplMeshCompose(PrplMeshBase):
         self.unique_id = os.getenv("RUN_ID")
         self.user_id = os.getenv("SUDO_USER", os.getenv("USER", ""))
 
-        self.name = "-".join((config.get("name", "prplmesh_compose"), self.unique_id))
+        self.docker_name = "-".join((config.get("name", "prplmesh_compose"), self.unique_id))
+        self.name = config.get("name", "prplmesh_compose")
         print('config.get("name") {}'.format(config.get("name")))
         # self.name = config.get("name")
         self.role = config.get("role", "agent")
