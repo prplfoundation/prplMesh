@@ -1336,9 +1336,8 @@ bool slave_thread::handle_cmdu_platform_manager_message(
                 db->ethernet.mac = network_utils::ZERO_MAC;
             }
 
-            configuration_stop_on_failure_attempts =
-                response->platform_settings().stop_on_failure_attempts;
-            stop_on_failure_attempts = configuration_stop_on_failure_attempts;
+            configuration_stop_on_failure_attempts = db->device_conf.stop_on_failure_attempts;
+            stop_on_failure_attempts               = configuration_stop_on_failure_attempts;
 
             LOG(TRACE) << "goto STATE_CONNECT_TO_BACKHAUL_MANAGER";
             slave_state = STATE_CONNECT_TO_BACKHAUL_MANAGER;
