@@ -105,6 +105,7 @@ public:
         uint8_t stop_on_failure_attempts;
 
         uint8_t client_band_steering_enabled;
+        uint8_t client_optimal_path_roaming_enabled;
     } device_conf;
 
     /** 
