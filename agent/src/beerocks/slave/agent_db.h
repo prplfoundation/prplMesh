@@ -102,6 +102,8 @@ public:
         uint8_t management_mode;
         uint8_t certification_mode;
         uint8_t stop_on_failure_attempts;
+
+        uint8_t client_band_steering_enabled;
     } device_conf;
 
     /** 
