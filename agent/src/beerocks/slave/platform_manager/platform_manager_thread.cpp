@@ -191,10 +191,9 @@ static bool fill_platform_settings(
     db->device_conf.local_gw = (platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY ||
                                 platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY_WISP);
 
-    msg->platform_settings().onboarding = uint8_t(platform_common_conf.onboarding);
-    db->device_conf.dfs_reentry_enabled = uint8_t(platform_common_conf.dfs_reentry);
-    msg->platform_settings().rdkb_extensions_enabled =
-        uint8_t(platform_common_conf.rdkb_extensions);
+    msg->platform_settings().onboarding          = uint8_t(platform_common_conf.onboarding);
+    db->device_conf.dfs_reentry_enabled          = uint8_t(platform_common_conf.dfs_reentry);
+    db->device_conf.rdkb_extensions_enabled      = uint8_t(platform_common_conf.rdkb_extensions);
     db->device_conf.client_band_steering_enabled = uint8_t(platform_common_conf.band_steering);
     db->device_conf.client_optimal_path_roaming_enabled =
         uint8_t(platform_common_conf.client_roaming);
@@ -231,7 +230,7 @@ static bool fill_platform_settings(
     LOG(DEBUG) << "dfs_reentry_enabled: " << (unsigned)db->device_conf.dfs_reentry_enabled;
     LOG(DEBUG) << "backhaul_preferred_radio_band: "
                << (unsigned)db->device_conf.back_radio.backhaul_preferred_radio_band;
-    LOG(DEBUG) << "rdkb_extensions: " << (unsigned)msg->platform_settings().rdkb_extensions_enabled;
+    LOG(DEBUG) << "rdkb_extensions: " << (unsigned)db->device_conf.rdkb_extensions_enabled;
 
     return true;
 }
