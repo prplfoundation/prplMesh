@@ -93,6 +93,7 @@ public:
             uint32_t security_type_bwl;
             uint8_t mem_only_psk;
             uint8_t backhaul_max_vaps;
+            uint8_t backhaul_network_enabled;
         } back_radio;
 
         bool local_gw;
