@@ -45,13 +45,13 @@ class PrplMeshCompose(PrplMeshBase):
         self.docker_network = "boardfarm-ci_default"
 
         if self.role == "controller":
-            self._docker_compose(["-d", "--name", self.name, "controller"],
+            self._docker_compose(["-d", "--name", self.docker_name, "controller"],
                                  "run", "start-controller-agent")
             time.sleep(self.delay)
             self.controller_entity = \
                 ALEntityDocker(self.name, device=self, is_controller=True, compose=True)
         else:
-            self._docker_compose(["-d", "--name", self.name, "agent"],
+            self._docker_compose(["-d", "--name", self.docker_name, "agent"],
                                  "run", "start-agent")
             time.sleep(self.delay)
             self.agent_entity = ALEntityDocker(self.name, device=self, is_controller=False, compose=True)
@@ -65,7 +65,7 @@ class PrplMeshCompose(PrplMeshBase):
         yml_path = "tools/docker/boardfarm-ci/docker-compose.yml"
         full_args = ["-f", os.path.join(rootdir, yml_path)]
         if parameter == "run":
-            log_path = os.path.join(rootdir, "logs/{}".format(self.name))
+            log_path = os.path.join(rootdir, "logs/{}".format(self.docker_name))
             if not os.path.exists(log_path):
                 os.mkdir(log_path)
 
@@ -90,9 +90,9 @@ class PrplMeshCompose(PrplMeshBase):
             self._run_shell_cmd("/usr/local/bin/docker-compose", full_args)
 
     def __del__(self):
-        # self._docker_compose(["stop", self.name])
-        self._run_shell_cmd("docker", ["stop", self.name])
-        self._run_shell_cmd("docker", ["container", "rm", "-f", self.name])
+        # self._docker_compose(["stop", self.name
+        self._run_shell_cmd("docker", ["stop", self.docker_name])
+        self._run_shell_cmd("docker", ["container", "rm", "-f", self.docker_name])
 
     def check_status(self):
         """Method required by boardfarm.
