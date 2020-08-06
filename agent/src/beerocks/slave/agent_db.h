@@ -101,6 +101,7 @@ public:
         bool local_controller;
         uint8_t operating_mode;
         uint8_t management_mode;
+        uint8_t certification_mode;
     } device_conf;
 
     /** 
