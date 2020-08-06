@@ -4320,25 +4320,15 @@ bool slave_thread::handle_client_steering_request(Socket *sd, ieee1905_1::CmduMe
 
 bool slave_thread::handle_beacon_metrics_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    auto mid = cmdu_rx.getMessageId();
-    LOG(DEBUG) << "Received BEACON_METRICS_QUERY_MESSAGE, mid=" << std::hex << int(mid);
-
-    // create vs message
-    auto request_out =
-        message_com::create_vs_message<beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_REQUEST>(
-            cmdu_tx, mid);
-    if (request_out == nullptr) {
-        LOG(ERROR) << "Failed building ACTION_MONITOR_CLIENT_BEACON_11K_REQUEST message!";
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Forwarding BEACON_METRICS_QUERY_MESSAGE to monitor_socket, mid=" << std::hex
+               << int(mid);
+    uint16_t length = message_com::get_uds_header(cmdu_rx)->length;
+    cmdu_rx.swap(); // swap back before forwarding
+    if (!message_com::forward_cmdu_to_uds(monitor_socket, cmdu_rx, length)) {
+        LOG(ERROR) << "Failed forwarding BEACON_METRICS_QUERY_MESSAGE message to monitor_socket";
         return false;
     }
-
-    if (!gate::load(request_out, cmdu_rx)) {
-        LOG(ERROR) << "faild translating 1905 message to vs message";
-        return false;
-    }
-
-    message_com::send_cmdu(monitor_socket, cmdu_tx);
-
     return true;
 }
 
