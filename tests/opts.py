@@ -8,7 +8,7 @@
 
 class opts:
     '''Static class that encodes the global options.'''
-    verbose = False
+    verbose = True
     tcpdump_dir = ''
     stop_on_failure = False
 
