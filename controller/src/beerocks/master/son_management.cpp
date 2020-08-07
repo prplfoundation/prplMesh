@@ -387,42 +387,53 @@ void son_management::handle_cli_message(Socket *sd,
         auto agent_mac         = database.get_node_parent_ire(hostap_mac);
         LOG(DEBUG) << "CLI beacon request for " << client_mac << " to " << hostap_mac;
 
-        auto request = message_com::create_vs_message<
-            beerocks_message::cACTION_CONTROL_CLIENT_BEACON_11K_REQUEST>(cmdu_tx);
-        if (request == nullptr) {
-            LOG(ERROR) << "Failed building ACTION_CONTROL_CLIENT_BEACON_11K_REQUEST message!";
+        auto beacon_metrics_request =
+            cmdu_tx.create(0, ieee1905_1::eMessageType::BEACON_METRICS_QUERY_MESSAGE);
+        if (!beacon_metrics_request) {
+            LOG(ERROR) << "Failed create BEACON_METRICS_QUERY_MESSAGE";
             isOK = false;
             break;
         }
-        //TODO: set params values
-        request->params().measurement_mode =
-            cli_request
-                ->measurement_mode(); // son::eWiFiMeasurementMode11K. Should be replaced with string "passive"/"active"/"table"
-        request->params().channel  = cli_request->channel();
-        request->params().op_class = cli_request->op_class();
-        request->params().repeats =
-            cli_request
-                ->repeats(); // '0' = once, '65535' = repeats until cancel request, other (1-65534) = specific num of repeats
-        request->params().rand_ival =
-            cli_request
-                ->rand_ival(); // random interval - specifies the upper bound of the random delay to be used prior to making the measurement, expressed in units of TUs [=1024usec]
-        request->params().duration =
-            cli_request->duration(); // measurement duration, expressed in units of TUs [=1024usec]
-        request->params().sta_mac = cli_request->client_mac();
-        request->params().bssid =
-            cli_request
-                ->bssid(); // the bssid which will be reported. for all bssid, use wildcard "ff:ff:ff:ff:ff:ff"
 
-        request->params().expected_reports_count = 1;
+        auto beacon_metrics_request_tlv = cmdu_tx.addClass<wfa_map::tlvBeaconMetricsQuery>();
 
-        // Optional:
-        if (cli_request->use_optional_ssid()) {
-            request->params().use_optional_ssid = 1; // bool
-            string_utils::copy_string(request->params().ssid, (char *)cli_request->ssid(),
-                                      beerocks::message::WIFI_SSID_MAX_LENGTH);
-        } else {
-            request->params().use_optional_ssid = 0;
+        if (!beacon_metrics_request_tlv) {
+            LOG(ERROR) << "Failed create BEACON_METRICS_QUERY_MESSAGE";
+            isOK = false;
+            break;
         }
+        beacon_metrics_request_tlv->associated_sta_mac() = cli_request->client_mac();
+
+        beacon_metrics_request_tlv->operating_class()        = cli_request->op_class();
+        beacon_metrics_request_tlv->channel_number()         = cli_request->channel();
+        beacon_metrics_request_tlv->bssid()                  = cli_request->bssid();
+        beacon_metrics_request_tlv->reporting_detail_value() = 1;
+        beacon_metrics_request_tlv->ssid_length() = beerocks::message::WIFI_SSID_MAX_LENGTH;
+
+        if (!beacon_metrics_request_tlv->alloc_ssid(beerocks::message::WIFI_SSID_MAX_LENGTH)) {
+            LOG(ERROR) << "Couldn't allocate memory for SSID.";
+            isOK = false;
+            break;
+        }
+
+        beacon_metrics_request_tlv->set_ssid((char *)cli_request->ssid());
+
+        if (beacon_metrics_request_tlv->channel_number() != 255) {
+
+            // If the value of Channel Number field is not set to 255,
+            // h (ap_channel_reports_num) is set to 0.
+            beacon_metrics_request_tlv->ap_channel_reports_num() = 0;
+        } else {
+            // TODO: If the value of the Number of AP Channel Reports field (h)
+            //       in the query is greater than zero and the value of the
+            //       Channel Number field in the query is 255, then h AP Channel
+            //       Report subelements shall be included in the 802.11 Beacon request,
+            //       each containing thespecified Operating Class and Channel List.
+            LOG(DEBUG) << "Unsupported condition: channel_number == 255";
+        }
+
+        // TODO: find the correct value for elemnt_id_list_length()
+        beacon_metrics_request_tlv->elemnt_id_list_length() = 0;
 
         const auto parent_radio = database.get_node_parent_radio(hostap_mac);
         son_actions::send_cmdu_to_agent(agent_mac, cmdu_tx, database, parent_radio);
