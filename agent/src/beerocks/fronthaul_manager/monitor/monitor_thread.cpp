@@ -19,6 +19,7 @@
 
 #include <tlvf/wfa_map/tlvApMetricQuery.h>
 #include <tlvf/wfa_map/tlvBeaconMetricsQuery.h>
+#include <tlvf/wfa_map/tlvBeaconMetricsResponse.h>
 
 #include <cmath>
 #include <vector>
@@ -656,6 +657,33 @@ bool monitor_thread::create_ap_metrics_response(uint16_t mid,
             }
         }
     }
+
+    return true;
+}
+
+bool monitor_thread::create_beacon_metrics_response(uint16_t mid,
+                                                    const bwl::SBeaconResponse11k &hal_data)
+{
+    auto beacon_response =
+        cmdu_tx.create(mid, ieee1905_1::eMessageType::BEACON_METRICS_RESPONSE_MESSAGE);
+
+    if (!beacon_response) {
+        LOG(ERROR) << "Failed to create BEACON_METRICS_RESPONSE_MESSAGE";
+        return false;
+    }
+
+    auto beacon_metrics_response_tlv = cmdu_tx.addClass<wfa_map::tlvBeaconMetricsResponse>();
+
+    if (!beacon_metrics_response_tlv) {
+        LOG(ERROR) << "Failed addClass<wfa_map::tlvBeaconMetricsResponse>";
+        return false;
+    }
+
+    // TODO: Add filling up the correct data according to the specification.
+
+    std::copy_n(hal_data.sta_mac.oct, sizeof(hal_data.sta_mac.oct),
+                beacon_metrics_response_tlv->associated_sta_mac().oct);
+    beacon_response->finalize();
 
     return true;
 }
