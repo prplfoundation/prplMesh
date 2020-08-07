@@ -146,6 +146,7 @@ private:
 
     bool handle_multi_ap_policy_config_request(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_ap_metrics_query(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_beacon_metrics_query(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 };
 } // namespace son
 

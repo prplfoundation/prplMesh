@@ -18,6 +18,7 @@
 #include <beerocks/tlvf/beerocks_message.h>
 
 #include <tlvf/wfa_map/tlvApMetricQuery.h>
+#include <tlvf/wfa_map/tlvBeaconMetricsQuery.h>
 
 #include <cmath>
 #include <vector>
@@ -1381,6 +1382,8 @@ bool monitor_thread::handle_cmdu_ieee1905_1_message(Socket &sd, ieee1905_1::Cmdu
         return handle_ap_metrics_query(sd, cmdu_rx);
     case ieee1905_1::eMessageType::MULTI_AP_POLICY_CONFIG_REQUEST_MESSAGE:
         return handle_multi_ap_policy_config_request(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::BEACON_METRICS_QUERY_MESSAGE:
+        return handle_beacon_metrics_query(sd, cmdu_rx);
     default:
         LOG(ERROR) << "Unknown CMDU message type: " << std::hex << int(cmdu_message_type);
     }
@@ -1478,6 +1481,88 @@ bool monitor_thread::handle_ap_metrics_query(Socket &sd, ieee1905_1::CmduMessage
     LOG(DEBUG) << "Sending AP_METRICS_RESPONSE_MESSAGE to slave_socket, mid=" << std::hex
                << int(mid);
     return message_com::send_cmdu(slave_socket, cmdu_tx);
+}
+
+bool monitor_thread::handle_beacon_metrics_query(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    int dialog_token;
+    auto beacon_metrics_query_tlv = cmdu_rx.getClass<wfa_map::tlvBeaconMetricsQuery>();
+    if (!beacon_metrics_query_tlv) {
+        LOG(ERROR) << "Beacon Metrics Query CMDU mid=" << mid
+                   << " does not have Beacon Metric Query TLV";
+        return false;
+    }
+
+    bwl::SBeaconRequest11k bwl_request;
+
+    bwl_request.measurement_mode = beerocks::MEASURE_MODE_ACTIVE;
+    bwl_request.channel          = beacon_metrics_query_tlv->channel_number();
+    bwl_request.op_class         = beacon_metrics_query_tlv->operating_class();
+    bwl_request.repeats          = 0;
+    bwl_request.rand_ival        = beerocks::BEACON_MEASURE_DEFAULT_RANDOMIZATION_INTERVAL;
+
+    bwl_request.duration = beerocks::BEACON_MEASURE_DEFAULT_ACTIVE_DURATION;
+
+    std::copy_n(beacon_metrics_query_tlv->associated_sta_mac().oct, sizeof(bwl_request.sta_mac.oct),
+                bwl_request.sta_mac.oct);
+
+    std::copy_n(beacon_metrics_query_tlv->bssid().oct, sizeof(bwl_request.bssid.oct),
+                bwl_request.bssid.oct);
+
+    bwl_request.parallel               = 0;
+    bwl_request.enable                 = 0;
+    bwl_request.request                = 1;
+    bwl_request.report                 = beacon_metrics_query_tlv->reporting_detail_value();
+    bwl_request.mandatory_duration     = 0;
+    bwl_request.expected_reports_count = 1;
+    bwl_request.use_optional_ssid      = 0;
+
+    auto ap_ch_report_length = beacon_metrics_query_tlv->ap_channel_reports_list_length();
+
+    if (ap_ch_report_length != 0 && bwl_request.channel != 255) {
+        LOG(ERROR) << "inconsistency between channel report length and channel number. please take "
+                      "look at the specification. v1 17.2.27";
+        return false;
+    }
+
+    if (ap_ch_report_length > 1) {
+        // the reason we support only 1 channel list is that the hostapd does not support more
+        // there is no way to tell it for which operating class which channels to use
+        LOG(ERROR)
+            << "too many channles requested (the maximum is 237, current support is only for 1): "
+            << +ap_ch_report_length;
+        return false;
+    }
+
+    // we support only one
+    if (1 == ap_ch_report_length) {
+
+        // get the first (and currently only) structure from the list
+        auto channel = beacon_metrics_query_tlv->ap_channel_reports_list(0);
+        if (!std::get<0>(channel)) {
+            LOG(ERROR) << "there should be a structure at index 0, but it wasn't found";
+            return false;
+        }
+
+        // the number of channels, excluding the first operating class
+        bwl_request.use_optional_ap_ch_report =
+            std::get<1>(channel).ap_channel_report_list_length() - 1;
+
+        // the first index in the tlv's channel-report-list is the operating class,
+        // we skip it. using pointer arithmethics and copying one element less from the source (we skip the operation class)
+        for (int idx = 0; idx < bwl_request.use_optional_ap_ch_report; ++idx) {
+            bwl_request.ap_ch_report[idx] = *std::get<1>(channel).ap_channel_report_list(idx + 1);
+        }
+
+        auto request = mon_wlan_hal->sta_beacon_11k_request(bwl_request, dialog_token);
+
+        if (!request) {
+            LOG(ERROR) << "BWL method sta_beacon_11k_request failed.";
+            return false;
+        }
+    }
+    return true;
 }
 
 bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event_ptr)
