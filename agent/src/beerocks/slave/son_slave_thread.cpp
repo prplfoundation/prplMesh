@@ -376,6 +376,8 @@ bool slave_thread::handle_cmdu_monitor_ieee1905_1_message(Socket &sd,
     switch (cmdu_message_type) {
     case ieee1905_1::eMessageType::AP_METRICS_RESPONSE_MESSAGE:
         return handle_monitor_ap_metrics_response(sd, cmdu_rx);
+    case ieee1905_1::eMessageType::BEACON_METRICS_RESPONSE_MESSAGE:
+        return handle_monitor_beacon_metrics_response(sd, cmdu_rx);
     default:
         LOG(ERROR) << "Unknown CMDU message type: " << std::hex << int(cmdu_message_type);
         return false;
@@ -4361,6 +4363,45 @@ bool slave_thread::handle_monitor_ap_metrics_response(Socket &sd,
     }
 
     return true;
+}
+
+bool slave_thread::handle_monitor_beacon_metrics_response(Socket &sd,
+                                                          ieee1905_1::CmduMessageRx &cmdu_rx)
+{
+    const auto mid = cmdu_rx.getMessageId();
+    LOG(DEBUG) << "Forwarding BEACON_METRICS_RESPONSE_MESSAGE to controller, mid=" << std::hex
+               << int(mid);
+
+    auto monitor_beacon_response = cmdu_rx.getClass<wfa_map::tlvBeaconMetricsResponse>();
+
+    if (!monitor_beacon_response) {
+        LOG(ERROR) << "Failed getClass<wfa_map::tlvBeaconMetricsResponse>";
+        return false;
+    }
+
+    auto beacon_response =
+        cmdu_tx.create(mid, ieee1905_1::eMessageType::BEACON_METRICS_RESPONSE_MESSAGE);
+
+    if (!beacon_response) {
+        LOG(ERROR) << "Failed to create BEACON_METRICS_RESPONSE_MESSAGE";
+        return false;
+    }
+
+    auto beacon_metrics_response_tlv = cmdu_tx.addClass<wfa_map::tlvBeaconMetricsResponse>();
+
+    if (!beacon_metrics_response_tlv) {
+        LOG(ERROR) << "Failed addClass<wfa_map::tlvBeaconMetricsResponse>";
+        return false;
+    }
+
+    // TODO: Add filling up the correct data according to the specification.
+
+    beacon_metrics_response_tlv->associated_sta_mac() =
+        monitor_beacon_response->associated_sta_mac();
+
+    beacon_response->finalize();
+
+    return send_cmdu_to_controller(cmdu_tx);
 }
 
 bool slave_thread::handle_channel_preference_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)

@@ -225,6 +225,7 @@ private:
     bool send_operating_channel_report();
     bool handle_ap_metrics_query(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_monitor_ap_metrics_response(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_monitor_beacon_metrics_response(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_channel_preference_query(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_channel_selection_request(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool channel_selection_get_channel_preference(ieee1905_1::CmduMessageRx &cmdu_rx);
