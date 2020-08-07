@@ -481,6 +481,7 @@ bool ap_wlan_hal_nl80211::update_vap_credentials(
                            << " backhaul=" << beerocks::string_utils::bool_str(bss_it->backhaul);
 
                 conf.set_create_vap_value(vap, "ssid", bss_it->ssid);
+                conf.set_create_vap_value(vap, "multi_ap", "3");
                 conf.set_create_vap_value(vap, "wps_state", bss_it->fronthaul ? "2" : "");
                 conf.set_create_vap_value(vap, "wps_independent", "0");
                 conf.set_create_vap_value(vap, "max_num_sta", bss_it->backhaul ? "1" : "");
