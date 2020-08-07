@@ -1681,61 +1681,18 @@ bool monitor_thread::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t event
     case Event::RRM_Beacon_Response: {
 
         auto hal_data = static_cast<bwl::SBeaconResponse11k *>(data);
-        int id        = 0;
         LOG(INFO) << "Received beacon measurement response on BSSID: "
                   << (sMacAddr &)hal_data->bssid
                   << ", dialog_token: " << int(hal_data->dialog_token);
 
-        // TODO: Can be changed to iterator loop?
-        auto event_map = pending_11k_events.equal_range("RRM_EVENT_BEACON_REP_RXED");
-        for (auto it = event_map.first; it != event_map.second;) {
-            if ((it->second.dialog_token == hal_data->dialog_token) ||
-                (hal_data->dialog_token == 0)) {
-
-                id = it->second.id;
-
-                auto response = message_com::create_vs_message<
-                    beerocks_message::cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE>(cmdu_tx, id);
-                if (response == nullptr) {
-                    LOG(ERROR)
-                        << "Failed building cACTION_MONITOR_CLIENT_BEACON_11K_RESPONSE message!";
-                    break;
-                }
-
-                // TODO: TEMPORARY CONVERSION!
-                response->params().channel                  = hal_data->channel;
-                response->params().op_class                 = hal_data->op_class;
-                response->params().dialog_token             = hal_data->dialog_token;
-                response->params().measurement_token        = hal_data->measurement_token;
-                response->params().rep_mode                 = hal_data->rep_mode;
-                response->params().phy_type                 = hal_data->phy_type;
-                response->params().frame_type               = hal_data->frame_type;
-                response->params().rcpi                     = hal_data->rcpi;
-                response->params().rsni                     = hal_data->rsni;
-                response->params().ant_id                   = hal_data->ant_id;
-                response->params().duration                 = hal_data->duration;
-                response->params().parent_tsf               = hal_data->parent_tsf;
-                response->params().start_time               = hal_data->start_time;
-                response->params().new_ch_width             = hal_data->new_ch_width;
-                response->params().new_ch_center_freq_seg_0 = hal_data->new_ch_center_freq_seg_0;
-                response->params().new_ch_center_freq_seg_1 = hal_data->new_ch_center_freq_seg_1;
-                response->params().use_optional_wide_band_ch_switch =
-                    hal_data->use_optional_wide_band_ch_switch;
-                std::copy_n(hal_data->sta_mac.oct, sizeof(response->params().sta_mac.oct),
-                            response->params().sta_mac.oct);
-                std::copy_n(hal_data->bssid.oct, sizeof(response->params().bssid.oct),
-                            response->params().bssid.oct);
-
-                it = pending_11k_events.erase(it);
-                LOG(INFO) << "Sending beacon measurement reponse on BSSID: "
-                          << response->params().bssid << " to task_id: " << id;
-
-                message_com::send_cmdu(slave_socket, cmdu_tx);
-                break;
-            } else {
-                ++it;
-            }
+        if (!create_beacon_metrics_response(0, *hal_data)) {
+            LOG(ERROR) << "Failed create_beacon_metrics_response.";
+            return false;
         }
+
+        LOG(DEBUG) << "Sending BEACON_METRICS_RESPONSE to slave_socket.";
+
+        return message_com::send_cmdu(slave_socket, cmdu_tx);
 
     } break;
 
