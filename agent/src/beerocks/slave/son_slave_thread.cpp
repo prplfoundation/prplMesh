@@ -3666,8 +3666,10 @@ bool slave_thread::autoconfig_wsc_authenticate(WSC::m2 &m2, uint8_t authkey[32])
     // This is the content of M1 and M2, without the type and length.
     uint8_t buf[m1_auth_buf_len + m2.getMessageLength() -
                 WSC::cWscAttrAuthenticator::get_initial_size()];
+    LOG(DEBUG) << "M2 before swapping:\n" << utils::dump_buffer(m2.getMessageBuff(), m2.getMessageBuffLength());
     auto next = std::copy_n(m1_auth_buf, m1_auth_buf_len, buf);
     m2.swap(); //swap to get network byte order
+    LOG(DEBUG) << "M2 after swapping:\n" << utils::dump_buffer(m2.getMessageBuff(), m2.getMessageBuffLength());
     std::copy_n(m2.getMessageBuff(),
                 m2.getMessageLength() - WSC::cWscAttrAuthenticator::get_initial_size(), next);
     m2.swap(); //swap back
