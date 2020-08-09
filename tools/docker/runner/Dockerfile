@@ -32,6 +32,8 @@ RUN apt-get update && apt-get install -y \
 	clang-format \
 	ebtables \
 	netcat \
+    wireshark-common \
+    tshark \
     && rm -rf /var/lib/apt/lists/*
 
 ARG bridgeip

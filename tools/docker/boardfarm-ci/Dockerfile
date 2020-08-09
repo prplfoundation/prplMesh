@@ -14,6 +14,7 @@ RUN apt-get update \
     netcat \
     software-properties-common \
     wireshark-common \
+    tshark \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt /app/requirements.txt
