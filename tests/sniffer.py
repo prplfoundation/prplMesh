@@ -101,8 +101,12 @@ class Packet:
 class Sniffer:
     '''Captures packets on an interface.'''
 
-    def __init__(self, interface: str, tcpdump_log_dir: str):
-        self.interface = interface
+    def __init__(self, interface: str, tcpdump_log_dir: str, device: str = ""):
+        self.device = device
+        if self.device:
+            self.interface = "br-lan"
+        else:
+            self.interface = interface
         self.tcpdump_log_dir = tcpdump_log_dir
         self.tcpdump_proc = None
         self.current_outputfile = None
@@ -110,13 +114,22 @@ class Sniffer:
 
     def start(self, outputfile_basename):
         '''Start tcpdump to outputfile.'''
-        debug("Starting tcpdump, output file {}.pcap".format(outputfile_basename))
         os.makedirs(os.path.join(self.tcpdump_log_dir, 'logs'), exist_ok=True)
-        self.current_outputfile = os.path.join(self.tcpdump_log_dir, outputfile_basename) + ".pcap"
+        if not self.device:
+            self.current_outputfile = os.path.join(self.tcpdump_log_dir, outputfile_basename) + ".pcap"
+        else:
+            self.current_outputfile = os.path.join(self.tcpdump_log_dir, self.device, outputfile_basename) + ".pcap"
         self.checkpoint_frame_number = 0
         # '-q' avoids the output, which we don't need.
         command = ["dumpcap", "-i", self.interface, '-q', '-w', self.current_outputfile, "-f",
                    "ether proto 0x88CC or ether proto 0x893A"]
+        if self.device:
+            docker_prefix = ["docker", "exec", self.device, "sh", "-c"]
+            command = docker_prefix + ['"{}"'.format(command.join(" "))]
+            debug("Starting tcpdump on device {} on interface {}, output file {}.pcap".format(self.device, self.interface, outputfile_basename))
+        else:
+            debug("Starting tcpdump on host interface {}, output file {}.pcap".format(self.interface, outputfile_basename))
+        debug(command)
         self.tcpdump_proc = subprocess.Popen(command, stderr=subprocess.PIPE)
         # dumpcap takes a while to start up. Wait for the appropriate output before continuing.
         # poll() so we exit the loop if dumpcap terminates for any reason.
