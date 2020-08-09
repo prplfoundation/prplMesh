@@ -2842,6 +2842,9 @@ bool db::load_persistent_db_clients()
                        << " added successfully to node-list with parameters: " << values_map;
 
             ++clients_added_no_error;
+
+            // Update the number of clients in persistent DB
+            ++m_persistent_db_clients_count;
             return true;
         };
 
