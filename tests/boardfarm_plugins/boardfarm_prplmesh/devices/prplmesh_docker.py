@@ -76,6 +76,7 @@ class PrplMeshDocker(PrplMeshBase):
             self.agent_entity = ALEntityDocker(self.docker_name,
                                                device=self, is_controller=False)
 
+        # TODO: initing same sniffer each time is clearly wrong, fix it after discussing a soln. to PPM-331
         self.wired_sniffer = Sniffer(_get_bridge_interface(self.docker_network),
                                      boardfarm.config.output_dir)
         self.check_status()

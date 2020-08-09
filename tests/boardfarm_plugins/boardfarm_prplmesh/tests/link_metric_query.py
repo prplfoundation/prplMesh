@@ -4,7 +4,7 @@ from boardfarm.exceptions import SkipTest
 from .prplmesh_base_test import PrplMeshBaseTest
 from capi import tlv
 from opts import debug
-
+from sniffer import Sniffer
 
 class LinkMetricQuery(PrplMeshBaseTest):
     """Check if an agent can report the links it formed with other devices properly
@@ -43,7 +43,9 @@ class LinkMetricQuery(PrplMeshBaseTest):
         except AttributeError as ae:
             raise SkipTest(ae)
 
-        sniffer = self.dev.DUT.wired_sniffer
+        tcpdump_log_dir = self.dev.DUT.wired_sniffer.tcpdump_log_dir
+        sniffer = Sniffer("", tcpdump_log_dir, agent1.name)
+        self.dev.DUT.wired_sniffer = sniffer
         sniffer.start(self.__class__.__name__ + "-" + self.dev.DUT.name)
 
         mid = controller.ucc_socket.dev_send_1905(agent1.mac, 0x0005,

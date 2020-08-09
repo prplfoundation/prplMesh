@@ -125,20 +125,27 @@ class Sniffer:
                    "ether proto 0x88CC or ether proto 0x893A"]
         if self.device:
             docker_prefix = ["docker", "exec", self.device, "sh", "-c"]
-            command = docker_prefix + ['"{}"'.format(command.join(" "))]
-            debug("Starting tcpdump on device {} on interface {}, output file {}.pcap".format(self.device, self.interface, outputfile_basename))
+            # command[-1] = '\\\"' + command[-1] + '\\\"'
+            command.pop()
+            command.pop()
+            # command = docker_prefix + ['"{}"'.format(" ".join(command))]
+            command = docker_prefix + ["\""] + command + ["\""]
+            command = ["docker", "exec", "-i", self.device, "sh", "-c", 'dumpcap -i br-lan -q -w {}'.format(self.current_outputfile)]
+            print("Starting tcpdump on device {} on interface {}, output file {}.pcap".format(self.device, self.interface, outputfile_basename))
         else:
-            debug("Starting tcpdump on host interface {}, output file {}.pcap".format(self.interface, outputfile_basename))
-        debug(command)
+            print("Starting tcpdump on host interface {}, output file {}.pcap".format(self.interface, outputfile_basename))
+        print(command)
         self.tcpdump_proc = subprocess.Popen(command, stderr=subprocess.PIPE)
         # dumpcap takes a while to start up. Wait for the appropriate output before continuing.
         # poll() so we exit the loop if dumpcap terminates for any reason.
         while not self.tcpdump_proc.poll():
             line = self.tcpdump_proc.stderr.readline()
+            print(line)
             debug(line.decode()[:-1])  # strip off newline
             if line.startswith(b"File: " + self.current_outputfile.encode()):
                 # Make sure it doesn't block due to stderr buffering
                 self.tcpdump_proc.stderr.close()
+                print("tcpdump started successfully")
                 break
         else:
             err("tcpdump terminated")
