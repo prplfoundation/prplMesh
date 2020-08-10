@@ -284,6 +284,9 @@ def command_server():
 
     global server
 
+    # Remove the docker network in case it was dangling out from an earlier
+    # failed test
+    destroy_docker_network()
     if not create_docker_network():
         return False
     # Get server ip address usign docker network
