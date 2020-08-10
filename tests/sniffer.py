@@ -12,6 +12,11 @@ import subprocess
 from opts import debug, err, status
 from typing import Callable
 
+import sys
+sys.path.append('..')
+sys.dont_write_bytecode = True
+from dctest import command_client
+
 
 class TlvStruct:
     '''Represents part of an IEEE1905.1 TLV in a Packet.'''
@@ -100,15 +105,27 @@ class Packet:
 
 class Sniffer:
     '''Captures packets on an interface.'''
-
-    def __init__(self, interface: str, tcpdump_log_dir: str):
+    def __init__(self, interface: str, tcpdump_log_dir: str, remote=True):
         self.interface = interface
         self.tcpdump_log_dir = tcpdump_log_dir
         self.tcpdump_proc = None
         self.current_outputfile = None
         self.checkpoint_frame_number = 0
+        self.remote = remote
 
     def start(self, outputfile_basename):
+        if not self.remote:
+            return self.local_start(outputfile_basename)
+        else:
+            return self.remote_start(outputfile_basename)
+
+    def remote_start(self, outputfile_basename):
+        ''' Communicate with dctest.py passing the parameters for it
+            to start dumpcap '''
+        command_client('{},{},{}'.format(self.interface, self.tcpdump_log_dir,
+                                         outputfile_basename))
+
+    def local_start(self, outputfile_basename):
         '''Start tcpdump to outputfile.'''
         debug("Starting tcpdump, output file {}.pcap".format(outputfile_basename))
         os.makedirs(os.path.join(self.tcpdump_log_dir, 'logs'), exist_ok=True)
@@ -237,8 +254,11 @@ class Sniffer:
 
     def stop(self):
         '''Stop tcpdump if it is running.'''
-        if self.tcpdump_proc:
-            status("Terminating tcpdump")
-            self.tcpdump_proc.terminate()
-            self.tcpdump_proc = None
-            self.current_outputfile = None
+        if not self.remote:
+            if self.tcpdump_proc:
+                status("Terminating tcpdump")
+                self.tcpdump_proc.terminate()
+                self.tcpdump_proc = None
+                self.current_outputfile = None
+        else:
+            print('MARK')

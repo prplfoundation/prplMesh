@@ -58,3 +58,8 @@ services:
         user: ${CURRENT_UID}
         working_dir: $ROOT_DIR/tests
         entrypoint: ["bash", "run_bf_compose.sh"]
+
+networks:
+    default:
+        external:
+            name: dctest-network

@@ -22,8 +22,27 @@ import grp
 import shutil
 import getpass
 import sys
+import socketserver
+import multiprocessing
+import socket
+import struct
+import time
+import threading
+import subprocess
+import logging
+import json
 from subprocess import Popen, PIPE
 
+if __name__ == '__main__':  # Only import sniffer if we ourselves are not
+                            # being imported
+    sys.dont_write_bytecode = True
+    sys.path.insert(0, 'tests')
+    from sniffer import Sniffer
+
+server = None
+server_ip = None
+docker_bridge = None
+server_port = 9997
 
 if not (sys.version_info.major == 3 and sys.version_info.minor >= 5):
     print("This script requires Python 3.5 or higher!")
@@ -184,8 +203,130 @@ def cleanup(rc):
         print('Return code !=0 -> {}'.format(rc))
     if getpass.getuser() == 'gitlab-runner':
         os.system('chown -R gitlab-runner:gitlab-runner .')
+    command_server_shutdown()
+    destroy_docker_network()
     sys.exit(rc)
 
+
+
+def get_default_gateway_linux():
+    with open("/proc/net/route") as fh:
+        for line in fh:
+            fields = line.strip().split()
+            if fields[1] != '00000000' or not int(fields[3], 16) & 2:
+                continue
+
+            return socket.inet_ntoa(struct.pack("<L", int(fields[2], 16)))
+
+
+class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
+    def handle(self):
+        logging.basicConfig(filename='snifferthread.log',level=logging.DEBUG,
+                            format='%(asctime)s %(message)s')
+        data = str(self.request.recv(1024), 'ascii')
+        cur_thread = threading.current_thread()
+        self.sniffer = None
+        #completed = subprocess.run(data, shell=True, capture_output=True)
+        #response = bytes("{}: {}".format(cur_thread.name, completed.stdout), 'ascii')
+        logging.info('Received data {}'.format(data))
+
+        if data == 'stop':
+            self.stop()
+        interface, tcpdump_log_dir, outputfile_basename = data.split(',')
+
+        # Do not use the interface passed but ours (the global one)
+        interface = docker_bridge
+        self.start(interface, tcpdump_log_dir, outputfile_basename)
+        response = bytes(data, 'ascii')
+        self.request.sendall(response)
+
+    def start(self, interface, tcpdump_log_dir, outputfile_basename):
+        logging.info('Starting sniffer')
+        self.sniffer = Sniffer(interface, tcpdump_log_dir, remote=False)
+        self.sniffer.start(outputfile_basename)
+
+    def stop(self):
+        logging.info('Stopping sniffer')
+        if self.sniffer is not None:
+            self.sniffer.stop()
+            self.sniffer = None
+
+
+# class ThreadedTCPServer(socketserver.ThreadingMixIn, socketserver.TCPServer):
+class ThreadedTCPServer(socketserver.ForkingMixIn, socketserver.TCPServer):
+    allow_reuse_address = True
+    pass
+
+
+def create_docker_network():
+    global server_ip
+    global docker_bridge
+
+    ret = subprocess.run("docker network create dctest-network", shell=True,
+            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    if ret.returncode != 0:
+        print("Error creating docker network:")
+        print(ret.stderr)
+        return False
+
+    ret = subprocess.run("docker network inspect dctest-network",
+                         shell=True, stdout=subprocess.PIPE)
+    server_ip = json.loads(ret.stdout)[0]['IPAM']['Config'][0]['Gateway']
+    docker_bridge = 'br-' + json.loads(ret.stdout)[0]['Id'][:12]
+    print('Server ip {}'.format(server_ip))
+    print('Docker bridge {}'.format(docker_bridge))
+    return True
+
+
+def destroy_docker_network():
+    ret = subprocess.run("docker network rm dctest-network", shell=True, stdout=subprocess.PIPE)
+
+
+def command_server():
+
+    global server
+
+    if not create_docker_network():
+        return False
+    # Get server ip address usign docker network
+    ret = subprocess.run("docker network inspect dctest-network",
+                         shell=True, stdout=subprocess.PIPE)
+    server_ip = json.loads(ret.stdout)[0]['IPAM']['Config'][0]['Gateway']
+    print('Server ip {}'.format(server_ip))
+    # HOST, PORT = "localhost", 9997
+    # print('HOST {} PORT {}'.format(HOST, PORT))
+    server = ThreadedTCPServer((server_ip, server_port), ThreadedTCPRequestHandler)
+    # ip, port = server.server_address
+    server_thread = threading.Thread(target=server.serve_forever)
+    server_thread.daemon = True
+    server_thread.start()
+    print("Command server running in thread:", server_thread.name)
+    return True
+    # command_client('ls -l /dev/null')
+    # time.sleep(5)
+    # server.shutdown()
+    # server.server_close()
+
+
+def command_client(message):
+    global server_ip
+    if server_ip is None:
+        # Get it from gateway
+        server_ip = get_default_gateway_linux()
+        print('Server ip {}'.format(server_ip))
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+        sock.connect((server_ip, server_port))
+        sock.sendall(bytes(message, 'ascii'))
+        response = str(sock.recv(1024), 'ascii')
+        print("Received: {}".format(response))
+
+
+def command_server_shutdown():
+    global server
+    if server is not None:
+        server.shutdown()
+        server.server_close()
+        server = None
 
 if __name__ == '__main__':
     check_docker_versions()
@@ -201,10 +342,27 @@ if __name__ == '__main__':
                         help='Pass the rest of arguments to docker-compose')
     parser.add_argument('--id', dest='bid', type=str,
                         help='Specify the id to use for build/shell/comp/clean')
+    parser.add_argument('--command', dest='command', type=str,
+                        help='Run command from dctest.py')
+    parser.add_argument('--server', dest='server', action='store_true',
+                        help='Test server')
     args, rest = parser.parse_known_args()
 
     if os.getenv('CI_PIPELINE_ID') is not None:
         args.bid == os.getenv('CI_PIPELINE_ID')
+
+    if args.command is not None:
+        print('Running command {}'.format(args.command))
+        command_client(args.command)
+        sys.exit(0)
+
+    if args.server:
+        print('Server test')
+        if not command_server():
+            sys.exit(1)
+        time.sleep(10)
+        command_server_shutdown()
+        sys.exit(0)
 
     if args.comp:
         if args.bid is None:
@@ -232,6 +390,8 @@ if __name__ == '__main__':
             print('Specify --id for the shell parameter')
             sys.exit(0)
         services = Services(bid=args.bid)
+        if not command_server():
+            cleanup(1)
         rc = services.dc(['run', '--rm', '--service-ports', '--entrypoint',
                           '/bin/bash', 'boardfarm'], interactive=True)
         cleanup(rc)
@@ -244,12 +404,14 @@ if __name__ == '__main__':
         cleanup(rc)
     else:
         if args.bid:
-            services = Services(bid=args.bid)   # With new build id
+            services = Services(bid=args.bid)   # With existing
         else:
             services = Services()   # With new build id
         # rc = services.dc(['up', 'boardfarm'])
         # rc = services.dc(['run', '--service-ports', '--entrypoint',
         #                  '/bin/bash', 'boardfarm'], interactive=True)
+        if not command_server():
+            cleanup(1)
         rc = services.dc(['run', '--rm', '--service-ports', '--use-aliases',
                           'boardfarm'], interactive=True)
         cleanup(rc)
