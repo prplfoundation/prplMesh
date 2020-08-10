@@ -1343,5 +1343,11 @@ if __name__ == '__main__':
     t.start_test('init')
     env.launch_environment_docker(options.unique_id, options.skip_init, options.tag)
 
+    for agent in env.agents:
+        debug("sending dev_set_config to an agent")
+        agent.cmd_reply("dev_set_config,program,map,backhaul,eth")
+
+    time.sleep(7)
+
     if t.run_tests(options.tests):
         sys.exit(1)
