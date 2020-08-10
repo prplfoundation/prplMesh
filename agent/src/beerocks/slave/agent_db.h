@@ -224,6 +224,15 @@ public:
     bool get_mac_by_ssid(const sMacAddr &ruid, const std::string &ssid, sMacAddr &value);
 
     /**
+     * @brief Get the MAC address of the backhaul sta based on the ruid.
+     *
+     * @param[in] ruid The Radio UID.
+     * @param[out] value The mac address of the backaul sta if found, else an invalid MAC (zero).
+     * @return true if the MAC address was found, false otherwise.
+     */
+    bool get_bsta_mac_by_ruid(const sMacAddr &ruid, sMacAddr &value);
+
+    /**
      * @brief 1905.1 Neighbor device information
      * Information gathered from a neighbor device upon reception of a Topology Discovery message.
      */

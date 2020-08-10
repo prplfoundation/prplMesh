@@ -109,9 +109,13 @@ bool agent_ucc_listener::handle_dev_get_param(std::unordered_map<std::string, st
         auto ruid_str = tlvf::mac_to_string(std::strtoull(params["ruid"].c_str(), nullptr, 16));
         auto ruid     = tlvf::mac_from_string(ruid_str);
         if (params.find("ssid") == params.end()) {
-            // No ssid was given, return the radio MAC.
-            // We use MAC address as Radio UID, so we can just return it here.
-            value = ruid_str;
+            // No ssid was given, we need to return the backhaul sta mac.
+            if (!db->get_bsta_mac_by_ruid(ruid, mac_value)) {
+                LOG(ERROR) << " failed to find the backhaul sta MAC address for ruid '" << ruid_str;
+                value = "backhaul sta MAC not found for ruid '" + ruid_str + "'";
+                return false;
+            }
+            value = tlvf::mac_to_string(mac_value);
             return true;
         }
         auto ssid = params["ssid"];
