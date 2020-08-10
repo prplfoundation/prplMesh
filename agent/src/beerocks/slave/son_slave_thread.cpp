@@ -157,13 +157,16 @@ void slave_thread::slave_reset()
 
     auto db = AgentDB::get();
 
+    /**
+     * m_fronthaul_iface is updated on ACTION_APMANAGER_JOINED_NOTIFICATION
+     * before this initial message the value is empty.
+     * We do not want to fail on this scenario.
+     */
     auto radio = db->radio(m_fronthaul_iface);
-    if (!radio) {
-        LOG(ERROR) << "Radio of iface " << m_fronthaul_iface << " does not exist on the db";
-        return;
+    if (radio) {
+        // Clear the front interface mac if radio exists
+        radio->front.iface_mac = network_utils::ZERO_MAC;
     }
-    // Clear the front interface mac.
-    radio->front.iface_mac = network_utils::ZERO_MAC;
 
     if (configuration_stop_on_failure_attempts && !stop_on_failure_attempts) {
         LOG(ERROR) << "Reached to max stop on failure attempts!";
