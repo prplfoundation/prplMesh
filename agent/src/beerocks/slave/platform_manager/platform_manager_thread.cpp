@@ -191,7 +191,6 @@ static bool fill_platform_settings(
     db->device_conf.local_gw = (platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY ||
                                 platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY_WISP);
 
-    msg->platform_settings().onboarding          = uint8_t(platform_common_conf.onboarding);
     db->device_conf.dfs_reentry_enabled          = uint8_t(platform_common_conf.dfs_reentry);
     db->device_conf.rdkb_extensions_enabled      = uint8_t(platform_common_conf.rdkb_extensions);
     db->device_conf.client_band_steering_enabled = uint8_t(platform_common_conf.band_steering);
@@ -216,7 +215,7 @@ static bool fill_platform_settings(
     db->device_conf.service_fairness_enabled = 0; // for v1.3 TODO read from CAL DB
 
     LOG(DEBUG) << "iface " << iface_name << " settings:";
-    LOG(DEBUG) << "onboarding: " << (unsigned)msg->platform_settings().onboarding;
+    LOG(DEBUG) << "onboarding: " << (unsigned)0;
     LOG(DEBUG) << "client_band_steering_enabled: "
                << (unsigned)db->device_conf.client_band_steering_enabled;
     LOG(DEBUG) << "client_optimal_path_roaming_enabled: "
