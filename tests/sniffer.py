@@ -15,7 +15,7 @@ from typing import Callable
 import sys
 sys.path.append('..')
 sys.dont_write_bytecode = True
-from dctest import command_client
+from dctest import command_client  # noqa
 
 
 class TlvStruct:
@@ -261,4 +261,4 @@ class Sniffer:
                 self.tcpdump_proc = None
                 self.current_outputfile = None
         else:
-            print('MARK')
+            command_client('stop')

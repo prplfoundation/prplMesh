@@ -23,7 +23,6 @@ import shutil
 import getpass
 import sys
 import socketserver
-import multiprocessing
 import socket
 import struct
 import time
@@ -33,8 +32,8 @@ import logging
 import json
 from subprocess import Popen, PIPE
 
-if __name__ == '__main__':  # Only import sniffer if we ourselves are not
-                            # being imported
+# Only import sniffer if we ourselves are not being imported
+if __name__ == '__main__':
     sys.dont_write_bytecode = True
     sys.path.insert(0, 'tests')
     from sniffer import Sniffer
@@ -208,7 +207,6 @@ def cleanup(rc):
     sys.exit(rc)
 
 
-
 def get_default_gateway_linux():
     with open("/proc/net/route") as fh:
         for line in fh:
@@ -221,17 +219,17 @@ def get_default_gateway_linux():
 
 class ThreadedTCPRequestHandler(socketserver.BaseRequestHandler):
     def handle(self):
-        logging.basicConfig(filename='snifferthread.log',level=logging.DEBUG,
+        logging.basicConfig(filename='snifferthread.log', level=logging.DEBUG,
                             format='%(asctime)s %(message)s')
         data = str(self.request.recv(1024), 'ascii')
-        cur_thread = threading.current_thread()
         self.sniffer = None
-        #completed = subprocess.run(data, shell=True, capture_output=True)
-        #response = bytes("{}: {}".format(cur_thread.name, completed.stdout), 'ascii')
         logging.info('Received data {}'.format(data))
 
         if data == 'stop':
             self.stop()
+            self.request.sendall(bytes('stopped', 'ascii'))
+            return
+
         interface, tcpdump_log_dir, outputfile_basename = data.split(',')
 
         # Do not use the interface passed but ours (the global one)
@@ -263,7 +261,7 @@ def create_docker_network():
     global docker_bridge
 
     ret = subprocess.run("docker network create dctest-network", shell=True,
-            stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
     if ret.returncode != 0:
         print("Error creating docker network:")
         print(ret.stderr)
@@ -279,7 +277,7 @@ def create_docker_network():
 
 
 def destroy_docker_network():
-    ret = subprocess.run("docker network rm dctest-network", shell=True, stdout=subprocess.PIPE)
+    subprocess.run("docker network rm dctest-network", shell=True, stdout=subprocess.PIPE)
 
 
 def command_server():
@@ -327,6 +325,7 @@ def command_server_shutdown():
         server.shutdown()
         server.server_close()
         server = None
+
 
 if __name__ == '__main__':
     check_docker_versions()
