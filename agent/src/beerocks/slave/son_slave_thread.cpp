@@ -2977,7 +2977,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                                   config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
 
         request->sta_iface_filter_low() = config.backhaul_wireless_iface_filter_low;
-        request->onboarding()           = platform_settings.onboarding;
+        request->onboarding()           = 0;
         request->certification_mode()   = db->device_conf.certification_mode;
 
         LOG(INFO) << "ACTION_BACKHAUL_REGISTER_REQUEST "
@@ -3006,12 +3006,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
     case STATE_JOIN_INIT: {
 
         auto db = AgentDB::get();
-        LOG(DEBUG) << "onboarding: " << int(platform_settings.onboarding);
-        if (platform_settings.onboarding) {
-            LOG(TRACE) << "goto STATE_ONBOARDING";
-            slave_state = STATE_ONBOARDING;
-            break;
-        } else if (!wlan_settings.band_enabled) {
+        LOG(DEBUG) << "onboarding: " << int(0);
+        if (!wlan_settings.band_enabled) {
             LOG(DEBUG) << "wlan_settings.band_enabled=false";
             LOG(TRACE) << "goto STATE_BACKHAUL_ENABLE";
             slave_state = STATE_BACKHAUL_ENABLE;
