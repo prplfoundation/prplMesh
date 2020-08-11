@@ -30,29 +30,19 @@ namespace beerocks {
  * event loop is at the highest level of control within the program.
  */
 
-template <typename E> class EventLoop {
+class EventLoop {
 public:
-    /**
-     * The type of the event source (e.g. file descriptor).
-     */
-    using EventType = E;
-
-    /**
-     * The type of the event loop.
-     */
-    using EventLoopType = EventLoop<E>;
-
     /**
      * @brief Event handler function definition.
      *
      * Parameters to the event handler function are:
-     * @param[in] event The resource where the event was originated at.
+     * @param[in] fd The file descriptor of the OS resource where the event was originated at.
      * @param[in] loop The event loop where the event was caught. Event handler can install new handlers, 
      * remove existing handlers and even ask for loop termination.
      * 
      * @returns True on success or false otherwise
      */
-    using EventHandler = std::function<bool(EventType event, EventLoopType &loop)>;
+    using EventHandler = std::function<bool(int fd, EventLoop &loop)>;
 
     /**
      * Set of event handler functions, one function to handle each possible event happened.
@@ -64,36 +54,28 @@ public:
     struct EventHandlers {
         /**
          * Hook method that is called back by the event loop to handle read events.
-         * Read events are dispatched when the socket is ready for a read operation (a read
-         * operation will not block).
-         * @param socket Socket the event was originated at.
-         * @param loop Event loop where the event was caught on.
+         * Read events are dispatched for example when a socket is ready for a read operation (a
+         * read operation will not block).
          */
         EventHandler on_read;
 
         /**
          * Hook method that is called back by the event loop to handle write events.
-         * Write events are dispatched when the socket is ready for a write operation (a write
-         * operation will not block).
-         * @param socket Socket the event was originated at.
-         * @param loop Event loop where the event was caught on.
+         * Write events are dispatched for example when a socket is ready for a write operation (a
+         * write operation will not block).
          */
         EventHandler on_write;
 
         /**
          * Hook method that is called back by the event loop to handle disconnect events.
-         * Disconnect events are dispatched when the remote socket is closed.
-         * @param socket Socket the event was originated at.
-         * @param loop Event loop where the event was caught on.
+         * Disconnect events are dispatched for example when the remote socket is closed.
          */
         EventHandler on_disconnect;
 
         /**
          * Hook method that is called back by the event loop to handle error events.
-         * Error events are dispatched when an error occurs while waiting for the socket to
-         * be ready for a read or write operation.
-         * @param socket Socket the event was originated at.
-         * @param loop Event loop where the event was caught on.
+         * Error events are dispatched for example when an error occurs while waiting for a socket
+         * to be ready for a read or write operation.
          */
         EventHandler on_error;
     };
@@ -109,30 +91,30 @@ public:
      * Event handler for the event that occurred will be called back when the event source is
      * ready for a read/write operation, when a disconnect/error occurs.
      *
-     * @param event Event source object.
+     * @param fd File descriptor of the event source object.
      * @param handlers Set of event handlers: class with the methods to be called back when an
      * event occurs.
      * @return True on success and false otherwise.
      */
-    virtual bool add_event(EventType event, EventHandlers handlers) = 0;
+    virtual bool register_handlers(int fd, const EventHandlers &handlers) = 0;
 
     /**
      * @brief Removes previously registered event handlers for the given event source.
      *
-     * @param event Event source object.
+     * @param fd File descriptor of the event source object.
      * @return True on success and false otherwise.
      */
-    virtual bool del_event(EventType socket) = 0;
+    virtual bool remove_handlers(int fd) = 0;
 
     /**
      * @brief Runs message loop.
      *
-     * Performs a single loop iteration and returns after processing IO events 
-     * or when an error or timeout occurs.
+     * Performs a single loop iteration and returns after processing IO events or when an error
+     * or timeout occurs.
      *
      * @return -1 on critical errors
-     * @return  0 on timeout without any socket events
-     * @return >0 number of socket events processed during the class to this method.
+     * @return  0 on timeout waiting for events on all file descriptors.
+     * @return >0 number of events processed during the call to this method.
      */
     virtual int run() = 0;
 };

@@ -34,11 +34,6 @@ namespace broker {
 class BrokerServer {
 public:
     /**
-     * The type of the supported EventLoop.
-     */
-    using BrokerEventLoop = EventLoop<std::shared_ptr<Socket>>;
-
-    /**
      * @brief Transport messages (@see Message) handler function definition.
      *
      * Parameters to the event handler function are:
@@ -53,9 +48,11 @@ public:
     /**
      * Constructor.
      * 
-     * @param [in] broker_uds_path The path and file name to the server UDS file.
+     * @param [in] server_socket Server socket listening for incoming connections.
+     * @param [in] Application event loop.
      */
-    explicit BrokerServer(SocketServer &broker_server, BrokerEventLoop &event_loop);
+    BrokerServer(const std::shared_ptr<SocketServer> &server_socket,
+                 const std::shared_ptr<EventLoop> &event_loop);
 
     /**
      * Destructor.
@@ -63,17 +60,26 @@ public:
     virtual ~BrokerServer() = default;
 
     /**
+     * @brief Start the Broker's server socket.
+     */
+    bool start();
+
+    /**
+     * @brief Stop the Broker's server socket.
+     */
+    bool stop();
+
+    /**
      * @brief Add an event to the Broker's event loop.
      * @see EventLoop::add_event
      */
-    virtual bool add_event(BrokerEventLoop::EventType event,
-                           BrokerEventLoop::EventHandlers handlers);
+    virtual bool add_event(int fd, const EventLoop::EventHandlers &handlers);
 
     /**
      * @brief Delete an event from the Broker's event loop.
      * @see EventLoop::del_event
      */
-    virtual bool del_event(BrokerEventLoop::EventType event);
+    virtual bool del_event(int fd);
 
     /**
      * @brief Run the Broker's event loop.
@@ -117,9 +123,9 @@ protected:
      * 
      * @param [in] sd The socket interface on which the incoming data event originated.
      * 
-     * @return true on success of false otherwise.
+     * @return true on success and false otherwise.
      */
-    virtual bool handle_msg(std::shared_ptr<Socket> &sd);
+    virtual bool handle_msg(const std::shared_ptr<Socket> &sd);
 
 private:
     /**
@@ -128,38 +134,36 @@ private:
      * @param [in] sd The socket interface on which the incoming data event originated.
      * @param [in] msg The internal SubscribeMessage message.
      * 
-     * @return true on success of false otherwise.
+     * @return true on success and false otherwise.
      */
-    bool handle_subscribe(std::shared_ptr<Socket> &sd, const messages::SubscribeMessage &msg);
+    bool handle_subscribe(const std::shared_ptr<Socket> &sd, const messages::SubscribeMessage &msg);
 
     /**
-     * @brief Handler method for socket connections.
+     * @brief Handler method to accept incoming socket connections.
      * 
-     * @param [in] sd The socket interface on which the connection event originated.
-     * 
-     * @return true on success of false otherwise.
+     * @return true on success and false otherwise.
      */
-    bool socket_connected(std::shared_ptr<SocketServer> sd);
+    bool socket_connected();
 
     /**
      * @brief Handler method for socket disconnections.
      * 
      * @param [in] sd The socket interface on which the disconnection event originated.
      * 
-     * @return true on success of false otherwise.
+     * @return true on success and false otherwise.
      */
-    bool socket_disconnected(std::shared_ptr<Socket> sd);
+    bool socket_disconnected(const std::shared_ptr<Socket> &sd);
 
 private:
     /**
      * Shared pointer to the broker server socket.
      */
-    std::shared_ptr<SocketServer> m_broker_server = nullptr;
+    std::shared_ptr<SocketServer> m_server_socket;
 
     /**
      * Reference to the event loop that should be used by the broker.
      */
-    BrokerEventLoop &m_broker_event_loop;
+    std::shared_ptr<EventLoop> m_event_loop;
 
     /**
      * Map for storing Socket->CMDU Type subscriptions.

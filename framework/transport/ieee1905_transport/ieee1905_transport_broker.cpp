@@ -41,71 +41,67 @@ static bool is_restricted_type(uint32_t type)
 /////////////////////////// Broker Implementation ////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-BrokerServer::BrokerServer(SocketServer &broker_server, BrokerEventLoop &event_loop)
-    : m_broker_server(std::make_shared<SocketServer>(broker_server)),
-      m_broker_event_loop(event_loop)
+BrokerServer::BrokerServer(const std::shared_ptr<SocketServer> &server_socket,
+                           const std::shared_ptr<EventLoop> &event_loop)
+    : m_server_socket(server_socket), m_event_loop(event_loop)
 {
-    LOG_IF(!m_broker_server, FATAL) << "Failed allocating memory!";
+    LOG_IF(!m_server_socket, FATAL) << "Server socket is a null pointer!";
+    LOG_IF(!m_event_loop, FATAL) << "Event loop is a null pointer!";
 
     // Check for errors
-    LOG_IF(!m_broker_server->getError().empty(), FATAL)
-        << "Failed opening server socket: " << m_broker_server
-        << " [ERROR: " << m_broker_server->getError() << "]";
-
-    // Add the socket to the poll
-    LOG_IF(
-        !m_broker_event_loop.add_event(
-            m_broker_server,
-            {
-                // Accept incoming connections
-                .on_read =
-                    [&](BrokerEventLoop::EventType socket, BrokerEventLoop::EventLoopType &loop) {
-                        // cppcheck falsely detects the call to socket_connected() as a call to a
-                        // virtual method from whithin the constructor, so suppress this warning,
-                        // by explicitly calling BrokerServer::socket_connected().
-
-                        // Handle connections to one of the server sockets
-                        if (!BrokerServer::socket_connected(
-                                std::dynamic_pointer_cast<SocketServer>(socket))) {
-                            // NOTE: Do NOT stop the broker on connection errors...
-                        }
-
-                        return true;
-                    },
-
-                // Not implemented
-                .on_write = nullptr,
-
-                // Fail on server socket disconnections or errors
-                .on_disconnect =
-                    [&](BrokerEventLoop::EventType socket, BrokerEventLoop::EventLoopType &loop) {
-                        LOG(ERROR) << "Broker socket disconnected!";
-                        return false;
-                    },
-                .on_error =
-                    [&](BrokerEventLoop::EventType socket, BrokerEventLoop::EventLoopType &loop) {
-                        LOG(ERROR) << "Broker socket error!";
-                        return false;
-                    },
-            }),
-        FATAL)
-        << "Failed adding the broker socket into the poll";
-
-    LOG(INFO) << "Broker server is running!";
+    LOG_IF(!m_server_socket->getError().empty(), FATAL)
+        << "Failed opening server socket: " << m_server_socket
+        << " [ERROR: " << m_server_socket->getError() << "]";
 }
 
-bool BrokerServer::add_event(BrokerEventLoop::EventType event,
-                             BrokerEventLoop::EventHandlers handlers)
+bool BrokerServer::start()
 {
-    return m_broker_event_loop.add_event(event, handlers);
+    EventLoop::EventHandlers handlers{
+        // Accept incoming connections
+        .on_read =
+            [&](int fd, EventLoop &loop) {
+                // Handle connections to one of the server sockets
+                if (!socket_connected()) {
+                    // NOTE: Do NOT stop the broker on connection errors...
+                }
+
+                return true;
+            },
+
+        // Not implemented
+        .on_write = nullptr,
+
+        // Fail on server socket disconnections or errors
+        .on_disconnect =
+            [&](int fd, EventLoop &loop) {
+                LOG(ERROR) << "Broker socket disconnected!";
+                return false;
+            },
+        .on_error =
+            [&](int fd, EventLoop &loop) {
+                LOG(ERROR) << "Broker socket error!";
+                return false;
+            },
+    };
+
+    if (!m_event_loop->register_handlers(m_server_socket->getSocketFd(), handlers)) {
+        LOG(ERROR) << "Failed adding the broker server socket into the poll";
+        return false;
+    }
+
+    return true;
 }
 
-bool BrokerServer::del_event(BrokerEventLoop::EventType event)
+bool BrokerServer::stop() { return m_event_loop->remove_handlers(m_server_socket->getSocketFd()); }
+
+bool BrokerServer::add_event(int fd, const EventLoop::EventHandlers &handlers)
 {
-    return m_broker_event_loop.del_event(event);
+    return m_event_loop->register_handlers(fd, handlers);
 }
 
-int BrokerServer::run() { return m_broker_event_loop.run(); }
+bool BrokerServer::del_event(int fd) { return m_event_loop->remove_handlers(fd); }
+
+int BrokerServer::run() { return m_event_loop->run(); }
 
 bool BrokerServer::publish(const messages::Message &msg)
 {
@@ -167,7 +163,7 @@ void BrokerServer::register_external_message_handler(MessageHandler handler)
     m_external_message_handler = handler;
 }
 
-bool BrokerServer::handle_msg(std::shared_ptr<Socket> &sd)
+bool BrokerServer::handle_msg(const std::shared_ptr<Socket> &sd)
 {
     // Check if the socket contains enough bytes for the header
     if (sd->getBytesReady() < static_cast<ssize_t>(sizeof(messages::Message::Header))) {
@@ -213,7 +209,7 @@ bool BrokerServer::handle_msg(std::shared_ptr<Socket> &sd)
     return true;
 }
 
-bool BrokerServer::handle_subscribe(std::shared_ptr<Socket> &sd,
+bool BrokerServer::handle_subscribe(const std::shared_ptr<Socket> &sd,
                                     const messages::SubscribeMessage &msg)
 {
     // Validate the message type
@@ -273,13 +269,13 @@ bool BrokerServer::handle_subscribe(std::shared_ptr<Socket> &sd,
     return true;
 }
 
-bool BrokerServer::socket_connected(std::shared_ptr<SocketServer> sd)
+bool BrokerServer::socket_connected()
 {
     // Accept the connection
-    auto new_socket = std::shared_ptr<Socket>(sd->acceptConnections());
+    auto new_socket = std::shared_ptr<Socket>(m_server_socket->acceptConnections());
 
     // Check for errors
-    const auto error_msg = sd->getError();
+    const auto error_msg = m_server_socket->getError();
     if ((!new_socket) || (!error_msg.empty())) {
         LOG(ERROR) << "Socket error: " << error_msg;
         return false;
@@ -288,34 +284,33 @@ bool BrokerServer::socket_connected(std::shared_ptr<SocketServer> sd)
     LOG(DEBUG) << "Accepted new connection, fd = " << new_socket->getSocketFd();
 
     // Add the newly accepted socket into the poll
-    if (!m_broker_event_loop.add_event(
-            new_socket,
-            {
-                // Handle incoming data
-                .on_read =
-                    [&](BrokerEventLoop::EventType socket, BrokerEventLoop::EventLoopType &loop) {
-                        // NOTE: Do NOT stop the broker on parsing errors...
-                        handle_msg(socket);
-                        return true;
-                    },
+    EventLoop::EventHandlers handlers{
+        // Handle incoming data
+        .on_read =
+            [new_socket, this](int fd, EventLoop &loop) {
+                // NOTE: Do NOT stop the broker on parsing errors...
+                handle_msg(new_socket);
+                return true;
+            },
 
-                // Not implemented
-                .on_write = nullptr,
+        // Not implemented
+        .on_write = nullptr,
 
-                // Remove the socket on disconnections or errors
-                .on_disconnect =
-                    [&](BrokerEventLoop::EventType socket, BrokerEventLoop::EventLoopType &loop) {
-                        // NOTE: Do NOT stop the broker on errors...
-                        socket_disconnected(socket);
-                        return true;
-                    },
-                .on_error =
-                    [&](BrokerEventLoop::EventType socket, BrokerEventLoop::EventLoopType &loop) {
-                        // NOTE: Do NOT stop the broker on errors...
-                        socket_disconnected(socket);
-                        return true;
-                    },
-            })) {
+        // Remove the socket on disconnections or errors
+        .on_disconnect =
+            [new_socket, this](int fd, EventLoop &loop) {
+                // NOTE: Do NOT stop the broker on errors...
+                socket_disconnected(new_socket);
+                return true;
+            },
+        .on_error =
+            [new_socket, this](int fd, EventLoop &loop) {
+                // NOTE: Do NOT stop the broker on errors...
+                socket_disconnected(new_socket);
+                return true;
+            },
+    };
+    if (!m_event_loop->register_handlers(new_socket->getSocketFd(), handlers)) {
         LOG(ERROR) << "Failed adding new socket into the poll!";
         return false;
     }
@@ -323,7 +318,7 @@ bool BrokerServer::socket_connected(std::shared_ptr<SocketServer> sd)
     return true;
 }
 
-bool BrokerServer::socket_disconnected(std::shared_ptr<Socket> sd)
+bool BrokerServer::socket_disconnected(const std::shared_ptr<Socket> &sd)
 {
     LOG(DEBUG) << "Socket disconnected: FD(" << sd->getSocketFd() << ")";
 
