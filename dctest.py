@@ -84,17 +84,6 @@ class Services:
             print('Making {}'.format(self.repeaterdir))
             os.makedirs(self.repeaterdir)
 
-    def cleanlogs(self):
-        shutil.rmtree(os.path.join(self.scriptdir, 'logs'))
-
-    def _setNonBlocking(fd):
-        """
-        Set the file description of the given file descriptor to non-blocking.
-        """
-        flags = fcntl.fcntl(fd, fcntl.F_GETFL)
-        flags = flags | os.O_NONBLOCK
-        fcntl.fcntl(fd, fcntl.F_SETFL, flags)
-
     def get_build_id(self):
         ci_pipeline_id = os.getenv('CI_PIPELINE_ID')
         if ci_pipeline_id is not None:
