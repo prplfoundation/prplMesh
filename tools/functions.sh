@@ -7,7 +7,7 @@
 ###############################################################
 
 # Docker registry which is used in all docker-related scripts
-export DOCKER_REGISTRY=registry.gitlab.com/prpl-foundation/prplmesh/
+export DOCKER_REGISTRY=registry.gitlab.com/prpl-foundation/prplmesh/prplmesh/
 
 dbg() {
     if [ "$VERBOSE" = "true" ]; then echo "$(basename "$0"): $*"; fi
