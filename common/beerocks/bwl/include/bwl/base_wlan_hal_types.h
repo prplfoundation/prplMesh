@@ -57,13 +57,10 @@ struct VAPElement {
 
     bool operator==(const VAPElement &other) const
     {
-        return (ssid == other.ssid && mac == other.mac);
+        return (bss == other.bss && ssid == other.ssid && mac == other.mac);
     }
 
-    bool operator!=(const VAPElement &other) const
-    {
-        return (ssid != other.ssid || mac != other.mac);
-    }
+    bool operator!=(const VAPElement &other) const { return !(*this == other); }
 };
 
 enum class ChanSwReason { Unknown = 0, Radar = 1, CoEx_20 = 2, CoEx_40 = 3 };
