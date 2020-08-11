@@ -632,7 +632,27 @@ bool base_wlan_hal_nl80211::refresh_radio_info()
         nl80211_client::radio_info radio_info;
         if (m_nl80211_client->get_radio_info(get_iface_name(), radio_info)) {
             if (!radio_info.bands.empty()) {
-                nl80211_client::band_info band_info = radio_info.bands.at(0);
+                nl80211_client::band_info band_info;
+                /*
+                   If there are multiple bands, use the 5G one only.
+                   TODO: properly support dual bands radio:
+                   https://jira.prplfoundation.org/browse/PPM-366
+                 */
+                if (radio_info.bands.size() > 1) {
+                    auto band_5G = find_if(
+                        radio_info.bands.begin(), radio_info.bands.end(),
+                        [&](const nl80211_client::band_info &band) { return band.is_5ghz_band(); });
+                    if (band_5G == radio_info.bands.end()) {
+                        LOG(ERROR) << "Dual band radio has no 5Ghz band: " << get_iface_name();
+                        return false;
+                    }
+                    band_info = *band_5G;
+                } else if (radio_info.bands.size() == 1) {
+                    band_info = radio_info.bands.at(0);
+                } else {
+                    LOG(ERROR) << "Unable to find any band for the radio: " << get_iface_name();
+                    return false;
+                }
 
                 m_radio_info.frequency_band = band_info.get_frequency_band();
                 m_radio_info.max_bandwidth  = band_info.get_max_bandwidth();
