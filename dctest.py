@@ -22,6 +22,7 @@ import grp
 import shutil
 import getpass
 import sys
+import json
 from subprocess import Popen, PIPE
 
 
@@ -71,18 +72,22 @@ class Services:
             self.build_id = self.get_build_id()
 
         self.logdir = os.path.join(self.scriptdir, 'logs')
-        device_name = 'dockerized_device-{}'.format(self.build_id)
-        self.devicedir = os.path.join(self.logdir, device_name)
-        repeater_name = 'repeater1-{}'.format(self.build_id)
-        self.repeaterdir = os.path.join(self.logdir, repeater_name)
         if not os.path.exists(self.logdir):
             os.makedirs(self.logdir)
-        if not os.path.exists(self.devicedir):
-            print('Making {}'.format(self.devicedir))
-            os.makedirs(self.devicedir)
-        if not os.path.exists(self.repeaterdir):
-            print('Making {}'.format(self.repeaterdir))
-            os.makedirs(self.repeaterdir)
+        for device in self._get_device_names():
+            device_name = '{}-{}'.format(device, self.build_id)
+            devicedir = os.path.join(self.logdir, device_name)
+            if not os.path.exists(devicedir):
+                print('Making {}'.format(devicedir))
+                os.makedirs(devicedir)
+
+    def _get_device_names(self):
+        jspath = './tests/boardfarm_plugins/boardfarm_prplmesh/prplmesh_config_compose.json'
+        js = json.loads(open(jspath, 'r').read())
+        devices = []
+        for device in js['prplmesh_compose']['devices']:
+            devices.append(device['name'])
+        return devices
 
     def get_build_id(self):
         ci_pipeline_id = os.getenv('CI_PIPELINE_ID')
@@ -94,9 +99,13 @@ class Services:
         last_id = 0
         if not os.path.exists('logs'):
             return str(1)
+
+        # Search if a directory exists with logs/<device>-<X> and use X+1 as
+        # id. Get the first device from the json list
+        search_prefix = self._get_device_names()[0] + '-'
         for d in os.listdir('logs'):
-            if d.startswith('dockerized_device-'):
-                suffix = d[len('dockerized_device-'):]
+            if d.startswith(search_prefix):
+                suffix = d[len(search_prefix):]
                 isuffix = int(suffix)
                 if isuffix > last_id:
                     last_id = isuffix
