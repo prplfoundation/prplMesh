@@ -1320,9 +1320,9 @@ bool slave_thread::handle_cmdu_platform_manager_message(
                 return true;
             }
 
-            wlan_settings = response->wlan_settings();
-
-            auto db = AgentDB::get();
+            auto db                    = AgentDB::get();
+            wlan_settings.band_enabled = db->device_conf.wlan_settings.band_enabled;
+            wlan_settings.channel      = db->device_conf.wlan_settings.channel;
 
             /**
              * On GW platform the ethernet interface which is used for backhaul connection must be

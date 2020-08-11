@@ -57,9 +57,7 @@ static beerocks::eFreqType bpl_band_to_freq_type(int bpl_band)
 }
 
 static bool fill_platform_settings(
-    std::string iface_name,
-    std::shared_ptr<beerocks_message::cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE> msg,
-    main_thread::platform_common_conf_t &platform_common_conf,
+    std::string iface_name, main_thread::platform_common_conf_t &platform_common_conf,
     std::unordered_map<std::string, std::shared_ptr<beerocks_message::sWlanSettings>>
         &iface_wlan_params_map,
     Socket *sd)
@@ -103,12 +101,13 @@ static bool fill_platform_settings(
         return false;
     }
     /* update message */
-    msg->wlan_settings().band_enabled = params.enabled;
-    msg->wlan_settings().channel      = params.channel;
+    db->device_conf.wlan_settings.band_enabled = params.enabled;
+    db->device_conf.wlan_settings.channel      = params.channel;
 
     LOG(DEBUG) << "wlan settings:"
-               << " band_enabled=" << string_utils::bool_str(msg->wlan_settings().band_enabled)
-               << " channel=" << int(msg->wlan_settings().channel);
+               << " band_enabled="
+               << string_utils::bool_str(db->device_conf.wlan_settings.band_enabled)
+               << " channel=" << int(db->device_conf.wlan_settings.channel);
 
     // initialize wlan params cache
     //erase interface cache from map if exists
@@ -223,7 +222,7 @@ static bool fill_platform_settings(
     LOG(DEBUG) << "client_optimal_path_roaming_prefer_signal_strength_enabled: "
                << (unsigned)
                       db->device_conf.client_optimal_path_roaming_prefer_signal_strength_enabled;
-    LOG(DEBUG) << "band_enabled: " << (unsigned)msg->wlan_settings().band_enabled;
+    LOG(DEBUG) << "band_enabled: " << (unsigned)db->device_conf.wlan_settings.band_enabled;
     LOG(DEBUG) << "local_gw: " << db->device_conf.local_gw;
     LOG(DEBUG) << "local_controller: " << db->device_conf.local_controller;
     LOG(DEBUG) << "dfs_reentry_enabled: " << (unsigned)db->device_conf.dfs_reentry_enabled;
@@ -649,7 +648,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             do {
                 LOG(TRACE) << "Trying to read settings of iface:" << strIfaceName
                            << ", attempt=" << int(retry_cnt);
-                if (fill_platform_settings(strIfaceName, register_response, platform_common_conf,
+                if (fill_platform_settings(strIfaceName, platform_common_conf,
                                            bpl_iface_wlan_params_map, sd)) {
                     register_response->valid() = 1;
                 } else {

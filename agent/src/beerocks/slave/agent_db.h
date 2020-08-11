@@ -111,6 +111,12 @@ public:
         uint8_t load_balancing_enabled;
         uint8_t service_fairness_enabled;
         uint8_t rdkb_extensions_enabled;
+
+        struct sWlanSettings {
+            uint8_t band_enabled;
+            uint8_t channel;
+        } wlan_settings;
+
     } device_conf;
 
     /** 
