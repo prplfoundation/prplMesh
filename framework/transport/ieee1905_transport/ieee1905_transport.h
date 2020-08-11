@@ -12,6 +12,8 @@
 #include <mapf/common/logger.h>
 #include <mapf/transport/ieee1905_transport_messages.h>
 
+#include <bcl/beerocks_event_loop.h>
+
 #include "ieee1905_transport_broker.h"
 
 #include <tlvf/tlvftypes.h>
@@ -53,9 +55,20 @@ namespace transport {
 
 class Ieee1905Transport {
 public:
+    /**
+     * Class constructor
+     *
+     * @param event_loop Event loop to wait for I/O events.
+     */
+    explicit Ieee1905Transport(const std::shared_ptr<EventLoop> &event_loop);
     void run();
 
 private:
+    /**
+     * Application event loop used by the process to wait for I/O events.
+     */
+    std::shared_ptr<EventLoop> m_event_loop;
+
     std::string if_index2name(unsigned int index)
     {
         char ifname[IF_NAMESIZE] = {0};

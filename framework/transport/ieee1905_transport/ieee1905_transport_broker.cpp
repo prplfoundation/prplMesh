@@ -94,15 +94,6 @@ bool BrokerServer::start()
 
 bool BrokerServer::stop() { return m_event_loop->remove_handlers(m_server_socket->getSocketFd()); }
 
-bool BrokerServer::add_event(int fd, const EventLoop::EventHandlers &handlers)
-{
-    return m_event_loop->register_handlers(fd, handlers);
-}
-
-bool BrokerServer::del_event(int fd) { return m_event_loop->remove_handlers(fd); }
-
-int BrokerServer::run() { return m_event_loop->run(); }
-
 bool BrokerServer::publish(const messages::Message &msg)
 {
     messages::SubscribeMessage::MsgType msg_opcode;

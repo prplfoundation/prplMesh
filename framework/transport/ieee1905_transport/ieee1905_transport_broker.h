@@ -70,24 +70,6 @@ public:
     bool stop();
 
     /**
-     * @brief Add an event to the Broker's event loop.
-     * @see EventLoop::add_event
-     */
-    virtual bool add_event(int fd, const EventLoop::EventHandlers &handlers);
-
-    /**
-     * @brief Delete an event from the Broker's event loop.
-     * @see EventLoop::del_event
-     */
-    virtual bool del_event(int fd);
-
-    /**
-     * @brief Run the Broker's event loop.
-     * @see EventLoop::run
-     */
-    virtual int run();
-
-    /**
      * @brief Publishes the message with the broker subscribers.
      * Sends the message to all the clients that subscribed for the type of the message.
      * 
@@ -161,7 +143,7 @@ private:
     std::shared_ptr<SocketServer> m_server_socket;
 
     /**
-     * Reference to the event loop that should be used by the broker.
+     * Application event loop to use by the broker to wait for I/O events.
      */
     std::shared_ptr<EventLoop> m_event_loop;
 
