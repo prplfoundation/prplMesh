@@ -763,7 +763,7 @@ bool base_wlan_hal_nl80211::refresh_vaps_info(int id)
              vap_id++) {
             VAPElement vap_element;
 
-            // Try reading the BSSID and SSID of the requested VAP
+            // Try reading values of the requested VAP
             vap_element.bss  = reply["bss[" + std::to_string(vap_id) + "]"];
             vap_element.mac  = reply["bssid[" + std::to_string(vap_id) + "]"];
             vap_element.ssid = reply["ssid[" + std::to_string(vap_id) + "]"];
@@ -789,7 +789,7 @@ bool base_wlan_hal_nl80211::refresh_vaps_info(int id)
 
         VAPElement vap_element;
 
-        // Try reading the BSSID and SSID of the requested VAP
+        // Try reading values of the requested VAP
         vap_element.bss  = reply["bss[" + std::to_string(id) + "]"];
         vap_element.mac  = reply["bssid[" + std::to_string(id) + "]"];
         vap_element.ssid = reply["ssid[" + std::to_string(id) + "]"];
