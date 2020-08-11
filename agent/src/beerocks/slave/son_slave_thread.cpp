@@ -3935,6 +3935,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
         c->encryption_type_attr().data     = config.encr_type;
         c->bss_type()                      = config.bss_type;
         request->add_wifi_credentials(c);
+        LOG(DEBUG) << "Config for bssid " << config.bssid << "ssid " << config.ssid;
     }
 
     ///////////////////////////////////////////////////////////////////

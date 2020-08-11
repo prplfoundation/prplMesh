@@ -311,6 +311,7 @@ bool ap_wlan_hal_nl80211::update_vap_credentials(
                       "configuration are applied";
         return true;
     }
+    LOG(DEBUG) << "conf_list_size" << bss_info_conf_list.size();
 
     // Load hostapd config for the radio
     prplmesh::hostapd::Configuration conf = load_hostapd_config(m_radio_info.iface_name);
@@ -318,6 +319,8 @@ bool ap_wlan_hal_nl80211::update_vap_credentials(
         LOG(ERROR) << "Autoconfiguration: no hostapd config to apply configuration!";
         return false;
     }
+
+    LOG(DEBUG) << "Initial configuration" << conf;
 
     // If a Multi-AP Agent receives an AP-Autoconfiguration WSC message containing one or
     // more M2, it shall validate each M2 (based on its 1905 AL MAC address) and configure
@@ -334,6 +337,7 @@ bool ap_wlan_hal_nl80211::update_vap_credentials(
             if (abort) {
                 return;
             }
+            LOG(DEBUG) << "new conf";
 
             if (bss_it != bss_info_conf_list.end()) {
 
