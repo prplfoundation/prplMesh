@@ -16,7 +16,6 @@
 #
 from __future__ import print_function  # To check for python2 or < 3.5 execution
 import argparse
-import fcntl
 import os
 import grp
 import shutil

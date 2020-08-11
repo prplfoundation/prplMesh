@@ -323,7 +323,8 @@ class RadioDocker(Radio):
     def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
         '''Poll the radio's logfile until it contains "regex" or times out.'''
         programs = ("agent_" + self.iface_name, "ap_manager_" + self.iface_name)
-        return _docker_wait_for_log(self.agent.device.docker_name, programs, regex, start_line, timeout)
+        return _docker_wait_for_log(self.agent.device.docker_name, programs, regex,
+                                    start_line, timeout)
 
     def send_bwl_event(self, event: str) -> None:
         # The file is only available within the docker container so we need to use an echo command.

@@ -53,7 +53,8 @@ class PrplMeshCompose(PrplMeshBase):
             self._docker_compose(["-d", "--name", self.docker_name, "agent"],
                                  "run", "start-agent")
             time.sleep(self.delay)
-            self.agent_entity = ALEntityDocker(self.name, device=self, is_controller=False, compose=True)
+            self.agent_entity = ALEntityDocker(self.name, device=self,
+                                               is_controller=False, compose=True)
 
         self.wired_sniffer = Sniffer(_get_bridge_interface(self.docker_network),
                                      boardfarm.config.output_dir)
@@ -101,7 +102,6 @@ class PrplMeshCompose(PrplMeshBase):
         self._run_shell_cmd("printf",
                             ["device_get_info", "|", "nc", "-w", "1", "controller-rme", "8002"])
 
-
     def isalive(self):
         """Method required by boardfarm.
 
@@ -113,4 +113,3 @@ class PrplMeshCompose(PrplMeshBase):
     def prprlmesh_status_check(self):
         self.check_status()
         return True
-
