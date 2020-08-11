@@ -22,6 +22,7 @@ case $TARGET_DEVICE in
     *)
         cp feeds.conf.default feeds.conf
         echo "src-git prpl $PRPL_FEED" >> feeds.conf
+        echo "src-git sah  $SAH_FEED" >> feeds.conf
         scripts/feeds update -a
         scripts/feeds install -a
         {

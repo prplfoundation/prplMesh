@@ -51,6 +51,9 @@ ENV PRPLMESH_VARIANT=$PRPLMESH_VARIANT
 # The feed to use to build prplMesh.
 ARG PRPL_FEED
 ENV PRPL_FEED=$PRPL_FEED
+# The feed to use to build HLAPI.
+ARG SAH_FEED
+ENV SAH_FEED=$SAH_FEED
 # optional: intel feed to use.
 ARG INTEL_FEED
 ENV INTEL_FEED=$INTEL_FEED
