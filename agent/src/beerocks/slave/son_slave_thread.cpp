@@ -1320,8 +1320,7 @@ bool slave_thread::handle_cmdu_platform_manager_message(
                 return true;
             }
 
-            platform_settings = response->platform_settings();
-            wlan_settings     = response->wlan_settings();
+            wlan_settings = response->wlan_settings();
 
             auto db = AgentDB::get();
 
@@ -3364,7 +3363,24 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 }
 
                 //Platform Settings
-                notification->platform_settings()              = platform_settings;
+                notification->platform_settings().client_band_steering_enabled =
+                    db->device_conf.client_band_steering_enabled;
+                notification->platform_settings().client_optimal_path_roaming_enabled =
+                    db->device_conf.client_optimal_path_roaming_enabled;
+                notification->platform_settings().dfs_reentry_enabled =
+                    db->device_conf.dfs_reentry_enabled;
+                notification->platform_settings()
+                    .client_optimal_path_roaming_prefer_signal_strength_enabled =
+                    db->device_conf.client_optimal_path_roaming_prefer_signal_strength_enabled;
+                notification->platform_settings().client_11k_roaming_enabled =
+                    db->device_conf.client_11k_roaming_enabled;
+                notification->platform_settings().load_balancing_enabled =
+                    db->device_conf.load_balancing_enabled;
+                notification->platform_settings().service_fairness_enabled =
+                    db->device_conf.service_fairness_enabled;
+                notification->platform_settings().rdkb_extensions_enabled =
+                    db->device_conf.rdkb_extensions_enabled;
+
                 notification->platform_settings().local_master = db->device_conf.local_controller;
 
                 //Wlan Settings
