@@ -14,6 +14,8 @@
 #include <tlvf/ieee_1905_1/tlvAlMacAddress.h>
 #include <tlvf/ieee_1905_1/tlvAutoconfigFreqBand.h>
 #include <tlvf/ieee_1905_1/tlvSearchedRole.h>
+#include <tlvf/ieee_1905_1/tlvSupportedFreqBand.h>
+#include <tlvf/ieee_1905_1/tlvSupportedRole.h>
 #include <tlvf/wfa_map/tlvSearchedService.h>
 #include <tlvf/wfa_map/tlvSupportedService.h>
 
@@ -191,6 +193,16 @@ bool ApAutoConfigurationTask::handle_cmdu(ieee1905_1::CmduMessageRx &cmdu_rx,
                                           const sMacAddr &src_mac,
                                           std::shared_ptr<beerocks_header> beerocks_header)
 {
+    switch (cmdu_rx.getMessageType()) {
+    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RESPONSE_MESSAGE: {
+        handle_ap_autoconfiguration_response(cmdu_rx, src_mac);
+        return true;
+    }
+    default: {
+        // Message was not handled, therefore return false.
+        return false;
+    }
+    }
     return true;
 }
 
@@ -297,4 +309,101 @@ bool ApAutoConfigurationTask::send_ap_autoconfiguration_search_message(
     LOG(DEBUG) << "sending autoconfig search message, bridge_mac=" << db->bridge.mac;
     return m_btl_ctx.send_cmdu_to_broker(m_cmdu_tx, network_utils::MULTICAST_1905_MAC_ADDR,
                                          tlvf::mac_to_string(db->bridge.mac));
+}
+
+void ApAutoConfigurationTask::handle_ap_autoconfiguration_response(
+    ieee1905_1::CmduMessageRx &cmdu_rx, const sMacAddr &src_mac)
+{
+    LOG(DEBUG) << "Received autoconfiguration response message";
+    auto db = AgentDB::get();
+    if (db->controller_info.bridge_mac != network_utils::ZERO_MAC &&
+        src_mac != db->controller_info.bridge_mac) {
+        LOG(INFO) << "current controller_bridge_mac=" << db->controller_info.bridge_mac
+                  << " but response came from src_mac=" << src_mac << ", ignoring";
+        return;
+    }
+
+    auto tlvSupportedRole = cmdu_rx.getClass<ieee1905_1::tlvSupportedRole>();
+    if (!tlvSupportedRole) {
+        LOG(ERROR) << "getClass tlvSupportedRole failed";
+        return;
+    }
+
+    if (tlvSupportedRole->value() != ieee1905_1::tlvSupportedRole::REGISTRAR) {
+        LOG(ERROR) << "invalid tlvSupportedRole value";
+        return;
+    }
+
+    // Set prplmesh_controller to false by default. If "SLAVE_HANDSHAKE_RESPONSE" is received, mark
+    // it to 'true'.
+    bool prplmesh_controller = false;
+
+    auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
+    if (beerocks_header &&
+        beerocks_header->action_op() == beerocks_message::ACTION_CONTROL_SLAVE_HANDSHAKE_RESPONSE) {
+        // Mark controller as prplMesh.
+        LOG(DEBUG) << "prplMesh controller: received ACTION_CONTROL_SLAVE_HANDSHAKE_RESPONSE from "
+                   << src_mac;
+        prplmesh_controller = true;
+    } else {
+        LOG(DEBUG) << "Not prplMesh controller " << src_mac;
+    }
+
+    auto tlvSupportedFreqBand = cmdu_rx.getClass<ieee1905_1::tlvSupportedFreqBand>();
+    if (!tlvSupportedFreqBand) {
+        LOG(ERROR) << "getClass tlvSupportedFreqBand failed";
+        return;
+    }
+
+    std::string band_name;
+    beerocks::eFreqType freq_type = beerocks::eFreqType::FREQ_UNKNOWN;
+    switch (tlvSupportedFreqBand->value()) {
+    case ieee1905_1::tlvSupportedFreqBand::BAND_2_4G:
+        band_name = "2.4GHz";
+        freq_type = beerocks::eFreqType::FREQ_24G;
+        break;
+    case ieee1905_1::tlvSupportedFreqBand::BAND_5G:
+        band_name = "5GHz";
+        freq_type = beerocks::eFreqType::FREQ_5G;
+        break;
+    case ieee1905_1::tlvSupportedFreqBand::BAND_60G:
+        LOG(DEBUG) << "received autoconfiguration response for 60GHz band, unsupported";
+        return;
+    default:
+        LOG(ERROR) << "invalid tlvSupportedFreqBand value";
+        return;
+    }
+    LOG(DEBUG) << "received ap_autoconfiguration response for " << band_name << " band";
+
+    auto tlvSupportedService = cmdu_rx.getClass<wfa_map::tlvSupportedService>();
+    if (!tlvSupportedService) {
+        LOG(ERROR) << "getClass tlvSupportedService failed";
+        return;
+    }
+    bool controller_found = false;
+    for (int i = 0; i < tlvSupportedService->supported_service_list_length(); i++) {
+        auto supportedServiceTuple = tlvSupportedService->supported_service_list(i);
+        if (!std::get<0>(supportedServiceTuple)) {
+            LOG(ERROR) << "Invalid tlvSupportedService";
+            return;
+        }
+        if (std::get<1>(supportedServiceTuple) ==
+            wfa_map::tlvSupportedService::eSupportedService::MULTI_AP_CONTROLLER) {
+            controller_found = true;
+        }
+    }
+
+    if (!controller_found) {
+        LOG(WARNING)
+            << "Invalid tlvSupportedService - supported service is not MULTI_AP_CONTROLLER";
+        return;
+    }
+
+    // Mark discovery status completed on band mentioned on the response and fill AgentDB fields.
+    db->controller_info.prplmesh_controller = prplmesh_controller;
+    db->controller_info.bridge_mac          = src_mac;
+    m_discovery_status[freq_type].completed = true;
+    LOG(DEBUG) << "controller_discovered on " << band_name
+               << " band, controller bridge_mac=" << src_mac
+               << ", prplmesh_controller=" << prplmesh_controller;
 }

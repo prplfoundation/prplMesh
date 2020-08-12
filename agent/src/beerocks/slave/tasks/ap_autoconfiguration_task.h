@@ -104,6 +104,17 @@ private:
     backhaul_manager &m_btl_ctx;
     ieee1905_1::CmduMessageTx &m_cmdu_tx;
 
+    /* 1905.1 message handlers: */
+
+    /**
+    * @brief Handles 1905 AP Autoconfiguration message.
+    * 
+    * @param[in] cmdu_rx Received CMDU.
+    * @param[in] src_mac MAC address of the message sender.
+    */
+    void handle_ap_autoconfiguration_response(ieee1905_1::CmduMessageRx &cmdu_rx,
+                                              const sMacAddr &src_mac);
+
     /* Helper functions */
     bool send_ap_autoconfiguration_search_message(const std::string &radio_iface);
 };

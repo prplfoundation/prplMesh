@@ -1947,9 +1947,6 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
      * false if the message needs to be forwarded by the calling function
      */
     switch (cmdu_rx.getMessageType()) {
-    case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RESPONSE_MESSAGE: {
-        return handle_1905_autoconfiguration_response(cmdu_rx, src_mac);
-    }
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RENEW_MESSAGE: {
         auto db = AgentDB::get();
         if (src_mac != tlvf::mac_to_string(db->controller_info.bridge_mac)) {
@@ -2696,119 +2693,6 @@ bool backhaul_manager::handle_1905_combined_infrastructure_metrics(
     LOG(DEBUG) << "sending ACK message to the originator, mid=" << std::hex << int(mid);
     auto db = AgentDB::get();
     return send_cmdu_to_broker(cmdu_tx, src_mac, tlvf::mac_to_string(db->bridge.mac));
-}
-
-bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMessageRx &cmdu_rx,
-                                                              const std::string &src_mac)
-{
-    LOG(DEBUG) << "received autoconfiguration response message";
-    auto db = AgentDB::get();
-    if (db->controller_info.bridge_mac != network_utils::ZERO_MAC &&
-        src_mac != tlvf::mac_to_string(db->controller_info.bridge_mac)) {
-        LOG(INFO) << "current controller_bridge_mac=" << db->controller_info.bridge_mac
-                  << " but response came from src_mac=" << src_mac << ", ignoring";
-        return true;
-    }
-
-    auto tlvSupportedRole = cmdu_rx.getClass<ieee1905_1::tlvSupportedRole>();
-    if (tlvSupportedRole) {
-        LOG(DEBUG) << "tlvSupportedRole->value()=" << int(tlvSupportedRole->value());
-        if (tlvSupportedRole->value() != ieee1905_1::tlvSupportedRole::REGISTRAR) {
-            LOG(ERROR) << "invalid tlvSupportedRole value";
-            return true;
-        }
-    } else {
-        LOG(ERROR) << "tlvSupportedRole missing - ignoring autoconfiguration response message";
-        return true;
-    }
-
-    // Set prplmesh_controller to false by default. If "SLAVE_HANDSHAKE_RESPONSE" is received, mark
-    // it to 'true'.
-    db->controller_info.prplmesh_controller = false;
-
-    auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
-    if (beerocks_header &&
-        beerocks_header->action_op() == beerocks_message::ACTION_CONTROL_SLAVE_HANDSHAKE_RESPONSE) {
-        // mark controller as prplMesh
-        LOG(DEBUG) << "prplMesh controller: received ACTION_CONTROL_SLAVE_HANDSHAKE_RESPONSE from "
-                   << src_mac;
-        db->controller_info.prplmesh_controller = true;
-    } else {
-        LOG(DEBUG) << "Not prplMesh controller " << src_mac;
-    }
-    db->controller_info.bridge_mac = tlvf::mac_from_string(src_mac);
-    LOG(INFO) << "update controller_bridge_mac=" << db->controller_info.bridge_mac;
-
-    auto tlvSupportedFreqBand = cmdu_rx.getClass<ieee1905_1::tlvSupportedFreqBand>();
-    if (tlvSupportedFreqBand) {
-        LOG(DEBUG) << "tlvSupportedFreqBand->value()=" << int(tlvSupportedFreqBand->value());
-        std::string band_name;
-        beerocks::eFreqType freq_type = beerocks::eFreqType::FREQ_UNKNOWN;
-        switch (tlvSupportedFreqBand->value()) {
-        case ieee1905_1::tlvSupportedFreqBand::BAND_2_4G:
-            band_name = "2.4GHz";
-            freq_type = beerocks::eFreqType::FREQ_24G;
-            break;
-        case ieee1905_1::tlvSupportedFreqBand::BAND_5G:
-            band_name = "5GHz";
-            freq_type = beerocks::eFreqType::FREQ_5G;
-            break;
-        case ieee1905_1::tlvSupportedFreqBand::BAND_60G:
-            LOG(DEBUG) << "received autoconfiguration response for 60GHz band, unsupported";
-            return true;
-        default:
-            LOG(ERROR) << "invalid tlvSupportedFreqBand value";
-            return true;
-        }
-        LOG(DEBUG) << "received autoconfiguration response for " << band_name << " band";
-        for (auto soc : slaves_sockets) {
-            auto radio = db->radio(soc->hostap_iface);
-            if (!radio) {
-                continue;
-            }
-            if (radio->front.freq_type == freq_type) {
-                LOG(DEBUG) << band_name << " band socket found, iface=" << soc->hostap_iface;
-                LOG(DEBUG) << "controller_discovered on" << band_name
-                           << " band, iface=" << soc->hostap_iface;
-                LOG(DEBUG) << FSM_CURR_STATE_STR;
-                finalize_slaves_connect_state(true, soc);
-            }
-        }
-    } else {
-        LOG(ERROR) << "tlvSupportedFreqBand missing - ignoring autoconfiguration response message";
-        return true;
-    }
-
-    auto tlvSupportedService = cmdu_rx.getClass<wfa_map::tlvSupportedService>();
-    if (tlvSupportedService) {
-        bool controllerFound = false;
-        for (int i = 0; i < tlvSupportedService->supported_service_list_length(); i++) {
-            auto supportedServiceTuple = tlvSupportedService->supported_service_list(i);
-            if (!std::get<0>(supportedServiceTuple)) {
-                LOG(ERROR) << "Invalid tlvSupportedService";
-                return true;
-            }
-            if (std::get<1>(supportedServiceTuple) ==
-                wfa_map::tlvSupportedService::eSupportedService::MULTI_AP_CONTROLLER) {
-                controllerFound = true;
-            }
-        }
-        if (!controllerFound) {
-            LOG(WARNING)
-                << "Invalid tlvSupportedService - supported service is not MULTI_AP_CONTROLLER";
-            return true;
-        }
-    } else {
-        LOG(ERROR) << "tlvSupportedService missing - ignoring autoconfiguration response message";
-        return true;
-    }
-
-    if (FSM_IS_IN_STATE(WAIT_FOR_AUTOCONFIG_COMPLETE)) {
-        FSM_MOVE_STATE(CONNECT_TO_MASTER);
-    } else {
-        LOG(TRACE) << "no state change";
-    }
-    return true;
 }
 
 bool backhaul_manager::handle_1905_beacon_metrics_query(ieee1905_1::CmduMessageRx &cmdu_rx,
