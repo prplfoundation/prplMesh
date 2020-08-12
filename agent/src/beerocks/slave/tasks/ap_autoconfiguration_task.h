@@ -101,6 +101,8 @@ private:
     backhaul_manager &m_btl_ctx;
     ieee1905_1::CmduMessageTx &m_cmdu_tx;
 
+    /* Helper functions */
+    bool send_ap_autoconfiguration_search_message(const std::string &radio_iface);
 };
 
 } // namespace beerocks
