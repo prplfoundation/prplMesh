@@ -93,8 +93,6 @@ private:
     finalize_slaves_connect_state(bool fConnected,
                                   std::shared_ptr<sRadioInfo> pSocket = nullptr); // cmdu_duplicate
 
-    bool send_autoconfig_search_message(const std::string &front_radio_iface_name);
-
     /**
      * @brief Sends an AP Metrics Query message for each bssid on 'bssid_list' to the son_slaves.
      * If the 'bssid_list' is empty, sends a query on each bssid that exists on the Agent.
