@@ -28,7 +28,7 @@ void TaskPool::run_tasks()
     }
 }
 
-void TaskPool::send_event(eTaskType task_type, uint8_t event)
+void TaskPool::send_event(eTaskType task_type, uint8_t event, void *event_obj)
 {
     auto task_it = m_task_pool.find(task_type);
     if (task_it == m_task_pool.end()) {
@@ -37,7 +37,7 @@ void TaskPool::send_event(eTaskType task_type, uint8_t event)
     }
 
     auto &task = task_it->second;
-    task->handle_event(event);
+    task->handle_event(event, event_obj);
 }
 
 bool TaskPool::handle_cmdu(ieee1905_1::CmduMessageRx &cmdu_rx, sMacAddr src_mac,

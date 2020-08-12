@@ -30,7 +30,7 @@ public:
         AGENT_DEVICE_INITIALIZED,
     };
 
-    void handle_event(uint8_t event_enum_value) override;
+    void handle_event(uint8_t event_enum_value, void *event_obj) override;
 
     bool handle_cmdu(ieee1905_1::CmduMessageRx &cmdu_rx, const sMacAddr &src_mac,
                      std::shared_ptr<beerocks_header> beerocks_header) override;
