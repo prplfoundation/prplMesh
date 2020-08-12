@@ -92,6 +92,10 @@ public:
         bool local_controller;
     } device_conf;
 
+    struct sControllerInfo {
+        bool prplmesh_controller;
+    } controller_info;
+
     /** 
      * Agent Sub Entities Data
      */

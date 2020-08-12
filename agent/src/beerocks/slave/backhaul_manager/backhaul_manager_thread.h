@@ -266,7 +266,6 @@ private:
     bool pending_enable = false;
 
     std::string controller_bridge_mac;
-    bool is_prplmesh_controller = false;
     std::string bssid_bridge_mac;
 
     std::unique_ptr<beerocks::agent_ucc_listener> m_agent_ucc_listener;
