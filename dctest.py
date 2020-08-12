@@ -114,12 +114,6 @@ class Services:
             new_id = last_id + 1
         return str(new_id)
 
-    def copy_build_dir(self):
-        new_id = self.build_id
-        self.build_dir = 'build-{}'.format(new_id)
-        shutil.copytree('build', 'build-{}'.format(self.build_dir))
-        print('Copied build/ into {}'.format(self.build_dir))
-
     def dc(self, args, interactive=False):
         params = ['docker-compose', '-f',
                   'tools/docker/boardfarm-ci/docker-compose.yml']
