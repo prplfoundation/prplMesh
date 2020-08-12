@@ -769,6 +769,19 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
 
     // UCC FSM. If UCC is in RESET, we have to stay in (or move to) ENABLED state.
     if (m_agent_ucc_listener && m_agent_ucc_listener->is_in_reset()) {
+        auto db            = AgentDB::get();
+        auto bridge        = db->bridge.iface_name;
+        auto bridge_ifaces = network_utils::linux_get_iface_list_from_bridge(bridge);
+        auto eth_iface     = db->ethernet.iface_name;
+        // remove the wired interface from the bridge, it will be added on dev_set_config.
+        if (std::find(bridge_ifaces.begin(), bridge_ifaces.end(), eth_iface) !=
+            bridge_ifaces.end()) {
+            if (!network_utils::linux_remove_iface_from_bridge(bridge, eth_iface)) {
+                LOG(ERROR) << "Failed to remove iface '" << eth_iface << "' from bridge '" << bridge
+                           << "' !";
+                return false;
+            }
+        }
         if (m_eFSMState == EState::ENABLED) {
             m_agent_ucc_listener->reset_completed();
             // Stay in ENABLE state until onboarding_state will change
