@@ -818,51 +818,20 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
             break;
         }
 
+        FSM_MOVE_STATE(WAIT_FOR_AUTOCONFIG_COMPLETE);
         m_task_pool.send_event(eTaskType::AP_AUTOCONFIGURATION,
                                ApAutoConfigurationTask::eEvent::START_AP_AUTOCONFIGURATION);
         break;
     }
-    case EState::SEND_AUTOCONFIG_SEARCH_MESSAGE: {
-        if (state_attempts++ > MAX_FAILED_AUTOCONFIG_SEARCH_ATTEMPTS) {
-            LOG(ERROR) << "exceeded maximum attempts for autoconfig discovery, state_attempts="
-                       << state_attempts;
-            FSM_MOVE_STATE(RESTART);
+    case EState::WAIT_FOR_AUTOCONFIG_COMPLETE: {
+        auto db = AgentDB::get();
+        if (db->statuses.ap_autoconfiguration_completed) {
+            finalize_slaves_connect_state(true);
+            FSM_MOVE_STATE(CONNECT_TO_MASTER);
             break;
         }
-
-        bool sent_for_2g = false;
-        bool sent_for_5g = false;
-        auto db          = AgentDB::get();
-
-        for (const auto &radio : db->get_radios_list()) {
-            if (!radio) {
-                continue;
-            }
-            //for (auto soc : slaves_sockets) {
-            if (radio->front.freq_type == eFreqType::FREQ_24G) {
-                if (sent_for_2g)
-                    continue;
-                if (send_autoconfig_search_message(radio->front.iface_name)) {
-                    sent_for_2g = true;
-                }
-            } else if (radio->front.freq_type == eFreqType::FREQ_5G) {
-                if (sent_for_5g)
-                    continue;
-                if (send_autoconfig_search_message(radio->front.iface_name)) {
-                    sent_for_5g = true;
-                }
-            }
-        }
-
-        state_time_stamp_timeout = std::chrono::steady_clock::now() +
-                                   std::chrono::seconds(AUTOCONFIG_DISCOVERY_TIMEOUT_SECONDS);
-
-        FSM_MOVE_STATE(WAIT_FOR_AUTOCONFIG_RESPONSE_MESSAGE);
-        break;
-    }
-    case EState::WAIT_FOR_AUTOCONFIG_RESPONSE_MESSAGE: {
-        if (std::chrono::steady_clock::now() > state_time_stamp_timeout) {
-            FSM_MOVE_STATE(SEND_AUTOCONFIG_SEARCH_MESSAGE);
+        if (db->statuses.ap_autoconfiguration_failure) {
+            FSM_MOVE_STATE(RESTART);
         }
         break;
     }
@@ -2834,7 +2803,7 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
         return true;
     }
 
-    if (FSM_IS_IN_STATE(WAIT_FOR_AUTOCONFIG_RESPONSE_MESSAGE)) {
+    if (FSM_IS_IN_STATE(WAIT_FOR_AUTOCONFIG_COMPLETE)) {
         FSM_MOVE_STATE(CONNECT_TO_MASTER);
     } else {
         LOG(TRACE) << "no state change";
