@@ -165,8 +165,6 @@ private:
 private:
     const std::string &beerocks_temp_path;
 
-    SocketClient *master_discovery_socket = nullptr;
-
     struct SBackhaulConfig {
         std::string ssid;
         std::string pass;
