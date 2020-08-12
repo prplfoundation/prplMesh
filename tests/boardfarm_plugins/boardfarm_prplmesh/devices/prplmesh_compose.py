@@ -82,10 +82,10 @@ class PrplMeshCompose(PrplMeshBase):
         if os.getenv('CI_PIPELINE_ID') is None:
             print('Setting CI_PIPELINE_ID "latest"')
             os.environ['CI_PIPELINE_ID'] = 'latest'
-            self._run_shell_cmd("/usr/local/bin/docker-compose",
+            self._run_shell_cmd("docker-compose",
                                 full_args, env=os.environ)
         else:
-            self._run_shell_cmd("/usr/local/bin/docker-compose", full_args)
+            self._run_shell_cmd("docker-compose", full_args)
 
     def __del__(self):
         self._run_shell_cmd("docker", ["stop", self.docker_name])
