@@ -185,14 +185,6 @@ BaseClass(base->getBuffPtr(), base->getBuffRemainingBytes(), parse){
 }
 cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE::~cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE() {
 }
-sPlatformSettings& cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE::platform_settings() {
-    return (sPlatformSettings&)(*m_platform_settings);
-}
-
-sWlanSettings& cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE::wlan_settings() {
-    return (sWlanSettings&)(*m_wlan_settings);
-}
-
 uint32_t& cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE::valid() {
     return (uint32_t&)(*m_valid);
 }
@@ -200,8 +192,6 @@ uint32_t& cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE::valid() {
 void cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_PLATFORM), reinterpret_cast<uint8_t*>(m_action_op));
-    m_platform_settings->struct_swap();
-    m_wlan_settings->struct_swap();
     tlvf_swap(32, reinterpret_cast<uint8_t*>(m_valid));
 }
 
@@ -235,8 +225,6 @@ bool cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE::finalize()
 size_t cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE::get_initial_size()
 {
     size_t class_size = 0;
-    class_size += sizeof(sPlatformSettings); // platform_settings
-    class_size += sizeof(sWlanSettings); // wlan_settings
     class_size += sizeof(uint32_t); // valid
     return class_size;
 }
@@ -247,18 +235,6 @@ bool cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE::init()
         TLVF_LOG(ERROR) << "Not enough available space on buffer. Class init failed";
         return false;
     }
-    m_platform_settings = reinterpret_cast<sPlatformSettings*>(m_buff_ptr__);
-    if (!buffPtrIncrementSafe(sizeof(sPlatformSettings))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sPlatformSettings) << ") Failed!";
-        return false;
-    }
-    if (!m_parse__) { m_platform_settings->struct_init(); }
-    m_wlan_settings = reinterpret_cast<sWlanSettings*>(m_buff_ptr__);
-    if (!buffPtrIncrementSafe(sizeof(sWlanSettings))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sWlanSettings) << ") Failed!";
-        return false;
-    }
-    if (!m_parse__) { m_wlan_settings->struct_init(); }
     m_valid = reinterpret_cast<uint32_t*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";

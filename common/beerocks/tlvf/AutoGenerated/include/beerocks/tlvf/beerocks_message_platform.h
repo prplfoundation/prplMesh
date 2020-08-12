@@ -83,8 +83,6 @@ class cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE : public BaseClass
         static eActionOp_PLATFORM get_action_op(){
             return (eActionOp_PLATFORM)(ACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE);
         }
-        sPlatformSettings& platform_settings();
-        sWlanSettings& wlan_settings();
         uint32_t& valid();
         void class_swap() override;
         bool finalize() override;
@@ -93,8 +91,6 @@ class cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE : public BaseClass
     private:
         bool init();
         eActionOp_PLATFORM* m_action_op = nullptr;
-        sPlatformSettings* m_platform_settings = nullptr;
-        sWlanSettings* m_wlan_settings = nullptr;
         uint32_t* m_valid = nullptr;
 };
 
