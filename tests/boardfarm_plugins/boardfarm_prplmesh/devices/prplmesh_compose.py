@@ -76,11 +76,9 @@ class PrplMeshCompose(PrplMeshBase):
                 vol = '{}:/tmp/beerocks/logs'.format(log_path)
 
             full_args += ["run", "--rm", "-v", vol]
-            # full_args += ["--entrypoint", entrypoint + ' ' + start]
             full_args += args
 
         print('_docker_compose: {}'.format(' '.join(full_args)))
-        # os.environ['CURRENT_UID'] = '1000:998'
         if os.getenv('CI_PIPELINE_ID') is None:
             print('Setting CI_PIPELINE_ID "latest"')
             os.environ['CI_PIPELINE_ID'] = 'latest'
