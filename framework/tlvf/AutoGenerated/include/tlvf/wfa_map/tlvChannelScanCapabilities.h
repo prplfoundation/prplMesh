@@ -29,6 +29,7 @@
 namespace wfa_map {
 
 class cRadiosWithScanCapabilities;
+class cOperatingClasses;
 
 class tlvChannelScanCapabilities : public BaseClass
 {
@@ -84,27 +85,14 @@ class cRadiosWithScanCapabilities : public BaseClass
             }
         } __attribute__((packed)) sCapabilities;
         
-        typedef struct sOperatingClasses {
-            uint8_t operating_class;
-            //Number of channels specified in the Channel List. k=0 indicates that the Multi-AP Agent
-            //is capable of scanning on all channels in the Operating Class.
-            uint8_t channel_list_length;
-            uint8_t* channels_list; //TLVF_TODO: not supported yet
-            void struct_swap(){
-            }
-            void struct_init(){
-            }
-        } __attribute__((packed)) sOperatingClasses;
-        
         sMacAddr& radio_uid();
-        uint8_t& capabilities_list_length();
-        std::tuple<bool, sCapabilities&> capabilities_list(size_t idx);
-        bool alloc_capabilities_list(size_t count = 1);
+        sCapabilities& capabilities();
         //The minimum interval in seconds between the start of two consecutive channel scans on this radio
         uint32_t& minimum_scan_interval();
         uint8_t& operating_classes_list_length();
-        std::tuple<bool, sOperatingClasses&> operating_classes_list(size_t idx);
-        bool alloc_operating_classes_list(size_t count = 1);
+        std::tuple<bool, cOperatingClasses&> operating_classes_list(size_t idx);
+        std::shared_ptr<cOperatingClasses> create_operating_classes_list();
+        bool add_operating_classes_list(std::shared_ptr<cOperatingClasses> ptr);
         void class_swap() override;
         bool finalize() override;
         static size_t get_initial_size();
@@ -112,14 +100,41 @@ class cRadiosWithScanCapabilities : public BaseClass
     private:
         bool init();
         sMacAddr* m_radio_uid = nullptr;
-        uint8_t* m_capabilities_list_length = nullptr;
-        sCapabilities* m_capabilities_list = nullptr;
-        size_t m_capabilities_list_idx__ = 0;
-        int m_lock_order_counter__ = 0;
+        sCapabilities* m_capabilities = nullptr;
         uint32_t* m_minimum_scan_interval = nullptr;
         uint8_t* m_operating_classes_list_length = nullptr;
-        sOperatingClasses* m_operating_classes_list = nullptr;
+        cOperatingClasses* m_operating_classes_list = nullptr;
         size_t m_operating_classes_list_idx__ = 0;
+        std::vector<std::shared_ptr<cOperatingClasses>> m_operating_classes_list_vector;
+        bool m_lock_allocation__ = false;
+        int m_lock_order_counter__ = 0;
+};
+
+class cOperatingClasses : public BaseClass
+{
+    public:
+        cOperatingClasses(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cOperatingClasses(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cOperatingClasses();
+
+        uint8_t& operating_class();
+        //Number of channels specified in the Channel List. k=0 indicates that the Multi-AP Agent
+        //is capable of scanning on all channels in the Operating Class.
+        uint8_t& channel_list_length();
+        uint8_t* channel_list(size_t idx = 0);
+        bool set_channel_list(const void* buffer, size_t size);
+        bool alloc_channel_list(size_t count = 1);
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        uint8_t* m_operating_class = nullptr;
+        uint8_t* m_channel_list_length = nullptr;
+        uint8_t* m_channel_list = nullptr;
+        size_t m_channel_list_idx__ = 0;
+        int m_lock_order_counter__ = 0;
 };
 
 }; // close namespace: wfa_map

@@ -80,6 +80,7 @@
 #include <tlvf/wfa_map/tlvBackhaulSteeringResponse.h>
 #include <tlvf/wfa_map/tlvBeaconMetricsQuery.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
+#include <tlvf/wfa_map/tlvChannelScanCapabilities.h>
 #include <tlvf/wfa_map/tlvClientCapabilityReport.h>
 #include <tlvf/wfa_map/tlvClientInfo.h>
 #include <tlvf/wfa_map/tlvErrorCode.h>
@@ -2419,6 +2420,55 @@ bool backhaul_manager::handle_ap_capability_query(ieee1905_1::CmduMessageRx &cmd
         }
 
         if (!add_ap_he_capabilities(*slave)) {
+            return false;
+        }
+    }
+
+    // Add channel scan capabilities
+    auto channel_scan_capabilities_tlv = cmdu_tx.addClass<wfa_map::tlvChannelScanCapabilities>();
+    if (!channel_scan_capabilities_tlv) {
+        LOG(ERROR) << "Error creating TLV_CHANNEL_SCAN_CAPABILITIES";
+        return false;
+    }
+
+    // Add Channel Scan Capabilities
+    for (const auto &slave : slaves_sockets) {
+        auto radio_channel_scan_capabilities = channel_scan_capabilities_tlv->create_radio_list();
+        if (!radio_channel_scan_capabilities) {
+            LOG(ERROR) << "create_radio_list() has failed!";
+            return false;
+        }
+        radio_channel_scan_capabilities->radio_uid()                 = slave->radio_mac;
+        radio_channel_scan_capabilities->capabilities().on_boot_only = 1;
+        radio_channel_scan_capabilities->capabilities().scan_impact =
+            0x2; // Time slicing impairment (Radio may go off channel for a series of short intervals)
+                 // Create operating class object
+        auto op_class_channels = radio_channel_scan_capabilities->create_operating_classes_list();
+        if (!op_class_channels) {
+            LOG(ERROR) << "create_operating_classes_list() has failed!";
+            return false;
+        }
+        //TODO: fill operating classes according to supported channels
+        //      fill channels per operating class accordingly
+        //op_class_channels->operating_class() = preference.oper_class;
+        // if (!op_class_channels->alloc_channel_list(preference.channels.size())) {
+        //     LOG(ERROR) << "alloc_channel_list() has failed!";
+        //     return false;
+        // }
+        // uint8_t idx = 0;
+        // for (auto wifi_channel : preference.channels) {
+        //     *op_class_channels->channel_list(idx) = wifi_channel.channel;
+        //     idx++;
+        // }
+        // Push operating class object to the list of operating class objects
+        // if (!channel_preference_tlv->add_operating_classes_list(op_class_channels)) {
+        //     LOG(ERROR) << "add_operating_classes_list() has failed!";
+        //     return false;
+        // }
+
+        // Push operating class object to the list of operating class objects
+        if (!channel_scan_capabilities_tlv->add_radio_list(radio_channel_scan_capabilities)) {
+            LOG(ERROR) << "add_radio_list() has failed!";
             return false;
         }
     }

@@ -51,6 +51,7 @@
 #include <tlvf/wfa_map/tlvApRadioIdentifier.h>
 #include <tlvf/wfa_map/tlvBackhaulSteeringResponse.h>
 #include <tlvf/wfa_map/tlvChannelPreference.h>
+#include <tlvf/wfa_map/tlvChannelScanCapabilities.h>
 #include <tlvf/wfa_map/tlvChannelSelectionResponse.h>
 #include <tlvf/wfa_map/tlvClientAssociationEvent.h>
 #include <tlvf/wfa_map/tlvClientCapabilityReport.h>
@@ -1450,6 +1451,78 @@ bool master_thread::handle_cmdu_1905_ap_capability_report(const std::string &src
 {
     auto mid = cmdu_rx.getMessageId();
     LOG(INFO) << "Received AP_CAPABILITY_REPORT_MESSAGE, mid=" << std::dec << int(mid);
+    auto channel_scan_capabilities_tlv = cmdu_rx.getClass<wfa_map::tlvChannelScanCapabilities>();
+
+    // read all operating class list
+    auto radio_list_length = channel_scan_capabilities_tlv->radio_list_length();
+
+    for (int rc_idx = 0; rc_idx < radio_list_length; rc_idx++) {
+        std::stringstream ss;
+        auto radio_capabilities_tuple = channel_scan_capabilities_tlv->radio_list(rc_idx);
+        if (!std::get<0>(radio_capabilities_tuple)) {
+            LOG(ERROR) << "getting radio capabilities entry has failed!";
+            return false;
+        }
+        auto &radio_capabilities_entry = std::get<1>(radio_capabilities_tuple);
+        auto &ruid                     = radio_capabilities_entry.radio_uid();
+        auto scan_capabilities         = radio_capabilities_entry.capabilities();
+        auto minimum_scan_interval     = radio_capabilities_entry.minimum_scan_interval();
+
+        ss << "ruid=" << ruid << std::endl
+           << "on_boot_only=" << std::hex << int(scan_capabilities.on_boot_only) << std::endl
+           << "scan_impact=" << std::oct << int(scan_capabilities.scan_impact) << std::endl
+           << "minimum_scan_interval=" << int(minimum_scan_interval) << std::endl;
+
+        auto operating_classes_list_length =
+            radio_capabilities_entry.operating_classes_list_length();
+
+        for (uint8_t oc_idx = 0; oc_idx < operating_classes_list_length; oc_idx++) {
+            auto operating_class_tuple = radio_capabilities_entry.operating_classes_list(oc_idx);
+            if (!std::get<0>(operating_class_tuple)) {
+                LOG(ERROR) << "getting operating class entry has failed!";
+                return false;
+            }
+
+            auto &operating_class_struct = std::get<1>(operating_class_tuple);
+            auto operating_class         = operating_class_struct.operating_class();
+            const auto &op_class_chan_set =
+                wireless_utils::operating_class_to_channel_set(operating_class);
+            ss << "operating class=" << int(operating_class);
+
+            auto channel_list_length = operating_class_struct.channel_list_length();
+
+            ss << ", channel_list={";
+            if (channel_list_length == 0) {
+                ss << "}";
+            }
+
+            std::vector<beerocks::message::sWifiChannel> channels_list;
+            for (int ch_idx = 0; ch_idx < channel_list_length; ch_idx++) {
+                auto channel = operating_class_struct.channel_list(ch_idx);
+                if (!channel) {
+                    LOG(ERROR) << "getting channel entry has failed!";
+                    return false;
+                }
+
+                // Check if channel is valid for operating class
+                if (op_class_chan_set.find(*channel) == op_class_chan_set.end()) {
+                    LOG(ERROR) << "Channel " << +*channel << " invalid for operating class "
+                               << +operating_class;
+                    return false;
+                }
+
+                ss << int(*channel);
+
+                // add comma if not last channel in the list, else close list by add curl brackets
+                ss << (((ch_idx + 1) != channel_list_length) ? "," : "}");
+
+                beerocks::message::sWifiChannel wifi_channel;
+                wifi_channel.channel = *channel;
+                channels_list.push_back(wifi_channel);
+            }
+            LOG(DEBUG) << ss.str();
+        }
+    }
 
     return true;
 }
@@ -2834,8 +2907,8 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION>();
         if (notification == nullptr) {
-            LOG(ERROR)
-                << "addClass ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION failed";
+            LOG(ERROR) << "addClass "
+                          "ACTION_CONTROL_CLIENT_RX_RSSI_MEASUREMENT_START_NOTIFICATION failed";
             return false;
         }
         break;
@@ -3328,8 +3401,8 @@ bool master_thread::handle_cmdu_control_message(const std::string &src_mac,
         auto notification = beerocks_header->addClass<
             beerocks_message::cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION>();
         if (notification == nullptr) {
-            LOG(ERROR)
-                << "addClass cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION failed";
+            LOG(ERROR) << "addClass "
+                          "cACTION_CONTROL_STEERING_EVENT_CLIENT_ACTIVITY_NOTIFICATION failed";
             return false;
         }
         //push event to rdkb_wlan_hal task

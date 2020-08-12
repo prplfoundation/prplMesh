@@ -4,7 +4,7 @@ _namespace: wfa_map
 
 tlvChannelScanCapabilities:
   _type: class
-  _is_tlv_class : True
+  _is_tlv_class: True
   type:
     _type: eTlvTypeMap
     _value_const: TLV_CHANNEL_SCAN_CAPABILITIES
@@ -14,17 +14,13 @@ tlvChannelScanCapabilities:
     _length_var: True
   radio_list:
     _type: cRadiosWithScanCapabilities
-    _length: [ radio_list_length ]
+    _length: [radio_list_length]
 
 cRadiosWithScanCapabilities:
   _type: class
   radio_uid: sMacAddr
-  capabilities_list_length:
-    _type: uint8_t
-    _length_var: True
-  capabilities_list:
+  capabilities:
     _type: sCapabilities
-    _length: [ capabilities_list_length ]
   minimum_scan_interval:
     _type: uint32_t
     _comment: |
@@ -33,19 +29,19 @@ cRadiosWithScanCapabilities:
     _type: uint8_t
     _length_var: True
   operating_classes_list:
-    _type: sOperatingClasses
-    _length: [ operating_classes_list_length ]
+    _type: cOperatingClasses
+    _length: [operating_classes_list_length]
 
 sCapabilities:
   _type: struct
   _bit_field: uint8_t
   on_boot_only:
-    _bit_range: [7,7]
+    _bit_range: [7, 7]
     _comment: |
       1: True (Agent can only perform scan on boot)
       0: False (Agent can perform Requested scans)
   scan_impact:
-    _bit_range: [6,5]
+    _bit_range: [6, 5]
     _comment: |
       0x00: No impact (independent radio is available for scanning that is not used for Fronthaul
       or backhaul)
@@ -55,8 +51,8 @@ sCapabilities:
   reserved:
     _bit_range: [4, 0]
 
-sOperatingClasses:
-  _type: struct
+cOperatingClasses:
+  _type: class
   _comment: |
     Operating Class contains an enumerated value from Table E-4 in Annex E of [1]
   operating_class: uint8_t
@@ -66,6 +62,6 @@ sOperatingClasses:
     _comment: |
       Number of channels specified in the Channel List. k=0 indicates that the Multi-AP Agent
       is capable of scanning on all channels in the Operating Class.
-  channels_list:
+  channel_list:
     _type: uint8_t
-    _length: [ channel_list_length ]
+    _length: [channel_list_length]
