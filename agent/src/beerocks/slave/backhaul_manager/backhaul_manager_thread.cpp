@@ -466,8 +466,6 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
         network_utils::iface_info iface_info;
         bool backhaul_manager_exist = false;
 
-        notification->params().controller_bridge_mac = tlvf::mac_from_string(controller_bridge_mac);
-
         if (!db->device_conf.local_gw) {
             // Read the IP addresses of the bridge interface
             if (network_utils::get_iface_info(iface_info, db->backhaul.selected_iface_name) != 0) {
@@ -901,7 +899,8 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
             create_backhaul_steering_response(wfa_map::tlvErrorCode::eReasonCode::RESERVED);
 
             LOG(DEBUG) << "Sending BACKHAUL_STA_STEERING_RESPONSE_MESSAGE";
-            send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+            send_cmdu_to_broker(cmdu_tx, tlvf::mac_to_string(db->controller_info.bridge_mac),
+                                bridge_info.mac);
         }
         break;
     }
@@ -1019,7 +1018,7 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
 
         db->backhaul.connection_type = AgentDB::sBackhaul::eConnectionType::Invalid;
 
-        controller_bridge_mac.clear();
+        db->controller_info.bridge_mac = network_utils::ZERO_MAC;
 
         if (configuration_stop_on_failure_attempts && !stop_on_failure_attempts) {
             LOG(ERROR) << "Reached to max stop on failure attempts!";
@@ -1700,7 +1699,8 @@ bool backhaul_manager::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_r
             }
 
         } else { // Forward the data (cmdu) to bus
-            // LOG(DEBUG) << "forwarding slave->master message, controller_bridge_mac=" << controller_bridge_mac;
+            // LOG(DEBUG) << "forwarding slave->master message, controller_bridge_mac="
+            //            << (db->controller_info.bridge_mac);
             cmdu_rx.swap(); //swap back before forwarding
             send_cmdu_to_broker(cmdu_rx, dst_mac, tlvf::mac_to_string(db->bridge.mac), length);
         }
@@ -2045,7 +2045,8 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
         }
 
         LOG(DEBUG) << "Send AssociatedStaLinkMetrics to controller, mid = " << mid;
-        send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, tlvf::mac_to_string(db->bridge.mac));
+        send_cmdu_to_broker(cmdu_tx, tlvf::mac_to_string(db->controller_info.bridge_mac),
+                            tlvf::mac_to_string(db->bridge.mac));
         break;
     }
     default: {
@@ -2075,8 +2076,9 @@ bool backhaul_manager::handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx,
         return handle_1905_autoconfiguration_response(cmdu_rx, src_mac);
     }
     case ieee1905_1::eMessageType::AP_AUTOCONFIGURATION_RENEW_MESSAGE: {
-        if (src_mac != controller_bridge_mac) {
-            LOG(INFO) << "current controller_bridge_mac=" << controller_bridge_mac
+        auto db = AgentDB::get();
+        if (src_mac != tlvf::mac_to_string(db->controller_info.bridge_mac)) {
+            LOG(INFO) << "current controller_bridge_mac=" << db->controller_info.bridge_mac
                       << " but renew came from src_mac=" << src_mac << ", ignoring";
             return true;
         }
@@ -2474,7 +2476,7 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
     if (0 == mid) {
         uint16_t length = message_com::get_uds_header(cmdu_rx)->length;
         cmdu_rx.swap(); //swap back before forwarding
-        return send_cmdu_to_broker(cmdu_rx, controller_bridge_mac,
+        return send_cmdu_to_broker(cmdu_rx, tlvf::mac_to_string(db->controller_info.bridge_mac),
                                    tlvf::mac_to_string(db->bridge.mac), length);
     }
 
@@ -2636,7 +2638,8 @@ bool backhaul_manager::handle_slave_ap_metrics_response(ieee1905_1::CmduMessageR
     m_ap_metric_response.clear();
 
     LOG(DEBUG) << "Sending AP_METRICS_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
-    return send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, tlvf::mac_to_string(db->bridge.mac));
+    return send_cmdu_to_broker(cmdu_tx, tlvf::mac_to_string(db->controller_info.bridge_mac),
+                               tlvf::mac_to_string(db->bridge.mac));
 }
 
 bool backhaul_manager::handle_1905_link_metric_query(ieee1905_1::CmduMessageRx &cmdu_rx,
@@ -2825,8 +2828,9 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
 {
     LOG(DEBUG) << "received autoconfiguration response message";
     auto db = AgentDB::get();
-    if (!controller_bridge_mac.empty() && src_mac != controller_bridge_mac) {
-        LOG(INFO) << "current controller_bridge_mac=" << controller_bridge_mac
+    if (db->controller_info.bridge_mac != network_utils::ZERO_MAC &&
+        src_mac != tlvf::mac_to_string(db->controller_info.bridge_mac)) {
+        LOG(INFO) << "current controller_bridge_mac=" << db->controller_info.bridge_mac
                   << " but response came from src_mac=" << src_mac << ", ignoring";
         return true;
     }
@@ -2857,8 +2861,8 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
     } else {
         LOG(DEBUG) << "Not prplMesh controller " << src_mac;
     }
-    controller_bridge_mac = src_mac;
-    LOG(INFO) << "update controller_bridge_mac=" << controller_bridge_mac;
+    db->controller_info.bridge_mac = tlvf::mac_from_string(src_mac);
+    LOG(INFO) << "update controller_bridge_mac=" << db->controller_info.bridge_mac;
 
     auto tlvSupportedFreqBand = cmdu_rx.getClass<ieee1905_1::tlvSupportedFreqBand>();
     if (tlvSupportedFreqBand) {
@@ -2894,7 +2898,6 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
                                << " band, iface=" << soc->hostap_iface;
                     LOG(DEBUG) << FSM_CURR_STATE_STR;
                     soc->controller_discovered = true;
-                    controller_bridge_mac      = src_mac;
                     finalize_slaves_connect_state(true, soc);
                 }
             }
@@ -3925,7 +3928,8 @@ bool backhaul_manager::handle_slave_channel_selection_response(ieee1905_1::CmduM
     m_expected_channel_selection.responses.clear();
 
     LOG(DEBUG) << "Sending CHANNEL_SELECTION_RESPONSE_MESSAGE, mid=" << std::hex << int(mid);
-    return send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, tlvf::mac_to_string(db->bridge.mac));
+    return send_cmdu_to_broker(cmdu_tx, tlvf::mac_to_string(db->controller_info.bridge_mac),
+                               tlvf::mac_to_string(db->bridge.mac));
 }
 
 bool backhaul_manager::handle_backhaul_steering_request(ieee1905_1::CmduMessageRx &cmdu_rx,
@@ -3948,8 +3952,11 @@ bool backhaul_manager::handle_backhaul_steering_request(ieee1905_1::CmduMessageR
         return false;
     }
 
+    auto db = AgentDB::get();
+
     LOG(DEBUG) << "Sending ACK message to the originator, mid=" << std::hex << mid;
-    send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+    send_cmdu_to_broker(cmdu_tx, tlvf::mac_to_string(db->controller_info.bridge_mac),
+                        bridge_info.mac);
 
     auto channel    = bh_sta_steering_req->target_channel_number();
     auto oper_class = bh_sta_steering_req->operating_class();
@@ -3968,7 +3975,8 @@ bool backhaul_manager::handle_backhaul_steering_request(ieee1905_1::CmduMessageR
             return false;
         }
 
-        send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+        send_cmdu_to_broker(cmdu_tx, tlvf::mac_to_string(db->controller_info.bridge_mac),
+                            bridge_info.mac);
 
         return false;
     }
@@ -3990,7 +3998,8 @@ bool backhaul_manager::handle_backhaul_steering_request(ieee1905_1::CmduMessageR
         LOG(ERROR) << "Couldn't associate active HAL with bssid: " << bssid;
 
         LOG(DEBUG) << "Sending ACK message to the originator, mid=" << std::hex << mid;
-        send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+        send_cmdu_to_broker(cmdu_tx, tlvf::mac_to_string(db->controller_info.bridge_mac),
+                            bridge_info.mac);
 
         auto response = create_backhaul_steering_response(
             wfa_map::tlvErrorCode::eReasonCode::
@@ -4001,7 +4010,8 @@ bool backhaul_manager::handle_backhaul_steering_request(ieee1905_1::CmduMessageR
             return false;
         }
 
-        send_cmdu_to_broker(cmdu_tx, controller_bridge_mac, bridge_info.mac);
+        send_cmdu_to_broker(cmdu_tx, tlvf::mac_to_string(db->controller_info.bridge_mac),
+                            bridge_info.mac);
 
         return false;
     }
