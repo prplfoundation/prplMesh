@@ -958,6 +958,25 @@ class cACTION_APMANAGER_START_WPS_PBC_REQUEST : public BaseClass
         eActionOp_APMANAGER* m_action_op = nullptr;
 };
 
+class cACTION_APMANAGER_RADIO_DISABLE_REQUEST : public BaseClass
+{
+    public:
+        cACTION_APMANAGER_RADIO_DISABLE_REQUEST(uint8_t* buff, size_t buff_len, bool parse = false);
+        explicit cACTION_APMANAGER_RADIO_DISABLE_REQUEST(std::shared_ptr<BaseClass> base, bool parse = false);
+        ~cACTION_APMANAGER_RADIO_DISABLE_REQUEST();
+
+        static eActionOp_APMANAGER get_action_op(){
+            return (eActionOp_APMANAGER)(ACTION_APMANAGER_RADIO_DISABLE_REQUEST);
+        }
+        void class_swap() override;
+        bool finalize() override;
+        static size_t get_initial_size();
+
+    private:
+        bool init();
+        eActionOp_APMANAGER* m_action_op = nullptr;
+};
+
 class cACTION_APMANAGER_HEARTBEAT_NOTIFICATION : public BaseClass
 {
     public:

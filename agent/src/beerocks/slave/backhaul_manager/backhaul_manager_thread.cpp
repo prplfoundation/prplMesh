@@ -3064,6 +3064,8 @@ bool backhaul_manager::send_slaves_enable()
         }
 
         if (soc->sta_iface == db->backhaul.selected_iface_name) {
+            LOG(DEBUG) << "Get slave channel from suplicant iface " << soc->sta_iface
+                       << " that is on channel" << iface_hal->get_channel();
             notification->channel() = iface_hal->get_channel();
         }
         LOG(DEBUG) << "Sending enable to slave " << soc->hostap_iface
@@ -3109,6 +3111,11 @@ bool backhaul_manager::hal_event_handler(bwl::base_wlan_hal::hal_event_ptr_t eve
         }
         if (FSM_IS_IN_STATE(WAIT_WPS)) {
             db->backhaul.selected_iface_name = iface;
+            db->backhaul.connection_type     = AgentDB::sBackhaul::eConnectionType::Wireless;
+            LOG(DEBUG) << "WPS scan completed successfully on iface=" << iface
+                       << " ,enabling slaves on ";
+            // Send slaves to enable the AP's
+            send_slaves_enable();
             FSM_MOVE_STATE(MASTER_DISCOVERY);
         }
         if (FSM_IS_IN_STATE(WIRELESS_ASSOCIATE_4ADDR_WAIT)) {
@@ -4111,6 +4118,15 @@ const std::string backhaul_manager::freq_to_radio_mac(eFreqType freq) const
 
 bool backhaul_manager::start_wps_pbc(const sMacAddr &radio_mac)
 {
+    auto it = std::find_if(
+        slaves_sockets.begin(), slaves_sockets.end(),
+        [&](std::shared_ptr<sRadioInfo> slave) { return slave->radio_mac == radio_mac; });
+    if (it == slaves_sockets.end()) {
+        LOG(ERROR) << "couldn't find slave for radio mac " << radio_mac;
+        return false;
+    }
+
+    auto soc = *it;
     if ((m_eFSMState == EState::OPERATIONAL)) {
         // WPS PBC registration on AP interface
         auto msg = message_com::create_vs_message<
@@ -4120,15 +4136,6 @@ bool backhaul_manager::start_wps_pbc(const sMacAddr &radio_mac)
             return false;
         }
 
-        auto it = std::find_if(
-            slaves_sockets.begin(), slaves_sockets.end(),
-            [&](std::shared_ptr<sRadioInfo> slave) { return slave->radio_mac == radio_mac; });
-        if (it == slaves_sockets.end()) {
-            LOG(ERROR) << "couldn't find slave for radio mac " << radio_mac;
-            return false;
-        }
-
-        auto soc = *it;
         LOG(DEBUG) << "Start WPS PBC registration on interface " << soc->hostap_iface;
         return message_com::send_cmdu(soc->slave, cmdu_tx);
     } else {
@@ -4138,7 +4145,22 @@ bool backhaul_manager::start_wps_pbc(const sMacAddr &radio_mac)
             LOG(ERROR) << "Failed to get backhaul STA hal";
             return false;
         }
-        return sta_wlan_hal->start_wps_pbc();
+
+        if (!sta_wlan_hal->start_wps_pbc()) {
+            LOG(ERROR) << "Failed to start wps";
+            return false;
+        }
+
+        // Disable the radio interface to make sure its not beaconing along while the supplicant is scanning
+        LOG(DEBUG) << "Disable the radio interface " << soc->hostap_iface << " before WPS start";
+        auto msg = message_com::create_vs_message<
+            beerocks_message::cACTION_BACKHAUL_RADIO_DISABLE_REQUEST>(cmdu_tx);
+        if (!msg) {
+            LOG(ERROR) << "Failed building cACTION_BACKHAUL_RADIO_DISABLE_REQUEST";
+            return false;
+        }
+
+        return message_com::send_cmdu(soc->slave, cmdu_tx);
     }
 }
 

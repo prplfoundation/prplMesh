@@ -930,6 +930,17 @@ bool ap_manager_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_
         }
         break;
     }
+
+    case beerocks_message::ACTION_APMANAGER_RADIO_DISABLE_REQUEST: {
+        LOG(DEBUG) << "Got ACTION_APMANAGER_RADIO_DISABLE_REQUEST";
+        // Disable the radio interface
+        if (!ap_wlan_hal->disable()) {
+            LOG(ERROR) << "Failed disabling radion iface";
+            return false;
+        }
+        break;
+    }
+
     case beerocks_message::ACTION_APMANAGER_STEERING_CLIENT_SET_REQUEST: {
         auto request =
             beerocks_header
