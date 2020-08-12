@@ -283,7 +283,7 @@ class ALEntityDocker(ALEntity):
                 device_ip = re.search(
                     r'inet (?P<ip>[0-9.]+)', device_ip_output.decode('utf-8')).group('ip')
         else:
-            device_ip = self.device.docker_name
+            device_ip = self.name
 
         ucc_socket = UCCSocket(device_ip, ucc_port)
         mac = ucc_socket.dev_get_parameter('ALid')
@@ -296,12 +296,12 @@ class ALEntityDocker(ALEntity):
 
     def command(self, *command: str) -> bytes:
         '''Execute `command` in docker container and return its output.'''
-        return subprocess.check_output(("docker", "exec", self.device.docker_name) + command)
+        return subprocess.check_output(("docker", "exec", self.name) + command)
 
     def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
         '''Poll the entity's logfile until it contains "regex" or times out.'''
         program = "controller" if self.is_controller else "agent"
-        return _docker_wait_for_log(self.device.docker_name, [program], regex, start_line, timeout)
+        return _docker_wait_for_log(self.name, [program], regex, start_line, timeout)
 
     def prprlmesh_status_check(self):
         return self.device.prprlmesh_status_check()
@@ -323,7 +323,7 @@ class RadioDocker(Radio):
     def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
         '''Poll the radio's logfile until it contains "regex" or times out.'''
         programs = ("agent_" + self.iface_name, "ap_manager_" + self.iface_name)
-        return _docker_wait_for_log(self.agent.device.docker_name, programs, regex,
+        return _docker_wait_for_log(self.agent.name, programs, regex,
                                     start_line, timeout)
 
     def send_bwl_event(self, event: str) -> None:

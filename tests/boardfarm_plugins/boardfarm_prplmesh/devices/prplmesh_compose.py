@@ -48,12 +48,12 @@ class PrplMeshCompose(PrplMeshBase):
                                  "run", "start-controller-agent")
             time.sleep(self.delay)
             self.controller_entity = \
-                ALEntityDocker(self.name, device=self, is_controller=True, compose=True)
+                ALEntityDocker(self.docker_name, device=self, is_controller=True, compose=True)
         else:
             self._docker_compose(["-d", "--name", self.docker_name, "agent"],
                                  "run", "start-agent")
             time.sleep(self.delay)
-            self.agent_entity = ALEntityDocker(self.name, device=self,
+            self.agent_entity = ALEntityDocker(self.docker_name, device=self,
                                                is_controller=False, compose=True)
 
         self.wired_sniffer = Sniffer(_get_bridge_interface(self.docker_network),
