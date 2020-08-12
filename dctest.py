@@ -156,14 +156,15 @@ def cleanup(rc):
 if __name__ == '__main__':
     check_docker_versions()
     parser = argparse.ArgumentParser(description='Dockerized test launcher')
-    parser.add_argument('--test', dest='test', type=str, help='Test to be run')
-    parser.add_argument('--clean', dest='clean', action='store_true',
+    group = parser.add_mutually_exclusive_group()
+    group.add_argument('--test', dest='test', type=str, help='Test to be run')
+    group.add_argument('--clean', dest='clean', action='store_true',
                         help='Clean containers images and networks')
-    parser.add_argument('--build', dest='build', action='store_true',
+    group.add_argument('--build', dest='build', action='store_true',
                         help='Rebuild containers')
-    parser.add_argument('--shell', dest='shell', action='store_true',
+    group.add_argument('--shell', dest='shell', action='store_true',
                         help='Run a shell on the bf container')
-    parser.add_argument('--comp', dest='comp', action='store_true',
+    group.add_argument('--comp', dest='comp', action='store_true',
                         help='Pass the rest of arguments to docker-compose')
     parser.add_argument('--id', dest='bid', type=str,
                         help='Specify the id to use for build/shell/comp/clean')
