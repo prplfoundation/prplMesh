@@ -466,7 +466,6 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
         network_utils::iface_info iface_info;
         bool backhaul_manager_exist = false;
 
-        notification->params().is_prplmesh_controller = is_prplmesh_controller;
         notification->params().controller_bridge_mac = tlvf::mac_from_string(controller_bridge_mac);
 
         if (!db->device_conf.local_gw) {
@@ -2844,18 +2843,19 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
         return true;
     }
 
+    // Set prplmesh_controller to false by default. If "SLAVE_HANDSHAKE_RESPONSE" is received, mark
+    // it to 'true'.
+    db->controller_info.prplmesh_controller = false;
+
     auto beerocks_header = message_com::parse_intel_vs_message(cmdu_rx);
     if (beerocks_header &&
         beerocks_header->action_op() == beerocks_message::ACTION_CONTROL_SLAVE_HANDSHAKE_RESPONSE) {
         // mark controller as prplMesh
         LOG(DEBUG) << "prplMesh controller: received ACTION_CONTROL_SLAVE_HANDSHAKE_RESPONSE from "
                    << src_mac;
-        LOG_IF(is_prplmesh_controller, ERROR)
-            << src_mac << " already marked as prplmesh controller!";
-        is_prplmesh_controller = true;
+        db->controller_info.prplmesh_controller = true;
     } else {
         LOG(DEBUG) << "Not prplMesh controller " << src_mac;
-        is_prplmesh_controller = false;
     }
     controller_bridge_mac = src_mac;
     LOG(INFO) << "update controller_bridge_mac=" << controller_bridge_mac;
