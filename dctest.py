@@ -117,7 +117,6 @@ class Services:
     def dc(self, args, interactive=False):
         params = ['docker-compose', '-f',
                   'tools/docker/boardfarm-ci/docker-compose.yml']
-        # params += ['-p', 'boardfarm-ci-{}'.format(self.build_id)]
         params += args
         local_env = os.environ
         local_env['ROOT_DIR'] = self.rootdir
