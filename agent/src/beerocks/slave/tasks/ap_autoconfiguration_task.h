@@ -25,8 +25,11 @@ public:
 
     void work() override;
 
+    enum eEvent : uint8_t {
+        START_AP_AUTOCONFIGURATION,
+    };
 
-    void handle_event(uint8_t event_enum_value, void *event_obj) override;
+    void handle_event(uint8_t event_enum_value, const void *event_obj) override;
 
     bool handle_cmdu(ieee1905_1::CmduMessageRx &cmdu_rx, const sMacAddr &src_mac,
                      std::shared_ptr<beerocks_header> beerocks_header) override;

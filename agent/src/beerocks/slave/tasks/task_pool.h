@@ -41,7 +41,7 @@ public:
      * @param event Event type, defined on the task itself.
      * @param event_obj Pointer to some chunk of memory used to pass data to the event handler.
      */
-    void send_event(eTaskType task_type, uint8_t event, void *event_obj = nullptr);
+    void send_event(eTaskType task_type, uint8_t event, const void *event_obj = nullptr);
 
     /**
      * @brief Iterate over all tasks on the pool and pass them the message on 'cmdu_rx'.
