@@ -769,6 +769,11 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
 
     // UCC FSM. If UCC is in RESET, we have to stay in (or move to) ENABLED state.
     if (m_agent_ucc_listener && m_agent_ucc_listener->is_in_reset()) {
+        auto active_hal = get_wireless_hal();
+        if (active_hal) {
+            active_hal->disconnect();
+        }
+
         auto db            = AgentDB::get();
         auto bridge        = db->bridge.iface_name;
         auto bridge_ifaces = network_utils::linux_get_iface_list_from_bridge(bridge);
@@ -787,10 +792,6 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
             // Stay in ENABLE state until onboarding_state will change
             return true;
         } else if (m_eFSMState > EState::ENABLED) {
-            auto active_hal = get_wireless_hal();
-            if (active_hal) {
-                active_hal->disconnect();
-            }
             FSM_MOVE_STATE(RESTART);
         }
     }
