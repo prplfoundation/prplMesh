@@ -321,8 +321,13 @@ class TestFlows:
         self.check_no_cmdu_type("autoconfig search while in reset", 0x0007, agent.mac)
         env.checkpoint()
         agent.cmd_reply("dev_set_config,backhaul,eth")
-        time.sleep(1)
+        time.sleep(2)
         self.check_cmdu_type("autoconfig search", 0x0007, agent.mac)
+
+        # After dev_reset_default there is a delay between the auto_config message to the moment,
+        # that the sockets to the son_slaves are open. Add a delay to make sure that the son_slaves
+        # are operational before continuing to the next test.
+        time.sleep(3)
 
     def test_capi_wireless_onboarding(self):
         '''Check configuration of wireless backhaul.'''
