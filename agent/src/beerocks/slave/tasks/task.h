@@ -48,8 +48,9 @@ public:
      * @brief Handle events, which are being send from containing thread.
      * 
      * @param event_enum_value Event enum value which shall be defined on the task.
+     * @param event_obj Pointer to some chunk of memory used to pass data to the event handler.
      */
-    virtual void handle_event(uint8_t event_enum_value){};
+    virtual void handle_event(uint8_t event_enum_value, void *event_obj){};
 
     /**
      * @brief Handle CMDU message.
