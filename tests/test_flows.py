@@ -53,7 +53,8 @@ class TestFlows:
 
     def wait_for_log(self, entity_or_radio: Union[env.ALEntity, env.Radio], regex: str,
                      start_line: int, timeout: float, fail_on_mismatch: bool = True) -> bool:
-        result, line, match = entity_or_radio.wait_for_log(regex, start_line, timeout)
+        result, line, match = entity_or_radio.wait_for_log(regex, start_line, timeout,
+                                                           fail_on_mismatch=fail_on_mismatch)
         if fail_on_mismatch and (not result):
             self.__fail_no_message()
         return result, line, match
@@ -312,7 +313,7 @@ class TestFlows:
     # TEST DEFINITIONS #
 
     def test_dev_reset_default(self):
-        '''Check behaviour of dev_reset_default CAPI command.'''
+        '''Check behavior of dev_reset_default CAPI command.'''
         agent = env.agents[0]
         agent.cmd_reply("dev_reset_default,devrole,agent,program,map,type,DUT")
         env.checkpoint()
