@@ -580,11 +580,6 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
         for (auto sc : slaves_sockets) {
 
             LOG(DEBUG) << "Iterating on slave " << sc->hostap_iface;
-            //if no controller was discovered for that slave's band, skip
-            if (!sc->controller_discovered) {
-                LOG(DEBUG) << "controller not discovered, skipping...";
-                continue;
-            }
 
             // If the notification should be sent to a specific socket, skip all other
             if (pSocket != nullptr && pSocket != sc) {
@@ -626,8 +621,6 @@ bool backhaul_manager::finalize_slaves_connect_state(bool fConnected,
             if (sc->slave == nullptr) {
                 continue;
             }
-
-            sc->controller_discovered = false;
 
             auto notification = message_com::create_vs_message<
                 beerocks_message::cACTION_BACKHAUL_DISCONNECTED_NOTIFICATION>(cmdu_tx);
@@ -1803,10 +1796,9 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
 
         std::copy_n(channels, request->preferred_channels_size(), soc->preferred_channels.begin());
 
-        soc->radio_mac             = request->iface_mac();
-        soc->controller_discovered = false;
-        soc->ht_supported          = request->ht_supported();
-        soc->ht_capability         = request->ht_capability();
+        soc->radio_mac     = request->iface_mac();
+        soc->ht_supported  = request->ht_supported();
+        soc->ht_capability = request->ht_capability();
         std::copy_n(request->ht_mcs_set(), soc->ht_mcs_set.size(), soc->ht_mcs_set.begin());
         soc->vht_supported  = request->vht_supported();
         soc->vht_capability = request->vht_capability();
@@ -2893,16 +2885,12 @@ bool backhaul_manager::handle_1905_autoconfiguration_response(ieee1905_1::CmduMe
             }
             if (radio->front.freq_type == freq_type) {
                 LOG(DEBUG) << band_name << " band socket found, iface=" << soc->hostap_iface;
-                if (!soc->controller_discovered) {
-                    LOG(DEBUG) << "set controller_discovered to true for " << band_name
-                               << " band, iface=" << soc->hostap_iface;
-                    LOG(DEBUG) << FSM_CURR_STATE_STR;
-                    soc->controller_discovered = true;
-                    finalize_slaves_connect_state(true, soc);
-                }
+                LOG(DEBUG) << "controller_discovered on" << band_name
+                           << " band, iface=" << soc->hostap_iface;
+                LOG(DEBUG) << FSM_CURR_STATE_STR;
+                finalize_slaves_connect_state(true, soc);
             }
         }
-
     } else {
         LOG(ERROR) << "tlvSupportedFreqBand missing - ignoring autoconfiguration response message";
         return true;

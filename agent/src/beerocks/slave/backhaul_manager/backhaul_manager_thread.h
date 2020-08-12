@@ -303,7 +303,6 @@ private:
         std::string sta_iface;    /**< Name of the bSTA interface on the radio (if any) */
         bool sta_iface_filter_low      = false;
         bool slave_is_backhaul_manager = false;
-        bool controller_discovered     = false;
 
         std::shared_ptr<bwl::sta_wlan_hal> sta_wlan_hal;
         Socket *sta_hal_ext_events = nullptr;
