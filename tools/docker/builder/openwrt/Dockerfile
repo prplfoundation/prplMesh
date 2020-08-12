@@ -13,7 +13,7 @@ FROM ubuntu:18.04 as openwrt-prerequisites
 RUN apt-get update \
     && apt-get -y install --no-install-recommends \
     build-essential libncurses5 libncurses5-dev python python3 \
-    unzip git ca-certificates gawk wget file bash \
+    unzip git ca-certificates gawk wget file bash fakeroot \
     python-yaml python3-yaml rsync less vim gnupg software-properties-common \
     #   yq is available in a separate ppa (needs gnupg and software-properties-common):
     && if [ -n "$HTTP_PROXY" ]; then KEYSERVER_OPTIONS="--keyserver-options http-proxy=$HTTP_PROXY"; fi \
