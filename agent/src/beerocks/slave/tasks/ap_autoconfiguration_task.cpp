@@ -68,21 +68,72 @@ void ApAutoConfigurationTask::work()
 {
     uint8_t configured_aps_count = 0;
     for (auto &state_kv : m_state) {
-        // Currently commented out because it makes the compilation to fail on unused variable.
-        // Will be commented out on the next commits.
-        // const auto &radio_iface = state_kv.first;
-        auto &state_status = state_kv.second;
+        const auto &radio_iface = state_kv.first;
+        auto &state_status      = state_kv.second;
         switch (state_status.state) {
         case eState::UNCONFIGURED: {
             break;
         }
         case eState::CONTROLLER_DISCOVERY: {
+            auto db = AgentDB::get();
+
+            auto radio = db->radio(radio_iface);
+            if (!radio) {
+                continue;
+            }
+
+            // If another radio with same band already finished the discovery phase, we can skip
+            // directly to next phase (AP_CONFIGURATION).
+            if (m_discovery_status[radio->front.freq_type].completed) {
+                FSM_MOVE_STATE(radio_iface, eState::AP_CONFIGURATION);
+            }
+
+            // If another radio with same band already have sent the
+            // AP_AUTOCONFIGURATION_SEARCH_MESSAGE, we can skip and let it handle it.
+            if (m_discovery_status[radio->front.freq_type].msg_sent) {
+                continue;
+            }
+
+            if (state_status.attempts++ > MAX_FAILED_AUTOCONFIG_SEARCH_ATTEMPTS) {
+                LOG(ERROR) << "exceeded maximum attempts for "
+                              "ap_autoconfiguration discovery on "
+                              "radio iface="
+                           << radio_iface << ", state_attempts=" << state_status.attempts;
+                db->statuses.ap_autoconfiguration_failure = true;
+                break;
+            }
+
+            if (send_ap_autoconfiguration_search_message(radio_iface)) {
+                m_discovery_status[radio->front.freq_type].msg_sent = true;
+            }
+
+            state_status.timeout = std::chrono::steady_clock::now() +
+                                   std::chrono::seconds(AUTOCONFIG_DISCOVERY_TIMEOUT_SECONDS);
+
+            FSM_MOVE_STATE(radio_iface, eState::WAIT_FOR_CONTROLLER_DISCOVERY_COMPLETE);
             break;
         }
         case eState::WAIT_FOR_CONTROLLER_DISCOVERY_COMPLETE: {
+            auto db    = AgentDB::get();
+            auto radio = db->radio(radio_iface);
+            if (!radio) {
+                continue;
+            }
+            if (m_discovery_status[radio->front.freq_type].completed) {
+                FSM_MOVE_STATE(radio_iface, eState::AP_CONFIGURATION);
+                break;
+            }
+
+            if (std::chrono::steady_clock::now() > state_status.timeout) {
+                FSM_MOVE_STATE(radio_iface, eState::CONTROLLER_DISCOVERY);
+            }
             break;
         }
         case eState::AP_CONFIGURATION: {
+            // TODO: This is a temporary implementation, since currently the son_slave is handling
+            // the configuration flow. When the son_slave will be unified, the configuration flow
+            // will move to here.
+            FSM_MOVE_STATE(radio_iface, eState::CONFIGIRED);
             break;
         }
         case eState::WAIT_FOR_AP_CONFIGURATION_COMPLETE: {

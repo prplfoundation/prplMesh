@@ -235,10 +235,6 @@ private:
     const int AP_BLACK_LIST_FAILED_ATTEMPTS_THRESHOLD = 2;
     const int INTERFACE_BRING_UP_TIMEOUT_SECONDS      = 600;
     const int DEAUTH_REASON_PASSPHRASE_MISMACH        = 2;
-    const int AUTOCONFIG_DISCOVERY_TIMEOUT_SECONDS    = 1;
-    const int MAX_FAILED_AUTOCONFIG_SEARCH_ATTEMPTS   = 20;
-    const int DISCOVERY_NEIGHBOUR_REMOVAL_TIMEOUT =
-        ieee1905_1_consts::DISCOVERY_NOTIFICATION_TIMEOUT_SEC + 3; // 3 seconds grace period
 
     std::chrono::steady_clock::time_point state_time_stamp_timeout;
     int state_attempts;
@@ -519,8 +515,7 @@ private:
     STATE(_WIRELESS_END_)                                                                          \
                                                                                                    \
     STATE(MASTER_DISCOVERY)                                                                        \
-    STATE(SEND_AUTOCONFIG_SEARCH_MESSAGE)                                                          \
-    STATE(WAIT_FOR_AUTOCONFIG_RESPONSE_MESSAGE)                                                    \
+    STATE(WAIT_FOR_AUTOCONFIG_COMPLETE)                                                            \
     STATE(CONNECT_TO_MASTER)                                                                       \
     STATE(CONNECTED)                                                                               \
     STATE(OPERATIONAL)                                                                             \
