@@ -83,7 +83,7 @@ void TopologyTask::work()
     }
 }
 
-void TopologyTask::handle_event(uint8_t event_enum_value, void *event_obj)
+void TopologyTask::handle_event(uint8_t event_enum_value, const void *event_obj)
 {
     switch (eEvent(event_enum_value)) {
     case AGENT_RADIO_STATE_CHANGED: {

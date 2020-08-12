@@ -818,8 +818,8 @@ bool backhaul_manager::backhaul_fsm_main(bool &skip_select)
             break;
         }
 
-        state_attempts = 0;
-        FSM_MOVE_STATE(SEND_AUTOCONFIG_SEARCH_MESSAGE);
+        m_task_pool.send_event(eTaskType::AP_AUTOCONFIGURATION,
+                               ApAutoConfigurationTask::eEvent::START_AP_AUTOCONFIGURATION);
         break;
     }
     case EState::SEND_AUTOCONFIG_SEARCH_MESSAGE: {
@@ -1727,7 +1727,9 @@ bool backhaul_manager::handle_slave_backhaul_message(std::shared_ptr<sRadioInfo>
 
         // If we're already connected, send a notification to the slave
         if (FSM_IS_IN_STATE(OPERATIONAL)) {
-            send_autoconfig_search_message(radio->front.iface_name);
+            m_task_pool.send_event(eTaskType::AP_AUTOCONFIGURATION,
+                                   ApAutoConfigurationTask::eEvent::START_AP_AUTOCONFIGURATION,
+                                   &radio->front.iface_name);
         } else if (pending_enable) {
             auto notification = message_com::create_vs_message<
                 beerocks_message::cACTION_BACKHAUL_BUSY_NOTIFICATION>(cmdu_tx);

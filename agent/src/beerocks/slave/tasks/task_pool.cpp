@@ -28,7 +28,7 @@ void TaskPool::run_tasks()
     }
 }
 
-void TaskPool::send_event(eTaskType task_type, uint8_t event, void *event_obj)
+void TaskPool::send_event(eTaskType task_type, uint8_t event, const void *event_obj)
 {
     auto task_it = m_task_pool.find(task_type);
     if (task_it == m_task_pool.end()) {
