@@ -94,6 +94,7 @@ public:
 
     struct sControllerInfo {
         bool prplmesh_controller;
+        sMacAddr bridge_mac;
     } controller_info;
 
     /** 

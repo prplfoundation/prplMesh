@@ -55,7 +55,6 @@ public:
     virtual bool work() override;
 
     // For agent_ucc_listener
-    const std::string &get_controller_bridge_mac() const { return controller_bridge_mac; }
     /**
      * @brief get radio mac (ruid) of registered slave based on frequency type
      * 
@@ -265,7 +264,6 @@ private:
     bool m_eth_link_up  = false;
     bool pending_enable = false;
 
-    std::string controller_bridge_mac;
     std::string bssid_bridge_mac;
 
     std::unique_ptr<beerocks::agent_ucc_listener> m_agent_ucc_listener;

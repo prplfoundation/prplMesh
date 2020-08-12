@@ -1078,8 +1078,6 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
             backhaul_params.gw_ipv4 = network_utils::ipv4_to_string(notification->params().gw_ipv4);
             backhaul_params.gw_bridge_mac =
                 tlvf::mac_to_string(notification->params().gw_bridge_mac);
-            backhaul_params.controller_bridge_mac =
-                tlvf::mac_to_string(notification->params().controller_bridge_mac);
             backhaul_params.bridge_ipv4 =
                 network_utils::ipv4_to_string(notification->params().bridge_ipv4);
             backhaul_params.backhaul_mac = tlvf::mac_to_string(notification->params().backhaul_mac);
@@ -3177,7 +3175,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         LOG(TRACE) << "MASTER_CONNECTED";
 
         master_socket = backhaul_manager_socket;
-        master_socket->setPeerMac(backhaul_params.controller_bridge_mac);
 
         auto db = AgentDB::get();
         if (!wlan_settings.band_enabled) {
@@ -3210,7 +3207,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         LOG(INFO) << "Backhaul Params Info:";
         LOG(INFO) << "gw_ipv4=" << backhaul_params.gw_ipv4;
         LOG(INFO) << "gw_bridge_mac=" << backhaul_params.gw_bridge_mac;
-        LOG(INFO) << "controller_bridge_mac=" << backhaul_params.controller_bridge_mac;
+        LOG(INFO) << "controller_bridge_mac=" << db->controller_info.bridge_mac;
         LOG(INFO) << "prplmesh_controller=" << db->controller_info.prplmesh_controller;
         LOG(INFO) << "bridge_mac=" << db->bridge.mac;
         LOG(INFO) << "bridge_ipv4=" << backhaul_params.bridge_ipv4;
@@ -3617,7 +3614,7 @@ bool slave_thread::send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx)
     auto dst_addr =
         cmdu_tx.getMessageType() == ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE
             ? network_utils::MULTICAST_1905_MAC_ADDR
-            : backhaul_params.controller_bridge_mac;
+            : tlvf::mac_to_string(db->controller_info.bridge_mac);
 
     return message_com::send_cmdu(master_socket, cmdu_tx, dst_addr,
                                   tlvf::mac_to_string(db->bridge.mac));
