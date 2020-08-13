@@ -122,7 +122,7 @@ static prplmesh::hostapd::Configuration load_hostapd_config(const std::string &r
         prplmesh::hostapd::Configuration hostapd_conf(try_fname);
 
         // try loading
-        if (!hostapd_conf.load("interface=")) {
+        if (!hostapd_conf.load("interface=", "bss=")) {
             LOG(ERROR) << "Failed to load hostapd config file: " << hostapd_conf;
             continue;
         }
