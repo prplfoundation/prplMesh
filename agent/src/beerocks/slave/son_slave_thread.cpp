@@ -4203,8 +4203,9 @@ bool slave_thread::handle_client_association_request(Socket *sd, ieee1905_1::Cmd
 bool slave_thread::handle_1905_higher_layer_data_message(Socket &sd,
                                                          ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    // Only one backhaul manager (the slave) should return ACK for higher layer data message.
-    if (is_backhaul_manager) {
+    // Only one son_slave should return ACK for higher layer data message, therefore ignore
+    // this message on non backhaul manager son_slaves.
+    if (!is_backhaul_manager) {
         return true;
     }
 
