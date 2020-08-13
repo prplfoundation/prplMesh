@@ -6,7 +6,6 @@ stages:
   - build
   - test
   - certification-dummy
-  - certification-netgear-rax40
   - certification-turris-omnia
   - certification-axepoint
   - certification-axepoint-bhwifi
@@ -330,12 +329,12 @@ run-certification-tests:
   variables:
     # TESTS_TO_RUN needs to be set by the user (or the pipeline schedule)
     GIT_CLONE_PATH: "/builds/prpl-foundation/prplmesh/prplMesh/"
-    # device to test with: prplmesh for dummy bwl, netgear-rax40 for dwpal on rax40
+    # device to test with: prplmesh for dummy bwl, axepoint for dwpal on axepoint
     DEVICE_UNDER_TEST: prplmesh
   script:
     - |
-      if [ "$DEVICE_UNDER_TEST" = netgear-rax40 ] ; then
-          tools/deploy_firmware.py --device netgear-rax40 --target-name "$DEVICE_UNDER_TEST" --image NETGEAR_RAX40-squashfs-fullimage.img
+      if [ "$DEVICE_UNDER_TEST" = axepoint ] ; then
+          tools/deploy_firmware.py --device axepoint --target-name "$DEVICE_UNDER_TEST" --image AX6000_2000_ETH_11AXUCI-squashfs-fullimage.img
           echo "Deploying to $DEVICE_UNDER_TEST"
           tools/deploy_ipk.sh --certification-mode $DEVICE_UNDER_TEST build/$DEVICE_UNDER_TEST/prplmesh.ipk
       fi
@@ -347,7 +346,7 @@ run-certification-tests:
     when: always
   needs:
     - job: build-in-docker
-    - job: build-for-netgear-rax40
+    - job: build-for-axepoint
   tags:
     - certs-tests
   timeout: 36h
@@ -357,7 +356,6 @@ run-certification-tests:
 include:
   - local: "/ci/certification/generic.yml"
   - local: "/ci/certification/dummy.yml"
-  - local: "/ci/certification/netgear-rax40.yml"
   - local: "/ci/certification/turris-omnia.yml"
   - local: "/ci/certification/axepoint.yml"
   - local: "/ci/certification/axepoint-bhwifi.yml"
