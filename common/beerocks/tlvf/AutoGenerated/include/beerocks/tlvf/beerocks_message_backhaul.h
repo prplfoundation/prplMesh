@@ -130,7 +130,6 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         sMacAddr& preferred_bssid();
         uint8_t& wire_iface_type();
         uint8_t& wireless_iface_type();
-        uint8_t& mem_only_psk();
         uint8_t& backhaul_preferred_radio_band();
         beerocks::eFreqType& frequency_band();
         beerocks::eWiFiBandwidth& max_bandwidth();
@@ -161,7 +160,6 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         sMacAddr* m_preferred_bssid = nullptr;
         uint8_t* m_wire_iface_type = nullptr;
         uint8_t* m_wireless_iface_type = nullptr;
-        uint8_t* m_mem_only_psk = nullptr;
         uint8_t* m_backhaul_preferred_radio_band = nullptr;
         beerocks::eFreqType* m_frequency_band = nullptr;
         beerocks::eWiFiBandwidth* m_max_bandwidth = nullptr;
