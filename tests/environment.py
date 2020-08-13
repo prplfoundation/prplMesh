@@ -252,6 +252,8 @@ class ALEntityDocker(ALEntity):
 
     The entity is defined from the name of the container, the rest is derived from that.
     '''
+    # NOTE: name arg can be also extracted from the device class itself, but test_flows.py
+    # don't have it. We can remove this arg as soon, as we drop test_flows.py
     def __init__(self, name: str, device: None = None, is_controller: bool = False,
                  compose: bool = False):
 
