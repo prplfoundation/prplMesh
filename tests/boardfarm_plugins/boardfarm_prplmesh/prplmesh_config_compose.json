@@ -16,7 +16,7 @@
                 "name": "lan2",
                 "type": "prplmesh_compose",
                 "role": "agent",
-                "delay" : 30,
+                "delay" : 7,
                 "conn_cmd": ""
             },
             {
