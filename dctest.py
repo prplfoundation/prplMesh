@@ -121,8 +121,7 @@ class Services:
         local_env = os.environ
         local_env['ROOT_DIR'] = self.rootdir
         docker_gid = grp.getgrnam('docker')[2]
-        local_env['CURRENT_UID'] = str(os.getuid()) + ':' + str(docker_gid)
-        local_env['CURRENT_ID'] = str(os.getuid())
+        local_env['CURRENT_UID_GID'] = str(os.getuid()) + ':' + str(docker_gid)
         local_env['RUN_ID'] = self.build_id
 
         if os.getenv('CI_PIPELINE_ID') is None:
@@ -133,7 +132,6 @@ class Services:
             # Running inside gitlab-ci
             local_env['FINAL_ROOT_DIR'] = '/builds/prpl-foundation/prplMesh'
 
-        # local_env['CURRENT_UID']= str(os.getuid()) + ':' + str(os.getgid())
         if not interactive:
             proc = Popen(params, stdout=PIPE, stderr=PIPE)
             for line in proc.stdout:
