@@ -385,64 +385,6 @@ bool cACTION_BACKHAUL_ENABLE::set_sta_iface(const char str[], size_t size) {
     std::copy(str, str + size, m_sta_iface);
     return true;
 }
-std::string cACTION_BACKHAUL_ENABLE::ssid_str() {
-    char *ssid_ = ssid();
-    if (!ssid_) { return std::string(); }
-    return std::string(ssid_, m_ssid_idx__);
-}
-
-char* cACTION_BACKHAUL_ENABLE::ssid(size_t length) {
-    if( (m_ssid_idx__ == 0) || (m_ssid_idx__ < length) ) {
-        TLVF_LOG(ERROR) << "ssid length is smaller than requested length";
-        return nullptr;
-    }
-    return ((char*)m_ssid);
-}
-
-bool cACTION_BACKHAUL_ENABLE::set_ssid(const std::string& str) { return set_ssid(str.c_str(), str.size()); }
-bool cACTION_BACKHAUL_ENABLE::set_ssid(const char str[], size_t size) {
-    if (str == nullptr) {
-        TLVF_LOG(WARNING) << "set_ssid received a null pointer.";
-        return false;
-    }
-    if (size > beerocks::message::WIFI_SSID_MAX_LENGTH) {
-        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
-        return false;
-    }
-    std::copy(str, str + size, m_ssid);
-    return true;
-}
-std::string cACTION_BACKHAUL_ENABLE::pass_str() {
-    char *pass_ = pass();
-    if (!pass_) { return std::string(); }
-    return std::string(pass_, m_pass_idx__);
-}
-
-char* cACTION_BACKHAUL_ENABLE::pass(size_t length) {
-    if( (m_pass_idx__ == 0) || (m_pass_idx__ < length) ) {
-        TLVF_LOG(ERROR) << "pass length is smaller than requested length";
-        return nullptr;
-    }
-    return ((char*)m_pass);
-}
-
-bool cACTION_BACKHAUL_ENABLE::set_pass(const std::string& str) { return set_pass(str.c_str(), str.size()); }
-bool cACTION_BACKHAUL_ENABLE::set_pass(const char str[], size_t size) {
-    if (str == nullptr) {
-        TLVF_LOG(WARNING) << "set_pass received a null pointer.";
-        return false;
-    }
-    if (size > beerocks::message::WIFI_PASS_MAX_LENGTH) {
-        TLVF_LOG(ERROR) << "Received buffer size is smaller than string length";
-        return false;
-    }
-    std::copy(str, str + size, m_pass);
-    return true;
-}
-uint32_t& cACTION_BACKHAUL_ENABLE::security_type() {
-    return (uint32_t&)(*m_security_type);
-}
-
 sMacAddr& cACTION_BACKHAUL_ENABLE::preferred_bssid() {
     return (sMacAddr&)(*m_preferred_bssid);
 }
@@ -573,7 +515,6 @@ void cACTION_BACKHAUL_ENABLE::class_swap()
 {
     tlvf_swap(8*sizeof(eActionOp_BACKHAUL), reinterpret_cast<uint8_t*>(m_action_op));
     m_iface_mac->struct_swap();
-    tlvf_swap(32, reinterpret_cast<uint8_t*>(m_security_type));
     m_preferred_bssid->struct_swap();
     tlvf_swap(8*sizeof(beerocks::eFreqType), reinterpret_cast<uint8_t*>(m_frequency_band));
     tlvf_swap(8*sizeof(beerocks::eWiFiBandwidth), reinterpret_cast<uint8_t*>(m_max_bandwidth));
@@ -617,9 +558,6 @@ size_t cACTION_BACKHAUL_ENABLE::get_initial_size()
     class_size += sizeof(sMacAddr); // iface_mac
     class_size += beerocks::message::IFACE_NAME_LENGTH * sizeof(char); // wire_iface
     class_size += beerocks::message::IFACE_NAME_LENGTH * sizeof(char); // sta_iface
-    class_size += beerocks::message::WIFI_SSID_MAX_LENGTH * sizeof(char); // ssid
-    class_size += beerocks::message::WIFI_PASS_MAX_LENGTH * sizeof(char); // pass
-    class_size += sizeof(uint32_t); // security_type
     class_size += sizeof(sMacAddr); // preferred_bssid
     class_size += sizeof(uint8_t); // wire_iface_type
     class_size += sizeof(uint8_t); // wireless_iface_type
@@ -661,23 +599,6 @@ bool cACTION_BACKHAUL_ENABLE::init()
         return false;
     }
     m_sta_iface_idx__  = beerocks::message::IFACE_NAME_LENGTH;
-    m_ssid = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::WIFI_SSID_MAX_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::WIFI_SSID_MAX_LENGTH) << ") Failed!";
-        return false;
-    }
-    m_ssid_idx__  = beerocks::message::WIFI_SSID_MAX_LENGTH;
-    m_pass = (char*)m_buff_ptr__;
-    if (!buffPtrIncrementSafe(sizeof(char) * (beerocks::message::WIFI_PASS_MAX_LENGTH))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(char) * (beerocks::message::WIFI_PASS_MAX_LENGTH) << ") Failed!";
-        return false;
-    }
-    m_pass_idx__  = beerocks::message::WIFI_PASS_MAX_LENGTH;
-    m_security_type = reinterpret_cast<uint32_t*>(m_buff_ptr__);
-    if (!buffPtrIncrementSafe(sizeof(uint32_t))) {
-        LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(uint32_t) << ") Failed!";
-        return false;
-    }
     m_preferred_bssid = reinterpret_cast<sMacAddr*>(m_buff_ptr__);
     if (!buffPtrIncrementSafe(sizeof(sMacAddr))) {
         LOG(ERROR) << "buffPtrIncrementSafe(" << std::dec << sizeof(sMacAddr) << ") Failed!";

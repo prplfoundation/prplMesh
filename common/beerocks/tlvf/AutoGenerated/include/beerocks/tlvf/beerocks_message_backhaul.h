@@ -127,15 +127,6 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         char* sta_iface(size_t length = 0);
         bool set_sta_iface(const std::string& str);
         bool set_sta_iface(const char buffer[], size_t size);
-        std::string ssid_str();
-        char* ssid(size_t length = 0);
-        bool set_ssid(const std::string& str);
-        bool set_ssid(const char buffer[], size_t size);
-        std::string pass_str();
-        char* pass(size_t length = 0);
-        bool set_pass(const std::string& str);
-        bool set_pass(const char buffer[], size_t size);
-        uint32_t& security_type();
         sMacAddr& preferred_bssid();
         uint8_t& wire_iface_type();
         uint8_t& wireless_iface_type();
@@ -167,11 +158,6 @@ class cACTION_BACKHAUL_ENABLE : public BaseClass
         int m_lock_order_counter__ = 0;
         char* m_sta_iface = nullptr;
         size_t m_sta_iface_idx__ = 0;
-        char* m_ssid = nullptr;
-        size_t m_ssid_idx__ = 0;
-        char* m_pass = nullptr;
-        size_t m_pass_idx__ = 0;
-        uint32_t* m_security_type = nullptr;
         sMacAddr* m_preferred_bssid = nullptr;
         uint8_t* m_wire_iface_type = nullptr;
         uint8_t* m_wireless_iface_type = nullptr;

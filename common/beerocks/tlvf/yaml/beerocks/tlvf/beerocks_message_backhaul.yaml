@@ -42,13 +42,6 @@ cACTION_BACKHAUL_ENABLE:
   sta_iface:
     _type: char
     _length: ["beerocks::message::IFACE_NAME_LENGTH"]
-  ssid:
-    _type: char
-    _length: ["beerocks::message::WIFI_SSID_MAX_LENGTH"]
-  pass:
-    _type: char
-    _length: ["beerocks::message::WIFI_PASS_MAX_LENGTH"]
-  security_type: uint32_t # bwl::sta_wlan_hal::Security
   preferred_bssid: sMacAddr
   wire_iface_type: uint8_t
   wireless_iface_type: uint8_t
