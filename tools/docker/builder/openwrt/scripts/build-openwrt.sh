@@ -22,6 +22,7 @@ case $TARGET_DEVICE in
     *)
         cp feeds.conf.default feeds.conf
         echo "src-git prpl $PRPL_FEED" >> feeds.conf
+        echo "src-git sah  $SAH_FEED" >> feeds.conf
         scripts/feeds update -a
         scripts/feeds install -a
         {
@@ -34,6 +35,23 @@ case $TARGET_DEVICE in
             echo "CONFIG_TARGET_${TARGET_SYSTEM}_${SUBTARGET}=y"
             echo "CONFIG_TARGET_${TARGET_SYSTEM}_${SUBTARGET}_${TARGET_PROFILE}=y"
             echo "CONFIG_PACKAGE_prplmesh${PRPLMESH_VARIANT}=y"
+            # AMBIORIX modules to work with u-bus
+            echo "CONFIG_PACKAGE_amxb-ubus=y"
+            # AMBIORIX applications for debug
+            echo "CONFIG_PACKAGE_amxb-inspect=y"
+            echo "CONFIG_PACKAGE_amxo-cg=y"
+            echo "CONFIG_PACKAGE_amxrt=y"
+            # AMBIORIX libs
+            echo "CONFIG_PACKAGE_libamxb=y"
+            echo "CONFIG_PACKAGE_libamxc=y"
+            echo "CONFIG_PACKAGE_libamxd=y"
+            echo "CONFIG_PACKAGE_libamxj=y"
+            echo "CONFIG_PACKAGE_libamxo=y"
+            echo "CONFIG_PACKAGE_libamxp=y"
+            echo "CONFIG_PACKAGE_libevent2=y"
+            # Dependencies of AMBIORIX
+            echo "CONFIG_PACKAGE_uriparser=y"
+            echo "CONFIG_PACKAGE_yajl=y"
         } >> .config
         make defconfig
         printf '%s=%s\n' "PRPL_FEED" "$PRPL_FEED" >> files/etc/prplwrt-version

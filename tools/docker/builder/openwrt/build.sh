@@ -28,6 +28,8 @@ usage() {
     echo "The following environment variables will affect the build:"
     echo " - PRPL_FEED: the prpl feed that will be used to install prplMesh."
     echo "   default: $PRPL_FEED"
+    echo " - SAH_FEED: the SAH feed that will be used to install bus agnostic API."
+    echo "   default: $SAH_FEED"
 
 }
 
@@ -41,6 +43,7 @@ build_image() {
            --build-arg TARGET_DEVICE="$TARGET_DEVICE" \
            --build-arg TARGET_PROFILE="$TARGET_PROFILE" \
            --build-arg PRPL_FEED="$PRPL_FEED" \
+           --build-arg SAH_FEED="$SAH_FEED" \
            --build-arg PRPLMESH_VARIANT="$PRPLMESH_VARIANT" \
            --target="$DOCKER_TARGET_STAGE" \
            "$scriptdir/"
@@ -131,6 +134,7 @@ main() {
     dbg "OPENWRT_REPOSITORY=$OPENWRT_REPOSITORY"
     dbg "OPENWRT_VERSION=$OPENWRT_VERSION"
     dbg "PRPL_FEED=$PRPL_FEED"
+    dbg "SAH_FEED=$SAH_FEED"
     dbg "IMAGE_ONLY=$IMAGE_ONLY"
     dbg "TARGET_DEVICE=$TARGET_DEVICE"
     dbg "TAG=$TAG"
@@ -158,6 +162,7 @@ main() {
     PRPLMESH_VERSION="$(git describe --always --dirty | sed -e 's/.*-g//')"
     export PRPLMESH_VERSION
     export PRPL_FEED
+    export SAH_FEED
     export PRPLMESH_VARIANT
 
     if [ $IMAGE_ONLY = true ] ; then
@@ -175,6 +180,7 @@ IMAGE_ONLY=false
 OPENWRT_REPOSITORY='https://git.prpl.dev/prplmesh/prplwrt.git'
 OPENWRT_VERSION='3d511d477e72bd1845c75101a7f3d4e00780991d'
 PRPL_FEED='https://git.prpl.dev/prplmesh/feed-prpl.git^89e6602655713f8487c72d8d636daa610d76a468'
+SAH_FEED='https://gitlab.com/soft.at.home/buildsystems/openwrt/sah-packages.git'
 PRPLMESH_VARIANT="-nl80211"
 DOCKER_TARGET_STAGE="prplmesh-builder"
 
