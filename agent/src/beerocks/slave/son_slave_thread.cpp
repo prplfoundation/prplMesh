@@ -3100,7 +3100,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             // removed completely from beerocks including the BPL.
             db->device_conf.back_radio.security_type_bwl = static_cast<uint32_t>(
                 platform_to_bwl_security(db->device_conf.back_radio.security_type));
-            bh_enable->mem_only_psk() = db->device_conf.back_radio.mem_only_psk;
             bh_enable->backhaul_preferred_radio_band() =
                 db->device_conf.back_radio.backhaul_preferred_radio_band;
 
