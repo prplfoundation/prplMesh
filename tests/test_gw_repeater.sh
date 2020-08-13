@@ -128,18 +128,13 @@ main() {
     sleep "${DELAY}"
 
     error=0
+
     [ "$START_GATEWAY" = "true" ] && report "GW operational" \
         "${rootdir}"/tools/docker/test.sh ${VERBOSE_OPT} -n "${GW_NAME}"
 
-
-    [ "$START_REPEATER" = "true" ] && {
-        for repeater in $REPEATER_NAMES
-        do
-            REPEATER_BRIDGE_MAC=$(get_repater_bridge_mac "${repeater}")
-            report "Repeater $repeater operational" \
-            "${rootdir}"/tools/docker/test.sh ${VERBOSE_OPT} -n "${GW_NAME}" -b "${REPEATER_BRIDGE_MAC}"
-        done
-    }
+    # Testing for operational status of the repeaters is disabled in PR #1572.
+    # In certification mode agents shall wait for dev_set_config or WPS PBC,
+    # so they are inoperational at this stage anyway.
 
     [ "$REMOVE" = "true" ] && {
         status "Deleting containers ${GW_NAME} ${REPEATER_NAMES}"

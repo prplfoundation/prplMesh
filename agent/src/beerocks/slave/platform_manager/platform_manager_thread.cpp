@@ -57,29 +57,27 @@ static beerocks::eFreqType bpl_band_to_freq_type(int bpl_band)
 }
 
 static bool fill_platform_settings(
-    std::string iface_name,
-    std::shared_ptr<beerocks_message::cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE> msg,
-    main_thread::platform_common_conf_t &platform_common_conf,
+    std::string iface_name, main_thread::platform_common_conf_t &platform_common_conf,
     std::unordered_map<std::string, std::shared_ptr<beerocks_message::sWlanSettings>>
         &iface_wlan_params_map,
     Socket *sd)
 {
     auto db = AgentDB::get();
 
-    if (bpl::cfg_get_beerocks_credentials(BPL_RADIO_FRONT, msg->platform_settings().front_ssid,
-                                          msg->platform_settings().front_pass,
-                                          msg->platform_settings().front_security_type) < 0) {
+    if (bpl::cfg_get_beerocks_credentials(BPL_RADIO_FRONT, db->device_conf.front_radio.ssid,
+                                          db->device_conf.front_radio.pass,
+                                          db->device_conf.front_radio.security_type) < 0) {
         LOG(ERROR) << "Failed reading front Wi-Fi credentials!";
         return false;
     }
 
     LOG(DEBUG) << "Front Credentials:"
-               << " ssid=" << msg->platform_settings().front_ssid
-               << " sec=" << msg->platform_settings().front_security_type << " pass=***";
+               << " ssid=" << db->device_conf.front_radio.ssid
+               << " sec=" << db->device_conf.front_radio.security_type << " pass=***";
 
-    if (bpl::cfg_get_beerocks_credentials(BPL_RADIO_BACK, msg->platform_settings().back_ssid,
-                                          msg->platform_settings().back_pass,
-                                          msg->platform_settings().back_security_type) < 0) {
+    if (bpl::cfg_get_beerocks_credentials(BPL_RADIO_BACK, db->device_conf.back_radio.ssid,
+                                          db->device_conf.back_radio.pass,
+                                          db->device_conf.back_radio.security_type) < 0) {
         LOG(ERROR) << "Failed reading Wi-Fi back credentials!";
         return false;
     }
@@ -90,12 +88,12 @@ static bool fill_platform_settings(
         return false;
     }
 
-    msg->platform_settings().mem_only_psk = mem_only_psk;
+    db->device_conf.back_radio.mem_only_psk = mem_only_psk;
 
     LOG(DEBUG) << "Back Credentials:"
-               << " ssid=" << msg->platform_settings().back_ssid
-               << " sec=" << msg->platform_settings().back_security_type
-               << " mem_only_psk=" << int(msg->platform_settings().mem_only_psk) << " pass=***";
+               << " ssid=" << db->device_conf.back_radio.ssid
+               << " sec=" << db->device_conf.back_radio.security_type
+               << " mem_only_psk=" << int(db->device_conf.back_radio.mem_only_psk) << " pass=***";
 
     bpl::BPL_WLAN_PARAMS params;
     if (bpl::cfg_get_wifi_params(iface_name.c_str(), &params) < 0) {
@@ -103,12 +101,13 @@ static bool fill_platform_settings(
         return false;
     }
     /* update message */
-    msg->wlan_settings().band_enabled = params.enabled;
-    msg->wlan_settings().channel      = params.channel;
+    db->device_conf.wlan_settings.band_enabled = params.enabled;
+    db->device_conf.wlan_settings.channel      = params.channel;
 
     LOG(DEBUG) << "wlan settings:"
-               << " band_enabled=" << string_utils::bool_str(msg->wlan_settings().band_enabled)
-               << " channel=" << int(msg->wlan_settings().channel);
+               << " band_enabled="
+               << string_utils::bool_str(db->device_conf.wlan_settings.band_enabled)
+               << " channel=" << int(db->device_conf.wlan_settings.channel);
 
     // initialize wlan params cache
     //erase interface cache from map if exists
@@ -191,48 +190,45 @@ static bool fill_platform_settings(
     db->device_conf.local_gw = (platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY ||
                                 platform_common_conf.operating_mode == BPL_OPER_MODE_GATEWAY_WISP);
 
-    msg->platform_settings().onboarding          = uint8_t(platform_common_conf.onboarding);
-    msg->platform_settings().dfs_reentry_enabled = uint8_t(platform_common_conf.dfs_reentry);
-    msg->platform_settings().rdkb_extensions_enabled =
-        uint8_t(platform_common_conf.rdkb_extensions);
-    msg->platform_settings().client_band_steering_enabled =
-        uint8_t(platform_common_conf.band_steering);
-    msg->platform_settings().client_optimal_path_roaming_enabled =
+    db->device_conf.dfs_reentry_enabled          = uint8_t(platform_common_conf.dfs_reentry);
+    db->device_conf.rdkb_extensions_enabled      = uint8_t(platform_common_conf.rdkb_extensions);
+    db->device_conf.client_band_steering_enabled = uint8_t(platform_common_conf.band_steering);
+    db->device_conf.client_optimal_path_roaming_enabled =
         uint8_t(platform_common_conf.client_roaming);
-    msg->platform_settings().client_optimal_path_roaming_prefer_signal_strength_enabled =
+    db->device_conf.client_optimal_path_roaming_prefer_signal_strength_enabled =
         0; // TODO add platform DB flag
-    msg->platform_settings().client_11k_roaming_enabled =
+    db->device_conf.client_11k_roaming_enabled =
         uint8_t(platform_common_conf.client_roaming || platform_common_conf.band_steering);
-    msg->platform_settings().operating_mode     = uint8_t(platform_common_conf.operating_mode);
-    msg->platform_settings().management_mode    = uint8_t(platform_common_conf.management_mode);
-    msg->platform_settings().certification_mode = uint8_t(platform_common_conf.certification_mode);
-    msg->platform_settings().stop_on_failure_attempts =
+    db->device_conf.operating_mode     = uint8_t(platform_common_conf.operating_mode);
+    db->device_conf.management_mode    = uint8_t(platform_common_conf.management_mode);
+    db->device_conf.certification_mode = uint8_t(platform_common_conf.certification_mode);
+    db->device_conf.stop_on_failure_attempts =
         uint8_t(platform_common_conf.stop_on_failure_attempts);
-    msg->platform_settings().backhaul_max_vaps = uint8_t(platform_common_conf.backhaul_max_vaps);
-    msg->platform_settings().backhaul_network_enabled =
+    db->device_conf.back_radio.backhaul_max_vaps = uint8_t(platform_common_conf.backhaul_max_vaps);
+    db->device_conf.back_radio.backhaul_network_enabled =
         uint8_t(platform_common_conf.backhaul_network_enabled);
-    msg->platform_settings().backhaul_preferred_radio_band =
+    db->device_conf.back_radio.backhaul_preferred_radio_band =
         uint8_t(bpl_band_to_freq_type(platform_common_conf.backhaul_preferred_radio_band));
 
-    msg->platform_settings().load_balancing_enabled   = 0; // for v1.3 TODO read from CAL DB
-    msg->platform_settings().service_fairness_enabled = 0; // for v1.3 TODO read from CAL DB
+    db->device_conf.load_balancing_enabled   = 0; // for v1.3 TODO read from CAL DB
+    db->device_conf.service_fairness_enabled = 0; // for v1.3 TODO read from CAL DB
 
     LOG(DEBUG) << "iface " << iface_name << " settings:";
-    LOG(DEBUG) << "onboarding: " << (unsigned)msg->platform_settings().onboarding;
+    LOG(DEBUG) << "onboarding: " << (unsigned)0;
     LOG(DEBUG) << "client_band_steering_enabled: "
-               << (unsigned)msg->platform_settings().client_band_steering_enabled;
+               << (unsigned)db->device_conf.client_band_steering_enabled;
     LOG(DEBUG) << "client_optimal_path_roaming_enabled: "
-               << (unsigned)msg->platform_settings().client_optimal_path_roaming_enabled;
+               << (unsigned)db->device_conf.client_optimal_path_roaming_enabled;
     LOG(DEBUG) << "client_optimal_path_roaming_prefer_signal_strength_enabled: "
-               << (unsigned)msg->platform_settings()
-                      .client_optimal_path_roaming_prefer_signal_strength_enabled;
-    LOG(DEBUG) << "band_enabled: " << (unsigned)msg->wlan_settings().band_enabled;
+               << (unsigned)
+                      db->device_conf.client_optimal_path_roaming_prefer_signal_strength_enabled;
+    LOG(DEBUG) << "band_enabled: " << (unsigned)db->device_conf.wlan_settings.band_enabled;
     LOG(DEBUG) << "local_gw: " << db->device_conf.local_gw;
     LOG(DEBUG) << "local_controller: " << db->device_conf.local_controller;
-    LOG(DEBUG) << "dfs_reentry_enabled: " << (unsigned)msg->platform_settings().dfs_reentry_enabled;
+    LOG(DEBUG) << "dfs_reentry_enabled: " << (unsigned)db->device_conf.dfs_reentry_enabled;
     LOG(DEBUG) << "backhaul_preferred_radio_band: "
-               << (unsigned)msg->platform_settings().backhaul_preferred_radio_band;
-    LOG(DEBUG) << "rdkb_extensions: " << (unsigned)msg->platform_settings().rdkb_extensions_enabled;
+               << (unsigned)db->device_conf.back_radio.backhaul_preferred_radio_band;
+    LOG(DEBUG) << "rdkb_extensions: " << (unsigned)db->device_conf.rdkb_extensions_enabled;
 
     return true;
 }
@@ -652,7 +648,7 @@ bool main_thread::handle_cmdu(Socket *sd, ieee1905_1::CmduMessageRx &cmdu_rx)
             do {
                 LOG(TRACE) << "Trying to read settings of iface:" << strIfaceName
                            << ", attempt=" << int(retry_cnt);
-                if (fill_platform_settings(strIfaceName, register_response, platform_common_conf,
+                if (fill_platform_settings(strIfaceName, platform_common_conf,
                                            bpl_iface_wlan_params_map, sd)) {
                     register_response->valid() = 1;
                 } else {

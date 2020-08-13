@@ -52,6 +52,9 @@ public:
      * again. This function allows the backhaul to signal that it has reached that state.
      */
     void reset_completed() { m_reset_completed = true; }
+
+    bool has_received_dev_set_config() { return m_received_dev_set_config; }
+
     std::string get_selected_backhaul();
     void update_vaps_list(std::string ruid, beerocks_message::sVapsList &vaps);
 
@@ -73,8 +76,9 @@ private:
     const std::string &m_bridge_iface;
     std::string m_bridge_mac;
 
-    bool m_in_reset        = false;
-    bool m_reset_completed = false;
+    bool m_in_reset                = false;
+    bool m_reset_completed         = false;
+    bool m_received_dev_set_config = false;
     std::string m_selected_backhaul; // "ETH" or "<RUID of the selected radio>"
 
     std::mutex mutex;

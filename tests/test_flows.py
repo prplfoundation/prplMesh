@@ -320,7 +320,7 @@ class TestFlows:
         self.check_no_cmdu_type("autoconfig search while in reset", 0x0007, agent.mac)
         env.checkpoint()
         agent.cmd_reply("dev_set_config,backhaul,eth")
-        time.sleep(1)
+        time.sleep(3)
         self.check_cmdu_type("autoconfig search", 0x0007, agent.mac)
 
     def test_capi_wireless_onboarding(self):
@@ -375,11 +375,13 @@ class TestFlows:
         mac_repeater1_upper = env.agents[0].mac.upper()
         # Configure the controller and send renew
         env.controller.cmd_reply("DEV_RESET_DEFAULT")
+        time.sleep(2)
         env.controller.cmd_reply(
             "DEV_SET_CONFIG,"
             "bss_info1,{} 8x Multi-AP-24G-1 0x0020 0x0008 maprocks1 0 1,"
             "bss_info2,{} 8x Multi-AP-24G-2 0x0020 0x0008 maprocks2 1 0"
             .format(mac_repeater1_upper, env.agents[0].mac))
+        time.sleep(2)
         env.controller.dev_send_1905(env.agents[0].mac, 0x000A,
                                      tlv(0x01, 0x0006, "{" + env.controller.mac + "}"),
                                      tlv(0x0F, 0x0001, "{0x00}"),
@@ -1340,6 +1342,12 @@ if __name__ == '__main__':
 
     t.start_test('init')
     env.launch_environment_docker(options.unique_id, options.skip_init, options.tag)
+
+    for agent in env.agents:
+        debug("sending dev_set_config to an agent")
+        agent.cmd_reply("dev_set_config,program,map,backhaul,eth")
+
+    time.sleep(7)
 
     if t.run_tests(options.tests):
         sys.exit(1)

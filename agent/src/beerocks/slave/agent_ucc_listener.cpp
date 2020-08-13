@@ -61,8 +61,9 @@ std::string agent_ucc_listener::fill_version_reply_string()
  */
 void agent_ucc_listener::clear_configuration()
 {
-    m_in_reset        = true;
-    m_reset_completed = false;
+    m_in_reset                = true;
+    m_reset_completed         = false;
+    m_received_dev_set_config = false;
 
     auto timeout =
         std::chrono::steady_clock::now() + std::chrono::seconds(UCC_REPLY_COMPLETE_TIMEOUT_SEC);
@@ -232,6 +233,8 @@ bool agent_ucc_listener::handle_dev_set_config(std::unordered_map<std::string, s
 
     // Signal to backhaul that it can continue onboarding.
     m_in_reset = false;
+
+    m_received_dev_set_config = true;
     return true;
 }
 
