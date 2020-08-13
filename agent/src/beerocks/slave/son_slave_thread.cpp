@@ -3098,13 +3098,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             // TODO: On passive mode, mem_only_psk is always be set, so supplying the credentials
             // to the backhaul manager will no longer be necessary, and therefore should be be
             // removed completely from beerocks including the BPL.
-            string_utils::copy_string(bh_enable->ssid(message::WIFI_SSID_MAX_LENGTH),
-                                      db->device_conf.back_radio.ssid,
-                                      message::WIFI_SSID_MAX_LENGTH);
-            string_utils::copy_string(bh_enable->pass(message::WIFI_PASS_MAX_LENGTH),
-                                      db->device_conf.back_radio.pass,
-                                      message::WIFI_PASS_MAX_LENGTH);
-            bh_enable->security_type() = static_cast<uint32_t>(
+            db->device_conf.back_radio.security_type_bwl = static_cast<uint32_t>(
                 platform_to_bwl_security(db->device_conf.back_radio.security_type));
             bh_enable->mem_only_psk() = db->device_conf.back_radio.mem_only_psk;
             bh_enable->backhaul_preferred_radio_band() =
