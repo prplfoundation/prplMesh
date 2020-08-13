@@ -1,5 +1,13 @@
 #!/usr/bin/env python3
 #
+# SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+# SPDX-FileCopyrightText: 2019-2020 the prplMesh contributors (see AUTHORS.md)
+#
+# This code is subject to the terms of the BSD+Patent license.
+#
+# See LICENSE file for more details.
+#
 # Launch the test suite using docker and docker-compose. This script wraps
 # the creation of the bridge(s) to be able to connect external devices with
 # the docker network, launching the service for boardfarm.
