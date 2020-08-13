@@ -1342,23 +1342,21 @@ typedef struct sBssidInfo {
     uint32_t downlink_estimated_mac_data_rate_mbps;
     uint32_t uplink_estimated_mac_data_rate_mbps;
     uint8_t sta_measured_uplink_rssi_dbm_enc;
-    void struct_swap(){
+    void struct_swap()
+    {
         bssid.struct_swap();
-        tlvf_swap(32, reinterpret_cast<uint8_t*>(&earliest_measurement_delta));
-        tlvf_swap(32, reinterpret_cast<uint8_t*>(&downlink_estimated_mac_data_rate_mbps));
-        tlvf_swap(32, reinterpret_cast<uint8_t*>(&uplink_estimated_mac_data_rate_mbps));
+        tlvf_swap(32, reinterpret_cast<uint8_t *>(&earliest_measurement_delta));
+        tlvf_swap(32, reinterpret_cast<uint8_t *>(&downlink_estimated_mac_data_rate_mbps));
+        tlvf_swap(32, reinterpret_cast<uint8_t *>(&uplink_estimated_mac_data_rate_mbps));
     }
-    void struct_init(){
-        bssid.struct_init();
-    }
+    void struct_init() { bssid.struct_init(); }
 } __attribute__((packed)) sBssidInfo;
 
-enum eClientSelectedBands: uint8_t {
+enum eClientSelectedBands : uint8_t {
     eSelectedBands_Disabled = 0x0,
-    eSelectedBands_24G = 0x1,
-    eSelectedBands_5G = 0x2,
-    eSelectedBands_6G = 0x4,
-    eSelectedBands_60G = 0x8,
+    eSelectedBands_24G      = 0x1,
+    eSelectedBands_5G       = 0x2,
+    eSelectedBands_6G       = 0x4,
 };
 
 typedef struct sClientConfig {
