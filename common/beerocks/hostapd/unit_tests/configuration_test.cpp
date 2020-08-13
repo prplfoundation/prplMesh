@@ -13,176 +13,85 @@
 
 namespace {
 
-//const std::string vap_indication("bss=");
-const std::string vap_indication("interface=");
+const std::string vap_indication_1("bss=");
+const std::string vap_indication_2("interface=");
 const std::string configuration_path("/tmp/");
 const std::string configuration_file_name("omnia.conf");
 const std::string configuration_content(
     "driver=nl80211\n"
     "logger_syslog=127\n"
-    "logger_syslog_level=2\n"
+    "logger_syslog_level=1\n"
     "logger_stdout=127\n"
-    "logger_stdout_level=2\n"
-    "sDisableMasterVap=1\n"
-    "atf_config_file=/var/run/hostapd-phy0-atf.conf\n"
-    "country_code=US\n"
-    "ieee80211d=1\n"
-    "hw_mode=g\n"
+    "logger_stdout_level=7\n"
+    "hw_mode=a\n"
     "beacon_int=100\n"
-    "channel=acs_smart\n"
+    "channel=44\n"
+    "tx_queue_data2_burst=2.0\n"
     "ieee80211n=1\n"
-    "ht_capab=[LDPC][SHORT-GI-20][SHORT-GI-40][TX-STBC][MAX-AMSDU-7935][DSSS_CCK-40]\n"
-    "vht_capab=[RXLDPC][SHORT-GI-80][SHORT-GI-160][TX-STBC-2BY1][SU-BEAMFORMER][SU-BEAMFORMEE][MU-"
-    "BEAMFORMER][VHT-TXOP-PS][VHT160][MAX-MPDU-11454][MAX-A-MPDU-LEN-EXP7][BF-ANTENNA-4][SOUNDING-"
-    "DIMENSION-2]\n"
-    "ieee80211ax=1\n"
-    "acs_num_scans=1\n"
-    "acs_smart_info_file=/var/run/acs_smart_info_wlan0.txt\n"
-    "acs_history_file=/var/run/acs_history_wlan0.txt\n"
+    "ht_coex=0\n"
+    "ht_capab=[HT40+][LDPC][SHORT-GI-20][SHORT-GI-40][TX-STBC][RX-STBC1][MAX-AMSDU-7935][DSSS_CCK-40]\n"
+    "vht_oper_chwidth=1\n"
+    "vht_oper_centr_freq_seg0_idx=42\n"
+    "ieee80211ac=1\n"
+    "vht_capab=[RXLDPC][SHORT-GI-80][TX-STBC-2BY1][RX-ANTENNA-PATTERN][TX-ANTENNA-PATTERN][RX-STBC-1][MAX-MPDU-11454][MAX-A-MPDU-LEN-EXP7]\n"
+
     "interface=wlan0\n"
     "ctrl_interface=/var/run/hostapd\n"
     "ap_isolate=1\n"
-    "rrm_neighbor_report=1\n"
-    "bss_transition=1\n"
-    "interworking=1\n"
+    "bss_load_update_period=60\n"
+    "chan_util_avg_period=600\n"
     "disassoc_low_ack=1\n"
     "preamble=1\n"
     "wmm_enabled=1\n"
-    "ignore_broadcast_ssid=1\n"
-    "uapsd_advertisement_enabled=1\n"
-    "mbo=1\n"
-    "vendor_elements=dd050009860100\n"
-    "vendor_vht=1\n"
-    "auth_algs=1\n"
-    "wpa=0\n"
-    "ssid=dummy_ssid_0\n"
-    "bridge=br-lan\n"
-    "bssid=02:9A:96:FB:59:0F\n" +
-
-    vap_indication +
-    "wlan0.0\n"
-    "ctrl_interface=/var/run/hostapd\n"
-    "ap_isolate=1\n"
-    "ap_max_inactivity=60\n"
-    "rrm_neighbor_report=1\n"
-    "bss_transition=1\n"
-    "interworking=1\n"
-    "disassoc_low_ack=1\n"
-    "preamble=1\n"
-    "wmm_enabled=1\n"
-    "mode=ap\n"
     "ignore_broadcast_ssid=0\n"
     "uapsd_advertisement_enabled=1\n"
-    "mbo=1\n"
-    "vendor_elements=dd050009860100\n"
-    "vendor_vht=1\n"
+    "utf8_ssid=1\n"
+    "multi_ap=0\n"
+    "wpa_passphrase=prplBEE$\n"
+    "wpa_psk_file=/var/run/hostapd-wlan0.psk\n"
     "auth_algs=1\n"
-    "eap_server=1\n"
-    "device_type=6-0050F204-1\n"
-    "device_name=WLAN-ROUTER\n"
-    "manufacturer=Intel Corporation\n"
-    "config_methods=push_button\n"
-    "wps_independent=1\n"
-    "wps_cred_processing=1\n"
-    "os_version=01020300\n"
-    "manufacturer_url=http://www.intel.com\n"
-    "model_description=TR069 Gateway\n"
-    "wps_rf_bands=a\n"
-    "bridge=br-lan\n"
-    "bssid=02:9A:96:FB:59:11\n"
-    "ssid=Multi-AP-24G-1\n"
     "wpa=2\n"
-    "okc=0\n"
-    "wpa_key_mgmt=WPA-PSK\n"
     "wpa_pairwise=CCMP\n"
-    "ieee80211w=0\n"
-    "wpa_passphrase=maprocks1\n"
-    "disable_pmksa_caching=1\n"
+    "ssid=prplmesh-front\n"
+    "bridge=br-lan\n"
     "wpa_disable_eapol_key_retries=0\n"
-    "wps_state=2\n"
-    "mesh_mode=fAP\n"
-    "multi_ap_backhaul_ssid=\"Multi-AP-24G-2\"\n"
-    "multi_ap_backhaul_wpa_passphrase=maprocks2\n" +
+    "wpa_key_mgmt=WPA-PSK\n"
+    "okc=0\n"
+    "disable_pmksa_caching=1\n"
+    "dynamic_vlan=0\n"
+    "vlan_naming=1\n"
+    "vlan_file=/var/run/hostapd-wlan0.vlan\n"
+    "bssid=04:f0:21:24:24:17\n"
 
-    vap_indication +
-    "wlan0.1\n"
-    "mode=non-ap\n"
+    "bss=wlan0-1\n"
     "ctrl_interface=/var/run/hostapd\n"
     "ap_isolate=1\n"
-    "ap_max_inactivity=60\n"
-    "rrm_neighbor_report=1\n"
-    "bss_transition=1\n"
-    "interworking=1\n"
+    "bss_load_update_period=60\n"
+    "chan_util_avg_period=600\n"
     "disassoc_low_ack=1\n"
     "preamble=1\n"
     "wmm_enabled=1\n"
     "ignore_broadcast_ssid=0\n"
     "uapsd_advertisement_enabled=1\n"
-    "mbo=1\n"
-    "vendor_elements=dd050009860100\n"
-    "vendor_vht=1\n"
+    "utf8_ssid=1\n"
+    "multi_ap=0\n"
+    "wpa_passphrase=prplBEE$\n"
+    "wpa_psk_file=/var/run/hostapd-wlan0-1.psk\n"
     "auth_algs=1\n"
-    "bridge=br-lan\n"
-    "bssid=02:9A:96:FB:59:12\n"
-    "ssid=Multi-AP-24G-2\n"
     "wpa=2\n"
-    "okc=0\n"
-    "wpa_key_mgmt=WPA-PSK\n"
     "wpa_pairwise=CCMP\n"
-    "ieee80211w=0\n"
-    "wpa_passphrase=maprocks2\n"
-    "disable_pmksa_caching=1\n"
-    "wpa_disable_eapol_key_retries=0\n"
-    "mesh_mode=bAP\n"
-    "sFourAddrMode=1\n"
-    "max_num_sta=1\n"
-
-    "#" +
-    vap_indication +
-    "wlan0.2\n"
-    "#ctrl_interface=/var/run/hostapd\n"
-    "#ap_isolate=1\n"
-    "#ap_max_inactivity=60\n"
-    "#rrm_neighbor_report=1\n"
-    "#mode=ap\n"
-    "#bss_transition=1\n"
-    "#interworking=1\n"
-    "#disassoc_low_ack=1\n"
-    "#preamble=1\n"
-    "#wmm_enabled=1\n"
-    "#ignore_broadcast_ssid=0\n"
-    "#uapsd_advertisement_enabled=1\n"
-    "#mbo=1\n"
-    "#vendor_elements=dd050009860100\n"
-    "#vendor_vht=1\n"
-    "#auth_algs=1\n"
-    "#wpa=0\n"
-    "#bridge=br-lan\n"
-    "#bssid=02:9A:96:FB:59:13\n"
-    "#start_disabled=1\n" +
-
-    vap_indication +
-    "wlan0.3\n"
-    "ctrl_interface=/var/run/hostapd\n"
-    "ap_isolate=1\n"
-    "ap_max_inactivity=60\n"
-    "rrm_neighbor_report=1\n"
-    "bss_transition=1\n"
-    "interworking=1\n"
-    "disassoc_low_ack=1\n"
-    "preamble=1\n"
-    "wmm_enabled=1\n"
-    "ignore_broadcast_ssid=0\n"
-    "uapsd_advertisement_enabled=1\n"
-    "mbo=1\n"
-    "vendor_elements=dd050009860100\n"
-    "vendor_vht=1\n"
-    "auth_algs=1\n"
-    "wpa=0\n"
+    "ssid=prplmesh-back\n"
     "bridge=br-lan\n"
-    "bssid=02:9A:96:FB:59:14\n"
-    "start_disabled=1\n"
-    "mode=ap\n");
+    "wpa_disable_eapol_key_retries=0\n"
+    "wpa_key_mgmt=WPA-PSK\n"
+    "okc=0\n"
+    "disable_pmksa_caching=1\n"
+    "dynamic_vlan=0\n"
+    "vlan_naming=1\n"
+    "vlan_file=/var/run/hostapd-wlan0-1.vlan\n"
+    "wds_sta=1\n"
+    "bssid=06:f0:21:24:24:17\n"
+);
 
 void clean_start()
 {
@@ -198,7 +107,7 @@ TEST(configuration_test, load)
 {
     //// start prerequsite ////
 
-    ////clean_start();
+    clean_start();
 
     //// end prerequsite ////
 
@@ -207,7 +116,7 @@ TEST(configuration_test, load)
     EXPECT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);
+    conf.load(vap_indication_1,vap_indication_2);
     EXPECT_TRUE(conf) << conf;
 }
 
@@ -216,24 +125,22 @@ TEST(configuration_test, store)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    // //clean_start();
+    clean_start();
 
     // load the dummy configuration file
     prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
-    EXPECT_FALSE(conf) << conf;
 
     // construct a configuration
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);
-    ;
+    conf.load(vap_indication_1,vap_indication_2);
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
 
     // add a value to vap
-    conf.set_create_vap_value("wlan0.1", "was_i_stroed", "yes_you_were");
+    conf.set_create_vap_value("wlan0-1", "was_i_stroed", "yes_you_were");
     EXPECT_TRUE(conf) << conf;
 
     // store
@@ -246,14 +153,14 @@ TEST(configuration_test, set_string_head_values)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    // //clean_start();
+    clean_start();
 
     // construct a configuration
     prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);
+    conf.load(vap_indication_1,vap_indication_2);
     ;
     ASSERT_TRUE(conf) << conf;
 
@@ -280,14 +187,14 @@ TEST(configuration_test, set_int_head_values)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    //clean_start();
+    clean_start();
 
     // construct a configuration
     prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);
+    conf.load(vap_indication_1,vap_indication_2);
     ;
     ASSERT_TRUE(conf) << conf;
 
@@ -306,22 +213,22 @@ TEST(configuration_test, get_head_values)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    //clean_start();
+    clean_start();
 
     // construct a configuration
     prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);
+    conf.load(vap_indication_1,vap_indication_2);
     ;
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
 
     // get existing key
-    auto val = conf.get_head_value("acs_num_scans");
-    EXPECT_EQ(val, "1");
+    auto val = conf.get_head_value("logger_syslog");
+    EXPECT_EQ(val, "127");
 
     // get non existing key
     val = conf.get_head_value("out_of_office");
@@ -344,7 +251,7 @@ TEST(configuration_test, set_string_vap_values)
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);
+    conf.load(vap_indication_1,vap_indication_2);
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
@@ -355,15 +262,15 @@ TEST(configuration_test, set_string_vap_values)
     EXPECT_TRUE(conf) << conf;
 
     // replace existing value for existing key for existing vap
-    conf.set_create_vap_value("wlan0.2", "disassoc_low_ack", "734");
+    conf.set_create_vap_value("wlan0", "disassoc_low_ack", "734");
     EXPECT_TRUE(conf) << conf;
 
     // add a key/value to exising vap
-    conf.set_create_vap_value("wlan0.3", "unit_test_ok", "true");
+    conf.set_create_vap_value("wlan0", "unit_test_ok", "true");
     EXPECT_TRUE(conf) << conf;
 
     // remove key/value from existing vap
-    conf.set_create_vap_value("wlan0.0", "vendor_elements", "");
+    conf.set_create_vap_value("wlan0-1", "vendor_elements", "");
     EXPECT_TRUE(conf) << conf;
 
     // set key/value for NON existing vap
@@ -381,14 +288,14 @@ TEST(configuration_test, set_int_vap_values)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    // //clean_start();
+    clean_start();
 
     // construct a configuration
     prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);
+    conf.load(vap_indication_1,vap_indication_2);
     ;
     ASSERT_TRUE(conf) << conf;
 
@@ -397,17 +304,17 @@ TEST(configuration_test, set_int_vap_values)
     //// start test ////
 
     // replace existing value for existing key for existing vap
-    conf.set_create_vap_value("wlan0.1", "ignore_broadcast_ssid", 42);
+    conf.set_create_vap_value("wlan0-1", "ignore_broadcast_ssid", 42);
     EXPECT_TRUE(conf) << conf;
 
     // add a key/value to exising vap
-    conf.set_create_vap_value("wlan0.3", "i_am_negative", -24);
+    conf.set_create_vap_value("wlan0", "i_am_negative", -24);
     EXPECT_TRUE(conf) << conf;
 
     // try to replace existing value for existing key for existing vap
     // with NON-int value. we expect the value to be trancated here
     // at the caller site
-    conf.set_create_vap_value("wlan0.2", "wmm_enabled", 333.444);
+    conf.set_create_vap_value("wlan0", "wmm_enabled", 333.444);
     EXPECT_TRUE(conf) << conf;
 
     //// end test ////
@@ -418,14 +325,14 @@ TEST(configuration_test, get_vap_values)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    // //clean_start();
+    clean_start();
 
     // construct a configuration
     prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);
+    conf.load(vap_indication_1,vap_indication_2);
     ;
     ASSERT_TRUE(conf) << conf;
 
@@ -436,12 +343,12 @@ TEST(configuration_test, get_vap_values)
     std::string value;
 
     // get existing value for existing vap
-    value = conf.get_vap_value("wlan0.1", "wpa_passphrase");
-    EXPECT_EQ(value, "maprocks2") << conf;
+    value = conf.get_vap_value("wlan0", "wpa_passphrase");
+    EXPECT_EQ(value, "prplBEE$") << conf;
 
     // another check - existing value for existing vap
-    value = conf.get_vap_value("wlan0.1", "bssid");
-    EXPECT_EQ(value, "02:9A:96:FB:59:12");
+    value = conf.get_vap_value("wlan0", "bssid");
+    EXPECT_EQ(value, "04:f0:21:24:24:17");
 
     // get NON existing value for existing vap
     value = conf.get_vap_value("wlan0.1", "does_not_exist");
@@ -459,14 +366,14 @@ TEST(configuration_test, disable_all_ap)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    // //clean_start();
+    clean_start();
 
     // construct a configuration
     prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);
+    conf.load(vap_indication_1,vap_indication_2);
     ;
     ASSERT_TRUE(conf) << conf;
 
@@ -506,14 +413,14 @@ TEST(configuration_test, enable_all_ap)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    // //clean_start();
+    clean_start();
 
     // construct a configuration
     prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);
+    conf.load(vap_indication_1,vap_indication_2);
     ;
     ASSERT_TRUE(conf) << conf;
 
@@ -547,14 +454,14 @@ TEST(configuration_test, comment_vap)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    // //clean_start();
+    clean_start();
 
     // construct a configuration
     prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);
+    conf.load(vap_indication_1,vap_indication_2);
     ;
     ASSERT_TRUE(conf) << conf;
 
@@ -562,7 +469,7 @@ TEST(configuration_test, comment_vap)
 
     //// start test ////
 
-    conf.comment_vap("wlan0.1");
+    conf.comment_vap("wlan0");
     EXPECT_TRUE(conf) << conf;
 
     conf.store();
@@ -576,27 +483,27 @@ TEST(configuration_test, uncomment_vap)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    // //clean_start();
+    clean_start();
 
     // construct a configuration
     prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);
+    conf.load(vap_indication_1,vap_indication_2);
     ;
     ASSERT_TRUE(conf) << conf;
 
     // comment twice!
-    conf.comment_vap("wlan0.1");
-    conf.comment_vap("wlan0.1");
+    conf.comment_vap("wlan0");
+    conf.comment_vap("wlan0");
     EXPECT_TRUE(conf) << conf;
 
     conf.store();
     EXPECT_TRUE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);
+    conf.load(vap_indication_1,vap_indication_2);
     ;
     ASSERT_TRUE(conf) << conf;
 
@@ -604,25 +511,25 @@ TEST(configuration_test, uncomment_vap)
 
     //// start test ////
 
-    conf.uncomment_vap("wlan0.1");
+    conf.uncomment_vap("wlan0");
     EXPECT_TRUE(conf) << conf;
 
-    conf.uncomment_vap("wlan0.2");
+    conf.uncomment_vap("wlan0");
     EXPECT_TRUE(conf) << conf;
 
     conf.store();
     EXPECT_TRUE(conf) << conf;
 
     // replace existing value for existing key for existing vap
-    conf.set_create_vap_value("wlan0.2", "disassoc_low_ack", "734");
+    conf.set_create_vap_value("wlan0", "disassoc_low_ack", "734");
     EXPECT_TRUE(conf) << conf;
 
     // add a key/value to exising vap
-    conf.set_create_vap_value("wlan0.3", "unit_test_ok", "true");
+    conf.set_create_vap_value("wlan0", "unit_test_ok", "true");
     EXPECT_TRUE(conf) << conf;
 
     // remove key/value from existing vap
-    conf.set_create_vap_value("wlan0.0", "vendor_elements", "");
+    conf.set_create_vap_value("wlan0-1", "preamble", "");
     EXPECT_TRUE(conf) << conf;
 
     // set key/value for NON existing vap
@@ -637,15 +544,15 @@ TEST(configuration_test, itererate_both_containers)
     //// start prerequsite ////
 
     // save the content of the string (start clean)
-    ////clean_start();
+    clean_start();
 
     // construct a configuration
     prplmesh::hostapd::Configuration conf(configuration_path + configuration_file_name);
     ASSERT_FALSE(conf) << conf;
 
     // load the dummy configuration file
-    conf.load(vap_indication);
-    ;
+    conf.load(vap_indication_1,vap_indication_2);
+
     ASSERT_TRUE(conf) << conf;
 
     //// end prerequsite ////
