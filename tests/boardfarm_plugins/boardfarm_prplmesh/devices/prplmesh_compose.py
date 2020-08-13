@@ -98,7 +98,7 @@ class PrplMeshCompose(PrplMeshBase):
         and also after test - to insure that device still operational.
         """
         self._run_shell_cmd("printf",
-                            ["device_get_info", "|", "nc", "-w", "1", "controller-rme", "8002"])
+                            ["device_get_info", "|", "nc", "-w", "1", self.docker_name, "8002"])
 
     def isalive(self):
         """Method required by boardfarm.
