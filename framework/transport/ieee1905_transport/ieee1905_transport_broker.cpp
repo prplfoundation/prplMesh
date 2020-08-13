@@ -142,13 +142,13 @@ bool BrokerServer::publish(const messages::Message &msg)
     return true;
 }
 
-void BrokerServer::register_internal_message_handler(MessageHandler handler)
+void BrokerServer::register_internal_message_handler(const MessageHandler &handler)
 {
     LOG_IF(m_internal_message_handler, WARNING) << "Overriding previously registered handler";
     m_internal_message_handler = handler;
 }
 
-void BrokerServer::register_external_message_handler(MessageHandler handler)
+void BrokerServer::register_external_message_handler(const MessageHandler &handler)
 {
     LOG_IF(m_internal_message_handler, WARNING) << "Overriding previously registered handler";
     m_external_message_handler = handler;

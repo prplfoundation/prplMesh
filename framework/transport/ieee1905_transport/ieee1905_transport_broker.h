@@ -29,7 +29,7 @@ namespace broker {
  * The broker accepts connection over a SocketServer.
  * Once connected to the server, a client can subscribe to CMDU types.
  * Message filtering is implemented inside the server, so that clients receive only
- * the message types they subscribed to.
+ * the message types they are subscribed to.
  */
 class BrokerServer {
 public:
@@ -88,7 +88,7 @@ public:
      * 
      * @param [in] handler Handler function.
      */
-    virtual void register_internal_message_handler(MessageHandler handler);
+    virtual void register_internal_message_handler(const MessageHandler &handler);
 
     /**
      * @brief Register a handler function for external (CMDU_TX/CMDU_RX) messages
@@ -97,7 +97,7 @@ public:
      * 
      * @param [in] handler Handler function.
      */
-    virtual void register_external_message_handler(MessageHandler handler);
+    virtual void register_external_message_handler(const MessageHandler &handler);
 
 protected:
     /**

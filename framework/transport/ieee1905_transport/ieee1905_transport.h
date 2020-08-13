@@ -58,12 +58,19 @@ public:
     /**
      * Class constructor
      *
+     * @param broker Message broker.
      * @param event_loop Event loop to wait for I/O events.
      */
-    explicit Ieee1905Transport(const std::shared_ptr<EventLoop> &event_loop);
+    Ieee1905Transport(const std::shared_ptr<broker::BrokerServer> &broker,
+                      const std::shared_ptr<EventLoop> &event_loop);
     void run();
 
 private:
+    /**
+     * Message broker implementing the publish/subscribe design pattern.
+     */
+    std::shared_ptr<broker::BrokerServer> m_broker;
+
     /**
      * Application event loop used by the process to wait for I/O events.
      */
@@ -99,8 +106,6 @@ private:
 
     // netlink socket file descriptor (used to track network interface status)
     int netlink_fd_ = -1;
-
-    std::unique_ptr<broker::BrokerServer> m_broker;
 
     uint16_t message_id_           = 0;
     uint8_t al_mac_addr_[ETH_ALEN] = {0};
