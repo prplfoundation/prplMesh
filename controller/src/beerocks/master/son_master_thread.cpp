@@ -1509,8 +1509,8 @@ bool master_thread::handle_cmdu_1905_higher_layer_data_message(const std::string
 
     const auto protocol       = tlvHigherLayerData->protocol();
     const auto payload_length = tlvHigherLayerData->payload_length();
-    LOG(DEBUG) << "protocol: " << std::hex << protocol;
-    LOG(DEBUG) << "payload length: " << int(payload_length);
+    LOG(DEBUG) << "Protocol: " << std::hex << protocol;
+    LOG(DEBUG) << "Payload-Length: " << int(payload_length);
 
     // build ACK message CMDU
     auto cmdu_tx_header = cmdu_tx.create(mid, ieee1905_1::eMessageType::ACK_MESSAGE);

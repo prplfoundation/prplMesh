@@ -253,6 +253,7 @@ boardfarm-tests:
     paths:
       - logs
       - results
+    when: always
   needs:
     - job: build-in-docker
     - job: image-build-boardfarm-ci

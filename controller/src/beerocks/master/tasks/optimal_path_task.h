@@ -63,6 +63,8 @@ private:
     double calculate_weighted_phy_rate(const std::string &hostap_mac, int &hops);
     bool is_hostap_on_cs_process(const std::string &hostap_mac);
 
+    template <typename C>
+    void remove_all_client_non_selected_band_radios(C &radios, const sMacAddr &client);
     db &database;
     ieee1905_1::CmduMessageTx &cmdu_tx;
     task_pool &tasks;
@@ -70,6 +72,7 @@ private:
     int starting_delay_ms   = 0;
     bool sta_support_11k    = false;
     bool started_as_client  = false;
+    bool is_force_steer     = false;
     int sticky_roaming_rssi = 0;
     std::string current_hostap_vap;
     std::string current_hostap;

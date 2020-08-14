@@ -44,14 +44,17 @@ class TestFlows:
         status(test + " starting")
 
     def check_log(self, entity_or_radio: Union[env.ALEntity, env.Radio], regex: str,
-                  start_line: int = 0) -> bool:
-        '''Verify that the logfile for "entity_or_radio" matches "regex", fail if not.'''
-        return self.wait_for_log(entity_or_radio, regex, start_line, 0.3)
+                  start_line: int = 0, fail_on_mismatch: bool = True) -> bool:
+        '''Verify that the log-file for "entity_or_radio" matches "regex",
+           fail if no match is found when "fail_on_mismatch" is enabled.
+        '''
+        return self.wait_for_log(entity_or_radio, regex, start_line, 0.3,
+                                 fail_on_mismatch=fail_on_mismatch)
 
     def wait_for_log(self, entity_or_radio: Union[env.ALEntity, env.Radio], regex: str,
-                     start_line: int, timeout: float) -> bool:
+                     start_line: int, timeout: float, fail_on_mismatch: bool = True) -> bool:
         result, line, match = entity_or_radio.wait_for_log(regex, start_line, timeout)
-        if not result:
+        if fail_on_mismatch and (not result):
             self.__fail_no_message()
         return result, line, match
 
@@ -1246,14 +1249,27 @@ class TestFlows:
         mid = env.controller.dev_send_1905(env.agents[0].mac, 0x8018,
                                            tlv(0xA0, 0x04b1, "{0x00 %s}" % payload))
 
-        debug("Confirming higher layer data message was received in the agent")
+        debug("Confirming higher layer data message was received in one of the agent's radios")
 
-        self.check_log(env.agents[0], r"HIGHER_LAYER_DATA_MESSAGE")
+        received_in_radio0, _, _ = self.check_log(env.agents[0].radios[0],
+                                                  r"HIGHER_LAYER_DATA_MESSAGE",
+                                                  fail_on_mismatch=False)
+        received_in_radio1, _, _ = self.check_log(env.agents[0].radios[1],
+                                                  r"HIGHER_LAYER_DATA_MESSAGE",
+                                                  fail_on_mismatch=False)
+
+        number_of_receiving_radios = int(received_in_radio0) + int(received_in_radio1)
+        if (number_of_receiving_radios != 1):
+            self.fail(f"higher layer data message was received and acknowledged by "
+                      f"{number_of_receiving_radios} agent's radios, "
+                      f"expected exactly 1")
+
+        received_agent_radio = (env.agents[0].radios[0] if received_in_radio0
+                                else env.agents[0].radios[1])
 
         debug("Confirming matching protocol and payload length")
-
-        self.check_log(env.agents[0], r"protocol: 0")
-        self.check_log(env.agents[0], r"payload_length: 0x4b0")
+        self.check_log(received_agent_radio, r"Protocol: 0")
+        self.check_log(received_agent_radio, r"Payload-Length: 0x4b0")
 
         debug("Confirming ACK message was received in the controller")
         self.check_log(env.controller, r"ACK_MESSAGE, mid=0x{:04x}".format(mid))
