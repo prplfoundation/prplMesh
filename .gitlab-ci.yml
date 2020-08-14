@@ -1,5 +1,7 @@
 variables:
   PYTHONUNBUFFERED: "1"
+default:
+  interruptible: true
 
 stages:
   - containers
@@ -325,6 +327,7 @@ test-on-netgear-rax40:
   needs: ["build-for-netgear-rax40"]
 
 run-certification-tests:
+  interruptible: false
   stage: test
   variables:
     # TESTS_TO_RUN needs to be set by the user (or the pipeline schedule)

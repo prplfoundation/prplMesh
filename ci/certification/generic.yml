@@ -1,4 +1,5 @@
 .certification-generic:
+  interruptible: false
   variables:
     # DEVICE_UNDER_TEST need to be set when extending the job
     GIT_CLONE_PATH: "/builds/prpl-foundation/prplmesh/prplMesh/"
