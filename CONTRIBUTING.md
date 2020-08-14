@@ -4,13 +4,14 @@ You can contribute to prplMesh in various ways: reporting bugs, improving docume
 
 ## Getting involved
 
-A large part of the conversation takes place directly on github, through issues, pull requests, and comments on commits.
-Thus, it is advisable to subscribe to (i.e. watch) the issues you are interested in, or the project as a whole.
+Part of the conversation takes place directly on gitlab through merge requests, and comments on commits.
+But discussions about the design of features or the approach to bug fixes happens in JIRA.
+Thus, it is advisable to subscribe to (i.e. watch) the JIRA issues you are interested in.
 
 Daily conversations take place on [Slack](https://prplfoundation.slack.com/).
-You can ask for an invite to anyone currently involved, e.g. by sending a message to an active contributer on github.
+You can ask for an invite to anyone currently involved, e.g. by sending a message to an active contributer on gitlab.
 
-Some issues are labelled as [good first issue](https://github.com/prplfoundation/prplMesh/issues?q=is%3Aopen+is%3Aissue+label%3A%22good+first+issue%22).
+Some issues are labelled as [good first issue](https://jira.prplfoundation.org/browse/PPM-305?jql=labels %3D good_first_issue).
 Picking one of these to work on as your first contribution is recommended.
 
 The [prpl Foundation Code of Conduct](https://prplfoundation.org/about/code-of-conduct/) applies to all communication about prplMesh.
@@ -31,10 +32,10 @@ It currently resides as pptx and docx documents in the [documentation](documenta
 ## Contributing code
 
 Before development is started, a [JIRA task or bug](#working-with-jira) should have been created for the issue.
-All development is managed using [pull requests](#pull-requests-workflow).
+All development is managed using [merge requests](#merge-requests-workflow).
 [Commits](#commits) must be in logical, consistent units and have a good commit message that includes the JIRA key of the corresponding issue.
 Every commit must carry a Signed-off-by tag to assert your agreement with the [DCO](#developers-certificate-of-origin).
-Pull requests are reviewed and checks are performed on them before they are merged.
+Merge requests are reviewed and checks are performed on them before they are merged.
 Code should adhere to the [coding style](#coding-style).
 
 Note that everybody follows these same guidelines.
@@ -57,10 +58,10 @@ Time spent reviewing other issues is not counted, but time spent implementing re
 When it's time for review, please transition the issue manually to the "In review" state.
 We're looking at possibly automating this in the future, but it still needs to be done manually for now.
 Make sure the JIRA issue has an informative description; it will form the basis of any discussion of the feature or bug in question, so you want to make sure that the description makes the problem clear.
-You can then copy the description to the pull request description (it's OK if they're the same).
+You can then copy the description to the merge request description (it's OK if they're the same).
 You may need to adjust the syntax manually if you do this, though.
 
-JIRA uses a syntax that's different from the markdown used by github/gitlab. It's described [here](https://jira.prplfoundation.org/secure/WikiRendererHelpAction.jspa)
+JIRA uses a syntax that's different from the markdown used by gitlab. It's described [here](https://jira.prplfoundation.org/secure/WikiRendererHelpAction.jspa)
 
 ### Copyright
 
@@ -108,7 +109,7 @@ A commit message consists of a subject, a message body and a set of tags.
     Co-Authored-by: The Other Author <email@address.com>
     Signed-off-by: The Other Author <email@address.com>
 
-The subject must be very short, it appears in the [short log](https://github.com/prplfoundation/prplMesh/commits/master).
+The subject must be very short, it appears in the [short log](https://gitlab.com/prpl-foundation/prplmesh/prplMesh/-/network/master).
 
 * Write it in the imperative: "add support for X".
 * Start with a prefix that indicates the component: tlvf, common, documentation, bpl, bwl, bcl, bml, transport, topology, master, slave, monitor.
@@ -187,8 +188,8 @@ This is a short way for you to say that you are entitled to contribute the patch
 It is a legal statement that asserts your agreement with the [DCO](#developers-certificate-of-origin).
 Therefore, it must have your *real name* (First Last) and a valid e-mail address.
 Adding this tag can be done automatically by using `git commit -s`.
-If you are editing files and committing through GitHub, you must write your real name in the “Name” field in GitHub settings and the email used in the "Signed-off-by:" must be your primary github email.
-You must manually add the "Signed-off-by:" to the commit message that github requests.
+If you are editing files and committing through GitLab, you must write your real name in the “Full Name” field in your GitLab profile and the email used in the "Signed-off-by:" must be your "Commit email" address.
+You must manually add the "Signed-off-by:" to the commit message that gitlab requests.
 If you are editing files and committing on your local PC, set your name and email with:
 
 ```bash
@@ -196,7 +197,9 @@ git config --global user.name "my name"
 git config --global user.email "my@email.address"
 ```
 
-### Pull Request workflow
+Then, adding the "Signed-off-by" line is as simple as using `git commit -s` instead of `git commit` (using an alias is recommended, e.g. `git config --global alias.ci='commit -s'`)
+
+### Merge Request workflow
 
 This section describes the workflow followed by core contributors and maintainers.
 It is advised to follow a similar workflow for your own contributions.
@@ -206,44 +209,43 @@ For smaller contributions, you may take shortcuts.
 The workflow is explained in detail below. In summary, it consists of these steps.
 
 1. Create a branch
-2. Create a draft pull request
+2. Create a "WIP" (work in progress) merge request. This means that the MR title starts with "WIP:", and is treated specially by gitlab (for instance, by preventing it from getting merged while in "WIP" state)
 3. Make the changes, commit with amend and rebase
 4. Push regularly
-5. Clean up the commits, push, and set pull request to "Ready for review"
+5. Clean up the commits, push, and move the MR out of "WIP" state
 6. Review starts - reviewer "Requests changes"
 7. Author addresses review comments in additional fixup commits.
    * If no more fixes are needed
-     * Author rebases with `git rebase -i --autosquash master` to clean up the pull request.
+     * Author rebases with `git rebase -i --autosquash master` to clean up the merge request.
    * If more fixes are needed (suggested by reviewers or by the author himself)
      * Author does rebase-force-push to squash fixup commits and asks for a followup review (this makes the next review iterations simpler)
 
 8. Review is approved by maintainers.
-9. Use `git rebase -i --autosquash master` to clean up the pull request.
+9. Use `git rebase -i --autosquash master` to clean up the branch of the merge request.
 10. If everything is ready, add the "ready for merge" label.
-11. The pull request will be merged automatically when CI succeeds.
+11. The merge request will be merged automatically when CI succeeds.
 
 Start by creating a branch.
 We give branches a name following `<type>/<subject>`.
 Types are `feature` for feature development, `bugfix` for fixing bugs from the issues list, `hotfix` for small fixes without an issue, and `dev/<user>` for personal development branches that are not meant for merging.
 Both `bugfix` and `feature` branches should have a JIRA identifier in their branch name (e.g. feature/PPM-204-implement-dynamic-steering)
 
-This branch is immediately pushed, and a draft pull request is created for it.
-The pull request can be created with the [`hub`](https://github.com/github/hub) tool: `hub pull-request -d`.
-This draft pull request signals the others that someone is working on this feature/bugfix.
+This branch is immediately pushed, and a "WIP" (Work in progress) merge request is created for it.
+This can be done in a number of ways: when using `git push` on the CLI, you will get a link to create a MR; alternatively, you can create a merge request from the gitlab UI, or [add options to git push](https://docs.gitlab.com/ee/user/project/push_options.html#push-options-for-merge-requests) to instruct gitlab to automatically create a MR for it.
+This WIP merge request signals the others that someone is working on this feature/bugfix.
 It allows others to see what you're doing before it is completed, and to give early feedback and suggestions.
-For such a draft pull request, it is not yet necessary that the commits are nicely split up.
+For such a WIP, it is not yet necessary that the commits are nicely split up.
 
 Continue developing the code.
 Push your work regularly.
 You can make separate commits, or amend a single commit, or rebase and sort it into different commits, at your option.
 Every time you push, CI will run on the code and you will be informed of any issues with it.
-Also, even if the pull request is still draft, maintainers may start giving comments on it.
+Also, even if the merge request is still WIP, maintainers may start giving comments on it.
 The purpose of these comments is to make sure your work is aligned with expectations.
 It avoids that after a lot of work, you are asked to still make major changes.
 
 Once your feature is ready, use `git rebase -i` to organise it in clean commits and add a proper commit message to every commit, including a Signed-off-by.
-Force-push the branch and change the pull request state from "Draft" to "Ready for review".
-
+Force-push the branch and take the merge request out of "WIP" state.
 Other contributors will start reviewing your change and make suggestions for improvements.
 The review has the following goals:
 
@@ -255,12 +257,12 @@ The review has the following goals:
 * Identify potential bugs.
 * Identify missing tests.
 
-Very often, the review will lead to comments that don't really need to be addressed for the pull request to be accepted.
+Very often, the review will lead to comments that don't really need to be addressed for the merge request to be accepted.
 Many of the review goals are more about having a discussion than about really forcing changes.
-Unfortunately, github doesn't have an easy way to make such a distinction, so reviewers have to mention explicitly when a suggestion is optional.
-If there are review comments that need to be addressed, the pull request will be marked as "Changes requested".
+Unfortunately, gitlab doesn't have an easy way to make such a distinction, so reviewers have to mention explicitly when a suggestion is optional.
+For issues that can be addressed later, it is acceptable to create a new JIRA task for them, then resolve the comment by pointing to the new JIRA task that will address those comments.
 
-If you make more changes after a pull request is marked as "Ready for review", do not rebase or amend.
+If you make more changes after a merge request is moved out of "WIP" state, do not rebase or amend.
 This will allow reviewers to easily see the differences compared to their previous review.
 Instead, create additional commits with `git commit --fixup <sha1 of commit to fix> -e`.
 Do _not_ add a Signed-off-by to these commits.
@@ -270,13 +272,13 @@ If the commit message itself needs to be changed, use `git commit --squash <sha1
 Below the subject line, add a second subject line, followed by the complete commit message and the Signed-off-by.
 During the autosquash rebase, we'll only retain the second commit message (see below).
 
-In the pull request's web interface, mark the comments that have been addressed as Resolved.
+In the merge request's web interface, mark the comments that have been addressed as Resolved (this should be automatic for specific code related comments; gitlab automatically detects if the code in question has been changed).
 Also mark the comments that are optional as Resolved.
 If you don't take the suggestion directly or you disagree or only apply it in part, don't mark it as Resolved.
 Regularly push your branch.
 
 There may be several iterations in the review.
-Finally, the pull-request is marked as Approved by the maintainers.
+Finally, the merge request is marked as Approved by the approvers.
 However, it cannot be applied as is because the commits are still "dirty".
 The last step is to perform `git rebase -i --autosquash master`.
 This will apply the fixup commits automatically.
@@ -284,30 +286,29 @@ For the squash commits, it will stop in an editor to allow you to update the com
 Just use the last commit message, remove all the rest.
 Finally, force-push the branch.
 The DCO check will now succeed.
-Add the "ready for merge" label to the pull request.
-When CI finishes and is successful, the pull request will be merged automatically.
+When CI finishes and is successful, the merge request will be merged automatically.
 
 Note that there are a few cases where it is not possible to use fixup commits.
 In these cases, use rebase and create a clean series of commits again.
-Add a comment in the pull request why this was done.
+Add a comment in the merge request why this was done.
 This is needed at least in the following cases:
 
-* If you need to pull in changes from master or another branch or pull request.
+* If you need to pull in changes from master or another branch or merge request.
 * If you need to reorder the commits.
 * If you need to move a subset of the changes from one commit to another commit.
 
 If you are working on a big feature, you often encounter something small that needs to be fixed or improved that is relatively independent of the feature.
-Such a change can be included as one of the first commits in the pull request.
-However, often it's useful to create a separate pull request for it, so it can be applied more quickly.
+Such a change can be included as one of the first commits in the merge request.
+However, often it's useful to create a separate merge request for it, so it can be applied more quickly.
 The typical workflow for this is:
 
 * Make the fix and commit it with a proper commit message.
 * Check out a new branch `hotfix/<description>` based on master.
 * Cherry-pick the fix commit.
-* Push and create a pull request.
+* Push and create a merge request.
 * Check out the development branch and rebase on the hotfix branch. This will automatically remove the fix commit.
 
-Sometimes a pull request looks like it's ready for review or merge (it is not draft, it has an approval) but really it isn't.
+Sometimes a merge request looks like it's ready for review or merge (it is not in "WIP", it has an approval) but really it isn't.
 For this purpose, the "don't merge" tag can be added to it.
 Example use cases:
 
@@ -317,9 +318,8 @@ Example use cases:
 - It's an oldish PR that needs to be rebased and conflicts need to be resolved.
 - It needs more testing before really approving it for merge.
 
-If a PR is marked "don't merge" and it becomes ready (i.e. you did the necessary fixups and rebased on master), please remember to remove the tag again.
-
-A good example of a pull request with review, discussion, and several iterations is https://github.com/prplfoundation/prplMesh/pull/831.
+If a MR is in WIP state and it becomes ready (i.e. you did the necessary fixups and rebased on master), please remember to remove the "WIP state".
+TODO: a good example of a merge request with review, discussion, and several iterations is https://gitlab.com/prpl-foundation/prplmesh/prplMesh/-/merge_requests/???
 
 ### Testing
 
@@ -327,11 +327,11 @@ Some changes are riskier than others, since they may break existing functionalit
 Changing the topology handling, channel selection, autoconfig - developers should take extra care when modifying such code areas.
 So, it is expected from every developer to use his/hers good judgement, consult with the EasyMesh Test plan, and run real certification tests
 with real devices using the prplmesh CI infrastructure which allows triggering a test in the CI testbed for a given branch.
-For more information on how to trigger a test, see [Testing in CI](https://github.com/prplfoundation/prplMesh/wiki/Testing-in-CI).
+For more information on how to trigger a test, see [Testing in CI](https://confluence.prplfoundation.org/display/PRPLMESH/Testing+in+CI).
 
 ### Definition of done
 
-Before a pull request can be merged, it must be considered "Done".
+Before a merge request can be merged, it must be considered "Done".
 That means the following conditions must hold.
 
 * All commits have a Signed-off-by. Automatic with the DCO check.
