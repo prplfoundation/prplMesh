@@ -1,0 +1,5 @@
+@startuml
+!include __inc_bh_fsm_shared.iuml!
+!include __inc_bh_fsm_wired_specific.iuml!
+!include __inc_bh_fsm_wireless_specific.iuml!
+@enduml
