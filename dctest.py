@@ -26,7 +26,6 @@ from __future__ import print_function  # To check for python2 or < 3.5 execution
 import argparse
 import os
 import grp
-import shutil
 import getpass
 import sys
 import json
@@ -167,13 +166,13 @@ if __name__ == '__main__':
     group = parser.add_mutually_exclusive_group()
     group.add_argument('--test', dest='test', type=str, help='Test to be run')
     group.add_argument('--clean', dest='clean', action='store_true',
-                        help='Clean containers images and networks')
+                       help='Clean containers images and networks')
     group.add_argument('--build', dest='build', action='store_true',
-                        help='Rebuild containers')
+                       help='Rebuild containers')
     group.add_argument('--shell', dest='shell', action='store_true',
-                        help='Run a shell on the bf container')
+                       help='Run a shell on the bf container')
     group.add_argument('--comp', dest='comp', action='store_true',
-                        help='Pass the rest of arguments to docker-compose')
+                       help='Pass the rest of arguments to docker-compose')
     parser.add_argument('--id', dest='bid', type=str,
                         help='Specify the id to use for build/shell/comp/clean')
     args, rest = parser.parse_known_args()
