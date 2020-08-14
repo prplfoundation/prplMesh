@@ -59,7 +59,6 @@ public:
     static const std::string TIMELIFE_DELAY_STR;
     static const std::string INITIAL_RADIO_ENABLE_STR;
     static const std::string INITIAL_RADIO_STR;
-    static const std::string SELECTED_BAND_ENABLE_STR;
     static const std::string SELECTED_BANDS_STR;
 
     // VAPs info list type
@@ -729,25 +728,6 @@ public:
     sMacAddr get_client_initial_radio(const sMacAddr &mac);
 
     /**
-     * @brief Set the client's stay-on-selected-band.
-     * 
-     * @param mac MAC address of a client.
-     * @param stay_on_selected_band Enable client stay on the selected band/bands.
-     * @param save_to_persistent_db If set to true, update the persistent-db (write-through), default is true.
-     * @return true on success, otherwise false.
-     */
-    bool set_client_stay_on_selected_band(const sMacAddr &mac, bool stay_on_selected_band,
-                                          bool save_to_persistent_db = true);
-
-    /**
-     * @brief Get the client's stay-on-selected-band.
-     * 
-     * @param mac MAC address of a client.
-     * @return Enable client stay on the selected band/bands.
-     */
-    eTriStateBool get_client_stay_on_selected_band(const sMacAddr &mac);
-
-    /**
      * @brief Set the client's selected-bands.
      * 
      * @param mac MAC address of a client.
@@ -1142,19 +1122,22 @@ private:
     /**
      * @brief Removes client with least timelife remaining from persistent db (with preference to disconnected clients).
      * 
+     * @param[in] client_to_skip A client mac that should not be selected as cadidate. This is to prevent currently added node as candidate.
      * @return true on success, otherwise false.
      */
-    bool remove_candidate_client();
+    bool remove_candidate_client(sMacAddr client_to_skip = beerocks::net::network_utils::ZERO_MAC);
 
     /**
      * @brief Returns the preferred client to be removed.
      * Preference is determined as follows:
      * - Prefer disconnected clients over connected ones.
      * - According to above, the client with least time left before aging.
-     *
+     
+     * @param[in] client_to_skip A client mac that should not be selected as cadidate. This is to prevent currently added node as candidate.
      * @return sMacAddr mac of candidate client to be removed - if not found, string_utils::ZERO_MAC is returned.
      */
-    sMacAddr get_candidate_client_for_removal();
+    sMacAddr get_candidate_client_for_removal(
+        sMacAddr client_to_skip = beerocks::net::network_utils::ZERO_MAC);
 
     int network_optimization_task_id = -1;
     int channel_selection_task_id    = -1;

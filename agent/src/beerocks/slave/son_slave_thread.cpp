@@ -157,13 +157,16 @@ void slave_thread::slave_reset()
 
     auto db = AgentDB::get();
 
+    /**
+     * m_fronthaul_iface is updated on ACTION_APMANAGER_JOINED_NOTIFICATION
+     * before this initial message the value is empty.
+     * We do not want to fail on this scenario.
+     */
     auto radio = db->radio(m_fronthaul_iface);
-    if (!radio) {
-        LOG(ERROR) << "Radio of iface " << m_fronthaul_iface << " does not exist on the db";
-        return;
+    if (radio) {
+        // Clear the front interface mac if radio exists
+        radio->front.iface_mac = network_utils::ZERO_MAC;
     }
-    // Clear the front interface mac.
-    radio->front.iface_mac = network_utils::ZERO_MAC;
 
     if (configuration_stop_on_failure_attempts && !stop_on_failure_attempts) {
         LOG(ERROR) << "Reached to max stop on failure attempts!";
@@ -1075,9 +1078,6 @@ bool slave_thread::handle_cmdu_backhaul_manager_message(
             backhaul_params.gw_ipv4 = network_utils::ipv4_to_string(notification->params().gw_ipv4);
             backhaul_params.gw_bridge_mac =
                 tlvf::mac_to_string(notification->params().gw_bridge_mac);
-            backhaul_params.controller_bridge_mac =
-                tlvf::mac_to_string(notification->params().controller_bridge_mac);
-            backhaul_params.is_prplmesh_controller = notification->params().is_prplmesh_controller;
             backhaul_params.bridge_ipv4 =
                 network_utils::ipv4_to_string(notification->params().bridge_ipv4);
             backhaul_params.backhaul_mac = tlvf::mac_to_string(notification->params().backhaul_mac);
@@ -1834,7 +1834,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         client_association_event_tlv->association_event() =
             wfa_map::tlvClientAssociationEvent::CLIENT_HAS_LEFT_THE_BSS;
 
-        if (!backhaul_params.is_prplmesh_controller) {
+        if (!db->controller_info.prplmesh_controller) {
             LOG(DEBUG) << "non-prplMesh, not adding ClientAssociationEvent VS TLV";
         } else {
             // Add vendor specific tlv
@@ -2017,7 +2017,7 @@ bool slave_thread::handle_cmdu_ap_manager_message(Socket *sd,
         client_association_event_tlv->association_event() =
             wfa_map::tlvClientAssociationEvent::CLIENT_HAS_JOINED_THE_BSS;
 
-        if (!backhaul_params.is_prplmesh_controller) {
+        if (!db->controller_info.prplmesh_controller) {
             LOG(DEBUG) << "non-prlMesh, not adding ClientAssociationEvent VS TLV";
         } else {
             // Add vendor specific tlv
@@ -3175,7 +3175,6 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         LOG(TRACE) << "MASTER_CONNECTED";
 
         master_socket = backhaul_manager_socket;
-        master_socket->setPeerMac(backhaul_params.controller_bridge_mac);
 
         auto db = AgentDB::get();
         if (!wlan_settings.band_enabled) {
@@ -3208,8 +3207,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
         LOG(INFO) << "Backhaul Params Info:";
         LOG(INFO) << "gw_ipv4=" << backhaul_params.gw_ipv4;
         LOG(INFO) << "gw_bridge_mac=" << backhaul_params.gw_bridge_mac;
-        LOG(INFO) << "controller_bridge_mac=" << backhaul_params.controller_bridge_mac;
-        LOG(INFO) << "is_prplmesh_controller=" << backhaul_params.is_prplmesh_controller;
+        LOG(INFO) << "controller_bridge_mac=" << db->controller_info.bridge_mac;
+        LOG(INFO) << "prplmesh_controller=" << db->controller_info.prplmesh_controller;
         LOG(INFO) << "bridge_mac=" << db->bridge.mac;
         LOG(INFO) << "bridge_ipv4=" << backhaul_params.bridge_ipv4;
         LOG(INFO) << "backhaul_iface=" << backhaul_params.backhaul_iface;
@@ -3293,7 +3292,7 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             return false;
         }
 
-        if (!backhaul_params.is_prplmesh_controller) {
+        if (!db->controller_info.prplmesh_controller) {
             LOG(INFO) << "Configured as non-prplMesh, not sending SLAVE_JOINED_NOTIFICATION";
         } else {
             auto notification = message_com::add_vs_tlv<
@@ -3599,7 +3598,7 @@ bool slave_thread::send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx)
     }
 
     if (cmdu_tx.getMessageType() == ieee1905_1::eMessageType::VENDOR_SPECIFIC_MESSAGE) {
-        if (!backhaul_params.is_prplmesh_controller) {
+        if (!db->controller_info.prplmesh_controller) {
             return true; // don't send VS messages to non prplmesh controllers
         }
         auto beerocks_header = message_com::get_beerocks_header(cmdu_tx);
@@ -3615,7 +3614,7 @@ bool slave_thread::send_cmdu_to_controller(ieee1905_1::CmduMessageTx &cmdu_tx)
     auto dst_addr =
         cmdu_tx.getMessageType() == ieee1905_1::eMessageType::TOPOLOGY_NOTIFICATION_MESSAGE
             ? network_utils::MULTICAST_1905_MAC_ADDR
-            : backhaul_params.controller_bridge_mac;
+            : tlvf::mac_to_string(db->controller_info.bridge_mac);
 
     return message_com::send_cmdu(master_socket, cmdu_tx, dst_addr,
                                   tlvf::mac_to_string(db->bridge.mac));
@@ -4204,8 +4203,9 @@ bool slave_thread::handle_client_association_request(Socket *sd, ieee1905_1::Cmd
 bool slave_thread::handle_1905_higher_layer_data_message(Socket &sd,
                                                          ieee1905_1::CmduMessageRx &cmdu_rx)
 {
-    // Only one backhaul manager (the slave) should return ACK for higher layer data message.
-    if (is_backhaul_manager) {
+    // Only one son_slave should return ACK for higher layer data message, therefore ignore
+    // this message on non backhaul manager son_slaves.
+    if (!is_backhaul_manager) {
         return true;
     }
 

@@ -2274,14 +2274,27 @@ int cli_bml::client_get_client(const std::string &sta_mac)
 
             return ret;
         };
+        auto print_configured_mac = [](uint8_t *mac) -> std::string {
+            uint8_t ZERO_MAC[BML_MAC_ADDR_LEN] = {0};
+            if (std::equal(mac, mac + BML_MAC_ADDR_LEN, ZERO_MAC)) {
+                return "Not configured";
+            }
+            return tlvf::mac_to_string(mac);
+        };
+
         std::cout << "client: " << tlvf::mac_to_string(client.sta_mac) << std::endl
                   << " timestamp_sec: " << client.timestamp_sec << std::endl
                   << " stay_on_initial_radio: " << client_bool_print(client.stay_on_initial_radio)
                   << std::endl
+                  << " initial_radio: " << print_configured_mac(client.initial_radio) << std::endl
                   << " selected_bands: " << client_selected_bands_print(client.selected_bands)
                   << std::endl
                   << " single_band: " << client_bool_print(client.single_band) << std::endl
-                  << " time_life_delay_days:" << client.time_life_delay_days << std::endl;
+                  << " time_life_delay_days: "
+                  << ((client.time_life_delay_days == PARAMETER_NOT_CONFIGURED)
+                          ? "not-configred"
+                          : std::to_string(client.time_life_delay_days))
+                  << std::endl;
     }
 
     printBmlReturnVals("bml_client_get_client", ret);

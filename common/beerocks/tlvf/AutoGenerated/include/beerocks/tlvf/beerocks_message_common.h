@@ -1383,6 +1383,8 @@ typedef struct sClient {
     uint32_t timestamp_sec;
     //1 for true, 0 for false, -1 for "not configured".
     int8_t stay_on_initial_radio;
+    //Initial radio stored for the client, set to network_utils::ZERO_MAC if not configured.
+    sMacAddr initial_radio;
     //1 for true, 0 for false, -1 for "not configured".
     int8_t stay_on_selected_device;
     //Bitset of selected bands supported by the client according to eClientSelectedBands
@@ -1397,6 +1399,7 @@ typedef struct sClient {
     void struct_swap(){
         sta_mac.struct_swap();
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&timestamp_sec));
+        initial_radio.struct_swap();
         tlvf_swap(32, reinterpret_cast<uint8_t*>(&time_life_delay_days));
     }
     void struct_init(){

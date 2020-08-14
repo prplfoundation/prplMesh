@@ -53,7 +53,8 @@ class TestFlows:
 
     def wait_for_log(self, entity_or_radio: Union[env.ALEntity, env.Radio], regex: str,
                      start_line: int, timeout: float, fail_on_mismatch: bool = True) -> bool:
-        result, line, match = entity_or_radio.wait_for_log(regex, start_line, timeout)
+        result, line, match = entity_or_radio.wait_for_log(regex, start_line, timeout,
+                                                           fail_on_mismatch=fail_on_mismatch)
         if fail_on_mismatch and (not result):
             self.__fail_no_message()
         return result, line, match
@@ -312,7 +313,7 @@ class TestFlows:
     # TEST DEFINITIONS #
 
     def test_dev_reset_default(self):
-        '''Check behaviour of dev_reset_default CAPI command.'''
+        '''Check behavior of dev_reset_default CAPI command.'''
         agent = env.agents[0]
         agent.cmd_reply("dev_reset_default,devrole,agent,program,map,type,DUT")
         env.checkpoint()
@@ -320,8 +321,13 @@ class TestFlows:
         self.check_no_cmdu_type("autoconfig search while in reset", 0x0007, agent.mac)
         env.checkpoint()
         agent.cmd_reply("dev_set_config,backhaul,eth")
-        time.sleep(1)
+        time.sleep(2)
         self.check_cmdu_type("autoconfig search", 0x0007, agent.mac)
+
+        # After dev_reset_default there is a delay between the auto_config message to the moment,
+        # that the sockets to the son_slaves are open. Add a delay to make sure that the son_slaves
+        # are operational before continuing to the next test.
+        time.sleep(3)
 
     def test_capi_wireless_onboarding(self):
         '''Check configuration of wireless backhaul.'''

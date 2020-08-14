@@ -92,6 +92,16 @@ public:
         bool local_controller;
     } device_conf;
 
+    struct sControllerInfo {
+        bool prplmesh_controller;
+        sMacAddr bridge_mac;
+    } controller_info;
+
+    struct sStatus {
+        bool ap_autoconfiguration_completed;
+        bool ap_autoconfiguration_failure;
+    } statuses;
+
     /** 
      * Agent Sub Entities Data
      */
@@ -235,7 +245,7 @@ public:
         std::chrono::steady_clock::time_point timestamp;
     };
 
-    /*
+    /**
      * @brief List of known 1905 neighbor devices.
      * 
      * Upper key: Local interface MAC on which the Topology Discovery message was received from.

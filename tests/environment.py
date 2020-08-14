@@ -65,7 +65,8 @@ class ALEntity:
         '''
         return self.command(os.path.join(self.installdir, command), *args)
 
-    def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
+    def wait_for_log(self, regex: str, start_line: int, timeout: float,
+                     fail_on_mismatch: bool = True) -> bool:
         '''Poll the entity's logfile until it contains "regex" or times out.'''
         raise NotImplementedError("wait_for_log is not implemented in abstract class ALEntity")
 
@@ -86,7 +87,8 @@ class Radio:
         self.mac = mac
         self.vaps = []
 
-    def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
+    def wait_for_log(self, regex: str, start_line: int, timeout: float,
+                     fail_on_mismatch: bool = True) -> bool:
         '''Poll the radio's logfile until it contains "regex" or times out.'''
         raise NotImplementedError("wait_for_log is not implemented in abstract class Radio")
 
@@ -188,7 +190,7 @@ on_wsl = "microsoft" in platform.uname()[3].lower()
 # as argument. In the log messages, we only use the first one.
 # This should be reverted again as part of Unified Agent.
 def _docker_wait_for_log(container: str, programs: [str], regex: str, start_line: int,
-                         timeout: float) -> bool:
+                         timeout: float, fail_on_mismatch: bool = True) -> bool:
     def logfilename(program):
         logfilename = os.path.join(rootdir, 'logs', container, 'beerocks_{}.log'.format(program))
 
@@ -219,8 +221,15 @@ def _docker_wait_for_log(container: str, programs: [str], regex: str, start_line
             if time.monotonic() < deadline:
                 time.sleep(.3)
             else:
-                err("Can't find '{}'\n\tin log of {} on {} after {}s".format(regex, programs[0],
-                                                                             container, timeout))
+                if fail_on_mismatch:
+                    err("Can't find '{}'\n\tin log of {} on {} after {}s".format(regex,
+                                                                                 programs[0],
+                                                                                 container,
+                                                                                 timeout))
+                else:
+                    debug("Can't find '{}'\n\tin log of {} on {},"
+                          "but failure allowed".format(regex, programs[0], container))
+
                 return (False, start_line, None)
     except OSError:
         err("Can't read log of {} on {}".format(programs[0], container))
@@ -256,7 +265,6 @@ class ALEntityDocker(ALEntity):
     # don't have it. We can remove this arg as soon, as we drop test_flows.py
     def __init__(self, name: str, device: None = None, is_controller: bool = False,
                  compose: bool = False):
-
         self.name = name
         self.bridge_name = 'br-lan'
         if device:
@@ -300,10 +308,12 @@ class ALEntityDocker(ALEntity):
         '''Execute `command` in docker container and return its output.'''
         return subprocess.check_output(("docker", "exec", self.name) + command)
 
-    def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
+    def wait_for_log(self, regex: str, start_line: int, timeout: float,
+                     fail_on_mismatch: bool = True) -> bool:
         '''Poll the entity's logfile until it contains "regex" or times out.'''
         program = "controller" if self.is_controller else "agent"
-        return _docker_wait_for_log(self.name, [program], regex, start_line, timeout)
+        return _docker_wait_for_log(self.name, [program], regex, start_line, timeout,
+                                    fail_on_mismatch=fail_on_mismatch)
 
     def prprlmesh_status_check(self):
         return self.device.prprlmesh_status_check()
@@ -311,6 +321,7 @@ class ALEntityDocker(ALEntity):
 
 class RadioDocker(Radio):
     '''Docker implementation of a radio.'''
+
     def __init__(self, agent: ALEntityDocker, iface_name: str):
         self.iface_name = iface_name
         ip_output = agent.command("ip", "-o",  "link", "list", "dev", self.iface_name).decode()
@@ -322,11 +333,12 @@ class RadioDocker(Radio):
         # the radio MAC as the bssid.
         VirtualAPDocker(self, mac)
 
-    def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
+    def wait_for_log(self, regex: str, start_line: int, timeout: float,
+                     fail_on_mismatch: bool = True) -> bool:
         '''Poll the radio's logfile until it contains "regex" or times out.'''
         programs = ("agent_" + self.iface_name, "ap_manager_" + self.iface_name)
-        return _docker_wait_for_log(self.agent.name, programs, regex,
-                                    start_line, timeout)
+        return _docker_wait_for_log(self.agent.name, programs, regex, start_line, timeout,
+                                    fail_on_mismatch=fail_on_mismatch)
 
     def send_bwl_event(self, event: str) -> None:
         # The file is only available within the docker container so we need to use an echo command.
@@ -461,7 +473,8 @@ class ALEntityPrplWrt(ALEntity):
         self.device.expect(self.device.prompt, timeout=10)
         return self.device.before
 
-    def wait_for_log(self, regex: str, start_line: int, timeout: float) -> bool:
+    def wait_for_log(self, regex: str, start_line: int, timeout: float,
+                     fail_on_mismatch: bool = True) -> bool:
         """Poll the entity's logfile until it contains "regex" or times out."""
         program = "controller" if self.is_controller else "agent"
         # Multiply timeout by 100, as test sets it in float.
@@ -498,7 +511,8 @@ class RadioHostapd(Radio):
                 vap_mac = self.get_mac("{}.{}".format(self.iface_name, vap_number))
                 VirtualAPHostapd(self, vap_mac)
 
-    def wait_for_log(self, regex: str, start_line: int, timeout: float):
+    def wait_for_log(self, regex: str, start_line: int, timeout: float,
+                     fail_on_mismatch: bool = True):
         ''' Poll the Radio's logfile until it match regular expression '''
         # Multiply timeout by 100, as test sets it in float.
         return _device_wait_for_log(self.agent.device, "{}/beerocks_agent_{}.log".format(
@@ -534,7 +548,7 @@ class VirtualAPHostapd(VirtualAP):
         device = self.radio.agent.device
         ssid = self.get_ssid()
         device.sendline(("grep \"Autoconfiguration for ssid: " +
-                        "{}\" \"{}/beerocks_agent_{}.log\" | tail -n 1")
+                         "{}\" \"{}/beerocks_agent_{}.log\" | tail -n 1")
                         .format(ssid, self.radio.log_folder, self.radio.iface_name))
         # We looking for key, which was set during last autoconfiguration. E.g of such string:
         # network_key: maprocks2 fronthaul:

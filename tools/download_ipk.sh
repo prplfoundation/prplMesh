@@ -75,7 +75,7 @@ main() {
         download_artifact latest/build/"$DEVICE"/prplmesh.ipk
         download_artifact latest/build/"$DEVICE"/prplmesh.buildinfo
     elif [ "$REMOTE" = "gitlab" ]; then
-        GITLAB_BASE_URL="https://gitlab.com/prpl-foundation/prplmesh/-/jobs/artifacts/"
+        GITLAB_BASE_URL="https://gitlab.com/prpl-foundation/prplmesh/prplMesh/-/jobs/artifacts/"
         # URL for downloading the prplmesh.ipk according to
         # https://docs.gitlab.com/ee/ci/pipelines/job_artifacts.html#downloading-the-latest-artifacts
         IPK_URL="$GITLAB_BASE_URL/$BRANCH/raw/build/$DEVICE/prplmesh.ipk?job=build-for-$DEVICE"

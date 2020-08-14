@@ -1,7 +1,7 @@
 .certification-generic:
   variables:
     # DEVICE_UNDER_TEST need to be set when extending the job
-    GIT_CLONE_PATH: "/builds/prpl-foundation/prplMesh/"
+    GIT_CLONE_PATH: "/builds/prpl-foundation/prplmesh/prplMesh/"
   script:
       - echo $CI_COMMIT_DESCRIPTION
       - ci/git-clean-reset.sh /easymesh_cert "$(<"ci/easymesh_cert_version")"

@@ -26,6 +26,7 @@ node::node(beerocks::eType type_, const std::string &mac_)
     }
     m_sta_5ghz_capabilities.valid  = false;
     m_sta_24ghz_capabilities.valid = false;
+    client_initial_radio           = net::network_utils::ZERO_MAC;
 }
 
 namespace son {
@@ -149,7 +150,6 @@ std::ostream &operator<<(std::ostream &os, const node &n)
                << (client_time_life_delay_hours % 24) << " hours" << std::endl
                << "   ClientStayOnInitialRadio: " << n.client_stay_on_initial_radio << std::endl
                << "   ClientInitialRadio: " << n.client_initial_radio << std::endl
-               << "   ClientStayOnSelectedBand: " << n.client_stay_on_selected_band << std::endl
                << "   ClientSelectedBands: " << n.client_selected_bands << std::endl;
         }
 

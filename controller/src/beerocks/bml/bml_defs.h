@@ -607,6 +607,9 @@ struct BML_CLIENT {
     // 1 for true, 0 for false, -1 for "not configured".
     int8_t stay_on_initial_radio;
 
+    // Initial radio stored for the client, Zeroed out if not configured (00:00:00:00:00:00).
+    uint8_t initial_radio[BML_MAC_ADDR_LEN];
+
     // Bitwise value of selected bands for the client.
     // Correlates to BML_CLIENT_SELECTED_BANDS
     int8_t selected_bands;
@@ -615,7 +618,7 @@ struct BML_CLIENT {
     // Determines the period of time after which the client configuration should be cleared,
     //   0 - Never age.
     //  -1 - Not Configured.
-    uint32_t time_life_delay_days;
+    int32_t time_life_delay_days;
 };
 
 /****************************************************************************/

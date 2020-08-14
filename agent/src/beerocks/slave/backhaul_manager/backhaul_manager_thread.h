@@ -55,7 +55,6 @@ public:
     virtual bool work() override;
 
     // For agent_ucc_listener
-    const std::string &get_controller_bridge_mac() const { return controller_bridge_mac; }
     /**
      * @brief get radio mac (ruid) of registered slave based on frequency type
      * 
@@ -94,8 +93,6 @@ private:
     finalize_slaves_connect_state(bool fConnected,
                                   std::shared_ptr<sRadioInfo> pSocket = nullptr); // cmdu_duplicate
 
-    bool send_autoconfig_search_message(const std::string &front_radio_iface_name);
-
     /**
      * @brief Sends an AP Metrics Query message for each bssid on 'bssid_list' to the son_slaves.
      * If the 'bssid_list' is empty, sends a query on each bssid that exists on the Agent.
@@ -127,8 +124,6 @@ private:
     bool handle_1905_1_message(ieee1905_1::CmduMessageRx &cmdu_rx, const std::string &src_mac,
                                Socket *&forward_to);
     // 1905 messages handlers
-    bool handle_1905_autoconfiguration_response(ieee1905_1::CmduMessageRx &cmdu_rx,
-                                                const std::string &src_mac);
     bool handle_1905_link_metric_query(ieee1905_1::CmduMessageRx &cmdu_rx,
                                        const std::string &src_mac);
     bool handle_1905_combined_infrastructure_metrics(ieee1905_1::CmduMessageRx &cmdu_rx,
@@ -165,8 +160,6 @@ private:
 
 private:
     const std::string &beerocks_temp_path;
-
-    SocketClient *master_discovery_socket = nullptr;
 
     struct SBackhaulConfig {
         std::string ssid;
@@ -240,10 +233,6 @@ private:
     const int AP_BLACK_LIST_FAILED_ATTEMPTS_THRESHOLD = 2;
     const int INTERFACE_BRING_UP_TIMEOUT_SECONDS      = 600;
     const int DEAUTH_REASON_PASSPHRASE_MISMACH        = 2;
-    const int AUTOCONFIG_DISCOVERY_TIMEOUT_SECONDS    = 1;
-    const int MAX_FAILED_AUTOCONFIG_SEARCH_ATTEMPTS   = 20;
-    const int DISCOVERY_NEIGHBOUR_REMOVAL_TIMEOUT =
-        ieee1905_1_consts::DISCOVERY_NOTIFICATION_TIMEOUT_SEC + 3; // 3 seconds grace period
 
     std::chrono::steady_clock::time_point state_time_stamp_timeout;
     int state_attempts;
@@ -265,8 +254,6 @@ private:
     bool m_eth_link_up  = false;
     bool pending_enable = false;
 
-    std::string controller_bridge_mac;
-    bool is_prplmesh_controller = false;
     std::string bssid_bridge_mac;
 
     std::unique_ptr<beerocks::agent_ucc_listener> m_agent_ucc_listener;
@@ -308,7 +295,6 @@ private:
         std::string sta_iface;    /**< Name of the bSTA interface on the radio (if any) */
         bool sta_iface_filter_low      = false;
         bool slave_is_backhaul_manager = false;
-        bool controller_discovered     = false;
 
         std::shared_ptr<bwl::sta_wlan_hal> sta_wlan_hal;
         Socket *sta_hal_ext_events = nullptr;
@@ -527,8 +513,7 @@ private:
     STATE(_WIRELESS_END_)                                                                          \
                                                                                                    \
     STATE(MASTER_DISCOVERY)                                                                        \
-    STATE(SEND_AUTOCONFIG_SEARCH_MESSAGE)                                                          \
-    STATE(WAIT_FOR_AUTOCONFIG_RESPONSE_MESSAGE)                                                    \
+    STATE(WAIT_FOR_AUTOCONFIG_COMPLETE)                                                            \
     STATE(CONNECT_TO_MASTER)                                                                       \
     STATE(CONNECTED)                                                                               \
     STATE(OPERATIONAL)                                                                             \
