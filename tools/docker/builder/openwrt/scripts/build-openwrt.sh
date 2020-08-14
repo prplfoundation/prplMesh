@@ -24,6 +24,9 @@ case $TARGET_DEVICE in
         echo "src-git prpl $PRPL_FEED" >> feeds.conf
         scripts/feeds update -a
         scripts/feeds install -a
+        # Add optional prplMesh dependencies (or a different toolchain
+        # for example) from our 'configs' directory:
+        cat configs/* > .config
         {
             # note that the result from diffconfig.sh with a minimal
             # configuration has the 3 CONFIG_TARGET items we set here, but NOT

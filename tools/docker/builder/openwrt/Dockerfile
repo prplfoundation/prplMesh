@@ -87,6 +87,7 @@ RUN printf '\033[1;35m%s Cloning prplWrt\n\033[0m' "$(date --iso-8601=seconds --
 
 WORKDIR /home/openwrt/openwrt
 
+COPY --chown=openwrt:openwrt configs/ /home/openwrt/openwrt/configs/
 COPY --chown=openwrt:openwrt profiles_feeds/ /home/openwrt/openwrt/profiles_feeds
 COPY --chown=openwrt:openwrt scripts/build-openwrt.sh /home/openwrt/openwrt/scripts/build-openwrt.sh
 
