@@ -28,7 +28,7 @@ class PrplMeshBase(linux.LinuxDevice):
                                           withexitstatus=1)
         entry = " ".join((cmd, " ".join(args)))
         if exitstatus != 0:
-            raise CommandError("Error executing {}:\{}".format(entry, res))
+            raise CommandError("Error executing {}:\n{}".format(entry, res))
 
         self.log_calls += entry
         self.log += "$ " + entry + "\r\n" + res
