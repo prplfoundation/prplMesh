@@ -4,7 +4,7 @@ FROM python:3.8-slim-buster
 RUN apt-get update \
 && DEBIAN_FRONTEND=noninteractive apt-get install \
 apt-transport-https ca-certificates curl gnupg-agent \
-software-properties-common curl gcc libsnmp-dev wireshark-common tshark \
+software-properties-common curl gcc libsnmp-dev jq wireshark-common tshark \
 -y && apt-get clean
 
 # Install docker and docker-compose from docker.com repositories
