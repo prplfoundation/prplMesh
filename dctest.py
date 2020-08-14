@@ -139,7 +139,7 @@ class Services:
             # Running inside gitlab-ci
             # Setting a fixed location is needed until
             # https://jira.prplfoundation.org/browse/PPM-208 is fixed.
-            local_env['FINAL_ROOT_DIR'] = '/builds/prpl-foundation/prplMesh'
+            local_env['FINAL_ROOT_DIR'] = '/builds/prpl-foundation/prplmesh/prplMesh'
 
         if not interactive:
             proc = Popen(params, stdout=PIPE, stderr=PIPE)

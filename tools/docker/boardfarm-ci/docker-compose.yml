@@ -2,7 +2,7 @@ version: '3'
 services:
     # Controller and agent are run from inside the boardfarm container
     controller:
-        image: registry.gitlab.com/prpl-foundation/prplmesh/prplmesh-runner:${CI_PIPELINE_ID}
+        image: registry.gitlab.com/prpl-foundation/prplmesh/prplmesh/prplmesh-runner:${CI_PIPELINE_ID}
         privileged: true    # For the creation of the bridge to work
         container_name: controller
         environment:
@@ -18,7 +18,7 @@ services:
         entrypoint: ["/root/entrypoint.sh", "/usr/bin/start-controller-agent"]
 
     agent:
-        image: registry.gitlab.com/prpl-foundation/prplmesh/prplmesh-runner:${CI_PIPELINE_ID}
+        image: registry.gitlab.com/prpl-foundation/prplmesh/prplmesh/prplmesh-runner:${CI_PIPELINE_ID}
         privileged: true
         container_name: agent
         environment:
