@@ -1358,7 +1358,6 @@ enum eClientSelectedBands: uint8_t {
     eSelectedBands_24G = 0x1,
     eSelectedBands_5G = 0x2,
     eSelectedBands_6G = 0x4,
-    eSelectedBands_60G = 0x8,
 };
 
 typedef struct sClientConfig {

@@ -984,7 +984,6 @@ eClientSelectedBands:
   eSelectedBands_24G: 1
   eSelectedBands_5G: 2
   eSelectedBands_6G: 4
-  eSelectedBands_60G: 8
 
 sClientConfig:
   _type: struct
