@@ -1248,6 +1248,38 @@ int bml_internal::process_cmdu_header(std::shared_ptr<beerocks_header> beerocks_
             //Resolve promise to "true"
             m_prmClientGet->set_value(true);
         } break;
+        case beerocks_message::ACTION_BML_CLIENT_DEL_PERSISTENT_DB_RESPONSE: {
+            LOG(DEBUG) << "ACTION_BML_CLIENT_DEL_PERSISTENT_DB_RESPONSE received";
+
+            if (!m_prmClientGet) {
+                LOG(WARNING) << "Received ACTION_BML_CLIENT_DEL_PERSISTENT_DB_RESPONSE response, "
+                             << "but no one is waiting...";
+                break;
+            }
+
+            auto response =
+                beerocks_header
+                    ->addClass<beerocks_message::cACTION_BML_CLIENT_DEL_PERSISTENT_DB_RESPONSE>();
+            if (!response) {
+                LOG(ERROR) << "addClass ACTION_BML_CLIENT_DEL_PERSISTENT_DB_RESPONSE failed";
+                return (-BML_RET_OP_FAILED);
+            }
+
+            if (response->result() != 0) {
+                LOG(ERROR) << "cACTION_BML_CLIENT_DEL_PERSISTENT_DB_RESPONSE failed with error: " << response->result();
+                m_prmClientGet->set_value(false);
+                break;
+            }
+
+            if (!m_client) {
+                LOG(ERROR) << "The pointer to the user client data is null!";
+                m_prmClientGet->set_value(false);
+                break;
+            }
+
+            //Resolve promise to "true"
+            m_prmClientGet->set_value(true);
+        } break;
         default: {
             LOG(WARNING) << "unhandled header BML action type 0x" << std::hex
                          << int(beerocks_header->action_op());
@@ -2178,6 +2210,84 @@ int bml_internal::register_nw_map_update_cb(BML_NW_MAP_QUERY_CB pCB)
     }
 
     return (BML_RET_OK);
+}
+
+int bml_internal::client_del_client_persistent_info(const sMacAddr &sta_mac, BML_CLIENT *client)
+{
+    LOG(DEBUG) << "client_del_client_persistent_info";
+
+    // If the socket is not valid, attempt to re-establish the connection
+    if (!m_sockMaster) {
+        int iRet = connect_to_master();
+        if (iRet != BML_RET_OK) {
+            LOG(ERROR) << " Unable to create context, connect_to_master failed!";
+            return iRet;
+        }
+    }
+
+    // Initialize the promise for receiving the response
+    beerocks::promise<bool> prmClientGet;
+    m_prmClientGet = &prmClientGet;
+    int iOpTimeout = RESPONSE_TIMEOUT; // Default timeout
+    m_client       = client;
+
+    auto request =
+        message_com::create_vs_message<beerocks_message::cACTION_BML_CLIENT_DEL_PERSISTENT_DB_REQUEST>(
+            cmdu_tx);
+
+    if (!request) {
+        LOG(ERROR) << "Failed building cACTION_BML_CLIENT_DEL_PERSISTENT_DB_REQUEST message!";
+        return (-BML_RET_OP_FAILED);
+    }
+
+    request->sta_mac() = sta_mac;
+
+    // Build and send the message
+    if (!message_com::send_cmdu(m_sockMaster, cmdu_tx)) {
+        LOG(ERROR) << "Failed sending param get message!";
+        m_prmClientGet = nullptr;
+        m_client       = nullptr;
+        return (-BML_RET_OP_FAILED);
+    }
+
+    LOG(DEBUG) << "cACTION_BML_CLIENT_DEL_PERSISTENT_DB_REQUEST sent";
+
+    int iRet = BML_RET_OK;
+
+    if (!m_prmClientGet->wait_for(iOpTimeout)) {
+        LOG(WARNING) << "Timeout while waiting for client response..";
+        iRet = -BML_RET_TIMEOUT;
+    }
+
+    // Clear the get client members
+    m_client = nullptr;
+
+    // Clear the promise holder
+    m_prmClientGet = nullptr;
+
+    if (iRet != BML_RET_OK) {
+            LOG(ERROR) << "delete client request returned"
+            " with error code:" << iRet;
+        return (iRet);
+    }
+
+    if (!prmClientGet.get_value()) {
+        LOG(ERROR) << "Get client request failed";
+        return (-BML_RET_OP_FAILED);
+    }
+     /*
+    else if (prmClientGet.get_value() == 2) {
+        LOG(ERROR) << "delete client request returned" 
+        << " with an error code: ("<< iRet <<
+        ") sta_mac is not found";
+    }
+    else if (prmClientGet.get_value() == 1){
+        LOG(WARNING) << "Delete client persistent DB"
+        << " info has completed succesfully";
+    } 
+    */   
+
+    return BML_RET_OK;
 }
 
 int bml_internal::device_oper_radios_query(BML_DEVICE_DATA *device_data)
