@@ -567,6 +567,9 @@ void cli_bml::setFunctionsMapAndArray()
     insertCommandToMap("bml_client_get_client", "<sta_mac>", "Get client with the given STA MAC.",
                        static_cast<pFunction>(&cli_bml::client_get_client_caller), 1, 1,
                        STRING_ARG);
+    insertCommandToMap("bml_client_del_persistent_info", "<sta_mac>", "Delete client persistent info with the given STA MAC.",
+                       static_cast<pFunction>(&cli_bml::client_del_persistent_info_caller), 1, 1,
+                       STRING_ARG);
     //bool insertCommandToMap(std::string command, std::string help_args, std::string help,  pFunction funcPtr, uint8_t minNumOfArgs, uint8_t maxNumOfArgs,
 }
 
@@ -1376,6 +1379,20 @@ int cli_bml::client_get_client_caller(int numOfArgs)
 {
     if (numOfArgs == 1) {
         return client_get_client(args.stringArgs[0]);
+    }
+    return -1;
+}
+
+/**
+ * Caller function for client_del_persistent_info_caller.
+ *
+ * @param [in] numOfArgs Number of received arguments
+ * @return 0 on success.
+ */
+int cli_bml::client_del_persistent_info_caller(int numOfArgs)
+{
+    if (numOfArgs == 1) {
+        return client_del_persistent_info(args.stringArgs[0]);
     }
     return -1;
 }
@@ -2298,6 +2315,28 @@ int cli_bml::client_get_client(const std::string &sta_mac)
     }
 
     printBmlReturnVals("bml_client_get_client", ret);
+
+    return 0;
+}
+
+/**
+ * get specific client according to MAC.
+ * 
+ * @param [in] sta_mac MAC address of requested client
+ * 
+ * @return 0 on success.
+ */
+int cli_bml::client_del_persistent_info(const std::string &sta_mac)
+{
+    BML_CLIENT client;
+    int ret = bml_client_del_persistent_db(ctx, sta_mac.c_str(), &client);
+
+    if (ret == BML_RET_OK) {
+        std::cout << "the designated client records will be removed the persistent DB" << std::endl;
+        std::cout << "client: " << tlvf::mac_to_string(client.sta_mac) << std::endl;
+    }
+
+    printBmlReturnVals("bml_client_del_persistent_info", ret);
 
     return 0;
 }
