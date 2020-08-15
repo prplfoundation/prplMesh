@@ -787,6 +787,13 @@ public:
      */
     std::deque<sMacAddr> get_clients_with_persistent_data_configured();
 
+    /**
+     * @brief Del the client presistent data (is used with CLI)
+     * 
+     * @return true on success, otherwise if client doesn't exist return false and prompt an error
+     */
+    bool del_clients_persistent_data(const sMacAddr& mac);
+
     //
     // CLI
     //
