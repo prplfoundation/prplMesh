@@ -10,7 +10,7 @@ git remote set-url --push origin git@gitlab.com:prpl-foundation/prplmesh/prplMes
 or for https:
 ```
 git remote set-url origin https://gitlab.com/prpl-foundation/prplmesh/prplMesh.git
-git remote set-url --push origin ghttps://gitlab.com/prpl-foundation/prplmesh/prplMesh.git
+git remote set-url --push origin https://gitlab.com/prpl-foundation/prplmesh/prplMesh.git
 ```
 
 # prplMesh
