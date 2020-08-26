@@ -193,6 +193,9 @@ def _docker_wait_for_log(container: str, programs: [str], regex: str, start_line
                          timeout: float, fail_on_mismatch: bool = True) -> bool:
     def logfilename(program):
         logfilename = os.path.join(rootdir, 'logs', container, 'beerocks_{}.log'.format(program))
+
+        print(' --- logfilename: {}'.format(logfilename))
+
         # WSL doesn't support symlinks on NTFS, so resolve the symlink manually
         if on_wsl:
             logfilename = os.path.join(
@@ -260,8 +263,8 @@ class ALEntityDocker(ALEntity):
     '''
     # NOTE: name arg can be also extracted from the device class itself, but test_flows.py
     # don't have it. We can remove this arg as soon, as we drop test_flows.py
-
-    def __init__(self, name: str, device: None = None, is_controller: bool = False):
+    def __init__(self, name: str, device: None = None, is_controller: bool = False,
+                 compose: bool = False):
         self.name = name
         self.bridge_name = 'br-lan'
         if device:
@@ -278,16 +281,19 @@ class ALEntityDocker(ALEntity):
                           config_file.read()).group('port')
 
         # On WSL, connect to the locally exposed container port
-        if on_wsl:
-            published_port_output = subprocess.check_output(
-                ["docker", "port", name, ucc_port]).decode('utf-8').split(":")
-            device_ip = published_port_output[0]
-            ucc_port = int(published_port_output[1])
+        if not compose:
+            if on_wsl:
+                published_port_output = subprocess.check_output(
+                    ["docker", "port", name, ucc_port]).decode('utf-8').split(":")
+                device_ip = published_port_output[0]
+                ucc_port = int(published_port_output[1])
+            else:
+                device_ip_output = self.command(
+                    'ip', '-f', 'inet', 'addr', 'show', self.bridge_name)
+                device_ip = re.search(
+                    r'inet (?P<ip>[0-9.]+)', device_ip_output.decode('utf-8')).group('ip')
         else:
-            device_ip_output = self.command(
-                'ip', '-f', 'inet', 'addr', 'show', self.bridge_name)
-            device_ip = re.search(r'inet (?P<ip>[0-9.]+)',
-                                  device_ip_output.decode('utf-8')).group('ip')
+            device_ip = self.name
 
         ucc_socket = UCCSocket(device_ip, ucc_port)
         mac = ucc_socket.dev_get_parameter('ALid')
