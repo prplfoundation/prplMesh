@@ -72,20 +72,7 @@ typedef struct sSonConfig {
 } __attribute__((packed)) sSonConfig;
 
 typedef struct sPlatformSettings {
-    char front_ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
-    char front_pass[beerocks::message::WIFI_PASS_MAX_LENGTH];
-    char front_security_type[beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH];
-    char back_ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
-    char back_pass[beerocks::message::WIFI_PASS_MAX_LENGTH];
-    char back_security_type[beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH];
-    uint8_t onboarding;
     uint8_t local_master;
-    uint8_t local_gw;
-    uint8_t operating_mode;
-    uint8_t management_mode;
-    uint8_t mem_only_psk;
-    uint8_t certification_mode;
-    uint8_t stop_on_failure_attempts;
     uint8_t client_band_steering_enabled;
     uint8_t client_optimal_path_roaming_enabled;
     uint8_t dfs_reentry_enabled;
@@ -94,9 +81,6 @@ typedef struct sPlatformSettings {
     uint8_t load_balancing_enabled;
     uint8_t service_fairness_enabled;
     uint8_t rdkb_extensions_enabled;
-    uint8_t backhaul_max_vaps;
-    uint8_t backhaul_network_enabled;
-    uint8_t backhaul_preferred_radio_band;
     void struct_swap(){
     }
     void struct_init(){

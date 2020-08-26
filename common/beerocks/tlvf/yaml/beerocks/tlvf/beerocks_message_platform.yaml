@@ -24,11 +24,9 @@ cACTION_PLATFORM_SON_SLAVE_REGISTER_REQUEST:
 
 cACTION_PLATFORM_SON_SLAVE_REGISTER_RESPONSE:
   _type: class
-  platform_settings: sPlatformSettings
-  wlan_settings: sWlanSettings
   valid:
     _type: uint32_t
-    _comment: #Marks whether the settings are valid
+    _comment: # Marks whether the settings received into agent_db
 
 cACTION_PLATFORM_ARP_MONITOR_NOTIFICATION:
   _type: class

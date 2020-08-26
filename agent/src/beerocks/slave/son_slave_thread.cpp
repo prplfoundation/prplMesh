@@ -794,7 +794,7 @@ bool slave_thread::handle_cmdu_control_message(Socket *sd,
         if (request_in->params().use_optional_ssid &&
             std::string((char *)request_in->params().ssid).empty()) {
             //LOG(DEBUG) << "ssid field is empty! using slave ssid -> " << config.ssid;
-            string_utils::copy_string(request_in->params().ssid, platform_settings.front_ssid,
+            string_utils::copy_string(request_in->params().ssid, db->device_conf.front_radio.ssid,
                                       message::WIFI_SSID_MAX_LENGTH);
         }
 
@@ -1317,10 +1317,9 @@ bool slave_thread::handle_cmdu_platform_manager_message(
                 return true;
             }
 
-            platform_settings = response->platform_settings();
-            wlan_settings     = response->wlan_settings();
-
-            auto db = AgentDB::get();
+            auto db                    = AgentDB::get();
+            wlan_settings.band_enabled = db->device_conf.wlan_settings.band_enabled;
+            wlan_settings.channel      = db->device_conf.wlan_settings.channel;
 
             /**
              * On GW platform the ethernet interface which is used for backhaul connection must be
@@ -1333,9 +1332,8 @@ bool slave_thread::handle_cmdu_platform_manager_message(
                 db->ethernet.mac = network_utils::ZERO_MAC;
             }
 
-            configuration_stop_on_failure_attempts =
-                response->platform_settings().stop_on_failure_attempts;
-            stop_on_failure_attempts = configuration_stop_on_failure_attempts;
+            configuration_stop_on_failure_attempts = db->device_conf.stop_on_failure_attempts;
+            stop_on_failure_attempts               = configuration_stop_on_failure_attempts;
 
             LOG(TRACE) << "goto STATE_CONNECT_TO_BACKHAUL_MANAGER";
             slave_state = STATE_CONNECT_TO_BACKHAUL_MANAGER;
@@ -2975,8 +2973,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                                   config.hostap_iface.c_str(), message::IFACE_NAME_LENGTH);
 
         request->sta_iface_filter_low() = config.backhaul_wireless_iface_filter_low;
-        request->onboarding()           = platform_settings.onboarding;
-        request->certification_mode()   = platform_settings.certification_mode;
+        request->onboarding()           = 0;
+        request->certification_mode()   = db->device_conf.certification_mode;
 
         LOG(INFO) << "ACTION_BACKHAUL_REGISTER_REQUEST "
                   << " hostap_iface=" << request->hostap_iface(message::IFACE_NAME_LENGTH)
@@ -3004,12 +3002,8 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
     case STATE_JOIN_INIT: {
 
         auto db = AgentDB::get();
-        LOG(DEBUG) << "onboarding: " << int(platform_settings.onboarding);
-        if (platform_settings.onboarding) {
-            LOG(TRACE) << "goto STATE_ONBOARDING";
-            slave_state = STATE_ONBOARDING;
-            break;
-        } else if (!wlan_settings.band_enabled) {
+        LOG(DEBUG) << "onboarding: " << int(0);
+        if (!wlan_settings.band_enabled) {
             LOG(DEBUG) << "wlan_settings.band_enabled=false";
             LOG(TRACE) << "goto STATE_BACKHAUL_ENABLE";
             slave_state = STATE_BACKHAUL_ENABLE;
@@ -3102,14 +3096,16 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
             // to the backhaul manager will no longer be necessary, and therefore should be be
             // removed completely from beerocks including the BPL.
             string_utils::copy_string(bh_enable->ssid(message::WIFI_SSID_MAX_LENGTH),
-                                      platform_settings.back_ssid, message::WIFI_SSID_MAX_LENGTH);
+                                      db->device_conf.back_radio.ssid,
+                                      message::WIFI_SSID_MAX_LENGTH);
             string_utils::copy_string(bh_enable->pass(message::WIFI_PASS_MAX_LENGTH),
-                                      platform_settings.back_pass, message::WIFI_PASS_MAX_LENGTH);
+                                      db->device_conf.back_radio.pass,
+                                      message::WIFI_PASS_MAX_LENGTH);
             bh_enable->security_type() = static_cast<uint32_t>(
-                platform_to_bwl_security(platform_settings.back_security_type));
-            bh_enable->mem_only_psk() = platform_settings.mem_only_psk;
+                platform_to_bwl_security(db->device_conf.back_radio.security_type));
+            bh_enable->mem_only_psk() = db->device_conf.back_radio.mem_only_psk;
             bh_enable->backhaul_preferred_radio_band() =
-                platform_settings.backhaul_preferred_radio_band;
+                db->device_conf.back_radio.backhaul_preferred_radio_band;
 
             string_utils::copy_string(bh_enable->wire_iface(message::IFACE_NAME_LENGTH),
                                       db->ethernet.iface_name.c_str(), message::IFACE_NAME_LENGTH);
@@ -3363,7 +3359,24 @@ bool slave_thread::slave_fsm(bool &call_slave_select)
                 }
 
                 //Platform Settings
-                notification->platform_settings()              = platform_settings;
+                notification->platform_settings().client_band_steering_enabled =
+                    db->device_conf.client_band_steering_enabled;
+                notification->platform_settings().client_optimal_path_roaming_enabled =
+                    db->device_conf.client_optimal_path_roaming_enabled;
+                notification->platform_settings().dfs_reentry_enabled =
+                    db->device_conf.dfs_reentry_enabled;
+                notification->platform_settings()
+                    .client_optimal_path_roaming_prefer_signal_strength_enabled =
+                    db->device_conf.client_optimal_path_roaming_prefer_signal_strength_enabled;
+                notification->platform_settings().client_11k_roaming_enabled =
+                    db->device_conf.client_11k_roaming_enabled;
+                notification->platform_settings().load_balancing_enabled =
+                    db->device_conf.load_balancing_enabled;
+                notification->platform_settings().service_fairness_enabled =
+                    db->device_conf.service_fairness_enabled;
+                notification->platform_settings().rdkb_extensions_enabled =
+                    db->device_conf.rdkb_extensions_enabled;
+
                 notification->platform_settings().local_master = db->device_conf.local_controller;
 
                 //Wlan Settings
@@ -3944,7 +3957,7 @@ bool slave_thread::handle_autoconfiguration_wsc(Socket *sd, ieee1905_1::CmduMess
     // All EasyMesh VAPs will be stored in the platform DB.
     // All other VAPs are manual, AKA should not be modified by prplMesh
     ////////////////////////////////////////////////////////////////////
-    if (platform_settings.management_mode != BPL_MGMT_MODE_NOT_MULTIAP) {
+    if (db->device_conf.management_mode != BPL_MGMT_MODE_NOT_MULTIAP) {
         message_com::send_cmdu(ap_manager_socket, cmdu_tx);
     } else {
         LOG(WARNING) << "non-EasyMesh mode - skip updating VAP credentials";
@@ -4708,7 +4721,7 @@ bool slave_thread::handle_channel_selection_request(Socket *sd, ieee1905_1::Cmdu
     // and in this case don't switch channel
     //
     ////////////////////////////////////////////////////////////////////
-    if (platform_settings.management_mode != BPL_MGMT_MODE_NOT_MULTIAP) {
+    if (db->device_conf.management_mode != BPL_MGMT_MODE_NOT_MULTIAP) {
         message_com::send_cmdu(ap_manager_socket, cmdu_tx);
     } else {
         LOG(WARNING) << "non-EasyMesh mode - skip channel switch";

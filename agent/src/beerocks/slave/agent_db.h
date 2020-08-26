@@ -81,15 +81,41 @@ public:
     /* Agent Configuration */
     struct sDeviceConf {
         struct sFrontRadio {
-
+            char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
+            char pass[beerocks::message::WIFI_PASS_MAX_LENGTH];
+            char security_type[beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH];
         } front_radio;
 
         struct sBackRadio {
-
+            char ssid[beerocks::message::WIFI_SSID_MAX_LENGTH];
+            char pass[beerocks::message::WIFI_PASS_MAX_LENGTH];
+            char security_type[beerocks::message::WIFI_SECURITY_TYPE_MAX_LENGTH];
+            uint8_t mem_only_psk;
+            uint8_t backhaul_max_vaps;
+            uint8_t backhaul_network_enabled;
+            uint8_t backhaul_preferred_radio_band;
         } back_radio;
 
         bool local_gw;
         bool local_controller;
+        uint8_t operating_mode;
+        uint8_t management_mode;
+        uint8_t certification_mode;
+        uint8_t stop_on_failure_attempts;
+        uint8_t client_band_steering_enabled;
+        uint8_t client_optimal_path_roaming_enabled;
+        uint8_t dfs_reentry_enabled;
+        uint8_t client_optimal_path_roaming_prefer_signal_strength_enabled;
+        uint8_t client_11k_roaming_enabled;
+        uint8_t load_balancing_enabled;
+        uint8_t service_fairness_enabled;
+        uint8_t rdkb_extensions_enabled;
+
+        struct sWlanSettings {
+            uint8_t band_enabled;
+            uint8_t channel;
+        } wlan_settings;
+
     } device_conf;
 
     struct sControllerInfo {

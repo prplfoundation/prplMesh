@@ -158,8 +158,7 @@ private:
     std::string backhaul_manager_uds;
     std::string platform_manager_uds;
     sSlaveConfig config;
-    beerocks_message::sPlatformSettings platform_settings; // from platform manager //
-    beerocks_message::sWlanSettings wlan_settings;         // from platform manager //
+    beerocks_message::sWlanSettings wlan_settings; // from platform manager //
     beerocks_message::sSonConfig son_config;
     beerocks::logging &logger;
     std::string master_version;
