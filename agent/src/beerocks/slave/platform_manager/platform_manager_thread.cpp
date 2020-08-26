@@ -452,6 +452,7 @@ bool main_thread::init()
         return (false);
     }
 
+    LOG(DEBUG) << "Start platform init";
     int i = 0;
     for (int slave_num = 0; slave_num < IRE_MAX_SLAVES && i < BPL_NUM_OF_INTERFACES; ++slave_num) {
 
