@@ -95,7 +95,7 @@ void Ieee1905Transport::update_network_interfaces(
         if (updated_network_interfaces.count(ifname) == 0) {
             MAPF_INFO("interface " << ifname << " is no longer used.");
             if (network_interface.fd) {
-                m_broker->del_event(network_interface.fd);
+                m_event_loop->remove_handlers(network_interface.fd->getSocketFd());
                 close(network_interface.fd->getSocketFd());
                 network_interface.fd = nullptr;
             }
@@ -125,39 +125,34 @@ void Ieee1905Transport::update_network_interfaces(
 
         if (!network_interfaces_[ifname].fd) {
             // if the interface is not already open, try to open it and add it to the poller loop
-            if (!open_interface_socket(if_index)) {
-                MAPF_WARN("cannot open interface " << if_index << ".");
+            if (!open_interface_socket(ifname)) {
+                MAPF_WARN("cannot open interface " << ifname << ".");
             }
 
             // add interface raw socket fd to poller loop (unless it's a bridge interface)
             if (!network_interfaces_[ifname].is_bridge && network_interfaces_[ifname].fd) {
                 // TODO: Move to a separate method
-                m_broker->add_event(
-                    network_interfaces_[ifname].fd,
+                m_event_loop->register_handlers(
+                    network_interfaces_[ifname].fd->getSocketFd(),
                     {
                         // Accept incoming connections
                         .on_read =
-                            [&](broker::BrokerServer::BrokerEventLoop::EventType socket,
-                                broker::BrokerServer::BrokerEventLoop::EventLoopType &loop) {
-                                LOG(DEBUG) << "Incoming message on interface fd: "
-                                           << socket->getSocketFd();
-                                handle_interface_pollin_event(socket->getSocketFd());
+                            [&](int fd, EventLoop &loop) {
+                                LOG(DEBUG) << "Incoming message on interface fd: " << fd;
+                                handle_interface_pollin_event(fd);
                                 return true;
                             },
 
                         // Not implemented
                         .on_write      = nullptr,
-                        .on_timeout    = nullptr,
                         .on_disconnect = nullptr,
 
                         // Handle interface errors
                         .on_error =
-                            [&](broker::BrokerServer::BrokerEventLoop::EventType socket,
-                                broker::BrokerServer::BrokerEventLoop::EventLoopType &loop) {
-                                LOG(DEBUG) << "Error on interface fd: " << socket->getSocketFd()
-                                           << " (disabling it).";
+                            [&](int fd, EventLoop &loop) {
+                                LOG(DEBUG) << "Error on interface fd: " << fd << " (disabling it).";
 
-                                handle_interface_status_change(socket->getSocketFd(), false);
+                                handle_interface_status_change(ifname, false);
                                 return true;
                             },
                     });
@@ -172,13 +167,8 @@ void Ieee1905Transport::update_network_interfaces(
     }
 }
 
-bool Ieee1905Transport::open_interface_socket(unsigned int if_index)
+bool Ieee1905Transport::open_interface_socket(const std::string &ifname)
 {
-    std::string ifname = if_index2name(if_index);
-    if (ifname.empty()) {
-        MAPF_ERR("Failed to get interface name for index " << if_index);
-        return false;
-    }
     MAPF_DBG("opening raw socket on interface " << ifname << ".");
 
     if (network_interfaces_[ifname].fd) {
@@ -211,7 +201,7 @@ bool Ieee1905Transport::open_interface_socket(unsigned int if_index)
     memset(&sockaddr, 0, sizeof(struct sockaddr_ll));
     sockaddr.sll_family   = AF_PACKET;
     sockaddr.sll_protocol = htons(ETH_P_ALL);
-    sockaddr.sll_ifindex  = if_index;
+    sockaddr.sll_ifindex  = if_nametoindex(ifname.c_str());
     if (bind(sockfd, (struct sockaddr *)&sockaddr, sizeof(sockaddr)) < 0) {
         MAPF_ERR("cannot bind socket to interface \"" << strerror(errno) << "\" (" << errno
                                                       << ").");
@@ -222,21 +212,15 @@ bool Ieee1905Transport::open_interface_socket(unsigned int if_index)
     network_interfaces_[ifname].fd = std::make_shared<Socket>(sockfd);
     LOG_IF(!sockfd, FATAL) << "Failed creating new Socket for fd: " << sockfd;
 
-    attach_interface_socket_filter(if_index);
+    attach_interface_socket_filter(ifname);
 
     return true;
 }
 
-bool Ieee1905Transport::attach_interface_socket_filter(unsigned int if_index)
+bool Ieee1905Transport::attach_interface_socket_filter(const std::string &ifname)
 {
-    std::string ifname = if_index2name(if_index);
-    if (ifname.empty()) {
-        MAPF_ERR("Failed to get interface name for index " << if_index);
-        return false;
-    }
-
     if (!network_interfaces_.count(ifname)) {
-        MAPF_ERR("un-tracked interface " << if_index << ".");
+        MAPF_ERR("un-tracked interface " << ifname << ".");
         return false;
     }
 
@@ -245,7 +229,7 @@ bool Ieee1905Transport::attach_interface_socket_filter(unsigned int if_index)
     // the AL MAC address (which is different the the interfaces HW address)
     //
     struct packet_mreq mr = {0};
-    mr.mr_ifindex         = if_index;
+    mr.mr_ifindex         = if_nametoindex(ifname.c_str());
     mr.mr_type            = PACKET_MR_PROMISC;
     if (setsockopt(network_interfaces_[ifname].fd->getSocketFd(), SOL_PACKET, PACKET_ADD_MEMBERSHIP,
                    &mr, sizeof(mr)) == -1) {
@@ -268,14 +252,8 @@ bool Ieee1905Transport::attach_interface_socket_filter(unsigned int if_index)
     return true;
 }
 
-void Ieee1905Transport::handle_interface_status_change(unsigned int if_index, bool is_active)
+void Ieee1905Transport::handle_interface_status_change(const std::string &ifname, bool is_active)
 {
-    std::string ifname = if_index2name(if_index);
-    if (ifname.empty()) {
-        MAPF_ERR("Failed to get interface name for index " << if_index);
-        return;
-    }
-
     if (!network_interfaces_.count(ifname)) {
         MAPF_ERR("un-tracked interface " << ifname << ".");
         return;
@@ -284,43 +262,38 @@ void Ieee1905Transport::handle_interface_status_change(unsigned int if_index, bo
     MAPF_INFO("interface " << ifname << " is now " << (is_active ? "active" : "inactive") << ".");
 
     if (!is_active && network_interfaces_[ifname].fd) {
-        m_broker->del_event(network_interfaces_[ifname].fd);
+        m_event_loop->remove_handlers(network_interfaces_[ifname].fd->getSocketFd());
         close(network_interfaces_[ifname].fd->getSocketFd());
         network_interfaces_[ifname].fd = nullptr;
     }
 
     if (is_active && !network_interfaces_[ifname].fd) {
-        if (!open_interface_socket(if_index)) {
-            MAPF_ERR("cannot open network interface " << if_index << ".");
+        if (!open_interface_socket(ifname)) {
+            MAPF_ERR("cannot open network interface " << ifname << ".");
         }
         if (network_interfaces_[ifname].fd)
             // Handle network events
-            m_broker->add_event(
-                network_interfaces_[ifname].fd,
+            m_event_loop->register_handlers(
+                network_interfaces_[ifname].fd->getSocketFd(),
                 {
                     // Accept incoming connections
                     .on_read =
-                        [&](broker::BrokerServer::BrokerEventLoop::EventType socket,
-                            broker::BrokerServer::BrokerEventLoop::EventLoopType &loop) {
-                            LOG(DEBUG)
-                                << "Incoming message on interface fd: " << socket->getSocketFd();
-                            handle_interface_pollin_event(socket->getSocketFd());
+                        [&](int fd, EventLoop &loop) {
+                            LOG(DEBUG) << "Incoming message on interface fd: " << fd;
+                            handle_interface_pollin_event(fd);
                             return true;
                         },
 
                     // Not implemented
                     .on_write      = nullptr,
-                    .on_timeout    = nullptr,
                     .on_disconnect = nullptr,
 
                     // Handle interface errors
                     .on_error =
-                        [&](broker::BrokerServer::BrokerEventLoop::EventType socket,
-                            broker::BrokerServer::BrokerEventLoop::EventLoopType &loop) {
-                            LOG(DEBUG) << "Error on interface fd: " << socket->getSocketFd()
-                                       << " (disabling it).";
+                        [&](int fd, EventLoop &loop) {
+                            LOG(DEBUG) << "Error on interface fd: " << fd << " (disabling it).";
 
-                            handle_interface_status_change(socket->getSocketFd(), false);
+                            handle_interface_status_change(ifname, false);
                             return true;
                         },
                 });
@@ -466,11 +439,9 @@ void Ieee1905Transport::set_al_mac_addr(const uint8_t *addr)
     // refresh packet filtering on all active interfaces to use the new AL MAC address
     for (auto it = network_interfaces_.begin(); it != network_interfaces_.end(); ++it) {
         auto &network_interface = it->second;
-        auto &ifname            = network_interface.ifname;
-        unsigned int if_index   = if_nametoindex(ifname.c_str());
 
         if (network_interface.fd) {
-            attach_interface_socket_filter(if_index);
+            attach_interface_socket_filter(network_interface.ifname);
         }
     }
 }

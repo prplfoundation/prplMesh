@@ -12,13 +12,15 @@
 #include <mapf/common/logger.h>
 #include <mapf/transport/ieee1905_transport_messages.h>
 
+#include <bcl/beerocks_event_loop.h>
+#include <bcl/network/interface_state_manager.h>
+
 #include "ieee1905_transport_broker.h"
 
 #include <tlvf/tlvftypes.h>
 
 #include <arpa/inet.h>
 #include <chrono>
-#include <linux/netlink.h>
 #include <map>
 #include <net/if.h>
 
@@ -53,9 +55,49 @@ namespace transport {
 
 class Ieee1905Transport {
 public:
-    void run();
+    /**
+     * Class constructor
+     *
+     * @param interface_state_manager Interface state manager.
+     * @param broker Message broker.
+     * @param event_loop Event loop to wait for I/O events.
+     */
+    Ieee1905Transport(
+        const std::shared_ptr<beerocks::net::InterfaceStateManager> &interface_state_manager,
+        const std::shared_ptr<broker::BrokerServer> &broker,
+        const std::shared_ptr<EventLoop> &event_loop);
+
+    /**
+     * @brief Starts the transport process.
+     *
+     * @return True on success and false otherwise.
+     */
+    bool start();
+
+    /**
+     * @brief Stops the transport process.
+     *
+     * @return True on success and false otherwise.
+     */
+    bool stop();
 
 private:
+    /**
+     * Interface state manager to read and detect changes (transitions to and from the
+     * up-and-running state) in the state of the network interfaces.
+     */
+    std::shared_ptr<beerocks::net::InterfaceStateManager> m_interface_state_manager;
+
+    /**
+     * Message broker implementing the publish/subscribe design pattern.
+     */
+    std::shared_ptr<broker::BrokerServer> m_broker;
+
+    /**
+     * Application event loop used by the process to wait for I/O events.
+     */
+    std::shared_ptr<EventLoop> m_event_loop;
+
     std::string if_index2name(unsigned int index)
     {
         char ifname[IF_NAMESIZE] = {0};
@@ -83,11 +125,6 @@ private:
     //
     // interface name (ifname) is used as Key to the table
     std::map<std::string, NetworkInterface> network_interfaces_;
-
-    // netlink socket file descriptor (used to track network interface status)
-    int netlink_fd_ = -1;
-
-    std::unique_ptr<broker::BrokerServer> m_broker;
 
     uint16_t message_id_           = 0;
     uint8_t al_mac_addr_[ETH_ALEN] = {0};
@@ -266,20 +303,13 @@ private:
     //
     void
     update_network_interfaces(std::map<std::string, NetworkInterface> updated_network_interfaces);
-    bool open_interface_socket(unsigned int if_index);
-    bool attach_interface_socket_filter(unsigned int if_index);
-    void handle_interface_status_change(unsigned int if_index, bool is_active);
+    bool open_interface_socket(const std::string &iface_name);
+    bool attach_interface_socket_filter(const std::string &iface_name);
+    void handle_interface_status_change(const std::string &iface_name, bool is_active);
     void handle_interface_pollin_event(int fd);
     bool get_interface_mac_addr(unsigned int if_index, uint8_t *addr);
     bool send_packet_to_network_interface(unsigned int if_index, Packet &packet);
     void set_al_mac_addr(const uint8_t *addr);
-
-    //
-    // NETLINK STUFF
-    //
-    bool open_netlink_socket();
-    int handle_netlink_message(struct nlmsghdr *msg);
-    void handle_netlink_pollin_event();
 
     //
     // BROKER STUFF

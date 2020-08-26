@@ -26,7 +26,7 @@ static constexpr std::chrono::milliseconds s_test_timeout(100);
 
 // Define Event and Loop types for the use of the unit tests
 using EventType = std::shared_ptr<Socket>;
-using LoopType  = EventLoop<EventType, std::chrono::milliseconds>;
+using LoopType  = EventLoop<EventType>;
 
 /**
  * @brief Mockable event handlers class
@@ -36,11 +36,8 @@ class EventHandlersMock : public LoopType::EventHandlers {
 public:
     EventHandlersMock()
     {
-        on_read    = [&](EventType socket, LoopType &loop) { return handle_read(socket, &loop); };
-        on_write   = [&](EventType socket, LoopType &loop) { return handle_write(socket, &loop); };
-        on_timeout = [&](EventType socket, LoopType &loop) {
-            return handle_timeout(socket, &loop);
-        };
+        on_read  = [&](EventType socket, LoopType &loop) { return handle_read(socket, &loop); };
+        on_write = [&](EventType socket, LoopType &loop) { return handle_write(socket, &loop); };
         on_disconnect = [&](EventType socket, LoopType &loop) {
             return handle_disconnect(socket, &loop);
         };
@@ -49,7 +46,6 @@ public:
 
     MOCK_METHOD(bool, handle_read, ((EventType &), LoopType *));
     MOCK_METHOD(bool, handle_write, ((EventType &), LoopType *));
-    MOCK_METHOD(bool, handle_timeout, ((EventType &), LoopType *));
     MOCK_METHOD(bool, handle_disconnect, ((EventType &), LoopType *));
     MOCK_METHOD(bool, handle_error, ((EventType &), LoopType *));
 };
@@ -64,79 +60,6 @@ TEST(beerocks_socket_event_loop, setup)
 
     // el::Loggers::addFlag(el::LoggingFlag::ColoredTerminalOutput);
     el::Loggers::reconfigureLogger("default", defaultConf);
-}
-
-TEST(beerocks_socket_event_loop, simple_timeout)
-{
-    SocketEventLoop loop(s_test_timeout);
-    StrictMock<EventHandlersMock> timeout;
-
-    // Disable the on_write handler (to prevent the loop from firing "write ready" events)
-    timeout.on_write = nullptr;
-
-    // Create a dummy socket for checking the timeout mechanism
-    auto timeout_socket = std::make_shared<Socket>(socket(AF_UNIX, SOCK_DGRAM, 0));
-    ASSERT_TRUE(timeout_socket && timeout_socket->getSocketFd() != -1);
-
-    {
-        InSequence sequence;
-
-        // Socket timeout handler
-        EXPECT_CALL(timeout, handle_timeout(timeout_socket, &loop))
-            .WillOnce(Invoke([](EventType socket, LoopType *loop) -> bool { return true; }));
-    };
-
-    // Add the dummy socket into the event loop
-    ASSERT_TRUE(loop.add_event(timeout_socket, timeout, std::chrono::milliseconds{1}));
-
-    // Execute the event loop
-    ASSERT_GE(loop.run(), 0);
-
-    // Remove the socket from the event loop
-    ASSERT_TRUE(loop.del_event(timeout_socket));
-    close(timeout_socket->getSocketFd());
-}
-
-TEST(beerocks_socket_event_loop, repeated_timeout)
-{
-    SocketEventLoop loop(s_test_timeout);
-    StrictMock<EventHandlersMock> timeout;
-
-    // Disable the on_write handler (to prevent the loop from firing "write ready" events)
-    timeout.on_write = nullptr;
-
-    // Create a dummy socket for checking the timeout mechanism
-    auto timeout_socket = std::make_shared<Socket>(socket(AF_UNIX, SOCK_DGRAM, 0));
-    ASSERT_NE(timeout_socket, nullptr);
-
-    // Timeout event counter
-    int timeout_seq = 0;
-
-    {
-        InSequence sequence;
-
-        // Expect the timeout handler to be executed exactly 3 times
-        EXPECT_CALL(timeout, handle_timeout(timeout_socket, &loop)).Times(3);
-
-        ON_CALL(timeout, handle_timeout(timeout_socket, &loop))
-            .WillByDefault([&](EventType socket, LoopType *loop) -> bool {
-                ++timeout_seq;
-                return true;
-            });
-    };
-
-    // Add the dummy socket into the event loop
-    ASSERT_TRUE(loop.add_event(timeout_socket, timeout, std::chrono::milliseconds{1}));
-
-    // Execute the event loop
-    ASSERT_EQ(1, loop.run());
-    ASSERT_EQ(1, loop.run());
-    ASSERT_EQ(1, loop.run());
-    ASSERT_EQ(3, timeout_seq);
-
-    // Remove the socket from the event loop
-    ASSERT_TRUE(loop.del_event(timeout_socket));
-    close(timeout_socket->getSocketFd());
 }
 
 TEST(beerocks_socket_event_loop, simple_read_write)
@@ -179,7 +102,7 @@ TEST(beerocks_socket_event_loop, simple_read_write)
     };
 
     // Add the reader/writer sockets and handlers to the loop
-    ASSERT_TRUE(loop.add_event(writer_socket, writer, std::chrono::milliseconds{1}));
+    ASSERT_TRUE(loop.add_event(writer_socket, writer));
     ASSERT_TRUE(loop.add_event(reader_socket, reader));
 
     // Run the loop

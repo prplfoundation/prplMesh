@@ -2,7 +2,6 @@ add_library(ieee1905_transport_lib
     ieee1905_transport.cpp 
     ieee1905_transport_broker.cpp 
     ieee1905_transport_network.cpp 
-    ieee1905_transport_netlink.cpp 
     ieee1905_transport_local_bus.cpp 
     ieee1905_transport_packet_processing.cpp)
 

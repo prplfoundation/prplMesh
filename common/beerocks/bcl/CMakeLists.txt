@@ -46,7 +46,8 @@ if (BUILD_TESTS)
     set(unit_tests_sources
         ${bcl_sources}
         ${MODULE_PATH}/unit_tests/network_utils_test.cpp
-        ${MODULE_PATH}/unit_tests/socket_event_loop_test.cpp
+        ${MODULE_PATH}/unit_tests/event_loop_impl_test.cpp
+        ${MODULE_PATH}/unit_tests/interface_state_manager_impl_test.cpp
         ${MODULE_PATH}/unit_tests/wireless_utils_test.cpp
     )
     add_executable(${TEST_PROJECT_NAME}

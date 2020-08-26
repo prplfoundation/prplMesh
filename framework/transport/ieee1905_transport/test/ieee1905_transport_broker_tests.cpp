@@ -12,8 +12,8 @@
 
 #include <sys/uio.h>
 
+#include <bcl/beerocks_event_loop_impl.h>
 #include <bcl/beerocks_os_utils.h>
-#include <bcl/beerocks_socket_event_loop.h>
 #include <bcl/beerocks_thread_base.h>
 
 #include <beerocks/tlvf/beerocks_message.h>
@@ -65,7 +65,7 @@ public:
 protected:
     bool m_error_occurred = false;
 
-    virtual bool handle_msg(std::shared_ptr<Socket> &sd) override
+    bool handle_msg(const std::shared_ptr<Socket> &sd) override
     {
         if (BrokerServer::handle_msg(sd) == false) {
             m_error_occurred = true;
@@ -97,9 +97,11 @@ TEST(broker_server, setup)
 
 TEST(broker_server, invalid_message_magic)
 {
-    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
-    SocketEventLoop broker_event_loop(broker_timeout);
-    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
+    auto server_socket = std::make_shared<SocketServer>(broker_uds_file, broker_listen_buffer);
+    auto event_loop    = std::make_shared<EventLoopImpl>(broker_timeout);
+    BrokerServerWrapper broker_wrapper(server_socket, event_loop);
+
+    ASSERT_TRUE(broker_wrapper.start());
 
     // Register a dummy internal message handler
     broker_wrapper.register_internal_message_handler(
@@ -113,24 +115,28 @@ TEST(broker_server, invalid_message_magic)
     header.magic = INVALID_MAGIC;
 
     SocketClient sock1(broker_uds_file);
-    ASSERT_EQ(1, broker_wrapper.run()); // Accept the connection
+    ASSERT_EQ(1, event_loop->run()); // Accept the connection
 
     LOG(DEBUG) << "Sending INVALID magic...";
     ASSERT_TRUE(messages::send_transport_message(sock1, dummy, &header));
-    ASSERT_EQ(1, broker_wrapper.run()); // Process
+    ASSERT_EQ(1, event_loop->run()); // Process
     ASSERT_TRUE(broker_wrapper.error());
 
     LOG(DEBUG) << "Sending VALID magic...";
     ASSERT_TRUE(messages::send_transport_message(sock1, dummy));
-    ASSERT_EQ(1, broker_wrapper.run());
+    ASSERT_EQ(1, event_loop->run());
     ASSERT_FALSE(broker_wrapper.error());
+
+    ASSERT_TRUE(broker_wrapper.stop());
 }
 
 TEST(broker_server, subscribe_empty_message)
 {
-    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
-    SocketEventLoop broker_event_loop(broker_timeout);
-    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
+    auto server_socket = std::make_shared<SocketServer>(broker_uds_file, broker_listen_buffer);
+    auto event_loop    = std::make_shared<EventLoopImpl>(broker_timeout);
+    BrokerServerWrapper broker_wrapper(server_socket, event_loop);
+
+    ASSERT_TRUE(broker_wrapper.start());
 
     // Create a subscribe message
     SubscribeMessage subscribe;
@@ -138,19 +144,23 @@ TEST(broker_server, subscribe_empty_message)
 
     // Connect to the broker and send the message
     SocketClient sock1(broker_uds_file);
-    ASSERT_EQ(1, broker_wrapper.run()); // Accept the connection
+    ASSERT_EQ(1, event_loop->run()); // Accept the connection
 
     ASSERT_TRUE(messages::send_transport_message(sock1, subscribe));
-    ASSERT_EQ(1, broker_wrapper.run()); // Process
+    ASSERT_EQ(1, event_loop->run()); // Process
 
     ASSERT_TRUE(broker_wrapper.error());
+
+    ASSERT_TRUE(broker_wrapper.stop());
 }
 
 TEST(broker_server, subscribe_single_type)
 {
-    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
-    SocketEventLoop broker_event_loop(broker_timeout);
-    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
+    auto server_socket = std::make_shared<SocketServer>(broker_uds_file, broker_listen_buffer);
+    auto event_loop    = std::make_shared<EventLoopImpl>(broker_timeout);
+    BrokerServerWrapper broker_wrapper(server_socket, event_loop);
+
+    ASSERT_TRUE(broker_wrapper.start());
 
     // Create a subscribe message
     SubscribeMessage subscribe;
@@ -160,19 +170,23 @@ TEST(broker_server, subscribe_single_type)
 
     // Connect to the broker and send the message
     SocketClient sock1(broker_uds_file);
-    ASSERT_EQ(1, broker_wrapper.run()); // Accept the connection
+    ASSERT_EQ(1, event_loop->run()); // Accept the connection
 
     ASSERT_TRUE(messages::send_transport_message(sock1, subscribe));
-    ASSERT_EQ(1, broker_wrapper.run()); // Process
+    ASSERT_EQ(1, event_loop->run()); // Process
 
     ASSERT_FALSE(broker_wrapper.error());
+
+    ASSERT_TRUE(broker_wrapper.stop());
 }
 
 TEST(broker_server, subscribe_multiple_types)
 {
-    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
-    SocketEventLoop broker_event_loop(broker_timeout);
-    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
+    auto server_socket = std::make_shared<SocketServer>(broker_uds_file, broker_listen_buffer);
+    auto event_loop    = std::make_shared<EventLoopImpl>(broker_timeout);
+    BrokerServerWrapper broker_wrapper(server_socket, event_loop);
+
+    ASSERT_TRUE(broker_wrapper.start());
 
     // Create a subscribe message
     SubscribeMessage subscribe;
@@ -184,19 +198,23 @@ TEST(broker_server, subscribe_multiple_types)
 
     // Connect to the broker and send the message
     SocketClient sock1(broker_uds_file);
-    ASSERT_EQ(1, broker_wrapper.run()); // Accept the connection
+    ASSERT_EQ(1, event_loop->run()); // Accept the connection
 
     ASSERT_TRUE(messages::send_transport_message(sock1, subscribe));
-    ASSERT_EQ(1, broker_wrapper.run()); // Process
+    ASSERT_EQ(1, event_loop->run()); // Process
 
     ASSERT_FALSE(broker_wrapper.error());
+
+    ASSERT_TRUE(broker_wrapper.stop());
 }
 
 TEST(broker_server, unsubscribe_empty_message)
 {
-    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
-    SocketEventLoop broker_event_loop(broker_timeout);
-    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
+    auto server_socket = std::make_shared<SocketServer>(broker_uds_file, broker_listen_buffer);
+    auto event_loop    = std::make_shared<EventLoopImpl>(broker_timeout);
+    BrokerServerWrapper broker_wrapper(server_socket, event_loop);
+
+    ASSERT_TRUE(broker_wrapper.start());
 
     // Create a subscribe message
     SubscribeMessage subscribe;
@@ -204,19 +222,23 @@ TEST(broker_server, unsubscribe_empty_message)
 
     // Connect to the broker and send the message
     SocketClient sock1(broker_uds_file);
-    ASSERT_EQ(1, broker_wrapper.run()); // Accept the connection
+    ASSERT_EQ(1, event_loop->run()); // Accept the connection
 
     ASSERT_TRUE(messages::send_transport_message(sock1, subscribe));
-    ASSERT_EQ(1, broker_wrapper.run()); // Process
+    ASSERT_EQ(1, event_loop->run()); // Process
 
     ASSERT_TRUE(broker_wrapper.error());
+
+    ASSERT_TRUE(broker_wrapper.stop());
 }
 
 TEST(broker_server, unsubscribe_single_type)
 {
-    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
-    SocketEventLoop broker_event_loop(broker_timeout);
-    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
+    auto server_socket = std::make_shared<SocketServer>(broker_uds_file, broker_listen_buffer);
+    auto event_loop    = std::make_shared<EventLoopImpl>(broker_timeout);
+    BrokerServerWrapper broker_wrapper(server_socket, event_loop);
+
+    ASSERT_TRUE(broker_wrapper.start());
 
     // Create a subscribe message
     SubscribeMessage subscribe;
@@ -226,19 +248,23 @@ TEST(broker_server, unsubscribe_single_type)
 
     // Connect to the broker and send the message
     SocketClient sock1(broker_uds_file);
-    ASSERT_EQ(1, broker_wrapper.run()); // Accept the connection
+    ASSERT_EQ(1, event_loop->run()); // Accept the connection
 
     ASSERT_TRUE(messages::send_transport_message(sock1, subscribe));
-    ASSERT_EQ(1, broker_wrapper.run()); // Process
+    ASSERT_EQ(1, event_loop->run()); // Process
 
     ASSERT_FALSE(broker_wrapper.error());
+
+    ASSERT_TRUE(broker_wrapper.stop());
 }
 
 TEST(broker_server, unsubscribe_multiple_types)
 {
-    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
-    SocketEventLoop broker_event_loop(broker_timeout);
-    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
+    auto server_socket = std::make_shared<SocketServer>(broker_uds_file, broker_listen_buffer);
+    auto event_loop    = std::make_shared<EventLoopImpl>(broker_timeout);
+    BrokerServerWrapper broker_wrapper(server_socket, event_loop);
+
+    ASSERT_TRUE(broker_wrapper.start());
 
     // Create a subscribe message
     SubscribeMessage subscribe;
@@ -250,19 +276,23 @@ TEST(broker_server, unsubscribe_multiple_types)
 
     // Connect to the broker and send the message
     SocketClient sock1(broker_uds_file);
-    ASSERT_EQ(1, broker_wrapper.run()); // Accept the connection
+    ASSERT_EQ(1, event_loop->run()); // Accept the connection
 
     ASSERT_TRUE(messages::send_transport_message(sock1, subscribe));
-    ASSERT_EQ(1, broker_wrapper.run()); // Process
+    ASSERT_EQ(1, event_loop->run()); // Process
 
     ASSERT_FALSE(broker_wrapper.error());
+
+    ASSERT_TRUE(broker_wrapper.stop());
 }
 
 TEST(broker_server, subscribe_unsubscribe)
 {
-    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
-    SocketEventLoop broker_event_loop(broker_timeout);
-    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
+    auto server_socket = std::make_shared<SocketServer>(broker_uds_file, broker_listen_buffer);
+    auto event_loop    = std::make_shared<EventLoopImpl>(broker_timeout);
+    BrokerServerWrapper broker_wrapper(server_socket, event_loop);
+
+    ASSERT_TRUE(broker_wrapper.start());
 
     // Create a subscribe message
     SubscribeMessage subscribe;
@@ -274,29 +304,33 @@ TEST(broker_server, subscribe_unsubscribe)
 
     // Connect to the broker and send the message
     SocketClient sock1(broker_uds_file);
-    ASSERT_EQ(1, broker_wrapper.run()); // Accept the connection
+    ASSERT_EQ(1, event_loop->run()); // Accept the connection
     ASSERT_FALSE(broker_wrapper.error());
 
     ASSERT_TRUE(messages::send_transport_message(sock1, subscribe));
-    ASSERT_EQ(1, broker_wrapper.run()); // Process
+    ASSERT_EQ(1, event_loop->run()); // Process
     ASSERT_FALSE(broker_wrapper.error());
 
     // Unsubscribe
     subscribe.metadata()->type = SubscribeMessage::ReqType::UNSUBSCRIBE;
     ASSERT_TRUE(messages::send_transport_message(sock1, subscribe));
-    ASSERT_EQ(1, broker_wrapper.run()); // Process
+    ASSERT_EQ(1, event_loop->run()); // Process
     ASSERT_FALSE(broker_wrapper.error());
+
+    ASSERT_TRUE(broker_wrapper.stop());
 }
 
 TEST(broker_server, publish_internal_message)
 {
-    SocketServer broker_server_socket(broker_uds_file, broker_listen_buffer);
-    SocketEventLoop broker_event_loop(broker_timeout);
-    BrokerServerWrapper broker_wrapper(broker_server_socket, broker_event_loop);
+    auto server_socket = std::make_shared<SocketServer>(broker_uds_file, broker_listen_buffer);
+    auto event_loop    = std::make_shared<EventLoopImpl>(broker_timeout);
+    BrokerServerWrapper broker_wrapper(server_socket, event_loop);
+
+    ASSERT_TRUE(broker_wrapper.start());
 
     // Connect to the broker
     SocketClient sock1(broker_uds_file);
-    ASSERT_EQ(1, broker_wrapper.run()); // Accept the connection
+    ASSERT_EQ(1, event_loop->run()); // Accept the connection
     ASSERT_FALSE(broker_wrapper.error());
 
     // Build a subscribe message
@@ -312,7 +346,7 @@ TEST(broker_server, publish_internal_message)
 
     // Subscribe to the InterfaceConfigurationIndicationMessage message
     ASSERT_TRUE(messages::send_transport_message(sock1, subscribe));
-    ASSERT_EQ(1, broker_wrapper.run()); // Process
+    ASSERT_EQ(1, event_loop->run()); // Process
     ASSERT_FALSE(broker_wrapper.error());
 
     // Publish an InterfaceConfigurationIndicationMessage message to subscribers
@@ -335,6 +369,8 @@ TEST(broker_server, publish_internal_message)
 
     // Validate the number of interfaces matches the sent message
     ASSERT_TRUE(iface_indication_msg_rx.metadata()->numInterfaces == NUM_OF_IFACES);
+
+    ASSERT_TRUE(broker_wrapper.stop());
 }
 
 } // namespace tests
