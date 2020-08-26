@@ -1,0 +1,5 @@
+{
+    "webdav_login": "Owncloud username",
+    "webdav_password": "Owncloud Password",
+    "webdav_hostname": "https://ftp.essensium.com/owncloud/remote.php/dav/files/"
+}
