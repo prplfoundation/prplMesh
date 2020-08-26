@@ -1,0 +1,3 @@
+' from backhaul_fsm_main
+
+ENABLED --> MASTER_DISCOVERY : Wired
