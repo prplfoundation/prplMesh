@@ -67,6 +67,9 @@
     "files.insertFinalNewline": true,
     "files.trimFinalNewlines": true,
     "editor.formatOnSave": true,
+    "git.inputValidation": "always",
+    "git.inputValidationSubjectLength": 72,
+    "git.inputValidationLength": 100,
     "C_Cpp.default.defines": [
         "BEEROCKS_LINUX",
         "BEEROCKS_CONF_PATH=\"build/install/config\"",

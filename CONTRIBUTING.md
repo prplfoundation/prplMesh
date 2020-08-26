@@ -117,8 +117,8 @@ The subject must be very short, it appears in the [short log](https://github.com
   If you feel multiple components apply, you should try to split up the commit into separate commits.
   The component does not always correspond to a directory.
   E.g. a change to [this file](CONTRIBUTING.md) would have `documentation` as component, even if it's not in the `documentation` directory.
-* If the change is to a specific class or function, add it after the component
-* In principle maximum 62 characters (including prefix).
+* If the change is to a specific class or function, add it after the component.
+* In principle maximum 72 characters (including prefix), because GitHub wraps the subject line at this limit.
   Because prefixes can be long (e.g. `transport: Ieee1905Transport::update_network_interfaces():`, this limit is often exceeded.
 * Describes the "what" succinctly.
 * Avoid verbs that don't say anything: "fix", "improve", "update", ...
@@ -172,7 +172,7 @@ Followed by the commit that actually makes the change:
 The extended description only needs to be added if there is actually something to say.
 For example, the commit that added this document only had the subject line "documentation: add CONTRIBUTING.md" and no extended description.
 
-The extended description should be wrapped at 72 columns (because `git log` indents with a tab, so it still fits on an 80-character line).
+The extended description should be wrapped at 100 columns (same limitation we have on code lines, to allow comfortable reading).
 There are four exceptions:
 
 * Strings found in log files should be copied as is, to simplify searching through the history.
