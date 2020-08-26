@@ -82,6 +82,15 @@ private:
      */
     bool create_ap_metrics_response(uint16_t mid, const std::vector<sMacAddr> &bssid_list);
 
+    /**
+     * @brief Creates Beacon Metrics Response message
+     *
+     * @param mid Message ID.
+     * @param hal_data Data received from hostapd.
+     * @return True on success and false otherwise.
+     */
+    bool create_beacon_metrics_response(uint16_t mid, const bwl::SBeaconResponse11k &hal_data);
+
     bool update_ap_stats();
     bool update_sta_stats();
 
@@ -146,6 +155,7 @@ private:
 
     bool handle_multi_ap_policy_config_request(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
     bool handle_ap_metrics_query(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
+    bool handle_beacon_metrics_query(Socket &sd, ieee1905_1::CmduMessageRx &cmdu_rx);
 };
 } // namespace son
 

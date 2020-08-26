@@ -49,6 +49,7 @@ class tlvBeaconMetricsQuery : public BaseClass
         bool set_ssid(const std::string& str);
         bool set_ssid(const char buffer[], size_t size);
         bool alloc_ssid(size_t count = 1);
+        uint8_t& ap_channel_reports_num();
         uint8_t& ap_channel_reports_list_length();
         std::tuple<bool, cApChannelReports&> ap_channel_reports_list(size_t idx);
         std::shared_ptr<cApChannelReports> create_ap_channel_reports_list();
@@ -74,6 +75,7 @@ class tlvBeaconMetricsQuery : public BaseClass
         char* m_ssid = nullptr;
         size_t m_ssid_idx__ = 0;
         int m_lock_order_counter__ = 0;
+        uint8_t* m_ap_channel_reports_num = nullptr;
         uint8_t* m_ap_channel_reports_list_length = nullptr;
         cApChannelReports* m_ap_channel_reports_list = nullptr;
         size_t m_ap_channel_reports_list_idx__ = 0;
