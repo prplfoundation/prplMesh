@@ -1,3 +1,18 @@
+# PROJECT HAS MOVED!
+
+This project has migrated to [Gitlab](https://gitlab.com/prpl-foundation/prplmesh/prplMesh). Please check there for the latest version of the repository.
+The version on github is obsolete and unmaintained. Users are strongly encouraged to update their `git remote` to point to the new repository:
+
+```
+git remote set-url origin git@gitlab.com:prpl-foundation/prplmesh/prplMesh.git
+git remote set-url --push origin git@gitlab.com:prpl-foundation/prplmesh/prplMesh.git
+```
+or for https:
+```
+git remote set-url origin https://gitlab.com/prpl-foundation/prplmesh/prplMesh.git
+git remote set-url --push origin ghttps://gitlab.com/prpl-foundation/prplmesh/prplMesh.git
+```
+
 # prplMesh
 [![Build Status](https://gitlab.com/prpl-foundation/prplmesh/prplMesh/badges/master/pipeline.svg)](https://gitlab.com/prpl-foundation/prplmesh/prplMesh/pipelines)
 
