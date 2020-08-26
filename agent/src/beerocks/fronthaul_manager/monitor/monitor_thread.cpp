@@ -1957,8 +1957,7 @@ void monitor_thread::update_vaps_in_db()
 
         // if vap exist in HAL, update it in the local db.
         if (radio_vaps.find(vap_id) != radio_vaps.end()) {
-            auto iface_name = beerocks::utils::get_iface_string_from_iface_vap_ids(
-                mon_wlan_hal->get_radio_info().iface_name, vap_id);
+            auto iface_name = radio_vaps.at(vap_id).bss;
 
             auto curr_vap = radio_vaps.at(vap_id);
 

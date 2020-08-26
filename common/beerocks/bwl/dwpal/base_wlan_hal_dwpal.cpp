@@ -969,6 +969,7 @@ bool base_wlan_hal_dwpal::refresh_vap_info(int vap_id)
     // New VAP Element
     VAPElement vapElement;
 
+    vapElement.bss  = ifname;
     vapElement.mac  = std::string(bssid);
     vapElement.ssid = std::string(ssid);
     if (!get_vap_type(ifname, vapElement.fronthaul, vapElement.backhaul)) {
