@@ -1943,6 +1943,7 @@ class TypedConfigurations : public base::threading::ThreadSafe {
   base::FileStreamPtr sharedFileStream(Level level);
   std::size_t maxLogFileSize(Level level);
   std::size_t logFlushThreshold(Level level);
+  std::string getDateTimeForFilename(const std::string &fmt);
 
  private:
   Configurations* m_configurations;
@@ -1958,6 +1959,9 @@ class TypedConfigurations : public base::threading::ThreadSafe {
   std::unordered_map<Level, std::size_t> m_maxLogFileSizeMap;
   std::unordered_map<Level, std::size_t> m_logFlushThresholdMap;
   LogStreamsReferenceMapPtr m_logStreamsReference = nullptr;
+
+  base::threading::Mutex m_dateTimeMutex;
+  std::string m_dateTimeNow;
 
   friend class el::Helpers;
   friend class el::base::MessageBuilder;
