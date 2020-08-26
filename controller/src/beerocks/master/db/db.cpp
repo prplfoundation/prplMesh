@@ -3002,6 +3002,31 @@ std::deque<sMacAddr> db::get_clients_with_persistent_data_configured()
     return configured_clients;
 }
 
+bool db::del_clients_persistent_data(const sMacAddr& mac)
+{
+    if (get_node_verify_type(mac, beerocks::TYPE_CLIENT)) {
+        LOG(ERROR) << "client node not found for mac " << mac;
+        return false;
+    }
+
+    // if persistent db is enabled
+    if (config.persistent_db) {
+        auto db_entry = client_db_entry_from_mac(mac);
+        if (!bpl::db_has_entry(type_to_string(beerocks::eType::TYPE_CLIENT), db_entry)) {
+            LOG(DEBUG) << "client entry does not exist in persistent-db for " << db_entry;
+            return true;
+        }
+
+        LOG(DEBUG) << "removing client entry " << db_entry << " from persistent db";
+        if (!remove_client_entry_and_update_counter(db_entry)) {
+            LOG(ERROR) << "failed to remove client entry " << db_entry;
+            return false;
+        }
+    }
+
+    return true;
+}
+
 //
 // CLI
 //

@@ -529,3 +529,14 @@ cACTION_BML_CLIENT_GET_CLIENT_RESPONSE:
     _type: uint8_t
     _comment: # 0 - Failure, 1 - Success
   client: sClient
+
+cACTION_BML_CLIENT_DEL_PERSISTENT_DB_REQUEST:
+  _type: class
+  sta_mac: sMacAddr
+
+cACTION_BML_CLIENT_DEL_PERSISTENT_DB_RESPONSE:
+  _type: class
+  result:
+    _type: uint8_t
+    _comment: # 0 - Failure, 1 - Success
+  client: sClient

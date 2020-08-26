@@ -2259,6 +2259,49 @@ void son_management::handle_bml_message(Socket *sd,
         message_com::send_cmdu(sd, cmdu_tx);
         break;
     }
+    case beerocks_message::ACTION_BML_CLIENT_DEL_PERSISTENT_DB_REQUEST: {
+        LOG(TRACE) << "ACTION_BML_CLIENT_DEL_PERSISTENT_DB_REQUEST";
+
+        auto request =
+            beerocks_header->addClass<beerocks_message::cACTION_BML_CLIENT_DEL_PERSISTENT_DB_REQUEST>();
+        if (!request) {
+            LOG(ERROR) << "addClass ACTION_BML_CLIENT_DEL_PERSISTENT_DB_REQUEST failed";
+            break;
+        }
+
+        auto response = message_com::create_vs_message<
+            beerocks_message::cACTION_BML_CLIENT_DEL_PERSISTENT_DB_RESPONSE>(cmdu_tx);
+        if (!response) {
+            LOG(ERROR) << "Failed building message "
+                          "cACTION_BML_CLIENT_DEL_PERSISTENT_DB_RESPONSE !";
+            break;
+        }
+
+        auto client_mac = request->sta_mac();
+        if (!database.has_node(client_mac)) {
+            LOG(DEBUG) << "Requested client " << client_mac << " is not listed in the DB";
+            response->result() = 1; //Fail.
+            message_com::send_cmdu(sd, cmdu_tx);
+            break;
+        }
+
+        // A configured client must have a valid timestamp configured
+        auto client_timestamp = database.get_client_parameters_last_edit(client_mac);
+        if (client_timestamp == std::chrono::steady_clock::time_point::min()) {
+            LOG(DEBUG) << "Requested client " << client_mac
+                       << " doesn't have a valid timestamp listed in the DB";
+            response->result() = 1; //Fail.
+            message_com::send_cmdu(sd, cmdu_tx);
+            break;
+        }
+
+        // Client mac
+        response->client().sta_mac = client_mac;
+        response->result() = 0; //Success.
+
+        message_com::send_cmdu(sd, cmdu_tx);
+        break;
+    }
     default: {
         LOG(ERROR) << "Unsupported BML action_op:" << int(beerocks_header->action_op());
         break;
